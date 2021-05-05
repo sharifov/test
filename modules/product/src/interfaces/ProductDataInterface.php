@@ -12,9 +12,9 @@ use modules\order\src\entities\order\Order;
  */
 interface ProductDataInterface
 {
-    public function getProject(): Project;
-    public function getLead(): Lead;
-    public function getClient(): Client;
+    public function getProject(): ?Project;
+    public function getLead(): ?Lead;
+    public function getClient(): ?Client;
     public function getOrder(): ?Order;
     public function getId(): int;
     public function serialize(): array;

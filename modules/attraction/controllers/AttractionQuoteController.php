@@ -170,7 +170,8 @@ class AttractionQuoteController extends FController
 
         return $this->renderAjax('search/_list_availabilities', [
             'dataProvider' => $dataProvider,
-            'attraction'   => $attraction
+            'attraction'   => $attraction,
+            'productKey' => $productKey
         ]);
     }
 
@@ -185,22 +186,24 @@ class AttractionQuoteController extends FController
 
         $apiAttractionService = AttractionModule::getInstance()->apiService;
         if ($availabilityKey) {
-            try {
-                $result = $apiAttractionService->getAvailability($availabilityKey);
-            } catch (\DomainException $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
-            }
+            $result = $apiAttractionService->getAvailability($availabilityKey);
         }
 
         $availability = $result['availability'];
 
         //VarDumper::dump($result, 10, true);
 
-        return $this->renderAjax('options', [
-            'model' => $optionsForm,
-            'availability' => $availability,
-            'attractionId' => $attractionId
-        ]);
+        if ($availability) {
+            return $this->renderAjax('options', [
+                'model' => $optionsForm,
+                'availability' => $availability,
+                'attractionId' => $attractionId
+            ]);
+        } else {
+            $response['error'] = true;
+            $response['message'] = 'Search service dont return any data about tis availability';
+            return $response;
+        }
     }
 
     public function actionInputAvailabilityOptions()
@@ -210,70 +213,96 @@ class AttractionQuoteController extends FController
         $attractionId = (int) Yii::$app->request->get('id', 0);
 
         $optionsModel->load(Yii::$app->request->post());
-        $result = [];
         $apiAttractionService = AttractionModule::getInstance()->apiService;
 
-        try {
-            $result = $apiAttractionService->inputOptionsToAvailability($optionsModel);
-        } catch (\DomainException $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
-        }
-
+        $result = $apiAttractionService->inputOptionsToAvailability($optionsModel);
         //VarDumper::dump($attractionId, 10, true); die();
-        $availability = $result['availability'];
-
-        return $this->renderAjax('availability_details', [
-            'availability' => $availability,
-            'paxForm' => $availabilityPaxForm,
-            'attractionId' => $attractionId
-        ]);
+        if (empty($result['errors'])) {
+            $availability = $result['data']['availability'];
+            return $this->renderAjax('availability_details', [
+                'availability' => $availability,
+                'paxForm' => $availabilityPaxForm,
+                'attractionId' => $attractionId,
+                'model' => $optionsModel,
+            ]);
+        } else {
+            $response['error'] = true;
+            $response['message'] = $result['errors'];
+            return $this->asJson($response);
+        }
     }
 
     public function actionAddQuoteAjax()
     {
         $availabilityPaxModel = new AvailabilityPaxFrom();
-        $availabilityPaxModel->load(Yii::$app->request->post());
         $attractionId = (int) Yii::$app->request->get('id', 0);
 
-        //Yii::$app->response->format = Response::FORMAT_JSON;
         $apiAttractionService = AttractionModule::getInstance()->apiService;
 
         try {
-            if (!$attractionId) {
-                throw new Exception('Attraction Request param not found', 2);
+            if ($availabilityPaxModel->load(Yii::$app->request->post()) && $availabilityPaxModel->validate()) {
+                if (!$attractionId) {
+                    throw new Exception('Attraction Request param not found', 2);
+                }
+                $attraction = $this->attractionRepository->find($attractionId);
+                $productId = $attraction->atn_product_id;
+
+                $result = $apiAttractionService->inputPriceCategoryToAvailability($availabilityPaxModel);
+                $quoteDetails = $result['availability'];
+
+                $invalidPricing = !empty(array_filter($quoteDetails['pricingCategoryList']['nodes'], function ($data) {
+                    return $data['isValid'] == false;
+                }));
+
+                if (!empty($quoteDetails['pricingCategoryList']['errors']) || $invalidPricing) {
+                    $response['error'] = true;
+                    $response['message'] = 'invalidPricing';
+                    /*if ($invalidPricing && empty($quoteDetails['pricingCategoryList']['errors'])) {
+                        $response['message'] = 'invalidPricing';
+                    } else {
+                        $response['message'] = $quoteDetails['pricingCategoryList']['errors'];
+                    }*/
+                } else {
+                    $productDetails = $apiAttractionService->getProductById($quoteDetails['productId']);
+
+                    if (!$quoteDetails) {
+                        throw new Exception('Not found quote - quote key (' . $availabilityPaxModel->availability_id . ')', 7);
+                    }
+
+                    $attractionQuote = AttractionQuote::findOrCreateByDataNew($quoteDetails, $attraction, Auth::id());
+
+                    if (!$attractionQuote) {
+                        throw new Exception('Not added attraction quote - id:  (' . $availabilityPaxModel->availability_id  . ')', 8);
+                    }
+
+                    $attractionQuote->atnq_product_details_json = $productDetails;
+                    $attractionQuote->save();
+
+                    Notifications::pub(
+                        ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
+                        'addedQuote',
+                        ['data' => ['productId' => $productId]]
+                    );
+
+                    $response['error'] = false;
+                    $response['message'] = 'Quote ID: ' . $attractionQuote->atnq_product_quote_id;
+                    $response['availabilityID'] = $availabilityPaxModel->availability_id;
+                    $response['html'] = $this->renderAjax('quote_details', [
+                        'quoteDetails' => $quoteDetails,
+                        'productId' => $productId
+                    ]);
+                }
+            } else {
+                $response['error'] = true;
+                $response['message'] = $this->getParsedErrors($availabilityPaxModel->getErrors());
             }
-            $attraction = $this->attractionRepository->find($attractionId);
-            $productId = $attraction->atn_product_id;
-
-            $result = $apiAttractionService->inputPriceCategoryToAvailability($availabilityPaxModel);
-            $quoteDetails = $result['availability'];
-
-            if (!$quoteDetails) {
-                throw new Exception('Not found quote - quote key (' . $availabilityPaxModel->availability_id . ')', 7);
-            }
-
-            $attractionQuote = AttractionQuote::findOrCreateByDataNew($quoteDetails, $attraction, Auth::id());
-
-            if (!$attractionQuote) {
-                throw new Exception('Not added attraction quote - id:  (' . $availabilityPaxModel->availability_id  . ')', 8);
-            }
-
-            Notifications::pub(
-                ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
-                'addedQuote',
-                ['data' => ['productId' => $productId]]
-            );
-        } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable), 'AttractionQuoteController:actionInputPriceCategory');
-            return ['error' => 'Error: ' . $throwable->getMessage()];
+        } catch (\Throwable $e) {
+            Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'AttractionQuoteController:actionInputPriceCategory:Throwable');
+            $response['message'] = 'Internal Server error; Try again letter';
+            $response['error'] = true;
         }
 
-        //VarDumper::dump($attraction, 10, true); exit;
-
-        return $this->renderAjax('quote_details', [
-            'quoteDetails' => $quoteDetails,
-            'productId' => $productId
-        ]);
+        return $this->asJson($response);
     }
 
     /**

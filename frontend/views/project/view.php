@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="col-md-3 bg-white">
         <h2>Contact info:</h2>
-        <?=\yii\helpers\VarDumper::dumpAsString($model->contactInfo->attributes, 10, true) ?>
+        <?=\yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($model->contact_info), 10, true) ?>
     </div>
     <div class="col-md-5 bg-white">
         <h2>Parameters:</h2>

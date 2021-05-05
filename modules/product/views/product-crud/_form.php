@@ -38,6 +38,8 @@ use yii\widgets\ActiveForm;
 
         <?php //= $form->field($model, 'pr_created_dt')->textInput() ?>
 
+        <?= $form->field($model, 'pr_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '---']) ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

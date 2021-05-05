@@ -194,7 +194,7 @@ class OfferController extends FController
                 $modelOffer->of_name = $model->of_name;
                 $modelOffer->of_status_id = $model->of_status_id;
 
-                $modelOffer->of_client_currency = $model->of_client_currency;
+                $modelOffer->of_client_currency = $model->of_client_currency ?: null;
                 $modelOffer->of_client_currency_rate = $model->of_client_currency_rate;
                 $modelOffer->of_app_total = $model->of_app_total;
 

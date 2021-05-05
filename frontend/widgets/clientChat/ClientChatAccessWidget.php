@@ -74,7 +74,7 @@ class ClientChatAccessWidget extends Widget
     {
         $user = Employee::findOne(['id' => $this->userId]);
 
-        if (!SettingHelper::isClientChatEnabled() || !$user || !$user->can('/client-chat/index')) {
+        if (!$user || !SettingHelper::isClientChatEnabled() || !$user->can('/client-chat/dashboard-v2')) {
             return false;
         }
         //      $result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($this->userId), static function () use ($_self) {

@@ -13,4 +13,6 @@ class RentCarCodeException
     public const RENT_CAR_QUOTE_NOT_FOUND = Module::RENT_CAR . 200;
     public const RENT_CAR_QUOTE_SAVE = Module::RENT_CAR . 201;
     public const RENT_CAR_QUOTE_REMOVE = Module::RENT_CAR . 202;
+
+    public const API_C2B_HANDLE = Module::RENT_CAR . 901;
 }

@@ -7,8 +7,8 @@ use Yii;
 /**
  * This is the model class for table "log".
  *
- * @property integer $id
- * @property integer $level
+ * @property int $id
+ * @property int $level
  * @property string $category
  * @property double $log_time
  * @property string $prefix
@@ -17,7 +17,7 @@ use Yii;
 class Log extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * @return string
      */
     public static function tableName()
     {
@@ -25,7 +25,8 @@ class Log extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return object
+     * @return object|\yii\db\Connection|null
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getDb()
     {
@@ -33,7 +34,7 @@ class Log extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * @return array
      */
     public function rules()
     {
@@ -46,7 +47,7 @@ class Log extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * @return string[]
      */
     public function attributeLabels()
     {
@@ -70,26 +71,86 @@ class Log extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param int|null $level
+     * @param bool $countGroup
      * @return array
      */
-    public static function getCategoryFilter()
+    public static function getCategoryFilter(?int $level = null, bool $countGroup = false): array
     {
         $arr = [];
-        $data = self::find()->select(["COUNT(*) AS cnt", "category"])
-            ->where('category IS NOT NULL')
-            //->andWhere("job_start_dt >= NOW() - interval '24 hour'")
-            ->groupBy(["category"])
-            ->orderBy('cnt DESC')->asArray()->all();
 
-        if ($data) {
-            foreach ($data as $v) {
-                $arr[$v['category']] = $v['category'] . ' - [' . $v['cnt'] . ']';
+        if ($countGroup) {
+            $query = self::find()->select(["COUNT(*) AS cnt", "category"])
+                ->where('category IS NOT NULL')
+                ->groupBy(["category"])
+                ->orderBy('cnt DESC')
+                ->cache(60)
+                ->asArray();
+
+            if ($level) {
+                $query->andWhere(['level' => (int) $level]);
+            }
+
+            $data = $query->all();
+
+            if ($data) {
+                foreach ($data as $v) {
+                    $arr[$v['category']] = $v['category'] . ' - [' . $v['cnt'] . ']';
+                }
+            }
+        } else {
+            $query = self::find()->select("DISTINCT(category) AS category")
+                ->cache(60)
+                ->orderBy('category')
+                ->asArray();
+
+            if ($level) {
+                $query->andWhere(['level' => (int) $level]);
+            }
+
+            $data = $query->all();
+
+            if ($data) {
+                foreach ($data as $v) {
+                    $arr[$v['category']] = $v['category'];
+                }
             }
         }
 
         return $arr;
     }
 
+    /**
+     * @return array
+     */
+    public static function getCategoryFilterByCnt(): array
+    {
+        $arr = [];
+        $data = self::find()->select(["COUNT(*) AS cnt", "category"])
+            ->where('category IS NOT NULL')
+            ->groupBy(["category"])
+            ->orderBy('cnt DESC')
+            ->cache(60)
+            ->asArray()->all();
+
+        if ($data) {
+            foreach ($data as $v) {
+                $arr[] = [
+                    'hash' => md5($v['category']),
+                    'name' => $v['category'],
+                    'cnt' => $v['cnt']
+                ];
+            }
+        }
+
+        return $arr;
+    }
+
+    /**
+     * @param null $condition
+     * @param array $params
+     * @return int
+     */
     public static function deleteAll($condition = null, $params = []): int
     {
         $command = self::getDb()->createCommand();

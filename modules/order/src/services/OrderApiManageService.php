@@ -12,6 +12,14 @@ use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\order\OrderStatusAction;
+use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderContact\OrderContactRepository;
+use modules\order\src\entities\orderData\OrderData;
+use modules\order\src\entities\orderData\OrderDataActions;
+use modules\order\src\entities\orderData\OrderDataLanguage;
+use modules\order\src\entities\orderData\OrderDataMarketCountry;
+use modules\order\src\entities\orderData\OrderDataRepository;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTips\OrderTipsRepository;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
@@ -25,6 +33,8 @@ use modules\product\src\entities\productOption\ProductOptionRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
+use sales\dispatchers\DeferredEventDispatcher;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\billingInfo\BillingInfoRepository;
 use sales\repositories\creditCard\CreditCardRepository;
 use sales\repositories\lead\LeadRepository;
@@ -53,77 +63,32 @@ use sales\services\TransactionManager;
  * @property FlightPaxRepository $flightPaxRepository
  * @property ProductHolderRepository $productHolderRepository
  * @property FlightQuoteOptionRepository $flightQuoteOptionRepository
+ * @property OrderContactRepository $orderContactRepository
+ * @property OrderDataService $orderDataService
+ * @property OrderContactManageService $orderContactManageService
  */
 class OrderApiManageService
 {
-    /**
-     * @var OrderRepository
-     */
-    private $orderRepository;
-    /**
-     * @var OrderUserProfitRepository
-     */
-    private $orderUserProfitRepository;
-    /**
-     * @var TransactionManager
-     */
-    private $transactionManager;
-    /**
-     * @var RecalculateProfitAmountService
-     */
-    private $recalculateProfitAmountService;
-    /**
-     * @var ProductQuoteRepository
-     */
+    private OrderRepository $orderRepository;
+    private OrderUserProfitRepository $orderUserProfitRepository;
+    private TransactionManager $transactionManager;
+    private RecalculateProfitAmountService $recalculateProfitAmountService;
     private ProductQuoteRepository $productQuoteRepository;
-    /**
-     * @var InvoiceRepository
-     */
     private InvoiceRepository $invoiceRepository;
-    /**
-     * @var PaymentMethodRepository
-     */
     private PaymentMethodRepository $paymentMethodRepository;
-    /**
-     * @var PaymentRepository
-     */
     private PaymentRepository $paymentRepository;
-    /**
-     * @var LeadRepository
-     */
     private LeadRepository $leadRepository;
-    /**
-     * @var CreditCardRepository
-     */
     private CreditCardRepository $creditCardRepository;
-    /**
-     * @var BillingInfoRepository
-     */
     private BillingInfoRepository $billingInfoRepository;
-    /**
-     * @var OrderTipsRepository
-     */
     private OrderTipsRepository $orderTipsRepository;
-    /**
-     * @var ProductOptionRepository
-     */
     private ProductOptionRepository $productOptionRepository;
-    /**
-     * @var ProductQuoteOptionRepository
-     */
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
-    /**
-     * @var FlightPaxRepository
-     */
     private FlightPaxRepository $flightPaxRepository;
-    /**
-     * @var ProductHolderRepository
-     */
     private ProductHolderRepository $productHolderRepository;
-    /**
-     * @var FlightQuoteOptionRepository
-     */
     private FlightQuoteOptionRepository $flightQuoteOptionRepository;
+    private OrderContactRepository $orderContactRepository;
+    private OrderDataService $orderDataService;
+    private OrderContactManageService $orderContactManageService;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -142,7 +107,10 @@ class OrderApiManageService
         ProductQuoteOptionRepository $productQuoteOptionRepository,
         FlightPaxRepository $flightPaxRepository,
         ProductHolderRepository $productHolderRepository,
-        FlightQuoteOptionRepository $flightQuoteOptionRepository
+        FlightQuoteOptionRepository $flightQuoteOptionRepository,
+        OrderContactRepository $orderContactRepository,
+        OrderDataService $orderDataService,
+        OrderContactManageService $orderContactManageService
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -161,21 +129,35 @@ class OrderApiManageService
         $this->flightPaxRepository = $flightPaxRepository;
         $this->productHolderRepository = $productHolderRepository;
         $this->flightQuoteOptionRepository = $flightQuoteOptionRepository;
+        $this->orderContactRepository = $orderContactRepository;
+        $this->orderDataService = $orderDataService;
+        $this->orderContactManageService = $orderContactManageService;
     }
 
     /**
      * @param CreateOrderDTO $dto
      * @param OrderCreateForm $form
+     * @param int|null $createdUserId
      * @return Order
      * @throws \Throwable
      */
-    public function createOrder(CreateOrderDTO $dto, OrderCreateForm $form): Order
+    public function createOrder(CreateOrderDTO $dto, OrderCreateForm $form, ?int $createdUserId): Order
     {
-        return $this->transactionManager->wrap(function () use ($dto, $form) {
+        return $this->transactionManager->wrap(function () use ($dto, $form, $createdUserId) {
             $newOrder = (new Order())->create($dto);
-            $newOrder->processing();
+            $newOrder->processing(null, OrderStatusAction::API, null);
             $orderId = $this->orderRepository->save($newOrder);
 //            $this->recalculateProfitAmountService->setOrders([$newOrder])->recalculateOrders();
+
+            $this->orderDataService->create(
+                $orderId,
+                null,
+                $form->sourceId,
+                $dto->languageId,
+                $dto->marketCountry,
+                OrderDataActions::API_ORDER_CREATE,
+                $createdUserId
+            );
 
             if ($newOrder->or_owner_user_id) {
                 $newOrderUserProfit = (new OrderUserProfit())->create($orderId, $newOrder->or_owner_user_id, 100, $newOrder->or_profit_amount);
@@ -239,6 +221,7 @@ class OrderApiManageService
                     $quote->pq_product_id,
                     $productQuotesForm->productHolder->firstName,
                     $productQuotesForm->productHolder->lastName,
+                    $productQuotesForm->productHolder->middleName,
                     $productQuotesForm->productHolder->email,
                     $productQuotesForm->productHolder->phone,
                 );
@@ -328,7 +311,36 @@ class OrderApiManageService
                 $this->flightPaxRepository->save($pax);
             }
 
+            if (isset($form->contactsInfo)) {
+                foreach ($form->contactsInfo as $contactInfoForm) {
+                    $this->orderContactManageService->create(
+                        $newOrder->or_id,
+                        $contactInfoForm->first_name,
+                        $contactInfoForm->last_name,
+                        $contactInfoForm->middle_name,
+                        $contactInfoForm->email,
+                        $contactInfoForm->phone,
+                        $newOrder->or_project_id
+                    );
+                }
+            }
+
+            /** @var DeferredEventDispatcher $eventDispatcher */
+            $eventDispatcher = \Yii::$container->get(EventDispatcher::class);
+            $eventDispatcher->detachByKey(Order::UPDATE_EVENT_KEY);
+
             return $newOrder;
         });
+    }
+
+    public function createByC2bFlow(CreateOrderDTO $dto): Order
+    {
+        $newOrder = (new Order())->create($dto);
+        if ($newOrder->isProcessing()) {
+            $newOrder->processing(null, OrderStatusAction::API, null);
+        }
+        $this->orderRepository->save($newOrder);
+
+        return $newOrder;
     }
 }

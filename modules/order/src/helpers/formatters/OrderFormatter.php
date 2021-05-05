@@ -15,4 +15,13 @@ class OrderFormatter
             ['target' => '_blank', 'data-pjax' => 0]
         );
     }
+
+    public static function asOrderId(int $id): string
+    {
+        return Html::a(
+            'order: ' . $id,
+            ['/order/order-crud/view', 'id' => $id],
+            ['target' => '_blank', 'data-pjax' => 0]
+        );
+    }
 }

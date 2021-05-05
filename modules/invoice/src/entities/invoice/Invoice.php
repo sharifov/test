@@ -2,6 +2,7 @@
 
 namespace modules\invoice\src\entities\invoice;
 
+use common\models\BillingInfo;
 use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\events\InvoicePaidEvent;
@@ -29,11 +30,13 @@ use yii\db\ActiveRecord;
  * @property int $inv_updated_user_id
  * @property string $inv_created_dt
  * @property string $inv_updated_dt
+ * @property int|null $inv_billing_id
  *
  * @property Currency $invClientCurrency
  * @property Employee $invCreatedUser
  * @property Order $invOrder
  * @property Employee $invUpdatedUser
+ * @property BillingInfo $billingInfo
  */
 class Invoice extends ActiveRecord
 {
@@ -68,13 +71,19 @@ class Invoice extends ActiveRecord
             [['inv_created_dt', 'inv_updated_dt'], 'safe'],
             [['inv_gid'], 'string', 'max' => 32],
             [['inv_uid'], 'string', 'max' => 15],
-            [['inv_client_currency'], 'string', 'max' => 3],
             [['inv_gid'], 'unique'],
             [['inv_uid'], 'unique'],
-            [['inv_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['inv_client_currency' => 'cur_code']],
             [['inv_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['inv_created_user_id' => 'id']],
             [['inv_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['inv_order_id' => 'or_id']],
             [['inv_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['inv_updated_user_id' => 'id']],
+
+            [['inv_client_currency'], 'filter', 'filter' => 'trim'],
+            [['inv_client_currency'], 'filter', 'filter' => 'strtoupper'],
+            [['inv_client_currency'], 'string', 'max' => 3],
+            [['inv_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['inv_client_currency' => 'cur_code']],
+
+            [['inv_billing_id'], 'integer'],
+            [['inv_billing_id'], 'exist', 'skipOnError' => true, 'targetClass' => BillingInfo::class, 'targetAttribute' => ['inv_billing_id' => 'bi_id']],
         ];
     }
 
@@ -98,6 +107,7 @@ class Invoice extends ActiveRecord
             'invUpdatedUser' => 'Updated User',
             'inv_created_dt' => 'Created Dt',
             'inv_updated_dt' => 'Updated Dt',
+            'inv_billing_id' => 'Billing Info',
         ];
     }
 
@@ -133,8 +143,13 @@ class Invoice extends ActiveRecord
         $this->inv_status_id = InvoiceStatus::NOT_PAID;
     }
 
-    public static function create(int $orderId, float $sum, ?string $clientCurrency, string $description): self
-    {
+    public static function create(
+        int $orderId,
+        float $sum,
+        ?string $clientCurrency,
+        string $description,
+        ?int $billingInfoId = null
+    ): self {
         $invoice = new self();
         $invoice->inv_gid = self::generateGid();
         $invoice->inv_uid = self::generateUid();
@@ -143,6 +158,7 @@ class Invoice extends ActiveRecord
         $invoice->inv_sum = $sum;
         $invoice->inv_client_currency = $clientCurrency;
         $invoice->inv_description = $description;
+        $invoice->inv_billing_id = $billingInfoId;
         $invoice->calculateClientAmount();
         if (!$invoice->inv_description) {
             $invoice->inv_description = $invoice->generateDescription();
@@ -150,36 +166,29 @@ class Invoice extends ActiveRecord
         return $invoice;
     }
 
-    /**
-     * @return ActiveQuery
-     */
     public function getInvClientCurrency(): ActiveQuery
     {
         return $this->hasOne(Currency::class, ['cur_code' => 'inv_client_currency']);
     }
 
-    /**
-     * @return ActiveQuery
-     */
     public function getInvCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'inv_created_user_id']);
     }
 
-    /**
-     * @return ActiveQuery
-     */
     public function getInvOrder(): ActiveQuery
     {
         return $this->hasOne(Order::class, ['or_id' => 'inv_order_id']);
     }
 
-    /**
-     * @return ActiveQuery
-     */
     public function getInvUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'inv_updated_user_id']);
+    }
+
+    public function getBillingInfo(): ActiveQuery
+    {
+        return $this->hasOne(BillingInfo::class, ['bi_id' => 'inv_billing_id']);
     }
 
     public static function find()

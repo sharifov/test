@@ -3,8 +3,7 @@
 namespace modules\flight\src\jobs;
 
 use modules\flight\models\FlightQuote;
-use modules\flight\src\services\flightQuote\FlightQuotePdfService;
-use modules\order\src\events\OrderFileGeneratedEvent;
+use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
 use sales\helpers\app\AppHelper;
@@ -31,16 +30,18 @@ class FlightQuotePdfJob implements RetryableJobInterface
 
         try {
             if (!$flightQuote = FlightQuote::findOne(['fq_id' => $this->flightQuoteId])) {
-                throw new NotFoundException('FlightQuote not found. Id (' . $this->flightQuoteId . ')');
+                throw new NotFoundException('FlightQuote not found. Id(' . $this->flightQuoteId . ')');
             }
-            $flightQuotePdfService = new FlightQuotePdfService($flightQuote);
-            $flightQuotePdfService->setProductQuoteId($flightQuote->fq_product_quote_id);
-            if ($flightQuotePdfService->processingFile()) {
-                \Yii::info([
-                    'message' => 'FlightQuotePdfJob - file is generated',
-                    'quoteId' => $this->flightQuoteId,
-                ], 'info\FlightQuotePdfJob:success');
+            if (!$flightQuote->flightQuoteFlights) {
+                throw new NotFoundException('FlightQuoteFlights not found in FlightQuote Id(' . $this->flightQuoteId . ')');
             }
+
+            FlightQuoteTicketIssuedService::generateTicketIssued($flightQuote);
+
+            \Yii::info([
+                'message' => 'FlightQuotePdfJob - file is generated',
+                'quoteId' => $this->flightQuoteId,
+            ], 'info\FlightQuotePdfJob:success');
         } catch (NotFoundException $throwable) {
             AppHelper::throwableLogger(
                 $throwable,

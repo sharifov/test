@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use common\components\SearchService;
+use common\components\validators\CheckJsonValidator;
 use common\models\Airline;
 use common\models\Client;
 use common\models\Employee;
@@ -62,6 +63,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteStatusLog[] $flightQuoteStatusLogs
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
+ * @property FlightQuoteFlight[] $flightQuoteFlights
  */
 class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 {
@@ -182,7 +184,8 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
-            [['fq_json_booking', 'fq_ticket_json'], 'safe'],
+            [['fq_json_booking'], 'safe'],
+            [['fq_ticket_json'], CheckJsonValidator::class],
             [['fq_flight_request_uid'], 'string', 'max' => 100],
         ];
     }
@@ -298,6 +301,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function getFlightQuoteTrips(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FlightQuoteTrip::class, ['fqt_flight_quote_id' => 'fq_id']);
+    }
+
+    public function getFlightQuoteFlights(): ActiveQuery
+    {
+        return $this->hasMany(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id']);
     }
 
     public static function find(): Scopes
@@ -611,25 +619,32 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 
     public function getProject(): Project
     {
-        return $this->fqProductQuote->pqProduct->prLead->project;
+        if ($project = ArrayHelper::getValue($this, 'fqProductQuote.pqProduct.project')) {
+            return $project;
+        }
+        if ($project = ArrayHelper::getValue($this, 'fqProductQuote.pqProduct.prLead.project')) {
+            return $project;
+        }
+        throw new \DomainException('FlightQuote not related to project');
     }
 
-    public function getLead(): Lead
+    public function getLead(): ?Lead
     {
-        return $this->fqProductQuote->pqProduct->prLead;
+        return ArrayHelper::getValue($this, 'fqProductQuote.pqProduct.prLead');
     }
 
-    public function getClient(): Client
+    public function getClient(): ?Client
     {
-        return $this->fqProductQuote->pqProduct->prLead->client;
+        return ArrayHelper::getValue($this, 'fqProductQuote.pqProduct.prLead.client');
     }
 
     public function getOrder(): ?Order
     {
-        if ($order = ArrayHelper::getValue($this, 'fqProductQuote.pqOrder')) {
-            /** @var Order $order */
-            return $order;
-        }
-        return null;
+        return ArrayHelper::getValue($this, 'fqProductQuote.pqOrder');
+    }
+
+    public static function findLastByFlightRequestUid(string $flightRequestUid)
+    {
+        return self::find()->where(['fq_flight_request_uid' => $flightRequestUid])->orderBy(['fq_id' => SORT_DESC])->one();
     }
 }

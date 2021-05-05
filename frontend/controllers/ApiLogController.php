@@ -12,6 +12,7 @@ use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * ApiLogController implements the CRUD actions for ApiLog model.
@@ -57,6 +58,18 @@ class ApiLogController extends FController
             'dataProvider' => $dataProvider,
             'modelCleaner' => $dbCleanerParamsForm,
         ]);
+    }
+
+    /**
+     * Lists of ApiLog Action.
+     * @return array
+     */
+    public function actionAjaxActionList(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['error' => '', 'data' => []];
+        $result['data'] = ApiLog::getActionFilterByCnt();
+        return $result;
     }
 
     /**

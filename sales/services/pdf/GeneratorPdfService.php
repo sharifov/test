@@ -21,7 +21,7 @@ class GeneratorPdfService
      * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
      * @throws \yii\base\InvalidConfigException
      */
-    public static function generateForBrowserOutput(string $content, string $fileName = 'filename.pdf', bool $cutStyle = false)
+    public static function generateForBrowserOutput(string $content, string $fileName = 'filename.pdf', bool $cutStyle = true)
     {
         $pdf = new Pdf(['mode' => Pdf::MODE_CORE,
             'destination' => Pdf::DEST_BROWSER,
@@ -44,7 +44,7 @@ class GeneratorPdfService
      * @throws \yii\base\Exception
      * @throws \yii\base\InvalidConfigException
      */
-    public static function generateAsFile(string $content, string $fileName, bool $cutStyle = false): string
+    public static function generateAsFile(string $content, string $fileName, bool $cutStyle = true): string
     {
         $patchToDir =  \Yii::getAlias('@frontend/runtime/pdf/');
         $patchToFile = $patchToDir . $fileName;
@@ -98,10 +98,12 @@ class GeneratorPdfService
         $startTag = strpos($content, '<' . $target, 0);
         $endTag = strpos($content, $closeTag, 0);
 
-        $content = substr($content, $startTag, ($endTag + strlen($closeTag) - $startTag));
+        if ($startTag !== false && $endTag !== false) {
+            $content = substr($content, $startTag, ($endTag + strlen($closeTag) - $startTag));
 
-        if ($removeTarget) {
-            $content = str_replace([$closeTag, '<' . $target . '>'], '', $content);
+            if ($removeTarget) {
+                $content = str_replace([$closeTag, '<' . $target . '>'], '', $content);
+            }
         }
         return $content;
     }
@@ -112,7 +114,10 @@ class GeneratorPdfService
      */
     public static function cutStyle(string $content): ?string
     {
-        $style = self::getSectionFromContent($content, 'style');
-        return str_replace($style, '', $content);
+        if (strpos($content, '<style') !== false) {
+            $style = self::getSectionFromContent($content, 'style');
+            return str_replace($style, '', $content);
+        }
+        return $content;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
 use sales\entities\serializer\Serializable;
 use sales\model\billingInfo\entity\serializer\BillingInfoSerializer;
@@ -42,6 +43,8 @@ use yii\db\ActiveRecord;
  * @property Order $biOrder
  * @property Employee $biUpdatedUser
  * @property PaymentMethod $paymentMethod
+ * @property Payment $payment
+ * @property Invoice $invoice
  */
 class BillingInfo extends \yii\db\ActiveRecord implements Serializable
 {
@@ -108,7 +111,6 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
             'bi_updated_dt' => 'Updated Dt',
         ];
     }
-
 
     /**
      * @return array
@@ -184,8 +186,8 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
         string $zip,
         string $phone,
         string $email,
-        int $paymentMethodId,
-        int $creditCardId,
+        ?int $paymentMethodId,
+        ?int $creditCardId,
         int $orderId
     ): self {
         $billing = new self();

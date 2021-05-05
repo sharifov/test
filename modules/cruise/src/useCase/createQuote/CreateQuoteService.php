@@ -4,18 +4,26 @@ namespace modules\cruise\src\useCase\createQuote;
 
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
+use modules\cruise\src\exceptions\CruiseCodeException;
+use modules\order\src\exceptions\OrderC2BDtoException;
+use modules\order\src\exceptions\OrderC2BException;
+use modules\order\src\forms\api\createC2b\QuotesForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
+use modules\product\src\interfaces\Productable;
+use modules\product\src\interfaces\ProductQuoteService;
+use sales\auth\Auth;
 use sales\helpers\product\ProductQuoteHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
-class CreateQuoteService
+class CreateQuoteService implements ProductQuoteService
 {
     public const SERVICE_FEE = 0.035;
 
-    public function create(int $userId, array $quote, Cruise $cruise, $currency): int
+    public function create(?int $userId, array $quote, Cruise $cruise, $currency): int
     {
         $hashKey = $this->getHash($quote['id'] . $quote['cabin']['code']);
 
@@ -102,5 +110,26 @@ class CreateQuoteService
     public static function generateGid(): string
     {
         return md5(uniqid('crq', true));
+    }
+
+    /**
+     * @param Productable|Cruise $product
+     * @param QuotesForm $form
+     * @throws \Throwable
+     */
+    public function c2bHandle(Productable $product, QuotesForm $form): void
+    {
+        return;
+        try {
+            $quoteData = Json::decode($form->originSearchData);
+
+            $this->create(null, $quoteData, $product, 'USD');
+        } catch (\Throwable $e) {
+            $dto = new OrderC2BDtoException(
+                $product,
+                $form->quoteOtaId
+            );
+            throw new OrderC2BException($dto, $e->getMessage(), CruiseCodeException::API_C2B_HANDLE);
+        }
     }
 }

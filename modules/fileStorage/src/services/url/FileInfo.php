@@ -2,6 +2,8 @@
 
 namespace modules\fileStorage\src\services\url;
 
+use modules\fileStorage\src\entity\fileStorage\FileStorage;
+
 /**
  * Class FileInfo
  *
@@ -35,5 +37,16 @@ class FileInfo
         } else {
             $this->queryParams = $queryParams;
         }
+    }
+
+    public static function byFileStorage(FileStorage $fileStorage, ?QueryParams $queryParams = null): FileInfo
+    {
+        return new self(
+            $fileStorage->fs_name,
+            $fileStorage->fs_path,
+            $fileStorage->fs_uid,
+            $fileStorage->fs_title,
+            $queryParams
+        );
     }
 }

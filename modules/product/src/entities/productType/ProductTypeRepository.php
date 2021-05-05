@@ -28,6 +28,14 @@ class ProductTypeRepository
         throw new NotFoundException('Product Type is not found', ProductCodeException::PRODUCT_TYPE_NOT_FOUND);
     }
 
+    public function findByKey(string $key): ProductType
+    {
+        if ($productType = ProductType::findOne(['pt_key' => $key])) {
+            return $productType;
+        }
+        throw new NotFoundException('Product Type is not found', ProductCodeException::PRODUCT_TYPE_NOT_FOUND);
+    }
+
     public function save(ProductType $productType): int
     {
         if (!$productType->save(false)) {

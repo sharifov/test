@@ -1,0 +1,31 @@
+class_name: ApiTester
+modules:
+  enabled:
+    - PhpBrowser:
+        url: 'https://test-api.sales.zeit.test/'
+    - REST:
+        depends: PhpBrowser
+        url: 'https://test-api.sales.zeit.test/'
+        configFile: 'config/test.php'
+        part: [json]
+    - Yii2:
+        part: [orm, fixtures]
+        entryScript: index-test.php
+
+
+env:
+  local:
+    modules:
+      config:
+        WebDriver:
+          #url: 'https://test-api.sales.zeit.test'
+          #host: '25.99.239.1'
+          browser: 'chrome'
+          #port: '4444'
+          delay: 1000
+          wait: 5
+          connection_timeout: 100
+          request_timeout: 100
+          window_size: 1024x768
+          #capabilities:
+          #args: ["--headless",  "--disable-gpu"]

@@ -48,21 +48,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'inv_client_currency',
             'inv_currency_rate',
             'inv_description:ntext',
-
+            'inv_billing_id',
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'inv_created_user_id',
                 'relation' => 'invCreatedUser',
                 'placeholder' => 'Select User',
             ],
-
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'inv_updated_user_id',
                 'relation' => 'invUpdatedUser',
                 'placeholder' => 'Select User',
             ],
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'inv_created_dt',

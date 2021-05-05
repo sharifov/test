@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -33,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'bi_last_name',
             'bi_middle_name',
             'bi_company_name',
+            'bi_cc_id',
             //'bi_address_line1',
             //'bi_address_line2',
             //'bi_city',
@@ -43,13 +45,18 @@ $this->params['breadcrumbs'][] = $this->title;
             //'bi_contact_email:email',
             //'bi_contact_name',
             //'bi_payment_method_id',
-            //'bi_cc_id',
             //'bi_order_id',
             //'bi_status_id',
             //'bi_created_user_id',
             //'bi_updated_user_id',
-            //'bi_created_dt',
-            //'bi_updated_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'bi_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'bi_updated_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

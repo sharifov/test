@@ -193,7 +193,7 @@ class Client extends ActiveRecord
 
             ['cl_locale', 'string', 'max' => 5],
 
-            ['cl_marketing_country', 'string', 'max' => 10],
+            ['cl_marketing_country', 'string', 'max' => 2],
             ['cl_marketing_country', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
 
             ['cl_call_recording_disabled', 'default', 'value' => false],

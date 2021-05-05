@@ -1,8 +1,12 @@
 # global codeception file to run tests from all apps
 include:
-    - common
-    - frontend
+    #- common
+    #- frontend
+    - webapi
 paths:
     log: console/runtime/logs
+
+bootstrap: _bootstrap.php
 settings:
+    memory_limit: 1024M
     colors: true

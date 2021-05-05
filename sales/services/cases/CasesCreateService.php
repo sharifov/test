@@ -3,11 +3,18 @@
 namespace sales\services\cases;
 
 use common\models\Client;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderData\OrderData;
+use sales\entities\cases\CaseCategory;
 use sales\entities\cases\Cases;
 use sales\forms\cases\CasesCreateByChatForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
+use sales\model\caseOrder\entity\CaseOrder;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatCase\entity\ClientChatCaseRepository;
@@ -15,6 +22,7 @@ use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
+use yii\helpers\VarDumper;
 
 /**
  * Class CasesCreateService
@@ -194,5 +202,46 @@ class CasesCreateService
         });
 
         return $case;
+    }
+
+    public function createByCancelFailedOrder(Order $order): void
+    {
+        if (
+            SettingHelper::isCreateCaseOnOrderCancelEnabled()
+            &&
+            $caseCategory = CaseCategory::find()->byKey(SettingHelper::getCaseCategoryKeyOnOrderCancel())->one()
+        ) {
+            try {
+                $orderData = OrderData::findOne(['od_order_id' => $order->or_id]);
+
+                $orderContact = OrderContact::find()->byOrderId($order->or_id)->one();
+                if (!$orderContact) {
+                    throw new \DomainException('Cannot create client, order contact not found');
+                }
+
+                if (!$client = $orderContact->client) {
+                    $client = $this->clientManageService->createBasedOnOrderContact($orderContact, $order->or_project_id);
+                }
+
+                $case = Cases::createByApi(
+                    $client->id,
+                    $order->or_project_id,
+                    $caseCategory->cc_dep_id,
+                    $orderData->od_display_uid ?? null,
+                    null,
+                    null,
+                    $caseCategory->cc_id
+                );
+                $this->casesRepository->save($case);
+
+                $caseOrder = CaseOrder::create($case->cs_id, $order->or_id);
+                $caseOrder->detachBehavior('user');
+                if (!$caseOrder->save()) {
+                    throw new \RuntimeException($caseOrder->getErrorSummary(true)[0]);
+                }
+            } catch (\Throwable $e) {
+                \Yii::error(VarDumper::dumpAsString(AppHelper::throwableLog($e, true)), 'CasesCreateService:createByCancelFailedOrder:Throwable');
+            }
+        }
     }
 }

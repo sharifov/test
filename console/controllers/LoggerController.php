@@ -10,7 +10,7 @@ use common\models\Lead;
 use common\models\LeadPreferences;
 use sales\entities\log\GlobalLog;
 use sales\logger\formatter\Formatter;
-use sales\services\log\GlobalLogFormatAttrService;
+use sales\services\log\GlobalEntityAttributeFormatServiceService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use yii\db\ActiveQuery;
@@ -24,7 +24,7 @@ use yii\helpers\VarDumper;
  * @package console\controllers
  *
  * @property $logger Logger
- * @property GlobalLogFormatAttrService $globalLogFormatAttrService
+ * @property GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService
  */
 class LoggerController extends Controller
 {
@@ -33,7 +33,7 @@ class LoggerController extends Controller
      */
     private $logger;
     /**
-     * @var GlobalLogFormatAttrService
+     * @var GlobalEntityAttributeFormatServiceService
      */
     private $globalLogFormatAttrService;
 
@@ -42,10 +42,10 @@ class LoggerController extends Controller
      * @param $id
      * @param $module
      * @param Logger $logger
-     * @param GlobalLogFormatAttrService $globalLogFormatAttrService
+     * @param GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService
      * @param array $config
      */
-    public function __construct($id, $module, Logger $logger, GlobalLogFormatAttrService $globalLogFormatAttrService, $config = [])
+    public function __construct($id, $module, Logger $logger, GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->logger = $logger;

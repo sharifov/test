@@ -4,6 +4,7 @@ namespace modules\flight\models;
 
 use modules\flight\src\entities\flightQuoteTrip\serializer\FlightQuoteTripSerializer;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "flight_quote_trip".
@@ -13,9 +14,11 @@ use Yii;
  * @property string|null $fqt_key
  * @property int $fqt_flight_quote_id
  * @property int|null $fqt_duration
+ * @property int|null $fqp_flight_id
  *
  * @property FlightQuoteSegment[] $flightQuoteSegments
  * @property FlightQuote $fqtFlightQuote
+ * @property FlightQuoteFlight $flightQuoteFlight
  */
 class FlightQuoteTrip extends \yii\db\ActiveRecord
 {
@@ -38,6 +41,9 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
             [['fqt_key'], 'string', 'max' => 255],
             [['fqt_uid'], 'string', 'max' => 20],
             [['fqt_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqt_flight_quote_id' => 'fq_id']],
+
+            [['fqp_flight_id'], 'integer'],
+            [['fqp_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqp_flight_id' => 'fqf_id']],
         ];
     }
 
@@ -51,6 +57,7 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
             'fqt_key' => 'Fqt Key',
             'fqt_flight_quote_id' => 'Fqt Flight Quote ID',
             'fqt_duration' => 'Fqt Duration',
+            'fqp_flight_id' => 'Quote Flight',
         ];
     }
 
@@ -60,6 +67,11 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
             $this->fqt_uid = $this->generateUid();
         }
         return parent::beforeSave($insert);
+    }
+
+    public function getFlightQuoteFlight(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'fqp_flight_id']);
     }
 
     /**
@@ -92,7 +104,7 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
      * @param string $duration
      * @return FlightQuoteTrip
      */
-    public static function create(FlightQuote $flightQuote, string $duration): self
+    public static function create(FlightQuote $flightQuote, ?string $duration): self
     {
         $trip = new self();
 

@@ -30,4 +30,10 @@ class FlightCodeException
 
     public const API_TICKET_FLIGHT_NOT_FOUND_DATA_ON_REQUEST = Module::FLIGHT . 800;
     public const API_TICKET_FLIGHT_VALIDATE = Module::FLIGHT . 801;
+
+    public const API_TICKET_ISSUE_FAILED = Module::FLIGHT . 802;
+    public const API_FLIGHT_FAIL_FAILED = Module::FLIGHT . 803;
+    public const API_FLIGHT_REPLACE_FAILED = Module::FLIGHT . 804;
+
+    public const API_C2B_HANDLE = Module::FLIGHT . 901;
 }

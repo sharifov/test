@@ -133,11 +133,7 @@ class ApiAttractionService extends Component
                                 label
                                 dataType
                                 isAnswered
-                                dataFormat
-                                availableOptions {
-                                    label
-                                    value
-                                }
+                                dataFormat                                
                                 answerValue
                                 answerFormattedText
                             }
@@ -160,12 +156,12 @@ class ApiAttractionService extends Component
                                 }
                                 minAge
                                 maxAge
-                                price
-                                currency                                
+                                price                                                                
                                 priceFormattedText
                                 priceTotal
                                 priceTotalFormattedText
                             }
+                            errors
                         }
                     }
                 }',
@@ -208,11 +204,13 @@ class ApiAttractionService extends Component
                         id                        
                         isValid
                         optionList {
+                            isComplete
                             nodes {
                                 id
                                 label
                                 dataType
                                 dataFormat
+                                isAnswered
                                 availableOptions {
                                     label
                                     value
@@ -237,8 +235,7 @@ class ApiAttractionService extends Component
                                 }
                                 minAge
                                 maxAge
-                                price
-                                currency
+                                price                                
                                 priceFormattedText
                                 priceTotal
                                 priceTotalFormattedText
@@ -252,8 +249,8 @@ class ApiAttractionService extends Component
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
-        //VarDumper::dump($result, 10, true); exit();
-        return $data['data'] ?? [];
+        //VarDumper::dump($data, 10, true); exit();
+        return $data ?? [];
     }
 
     public function getAvailability(string $availabilityId): array
@@ -294,8 +291,7 @@ class ApiAttractionService extends Component
                             }
                             minAge
                             maxAge
-                            price
-                            currency
+                            price                            
                             priceFormattedText
                             priceTotal
                             priceTotalFormattedText
@@ -350,20 +346,24 @@ class ApiAttractionService extends Component
               product(id: $productId) {
                 id
                 code
-                name                
+                name
+                abstract
                 guidePriceCurrency
                 guidePrice
                 difficultyLevel
                 supplierName
-                __typename
+                
+                availabilityCount
+                availabilityType
+                bookingUrl
                 previewImage {
-                  url
+                    url
                 }
-                contentList {nodes{
-                  name
-                  type
-                  description
-                }}
+                cancellationPolicy {
+                    isCancellable
+                }
+                minDuration
+                maxDuration
               }
             }',
             'variables' => '{"productId":"' . $productId . '"}',
@@ -379,28 +379,48 @@ class ApiAttractionService extends Component
     {
         $query = [
             'query' => 'query holibob ($term: String!){
-              productList(filter: {search: $term}) {
-                recordCount
-                pageCount 
-                nodes {
-                  id
-                  name  
-                  availabilityType
-                  guidePriceFormattedText
-                  guidePrice
-                  supplierName
-                  abstract
-                  previewImage {
-                     url
-                  }
-                   place {
-                     cityId
-                     cityName                    
-                     countryId
-                     countryName
-                   }
+                productList(filter: {search: $term} pageSize: 100 sort: {isRecommended: desc}) {
+                    recordCount
+                    pageCount 
+                    nodes {
+                        id
+                        abstract  
+                        availabilityType
+                        cancellationPolicy {
+                            isCancellable
+                            penaltyList {
+                                nodes {
+                                    amount
+                                    amountCurrency
+                                    amountType
+                                    formattedText
+                                    ordinalPosition
+                                    refundPercentage
+                                    relativeTo
+                                    type
+                                }
+                            }
+                        }
+                        categoryList {
+                            nodes {                      
+                                name
+                            }
+                        }
+                        name                        
+                        guidePriceFormattedText
+                        guidePrice
+                        supplierName
+                        minDuration
+                        maxDuration                  
+                        previewImage {
+                            url
+                        }
+                        place {                     
+                            cityName
+                            countryName
+                        }                                                
+                    }
                 }
-              }
             }',
             'variables' => '{"term":"' . $attraction->atn_destination . '"}',
             'operationName' => 'holibob',

@@ -102,9 +102,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'contact_info',
                 'value' => static function (\common\models\Project $model) {
-                    return \yii\helpers\VarDumper::dumpAsString($model->contactInfo->attributes, 5);
+                    return \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($model->contact_info), 5);
                 },
-                //'format' => 'raw'
+//                'format' => 'raw'
             ],
 
             [

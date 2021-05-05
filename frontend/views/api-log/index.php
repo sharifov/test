@@ -21,12 +21,12 @@ $pjaxListId = 'pjax-api-log';
 ?>
 <div class="api-log-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-list"></i> <?= Html::encode($this->title) ?></h1>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
-        <?= Html::a('Delete All', ['delete-all'], [
+        <?= Html::a('<i class="fa fa-remove"></i> Delete All', ['delete-all'], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete all items?',
@@ -62,7 +62,7 @@ $pjaxListId = 'pjax-api-log';
                     return '<b>' . Html::encode($model->al_action) . '</b>';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\ApiLog::getActionFilter()
+                'filter' => \common\models\ApiLog::getActionFilter(Yii::$app->request->isPjax)
             ],
             [
                 'label' => 'Relative Time',
@@ -175,13 +175,38 @@ $pjaxListId = 'pjax-api-log';
 
 <?php
 yii\bootstrap4\Modal::begin([
-        'title' => 'Log detail',
-        'id' => 'modal',
-        'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
-    ]);
+    'title' => 'Log detail',
+    'id' => 'modal',
+    'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
+]);
 yii\bootstrap4\Modal::end();
 
+$ajaxUrl = \yii\helpers\Url::to(['/api-log/ajax-action-list']);
+$actionValue = $searchModel->al_action ? md5($searchModel->al_action) : '';
+
 $jsCode = <<<JS
+    let ajaxUrlCategoryList = '$ajaxUrl';
+    let actionValue = '$actionValue';
+
+    function updateActionList() {
+        $.getJSON(ajaxUrlCategoryList, function(response) {
+            let obj = $( "select[name='ApiLogSearch[al_action]']" );
+        
+            obj.html('').append('<option value=""></option>');
+            $.each(response.data, function(){
+                let selected = '';
+                
+                if (actionValue === this.hash) {
+                    selected = 'selected';
+                }
+                obj.append('<option value="'+ this.name +'" ' + selected + '>'+ this.name +' - ['+ this.cnt +']</option>')
+            });
+
+        });
+    }
+
+    setTimeout(updateActionList, 2000);
+
     $(document).on('click', '.showDetail', function(){
         
         let logId = $(this).data('idt');

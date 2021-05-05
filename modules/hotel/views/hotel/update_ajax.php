@@ -115,22 +115,22 @@ $pjaxId = 'pjax-hotel-update'
                 ]
             ]) ?>
 
-            <div class="row">
+            <!--<div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'ph_min_star_rate')->dropDownList(array_combine(range(1, 5), range(1, 5)), ['prompt' => '-']) ?>
+                    <?/*= $form->field($model, 'ph_min_star_rate')->dropDownList(array_combine(range(1, 5), range(1, 5)), ['prompt' => '-']) */?>
                 </div>
                 <div class="col-md-6">
-                    <?= $form->field($model, 'ph_max_star_rate')->dropDownList(array_combine(range(1, 5), range(1, 5)), ['prompt' => '-']) ?>
-                </div>
-
-                <div class="col-md-6">
-                    <?= $form->field($model, 'ph_min_price_rate')->input('number', ['min' => 0, 'step' => 0.01]) ?>
-                </div>
-                <div class="col-md-6">
-                    <?= $form->field($model, 'ph_max_price_rate')->input('number', ['min' => 0, 'step' => 0.01]) ?>
+                    <?/*= $form->field($model, 'ph_max_star_rate')->dropDownList(array_combine(range(1, 5), range(1, 5)), ['prompt' => '-']) */?>
                 </div>
 
-            </div>
+                <div class="col-md-6">
+                    <?/*= $form->field($model, 'ph_min_price_rate')->input('number', ['min' => 0, 'step' => 0.01]) */?>
+                </div>
+                <div class="col-md-6">
+                    <?/*= $form->field($model, 'ph_max_price_rate')->input('number', ['min' => 0, 'step' => 0.01]) */?>
+                </div>
+
+            </div>-->
 
             <?= $form->field($model, 'ph_destination_code')->hiddenInput([
                 'id' => 'ph_destination_code'

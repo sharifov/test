@@ -2,18 +2,52 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\models\BillingInfo;
+use common\models\CreditCard;
+use common\models\Payment;
+use frontend\helpers\JsonHelper;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\FileSystem;
 use modules\offer\src\entities\offer\OfferRepository;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\order\OrderStatus;
+use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderContact\OrderContactRepository;
+use modules\order\src\entities\orderData\OrderData;
+use modules\order\src\entities\orderData\OrderDataActions;
+use modules\order\src\entities\orderData\OrderDataLanguage;
+use modules\order\src\entities\orderData\OrderDataMarketCountry;
+use modules\order\src\entities\orderData\OrderDataRepository;
+use modules\order\src\entities\orderRequest\OrderRequest;
+use modules\order\src\entities\orderRequest\OrderRequestRepository;
+use modules\order\src\exceptions\OrderC2BException;
 use modules\order\src\exceptions\OrderCodeException;
+use modules\order\src\flow\cancelOrder\CanceledException;
+use modules\order\src\flow\cancelOrder\CancelOrder;
+use modules\order\src\forms\api\cancel\CancelForm;
 use modules\order\src\forms\api\create\OrderCreateForm;
+use modules\order\src\forms\api\createC2b\OrderCreateC2BForm;
 use modules\order\src\forms\api\view\OrderViewForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderApiManageService;
+use modules\order\src\services\OrderContactManageService;
+use modules\order\src\services\OrderDataService;
+use modules\product\src\entities\productType\ProductTypeRepository;
+use modules\product\src\useCases\product\create\ProductCreateForm;
+use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
+use sales\dispatchers\DeferredEventDispatcher;
+use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
+use sales\repositories\billingInfo\BillingInfoRepository;
+use sales\repositories\creditCard\CreditCardRepository;
+use sales\repositories\NotFoundException;
 use sales\repositories\product\ProductQuoteRepository;
+use sales\repositories\project\ProjectRepository;
+use sales\services\TransactionManager;
+use webapi\models\ApiUser;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
@@ -25,19 +59,19 @@ use webapi\src\response\behaviors\ResponseStatusCodeBehavior;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
+use webapi\src\response\messages\DetailErrorMessage;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
-use webapi\src\response\messages\RequestMessage;
 use webapi\src\response\messages\SourceMessage;
 use webapi\src\response\messages\Sources;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\messages\StatusFailedMessage;
 use webapi\src\response\ProxyResponse;
-use webapi\src\response\SimpleResponse;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\httpclient\Response;
 use yii\web\NotFoundHttpException;
@@ -51,30 +85,39 @@ use yii\web\NotFoundHttpException;
  * @property ProductQuoteRepository $productQuoteRepository
  * @property OrderRepository $orderRepository
  * @property FileSystem $fileSystem
+ * @property OrderRequestRepository $orderRequestRepository
+ * @property ProjectRepository $projectRepository
+ * @property ProductCreateService $productCreateService
+ * @property ProductTypeRepository $productTypeRepository
+ * @property TransactionManager $transactionManager
+ * @property OrderDataRepository $orderDataRepository
+ * @property CreditCardRepository $creditCardRepository
+ * @property BillingInfoRepository $billingInfoRepository
+ * @property CancelOrder $cancelOrder
+ * @property OrderContactRepository $orderContactRepository
+ * @property OrderDataService $orderDataService
+ * @property OrderContactManageService $orderContactManageService
  */
 class OrderController extends BaseController
 {
     private $requestBo;
-    /**
-     * @var OfferRepository
-     */
     private OfferRepository $offerRepository;
-    /**
-     * @var OrderApiManageService
-     */
     private OrderApiManageService $orderManageService;
-    /**
-     * @var ProductQuoteRepository
-     */
     private ProductQuoteRepository $productQuoteRepository;
-    /**
-     * @var OrderRepository
-     */
     private OrderRepository $orderRepository;
-    /**
-     * @var FileSystem
-     */
     private FileSystem $fileSystem;
+    private OrderRequestRepository $orderRequestRepository;
+    private ProjectRepository $projectRepository;
+    private ProductCreateService $productCreateService;
+    private ProductTypeRepository $productTypeRepository;
+    private TransactionManager $transactionManager;
+    private OrderDataRepository $orderDataRepository;
+    private CreditCardRepository $creditCardRepository;
+    private BillingInfoRepository $billingInfoRepository;
+    private CancelOrder $cancelOrder;
+    private OrderContactRepository $orderContactRepository;
+    private OrderDataService $orderDataService;
+    private OrderContactManageService $orderContactManageService;
 
     public function __construct(
         $id,
@@ -86,6 +129,18 @@ class OrderController extends BaseController
         ProductQuoteRepository $productQuoteRepository,
         OrderRepository $orderRepository,
         FileSystem $fileSystem,
+        OrderRequestRepository $orderRequestRepository,
+        ProjectRepository $projectRepository,
+        ProductCreateService $productCreateService,
+        ProductTypeRepository $productTypeRepository,
+        TransactionManager $transactionManager,
+        OrderDataRepository $orderDataRepository,
+        CreditCardRepository $creditCardRepository,
+        BillingInfoRepository $billingInfoRepository,
+        CancelOrder $cancelOrder,
+        OrderContactRepository $orderContactRepository,
+        OrderDataService $orderDataService,
+        OrderContactManageService $orderContactManageService,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -95,6 +150,18 @@ class OrderController extends BaseController
         $this->productQuoteRepository = $productQuoteRepository;
         $this->orderRepository = $orderRepository;
         $this->fileSystem = $fileSystem;
+        $this->orderRequestRepository = $orderRequestRepository;
+        $this->projectRepository = $projectRepository;
+        $this->productCreateService = $productCreateService;
+        $this->productTypeRepository = $productTypeRepository;
+        $this->transactionManager = $transactionManager;
+        $this->orderDataRepository = $orderDataRepository;
+        $this->creditCardRepository = $creditCardRepository;
+        $this->billingInfoRepository = $billingInfoRepository;
+        $this->cancelOrder = $cancelOrder;
+        $this->orderContactRepository = $orderContactRepository;
+        $this->orderDataService = $orderDataService;
+        $this->orderContactManageService = $orderContactManageService;
     }
 
     public function behaviors(): array
@@ -108,7 +175,7 @@ class OrderController extends BaseController
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'filter' => CreditCardFilter::class,
-            'except' => ['create', 'get-file'],
+            'except' => ['create', 'get-file', 'create-c2b'],
         ];
         $behaviors['responseStatusCode'] = [
             'class' => ResponseStatusCodeBehavior::class,
@@ -116,7 +183,7 @@ class OrderController extends BaseController
         ];
         $behaviors['technical'] = [
             'class' => TechnicalInfoBehavior::class,
-            'except' => ['get-file'],
+            'except' => ['get-file', 'create-c2b'],
         ];
         return $behaviors;
     }
@@ -132,7 +199,7 @@ class OrderController extends BaseController
      * @api {post} /v2/order/create-proxy Create Order Proxy
      * @apiVersion 0.2.0
      * @apiName CreateOrderProxy
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -300,7 +367,7 @@ class OrderController extends BaseController
      * @api {post} /v2/order/create Create Order
      * @apiVersion 0.2.0
      * @apiName CreateOrder
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -310,52 +377,96 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {String}       offerGid                                            Offer gid
-     * @apiParam {Object[]}     productQuotes                                       Product Quotes
-     * @apiParam {String}       productQuotes.gid                                   Product Quote Gid
-     * @apiParam {Object[]}     productQuotes.productOptions                        Quote Options
-     * @apiParam {String}       productQuotes.productOptions.productOptionKey       Product option key
-     * @apiParam {String}       productQuotes.productOptions.name                   Name
-     * @apiParam {String}       productQuotes.productOptions.description            Description
-     * @apiParam {Decimal}      productQuotes.productOptions.price                  Price
+     * @apiParam {string{max 10}}       sourceCid                                           Source cid
+     * @apiParam {string{max 32}}       offerGid                                            Offer gid
+     * @apiParam {string{max 5}}        languageId                                          Language Id
+     * @apiParam {string{max 2}}        marketCountry                                       Market Country
+     * @apiParam {Object[]}             productQuotes                                       Product Quotes
+     * @apiParam {string{max 32}}       productQuotes.gid                                   Product Quote Gid
+     * @apiParam {Object[]}             productQuotes.productOptions                        Quote Options
+     * @apiParam {string{max 30}}       productQuotes.productOptions.productOptionKey       Product option key
+     * @apiParam {string{max 50}}       [productQuotes.productOptions.name]                   Name
+     * @apiParam {string}               [productQuotes.productOptions.description]            Description
+     * @apiParam {Decimal}              productQuotes.productOptions.price                  Price
+     * @apiParam {string}               productQuotes.productOptions.json_data              Original data
      *
-     * @apiParam {Object}      productQuotes.productHolder                         Holder first name
-     * @apiParam {String}      productQuotes.productHolder.firstName               Holder first name
-     * @apiParam {String}      productQuotes.productHolder.lastName                Holder last name
-     * @apiParam {String}      productQuotes.productHolder.email                   Holder email
-     * @apiParam {String}      productQuotes.productHolder.phone                   Holder phone
+     * @apiParam {Object}               productQuotes.productHolder                         Holder Info
+     * @apiParam {string{max 50}}       productQuotes.productHolder.firstName               Holder first name
+     * @apiParam {string{max 50}}       productQuotes.productHolder.lastName                Holder last name
+     * @apiParam {string{max 50}}       [productQuotes.productHolder.middleName]            Holder middle name
+     * @apiParam {string{max 100}}      productQuotes.productHolder.email                   Holder email
+     * @apiParam {string{max 20}}       productQuotes.productHolder.phone                   Holder phone
      *
-     * @apiParam {Object}       payment                 Payment
-     * @apiParam {String}       payment.type            Type
-     * @apiParam {Integer}      payment.transactionId   Transaction Id
-     * @apiParam {String}       payment.date            Date
-     * @apiParam {Decimal}      payment.amount          Amount
-     * @apiParam {String}       payment.currency        Currency
+     * @apiParam {Object[]}              [productQuotes.productHolder.data]                   Quote options
+     * @apiParam {string}                productQuotes.productHolder.data.segment_uid         Segment uid
+     * @apiParam {string}                productQuotes.productHolder.data.pax_uid         Pax uid
+     * @apiParam {string}                productQuotes.productHolder.data.trip_uid         Trip uid
+     * @apiParam {Decimal}               productQuotes.productHolder.data.total         Total
+     * @apiParam {string{max 5}}         productQuotes.productHolder.data.currency         Currency
+     * @apiParam {Decimal}               productQuotes.productHolder.data.usd_total         Total price in usd
+     * @apiParam {Decimal}               productQuotes.productHolder.data.base_price         Base price in usd
+     * @apiParam {Decimal}               productQuotes.productHolder.data.markup_amount         Markup amount
+     * @apiParam {Decimal}               productQuotes.productHolder.data.usd_base_price         Base price in usd
+     * @apiParam {Decimal}               productQuotes.productHolder.data.usd_markup_amount         Markup amount in usd
+     * @apiParam {string{max 255}}       productQuotes.productHolder.data.display_name         Display name
      *
-     * @apiParam {Object}       billingInfo                 BillingInfo
-     * @apiParam {string}       billingInfo.first_name      First Name
-     * @apiParam {string}       billingInfo.last_name       Last Name
-     * @apiParam {string}       billingInfo.middle_name     Middle Name
-     * @apiParam {string}       billingInfo.address         Address
-     * @apiParam {string}       billingInfo.country_id      Country Id
-     * @apiParam {string}       billingInfo.city            City
-     * @apiParam {string}       billingInfo.state           State
-     * @apiParam {string}       billingInfo.zip             Zip
-     * @apiParam {string}       billingInfo.phone           Phone
-     * @apiParam {string}       billingInfo.email           Email
+     * @apiParam {Object}               payment                 Payment
+     * @apiParam {string}               payment.type            Type
+     * @apiParam {string{max 255}}      payment.transactionId   Transaction Id
+     * @apiParam {string{format yyyy-mm-dd}}    payment.date            Date
+     * @apiParam {Decimal}              payment.amount          Amount
+     * @apiParam {string{max 3}}        payment.currency        Currency
      *
-     * @apiParam {Object}       creditCard                  Credit Card
-     * @apiParam {String}       creditCard.holder_name      Holder Name
-     * @apiParam {String}       creditCard.number           Credit Card Number
-     * @apiParam {String}       creditCard.type             Credit Card type
-     * @apiParam {String}       creditCard.expiration       Credit Card expiration
-     * @apiParam {String}       creditCard.cvv              Credit Card cvv
+     * @apiParam {Object}       [billingInfo]                 BillingInfo
+     * @apiParam {string{max 30}}       billingInfo.first_name      First Name
+     * @apiParam {string{max 30}}       billingInfo.last_name       Last Name
+     * @apiParam {string{max 30}}       billingInfo.middle_name     Middle Name
+     * @apiParam {string{max 50}}       billingInfo.address         Address
+     * @apiParam {string{max 2}}        billingInfo.country_id      Country Id
+     * @apiParam {string{max 30}}       billingInfo.city            City
+     * @apiParam {string{max 40}}       billingInfo.state           State
+     * @apiParam {string{max 10}}       billingInfo.zip             Zip
+     * @apiParam {string{max 20}}       billingInfo.phone           Phone <code>Deprecated</code>
+     * @apiParam {string{max 160}}      billingInfo.email           Email <code>Deprecated</code>
+     *
+     * @apiParam {Object}               creditCard                  Credit Card
+     * @apiParam {string{max 50}}       [creditCard.holder_name]      Holder Name
+     * @apiParam {string{max 20}}       creditCard.number           Credit Card Number
+     * @apiParam {string}               [creditCard.type]             Credit Card type
+     * @apiParam {string{max 18}}       creditCard.expiration       Credit Card expiration
+     * @apiParam {string{max 4}}        creditCard.cvv              Credit Card cvv
+     *
+     * @apiParam {Object}               [Tips]                  Tips
+     * @apiParam {Decimal}              Tips.total_amount       Total Amount
+     *
+     * @apiParam {Object}                       Paxes[]                 Paxes
+     * @apiParam {string}                       Paxes.uid                   Uid
+     * @apiParam {string{max 40}}               [Paxes.first_name]            First Name
+     * @apiParam {string{max 40}}               [Paxes.last_name]             Last Name
+     * @apiParam {string{max 40}}               [Paxes.middle_name]           Middle Name
+     * @apiParam {string{max 5}}    [Paxes.nationality]           Nationality
+     * @apiParam {string{max 1}}                [Paxes.gender]                Gender
+     * @apiParam {string{format yyyy-mm-dd}}    [Paxes.birth_date]            Birth Date
+     * @apiParam {string{max 100}}              [Paxes.email]                 Email
+     * @apiParam {string{max 5}}                [Paxes.language]              Language
+     * @apiParam {string{max 5}}                [Paxes.citizenship]           Citizenship
+     *
+     *
+     * @apiParam {Object[]}             contactsInfo                 BillingInfo
+     * @apiParam {string{max 50}}       contactsInfo.first_name      First Name
+     * @apiParam {string{max 50}}       [contactsInfo.last_name]       Last Name
+     * @apiParam {string{max 50}}       [contactsInfo.middle_name]     Middle Name
+     * @apiParam {string{max 20}}       [contactsInfo.phone]           Phone number
+     * @apiParam {string{max 100}}      contactsInfo.email           Email
      *
      * @apiParam {Object}       Request                 Request Data for BO
      *
      * @apiParamExample {json} Request-Example:
      * {
+    "sourceCid": "OVA102",
     "offerGid": "73c8bf13111feff52794883446461740",
+    "languageId": "en-US",
+    "marketCountry": "US",
     "productQuotes": [
         {
             "gid": "aebf921f5a64a7ac98d4942ace67e498",
@@ -387,6 +498,7 @@ class OrderController extends BaseController
             "productHolder": {
                 "firstName": "Test",
                 "lastName": "Test",
+                "middleName": "",
                 "email": "test@test.test",
                 "phone": "+19074861000"
             }
@@ -442,6 +554,22 @@ class OrderController extends BaseController
             "email": "mike.kane@techork.com",
             "language": "en-US",
             "citizenship": "US"
+        }
+    ],
+    "contactsInfo": [
+        {
+            "first_name": "Barbara",
+            "last_name": "Elmore",
+            "middle_name": "",
+            "phone": "+19074861000",
+            "email": "barabara@test.com"
+        },
+        {
+            "first_name": "John",
+            "last_name": "Doe",
+            "middle_name": "",
+            "phone": "+19074865678",
+            "email": "john@test.com"
         }
     ],
     "Request": {
@@ -1273,7 +1401,7 @@ class OrderController extends BaseController
     public function actionCreate(): \webapi\src\response\Response
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateForm(count($request->post('productQuotes', [])), count($request->post('paxes', [])));
+        $form = new OrderCreateForm();
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(
@@ -1291,31 +1419,58 @@ class OrderController extends BaseController
         }
 
         try {
+            $orderRequest = OrderRequest::create($request->post(), OrderSourceType::P2B);
+            $this->orderRequestRepository->save($orderRequest);
+
             $offer = $this->offerRepository->findByGid($form->offerGid);
 
-            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $form->payment->currency, $request->post())), $form);
+            $dto = new CreateOrderDTO(
+                $offer->of_lead_id,
+                $form->payment->currency,
+                $request->post(),
+                OrderSourceType::P2B,
+                $orderRequest->orr_id,
+                $form->projectId,
+                OrderStatus::PENDING,
+                null,
+                $form->languageId,
+                $form->marketCountry
+            );
+            $order = $this->orderManageService->createOrder($dto, $form, null);
+
+            $response = new SuccessResponse(
+                new DataMessage(
+                    new Message('order_gid', $order->or_gid),
+                )
+            );
+
+            $orderRequest->successResponse(ArrayHelper::toArray($response));
+            $this->orderRequestRepository->save($orderRequest);
+            return $response;
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreate::Throwable');
-            return new ErrorResponse(
+
+            $response = new ErrorResponse(
                 new StatusFailedMessage(),
                 new MessageMessage($e->getMessage()),
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
-        }
 
-        return new SuccessResponse(
-            new DataMessage(
-                new Message('order_gid', $order->or_gid),
-            )
-        );
+            if (isset($orderRequest)) {
+                $orderRequest->errorResponse(ArrayHelper::toArray($response));
+                $this->orderRequestRepository->save($orderRequest);
+            }
+
+            return $response;
+        }
     }
 
     /**
      * @api {post} /v2/order/view View Order
      * @apiVersion 0.1.0
      * @apiName ViewOrder
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -1370,9 +1525,9 @@ class OrderController extends BaseController
                 "bi_state": "KY",
                 "bi_country": "US",
                 "bi_zip": "99999",
-                "bi_contact_phone": "+19074861000",
-                "bi_contact_email": "mike.kane@techork.com",
-                "bi_contact_name": null,
+                "bi_contact_phone": "+19074861000", -- deprecated, will be removed soon
+                "bi_contact_email": "mike.kane@techork.com", -- deprecated, will be removed soon
+                "bi_contact_name": null, -- deprecated, will be removed soon
                 "bi_payment_method_id": 1,
                 "bi_country_name": "United States of America",
                 "bi_payment_method_name": "Credit / Debit Card"
@@ -1711,7 +1866,7 @@ class OrderController extends BaseController
      * @api {get} /v2/order/get-file Get File
      * @apiVersion 0.2.0
      * @apiName GetFile
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -1761,8 +1916,635 @@ class OrderController extends BaseController
         }
     }
 
+    /**
+     * @return \webapi\src\response\Response
+     * @api {post} /v2/order/create-c2b Create Order c2b flow
+     * @apiVersion 1.0.0
+     * @apiName CreateOrderClickToBook
+     * @apiGroup Order
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     * {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     * @apiParam {string{max 10}}               sourceCid       Source cid
+     * @apiParam {string{max 7}}               bookingId       Booking id
+     * @apiParam {string{max 255}}              fareId          Unique value of order
+     * @apiParam {string="success","failed"{max 10}}               status       Status
+     * @apiParam {string{max 5}}               languageId          Language Id
+     * @apiParam {string{max 2}}               marketCountry       Market Country
+     *
+     * @apiParam {Object[]}             quotes                  Product quotes
+     * @apiParam {string}               quotes.productKey       Product key
+     * @apiParam {string="booked","failed"}               quotes.status           Status
+     * @apiParam {string}               quotes.originSearchData       Product quote origin search data
+     * @apiParam {string}               quotes.quoteOtaId          Product quote custom id
+     * @apiParam {Object}               quotes.holder                         Holder Info
+     * @apiParam {string{max 50}}       quotes.holder.firstName               Holder first name
+     * @apiParam {string{max 50}}       quotes.holder.lastName                Holder last name
+     * @apiParam {string{max 50}}       [quotes.holder.middleName]              Holder middle name
+     * @apiParam {string{max 100}}      quotes.holder.email                   Holder email
+     * @apiParam {string{max 20}}       quotes.holder.phone                   Holder phone
+     *
+     * @apiParam {Object[]}             quotes.options                        Quote Options
+     * @apiParam {string{max 30}}       quotes.options.productOptionKey       Product option key
+     * @apiParam {string{max 50}}       [quotes.options.name]                   Name
+     * @apiParam {string}               [quotes.options.description]            Description
+     * @apiParam {Decimal}              quotes.options.price                  Price
+     *
+     * @apiParam {Object}                           [quotes.flightPaxData][]      Flight pax data
+     * @apiParam {string="ADT","CHD","INF"}         quotes.flightPaxData.type                  Pax type
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.first_name]            First Name
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.last_name]             Last Name
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.middle_name]           Middle Name
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.nationality]           Nationality
+     * @apiParam {string{max 1}}                    [quotes.flightPaxData.gender]                Gender
+     * @apiParam {string{format yyyy-mm-dd}}        [quotes.flightPaxData.birth_date]            Birth Date
+     * @apiParam {string{max 100}}                  [quotes.flightPaxData.email]                 Email
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.language]              Language
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.citizenship]           Citizenship
+     *
+     * @apiParam {Object}                           [quotes.hotelPaxData][]      Flight pax data
+     * @apiParam {string="ADT","CHD"}               quotes.hotelPaxData.type                    Pax type
+     * @apiParam {string{max 40}}                   [quotes.hotelPaxData.first_name]            First Name
+     * @apiParam {string{max 40}}                   [quotes.hotelPaxData.last_name]             Last Name
+     * @apiParam {string{format yyyy-mm-dd}}        [quotes.hotelPaxData.birth_date]            Birth Date
+     * @apiParam {integer}                          [quotes.hotelPaxData.age]                   Age
+     * @apiParam {string}                           quotes.hotelPaxData.hotelRoomKey            Hotel Room Key
+     *
+     * @apiParam {Object}       quotes.hotelRequest                     Hotel Request data <code>required for hotel quotes</code>
+     * @apiParam {string}       quotes.hotelRequest.destinationName     Destination Name
+     * @apiParam {string}       quotes.hotelRequest.destinationCode     Destination Code
+     * @apiParam {string}       quotes.hotelRequest.checkIn             Check In Date <code>format: yyyy-mm-dd</code>
+     * @apiParam {string}       quotes.hotelRequest.checkOut            Check Out Date <code>format: yyyy-mm-dd</code>
+     *
+     * @apiParam {Object}               [billingInfo]               BillingInfo
+     * @apiParam {string{max 30}}       [billingInfo.first_name]      First Name
+     * @apiParam {string{max 30}}       [billingInfo.last_name]       Last Name
+     * @apiParam {string{max 30}}       [billingInfo.middle_name]     Middle Name
+     * @apiParam {string{max 50}}       [billingInfo.address]         Address
+     * @apiParam {string{max 2}}        [billingInfo.country_id]      Country Id
+     * @apiParam {string{max 30}}       [billingInfo.city]            City
+     * @apiParam {string{max 40}}       [billingInfo.state]           State
+     * @apiParam {string{max 10}}       [billingInfo.zip]             Zip
+     * @apiParam {string{max 20}}       [billingInfo.phone]           Phone <code>Deprecated</code>
+     * @apiParam {string{max 160}}      [billingInfo.email]           Email <code>Deprecated</code>
+     *
+     * @apiParam {Object}               [creditCard]                    Credit Card
+     * @apiParam {string{max 50}}       [creditCard.holder_name]        Holder Name
+     * @apiParam {string{max 20}}       creditCard.number               Credit Card Number
+     * @apiParam {string}               [creditCard.type]               Credit Card type
+     * @apiParam {string{max 18}}       creditCard.expiration           Credit Card expiration
+     * @apiParam {string{max 4}}        creditCard.cvv                  Credit Card cvv
+     *
+     * @apiParam {Object[]}             contactsInfo                 BillingInfo
+     * @apiParam {string{max 50}}       contactsInfo.first_name      First Name
+     * @apiParam {string{max 50}}       [contactsInfo.last_name]       Last Name
+     * @apiParam {string{max 50}}       [contactsInfo.middle_name]     Middle Name
+     * @apiParam {string{max 20}}       [contactsInfo.phone]           Phone number
+     * @apiParam {string{max 100}}      contactsInfo.email           Email
+     *
+     * @apiParam {Object}               [payment]                    Payment info
+     * @apiParam {string{max 3}}        [payment.clientCurrency]     Client currency
+     *
+     * @apiParamExample {json} Request-Example:
+     *
+     * {
+            "sourceCid": "ACHUY23AS",
+            "bookingId": "WCJ12C",
+            "fareId": "A0EA9F-5cc2ce331e8bb3.16383647",
+            "status": "success",
+            "languageId": "en-US",
+            "marketCountry": "US",
+            "quotes": [
+                {
+                    "status": "booked",
+                    "productKey": "flight",
+                    "originSearchData": "{\"key\":\"2_QldLMTAxKlkxMDAwL0pGS1BBUjIwMjEtMDgtMDcqREx+I0RMOTE4MH5sYzplbl91cw==\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-04-05\",\"totalPrice\":354.2,\"totalTax\":229.2,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"ADT\",\"cnt\":1,\"baseFare\":125,\"pubBaseFare\":125,\"baseTax\":229.2,\"markup\":0,\"comm\":0,\"price\":354.2,\"tax\":229.2,\"oBaseFare\":{\"amount\":125,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":229.2,\"currency\":\"USD\"}}},\"penalties\":{\"exchange\":true,\"refund\":false,\"list\":[{\"type\":\"ex\",\"applicability\":\"before\",\"permitted\":true,\"amount\":0},{\"type\":\"ex\",\"applicability\":\"after\",\"permitted\":true,\"amount\":0},{\"type\":\"re\",\"applicability\":\"before\",\"permitted\":false},{\"type\":\"re\",\"applicability\":\"after\",\"permitted\":false}]},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-08-07 16:30\",\"arrivalTime\":\"2021-08-08 05:55\",\"stop\":0,\"stops\":[],\"flightNumber\":\"9180\",\"bookingClass\":\"E\",\"duration\":445,\"departureAirportCode\":\"JFK\",\"departureAirportTerminal\":\"1\",\"arrivalAirportCode\":\"CDG\",\"arrivalAirportTerminal\":\"2E\",\"operatingAirline\":\"AF\",\"airEquipType\":\"77W\",\"marketingAirline\":\"DL\",\"marriageGroup\":\"O\",\"mileage\":3629,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"686562\",\"brandName\":\"BASIC ECONOMY\",\"meal\":\"\",\"fareCode\":\"VH7L09B1\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false}],\"duration\":445}],\"maxSeats\":9,\"paxCnt\":1,\"validatingCarrier\":\"DL\",\"gds\":\"T\",\"pcc\":\"E9V\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"OW\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"keys\":{\"travelport\":{\"traceId\":\"9cbb17ae-40dd-4d94-83be-2f0eed47e9ad\",\"availabilitySources\":\"S\",\"type\":\"T\"},\"seatHoldSeg\":{\"trip\":0,\"segment\":0,\"seats\":9}},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"QldLMTAxWTEwMDB8SkZLUEFSMjAyMS0wOC0wNw==\",\"lang\":\"en\",\"rank\":10,\"cheapest\":true,\"fastest\":false,\"best\":true,\"bags\":0,\"country\":\"us\",\"prod_types\":[\"PUB\"]}}",
+                    "options": [
+                        {
+                            "productOptionKey": "travelGuard",
+                            "name": "Travel Guard",
+                            "description": "",
+                            "price": 20
+                        }
+                    ],
+                    "flightPaxData": [
+                        {
+                            "first_name": "Test name",
+                            "last_name": "Test last name",
+                            "middle_name": "Test middle name",
+                            "nationality": "US",
+                            "gender": "M",
+                            "birth_date": "1963-04-07",
+                            "email": "mike.kane@techork.com",
+                            "language": "en-US",
+                            "citizenship": "US",
+                            "type": "ADT"
+                        }
+                    ],
+                    "quoteOtaId": "asdff43fsgfdsv343ddx",
+                    "holder": {
+                        "firstName": "Test",
+                        "lastName": "Test",
+                        "middleName": "Test",
+                        "email": "test@test.test",
+                        "phone": "+19074861000"
+                    }
+                },
+                {
+                    "status": "booked",
+                    "productKey": "hotel",
+                    "originSearchData": "{\"categoryName\":\"3 STARS\",\"destinationName\":\"Chisinau\",\"zoneName\":\"Chisinau\",\"minRate\":135.92,\"maxRate\":285.94,\"currency\":\"USD\",\"code\":148030,\"name\":\"Cosmos Hotel\",\"description\":\"The hotel is situated in the heart of Chisinau, the capital of Moldova. It is perfectly located for access to the business centre, cultural institutions and much more. Chisinau Airport is only 15 minutes away and the railway station is less than 5 minutes away from the hotel.\\n\\nThe city hotel offers a choice of 150 rooms, 24-hour reception and check-out services in the lobby, luggage storage, a hotel safe, currency exchange facility and a cloakroom. There is lift access to the upper floors as well as an on-site restaurant and conference facilities. Internet access, a laundry service (fees apply) and free parking in the car park are also on offer to guests during their stay.\\n\\nAll the rooms are furnished with double or king-size beds and provide an en suite bathroom with a shower. Air conditioning, central heating, satellite TV, a telephone, mini fridge, radio and free wireless Internet access are also on offer.\\n\\nThere is a golf course about 12 km from the hotel.\\n\\nThe hotel restaurant offers a wide selection of local and European cuisine. Breakfast is served as a buffet and lunch and dinner can be chosen la carte.\",\"countryCode\":\"MD\",\"stateCode\":\"MD\",\"destinationCode\":\"KIV\",\"zoneCode\":1,\"latitude\":47.014293,\"longitude\":28.853371,\"categoryCode\":\"3EST\",\"categoryGroupCode\":\"GRUPO3\",\"accomodationType\":{\"code\":\"HOTEL\"},\"boardCodes\":[\"BB\",\"AI\",\"HB\",\"FB\",\"RO\"],\"segmentCodes\":[],\"address\":\"NEGRUZZI, 2\",\"postalCode\":\"MD2001\",\"city\":\"CHISINAU\",\"email\":\"info@hotel-cosmos.com\",\"phones\":[{\"type\":\"PHONEBOOKING\",\"number\":\"+37322890054\"},{\"type\":\"PHONEHOTEL\",\"number\":\"+37322837505\"},{\"type\":\"FAXNUMBER\",\"number\":\"+37322542744\"}],\"images\":[{\"url\":\"14/148030/148030a_hb_a_001.jpg\",\"type\":\"GEN\"}],\"web\":\"http://hotel-cosmos.com/\",\"lastUpdate\":\"2020-11-23\",\"s2C\":\"1*\",\"ranking\":14,\"serviceType\":\"HOTELBEDS\",\"groupKey\":\"2118121725\",\"totalAmount\":341.32,\"totalMarkup\":26.69,\"totalPublicAmount\":347.99,\"totalSavings\":6.67,\"totalEarnings\":3.34,\"rates\":[{\"code\":\"ROO.ST\",\"name\":\"Room Standard\",\"key\":\"20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|BB|B2B|1~1~0||N@06~~24ebc~-829367492~N~~~NOR~C98A4E21F1184B3161702850635900AWUS0000029001400030824ebc\",\"class\":\"NOR\",\"allotment\":3,\"type\":\"RECHECK\",\"paymentType\":\"AT_WEB\",\"boardCode\":\"BB\",\"boardName\":\"BED AND BREAKFAST\",\"rooms\":1,\"adults\":1,\"markup\":16.62,\"amount\":205.4,\"publicAmmount\":209.55,\"savings\":4.15,\"earnings\":2.08},{\"code\":\"ROO.ST\",\"name\":\"Room Standard\",\"key\":\"20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d\",\"class\":\"NOR\",\"allotment\":3,\"type\":\"RECHECK\",\"paymentType\":\"AT_WEB\",\"boardCode\":\"RO\",\"boardName\":\"ROOM ONLY\",\"rooms\":1,\"adults\":2,\"markup\":10.07,\"amount\":135.92,\"publicAmmount\":138.44,\"savings\":2.52,\"earnings\":1.26}]}",
+
+                    "quoteOtaId": "asdfw43wfdswef3x",
+                    "holder": {
+                        "firstName": "Test 2",
+                        "lastName": "Test 2",
+                        "email": "test+2@test.test",
+                        "phone": "+19074861000"
+                    },
+                    "hotelPaxData": [
+                        {
+                            "hotelRoomKey": "20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d",
+                            "first_name": "Test",
+                            "last_name": "Test",
+                            "birth_date": "1963-04-07",
+                            "age": "45",
+                            "type": "ADT"
+                        },
+                        {
+                            "hotelRoomKey": "20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d",
+                            "first_name": "Mary",
+                            "last_name": "Smith",
+                            "birth_date": "1963-04-07",
+                            "age": "32",
+                            "type": "ADT"
+                        }
+                    ],
+                    "hotelRequest": {
+                        "destinationCode": "BGO",
+                        "destinationName": "Norway, Bergen",
+                        "checkIn": "2021-09-10",
+                        "checkOut": "2021-09-30"
+                    }
+                }
+            ],
+            "creditCard": {
+                "holder_name": "Barbara Elmore",
+                "number": "1111111111111111",
+                "type": "Visas",
+                "expiration": "07 / 23",
+                "cvv": "324"
+            },
+            "billingInfo": {
+                "first_name": "Barbara Elmore",
+                "middle_name": "",
+                "last_name": "T",
+                "address": "1013 Weda Cir",
+                "country_id": "US",
+                "city": "Mayfield",
+                "state": "KY",
+                "zip": "99999",
+                "phone": "+19074861000", -- deprecated, will be removed soon
+                "email": "barabara@test.com" -- deprecated, will be removed soon
+            },
+            "contactsInfo": [
+                {
+                    "first_name": "Barbara",
+                    "last_name": "Elmore",
+                    "middle_name": "",
+                    "phone": "+19074861000",
+                    "email": "barabara@test.com"
+                },
+                {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "middle_name": "",
+                    "phone": "+19074865678",
+                    "email": "john@test.com"
+                }
+            ],
+            "payment": {
+                "clientCurrency": "USD"
+            }
+        }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+            "status": 200,
+            "message": "OK",
+            "data": {
+                "order_gid": "1588da7b87cd3b91cc1df4aed0d7aeba"
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "quotes.0.productKey": [
+                    "Product type not found by key: flights"
+                ]
+            },
+            "code": 0
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "test",
+            "detailError": {
+                "product": "Flight",
+                "quoteOtaId": "asdff43fsgfdsv343ddx"
+            },
+            "code": 15901,
+            "errors": []
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "fareId": [
+                    "Fare Id \"A0EA9F-5cc2ce331e8bb3.16383647\" has already been taken."
+                ]
+            },
+            "code": 0
+        }
+     *
+     * @return ErrorResponse|SuccessResponse
+     */
+    public function actionCreateC2b()
+    {
+        $request = Yii::$app->request;
+        $form = new OrderCreateC2BForm();
+
+        if (!$form->load($request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+            );
+        }
+
+        try {
+            $orderRequest = OrderRequest::create($request->post(), OrderSourceType::C2B);
+            $this->orderRequestRepository->save($orderRequest);
+
+            $order = $this->transactionManager->wrap(function () use ($form, $request, $orderRequest) {
+                $dto = new CreateOrderDTO(
+                    null,
+                    $form->payment->clientCurrency,
+                    $request->post(),
+                    OrderSourceType::C2B,
+                    $orderRequest->orr_id,
+                    $form->projectId,
+                    $form->getOrderStatus(),
+                    $form->fareId,
+                    $form->languageId,
+                    $form->marketCountry
+                );
+                $order = $this->orderManageService->createByC2bFlow($dto);
+
+                foreach ($form->quotes as $quoteForm) {
+                    $quoteForm->orderId = $order->or_id;
+                    $quoteForm->bookingId = $form->bookingId;
+
+                    $productType = $this->productTypeRepository->findByKey($quoteForm->productKey);
+                    $productCreateForm = new ProductCreateForm();
+                    $productCreateForm->pr_type_id = $productType->pt_id;
+                    $productCreateForm->pr_project_id = $form->projectId;
+                    $product = $this->productCreateService->handle($productCreateForm);
+                    $childProduct = $product->getChildProduct();
+                    if ($childProduct) {
+                        $childProduct->getService()->c2bHandle($childProduct, $quoteForm);
+                    }
+                }
+
+                $order->calculateTotalPrice();
+                $order->recalculateProfitAmount();
+                $this->orderRepository->save($order);
+
+                $this->orderDataService->create(
+                    $order->or_id,
+                    $form->bookingId,
+                    $form->sourceId,
+                    $dto->languageId,
+                    $dto->marketCountry,
+                    OrderDataActions::API_ORDER_CREATE_C2B,
+                    null
+                );
+
+                if (isset($form->creditCard)) {
+                    if (
+                        !$creditCard = CreditCard::getCreditCardByParams(
+                            $form->creditCard->expiration_month,
+                            $form->creditCard->expiration_year,
+                            $form->creditCard->holder_name,
+                            $form->creditCard->type_id
+                        )
+                    ) {
+                        $creditCard = CreditCard::create(
+                            $form->creditCard->number,
+                            $form->creditCard->holder_name,
+                            $form->creditCard->expiration_month,
+                            $form->creditCard->expiration_year,
+                            $form->creditCard->cvv,
+                            $form->creditCard->type_id,
+                        );
+                        $creditCard->updateSecureCardNumber();
+                        $creditCard->updateSecureCvv();
+                        $this->creditCardRepository->save($creditCard);
+                    }
+                }
+
+                if (isset($form->billingInfo)) {
+                    $billingInfo = BillingInfo::create(
+                        $form->billingInfo->first_name,
+                        $form->billingInfo->last_name,
+                        $form->billingInfo->middle_name,
+                        $form->billingInfo->address,
+                        $form->billingInfo->city,
+                        $form->billingInfo->state,
+                        $form->billingInfo->country_id,
+                        $form->billingInfo->zip,
+                        $form->billingInfo->phone,
+                        $form->billingInfo->email,
+                        null,
+                        $creditCard->cc_id ?? null,
+                        $order->or_id
+                    );
+                    $this->billingInfoRepository->save($billingInfo);
+                }
+
+                if (isset($form->contactsInfo)) {
+                    foreach ($form->contactsInfo as $contactInfoForm) {
+                        $this->orderContactManageService->create(
+                            $order->or_id,
+                            $contactInfoForm->first_name,
+                            $contactInfoForm->last_name,
+                            $contactInfoForm->middle_name,
+                            $contactInfoForm->email,
+                            $contactInfoForm->phone,
+                            $order->or_project_id
+                        );
+                    }
+                }
+
+                /** @var DeferredEventDispatcher $eventDispatcher */
+                $eventDispatcher = Yii::$container->get(EventDispatcher::class);
+                $eventDispatcher->detachByKey(Order::UPDATE_EVENT_KEY);
+
+                return $order;
+            });
+
+            $response = new SuccessResponse(
+                new DataMessage(
+                    new Message('order_gid', $order->or_gid),
+                )
+            );
+
+            $orderRequest->successResponse(ArrayHelper::toArray($response));
+            $this->orderRequestRepository->save($orderRequest);
+
+            return $response;
+        } catch (OrderC2BException $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::OrderC2BException');
+
+            $response = new ErrorResponse(
+                new StatusCodeMessage(422),
+                new MessageMessage($e->getMessage()),
+                new DetailErrorMessage([
+                    'product' => $e->dto->product->getProductName(),
+                    'quoteOtaId' => $e->dto->quoteOtaId
+                ]),
+                new CodeMessage($e->getCode())
+            );
+        } catch (\Throwable $e) {
+            $code = $e->getCode();
+            $message = $code >= 500 ? 'Internal Server Error. Try again letter.' : $e->getMessage();
+            Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::Throwable');
+
+            $response = new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($message),
+                new ErrorsMessage($message),
+                new CodeMessage($code)
+            );
+        }
+
+        if (isset($orderRequest)) {
+            $orderRequest->errorResponse(ArrayHelper::toArray($response));
+            $this->orderRequestRepository->save($orderRequest);
+        }
+
+        return $response;
+    }
+
     private function isClickToBook($data): bool
     {
         return isset($data['FlightRequest']);
+    }
+
+    /**
+     * @api {post} /v2/order/cancel Cancel Order
+     * @apiVersion 0.2.0
+     * @apiName CancelOrder
+     * @apiGroup Order
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}       gid            Order gid
+     *
+     * @apiParamExample {json} Request-Example:
+     *
+     * {
+     *     "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *    "status": 200,
+     *    "message": "OK",
+     *    "code": 0,
+     *    "technical": {
+     *        "action": "v2/order/cancel",
+     *        "response_id": 15629,
+     *        "request_dt": "2021-04-01 09:03:11",
+     *        "response_dt": "2021-04-01 09:03:11",
+     *        "execution_time": 0.019,
+     *        "memory_usage": 186192
+     *    },
+     *    "request": {
+     *       "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
+     *    }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *       "status": 400,
+     *       "message": "Load data error",
+     *       "errors": [
+     *           "Not found data on POST request"
+     *       ],
+     *       "code": 10,
+     *       "request": {
+     *           ...
+     *       },
+     *       "technical": {
+     *           ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *          "gid": [
+     *            "Gid is invalid."
+     *         ]
+     *     },
+     *     "code": 20,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "The order is not available for processing."
+     *     },
+     *     "code": 30,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "Unable to process flight cancellation."
+     *     },
+     *     "code": 40,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "Unable to process hotel cancellation."
+     *     },
+     *     "code": 50,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     */
+    public function actionCancel()
+    {
+        $form = new CancelForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+                new CodeMessage(10)
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+                new CodeMessage(20)
+            );
+        }
+
+        try {
+            $this->cancelOrder->cancel($form->gid);
+        } catch (\DomainException $e) {
+            return new ErrorResponse(
+                new MessageMessage('Error'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        } catch (\Throwable $e) {
+            Yii::error([
+                'message' => 'Order cancel error.',
+                'error' => $e->getMessage(),
+                'orderGid' => $form->gid
+            ], 'OrderCancelFlow:actionCancel');
+            return new ErrorResponse(
+                new MessageMessage('Error'),
+                new ErrorsMessage('Server error. Please try again later.'),
+                new StatusCodeMessage(500)
+            );
+        }
+        return new SuccessResponse(
+            new CodeMessage(0)
+        );
     }
 }

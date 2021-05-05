@@ -7,14 +7,27 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\fileStorage\src\entity\fileProductQuote\FileProductQuote;
+use modules\fileStorage\src\entity\fileProductQuote\FileProductQuoteQuery;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderData\OrderData;
+use modules\order\src\entities\orderEmail\OrderEmail;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\VarDumper;
 
+/**
+ * @property string $template
+ */
 class EmailConfirmationSender
 {
-    private const TEMPLATE = 'order_update';
+    private string $template;
+
+    public function __construct(string $template = 'order_update')
+    {
+        $this->template = $template;
+    }
 
     public function sendWithoutAttachments(Order $order): void
     {
@@ -23,29 +36,13 @@ class EmailConfirmationSender
 
     public function sendWithAllAttachments(Order $order): void
     {
+        $files = [];
         $receipt = FileOrder::find()->andWhere([
             'fo_category_id' => FileOrder::CATEGORY_RECEIPT,
             'fo_or_id' => $order->or_id
         ])->one();
         if (!$receipt) {
             throw new \DomainException('Not found Receipt File. OrderId: ' . $order->or_id);
-        }
-
-        /** @var FileOrder[] $confirmations */
-        $confirmations = [];
-
-        $quotes = ProductQuote::find()->select(['pq_id'])->andWhere(['pq_order_id' => $order->or_id])->column();
-        foreach ($quotes as $quote) {
-            $confirm = FileOrder::find()->andWhere([
-                'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
-                'fo_or_id' => $order->or_id,
-                'fo_pq_id' => $quote
-            ])->with(['file'])->one();
-
-            if (!$confirm) {
-                throw new \DomainException('Not found File Confirmation. QuoteId: ' . $quote . ' OrderId: ' . $order->or_id);
-            }
-            $confirmations[] = $confirm;
         }
 
         $files[] = new \modules\fileStorage\src\services\url\FileInfo(
@@ -56,14 +53,20 @@ class EmailConfirmationSender
             null
         );
 
-        foreach ($confirmations as $confirmation) {
-            $files[] = new \modules\fileStorage\src\services\url\FileInfo(
-                $confirmation->file->fs_name,
-                $confirmation->file->fs_path,
-                $confirmation->file->fs_uid,
-                $confirmation->file->fs_title,
-                null
-            );
+        $quotes = ProductQuote::find()->select(['pq_id'])->byOrderId($order->or_id)->booked()->column();
+        foreach ($quotes as $quote) {
+            if (!$fileProductQuotes = FileProductQuoteQuery::getByQuoteOrderAndCategory($quote, $order->or_id, FileOrder::CATEGORY_CONFIRMATION)) {
+                throw new \DomainException('Not found File Confirmation. QuoteId: ' . $quote . ' OrderId: ' . $order->or_id);
+            }
+            foreach ($fileProductQuotes as $fileProductQuote) {
+                $files[] = new \modules\fileStorage\src\services\url\FileInfo(
+                    $fileProductQuote->file->fs_name,
+                    $fileProductQuote->file->fs_path,
+                    $fileProductQuote->file->fs_uid,
+                    $fileProductQuote->file->fs_title,
+                    null
+                );
+            }
         }
 
         $fileStorageUrlGenerator = \Yii::createObject(\modules\fileStorage\src\services\url\UrlGenerator::class);
@@ -91,31 +94,16 @@ class EmailConfirmationSender
             );
         }
 
-        /** @var FileOrder[] $confirmations */
-        $confirmations = [];
-
-        $quotes = ProductQuote::find()->select(['pq_id'])->andWhere(['pq_order_id' => $order->or_id])->column();
-        foreach ($quotes as $quote) {
-            $confirm = FileOrder::find()->andWhere([
-                'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
-                'fo_or_id' => $order->or_id,
-                'fo_pq_id' => $quote
-            ])->with(['file'])->one();
-
-            if (!$confirm) {
-                continue;
+        if ($fileProductQuotes = FileProductQuoteQuery::getByOrderAndCategory($order->or_id, FileOrder::CATEGORY_CONFIRMATION)) {
+            foreach ($fileProductQuotes as $fileProductQuote) {
+                $files[] = new \modules\fileStorage\src\services\url\FileInfo(
+                    $fileProductQuote->file->fs_name,
+                    $fileProductQuote->file->fs_path,
+                    $fileProductQuote->file->fs_uid,
+                    $fileProductQuote->file->fs_title,
+                    null
+                );
             }
-            $confirmations[] = $confirm;
-        }
-
-        foreach ($confirmations as $confirmation) {
-            $files[] = new \modules\fileStorage\src\services\url\FileInfo(
-                $confirmation->file->fs_name,
-                $confirmation->file->fs_path,
-                $confirmation->file->fs_uid,
-                $confirmation->file->fs_title,
-                null
-            );
         }
 
         $fileStorageUrlGenerator = \Yii::createObject(\modules\fileStorage\src\services\url\UrlGenerator::class);
@@ -126,7 +114,7 @@ class EmailConfirmationSender
 
     private function send(Order $order, array $files): void
     {
-        $projectId = $order->orLead->project_id ?? null;
+        $projectId = $order->or_project_id ?? null;
 
         if (!$projectId) {
             \Yii::error([
@@ -136,57 +124,63 @@ class EmailConfirmationSender
             return;
         }
 
-        $project = $order->orLead->project;
-
-        $from = $project->getContactInfo()->email;
+        $project = $order->project;
+        $from = $project->getEmailNoReply();
         $fromName = $project->name;
 
-        $billingInfo = BillingInfo::find()->select([
-            'bi_id',
-            'bi_contact_email'
-        ])->andWhere(['bi_order_id' => $order->or_id])->orderBy(['bi_id' => SORT_DESC])->asArray()->one();
-        if (!$billingInfo) {
-            throw new \DomainException('Not found Billing Info. OrderId: ' . $order->or_id);
-        }
-        if (!$billingInfo['bi_contact_email']) {
-            throw new \DomainException('Not found Billing Email. OrderId: ' . $order->or_id . ' BillingInfoId: ' . $billingInfo['bi_id']);
-        }
-        $to = $billingInfo['bi_contact_email'];
+        $orderContacts = OrderContact::find()
+            ->select('oc_email')
+            ->distinct()
+            ->byOrderId($order->or_id)
+            ->all();
 
-        $languageId = $this->getLanguage($order->orLead);
-
-        $mailPreview = \Yii::$app->communication->mailPreview(
-            $projectId,
-            self::TEMPLATE,
-            $from,
-            $to,
-            (new EmailConfirmationData())->generate($order),
-        );
-
-        if ($mailPreview['error'] !== false) {
-            throw new \DomainException($mailPreview['error']);
+        if (!$orderContacts) {
+            throw new \DomainException('Order Contacts not found by order id: ' . $order->or_id);
         }
 
-        $this->sendEmail(
-            $order,
-            self::TEMPLATE,
-            $from,
-            $fromName,
-            $to,
-            $languageId,
-            $mailPreview['data']['email_subject'],
-            $mailPreview['data']['email_body_html'],
-            $files
-        );
+        $mailPreviewErrors = [];
+
+        $languageId = $this->getLanguage($order);
+
+        foreach ($orderContacts as $orderContact) {
+            $mailPreview = \Yii::$app->communication->mailPreview(
+                $projectId,
+                $this->template,
+                $from,
+                $orderContact->oc_email,
+                (new EmailConfirmationData())->generate($order),
+            );
+
+            if ($mailPreview['error'] !== false) {
+                $mailPreviewErrors[] = $this->mailPreviewError($from, $orderContact->oc_email, $mailPreview['error']);
+            } else {
+                $this->sendEmail(
+                    $order,
+                    $this->template,
+                    $from,
+                    $fromName,
+                    $orderContact->oc_email,
+                    $languageId,
+                    $mailPreview['data']['email_subject'],
+                    $mailPreview['data']['email_body_html'],
+                    $files
+                );
+            }
+        }
+
+        if ($mailPreviewErrors) {
+            throw new \DomainException(implode('; ', $mailPreviewErrors));
+        }
     }
 
-    private function getLanguage(Lead $lead): string
+    private function getLanguage(Order $order): string
     {
-        if ($lead->l_client_lang) {
-            return $lead->l_client_lang;
+        $data = OrderData::find()->select(['od_language_id'])->byOrderId($order->or_id)->asArray()->one();
+        if ($data && $data['od_language_id']) {
+            return $data['od_language_id'];
         }
         $locale = ProjectLocale::find()->select(['pl_language_id'])->andWhere([
-            'pl_project_id' => $lead->project_id,
+            'pl_project_id' => $order->or_project_id,
             'pl_default' => true
         ])->orderBy(['pl_id' => SORT_ASC])->asArray()->one();
         if ($locale && $locale['pl_language_id']) {
@@ -207,7 +201,7 @@ class EmailConfirmationSender
         array $files
     ): void {
         $mail = new Email();
-        $mail->e_project_id = $order->orLead->project_id;
+        $mail->e_project_id = $order->or_project_id;
         $mail->e_lead_id = $order->or_lead_id;
         $templateTypeId = EmailTemplateType::find()
             ->select(['etp_id'])
@@ -234,6 +228,11 @@ class EmailConfirmationSender
             throw new \DomainException(VarDumper::dumpAsString($mail->getErrors()));
         }
 
+        $orderEmail = new OrderEmail();
+        $orderEmail->oe_order_id = $order->or_id;
+        $orderEmail->oe_email_id = $mail->e_id;
+        $orderEmail->save();
+
         $mail->e_message_id = $mail->generateMessageId();
         $mail->save();
         $mailResponse = $mail->sendMail($files);
@@ -241,5 +240,10 @@ class EmailConfirmationSender
         if ($mailResponse['error'] !== false) {
             throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
         }
+    }
+
+    private function mailPreviewError(string $from, string $to, string $message): string
+    {
+        return 'Sending email from ' . $from . ' to ' . $to . ' failed: ' . $message;
     }
 }

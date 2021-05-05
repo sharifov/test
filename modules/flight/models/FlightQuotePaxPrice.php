@@ -3,9 +3,11 @@
 namespace modules\flight\models;
 
 use common\models\Currency;
+use modules\flight\src\dto\flightQuotePaxPrice\FlightQuotePaxPriceApiBoDto;
 use modules\flight\src\entities\flightQuotePaxPrice\serializer\FlightQuotePaxPriceSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "flight_quote_pax_price".
@@ -26,10 +28,12 @@ use Yii;
  * @property string|null $qpp_created_dt
  * @property string|null $qpp_updated_dt
  * @property string|null $qpp_cnt
+ * @property int|null $qpp_flight_id
  *
  * @property Currency $qppClientCurrency
  * @property FlightQuote $qppFlightQuote
  * @property Currency $qppOriginCurrency
+ * @property FlightQuoteFlight $flightQuoteFlight
  */
 class FlightQuotePaxPrice extends \yii\db\ActiveRecord
 {
@@ -57,6 +61,9 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             [['qpp_origin_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['qpp_origin_currency' => 'cur_code']],
 
             ['qpp_cnt', 'integer'],
+
+            [['qpp_flight_id'], 'integer'],
+            [['qpp_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['qpp_flight_id' => 'fqf_id']],
         ];
     }
 
@@ -82,7 +89,13 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             'qpp_cnt' => 'Count',
             'qpp_created_dt' => 'Created Dt',
             'qpp_updated_dt' => 'Updated Dt',
+            'qpp_flight_id' => 'Quote Flight',
         ];
+    }
+
+    public function getFlightQuoteFlight(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'qpp_flight_id']);
     }
 
     /**
@@ -182,6 +195,32 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         $paxPrice->qpp_client_tax = 0;
         $paxPrice->qpp_flight_pax_code_id = $paxCodeId;
 
+        return $paxPrice;
+    }
+
+    public static function createFromBo(FlightQuotePaxPriceApiBoDto $dto): FlightQuotePaxPrice
+    {
+        $paxPrice = new self();
+        $paxPrice->qpp_flight_quote_id = $dto->flightQuoteId;
+        $paxPrice->qpp_flight_pax_code_id = $dto->flightPaxCodeId;
+        $paxPrice->qpp_cnt = $dto->cnt;
+
+        $paxPrice->qpp_fare = $dto->fare;
+        $paxPrice->qpp_tax = $dto->tax;
+
+        $paxPrice->qpp_origin_fare = $dto->originFare;
+        $paxPrice->qpp_origin_currency = $dto->originCurrency;
+        $paxPrice->qpp_origin_tax = $dto->originTax;
+
+        $paxPrice->qpp_client_fare = $dto->clientFare;
+        $paxPrice->qpp_client_currency = $dto->clientCurrency;
+        $paxPrice->qpp_client_tax = $dto->clientTax;
+
+        $paxPrice->qpp_system_mark_up = $dto->systemMarkUp;
+        $paxPrice->qpp_agent_mark_up = $dto->agentMarkUp;
+
+        $paxPrice->qpp_created_dt = date('Y-m-d H:i:s');
+        $paxPrice->qpp_updated_dt = date('Y-m-d H:i:s');
         return $paxPrice;
     }
 }

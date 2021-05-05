@@ -356,6 +356,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
                 ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
+                ['label' => 'Product Quote Relation', 'url' => ['/product/product-quote-relation-crud/index']],
+                ['label' => 'Product Quote Lead', 'url' => ['/product/product-quote-lead/index']],
+                ['label' => 'Product Quote Origin', 'url' => ['/product/product-quote-origin/index']],
+
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
                     ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
                     ['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
@@ -363,6 +367,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Orders Tips', 'url' => ['/order/order-tips-crud/index']],
                     ['label' => 'Orders Tips User Profit', 'url' => ['/order/order-tips-user-profit-crud/index']],
                     ['label' => 'Order Process Manager', 'url' => ['/order/order-process-manager/index']],
+                    ['label' => 'Order Request', 'url' => ['/order/order-request-crud/index']],
+                    ['label' => 'Order Data', 'url' => ['/order/order-data-crud/index']],
+                    ['label' => 'Case Order Relation', 'url' => ['/case-order-crud/index']],
+                    ['label' => 'Lead Order Relation', 'url' => ['/lead-order-crud/index']],
+                    ['label' => 'Lead Product Relation', 'url' => ['/lead-product-crud/index']],
+                    ['label' => 'Order Contact', 'url' => ['/order/order-contact-crud/index']],
+                    ['label' => 'Order Email', 'url' => ['/order/order-email-crud/index']],
                 ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],
@@ -531,6 +542,26 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
                 ['label' => 'User Monitor', 'url' => ['/user-monitor/index'], 'icon' => 'list'],
                 ['label' => 'User Monitor Stats', 'url' => ['/user-monitor/stats'], 'icon' => 'list'],
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'Orders',
+            'url' => 'javascript:',
+            'icon' => 'shopping-cart',
+            'items' => [
+                ['label' => 'Search Orders', 'url' => ['/order/order/search'], 'icon' => 'search'],
+                ['label' => 'Error Orders', 'url' => ['/order/order/error-list'], 'icon' => 'exclamation-triangle'],
+                ['label' => 'New <span id="order-q-new" data-type="new" class="label-warning label pull-right order-q-info"></span>', 'url' => ['/order/order-q/new'], 'icon' => 'paste text-warning'],
+                ['label' => 'Pending <span id="order-q-pending" data-type="pending" class="label-info label pull-right order-q-info"></span>', 'url' => ['/order/order-q/pending'], 'icon' => 'briefcase text-info'],
+                ['label' => 'Processing <span id="order-q-processing" data-type="processing" class="label-info label pull-right order-q-info"></span>', 'url' => ['/order/order-q/processing'], 'icon' => 'spinner'],
+                ['label' => 'Prepared <span id="order-q-prepared" data-type="prepared" class="label-success label pull-right order-q-info"></span>', 'url' => ['/order/order-q/prepared'], 'icon' => 'recycle'],
+                ['label' => 'Complete <span id="order-q-complete" data-type="complete" class="label-success label pull-right order-q-info"></span>', 'url' => ['/order/order-q/complete'], 'icon' => 'flag text-success'],
+                ['label' => 'Cancel Processing <span id="order-q-cancel-processing" data-type="cancel-processing" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/cancel-processing'], 'icon' => 'spinner text-danger'],
+                ['label' => 'Error <span id="order-q-error" data-type="error" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/error'], 'icon' => 'exclamation-triangle text-danger'],
+                ['label' => 'Declined <span id="order-q-declined" data-type="declined" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/declined'], 'icon' => 'reply'],
+                ['label' => 'Canceled <span id="order-q-canceled" data-type="canceled" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/canceled'], 'icon' => 'close'],
+                ['label' => 'Canceled failed <span id="order-q-canceled-failed" data-type="canceled-failed" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/cancel-failed'], 'icon' => 'close '],
             ]
         ];
 

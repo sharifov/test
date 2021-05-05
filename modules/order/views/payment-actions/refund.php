@@ -8,7 +8,7 @@ use yii\bootstrap4\ActiveForm;
 /* @var $model RefundForm */
 /* @var $form yii\bootstrap4\ActiveForm */
 
-$pjaxId = 'pjax-order-payment-' . $model->orderId;
+$pjaxId = 'pjax-order-payment-refund-' . $model->orderId;
 ?>
 
 <div class="order-form">

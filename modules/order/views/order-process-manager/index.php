@@ -2,6 +2,8 @@
 
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerSearch;
+use modules\order\src\processManager\Status;
+use modules\order\src\processManager\Type;
 use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -32,9 +34,16 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'opm_status',
                 'value' => static function (OrderProcessManager $orderProcess) {
-                    return OrderProcessManager::STATUS_LIST[$orderProcess->opm_status] ?? 'undefined';
+                    return Status::LIST[$orderProcess->opm_status] ?? 'undefined';
                 },
-                'filter' => OrderProcessManager::STATUS_LIST,
+                'filter' => Status::LIST,
+            ],
+            [
+                'attribute' => 'opm_type',
+                'value' => static function (OrderProcessManager $orderProcess) {
+                    return Type::LIST[$orderProcess->opm_type] ?? 'undefined';
+                },
+                'filter' => Type::LIST,
             ],
             ['class' => DateTimeColumn::class, 'attribute' => 'opm_created_dt'],
             ['class' => 'yii\grid\ActionColumn'],

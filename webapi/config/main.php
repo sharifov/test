@@ -1,5 +1,6 @@
 <?php
 
+use modules\hotel\HotelModule;
 use yii\log\FileTarget;
 use yii\log\DbTarget;
 use webapi\bootstrap\SetUp;
@@ -34,12 +35,16 @@ return [
             'basePath' => '@webapi/modules/v2',
             'controllerNamespace' => 'webapi\modules\v2\controllers',
         ],
+        'hotel' => [
+            'class' => HotelModule::class,
+        ],
     ],
 
     'components' => [
         'defaultRoute' => 'site/index',
         'response' => [
             'class' => 'yii\web\Response',
+            'format' =>  \yii\web\Response::FORMAT_JSON,
             'on beforeSend' => static function ($event) {
                 $response = $event->sender;
                 if ($response->data !== null && !empty(Yii::$app->request->get('suppress_response_code'))) {

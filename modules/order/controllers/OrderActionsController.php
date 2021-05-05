@@ -69,9 +69,16 @@ class OrderActionsController extends FController
                     OrderStatusAction::MANUAL,
                     Auth::id()
                 );
-                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
+                return '<script>
+                        $("#modal-df").modal("hide");
+                        ' . self::pjaxReloadScript($orderId) . '
+                    </script>';
             } catch (\Throwable $e) {
-                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000}); createNotify(\'Cancel order\', \'' . $e->getMessage() . '\', \'error\')</script>';
+                return '<script>
+                        $("#modal-df").modal("hide"); 
+                        ' . self::pjaxReloadScript($orderId) . '
+                        createNotify(\'Cancel order\', \'' . $e->getMessage() . '\', \'error\')
+                    </script>';
             }
         }
 
@@ -96,9 +103,16 @@ class OrderActionsController extends FController
                     OrderStatusAction::MANUAL,
                     Auth::id()
                 );
-                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
+                return '<script>
+                        $("#modal-df").modal("hide"); 
+                        ' . self::pjaxReloadScript($orderId) . '
+                    </script>';
             } catch (\Throwable $e) {
-                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000}); createNotify(\'Complete order\', \'' . $e->getMessage() . '\', \'error\')</script>';
+                return '<script>
+                        $("#modal-df").modal("hide"); 
+                        ' . self::pjaxReloadScript($orderId) . ' 
+                        createNotify(\'Complete order\', \'' . $e->getMessage() . '\', \'error\')
+                    </script>';
             }
         }
 
@@ -141,7 +155,7 @@ class OrderActionsController extends FController
         $order = $this->findModel($orderId);
 
         try {
-            (new OrderPdfService($order))->processingFile();
+            (new OrderPdfService($order))->processingFileWithoutEvent();
             return [
                 'error' => false,
                 'message' => 'OK',
@@ -171,5 +185,16 @@ class OrderActionsController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    private static function pjaxReloadScript(int $orderId): string
+    {
+        return '
+            if ($("#pjax-lead-orders").length) {
+                pjaxReload({container: "#pjax-lead-orders"}); 
+            } 
+            if ($("#pjax-order-view-' . $orderId . '").length) {
+                pjaxReload({container: "#pjax-order-view-' . $orderId . '"}); 
+            }';
     }
 }

@@ -17,7 +17,7 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
     public function rules()
     {
         return [
-            [['qpp_id', 'qpp_flight_quote_id', 'qpp_flight_pax_code_id', 'qpp_cnt'], 'integer'],
+            [['qpp_id', 'qpp_flight_quote_id', 'qpp_flight_pax_code_id', 'qpp_cnt', 'qpp_flight_id'], 'integer'],
             [['qpp_fare', 'qpp_tax', 'qpp_system_mark_up', 'qpp_agent_mark_up', 'qpp_origin_fare', 'qpp_origin_tax', 'qpp_client_fare', 'qpp_client_tax'], 'number'],
             [['qpp_origin_currency', 'qpp_client_currency'], 'safe'],
             [['qpp_created_dt', 'qpp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
@@ -58,7 +58,7 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -78,6 +78,7 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
             'qpp_cnt' => $this->qpp_cnt,
             'DATE(qpp_created_dt)' => $this->qpp_created_dt,
             'DATE(qpp_updated_dt)' => $this->qpp_updated_dt,
+            'qpp_flight_id' => $this->qpp_flight_id,
         ]);
 
         $query->andFilterWhere(['like', 'qpp_origin_currency', $this->qpp_origin_currency])

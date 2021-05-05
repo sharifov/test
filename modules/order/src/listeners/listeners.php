@@ -1,98 +1,125 @@
 <?php
 
-use modules\order\src\entities\order\events\OrderCanceledEvent;
-use modules\order\src\entities\order\events\OrderCompletedEvent;
-use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
-use modules\order\src\entities\order\events\OrderPreparedEvent;
-use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
-use modules\order\src\entities\order\events\OrderRecalculateTotalPriceEvent;
-use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
-use modules\order\src\entities\order\events\UpdateOrderTipsUserProfitAmountEvent;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\events\OrderProcessingEvent;
-use modules\order\src\listeners\lead\LeadPaymentStatusReloadOrdersListener;
-use modules\order\src\listeners\lead\LeadSoldListener;
-use modules\order\src\listeners\lead\LeadStatusReloadOrdersListener;
-use modules\order\src\listeners\order\OrderAllFilesGeneratedListener;
-use modules\order\src\listeners\order\OrderCanceledConfirmationListener;
-use modules\order\src\listeners\order\OrderCanceledHybridNotificationListener;
-use modules\order\src\listeners\order\OrderChangeStatusLogListener;
-use modules\order\src\listeners\order\OrderCompletedHybridNotificationListener;
-use modules\order\src\listeners\order\OrderFileGeneratorListener;
-use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
-use modules\order\src\listeners\order\OrderProcessingConfirmationListener;
-use modules\order\src\listeners\order\OrderProcessingHybridNotificationListener;
-use modules\order\src\listeners\order\OrderRecalculateTotalPriceListener;
-use modules\order\src\processManager\listeners\OrderPrepareOrderProcessingListener;
-use modules\order\src\listeners\order\OrderRecalculateProfitAmountListener;
-use modules\order\src\listeners\orderTipsUserProfit\UpdateOrderTipsUserProfitAmountEventListener;
+use modules\order\src\entities\order\events as OrderEvents;
+use modules\order\src\events\OrderUpdateEvent;
+use modules\order\src\listeners\lead as LeadListeners;
+use modules\order\src\listeners\order as OrderListeners;
+use modules\order\src\processManager;
 use modules\order\src\listeners\orderUserProfit\OrderUserProfitUpdateProfitAmountEventListener;
-use modules\order\src\payment\listeners\OrderProcessPaymentChargeListener;
-use modules\order\src\processManager\events;
-use modules\order\src\processManager\listeners;
 
 return [
-    OrderRecalculateProfitAmountEvent::class => [OrderRecalculateProfitAmountListener::class],
-    OrderUserProfitUpdateProfitAmountEvent::class => [OrderUserProfitUpdateProfitAmountEventListener::class],
+    OrderEvents\OrderRecalculateProfitAmountEvent::class => [
+        OrderListeners\OrderRecalculateProfitAmountListener::class,
+    ],
+    OrderEvents\OrderUserProfitUpdateProfitAmountEvent::class => [
+        OrderUserProfitUpdateProfitAmountEventListener::class,
+    ],
     OrderProcessingEvent::class => [
-        OrderProcessingConfirmationListener::class,
-        OrderProcessingHybridNotificationListener::class,
-        listeners\StartAutoProcessingListener::class,
+        OrderListeners\OrderProcessingConfirmationListener::class,
+        OrderListeners\OrderProcessingHybridNotificationListener::class,
+        processManager\listeners\StartAutoProcessingListener::class,
+        OrderListeners\OrderChangeStatusLogListener::class,
+    ],
+    OrderEvents\OrderCancelProcessingEvent::class => [
+        processManager\listeners\StopOrderProcessManagerListener::class,
+        OrderListeners\OrderChangeStatusLogListener::class,
+    ],
+    OrderEvents\OrderCancelFailedEvent::class => [
+        processManager\listeners\StopOrderProcessManagerListener::class,
+        OrderListeners\OrderChangeStatusLogListener::class,
+    ],
+    OrderEvents\OrderDeclinedEvent::class => [
+        processManager\listeners\StopOrderProcessManagerListener::class,
+        OrderListeners\OrderChangeStatusLogListener::class,
+    ],
+    OrderEvents\OrderErrorEvent::class => [
+        OrderListeners\OrderChangeStatusLogListener::class,
+    ],
+    OrderEvents\OrderNewEvent::class => [
+        OrderListeners\OrderChangeStatusLogListener::class,
+    ],
+    OrderEvents\OrderPendingEvent::class => [
+        OrderListeners\OrderChangeStatusLogListener::class,
+    ],
+    OrderEvents\OrderRecalculateTotalPriceEvent::class => [
+        OrderListeners\OrderRecalculateTotalPriceListener::class
+    ],
+    OrderEvents\OrderPreparedEvent::class => [
+        processManager\phoneToBook\listeners\OrderProcessPaymentChargeListener::class,
+        OrderListeners\OrderChangeStatusLogListener::class,
+        LeadListeners\LeadStatusReloadOrdersListener::class,
+    ],
+    OrderEvents\OrderPaymentPaidEvent::class => [
+        processManager\phoneToBook\listeners\OrderProcessOrderCompleteListener::class,
+        OrderListeners\OrderLogPaymentStatusListener::class,
+        LeadListeners\LeadPaymentStatusReloadOrdersListener::class,
+    ],
+    OrderEvents\OrderCompletedEvent::class => [
+        LeadListeners\LeadSoldListener::class,
+        OrderListeners\OrderChangeStatusLogListener::class,
+        OrderListeners\OrderCompletedHybridNotificationListener::class,
+        OrderListeners\OrderFileGeneratorListener::class,
+        LeadListeners\LeadStatusReloadOrdersListener::class,
+    ],
+    OrderEvents\OrderCanceledEvent::class => [
+        processManager\listeners\StopOrderProcessManagerListener::class,
+        OrderListeners\OrderChangeStatusLogListener::class,
+        OrderListeners\OrderCanceledConfirmationListener::class,
+        OrderListeners\OrderCanceledHybridNotificationListener::class,
+        LeadListeners\LeadStatusReloadOrdersListener::class,
     ],
 
-    OrderRecalculateTotalPriceEvent::class => [
-        OrderRecalculateTotalPriceListener::class
-    ],
-
-    //OrderProcessManagerEvents
-    events\CreatedEvent::class => [
-        listeners\StartBookingListener::class,
-        listeners\LogCreatedListener::class,
-        listeners\OrderProcessStatusReloadLeadOrdersListener::class,
-    ],
-    events\BookingFlightEvent::class => [
-        listeners\BookingFlightListener::class,
-        listeners\LogStatusListener::class,
-        listeners\OrderProcessStatusReloadLeadOrdersListener::class,
-    ],
-    events\BookingOtherProductsEvent::class => [
-        listeners\StartBookingOtherProductsListener::class,
-        listeners\LogStatusListener::class,
-        listeners\OrderProcessStatusReloadLeadOrdersListener::class,
-    ],
-    events\BookedEvent::class => [
-        listeners\LogStatusListener::class,
-        OrderPrepareOrderProcessingListener::class,
-        listeners\OrderProcessStatusReloadLeadOrdersListener::class,
-    ],
-    events\CanceledEvent::class => [
-        listeners\LogStatusListener::class,
-        listeners\OrderProcessStatusReloadLeadOrdersListener::class,
-    ],
-    OrderPreparedEvent::class => [
-        OrderProcessPaymentChargeListener::class,
-        OrderChangeStatusLogListener::class,
-        LeadStatusReloadOrdersListener::class,
-    ],
-    OrderPaymentPaidEvent::class => [
-        listeners\OrderProcessOrderCompleteListener::class,
-        OrderLogPaymentStatusListener::class,
-        LeadPaymentStatusReloadOrdersListener::class,
-    ],
-    OrderCompletedEvent::class => [
-        LeadSoldListener::class,
-        OrderChangeStatusLogListener::class,
-        OrderCompletedHybridNotificationListener::class,
-        OrderFileGeneratorListener::class,
-        LeadStatusReloadOrdersListener::class,
-    ],
-    OrderCanceledEvent::class => [
-        OrderChangeStatusLogListener::class,
-//        OrderCanceledConfirmationListener::class,
-        OrderCanceledHybridNotificationListener::class,
-        LeadStatusReloadOrdersListener::class,
-    ],
     OrderFileGeneratedEvent::class => [
-        OrderAllFilesGeneratedListener::class,
+        OrderListeners\OrderAllFilesGeneratedListener::class,
     ],
+
+    processManager\events\CreatedEvent::class => [
+        processManager\phoneToBook\listeners\StartBookingListener::class,
+        processManager\clickToBook\listeners\StartBookingListener::class,
+        processManager\listeners\LogCreatedListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
+    processManager\events\BookingFlightEvent::class => [
+        processManager\phoneToBook\listeners\BookingFlightListener::class,
+        processManager\listeners\LogStatusListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
+    processManager\events\BookingOtherProductsEvent::class => [
+        processManager\phoneToBook\listeners\StartBookingOtherProductsListener::class,
+        processManager\listeners\LogStatusListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
+    processManager\events\BookedEvent::class => [
+        processManager\phoneToBook\listeners\OrderPrepareOrderProcessingListener::class,
+        processManager\clickToBook\listeners\CompleteOrderListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+        processManager\listeners\LogStatusListener::class,
+    ],
+    processManager\events\CanceledEvent::class => [
+        processManager\listeners\LogStatusListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
+    processManager\events\FailedEvent::class => [
+        processManager\listeners\LogStatusListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
+    processManager\events\StoppedEvent::class => [
+        processManager\listeners\LogStatusListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
+    processManager\events\FlightProductProcessedEvent::class => [
+        processManager\clickToBook\listeners\CheckOrderIsPaymentListener::class,
+    ],
+    processManager\clickToBook\events\FlightProductProcessedSuccessEvent::class => [
+        processManager\clickToBook\listeners\FlightProductProcessedSuccessListener::class,
+    ],
+    processManager\clickToBook\events\FlightProductProcessedErrorEvent::class => [
+        processManager\clickToBook\listeners\FlightProductProcessedErrorListener::class,
+    ],
+
+    OrderUpdateEvent::class => [
+        OrderListeners\OrderSendWebhookBOListener::class
+    ]
 ];

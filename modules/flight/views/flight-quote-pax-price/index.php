@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'qpp_client_fare',
             'qpp_client_tax',
             'qpp_cnt',
-            //'qpp_created_dt',
+            'qpp_flight_id',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'qpp_created_dt'

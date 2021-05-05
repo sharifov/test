@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fqs_flight_quote_id',
             'fqs_flight_quote_trip_id',
             'fqs_uid',
-            //'fqs_departure_dt',
+            'fqs_flight_id',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'fqs_departure_dt'

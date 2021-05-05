@@ -65,8 +65,8 @@ class BillingInfoSearch extends BillingInfo
             'bi_status_id' => $this->bi_status_id,
             'bi_created_user_id' => $this->bi_created_user_id,
             'bi_updated_user_id' => $this->bi_updated_user_id,
-            'bi_created_dt' => $this->bi_created_dt,
-            'bi_updated_dt' => $this->bi_updated_dt,
+            'DATE(bi_created_dt)' => $this->bi_created_dt,
+            'DATE(bi_updated_dt)' => $this->bi_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'bi_first_name', $this->bi_first_name])

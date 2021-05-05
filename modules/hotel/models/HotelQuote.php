@@ -167,6 +167,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
      * @param HotelList $hotelModel
      * @param Hotel $hotelRequest
      * @param int|null $ownerId
+     * @param int|null $orderId
      * @param string $currency
      * @return array|HotelQuote|null
      * @throws \yii\base\InvalidConfigException
@@ -176,6 +177,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
         HotelList $hotelModel,
         Hotel $hotelRequest,
         ?int $ownerId,
+        ?int $orderId,
         string $currency = 'USD'
     ) {
         $hQuote = null;
@@ -206,6 +208,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
                     $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
                     $productQuoteDto->originCurrencyRate = Currency::getBaseRateByCurrencyCode($currency);
                     $productQuoteDto->name = mb_substr(implode(' & ', $nameArray), 0, 40);
+                    $productQuoteDto->orderId = $orderId;
 
                     $productTypeServiceFee = null;
                     $productType = ProductType::find()->select(['pt_service_fee_percent'])->byHotel()->asArray()->one();
@@ -244,9 +247,9 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
             if ($hQuote && !$hQuote->hotelQuoteRooms) {
                 $totalSystemPrice = 0;
                 $totalServiceFeeSum = 0;
+                $importedHotelRoomIds = [];
+                $importHotelRoomStatus = false;
                 foreach ($rooms as $room) {
-                    $importedHotelRoomIds = [];
-                    $importHotelRoomStatus = false;
                     $childrenAges = '';
                     if (array_key_exists('childrenAges', $room) && !empty($room['childrenAges'])) {
                         $childrenAgesArr = explode(',', $room['childrenAges']);
@@ -281,17 +284,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
                     $totalServiceFeeSum += $serviceFeeSum;
                     $totalSystemPrice += $qRoom->hqr_amount + $serviceFeeSum + $qRoom->hqr_system_mark_up;
 
-
-                    if (isset($room['cancellationPolicies'][0]['amount'])) {
-                        $qRoom->hqr_cancel_amount = $room['cancellationPolicies'][0]['amount'];
-                    } else {
-                        $qRoom->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
-                    }
-                    if (isset($room['cancellationPolicies']) && $room['cancellationPolicies'][0]['from']) {
-                        $qRoom->hqr_cancel_from_dt = date("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
-                    } else {
-                        $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
-                    }
+                    $qRoom->hqr_cancellation_policies = $room['cancellationPolicies'] ?? [];
 
                     if ($qRoom->hqr_amount) {
                         $hotelQuoteRoomAmount += $qRoom->hqr_amount;
@@ -332,16 +325,17 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
                                 $hotelRoomPaxes = $hotelRoomPax::find()
                                     ->where(['hrp_hotel_room_id' => $hotelRoom['hr_id']])
                                     ->all();
-
-                                foreach ($hotelRoomPaxes as $pax) {
-                                    $hotelQuoteRoomPax = new HotelQuoteRoomPax();
-                                    $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
-                                    $hotelQuoteRoomPax->hqrp_type_id = $pax->hrp_type_id;
-                                    $hotelQuoteRoomPax->hqrp_age = $pax->hrp_age;
-                                    $hotelQuoteRoomPax->hqrp_first_name = $pax->hrp_first_name;
-                                    $hotelQuoteRoomPax->hqrp_last_name = $pax->hrp_last_name;
-                                    $hotelQuoteRoomPax->hqrp_dob = $pax->hrp_dob;
-                                    $hotelQuoteRoomPax->save();
+                                if (!in_array($hotelRoom['hr_id'], $importedHotelRoomIds)) {
+                                    foreach ($hotelRoomPaxes as $pax) {
+                                        $hotelQuoteRoomPax = new HotelQuoteRoomPax();
+                                        $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
+                                        $hotelQuoteRoomPax->hqrp_type_id = $pax->hrp_type_id;
+                                        $hotelQuoteRoomPax->hqrp_age = $pax->hrp_age;
+                                        $hotelQuoteRoomPax->hqrp_first_name = $pax->hrp_first_name;
+                                        $hotelQuoteRoomPax->hqrp_last_name = $pax->hrp_last_name;
+                                        $hotelQuoteRoomPax->hqrp_dob = $pax->hrp_dob;
+                                        $hotelQuoteRoomPax->save();
+                                    }
                                 }
                                 $importedHotelRoomIds[] = $hotelRoom['hr_id'];
                                 $importHotelRoomStatus = true;
@@ -351,7 +345,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
 
                     if (!$importHotelRoomStatus) { // if not found in hotel_room_pax
                         if (!empty($qRoom->hqr_adults) && $qRoom->hqr_adults) { // adults
-                            for ($i = 0; $i <= $qRoom->hqr_adults; $i++) {
+                            for ($i = 0; $i < $qRoom->hqr_adults; $i++) {
                                 $hotelQuoteRoomPax = new HotelQuoteRoomPax();
                                 $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
                                 $hotelQuoteRoomPax->hqrp_type_id = $hotelQuoteRoomPax::PAX_TYPE_ADL;
@@ -368,7 +362,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
                                     $hotelQuoteRoomPax->save();
                                 }
                             } else { // without age
-                                for ($i = 0; $i <= $qRoom->hqr_children; $i++) {
+                                for ($i = 0; $i < $qRoom->hqr_children; $i++) {
                                     $hotelQuoteRoomPax = new HotelQuoteRoomPax();
                                     $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
                                     $hotelQuoteRoomPax->hqrp_type_id = $hotelQuoteRoomPax::PAX_TYPE_CHD;
@@ -548,25 +542,27 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
 
     public function getProject(): Project
     {
-        return $this->hqProductQuote->pqProduct->prLead->project;
+        if ($project = ArrayHelper::getValue($this, 'hqProductQuote.pqProduct.project')) {
+            return $project;
+        }
+        if ($project = ArrayHelper::getValue($this, 'hqProductQuote.pqProduct.prLead.project')) {
+            return $project;
+        }
+        throw new \DomainException('HotelQuote not related to project');
     }
 
-    public function getLead(): Lead
+    public function getLead(): ?Lead
     {
-        return $this->hqProductQuote->pqProduct->prLead;
+        return ArrayHelper::getValue($this, 'hqProductQuote.pqProduct.prLead');
     }
 
-    public function getClient(): Client
+    public function getClient(): ?Client
     {
-        return $this->hqProductQuote->pqProduct->prLead->client;
+        return ArrayHelper::getValue($this, 'hqProductQuote.pqProduct.prLead.client');
     }
 
     public function getOrder(): ?Order
     {
-        if ($order = ArrayHelper::getValue($this, 'hqProductQuote.pqOrder')) {
-            /** @var Order $order */
-            return $order;
-        }
-        return null;
+        return ArrayHelper::getValue($this, 'hqProductQuote.pqOrder');
     }
 }

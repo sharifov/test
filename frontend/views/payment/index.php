@@ -1,5 +1,6 @@
 <?php
 
+use yii\grid\ActionColumn;
 use common\models\Payment;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -22,14 +23,11 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
             'pay_id',
             'pay_type_id',
             'pay_method_id',
@@ -40,22 +38,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => Payment::getStatusList()
             ],
-            //'pay_date',
             'pay_code',
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'pay_date'
-            ],
-            //'pay_amount',
-            //'pay_currency',
-            //'pay_invoice_id',
-            //'pay_order_id',
+            'pay_invoice_id',
+            'pay_order_id',
+            'pay_billing_id',
+            'pay_date',
+            'pay_amount',
+            'pay_currency',
             //'pay_created_user_id',
             //'pay_updated_user_id',
             //'pay_created_dt',
             //'pay_updated_dt',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
 

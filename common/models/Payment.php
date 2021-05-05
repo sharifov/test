@@ -10,7 +10,9 @@ use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "payment".
@@ -29,6 +31,8 @@ use yii\db\ActiveRecord;
  * @property string|null $pay_created_dt
  * @property string|null $pay_updated_dt
  * @property string|null $pay_code
+ * @property string|null $pay_description
+ * @property int|null $pay_billing_id
  *
  * @property Employee $payCreatedUser
  * @property Currency $payCurrency
@@ -37,6 +41,7 @@ use yii\db\ActiveRecord;
  * @property Order $payOrder
  * @property Employee $payUpdatedUser
  * @property Transaction[] $transactions
+ * @property BillingInfo $billingInfo
  */
 class Payment extends \yii\db\ActiveRecord
 {
@@ -99,6 +104,19 @@ class Payment extends \yii\db\ActiveRecord
         $this->pay_status_id = self::STATUS_IN_PROGRESS;
     }
 
+    public function isAuthorized(): bool
+    {
+        return $this->pay_status_id === self::STATUS_AUTHORIZED;
+    }
+
+    public function authorized(): void
+    {
+        if ($this->isAuthorized()) {
+            throw new \DomainException('Payment is already Authorized.');
+        }
+        $this->pay_status_id = self::STATUS_AUTHORIZED;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -113,7 +131,7 @@ class Payment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['pay_type_id', 'pay_method_id', 'pay_status_id', 'pay_invoice_id', 'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id'], 'integer'],
+            [['pay_type_id', 'pay_status_id', 'pay_invoice_id', 'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id'], 'integer'],
             [['pay_date', 'pay_amount'], 'required'],
             ['pay_date', 'date', 'format' => 'php:Y-m-d'],
             [['pay_created_dt', 'pay_updated_dt'], 'safe'],
@@ -124,9 +142,16 @@ class Payment extends \yii\db\ActiveRecord
             [['pay_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pay_created_user_id' => 'id']],
             [['pay_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pay_currency' => 'cur_code']],
             [['pay_invoice_id'], 'exist', 'skipOnError' => true, 'targetClass' => Invoice::class, 'targetAttribute' => ['pay_invoice_id' => 'inv_id']],
-            [['pay_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['pay_method_id' => 'pm_id']],
+
+            [['pay_method_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
+                'targetClass' => PaymentMethod::class, 'targetAttribute' => ['pay_method_id' => 'pm_id']],
             [['pay_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['pay_order_id' => 'or_id']],
             [['pay_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pay_updated_user_id' => 'id']],
+
+            [['pay_description'], 'string', 'max' => 255],
+
+            [['pay_billing_id'], 'integer'],
+            [['pay_billing_id'], 'exist', 'skipOnError' => true, 'targetClass' => BillingInfo::class, 'targetAttribute' => ['pay_billing_id' => 'bi_id']],
         ];
     }
 
@@ -150,6 +175,8 @@ class Payment extends \yii\db\ActiveRecord
             'pay_created_dt' => 'Created Dt',
             'pay_updated_dt' => 'Updated Dt',
             'pay_code' => 'Code',
+            'pay_description' => 'Pay description',
+            'pay_billing_id' => 'Billing Info',
         ];
     }
 
@@ -231,6 +258,11 @@ class Payment extends \yii\db\ActiveRecord
         return $this->hasMany(Transaction::class, ['tr_payment_id' => 'pay_id']);
     }
 
+    public function getBillingInfo(): ActiveQuery
+    {
+        return $this->hasOne(BillingInfo::class, ['bi_id' => 'pay_billing_id']);
+    }
+
     /**
      * {@inheritdoc}
      * @return \common\models\query\PaymentQuery the active query used by this AR class.
@@ -251,13 +283,15 @@ class Payment extends \yii\db\ActiveRecord
     }
 
     public static function create(
-        int $methodId,
+        ?int $methodId,
         string $date,
         float $amount,
         string $currency,
-        int $invoiceId,
+        ?int $invoiceId,
         int $orderId,
-        string $code
+        string $code,
+        ?string $payDescription = null,
+        ?int $billingInfoId = null
     ): self {
         $payment = new self();
         $payment->pay_method_id = $methodId;
@@ -267,6 +301,61 @@ class Payment extends \yii\db\ActiveRecord
         $payment->pay_invoice_id = $invoiceId;
         $payment->pay_order_id = $orderId;
         $payment->pay_code = $code;
+        $payment->pay_description = $payDescription;
+        $payment->pay_billing_id = $billingInfoId;
         return $payment;
+    }
+
+    /**
+     * @param string $payCode
+     * @param int $orderId
+     * @return Payment|null
+     */
+    public static function findLastByCodeAndOrder(string $payCode, int $orderId): ?Payment
+    {
+        return self::find()
+            ->where(['pay_code' => $payCode])
+            ->andWhere(['pay_order_id' => $orderId])
+            ->orderBy(['pay_id' => SORT_DESC])->one();
+    }
+
+    public function isAuthorizable(): bool
+    {
+        return ArrayHelper::isIn(
+            $this->pay_status_id,
+            [
+                self::STATUS_NEW,
+                self::STATUS_PENDING,
+                self::STATUS_IN_PROGRESS,
+            ]
+        );
+    }
+
+    public function isCompletable(): bool
+    {
+        return ArrayHelper::isIn(
+            $this->pay_status_id,
+            [
+                self::STATUS_NEW,
+                self::STATUS_PENDING,
+                self::STATUS_IN_PROGRESS,
+                self::STATUS_AUTHORIZED,
+            ]
+        );
+    }
+
+    public function isRefundable(): bool
+    {
+        return ArrayHelper::isIn(
+            $this->pay_status_id,
+            [
+                self::STATUS_COMPLETED,
+            ]
+        );
+    }
+
+    public function changeAmount(float $amount): void
+    {
+        $this->pay_amount = $amount;
     }
 }

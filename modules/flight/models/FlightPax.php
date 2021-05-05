@@ -7,6 +7,7 @@ use modules\flight\src\entities\flightPax\serializer\FlightPaxSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use sales\entities\serializer\Serializable;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "flight_pax".
@@ -20,14 +21,15 @@ use Yii;
  * @property string|null $fp_last_name
  * @property string|null $fp_middle_name
  * @property string|null $fp_dob
- *
- * @property Flight $fpFlight
- * @property FlightQuoteSegmentPaxBaggageCharge[] $flightQuoteSegmentPaxBaggageCharges
  * @property string $fp_nationality [varchar(5)]
  * @property string $fp_gender [varchar(1)]
  * @property string $fp_email [varchar(100)]
  * @property string $fp_language [varchar(5)]
  * @property string $fp_citizenship [varchar(5)]
+ *
+ * @property Flight $fpFlight
+ * @property FlightQuoteSegmentPaxBaggageCharge[] $flightQuoteSegmentPaxBaggageCharges
+ * @property FlightQuoteTicket $flightQuoteTicket
  */
 class FlightPax extends \yii\db\ActiveRecord implements Serializable
 {
@@ -123,6 +125,11 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         return $this->hasOne(Flight::class, ['fl_id' => 'fp_flight_id']);
     }
 
+    public function getFlightQuoteTicket(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteTicket::class, ['fqt_pax_id' => 'fp_id']);
+    }
+
     /**
      * {@inheritdoc}
      * @return \modules\flight\models\query\FlightPaxQuery the active query used by this AR class.
@@ -148,6 +155,28 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         $flightPax->fp_middle_name = $dto->middleName;
         $flightPax->fp_dob = $dto->dob;
 
+        return $flightPax;
+    }
+
+    public static function createByParams(
+        int $flightId,
+        string $paxType,
+        ?string $firstName = null,
+        ?string $lastName = null,
+        ?string $middleName = null,
+        ?string $dob = null,
+        ?string $gender = null,
+        ?string $nationality = null
+    ): FlightPax {
+        $flightPax = new self();
+        $flightPax->fp_flight_id = $flightId;
+        $flightPax->fp_pax_type = $paxType;
+        $flightPax->fp_first_name = $firstName;
+        $flightPax->fp_last_name = $lastName;
+        $flightPax->fp_middle_name = $middleName;
+        $flightPax->fp_dob = $dob;
+        $flightPax->fp_gender = $gender;
+        $flightPax->fp_nationality = $nationality;
         return $flightPax;
     }
 

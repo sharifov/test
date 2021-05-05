@@ -42,7 +42,37 @@ class HotelRoomPax extends \yii\db\ActiveRecord
         ]
     ];
 
-        /**
+    public static function clone(HotelRoomPax $pax, int $roomId): self
+    {
+        $clone = new static();
+        $clone->hrp_hotel_room_id = $roomId;
+        $clone->hrp_type_id = $pax->hrp_type_id;
+        $clone->hrp_age = $pax->hrp_age;
+        $clone->hrp_first_name = $pax->hrp_first_name;
+        $clone->hrp_last_name = $pax->hrp_last_name;
+        $clone->hrp_dob = $pax->hrp_dob;
+        return $clone;
+    }
+
+    public static function create(
+        int $hotelRoomId,
+        int $typeId,
+        ?int $age,
+        ?string $firstName,
+        ?string $lastName,
+        ?string $dateBirth
+    ): self {
+        $roomPax = new self();
+        $roomPax->hrp_hotel_room_id = $hotelRoomId;
+        $roomPax->hrp_type_id = $typeId;
+        $roomPax->hrp_age = $age;
+        $roomPax->hrp_first_name = $firstName;
+        $roomPax->hrp_last_name = $lastName;
+        $roomPax->hrp_dob = $dateBirth;
+        return $roomPax;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()

@@ -4,6 +4,7 @@ namespace common\components;
 
 use http\Client\Request;
 use http\Client\Response;
+use sales\helpers\setting\SettingHelper;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\VarDumper;
@@ -153,6 +154,38 @@ class BackOffice
             }
         } else {
             \Yii::warning('Not isset settings bo_web_hook_enable or empty params webHookEndpoint', 'UserGroupEvents:webHook');
+        }
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public static function orderUpdateWebhook(array $data)
+    {
+        $endpoint = SettingHelper::getWebhookOrderUpdateBOEndpoint();
+
+        if ($endpoint) {
+            try {
+                $response = self::sendRequest2($endpoint, $data);
+
+                if ($response->isOk) {
+                    $result = $response->data;
+                    if ($result && is_array($result)) {
+                        return $result;
+                    }
+                } else {
+                    throw new Exception('Endpoint: ' . $endpoint . ' , BO request Error: ' . VarDumper::dumpAsString($response->content), $response->statusCode);
+                }
+            } catch (\Throwable $exception) {
+                $code = $exception->getCode();
+                \Yii::error($exception->getMessage(), 'BackOffice:orderUpdateWebhook');
+                if ($code < 500 && $code !== 404) {
+                    throw new \RuntimeException($exception->getMessage());
+                }
+            }
+        } else {
+            \Yii::error('Not provided endpoint', 'BackOffice:orderUpdateWebhook');
         }
     }
 }

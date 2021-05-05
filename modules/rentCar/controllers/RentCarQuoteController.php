@@ -18,6 +18,7 @@ use modules\rentCar\src\forms\RentCarSearchForm;
 use modules\rentCar\src\helpers\RentCarDataParser;
 use modules\rentCar\src\helpers\RentCarQuoteHelper;
 use modules\rentCar\src\repositories\rentCar\RentCarQuoteRepository;
+use modules\rentCar\src\services\RentCarQuoteBookGuard;
 use modules\rentCar\src\services\RentCarQuoteBookService;
 use modules\rentCar\src\services\RentCarQuoteCancelBookService;
 use modules\rentCar\src\services\RentCarQuotePdfService;
@@ -29,6 +30,7 @@ use Yii;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -250,7 +252,14 @@ class RentCarQuoteController extends FController
                 $result['message'] = 'Document have been successfully generated';
             }
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionFileGenerate');
+            $throwableLog = AppHelper::throwableLog($throwable);
+            Yii::warning(
+                ArrayHelper::merge(
+                    $throwableLog,
+                    ['productQuoteId' => isset($rentCarQuote) ? $rentCarQuote->rcqProductQuote->pq_id : null]
+                ),
+                'RentCarQuoteController:actionFileGenerate'
+            );
             $result['message'] = $throwable->getMessage();
         }
         return $result;
@@ -271,6 +280,7 @@ class RentCarQuoteController extends FController
                 throw new \RuntimeException('RentCarQuoteId param not found');
             }
             $rentCarQuote = $this->findRentCarQuote($rentCarQuoteId);
+            RentCarQuoteBookGuard::guard($rentCarQuote);
 
             if ($bookingId = RentCarQuoteBookService::book($rentCarQuote, Auth::id())) {
                 Notifications::pub(

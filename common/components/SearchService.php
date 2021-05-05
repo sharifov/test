@@ -52,6 +52,15 @@ class SearchService
         CABIN_FIRST = 'F',
         CABIN_PREMIUM_FIRST = 'P';
 
+    public const CABIN_LIST = [
+        self::CABIN_ECONOMY => 'Economy',
+        self::CABIN_PREMIUM_ECONOMY => 'Premium Economy',
+        self::CABIN_BUSINESS => 'Business',
+        self::CABIN_PREMIUM_BUSINESS => 'Premium Business',
+        self::CABIN_FIRST => 'First',
+        self::CABIN_PREMIUM_FIRST => 'Premium First',
+    ];
+
     /**
      * @param $minutes
      * @return string
@@ -76,25 +85,12 @@ class SearchService
     }
 
     /**
-     * @param null $cabin
-     * @return array|mixed|null
+     * @param string|null $cabin
+     * @return string|null
      */
-    public static function getCabin($cabin = null)
+    public static function getCabin(?string $cabin): ?string
     {
-        $mapping = [
-            self::CABIN_ECONOMY => 'Economy',
-            self::CABIN_PREMIUM_ECONOMY => 'Premium Economy',
-            self::CABIN_BUSINESS => 'Business',
-            self::CABIN_PREMIUM_BUSINESS => 'Premium Business',
-            self::CABIN_FIRST => 'First',
-            self::CABIN_PREMIUM_FIRST => 'Premium First',
-        ];
-
-        if ($cabin === null) {
-            return $mapping;
-        }
-
-        return $mapping[$cabin] ?? $cabin;
+        return self::CABIN_LIST[$cabin] ?? $cabin;
     }
 
     /**

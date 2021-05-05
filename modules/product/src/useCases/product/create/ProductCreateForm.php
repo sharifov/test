@@ -15,6 +15,7 @@ use yii\base\Model;
  * @property int $pr_type_id
  * @property string $pr_name
  * @property string $pr_description
+ * @property int $pr_project_id
  */
 class ProductCreateForm extends Model
 {
@@ -22,6 +23,7 @@ class ProductCreateForm extends Model
     public $pr_type_id;
     public $pr_name;
     public $pr_description;
+    public $pr_project_id;
 
     /**
      * @return array
@@ -48,6 +50,7 @@ class ProductCreateForm extends Model
             ['pr_name', 'string', 'max' => 40],
 
             ['pr_description', 'string'],
+            ['pr_project_id', 'integer']
         ];
     }
 
@@ -66,6 +69,6 @@ class ProductCreateForm extends Model
 
     public function getDto(): CreateDto
     {
-        return new CreateDto($this->pr_lead_id, $this->pr_type_id, $this->pr_name, $this->pr_description);
+        return new CreateDto($this->pr_lead_id, $this->pr_type_id, $this->pr_name, $this->pr_description, $this->pr_project_id);
     }
 }

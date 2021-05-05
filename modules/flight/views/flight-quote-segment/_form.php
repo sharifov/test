@@ -58,6 +58,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'fqs_mileage')->textInput() ?>
 
+    <?= $form->field($model, 'fqs_flight_id')->textInput() ?>
+
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

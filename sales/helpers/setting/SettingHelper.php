@@ -238,6 +238,26 @@ class SettingHelper
         return null;
     }
 
+    public static function isWebhookOrderUpdateBOEnabled()
+    {
+        return Yii::$app->params['settings']['webhook_order_update_bo_enabled'] ?? true;
+    }
+
+    public static function isWebhookOrderUpdateHybridEnabled()
+    {
+        return Yii::$app->params['settings']['webhook_order_update_hybrid_enabled'] ?? true;
+    }
+
+    public static function getWebhookOrderUpdateBOEndpoint(): ?string
+    {
+        return Yii::$app->params['settings']['webhook_order_update_bo_endpoint'] ?? null;
+    }
+
+    public static function getWebhookOrderUpdateHybridEndpoint()
+    {
+        return Yii::$app->params['settings']['webhook_order_update_hybrid_endpoint'] ?? null;
+    }
+
     public static function warmTransferTimeout(): int
     {
         return (int)(\Yii::$app->params['settings']['warm_transfer_timeout'] ?? 30);

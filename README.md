@@ -144,28 +144,28 @@ sudo service mysql restart
 
 Prod Kiv Host:
 -------------------
- - [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
- - [sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
+- [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
+- [sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
+- [sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html) - API Documentation
  
 Prod GTT Host:
 -------------------
 - [crm.gttglobal.com](https://crm.gttglobal.com) - Frontend
 - [crm-api.gttglobal.com](https://crm-api.gttglobal.com) - API
+- [crm-api.gttglobal.com/doc/index.html](https://crm-api.gttglobal.com/doc/index.html) - API Documentation
  
 Stage Host:
 -------------------
- - [stage-sales.travel-dev.com](https://stage-sales.travel-dev.com) - Frontend
- - [stage-sales-api.travel-dev.com](https://stage-sales-api.travel-dev.com) - API
+- [stage-sales.travel-dev.com](https://stage-sales.travel-dev.com) - Frontend
+- [stage-sales-api.travel-dev.com](https://stage-sales-api.travel-dev.com) - API
+- [stage-sales-api.travel-dev.com/doc/index.html](https://stage-sales-api.travel-dev.com/doc/index.html) - API Documentation
 
 Dev Host:
 -------------------
- - [sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
- - [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
+- [sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
+- [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
+- [api-sales.dev.travelinsides.com/doc/index.html](https://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
   
-API Documentation
--------------------
- [https://sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html)
-
  Generate API Documentation (apiDoc):
  ```
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
@@ -381,6 +381,7 @@ CRONs
 30 4 * * * php /var/www/sale/yii call-report/priceline
 * * * * *   php /var/www/sale/yii user/update-online-status
 0 0 1 * *   php /var/www/sale/yii client-chat/refresh-rocket-chat-user-token
+0 8 * * 1   php /var/www/sale/yii call-report/priceline-weekly
 ```
   
 ```

@@ -166,7 +166,7 @@ class Project extends \yii\db\ActiveRecord
     {
         if (empty($this->_contactInfo)) {
             $this->_contactInfo = new ContactInfo();
-            $contactArr = @json_decode($this->contact_info, true, 512, JSON_THROW_ON_ERROR);
+            $contactArr = @json_decode($this->contact_info, true, 512);
             if ($contactArr) {
                 $this->_contactInfo->attributes = $contactArr;
             }
@@ -646,5 +646,10 @@ class Project extends \yii\db\ActiveRecord
     public function getVisitorLogs(): ActiveQuery
     {
         return $this->hasMany(VisitorLog::class, ['vl_project_id' => 'id']);
+    }
+
+    public function getEmailNoReply()
+    {
+        return $this->getContactInfo()->getEmailNoReply() . '@' . $this->email_postfix;
     }
 }

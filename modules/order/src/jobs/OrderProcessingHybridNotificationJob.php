@@ -33,7 +33,7 @@ class OrderProcessingHybridNotificationJob implements JobInterface
         }
 
         try {
-            \Yii::$app->hybrid->updateStatus($order->orLead->project_id, $order->or_gid, OrderStatus::PROCESSING);
+            \Yii::$app->hybrid->updateStatus($order->or_project_id, $order->or_gid, OrderStatus::PROCESSING);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Send processing status to hybrid',

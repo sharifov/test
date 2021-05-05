@@ -33,7 +33,7 @@ class OrderCompletedHybridNotificationJob implements JobInterface
         }
 
         try {
-            \Yii::$app->hybrid->updateStatus($order->orLead->project_id, $order->or_gid, OrderStatus::COMPLETE);
+            \Yii::$app->hybrid->updateStatus($order->or_project_id, $order->or_gid, OrderStatus::COMPLETE);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Send completed status to hybrid',

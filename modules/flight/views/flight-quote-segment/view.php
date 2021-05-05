@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fqs_ticket_id',
             'fqs_recheck_baggage',
             'fqs_mileage',
+            'fqs_flight_id',
         ],
     ]) ?>
 

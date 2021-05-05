@@ -33,7 +33,7 @@ class CountryHelper
             throw new \RuntimeException('Error file (' . $fileName . ') not exist');
         }
 
-        require_once $fileName;
+        require $fileName;
         $countries = $countries ?? [];
         if (is_array($countries)) {
             $result = $countries;

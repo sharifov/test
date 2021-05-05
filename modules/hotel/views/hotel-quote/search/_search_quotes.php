@@ -5,9 +5,14 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
-/* @var $this yii\web\View */
-/* @var $hotelSearch \modules\hotel\models\Hotel */
-/* @var $dataProvider yii\data\ArrayDataProvider */
+/**
+ * @var $this yii\web\View
+ * @var $hotelSearch \modules\hotel\models\Hotel
+ * @var $dataProvider yii\data\ArrayDataProvider
+ * @var $filtersForm \modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchForm
+ * @var $showFilters bool
+ * @var $hotelTypes array
+ */
 
 //$this->title = 'Hotel Quotes';
 
@@ -68,7 +73,16 @@ The SPA service at Christmas is closed on December 25 and January 1.'
 
     <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+<div class="row">
+    <?php if (!$showFilters) :?>
+        <div class="col-2 quote">
+                <?= $this->render('_quote_filters', [
+                    'filtersForm' => $filtersForm
+            ]) ?>
+        </div>
+    <?php endif; ?>
 
+    <div class="col-10">
     <?= \yii\widgets\ListView::widget([
         'dataProvider' => $dataProvider,
         /*'options' => [
@@ -76,8 +90,15 @@ The SPA service at Christmas is closed on December 25 and January 1.'
             'class' => 'table table-bordered',
         ],*/
         'emptyText' => '<div class="text-center">Not found any hotels</div><br>',
-        'itemView' => function ($dataHotel, $key, $index, $widget) use ($hotelSearch) {
-            return $this->render('_list_hotel_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch]);
+        'itemView' => function ($dataHotel, $key, $index, $widget) use ($hotelSearch, $filtersForm, $hotelTypes) {
+            return $this->render('_list_hotel_quotes', [
+                'dataHotel' => $dataHotel,
+                'index' => $index,
+                'key' => $key,
+                'hotelSearch' => $hotelSearch,
+                'form' => $filtersForm,
+                'hotelTypes' => $hotelTypes
+            ]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
         'itemOptions' => [
@@ -85,7 +106,8 @@ The SPA service at Christmas is closed on December 25 and January 1.'
             'tag' => false,
         ],
     ]) ?>
-
+    </div>
+</div>
 
     <?php /*= GridView::widget([
         'dataProvider' => $dataProvider,

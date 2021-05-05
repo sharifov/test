@@ -3,9 +3,12 @@
 namespace webapi\modules\v1\controllers;
 
 use Yii;
+use yii\filters\ContentNegotiator;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\HttpException;
+use yii\web\NotAcceptableHttpException;
+use yii\web\Response;
 
 /**
  * Site controller
@@ -13,6 +16,21 @@ use yii\web\HttpException;
 class SiteController extends Controller
 {
 
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['contentNegotiator'] = [
+            'class' => ContentNegotiator::class,
+            'formats' => [
+                'application/json' => Response::FORMAT_JSON,
+            ],
+        ];
+
+        return $behaviors;
+    }
 
     /**
      * Displays homepage.
@@ -21,11 +39,14 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        echo  '<h1>API - ' . Yii::$app->request->serverName . '</h1> ' . date('Y-m-d H:i:s');
+        echo  '<h1>API v1 - ' . Yii::$app->request->serverName . '</h1> ' . date('Y-m-d H:i:s');
         exit;
     }
 
-    public function actionTest()
+    /**
+     * @return array
+     */
+    public function actionTest(): array
     {
         $headers = [];
         foreach ($_SERVER as $name => $value) {
@@ -46,7 +67,8 @@ class SiteController extends Controller
             'headers'   => $headers
         ];
 
-        Yii::info(VarDumper::dumpAsString($out), 'info\API:AppController:Test');
-        VarDumper::dump($out);
+        Yii::info(VarDumper::dumpAsString($out), 'info\API:v1:AppController:Test');
+        //VarDumper::dump($out);
+        return $out;
     }
 }

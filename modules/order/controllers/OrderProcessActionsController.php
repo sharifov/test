@@ -4,8 +4,8 @@ namespace modules\order\controllers;
 
 use frontend\controllers\FController;
 use modules\order\src\entities\order\Order;
-use modules\order\src\processManager\OrderProcessManager;
-use modules\order\src\processManager\OrderProcessManagerRepository;
+use modules\order\src\processManager\OrderProcessManagerCanceler;
+use modules\order\src\processManager\OrderProcessManagerFactory;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -14,20 +14,24 @@ use yii\web\NotFoundHttpException;
 /**
  * Class OrderProcessActionsController
  *
- * @property OrderProcessManagerRepository $processRepository
+ * @property OrderProcessManagerCanceler $orderProcessManagerCanceler
+ * @property OrderProcessManagerFactory $orderProcessManagerFactory
  */
 class OrderProcessActionsController extends FController
 {
-    private OrderProcessManagerRepository $processRepository;
+    private OrderProcessManagerCanceler $orderProcessManagerCanceler;
+    private OrderProcessManagerFactory $orderProcessManagerFactory;
 
     public function __construct(
         $id,
         $module,
-        OrderProcessManagerRepository $processRepository,
+        OrderProcessManagerCanceler $orderProcessManagerCanceler,
+        OrderProcessManagerFactory $orderProcessManagerFactory,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
-        $this->processRepository = $processRepository;
+        $this->orderProcessManagerCanceler = $orderProcessManagerCanceler;
+        $this->orderProcessManagerFactory = $orderProcessManagerFactory;
     }
 
     public function behaviors(): array
@@ -54,16 +58,8 @@ class OrderProcessActionsController extends FController
             throw new NotFoundHttpException('The requested page does not exist.');
         }
 
-        if (OrderProcessManager::find()->andWhere(['opm_id' => $order->or_id])->exists()) {
-            return $this->asJson([
-                'error' => true,
-                'message' => 'Process is already exist.'
-            ]);
-        }
-
         try {
-            $process = OrderProcessManager::create($order->or_id, new \DateTimeImmutable());
-            $this->processRepository->save($process);
+            $this->orderProcessManagerFactory->create($order->or_id, $order->or_type_id);
             return $this->asJson([
                 'error' => false,
                 'message' => 'Success'
@@ -85,18 +81,8 @@ class OrderProcessActionsController extends FController
     {
         $orderId = (int)Yii::$app->request->post('id');
 
-        $process = OrderProcessManager::findOne($orderId);
-
-        if (!$process) {
-            return $this->asJson([
-                'error' => true,
-                'message' => 'Not found Process'
-            ]);
-        }
-
         try {
-            $process->cancel(new \DateTimeImmutable());
-            $this->processRepository->save($process);
+            $this->orderProcessManagerCanceler->stop($orderId);
             return $this->asJson([
                 'error' => false,
                 'message' => 'Success'
@@ -105,7 +91,7 @@ class OrderProcessActionsController extends FController
             Yii::error([
                 'message' => 'Cancel Order Process error',
                 'error' => $e->getMessage(),
-                'orderId' => $process->opm_id,
+                'orderId' => $orderId,
             ], 'OrderActionsController');
             return $this->asJson([
                 'error' => true,

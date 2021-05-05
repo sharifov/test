@@ -153,6 +153,20 @@ class Formatter extends \yii\i18n\Formatter
         return CasesSourceType::asFormat($value);
     }
 
+    public function asSource(?int $id): string
+    {
+        if ($id === null) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('i', '', ['class' => 'fa fa-arrow-right'])
+            . ' ' .
+            Html::a(
+                $id,
+                ['/sources/view', 'id' => $id],
+                ['target' => '_blank', 'data-pjax' => 0]
+            );
+    }
+
     public function asQaTask(?QaTask $task): string
     {
         if ($task === null) {
@@ -241,6 +255,15 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return OrderFormatter::asOrder($order);
+    }
+
+    public function asOrderId(?int $id): string
+    {
+        if ($id === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderFormatter::asOrderId($id);
     }
 
     public function asOrderPayStatus($value): string

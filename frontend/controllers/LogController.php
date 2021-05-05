@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use aki\telegram\base\Command;
 use Mpdf\Tag\Li;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
@@ -69,6 +70,18 @@ class LogController extends FController
             'dataProvider' => $dataProvider,
             'modelCleaner' => $logCleanerForm,
         ]);
+    }
+
+    /**
+     * Lists of Log Category.
+     * @return array
+     */
+    public function actionAjaxCategoryList(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['error' => '', 'data' => []];
+        $result['data'] = Log::getCategoryFilterByCnt(null, false);
+        return $result;
     }
 
     /**

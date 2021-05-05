@@ -5,6 +5,14 @@ namespace modules\product\src\entities\productQuote;
 use common\models\Currency;
 use common\models\Employee;
 use modules\flight\models\FlightQuote;
+use modules\hotel\models\HotelQuote;
+use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuoteLead\ProductQuoteLead;
+use modules\product\src\entities\productQuoteLead\ProductQuoteLeadQuery;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
+use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
+use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
+use modules\attraction\models\AttractionQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
@@ -25,6 +33,7 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionsQuery;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
@@ -82,6 +91,12 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteOption[] $productQuoteOptionsActive
  * @property ProductQuote|null $clone
  * @property FlightQuote|null $flightQuote
+ * @property HotelQuote|null $hotelQuote
+ * @property RentCarQuote|null $rentCarQuote
+ * @property CruiseQuote|null $cruiseQuote
+ * @property AttractionQuote| $attractionQuote
+ * @property ProductQuote[]|null $relates
+ * @property ProductQuote|null $relateParent
  *
  * @property Quotable|null $childQuote
  */
@@ -90,6 +105,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     use EventTrait;
 
     private $childQuote;
+
+    private ?bool $isQuoteAlternative = null;
+    private ?bool $isQuoteOrigin = null;
 
     public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
@@ -220,6 +238,18 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->hasOne(static::class, ['pq_id' => 'pq_clone_id']);
     }
 
+    public function getRelates(): ActiveQuery
+    {
+        return $this->hasMany(static::class, ['pq_id' => 'pqr_related_pq_id'])
+            ->viaTable('product_quote_relation', ['pqr_parent_pq_id' => 'pq_id']);
+    }
+
+    public function getRelateParent(): ActiveQuery
+    {
+        return $this->hasOne(static::class, ['pq_id' => 'pqr_parent_pq_id'])
+            ->viaTable('product_quote_relation', ['pqr_related_pq_id' => 'pq_id']);
+    }
+
     /**
      * @return ActiveQuery
      */
@@ -231,6 +261,26 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getFlightQuote()
     {
         return $this->hasOne(FlightQuote::class, ['fq_product_quote_id' => 'pq_id']);
+    }
+
+    public function getHotelQuote()
+    {
+        return $this->hasOne(HotelQuote::class, ['hq_product_quote_id' => 'pq_id']);
+    }
+
+    public function getRentCarQuote()
+    {
+        return $this->hasOne(RentCarQuote::class, ['rcq_product_quote_id' => 'pq_id']);
+    }
+
+    public function getCruiseQuote()
+    {
+        return $this->hasOne(CruiseQuote::class, ['crq_product_quote_id' => 'pq_id']);
+    }
+
+    public function getAttractionQuote()
+    {
+        return $this->hasOne(AttractionQuote::class, ['atnq_product_quote_id' => 'pq_id']);
     }
 
     /**
@@ -337,6 +387,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function applied(): void
     {
         $this->pq_status_id = ProductQuoteStatus::APPLIED;
+    }
+
+    public function failed(): void
+    {
+        $this->pq_status_id = ProductQuoteStatus::ERROR;
     }
 
     /**
@@ -466,6 +521,19 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $clone;
     }
 
+    public static function replace(ProductQuote $quote): self
+    {
+        $clone = new self();
+        $clone->attributes = $quote->attributes;
+
+        $clone->pq_id = null;
+        $clone->pq_gid = self::generateGid();
+        $clone->pq_status_id = ProductQuoteStatus::NEW;
+        $clone->pq_clone_id = $quote->pq_id;
+        $clone->recordEvent(new ProductQuoteReplaceEvent($clone, $quote->pq_id));
+        return $clone;
+    }
+
     /**
      * @return string
      */
@@ -563,6 +631,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isRentCar(): bool
     {
         return $this->pqProduct->isRenTCar();
+    }
+
+    public function isCruise(): bool
+    {
+        return $this->pqProduct->isCruise();
     }
 
     /**
@@ -733,6 +806,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pq_status_id === ProductQuoteStatus::BOOKED;
     }
 
+    public function isInProgress(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::IN_PROGRESS;
+    }
+
+    public function isError(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::ERROR;
+    }
+
     public function isDeletable(): bool
     {
         return ProductQuoteStatus::isDeletable($this->pq_status_id);
@@ -773,5 +856,27 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->calculatePrice();
         $this->calculateClientPrice();
         $this->updateProfitAmount();
+    }
+
+    public function updatePricesC2b(float $originPrice): void
+    {
+        $this->pq_origin_price = $originPrice;
+        $this->pq_app_markup = 0.00;
+        $this->pq_agent_markup = 0.00;
+        $this->pq_service_fee_sum = 0.00;
+
+        $this->calculatePrice();
+        $this->calculateClientPrice();
+        $this->updateProfitAmount();
+    }
+
+    public function isAlternative(): bool
+    {
+        return $this->isQuoteAlternative ?? ($this->isQuoteAlternative = ProductQuoteRelationQuery::isRelatedAlternativeQuoteExists($this->pq_id));
+    }
+
+    public function isOrigin(): bool
+    {
+        return $this->isQuoteOrigin ?? ($this->isQuoteOrigin = ProductQuoteRelationQuery::isOriginQuoteExists($this->pq_id));
     }
 }

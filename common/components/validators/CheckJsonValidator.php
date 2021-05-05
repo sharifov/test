@@ -2,8 +2,8 @@
 
 namespace common\components\validators;
 
+use frontend\helpers\JsonHelper;
 use yii\base\Model;
-use yii\helpers\Json;
 use yii\validators\Validator;
 
 /**
@@ -21,7 +21,7 @@ class CheckJsonValidator extends Validator
     {
         $value = $model->$attribute;
         try {
-            Json::decode($value);
+            JsonHelper::decode($value);
         } catch (\Throwable $throwable) {
             $this->addError($model, $attribute, '{attribute} is not valid json.');
         }

@@ -28,8 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-//            ['class' => 'yii\grid\SerialColumn'],
-
             'fq_id',
             'fq_flight_id',
             'fq_source_id',
@@ -46,13 +44,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'fq_trip_type_id',
             'fq_main_airline',
             'fq_fare_type_id',
-            [
+            /*[
                 'label' => 'Ticket exist',
+                'attribute' => 'ticketExist',
                 'value' => static function (FlightQuote $model) {
                     return Yii::$app->formatter->asBooleanByLabel(!empty($model->fq_ticket_json));
                 },
                 'format' => 'raw',
-            ],
+                'filter' => [1 => 'Yes', 0 => 'No'],
+            ],*/
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'fq_created_user_id',

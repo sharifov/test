@@ -58,25 +58,7 @@ use yii\widgets\ActiveForm;
 
                 <?= $form->field($model, 'fq_flight_request_uid')->textInput(['maxlength' => true]) ?>
             </div>
-            <div class="col-md-6">
-                <?php
-                    $model->fq_ticket_json = \frontend\helpers\JsonHelper::encode($model->fq_ticket_json);
-                try {
-                    echo $form->field($model, 'fq_ticket_json')->widget(
-                        \kdn\yii2\JsonEditor::class,
-                        [
-                            'clientOptions' => [
-                                'modes' => ['code', 'form', 'tree'], //'text',
-                                'mode' => $model->isNewRecord ? 'code' : 'form'
-                            ],
-                            'expandAll' => ['tree', 'form'],
-                        ]
-                    );
-                } catch (Exception $exception) {
-                    echo $form->field($model, 'fq_ticket_json')->textarea(['rows' => 6]);
-                }
-                ?>
-            </div>
+
             <div class="col-md-12">
                 <div class="form-group">
                     <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

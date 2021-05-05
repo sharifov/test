@@ -37,6 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'qss_duration',
             'qss_departure_dt',
             'qss_arrival_dt',
+            'qss_flight_id',
         ],
     ]) ?>
 

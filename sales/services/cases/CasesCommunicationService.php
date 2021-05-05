@@ -100,19 +100,19 @@ class CasesCommunicationService
 
     /**
      * @param int $projectId
-     * @param Client $client
+     * @param string|null $marketingCountry
      * @param string|null $locale
      * @return array|mixed|null
      */
-    public static function getLocaleParams(int $projectId, Client $client, ?string $locale)
+    public static function getLocaleParams(int $projectId, ?string $marketingCountry, ?string $locale)
     {
-        if ($locale && $client->cl_marketing_country) {
-            if ($params = self::searchParams($projectId, $locale, $client->cl_marketing_country)) {
+        if ($locale && $marketingCountry) {
+            if ($params = self::searchParams($projectId, $locale, $marketingCountry)) {
                 return $params;
             }
         }
 
-        if ($locale && !$client->cl_marketing_country) {
+        if ($locale && !$marketingCountry) {
             if ($defaultMarketCountry = ProjectLocale::getDefaultMarketCountryByProject($projectId)) {
                 if ($params = self::searchParams($projectId, $locale, $defaultMarketCountry)) {
                     return $params;
@@ -165,7 +165,7 @@ class CasesCommunicationService
         }
         $localeParams = [];
         if ($project && $client = $case->client) {
-            $localeParams = self::getLocaleParams($project->id, $client, $locale);
+            $localeParams = self::getLocaleParams($project->id, $client->cl_marketing_country, $locale);
         }
 
         $content_data['case'] = [

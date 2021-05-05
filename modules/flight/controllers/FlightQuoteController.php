@@ -12,7 +12,7 @@ use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\services\flight\FlightManageService;
 use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
-use modules\flight\src\services\flightQuote\FlightQuotePdfService;
+use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
@@ -23,7 +23,6 @@ use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productType\ProductType;
-use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
@@ -36,6 +35,7 @@ use modules\flight\models\search\FlightQuoteSearch;
 use frontend\controllers\FController;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -407,7 +407,7 @@ class FlightQuoteController extends FController
 
                 $flightQuotePaxPrice = $this->flightQuotePaxPriceRepository->findByIdAndCode($fqId, $paxCodeId);
 
-                $this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, $value);
+                $this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, (float)$value);
                 $leadId = $flightQuotePaxPrice->qppFlightQuote->fqProductQuote->pqProduct->pr_lead_id ?? null;
                 if ($leadId) {
                     Notifications::pub(
@@ -571,18 +571,17 @@ class FlightQuoteController extends FController
             if (!$flightQuote->isBooked()) {
                 throw new \DomainException('Quote should have Booked status.');
             }
-
-            $flightQuotePdfService = new FlightQuotePdfService($flightQuote);
-            $flightQuotePdfService->setProductQuoteId($flightQuote->fq_product_quote_id);
-            if ($flightQuotePdfService->processingFile()) {
-                $result['status'] = 1;
-                $result['message'] = 'Document have been successfully generated';
-                return $result;
+            if (!$flightQuote->flightQuoteFlights) {
+                throw new NotFoundException('FlightQuoteFlights not found in FlightQuote Id(' . $flightQuoteId . ')');
             }
-            throw new \DomainException('Document generate failed.');
+
+            FlightQuoteTicketIssuedService::generateTicketIssued($flightQuote);
+
+            $result['status'] = 1;
+            $result['message'] = 'Document have been successfully generated';
         } catch (\Throwable $throwable) {
             $result['message'] = $throwable->getMessage();
-            \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxFileGenerate');
+            \Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxFileGenerate');
         }
         return $result;
     }

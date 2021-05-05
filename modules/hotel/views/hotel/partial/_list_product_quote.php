@@ -183,6 +183,10 @@ JS;
 <div class="x_panel">
     <div class="x_title">
 
+        <?php if ($model->hqProductQuote->isAlternative()) : ?>
+            <i class="fab fa-autoprefixer" title="Alternative Quote" data-toggle="tooltip" data-placement="top"></i>
+        <?php endif;?>
+
         <span class="badge badge-white">Q<?=($model->hq_product_quote_id)?></span> Hotel "<b><?=\yii\helpers\Html::encode($model->hqHotelList->hl_name)?></b>"
             (<?=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>),
             <?php //=\yii\helpers\Html::encode($model->hqProductQuote->pq_name)?>
@@ -393,8 +397,8 @@ JS;
                             <?=$room->hqr_children ? ', <i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?>
                         </td>
                         <td>
-                            <?php if ($room->hqr_cancel_amount) : ?>
-                                <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
+                            <?php if ($room->getActualCancelAmount()) : ?>
+                                <?=Html::encode($room->getActualCancelAmount())?>, <?=Html::encode($room->getActualCancelDate())?>
                             <?php endif; ?>
                         </td>
                         <td><?= Html::encode($room->hqr_amount) ?></td>

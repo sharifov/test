@@ -93,6 +93,34 @@ class AppHelper
 
     /**
      * @param array $array
+     * @param array $indexPath
+     * @param null $value
+     * @return array
+     */
+    public static function filterByValueMultiLevel(array $array, array $indexPath, $value = null): array
+    {
+        $newArray = [];
+
+        if (is_array($array) && $array) {
+            foreach (array_keys($array) as $key) {
+                if ($value !== null) {
+                    $current = $array[$key];
+                    foreach ($indexPath as $step) {
+                        $current = $current[$step];
+                        if ($current === $value) {
+                            $newArray[$key] = $array[$key];
+                        }
+                    }
+                } else {
+                    $newArray[$key] = $array[$key];
+                }
+            }
+        }
+        return $newArray;
+    }
+
+    /**
+     * @param array $array
      * @param string $index
      * @param array $arrayVal
      * @return array

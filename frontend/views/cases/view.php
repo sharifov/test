@@ -5,6 +5,7 @@ use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use sales\auth\Auth;
 use sales\helpers\cases\CasesViewRenderHelper;
+use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 
@@ -37,6 +38,8 @@ use yii\bootstrap4\Modal;
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
  * @var array $unsubscribedEmails
+ *
+ * @var ActiveDataProvider $dataProviderOrders
  */
 
 $this->title = 'Case ' . $model->cs_id;
@@ -140,6 +143,12 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
     <div class="row">
         <div class="col-md-6">
             <?= $this->render('coupons/view', ['model' => $model, 'coupons' => $coupons, 'sendCouponsForm' => $sendCouponsForm]) ?>
+
+            <?php if ($dataProviderOrders->totalCount) : ?>
+                <?= $this->render('orders/case_orders', [
+                    'dataProviderOrders' => $dataProviderOrders,
+                ]) ?>
+            <?php endif; ?>
         </div>
 
         <div class="col-md-6">

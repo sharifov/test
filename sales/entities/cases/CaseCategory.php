@@ -160,4 +160,9 @@ class CaseCategory extends ActiveRecord
     {
         return '{{%case_category}}';
     }
+
+    public static function find()
+    {
+        return new CasesCategoryQuery(static::class);
+    }
 }

@@ -234,25 +234,27 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable, ProductData
 
     public function getProject(): Project
     {
-        return $this->rcqProductQuote->pqProduct->prLead->project;
+        if ($project = ArrayHelper::getValue($this, 'rcqProductQuote.pqProduct.project')) {
+            return $project;
+        }
+        if ($project = ArrayHelper::getValue($this, 'rcqProductQuote.pqProduct.prLead.project')) {
+            return $project;
+        }
+        throw new \DomainException('RentCarQuote not related to project');
     }
 
-    public function getLead(): Lead
+    public function getLead(): ?Lead
     {
-        return $this->rcqProductQuote->pqProduct->prLead;
+        return ArrayHelper::getValue($this, 'rcqProductQuote.pqProduct.prLead');
     }
 
-    public function getClient(): Client
+    public function getClient(): ?Client
     {
-        return $this->rcqProductQuote->pqProduct->prLead->client;
+        return ArrayHelper::getValue($this, 'rcqProductQuote.pqProduct.prLead.client');
     }
 
     public function getOrder(): ?Order
     {
-        if ($order = ArrayHelper::getValue($this, 'rcqProductQuote.pqOrder')) {
-            /** @var Order $order */
-            return $order;
-        }
-        return null;
+        return ArrayHelper::getValue($this, 'rcqProductQuote.pqOrder');
     }
 }

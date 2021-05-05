@@ -188,7 +188,7 @@ JS;
     <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->atnqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
-        <span class="badge badge-white">Q<?=($model->atnq_product_quote_id)?></span> Attraction "<b><?=\yii\helpers\Html::encode($model->atnq_attraction_name)?></b>"
+        <span class="badge badge-white">Q<?=($model->atnq_product_quote_id)?></span> Attraction "<b><?=\yii\helpers\Html::encode($model->atnq_product_details_json['product']['name'])?></b>"
             <?php //=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>
             <?php //=\yii\helpers\Html::encode($model->atnqProductQuote->pq_name)?>
             <?php //=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>

@@ -2,7 +2,7 @@
 
 namespace modules\order\src\processManager\jobs;
 
-use modules\order\src\processManager\OrderProcessManagerRepository;
+use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 

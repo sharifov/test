@@ -45,6 +45,10 @@ class ProductCrudSearch extends Product
             ['pr_name', 'string', 'max' => 40],
 
             [['pr_created_dt', 'pr_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+
+            ['pr_project_id', 'integer'],
+
+            ['pr_gid', 'string', 'max' => 32],
         ];
     }
 
@@ -52,17 +56,17 @@ class ProductCrudSearch extends Product
     {
         $query = self::find()->with(['prUpdatedUser', 'prCreatedUser', 'prLead']);
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['pr_id' => SORT_DESC]
+            ],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -84,9 +88,11 @@ class ProductCrudSearch extends Product
             'pr_client_budget' => $this->pr_client_budget,
             'pr_created_user_id' => $this->pr_created_user_id,
             'pr_updated_user_id' => $this->pr_updated_user_id,
+            'pr_project_id' => $this->pr_project_id,
         ]);
 
         $query->andFilterWhere(['like', 'pr_name', $this->pr_name])
+            ->andFilterWhere(['like', 'pr_gid', $this->pr_gid])
             ->andFilterWhere(['like', 'pr_description', $this->pr_description]);
 
         return $dataProvider;

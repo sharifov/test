@@ -222,5 +222,7 @@ return [
         \common\bootstrap\Logger::class,
         \common\bootstrap\FileStorage::class,
         \common\bootstrap\PaymentSetup::class,
+        \common\bootstrap\OrderProcessManagerQueue::class,
+        \modules\order\bootstrap\Logger::class
     ],
 ];

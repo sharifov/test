@@ -9,12 +9,17 @@ use common\models\Payment;
 use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
-use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\Status;
+use modules\order\src\transaction\services\TransactionService;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
+use yii\widgets\Pjax;
 
 $process = OrderProcessManager::findOne($order->or_id);
+$formatter = new \common\components\i18n\Formatter();
 ?>
 
 <div class="x_panel">
@@ -24,13 +29,14 @@ $process = OrderProcessManager::findOne($order->or_id);
         (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
+        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
         "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
 
         <?php if ($order->or_profit_amount > 0) : ?>
             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
         <?php endif; ?>
         <?php if ($process) : ?>
-            &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= OrderProcessManager::STATUS_LIST[$process->opm_status] ?? 'undefined'?>)
+            &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= Status::LIST[$process->opm_status] ?? 'undefined'?>)
         <?php endif; ?>
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
@@ -144,6 +150,7 @@ $process = OrderProcessManager::findOne($order->or_id);
             $ordTotalFee = 0;
             $calcTotalPrice = 0;
             $orderTipsAmount = 0.00;
+            $orderTipsAmountClient = 0.00;
         ?>
 
         <table class="table table-bordered">
@@ -170,7 +177,7 @@ $process = OrderProcessManager::findOne($order->or_id);
                     $ordOptionTotalPrice += $quote->optionAmountSum;
                     ?>
                     <tr>
-                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?></td>
+                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?> <br> <?= ProductQuoteHelper::displayOriginOrAlternativeIcon($quote) ?></td>
                         <td title="<?=Html::encode($quote->pq_product_id)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
                             <?=Html::encode($quote->pqProduct->prType->pt_name)?>
@@ -247,7 +254,7 @@ $process = OrderProcessManager::findOne($order->or_id);
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($order->or_created_dt)) ?>,
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($order->or_client_currency)?> <span title="Rate: <?=$order->or_client_currency_rate?>">(<?=round($order->or_client_currency_rate, 3)?>)</span>
 
-        <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum  + $orderTipsAmount, 2)?> USD, Total: <?=number_format($order->or_app_total + $orderTipsAmount, 2)?> USD</h4></div>
+        <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum  + $orderTipsAmount, 2)?> USD, Total: <?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></h4></div>
 
         <hr>
         <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-invoice-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
@@ -408,7 +415,7 @@ $process = OrderProcessManager::findOne($order->or_id);
                     <?php foreach ($payments as $payment) :
                         $paymentTotalPrice += $payment->pay_amount;
                         ?>
-                        <tr>
+                        <tr class="payment_row_<?php echo $payment->pay_id ?>">
                             <td title="Payment ID"><?=Html::encode($payment->pay_id)?></td>
                             <td><?=$payment->pay_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($payment->pay_created_dt)) : '-'?></td>
                             <td><?= Payment::getStatusName($payment->pay_status_id) ?></td>
@@ -524,7 +531,17 @@ $process = OrderProcessManager::findOne($order->or_id);
             <?php endif; ?>
 
         <?php \yii\widgets\Pjax::end() ?>
+        <hr>
+        <?php if (Auth::can('global/transaction/list/view')) : ?>
+            <?php Pjax::begin(['id' => 'pjax-order-transaction-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
+                <?php if ($transactions = TransactionService::getTransactionsByOrder($order->or_id)) : ?>
+                    <h4><i class="fa fa-exchange"></i> Transaction List</h4>
+                    <?php echo $this->render('@frontend/views/transaction/_partial/_transaction_table', [
+                        'transactions' => $transactions,
+                    ]) ?>
+                <?php endif ?>
+            <?php Pjax::end() ?>
+        <?php endif ?>
     </div>
-
 
 </div>

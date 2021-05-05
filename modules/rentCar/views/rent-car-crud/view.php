@@ -40,10 +40,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'prc_drop_off_date',
                 'prc_pick_up_time',
                 'prc_drop_off_time',
-                'prc_created_dt',
-                'prc_updated_dt',
-                'prc_created_user_id',
-                'prc_updated_user_id',
+                'prc_created_dt:byUserDateTime',
+                'prc_updated_dt:byUserDateTime',
+                'prc_created_user_id:userName',
+                'prc_updated_user_id:userName',
             ],
         ]) ?>
 

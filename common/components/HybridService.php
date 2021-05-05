@@ -3,6 +3,7 @@
 namespace common\components;
 
 use common\models\Project;
+use sales\helpers\setting\SettingHelper;
 use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;
@@ -98,27 +99,29 @@ class HybridService extends Component
             'order_id' => $orderGid,
         ];
 
-        $response = $this->sendRequest($projectId, '/offer/v1/order-update-status', $data);
+        if (SettingHelper::isWebhookOrderUpdateHybridEnabled()) {
+            $response = $this->sendRequest($projectId, SettingHelper::getWebhookOrderUpdateHybridEndpoint(), $data);
 
-        if ($response->isOk) {
-            if (array_key_exists('status', $response->data)) {
-                if ($response->data['status']) {
-                    return;
+            if ($response->isOk) {
+                if (array_key_exists('status', $response->data)) {
+                    if ($response->data['status']) {
+                        return;
+                    }
                 }
+                \Yii::error([
+                    'message' => 'Not found in response array status key [status]',
+                    'responseData' => VarDumper::dumpAsString($response->data),
+                    'requestData' => $data,
+                ], 'Component:HybridService::updateStatus');
+                throw new \DomainException('Not found in response array status key [status]');
             }
+
             \Yii::error([
-                'message' => 'Not found in response array status key [status]',
-                'responseData' => VarDumper::dumpAsString($response->data),
+                'message' => 'Not found status response array',
+                'responseContent' => $response->content,
                 'requestData' => $data,
             ], 'Component:HybridService::updateStatus');
-            throw new \DomainException('Not found in response array status key [status]');
+            throw new \DomainException($response->content);
         }
-
-        \Yii::error([
-            'message' => 'Not found status response array',
-            'responseContent' => $response->content,
-            'requestData' => $data,
-        ], 'Component:HybridService::updateStatus');
-        throw new \DomainException($response->content);
     }
 }

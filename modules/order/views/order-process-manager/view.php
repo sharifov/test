@@ -1,6 +1,8 @@
 <?php
 
 use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\Status;
+use modules\order\src\processManager\Type;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -36,7 +38,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'opm_status',
                         'value' => static function (OrderProcessManager $orderProcess) {
-                            return OrderProcessManager::STATUS_LIST[$orderProcess->opm_status] ?? 'undefined';
+                            return Status::LIST[$orderProcess->opm_status] ?? 'undefined';
+                        },
+                    ],
+                    [
+                        'attribute' => 'opm_type',
+                        'value' => static function (OrderProcessManager $orderProcess) {
+                            return Type::LIST[$orderProcess->opm_type] ?? 'undefined';
                         },
                     ],
                     'opm_created_dt:byUserDateTime',

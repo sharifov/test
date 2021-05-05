@@ -23,6 +23,7 @@ class FlightQuoteSegmentPaxBaggageSerializer extends Serializer
             'qsb_flight_pax_code_id',
             'qsb_flight_quote_segment_id',
             'qsb_airline_code',
+            'qsb_carry_one',
             'qsb_allow_pieces',
             'qsb_allow_weight',
             'qsb_allow_unit',

@@ -16,6 +16,7 @@ class OrderStatus
     public const ERROR = 7;
     public const DECLINED = 8;
     public const CANCELED = 9;
+    public const CANCEL_FAILED = 10;
 
     private const LIST = [
         self::NEW => 'New',
@@ -27,6 +28,7 @@ class OrderStatus
         self::ERROR => 'Error',
         self::DECLINED => 'Declined',
         self::CANCELED => 'Canceled',
+        self::CANCEL_FAILED => 'Cancel failed',
     ];
 
     private const CLASS_LIST = [
@@ -39,25 +41,29 @@ class OrderStatus
         self::ERROR => 'danger',
         self::DECLINED => 'danger',
         self::CANCELED => 'danger',
+        self::CANCEL_FAILED => 'danger',
     ];
 
     public const ROUTE_RULES = [
         null => [
             self::NEW,
             self::PENDING,
-            self::PROCESSING
+            self::PROCESSING,
+            self::CANCEL_FAILED,
         ],
         self::NEW => [
             self::PENDING,
             self::PROCESSING,
             self::DECLINED,
-            self::CANCELED
+            self::CANCELED,
+            self::CANCEL_FAILED,
         ],
         self::PENDING => [
             self::PREPARED,
             self::PROCESSING,
             self::CANCEL_PROCESSING,
-            self::ERROR
+            self::ERROR,
+            self::CANCEL_FAILED,
         ],
         self::PROCESSING => [
             self::PREPARED,
@@ -65,20 +71,32 @@ class OrderStatus
             self::CANCEL_PROCESSING,
             self::ERROR,
             self::DECLINED,
-            self::CANCELED
+            self::CANCELED,
+            self::CANCEL_FAILED,
         ],
         self::PREPARED => [
             self::COMPLETE,
             self::CANCEL_PROCESSING,
             self::ERROR,
-            self::CANCELED
+            self::CANCELED,
+            self::CANCEL_FAILED,
         ],
         self::COMPLETE => [
             self::CANCEL_PROCESSING,
-            self::CANCELED
+            self::CANCELED,
+            self::CANCEL_FAILED,
         ],
         self::CANCEL_PROCESSING  => [
             self::CANCELED
+        ],
+        self::ERROR  => [
+            self::CANCEL_FAILED
+        ],
+        self::DECLINED  => [
+        ],
+        self::CANCELED  => [
+        ],
+        self::CANCEL_FAILED  => [
         ],
     ];
 

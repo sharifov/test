@@ -1,6 +1,6 @@
 <?php
 
-use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

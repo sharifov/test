@@ -38,6 +38,7 @@ use yii\helpers\VarDumper;
  * @property string|null $atnq_availability_date
  * @property int|null $atnq_availability_is_valid
  * @property float|null $atnq_service_fee_percent
+ * @property string|null $atnq_product_details_json
  *
  * @property Attraction $atnqAttraction
  * @property ProductQuote $atnqProductQuote
@@ -62,7 +63,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
         return [
             [['atnq_attraction_id'], 'required'],
             [['atnq_attraction_id', 'atnq_product_quote_id', 'atnq_availability_is_valid'], 'integer'],
-            [['atnq_json_response', 'atnq_availability_date'], 'safe'],
+            [['atnq_json_response', 'atnq_availability_date', 'atnq_product_details_json'], 'safe'],
             [['atnq_hash_key'], 'string', 'max' => 32],
             [['atnq_hash_key'], 'unique'],
             [['atnq_attraction_id'], 'exist', 'skipOnError' => true, 'targetClass' => Attraction::class, 'targetAttribute' => ['atnq_attraction_id' => 'atn_id']],
@@ -95,12 +96,13 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
             'atnq_availability_date' => 'Availability Date',
             'atnq_availability_is_valid' => 'Availability Is Valid',
             'atnq_service_fee_percent' => 'Service Fee Percent',
+            'atnq_product_details_json' => 'Product Details Json',
         ];
     }
 
-    public static function getHashKey(string $key): string
+    public static function getHashKey(array $quote): string
     {
-        return md5($key);
+        return md5($quote['productId'] . '|' . $quote['date']);
     }
 
     public static function generateGid(): string
@@ -108,82 +110,12 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
         return md5(uniqid('aq', true));
     }
 
-    public static function findOrCreateByData(
-        array $quoteData,
-        Attraction $attractionProduct,
-        string $date,
-        ?int $ownerId,
-        string $currency = 'USD'
-    ) {
-        $aQuote = null;
-
-        if (isset($quoteData['product']) && $quoteId = $quoteData['product']['id']) {
-            $totalAmount = 0;
-            if (isset($quoteId)) {
-                $hashKey = self::getHashKey($quoteData, $attractionProduct);
-
-                $aQuote = self::find()->where([
-                    'atnq_attraction_id' => $attractionProduct->atn_id,
-                    'atnq_hash_key' => $hashKey
-                ])->one();
-
-                //$totalAmount = substr($quoteData['leadTicket']['price']['lead']['formatted'], 1);
-                $totalAmount = $quoteData['product']['guidePrice'];
-
-                if (!$aQuote) {
-                    $productQuoteDto = new AttractionProductQuoteCreateDto();
-                    $productQuoteDto->productId = $attractionProduct->atn_product_id;
-                    $productQuoteDto->originCurrency = $currency;
-                    $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($attractionProduct->atnProduct);
-                    $productQuoteDto->ownerUserId = $ownerId;
-                    $productQuoteDto->price = (float)$totalAmount;
-                    $productQuoteDto->originPrice = (float)$totalAmount;
-                    $productQuoteDto->clientPrice = (float)$totalAmount;
-                    $productQuoteDto->serviceFeeSum = 0;
-//                    $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
-                    $productQuoteDto->originCurrencyRate = 1;
-                    $productQuoteDto->name = mb_substr($quoteData['product']['name'], 0, 40);
-
-                    $productTypeServiceFee = null;
-                    $productType = ProductType::find()->select(['pt_service_fee_percent'])->byAttraction()->asArray()->one();
-                    if ($productType && $productType['pt_service_fee_percent']) {
-                        $productTypeServiceFee = $productType['pt_service_fee_percent'];
-                    }
-
-                    $prQuote = ProductQuote::create($productQuoteDto, $productTypeServiceFee);
-
-                    if ($prQuote->save()) {
-                        $aQuote = new self();
-                        $aQuote->atnq_hash_key = $hashKey;
-                        $aQuote->atnq_attraction_id = $attractionProduct->atn_id;
-                        $aQuote->atnq_product_quote_id = $prQuote->pq_id;
-                        $aQuote->atnq_attraction_name = $quoteData['product']['name'];
-                        $aQuote->atnq_supplier_name = $quoteData['product']['supplierName'];
-                        $aQuote->atnq_type_name = $quoteData['product']['__typename'];
-                        $aQuote->atnq_json_response = $quoteData;
-                        //$aQuote->atnq_date = $date;
-                        //$aQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
-
-                        if (!$aQuote->save()) {
-                            Yii::error(
-                                VarDumper::dumpAsString($aQuote->errors),
-                                'Model:AttractionQuote:findOrCreateByData:AttractionQuote:save'
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        return $aQuote;
-    }
-
     public static function findOrCreateByDataNew(array $quoteData, Attraction $attraction, ?int $ownerId)
     {
         $aQuote = null;
 
         if (!empty($quoteData['id'])) {
-            $hashKey = self::getHashKey($quoteData['id']);
+            $hashKey = self::getHashKey($quoteData);
 
             $aQuote = self::find()->where([
                     'atnq_attraction_id' => $attraction->atn_id,
@@ -267,7 +199,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
                                 $pricingCategory->atqpc_max_participants = $category['maxParticipants'];
                                 $pricingCategory->atqpc_quantity = $category['value'];
                                 $pricingCategory->atqpc_price = $category['price'];
-                                $pricingCategory->atqpc_currency = $category['currency'];
+                                //$pricingCategory->atqpc_currency = $category['currency'];
 
                                 if (!$pricingCategory->save()) {
                                     Yii::error(
@@ -386,25 +318,27 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
 
     public function getProject(): Project
     {
-        return $this->atnqProductQuote->pqProduct->prLead->project;
+        if ($project = ArrayHelper::getValue($this, 'atnqProductQuote.pqProduct.project')) {
+            return $project;
+        }
+        if ($project = ArrayHelper::getValue($this, 'atnqProductQuote.pqProduct.prLead.project')) {
+            return $project;
+        }
+        throw new \DomainException('AttractionQuote not related to project');
     }
 
-    public function getLead(): Lead
+    public function getLead(): ?Lead
     {
-        return $this->atnqProductQuote->pqProduct->prLead;
+        return ArrayHelper::getValue($this, 'atnqProductQuote.pqProduct.prLead');
     }
 
-    public function getClient(): Client
+    public function getClient(): ?Client
     {
-        return $this->atnqProductQuote->pqProduct->prLead->client;
+        return ArrayHelper::getValue($this, 'atnqProductQuote.pqProduct.prLead.client');
     }
 
     public function getOrder(): ?Order
     {
-        if ($order = ArrayHelper::getValue($this, 'atnqProductQuote.pqOrder')) {
-            /** @var Order $order */
-            return $order;
-        }
-        return null;
+        return ArrayHelper::getValue($this, 'atnqProductQuote.pqOrder');
     }
 }

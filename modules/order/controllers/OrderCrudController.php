@@ -66,9 +66,11 @@ class OrderCrudController extends FController
     public function actionCreate()
     {
         $model = new Order();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->or_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->or_uid = $model::generateUid();
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->or_id]);
+            }
         }
 
         return $this->render('create', [
@@ -86,7 +88,9 @@ class OrderCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-            $model->or_request_data = JsonHelper::decode($model->or_request_data);
+            if (!empty($model->or_request_data)) {
+                $model->or_request_data = JsonHelper::decode($model->or_request_data);
+            }
             if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->or_id]);
             }

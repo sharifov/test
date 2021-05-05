@@ -59,12 +59,14 @@ use yii\widgets\ActiveForm;
             echo $form->field($model, 'ccc_settings')->widget(
                 \kdn\yii2\JsonEditor::class,
                 [
-                    'clientOptions' => [
-                        'modes' => ['code', 'form', 'tree', 'view'], //'text',
-                        'mode' => $model->isNewRecord ? 'code' : 'form'
-                    ],
-                    //'collapseAll' => ['view'],
-                    'expandAll' => ['tree', 'form'],
+                    [
+                        'clientOptions' => [
+                            'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                            'mode' => $model->isNewRecord ? 'code' : 'form'
+                        ],
+                        //'collapseAll' => ['view'],
+                        'expandAll' => ['tree', 'form'],
+                    ]
                 ]
             );
         } catch (Exception $exception) {

@@ -9,6 +9,6 @@ class ProductHolderRepository
         if ($holder->save()) {
             return $holder->ph_id;
         }
-        throw new \RuntimeException('Product holder saving failed');
+        throw new \RuntimeException('Product holder saving failed: ' . $holder->getErrorSummary(true)[0]);
     }
 }

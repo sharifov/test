@@ -4,9 +4,11 @@ namespace modules\product\src\entities\product;
 
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Project;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
+use modules\product\src\entities\product\events\ProductClonedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\product\serializer\ProductSerializer;
 use modules\product\src\entities\productHolder\ProductHolder;
@@ -17,7 +19,6 @@ use modules\hotel\models\Hotel;
 use modules\attraction\models\Attraction;
 use modules\product\src\entities\product\events\ProductCreateEvent;
 use modules\product\src\interfaces\Productable;
-use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
@@ -43,6 +44,7 @@ use yii\db\ActiveRecord;
  * @property string|null $pr_updated_dt
  * @property $pr_market_price
  * @property $pr_client_budget
+ * @property int|null $pr_project_id [int]
  *
  * @property Attraction[] $attractions
  * @property Attraction $attraction
@@ -62,6 +64,7 @@ use yii\db\ActiveRecord;
  * @property ProductHolder $holder
  *
  * @property Productable|null $childProduct
+ * @property Project $project
  */
 class Product extends \yii\db\ActiveRecord implements Serializable
 {
@@ -77,8 +80,27 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         $product->pr_type_id = $dto->pr_type_id;
         $product->pr_name = $dto->pr_name;
         $product->pr_description = $dto->pr_description;
+        $product->pr_project_id = $dto->pr_project_id;
         $product->recordEvent(new ProductCreateEvent($product));
         return $product;
+    }
+
+    public static function clone(Product $product, int $leadId, ?int $createdUserId): self
+    {
+        $clone = new static();
+        $clone->pr_gid = self::generateGid();
+        $clone->pr_type_id = $product->pr_type_id;
+        $clone->pr_name = $product->pr_name;
+        $clone->pr_lead_id = $leadId;
+        $clone->pr_description = $product->pr_description;
+        $clone->pr_status_id = $product->pr_status_id;
+        $clone->pr_service_fee_percent = $product->pr_service_fee_percent;
+        $clone->pr_created_user_id = $createdUserId;
+        $clone->pr_market_price = $product->pr_market_price;
+        $clone->pr_client_budget = $product->pr_client_budget;
+        $clone->pr_project_id = $product->pr_project_id;
+        $clone->recordEvent(new ProductClonedEvent($product));
+        return $clone;
     }
 
     public function updateInfo(?string $name, ?string $description)
@@ -169,7 +191,7 @@ class Product extends \yii\db\ActiveRecord implements Serializable
 
             ['pr_description', 'string'],
 
-            ['pr_service_fee_percent', 'number'],
+            ['pr_service_fee_percent', 'number', 'max' => 100],
 
             ['pr_name', 'string', 'max' => 40],
 
@@ -178,6 +200,9 @@ class Product extends \yii\db\ActiveRecord implements Serializable
 
             ['pr_market_price', 'number'],
             ['pr_client_budget', 'number'],
+
+            ['pr_project_id', 'integer'],
+            [['pr_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['pr_project_id' => 'id']],
         ];
     }
 
@@ -197,6 +222,7 @@ class Product extends \yii\db\ActiveRecord implements Serializable
             'pr_updated_dt' => 'Updated Dt',
             'pr_market_price' => 'Market price',
             'pr_client_budget' => 'Client budget',
+            'pr_project_id' => 'Project',
         ];
     }
 
@@ -214,11 +240,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pr_created_user_id',
-                'updatedByAttribute' => 'pr_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'pr_created_user_id',
+//                'updatedByAttribute' => 'pr_updated_user_id',
+//            ],
         ];
     }
 
@@ -336,6 +362,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_product_id' => 'pr_id']);
+    }
+
+    public function getProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'pr_project_id']);
     }
 
     public static function find(): Scopes

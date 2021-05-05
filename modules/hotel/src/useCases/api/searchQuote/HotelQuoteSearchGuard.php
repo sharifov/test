@@ -3,6 +3,8 @@
 namespace modules\hotel\src\useCases\api\searchQuote;
 
 use modules\hotel\models\Hotel;
+use modules\hotel\models\HotelRoom;
+use modules\hotel\src\entities\hotelRoomPax\HotelRoomPaxQuery;
 
 class HotelQuoteSearchGuard
 {
@@ -28,6 +30,22 @@ class HotelQuoteSearchGuard
             throw new \DomainException('Missing rooms in Hotel data; Add rooms;');
         }
 
+        self::checkIfAdultsExists($hotel->hotelRooms);
+
         return $hotel;
+    }
+
+    /**
+     * @param HotelRoom[] $hotelRooms
+     * @return bool
+     */
+    private static function checkIfAdultsExists(array $hotelRooms): bool
+    {
+        foreach ($hotelRooms as $hotelRoom) {
+            if (!HotelRoomPaxQuery::adultsExistByRoomId($hotelRoom->hr_id)) {
+                throw new \DomainException('Not found adult passengers in one of the rooms; Update hotel room data;');
+            }
+        }
+        return true;
     }
 }

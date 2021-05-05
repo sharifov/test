@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'invUpdatedUser:userName',
             'inv_created_dt:byUserDateTime',
             'inv_updated_dt:byUserDateTime',
+            'inv_billing_id',
         ],
     ]) ?>
 

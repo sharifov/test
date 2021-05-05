@@ -4,9 +4,12 @@ namespace modules\flight\models;
 
 use common\models\Airline;
 use common\models\Airports;
+use modules\flight\src\dto\flightSegment\FlightQuoteSegmentApiBoDto;
 use modules\flight\src\entities\flightQuoteSegment\serializer\FlightQuoteSegmentSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use Yii;
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -37,6 +40,7 @@ use yii\helpers\VarDumper;
  * @property int|null $fqs_ticket_id
  * @property int|null $fqs_recheck_baggage
  * @property int|null $fqs_mileage
+ * @property int|null $fqs_flight_id
  *
  * @property FlightQuote $fqsFlightQuote
  * @property FlightQuoteTrip $fqsFlightQuoteTrip
@@ -46,6 +50,7 @@ use yii\helpers\VarDumper;
  * @property Airline $marketingAirline
  * @property Airports $departureAirport
  * @property Airports $arrivalAirport
+ * @property FlightQuoteFlight $flightQuoteFlight
  */
 class FlightQuoteSegment extends \yii\db\ActiveRecord
 {
@@ -74,14 +79,23 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             [['fqs_flight_quote_id', 'fqs_flight_quote_trip_id', 'fqs_stop', 'fqs_flight_number', 'fqs_duration', 'fqs_ticket_id', 'fqs_recheck_baggage', 'fqs_mileage'], 'integer'],
             [['fqs_departure_dt', 'fqs_arrival_dt', 'fqs_uid'], 'safe'],
             [['fqs_booking_class'], 'string', 'max' => 1],
-            [['fqs_departure_airport_iata', 'fqs_departure_airport_terminal', 'fqs_arrival_airport_iata', 'fqs_arrival_airport_terminal'], 'string', 'max' => 3],
-            [['fqs_operating_airline', 'fqs_marketing_airline', 'fqs_marriage_group', 'fqs_cabin_class', 'fqs_meal'], 'string', 'max' => 2],
-            [['fqs_air_equip_type'], 'string', 'max' => 4],
+            [
+                [
+                    'fqs_departure_airport_iata', 'fqs_departure_airport_terminal', 'fqs_arrival_airport_iata',
+                    'fqs_arrival_airport_terminal', 'fqs_marriage_group'
+                ],
+                'string', 'max' => 3
+            ],
+            [['fqs_operating_airline', 'fqs_marketing_airline', 'fqs_cabin_class', 'fqs_meal'], 'string', 'max' => 2],
+            [['fqs_air_equip_type'], 'string', 'max' => 30],
             [['fqs_uid'], 'string', 'max' => 20],
             [['fqs_fare_code'], 'string', 'max' => 50],
             [['fqs_key'], 'string', 'max' => 40],
             [['fqs_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqs_flight_quote_id' => 'fq_id']],
             [['fqs_flight_quote_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteTrip::class, 'targetAttribute' => ['fqs_flight_quote_trip_id' => 'fqt_id']],
+
+            [['fqs_flight_id'], 'integer'],
+            [['fqs_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqs_flight_id' => 'fqf_id']],
         ];
     }
 
@@ -115,6 +129,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             'fqs_ticket_id' => 'Fqs Ticket ID',
             'fqs_recheck_baggage' => 'Fqs Recheck Baggage',
             'fqs_mileage' => 'Fqs Mileage',
+            'fqs_flight_id' => 'Quote Flight',
         ];
     }
 
@@ -124,6 +139,11 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             $this->fqs_uid = $this->generateUid();
         }
         return parent::beforeSave($insert);
+    }
+
+    public function getFlightQuoteFlight(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'fqs_flight_id']);
     }
 
     /**
@@ -266,5 +286,34 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     public function generateUid(): string
     {
         return uniqid('fqs');
+    }
+
+    public static function createFromBo(FlightQuoteSegmentApiBoDto $dto): FlightQuoteSegment
+    {
+        $segment = new self();
+        $segment->fqs_flight_quote_id = $dto->flightQuoteId;
+        $segment->fqs_flight_quote_trip_id = $dto->flightQuoteTripId;
+        $segment->fqs_departure_dt = $dto->departureDt;
+        $segment->fqs_arrival_dt = $dto->arrivalDt;
+        $segment->fqs_stop = $dto->stop;
+        $segment->fqs_flight_number = $dto->flightNumber;
+        $segment->fqs_booking_class = $dto->bookingClass;
+        $segment->fqs_duration = $dto->duration;
+        $segment->fqs_departure_airport_iata = $dto->departureAirportIata;
+        $segment->fqs_departure_airport_terminal = $dto->departureAirportTerminal;
+        $segment->fqs_arrival_airport_iata = $dto->arrivalAirportIata;
+        $segment->fqs_arrival_airport_terminal = $dto->arrivalAirportTerminal;
+        $segment->fqs_operating_airline = $dto->operatingAirline;
+        $segment->fqs_marketing_airline = $dto->marketingAirline;
+        $segment->fqs_air_equip_type = $dto->airEquipType;
+        $segment->fqs_marriage_group = $dto->marriageGroup;
+        $segment->fqs_cabin_class = $dto->cabinClass;
+        $segment->fqs_meal = $dto->meal;
+        $segment->fqs_fare_code = $dto->fareCode;
+        $segment->fqs_key = $dto->key;
+        $segment->fqs_ticket_id = $dto->ticketId;
+        $segment->fqs_recheck_baggage = $dto->recheckBaggage;
+        $segment->fqs_mileage = $dto->mileage;
+        return $segment;
     }
 }

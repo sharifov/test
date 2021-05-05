@@ -19,9 +19,11 @@ use yii\db\ActiveQuery;
  * @property int|null $qss_duration
  * @property string|null $qss_departure_dt
  * @property string|null $qss_arrival_dt
+ * @property int|null $qss_flight_id
  *
  * @property FlightQuoteSegment $qssQuoteSegment
  * @property Airports $locationAirport
+ * @property FlightQuoteFlight $flightQuoteFlight
  */
 class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
 {
@@ -45,6 +47,9 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
             [['qss_location_iata'], 'string', 'max' => 3],
             [['qss_equipment'], 'string', 'max' => 5],
             [['qss_quote_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteSegment::class, 'targetAttribute' => ['qss_quote_segment_id' => 'fqs_id']],
+
+            [['qss_flight_id'], 'integer'],
+            [['qss_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['qss_flight_id' => 'fqf_id']],
         ];
     }
 
@@ -62,7 +67,13 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
             'qss_duration' => 'Qss Duration',
             'qss_departure_dt' => 'Qss Departure Dt',
             'qss_arrival_dt' => 'Qss Arrival Dt',
+            'qss_flight_id' => 'Quote Flight',
         ];
+    }
+
+    public function getFlightQuoteFlight(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'qss_flight_id']);
     }
 
     /**

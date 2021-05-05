@@ -19,14 +19,17 @@ use yii\helpers\Html;
             <table class="table table-bordered caption-top">
                 <thead>
                 <tr class=" bg-info">
-                    <th>Name</th>
-                    <th>value</th>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Is Answered</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php foreach ($quoteDetails['optionList']['nodes'] as $index => $option) : ?>
                     <tr>
-                        <td> <?= $option['label'] ?> </td> <td> <?= $option['answerFormattedText'] ?> </td>
+                        <td> <?= $option['label'] ?> </td>
+                        <td> <?= $option['answerFormattedText'] ?> </td>
+                        <td> <?= $option['isAnswered'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?> </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -48,6 +51,7 @@ use yii\helpers\Html;
                 <th>Max Participants</th>
                 <th>Min Age</th>
                 <th>Max Age</th>
+                <th>Is Valid</th>
                 <th>Quantity</th>
                 <th>Price per Unit</th>
             </tr>
@@ -63,13 +67,14 @@ use yii\helpers\Html;
                             <td><?= Html::encode($pax['maxParticipants']) ?></td>
                             <td><?= Html::encode($pax['minAge']) ?></td>
                             <td><?= Html::encode($pax['maxAge']) ?></td>
+                            <td><?= $pax['isValid'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?></td>
                             <td><?= Html::encode($pax['value']) ?></td>
                             <td><?= Html::encode($pax['priceFormattedText']) ?></td>
                         </tr>
                     <?php endif; ?>
                 <?php endforeach; ?>
                 <tr>
-                    <td colspan="6"></td>
+                    <td colspan="7"></td>
                     <td>Total Price</td>
                     <td><?= Html::encode($quoteDetails['pricingCategoryList']['priceTotalFormattedText']) ?></td>
                 </tr>

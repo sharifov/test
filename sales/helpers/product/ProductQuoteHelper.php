@@ -5,8 +5,11 @@ namespace sales\helpers\product;
 use common\models\Currency;
 use common\models\CurrencyHistory;
 use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use sales\services\CurrencyHelper;
+use yii\helpers\Html;
 
 class ProductQuoteHelper
 {
@@ -52,9 +55,9 @@ class ProductQuoteHelper
      */
     public static function getClientCurrencyCode(Product $product): string
     {
-        $leadPreferences = $product->prLead->leadPreferences;
+        $leadPreferences = $product->prLead->leadPreferences ?? null;
         if ($leadPreferences && $currency = $leadPreferences->prefCurrency) {
-                return $currency->cur_code ?? Currency::getDefaultCurrencyCode();
+            return $currency->cur_code ?? Currency::getDefaultCurrencyCode();
         }
         return Currency::getDefaultCurrencyCode();
     }
@@ -65,10 +68,47 @@ class ProductQuoteHelper
      */
     public static function getClientCurrencyRate(Product $product): float
     {
-        $leadPreferences = $product->prLead->leadPreferences;
+        $leadPreferences = $product->prLead->leadPreferences ?? null;
         if ($leadPreferences && $currency = $leadPreferences->prefCurrency) {
-                return $currency->cur_app_rate ?? Currency::getDefaultClientCurrencyRate();
+            return $currency->cur_app_rate ?? Currency::getDefaultClientCurrencyRate();
         }
         return Currency::getDefaultClientCurrencyRate();
+    }
+
+    public static function displayAlternativeQuoteIcon(): string
+    {
+        return Html::tag('i', '', [
+            'class' => 'fab fa-autoprefixer',
+            'title' => 'Alternative Quote',
+            'data-toggle' => 'tooltip'
+        ]);
+    }
+
+    public static function displayOriginQuoteIcon(int $productQuoteId): string
+    {
+        $alternativeQuotes = ProductQuoteRelationQuery::getAlternativeQuoteIdsByOrigin($productQuoteId);
+
+        $title = 'Origin Quote';
+        if ($alternativeQuotes) {
+            $title .= '; Related Alternative Quotes: ' . implode(', ', $alternativeQuotes);
+        }
+        return Html::tag('i', '', [
+            'class' => 'fas fa-object-ungroup',
+            'title' => $title,
+            'data-toggle' => 'tooltip'
+        ]);
+    }
+
+    public static function displayOriginOrAlternativeIcon(ProductQuote $productQuote): string
+    {
+        if ($productQuote->isAlternative()) {
+            return self::displayAlternativeQuoteIcon();
+        }
+
+        if ($productQuote->isOrigin()) {
+            return self::displayOriginQuoteIcon($productQuote->pq_id);
+        }
+
+        return '';
     }
 }

@@ -23,8 +23,8 @@ class RentCarScopes extends \yii\db\ActiveQuery
         return parent::one($db);
     }
 
-    public function byProduct(int $productId)
+    public function byProduct(int $productId): RentCarScopes
     {
-        $this->andWhere(['prc_product_id' => $productId]);
+        return $this->andWhere(['prc_product_id' => $productId]);
     }
 }

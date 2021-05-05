@@ -113,10 +113,11 @@ class FlightManageService
             $productCreateForm = new ProductCreateForm();
             $productCreateForm->pr_lead_id = $lead->id;
             $productCreateForm->pr_type_id = ProductType::PRODUCT_FLIGHT;
-            $newProductId = $this->productCreateService->create($productCreateForm);
-            $product = $this->productRepository->find($newProductId);
+            $productCreateForm->pr_project_id = $lead->project_id;
+            $newProduct = $this->productCreateService->create($productCreateForm);
+//            $product = $this->productRepository->find($newProductId);
 
-            $newFlight = $product->flight;
+            $newFlight = $newProduct->flight;
             $newFlight->editItinerary(
                 Flight::getCabinByRealCode($quote['cabin']),
                 $quote['passengers'][FlightPax::PAX_ADULT]['cnt'] ?? 0,

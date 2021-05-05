@@ -27,7 +27,6 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\user\entity\monitor\UserMonitor;
 use sales\services\lead\qcall\CalculateDateService;
-use sales\services\log\GlobalLogFormatAttrService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;

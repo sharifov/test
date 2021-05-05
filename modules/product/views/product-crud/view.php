@@ -50,6 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pr_updated_user_id:userName',
             'pr_created_dt:byUserDateTime',
             'pr_updated_dt:byUserDateTime',
+            'pr_project_id:projectName',
         ],
     ]) ?>
 

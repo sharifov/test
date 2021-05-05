@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'qss_equipment',
             'qss_elapsed_time:datetime',
             'qss_duration',
-            //'qss_departure_dt',
+            'qss_flight_id',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'qss_departure_dt'

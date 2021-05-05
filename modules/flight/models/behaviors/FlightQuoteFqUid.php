@@ -24,6 +24,6 @@ class FlightQuoteFqUid extends Behavior
 
     public function generateUid(): void
     {
-        $this->owner->fq_uid = empty($this->owner->fq_uid) ? uniqid('', true) : $this->owner->fq_uid;
+        $this->owner->fq_uid = empty($this->owner->fq_uid) ? uniqid('', false) : $this->owner->fq_uid;
     }
 }

@@ -9,4 +9,6 @@ interface Productable
     public function serialize(): array;
     public function getId(): int;
     public static function findByProduct(int $productId): ?Productable;
+    public function getService(): ProductQuoteService;
+    public function getProductName(): string;
 }

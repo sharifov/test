@@ -26,14 +26,13 @@ class HotelQuoteRoomSerializer extends Serializer
             'hqr_class',
             'hqr_amount',
             'hqr_currency',
-            'hqr_cancel_amount',
-            'hqr_cancel_from_dt',
             // 'hqr_payment_type',
             //'hqr_board_code',
             'hqr_board_name',
             'hqr_rooms',
             'hqr_adults',
             'hqr_children',
+            'hqr_cancellation_policies'
         ];
     }
 
