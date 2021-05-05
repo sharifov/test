@@ -5778,6 +5778,104 @@
   },
   {
     "type": "post",
+    "url": "/v1/quote/create-data",
+    "title": "Create Flight Quote by origin search data",
+    "version": "1.0.0",
+    "name": "CreateQuoteData",
+    "group": "Quotes",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "lead_id",
+            "description": "<p>Lead Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "origin_search_data",
+            "description": "<p>Origin Search Data from flight search service <code>Valid JSON</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "size": "..max 50",
+            "optional": true,
+            "field": "provider_project_key",
+            "description": "<p>Project Key</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n            \"lead_id\": 513145,\n            \"origin_search_data\": \"{\\\"key\\\":\\\"2_U0FMMTAxKlkyMTAwL0tJVkxPTjIwMjEtMTEtMTcqUk9+I1JPMjAyI1JPMzkxfmxjOmVuX3Vz\\\",\\\"routingId\\\":1,\\\"prices\\\":{\\\"lastTicketDate\\\":\\\"2021-05-05\\\",\\\"totalPrice\\\":408.9,\\\"totalTax\\\":99.9,\\\"comm\\\":0,\\\"isCk\\\":false,\\\"markupId\\\":0,\\\"markupUid\\\":\\\"\\\",\\\"markup\\\":0},\\\"passengers\\\":{\\\"ADT\\\":{\\\"codeAs\\\":\\\"JWZ\\\",\\\"cnt\\\":2,\\\"baseFare\\\":103,\\\"pubBaseFare\\\":103,\\\"baseTax\\\":33.3,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":136.3,\\\"tax\\\":33.3,\\\"oBaseFare\\\":{\\\"amount\\\":103,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":33.3,\\\"currency\\\":\\\"USD\\\"}},\\\"CHD\\\":{\\\"codeAs\\\":\\\"JWC\\\",\\\"cnt\\\":1,\\\"baseFare\\\":103,\\\"pubBaseFare\\\":103,\\\"baseTax\\\":33.3,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":136.3,\\\"tax\\\":33.3,\\\"oBaseFare\\\":{\\\"amount\\\":103,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":33.3,\\\"currency\\\":\\\"USD\\\"}}},\\\"penalties\\\":{\\\"exchange\\\":true,\\\"refund\\\":false,\\\"list\\\":[{\\\"type\\\":\\\"ex\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":true,\\\"amount\\\":72,\\\"oAmount\\\":{\\\"amount\\\":72,\\\"currency\\\":\\\"USD\\\"}},{\\\"type\\\":\\\"ex\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":true,\\\"amount\\\":72,\\\"oAmount\\\":{\\\"amount\\\":72,\\\"currency\\\":\\\"USD\\\"}},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":false},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":false}]},\\\"trips\\\":[{\\\"tripId\\\":1,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2021-11-17 09:30\\\",\\\"arrivalTime\\\":\\\"2021-11-17 10:45\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"202\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":75,\\\"departureAirportCode\\\":\\\"KIV\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"OTP\\\",\\\"arrivalAirportTerminal\\\":\\\"\\\",\\\"operatingAirline\\\":\\\"RO\\\",\\\"airEquipType\\\":\\\"AT7\\\",\\\"marketingAirline\\\":\\\"RO\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":215,\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"EOWSVRMD\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":2,\\\"departureTime\\\":\\\"2021-11-17 12:20\\\",\\\"arrivalTime\\\":\\\"2021-11-17 14:05\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"391\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":225,\\\"departureAirportCode\\\":\\\"OTP\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"LHR\\\",\\\"arrivalAirportTerminal\\\":\\\"4\\\",\\\"operatingAirline\\\":\\\"RO\\\",\\\"airEquipType\\\":\\\"73H\\\",\\\"marketingAirline\\\":\\\"RO\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":1292,\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"EOWSVRGB\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":395}],\\\"maxSeats\\\":3,\\\"paxCnt\\\":3,\\\"validatingCarrier\\\":\\\"RO\\\",\\\"gds\\\":\\\"T\\\",\\\"pcc\\\":\\\"DVI\\\",\\\"cons\\\":\\\"GTT\\\",\\\"fareType\\\":\\\"PUB\\\",\\\"tripType\\\":\\\"OW\\\",\\\"cabin\\\":\\\"Y\\\",\\\"currency\\\":\\\"USD\\\",\\\"currencies\\\":[\\\"USD\\\"],\\\"currencyRates\\\":{\\\"USDUSD\\\":{\\\"from\\\":\\\"USD\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1}},\\\"keys\\\":{\\\"travelport\\\":{\\\"traceId\\\":\\\"908f70b5-cbe1-4800-89e2-1f0496cc1502\\\",\\\"availabilitySources\\\":\\\"A,A\\\",\\\"type\\\":\\\"T\\\"},\\\"seatHoldSeg\\\":{\\\"trip\\\":0,\\\"segment\\\":0,\\\"seats\\\":3}},\\\"meta\\\":{\\\"eip\\\":0,\\\"noavail\\\":false,\\\"searchId\\\":\\\"U0FMMTAxWTIxMDB8S0lWTE9OMjAyMS0xMS0xNw==\\\",\\\"lang\\\":\\\"en\\\",\\\"group1\\\":\\\"KIVLON:RORO:0:408.90\\\",\\\"rank\\\":10,\\\"cheapest\\\":true,\\\"fastest\\\":false,\\\"best\\\":true,\\\"bags\\\":1,\\\"country\\\":\\\"us\\\",\\\"prod_types\\\":[\\\"PUB\\\"]}}\",\n            \"provider_project_key\": \"hop2\"\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n {\n            \"status\": 200,\n            \"message\": \"OK\",\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n            \"status\": 422,\n            \"message\": \"Validation error\",\n            \"errors\": {\n                \"lead_id\": [\n                    \"Lead Id is invalid.\"\n                ]\n            },\n            \"code\": 0\n        }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Validation Error\n{\n            \"status\": 422,\n            \"message\": \"Error\",\n            \"errors\": [\n                \"Not found project relation by key: ovago\"\n            ],\n            \"code\": 0\n        }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n\n{\n            \"status\": 400,\n            \"message\": \"Load data error\",\n            \"errors\": [\n                \"Not found data on POST request\"\n            ],\n            \"code\": 0\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/QuoteController.php",
+    "groupTitle": "Quotes"
+  },
+  {
+    "type": "post",
     "url": "/v1/quote/get-info",
     "title": "Get Quote",
     "version": "0.1.0",
