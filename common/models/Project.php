@@ -73,6 +73,7 @@ use common\components\validators\IsArrayValidator;
  * @property UserProjectParams[] $userProjectParams
  * @property VisitorLog[] $visitorLogs
  * @property ProjectRelation[] $projectRelations
+ * @property ProjectRelation $projectMainRelation
  */
 class Project extends \yii\db\ActiveRecord
 {
@@ -673,14 +674,21 @@ class Project extends \yii\db\ActiveRecord
         return $this->hasMany(ProjectRelation::class, ['prl_project_id' => 'id']);
     }
 
+    public function getProjectMainRelation(): ActiveQuery
+    {
+        return $this->hasOne(ProjectRelation::class, ['prl_related_project_id' => 'id']);
+    }
+
     public function getRelatedProjectIds(): array
     {
         $result = [];
-        if (!$this->projectRelations) {
-            return $result;
+        if ($this->projectRelations) {
+            foreach ($this->projectRelations as $projectRelations) {
+                $result[] = $projectRelations->prl_related_project_id;
+            }
         }
-        foreach ($this->projectRelations as $projectRelations) {
-            $result[] = $projectRelations->prl_related_project_id;
+        if ($this->projectMainRelation) {
+            $result[] = $this->projectMainRelation->prl_project_id;
         }
         return $result;
     }
