@@ -18,25 +18,28 @@ use yii\base\Model;
  */
 class QuoteCreateDataForm extends Model
 {
-    public int $lead_id = 0;
+    public $lead_id;
 
-    public string $origin_search_data = '';
+    public $origin_search_data;
 
-    public ?string $provider_project_key = null;
+    public $provider_project_key;
 
     public function rules(): array
     {
         return [
             [['lead_id', 'origin_search_data'], 'required'],
+
+            [['lead_id'], 'integer'],
             [['lead_id'], 'filter', 'filter' => 'intval'],
 
             [['provider_project_key'], 'string', 'max' => 50],
 
+            [['origin_search_data'], 'string'],
             [['origin_search_data'], CheckJsonValidator::class],
             [['origin_search_data'], 'validateOriginSearchData'],
 
-            [['lead_id'], 'exist', 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
-            [['provider_project_key'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['provider_project_key' => 'project_key']]
+            [['lead_id'], 'exist', 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id'], 'message' => 'Lead not found'],
+            [['provider_project_key'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['provider_project_key' => 'project_key'], 'message' => 'Project not found']
         ];
     }
 

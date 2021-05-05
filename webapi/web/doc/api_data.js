@@ -5847,7 +5847,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n {\n            \"status\": 200,\n            \"message\": \"OK\",\n        }",
+          "content": "\nHTTP/1.1 200 OK\n{\n            \"status\": 200,\n            \"message\": \"OK\",\n            \"data\": {\n                \"quote_uid\": \"609259bfe52b9\"\n            }\n        }",
           "type": "json"
         }
       ]
@@ -5945,7 +5945,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n {\n            \"status\": 200,\n            \"message\": \"OK\",\n        }",
+          "content": "\nHTTP/1.1 200 OK\n{\n            \"status\": 200,\n            \"message\": \"OK\",\n            \"data\": {\n                \"quote_uid\": \"609259bfe52b9\"\n            }\n        }",
           "type": "json"
         }
       ]

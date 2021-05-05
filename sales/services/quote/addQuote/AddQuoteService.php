@@ -119,7 +119,7 @@ class AddQuoteService
         });
     }
 
-    public function createByData(array $data, Lead $lead, ?int $providerProjectId)
+    public function createByData(array $data, Lead $lead, ?int $providerProjectId): string
     {
         return $this->transactionManager->wrap(function () use ($data, $lead, $providerProjectId) {
             $quote = Quote::createQuoteFromSearch($data, $lead, null);
@@ -131,6 +131,8 @@ class AddQuoteService
             if ($lead->called_expert) {
                 $quote->sendUpdateBO();
             }
+
+            return $quote->uid;
         });
     }
 

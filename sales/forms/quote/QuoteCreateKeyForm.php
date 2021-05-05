@@ -16,16 +16,18 @@ use yii\base\Model;
  */
 class QuoteCreateKeyForm extends Model
 {
-    public int $lead_id = 0;
+    public $lead_id;
 
-    public string $offer_search_key = '';
+    public $offer_search_key;
 
-    public ?string $provider_project_key = null;
+    public $provider_project_key;
 
     public function rules(): array
     {
         return [
             [['lead_id', 'offer_search_key'], 'required'],
+
+            [['lead_id'], 'integer'],
             [['lead_id'], 'filter', 'filter' => 'intval'],
 
             [['offer_search_key'], 'string', 'max' => 255],

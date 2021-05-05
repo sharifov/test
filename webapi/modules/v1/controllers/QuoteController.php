@@ -39,7 +39,9 @@ use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
+use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
@@ -1189,9 +1191,12 @@ class QuoteController extends ApiBaseController
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK
-     *  {
+     * {
             "status": 200,
             "message": "OK",
+            "data": {
+                "quote_uid": "609259bfe52b9"
+            }
         }
      *
      * @apiErrorExample {json} Error-Response (422):
@@ -1247,11 +1252,15 @@ class QuoteController extends ApiBaseController
             );
         }
 
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
         if (!$form->validate()) {
-            return new ErrorResponse(
+            $response = new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($form->getErrors()),
+                new ErrorsMessage($form->getErrors())
             );
+            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            return $response;
         }
 
         try {
@@ -1264,21 +1273,31 @@ class QuoteController extends ApiBaseController
             }
 
             $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [JsonHelper::decode($form->origin_search_data)]]);
-            $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
+            $quoteUid = $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
         } catch (\DomainException | \RuntimeException $e) {
-            return new ErrorResponse(
+            $response = new ErrorResponse(
                 new MessageMessage('Error'),
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
+            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            return $response;
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableLog($e, true), 'API:QuoteController:actionCreateData:Throwable');
-            return new ErrorResponse(
+            $response = new ErrorResponse(
                 new ErrorsMessage('An error occurred while creating a quote'),
                 new CodeMessage($e->getCode())
             );
+            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            return $response;
         }
-        return new SuccessResponse();
+        $response = new SuccessResponse(
+            new DataMessage(
+                new Message('quote_uid', $quoteUid)
+            )
+        );
+        $apiLog->endApiLog(ArrayHelper::toArray($response));
+        return $response;
     }
 
     /**
@@ -1307,9 +1326,12 @@ class QuoteController extends ApiBaseController
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK
-     *  {
+     * {
             "status": 200,
             "message": "OK",
+            "data": {
+                "quote_uid": "609259bfe52b9"
+            }
         }
      *
      * @apiErrorExample {json} Error-Response (422):
@@ -1365,11 +1387,15 @@ class QuoteController extends ApiBaseController
             );
         }
 
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
         if (!$form->validate()) {
-            return new ErrorResponse(
+            $response = new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($form->getErrors()),
+                new ErrorsMessage($form->getErrors())
             );
+            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            return $response;
         }
 
         try {
@@ -1386,21 +1412,31 @@ class QuoteController extends ApiBaseController
                 throw new \RuntimeException('Quote not found by key: ' . $form->offer_search_key);
             }
             $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
-            $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
+            $quoteUid = $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
         } catch (\DomainException | \RuntimeException $e) {
-            return new ErrorResponse(
+            $response = new ErrorResponse(
                 new MessageMessage('Error'),
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
+            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            return $response;
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableLog($e, true), 'API:QuoteController:actionCreateKey:Throwable');
-            return new ErrorResponse(
+            $response = new ErrorResponse(
                 new ErrorsMessage('An error occurred while creating a quote'),
                 new CodeMessage($e->getCode())
             );
+            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            return $response;
         }
-        return new SuccessResponse();
+        $response = new SuccessResponse(
+            new DataMessage(
+                new Message('quote_uid', $quoteUid)
+            )
+        );
+        $apiLog->endApiLog(ArrayHelper::toArray($response));
+        return $response;
     }
 
     private function setTypeQuoteInsert($type, Quote $quote, Lead $lead): void
