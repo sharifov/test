@@ -19,10 +19,14 @@ use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\app\AppHelper;
+use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
+use sales\repositories\client\ClientsQuery;
 use sales\services\cases\CasesSaleService;
+use sales\services\client\ClientCreateForm;
+use sales\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\console\Controller;
@@ -31,6 +35,7 @@ use yii\db\Query;
 use yii\helpers\BaseConsole;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
+use yii\validators\DateValidator;
 
 class OneTimeController extends Controller
 {
@@ -1060,5 +1065,67 @@ class OneTimeController extends Controller
 
         printf(PHP_EOL . 'Execute Time: %s' . PHP_EOL, $this->ansiFormat($time . ' s', Console::FG_RED));
         printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionFixOldCallLogEntities()
+    {
+        $dateValidator = new DateValidator([
+            'format' => 'php:Y-m-d'
+        ]);
+
+        $from = BaseConsole::input('Date from: ');
+
+        if (!$dateValidator->validate($from, $error)) {
+            echo 'Date From error: ' . $error . PHP_EOL;
+            return;
+        }
+
+        $to = BaseConsole::input('Date to: ');
+
+        if (!$dateValidator->validate($to, $error)) {
+            echo 'Date To error: ' . $error . PHP_EOL;
+            return;
+        }
+
+        $clientManageService = Yii::createObject(ClientManageService::class);
+
+        $logs = CallLog::find()->alias('log')
+            ->innerJoin(Client::tableName() . ' as client', 'client.id = log.cl_client_id')
+            ->andWhere(['>=', 'log.cl_call_created_dt', $from])
+            ->andWhere(['<', 'log.cl_call_created_dt', $to])
+            ->andWhere(new Expression('log.cl_id = log.cl_group_id'))
+            ->andWhere(['log.cl_type_id' => Call::CALL_TYPE_IN])
+            ->andWhere(new Expression('log.cl_project_id != client.cl_project_id'))
+            ->with(['case', 'lead'])
+            ->all();
+
+        $count = count($logs);
+
+        Console::startProgress(0, $count);
+        $processed = 0;
+
+        foreach ($logs as $log) {
+            $clientId = null;
+            if ($log->lead && $log->lead->client_id) {
+                $clientId = $log->lead->client_id;
+            } elseif ($log->case && $log->case->cs_client_id) {
+                $clientId = $log->case->cs_client_id;
+            } else {
+                $client = ClientsQuery::oneByPhoneAndProject($log->cl_phone_from, $log->cl_project_id, null);
+                if ($client) {
+                    $clientId = $client->id;
+                } else {
+                    $clientForm = ClientCreateForm::createWidthDefaultName();
+                    $clientForm->projectId = $log->cl_project_id;
+                    $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
+                    $client = $clientManageService->create($clientForm, null);
+                    $clientId = $client->id;
+                }
+            }
+            CallLog::updateAll(['cl_client_id' => $clientId], ['cl_group_id' => $log->cl_group_id]);
+            $processed++;
+            Console::updateProgress($processed, $count);
+        }
+        Console::endProgress(false);
     }
 }
