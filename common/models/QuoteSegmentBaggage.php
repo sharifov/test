@@ -148,6 +148,9 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
         if (!empty($this->qsb_allow_max_weight)) {
             $data['allowMaxWeight'] = $this->qsb_allow_max_weight;
         }
+        if (!empty($this->qsb_carry_one)) {
+            $data['carryOne'] = (bool) $this->qsb_carry_one;
+        }
 
         return $data;
     }
