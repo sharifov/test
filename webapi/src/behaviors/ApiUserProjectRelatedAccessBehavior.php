@@ -55,7 +55,7 @@ class ApiUserProjectRelatedAccessBehavior extends ApiUserProjectAccessBehavior
      */
     private function getApiUser(Project $project): ?ApiUser
     {
-        $projectIds = ArrayHelper::merge([$project->id], $project->getRelatedProjectIds(true));
+        $projectIds = ArrayHelper::merge([$project->id], $project->getRelatedProjectIds(false));
         return ApiUser::find()
             ->where(['au_enabled' => true])
             ->andWhere(['IN', 'au_project_id', $projectIds])
