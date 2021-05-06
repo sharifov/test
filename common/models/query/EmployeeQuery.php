@@ -54,7 +54,8 @@ class EmployeeQuery extends \yii\db\ActiveQuery
     {
         return $this->innerJoin(
             UserClientChatData::tableName(),
-            "uccd_employee_id = id AND uccd_rc_user_id IS NOT NULL AND uccd_rc_user_id <> ''"
+            "uccd_employee_id = id AND uccd_rc_user_id IS NOT NULL AND uccd_rc_user_id <> '' and uccd_chat_status_id = :chatStatusId",
+            ['chatStatusId' => UserClientChatData::CHAT_STATUS_READY]
         );
     }
 

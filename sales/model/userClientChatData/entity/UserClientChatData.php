@@ -33,8 +33,8 @@ use yii\db\ActiveRecord;
  */
 class UserClientChatData extends \yii\db\ActiveRecord
 {
-    private const CHAT_STATUS_READY = 1;
-    private const CHAT_STATUS_BUSY = 2;
+    public const CHAT_STATUS_READY = 1;
+    public const CHAT_STATUS_BUSY = 2;
 
     private const CHAT_STATUS_LIST = [
         self::CHAT_STATUS_READY => 'Ready',
@@ -187,5 +187,10 @@ class UserClientChatData extends \yii\db\ActiveRecord
     public function chatStatusName(): string
     {
         return self::getChatStatusList()[$this->uccd_chat_status_id] ?? 'Unknown status';
+    }
+
+    public function isStatusBusy(): bool
+    {
+        return $this->uccd_chat_status_id === self::CHAT_STATUS_BUSY;
     }
 }

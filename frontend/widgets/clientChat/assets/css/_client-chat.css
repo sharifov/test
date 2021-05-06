@@ -22,9 +22,23 @@
     border-bottom: none;
 }
 ._cc-box-header.active {
-    background-color: #78c286;
+    background-color: #2a3f54;
 }
-
+#_cc-box-title {
+    position: relative;
+    top: 10px;
+}
+._chat_status {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translate(-40%, -65%);
+}
+._chat_status.switchery.switchery-default {
+    background-color: rgb(38, 185, 154);
+    border-color: rgb(38, 185, 154);
+    box-shadow: rgb(120 194 134) 0px 0px 0px 0px inset;
+}
 #_client_chat_access_widget {
     position: relative;
     z-index: 1040;

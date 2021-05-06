@@ -92,7 +92,7 @@ class ClientChatAccessWidget extends Widget
 
         //      $search = new ClientChatUserAccessSearch();
         //      $result = $search->searchPendingRequests($this->userId, $this->page, $this->limit * ($this->page+1));
-        return $this->render('cc_request', ['access' => [], 'open' => $this->open, 'formatter' => $formatter, 'page' => $this->page]);
+        return $this->render('cc_request', ['access' => [], 'open' => $this->open, 'formatter' => $formatter, 'page' => $this->page, 'userChatData' => $user->userClientChatData]);
     }
 
     public function fetchItems(): array
