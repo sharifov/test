@@ -6336,6 +6336,139 @@
   },
   {
     "type": "post",
+    "url": "/v1/offer-sms/send-quote",
+    "title": "Offer sms Send Quote",
+    "version": "0.1.0",
+    "name": "SendSmsQuote",
+    "group": "Quotes",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "13",
+            "optional": false,
+            "field": "quote_uid",
+            "description": "<p>Quote UID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "template_key",
+            "description": "<p>Template key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "sms_from",
+            "description": "<p>Sms from</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "sms_to",
+            "description": "<p>Sms to</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "json",
+            "optional": true,
+            "field": "additional_data",
+            "description": "<p>Additional data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "5",
+            "optional": true,
+            "field": "language_id",
+            "description": "<p>Language Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "market_country_code",
+            "description": "<p>Market country code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "apiKey",
+            "description": "<p>API Key for Project (if not use Basic-Authorization)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n   \"quote_uid\": \"60910028642b8\",\n   \"template_key\": \"sms_client_offer\",\n   \"sms_from\": \"+16082175601\",\n   \"sms_to\": \"+16082175602\",\n   \"language_id\": \"en-US\",\n   \"market_country_code\": \"RU\",\n   \"additional_data\": [\n       {\n           \"code\": \"PR\",\n           \"airline\": \"Philippine Airlines\"\n       }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200,\n   \"message\": \"OK\",\n   \"data\": {\n       \"result\": \"Sms sending. Mail ID(427561)\"\n   }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 404 Not Found\n{\n   \"status\": 422,\n   \"message\": \"Validation error\",\n   \"errors\": {\n       \"quote_uid\": [\n           \"Quote not found by Uid(60910028642b1)\"\n       ]\n   },\n   \"code\": 0\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "HTTP/1.1 400 Bad Request\n{\n   \"name\": \"Bad Request\",\n   \"message\": \"POST data request is empty\",\n   \"code\": 2,\n   \"status\": 400,\n   \"type\": \"yii\\\\web\\\\BadRequestHttpException\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/OfferSmsController.php",
+    "groupTitle": "Quotes"
+  },
+  {
+    "type": "post",
     "url": "/v2/quote/get-info",
     "title": "Get Quote",
     "version": "0.2.0",

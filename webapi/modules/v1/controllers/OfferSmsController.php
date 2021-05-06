@@ -4,18 +4,18 @@ namespace webapi\modules\v1\controllers;
 
 use common\models\ApiLog;
 use common\models\Client;
-use common\models\Email;
-use common\models\EmailTemplateType;
-use common\models\Quote;
+use common\models\Sms;
+use common\models\SmsTemplateType;
 use frontend\helpers\JsonHelper;
-use sales\forms\lead\EmailCreateForm;
+use frontend\models\LeadPreviewSmsForm;
+use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\airportLang\helpers\AirportLangHelper;
 use sales\repositories\lead\LeadRepository;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
-use webapi\src\forms\quote\SendQuoteApiForm;
+use webapi\src\forms\quote\SendSmsQuoteApiForm;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\DataMessage;
@@ -29,12 +29,12 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
- * Class OfferEmailController
+ * Class OfferSmsController
  *
  * @property ClientManageService $clientManageService
  * @property LeadRepository $leadRepository
  */
-class OfferEmailController extends ApiBaseController
+class OfferSmsController extends ApiBaseController
 {
     private ClientManageService $clientManageService;
     private LeadRepository $leadRepository;
@@ -58,11 +58,10 @@ class OfferEmailController extends ApiBaseController
         parent::__construct($id, $module, $config);
     }
 
-
     /**
-     * @api {post} /v1/offer-email/send-quote Offer email Send Quote
+     * @api {post} /v1/offer-sms/send-quote Offer sms Send Quote
      * @apiVersion 0.1.0
-     * @apiName SendQuote
+     * @apiName SendSmsQuote
      * @apiGroup Quotes
      * @apiPermission Authorized User
      *
@@ -75,9 +74,8 @@ class OfferEmailController extends ApiBaseController
      *
      * @apiParam {string{13}}       quote_uid             Quote UID
      * @apiParam {string{50}}       template_key          Template key
-     * @apiParam {string{50}}       email_from            Email from
-     * @apiParam {string{50}}       email_from_name       Email from name
-     * @apiParam {string{50}}       email_to              Email to
+     * @apiParam {string{50}}       sms_from              Sms from
+     * @apiParam {string{50}}       sms_to                Sms to
      * @apiParam {json}             [additional_data]     Additional data
      * @apiParam {string{5}}        [language_id]         Language Id
      * @apiParam {string{2}}        [market_country_code] Market country code
@@ -85,10 +83,9 @@ class OfferEmailController extends ApiBaseController
      * @apiParamExample {json} Request-Example:
          {
             "quote_uid": "60910028642b8",
-            "template_key": "cl_offer",
-            "email_from": "from@test.com",
-            "email_from_name": "Tester",
-            "email_to": "to@test.com",
+            "template_key": "sms_client_offer",
+            "sms_from": "+16082175601",
+            "sms_to": "+16082175602",
             "language_id": "en-US",
             "market_country_code": "RU",
             "additional_data": [
@@ -105,7 +102,7 @@ class OfferEmailController extends ApiBaseController
      *      "status": 200,
      *      "message": "OK",
      *      "data": {
-     *          "result": "Email sending. Mail ID(427561)"
+     *          "result": "Sms sending. Mail ID(427561)"
      *      }
      *   }
      *
@@ -138,7 +135,7 @@ class OfferEmailController extends ApiBaseController
         $apiLog = $this->startApiLog($this->action->uniqueId);
         $post = Yii::$app->request->post();
         $responseData = [];
-        $sendQuoteApiForm = new SendQuoteApiForm();
+        $sendQuoteApiForm = new SendSmsQuoteApiForm();
 
         if (!$sendQuoteApiForm->load($post)) {
             return $this->endApiLog($apiLog, new ErrorResponse(
@@ -149,7 +146,7 @@ class OfferEmailController extends ApiBaseController
         if (!$sendQuoteApiForm->validate()) {
             \Yii::warning(
                 ErrorsToStringHelper::extractFromModel($sendQuoteApiForm),
-                'OfferEmailController:actionSendQuote:sendQuoteApiForm'
+                'OfferSmsController:actionSendQuote:sendQuoteApiForm'
             );
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
@@ -173,48 +170,77 @@ class OfferEmailController extends ApiBaseController
             if ($lead->project && $lead->project->contact_info) {
                 $projectContactInfo = JsonHelper::decode($lead->project->contact_info);
             }
+            $contentData = $lead->getEmailData2([$quote->id], $projectContactInfo, $lang, $agent);
+            $contentData = ArrayHelper::merge($contentData, $sendQuoteApiForm->additional_data);
 
-            $emailData = $lead->getEmailData2([$quote->id], $projectContactInfo, $lang, $agent);
-            $emailData = ArrayHelper::merge($emailData, $sendQuoteApiForm->additional_data);
-
-            $mailPreview = \Yii::$app->communication->mailPreview(
+            $smsPreview = Yii::$app->communication->smsPreview(
                 $lead->project_id,
                 $sendQuoteApiForm->template_key,
-                $sendQuoteApiForm->email_from,
-                $sendQuoteApiForm->email_to,
-                $emailData
+                $sendQuoteApiForm->sms_from,
+                $sendQuoteApiForm->sms_to,
+                $contentData,
+                $sendQuoteApiForm->language_id
             );
 
-            if ($mailPreview['error'] !== false) {
-                throw new \DomainException(VarDumper::dumpAsString($mailPreview['error']));
+            if ($smsPreview['error'] !== false) {
+                throw new \DomainException($smsPreview['error']);
             }
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $lead->project_id;
-            $clientForm->typeCreate = Client::TYPE_CREATE_EMAIL;
-            $client = $this->clientManageService->getOrCreateByEmails([new EmailCreateForm(['email' => $sendQuoteApiForm->email_to])], $clientForm);
+            $clientForm->typeCreate = Client::TYPE_CREATE_SMS;
+            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $sendQuoteApiForm->sms_to])], $clientForm);
 
-            $mail = self::createEmail(
-                $quote,
-                $sendQuoteApiForm->template_key,
-                $sendQuoteApiForm->email_from,
-                $sendQuoteApiForm->email_from_name,
-                $sendQuoteApiForm->email_to,
-                $sendQuoteApiForm->language_id,
-                $mailPreview['data']['email_subject'],
-                $mailPreview['data']['email_body_html'],
-                $client->id
-            );
-            self::sendEmail($mail);
+            $previewSmsForm = new LeadPreviewSmsForm();
+            $previewSmsForm->is_send = false;
+            $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
+            $previewSmsForm->s_lead_id = $lead->id;
+            $previewSmsForm->s_quote_list = JsonHelper::encode([$quote->id]);
+            $previewSmsForm->s_phone_from = $sendQuoteApiForm->sms_from;
+            $previewSmsForm->s_phone_to = $sendQuoteApiForm->sms_to;
+            $previewSmsForm->s_language_id = $sendQuoteApiForm->language_id;
+
+            if ($templateTypeId = self::getTemplateTypeId($sendQuoteApiForm->template_key)) {
+                $previewSmsForm->s_sms_tpl_id = (int) $templateTypeId;
+            }
+
+            $sms = new Sms();
+            $sms->s_project_id = $lead->project_id;
+            $sms->s_lead_id = $lead->id;
+            if ($previewSmsForm->s_sms_tpl_id) {
+                $sms->s_template_type_id = $previewSmsForm->s_sms_tpl_id;
+            }
+            $sms->s_type_id = Sms::TYPE_OUTBOX;
+            $sms->s_status_id = Sms::STATUS_PENDING;
+
+            $sms->s_sms_text = $previewSmsForm->s_sms_message;
+            $sms->s_phone_from = $previewSmsForm->s_phone_from;
+            $sms->s_phone_to = $previewSmsForm->s_phone_to;
+
+            if ($previewSmsForm->s_language_id) {
+                $sms->s_language_id = $previewSmsForm->s_language_id;
+            }
+
+            $sms->s_created_dt = date('Y-m-d H:i:s');
+            $sms->s_created_user_id = null;
+
+            if (!$sms->save()) {
+                throw new \DomainException(ErrorsToStringHelper::extractFromModel($sms));
+            }
+
+            $smsResponse = $sms->sendSms();
+            if (isset($smsResponse['error']) && $smsResponse['error']) {
+                throw new \DomainException(VarDumper::dumpAsString($smsResponse['error']));
+            }
 
             if (!$lead->client_id) {
                 $lead->client_id = $client->id;
             }
             $this->leadRepository->save($lead);
 
-            $responseData['result'] = 'Email sending. Mail ID(' . $mail->e_id . ')';
+            $responseData['result'] = 'Sms sending. Sms ID(' . $sms->s_id . ')';
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable, true), 'OfferEmailController:actionSendQuote:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable, true), 'OfferSmsController:actionSendQuote:Throwable');
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage())
@@ -228,62 +254,15 @@ class OfferEmailController extends ApiBaseController
         ));
     }
 
-    private static function createEmail(
-        Quote $quote,
-        $templateKey,
-        $from,
-        $fromName,
-        $to,
-        $languageId,
-        $subject,
-        $body,
-        $clientId
-    ): Email {
-        $mail = new Email();
-        $mail->e_project_id = $quote->lead->project_id;
-        $mail->e_lead_id = $quote->lead_id;
-
-        if ($templateTypeId = self::getTemplateTypeId($templateKey)) {
-            $mail->e_template_type_id = (int) $templateTypeId;
-        }
-        $mail->e_type_id = Email::TYPE_OUTBOX;
-        $mail->e_status_id = Email::STATUS_PENDING;
-        $mail->e_email_subject = $subject;
-        $mail->body_html = $body;
-        $mail->e_email_from = $from;
-        $mail->e_email_from_name = $fromName;
-        $mail->e_language_id = $languageId;
-        $mail->e_email_to = $to;
-        $mail->e_created_dt = date('Y-m-d H:i:s');
-        $mail->e_client_id = $clientId;
-
-        if (!$mail->save()) {
-            throw new \DomainException(ErrorsToStringHelper::extractFromModel($mail));
-        }
-
-        $mail->e_message_id = $mail->generateMessageId();
-        $mail->save();
-        return $mail;
-    }
-
-    private static function sendEmail(Email $mail): void
-    {
-        $mailResponse = $mail->sendMail();
-
-        if ($mailResponse['error'] !== false) {
-            throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
-        }
-    }
-
     /**
      * @param string $templateKey
      * @return false|int|string|null
      */
     private static function getTemplateTypeId(string $templateKey)
     {
-        return EmailTemplateType::find()
-            ->select(['etp_id'])
-            ->andWhere(['etp_key' => $templateKey])
+        return SmsTemplateType::find()
+            ->select(['stp_id'])
+            ->andWhere(['stp_key' => $templateKey])
             ->scalar();
     }
 
