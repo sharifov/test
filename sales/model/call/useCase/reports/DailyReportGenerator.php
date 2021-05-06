@@ -32,12 +32,21 @@ select
     end as `Status`
     ,cl.clq_queue_time as `Queue Time`
     ,coalesce(cl.clr_duration,0) as `Talk Time`
-    ,cl.cl_client_id as  `Client ID`
-    ,cl.cll_lead_id as `Trip ID`
- 	,if ((select count(*)  from call_log  where cl_client_id = cl.cl_client_id and cl_group_id < cl.cl_group_id ) > 0, "Old", "New") as `Client`
- 	,cl_phone_to as `Phone number`
+    ,cl.cl_client_id as  `Client ID`,
+    if(cl.dep_name = "Sales", cl.cll_lead_id,
+         (select max(l.id)
+          from  (select id, bo_flight_id 
+                    from leads
+                    where `leads`.project_id = 15
+                ) l
+         inner join case_sale on css_sale_id = `l`.`bo_flight_id` and   css_cs_id = cl.clc_case_id
+        )
+    ) as `Trip ID`
+    ,if ((select count(*)  from call_log  where cl_client_id = cl.cl_client_id and cl_group_id < cl.cl_group_id ) > 0, "Old", "New") as `Client`
+    ,cl_phone_to as `Phone number`
     , (select count(cll_lead_id)  from call_log 
                         left join  call_log_lead as cll on cll_cl_id=cl_id
+                        inner join lead_flow on lead_flow.lead_id = cll_lead_id and lead_flow.status = 12
                            where cl_client_id = cl.cl_client_id and cl.cll_lead_id>cll.cll_lead_id 
         ) as `calls_earlier_leads`
       
@@ -46,15 +55,16 @@ from
             from `call_log` 
             left join `call_log_record` on clr_cl_id = cl_id
             left join `call_log_queue` on clq_cl_id = cl_id
-            left join  `call_log_lead` on cll_cl_id=cl_id
+            left join  `call_log_lead` on cll_cl_id = cl_id
+            left join `call_log_case` on clc_cl_id = cl_id
             left join `department` on dep_id = cl_department_id
             where cl_type_id=2 and cl_call_created_dt >= date(now()) - interval 1 day and cl_call_created_dt < date(now()) 
             and cl_phone_to in (select pl_phone_number
                                                     from phone_list
                                                     where pl_id in  (select dpp_phone_list_id 
-                                                    					from projects
-                                                    					left join department_phone_project on projects.id=dpp_project_id
-                                                    					where project_key = "priceline")) 
+                                                                        from projects
+                                                                        left join department_phone_project on projects.id=dpp_project_id
+                                                                        where project_key = "priceline")) 
     ) cl
 
 order by `Time Stamp (UTC)` asc
