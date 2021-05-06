@@ -58,6 +58,16 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         );
     }
 
+    public function hasPermission(string $permission): self
+    {
+        return $this->innerJoin('auth_assignment', 'auth_assignment.user_id = id')
+            ->innerJoin(
+                'auth_item_child',
+                'auth_item_child.child = :permission and auth_item_child.parent = auth_assignment.item_name',
+                ['permission' => $permission]
+            );
+    }
+
 //    public function supervisorsByGroups(array $groups)
 //  {
 //      return $this->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => Employee::SUPE])->innerJoin(UserGroup::tableName(), new Expression(''))
