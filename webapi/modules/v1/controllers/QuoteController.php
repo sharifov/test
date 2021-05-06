@@ -1244,6 +1244,14 @@ class QuoteController extends ApiBaseController
     {
         $form = new QuoteCreateDataForm();
 
+        if (!Yii::$app->request->isPost) {
+            return new ErrorResponse(
+                new StatusCodeMessage(405),
+                new MessageMessage('Method not allowed'),
+                new ErrorsMessage('Method not allowed'),
+            );
+        }
+
         if (!$form->load(Yii::$app->request->post())) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -1378,6 +1386,14 @@ class QuoteController extends ApiBaseController
     public function actionCreateKey()
     {
         $form = new QuoteCreateKeyForm();
+
+        if (!Yii::$app->request->isPost) {
+            return new ErrorResponse(
+                new StatusCodeMessage(405),
+                new MessageMessage('Method not allowed'),
+                new ErrorsMessage('Method not allowed'),
+            );
+        }
 
         if (!$form->load(Yii::$app->request->post())) {
             return new ErrorResponse(
