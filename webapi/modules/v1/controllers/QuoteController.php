@@ -90,16 +90,6 @@ class QuoteController extends ApiBaseController
         parent::__construct($id, $module, $config);
     }
 
-    public function behaviors(): array
-    {
-        $behaviors = parent::behaviors();
-
-        if ($this->action->id === 'get-info' && $apiKey = Yii::$app->request->post('apiKey')) {
-            $behaviors['apiUserProjectAccessBehavior'] = ['class' => ApiUserProjectRelatedAccessBehavior::class, 'apiKey' => $apiKey];
-        }
-        return $behaviors;
-    }
-
     /**
      *
      * @api {post} /v1/quote/get-info Get Quote
@@ -390,12 +380,16 @@ class QuoteController extends ApiBaseController
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
 
-        $model = Quote::find()->where(['uid' => $uid])->one();
+        if ($this->apiProject) {
+            $projectIds = ArrayHelper::merge([$this->apiProject->id], $this->apiProject->getRelatedProjectIds());
+            $model = Quote::getQuoteByUidAndProjects($uid, $projectIds);
+        } else {
+            $model = Quote::find()->where(['uid' => $uid])->one();
+        }
 
         if (!$model) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $uid, 2);
         }
-
 
         $response = [
             'status' => 'Failed',

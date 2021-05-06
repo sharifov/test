@@ -23,16 +23,6 @@ use yii\web\UnprocessableEntityHttpException;
 
 class QuoteController extends ApiBaseController
 {
-
-    public function behaviors(): array
-    {
-        $behaviors = parent::behaviors();
-        if ($this->action->uniqueId === 'get-info' && $apiKey = Yii::$app->request->post('apiKey')) {
-            $behaviors['apiUserProjectAccessBehavior'] = ['class' => ApiUserProjectRelatedAccessBehavior::class, 'apiKey' => $apiKey];
-        }
-        return $behaviors;
-    }
-
     /**
      *
      * @return array
@@ -469,7 +459,12 @@ class QuoteController extends ApiBaseController
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
 
-        $model = Quote::find()->where(['uid' => $uid])->one();
+        if ($this->apiProject) {
+            $projectIds = ArrayHelper::merge([$this->apiProject->id], $this->apiProject->getRelatedProjectIds());
+            $model = Quote::getQuoteByUidAndProjects($uid, $projectIds);
+        } else {
+            $model = Quote::find()->where(['uid' => $uid])->one();
+        }
 
         if (!$model) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $uid, 2);

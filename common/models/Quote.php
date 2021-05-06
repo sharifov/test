@@ -2733,4 +2733,17 @@ class Quote extends \yii\db\ActiveRecord
     {
         return self::findOne(['lead_id' => $leadId, 'type_id' => self::TYPE_ORIGINAL]);
     }
+
+    public static function getQuoteByUidAndProjects(string $uid, array $projectIds): ?Quote
+    {
+        /** @var Quote $quote */
+        $quote = self::find()
+            ->alias('quote')
+            ->select('quote.*')
+            ->innerJoin(Lead::tableName() . ' AS lead', 'lead.id = quote.lead_id')
+            ->andWhere(['quote.uid' => $uid])
+            ->andWhere(['IN', 'lead.project_id', $projectIds])
+            ->one();
+        return $quote;
+    }
 }
