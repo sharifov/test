@@ -50,8 +50,8 @@ class ClientsQuery
         $query = Client::find()->alias('clients')->select(['clients.*'])
             ->innerJoin(
                 ClientPhone::tableName() . ' AS phones',
-                'phones.client_id = clients.id AND phones.phone = :phone',
-                [':phone' => $phone]
+                'phones.client_id = clients.id AND phones.phone = :phone AND (phones.type IS NULL OR phones.type != :type)',
+                [':phone' => $phone, ':type' => ClientPhone::PHONE_INVALID]
             )
             ->where(['clients.cl_project_id' => $projectId])
             ->orderBy(['clients.id' => SORT_DESC])

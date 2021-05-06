@@ -65,7 +65,7 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
                 $.pjax.reload({container: '#pjax-client-info', timeout: 10000, async: false});
                 
                 let clientLocale = $('#casesclientupdateform-locale').val();
-                if (clientLocale !== 'undefined' && clientLocale.length && $('#language option[value=' + clientLocale + ']').length) {
+                if (typeof clientLocale !== typeof undefined && clientLocale.length && $('#language option[value=' + clientLocale + ']').length) {
                     $('#language option[value=' + clientLocale + ']').prop('selected', true);
                 }
                 
