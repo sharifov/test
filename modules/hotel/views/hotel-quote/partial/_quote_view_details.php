@@ -74,8 +74,8 @@ HotelAsset::register($this);
                             <span class="ml-2"><i class="fa fa-child"></i> <?=(Html::encode($quoteRoom->hqr_children ?? 0))?></span>
                         </td>
                         <td>
-                            <span class="ml-2"><i class="fa fa-clock-o"></i> <?=(Html::encode(Yii::$app->formatter->asDatetime(strtotime($quoteRoom->hqr_cancellation_policies[0]['from']), 'php: d-M-Y [H:i]')))?></span>
-                            <span class="ml-2"><i class="fa fa-money"></i> <?=(Html::encode($quoteRoom->hqr_cancellation_policies[0]['amount']))?></span>
+                            <span class="ml-2"><i class="fa fa-clock-o"></i> <?= !empty($quoteRoom->hqr_cancellation_policies[0]['from']) ? (Html::encode(Yii::$app->formatter->asDatetime(strtotime($quoteRoom->hqr_cancellation_policies[0]['from']), 'php: d-M-Y [H:i]'))) : '-' ?></span>
+                            <span class="ml-2"><i class="fa fa-money"></i> <?= !empty($quoteRoom->hqr_cancellation_policies[0]['amount']) ? (Html::encode($quoteRoom->hqr_cancellation_policies[0]['amount'])) : '-'?></span>
                         </td>
                         <td>$<?=number_format(Html::encode($quoteRoom->hqr_amount), 2)?></td>
                     </tr>

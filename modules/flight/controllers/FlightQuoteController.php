@@ -379,7 +379,7 @@ class FlightQuoteController extends FController
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
         $lead = $productQuote->pqProduct->prLead;
 
-        if ($lead->isInTrash() && Auth::user()->isAgent()) {
+        if ($lead && $lead->isInTrash() && Auth::user()->isAgent()) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 
