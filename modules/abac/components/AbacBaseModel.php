@@ -10,6 +10,8 @@
 namespace modules\abac\components;
 
 use common\models\Department;
+use common\models\Project;
+use common\models\UserGroup;
 
 /**
  * Class AbacBaseModel
@@ -64,6 +66,8 @@ class AbacBaseModel
     public const OP_IS_NOT_NULL         = 'is_not_null';
 
     public const OP_MATCH               = 'match';
+    public const OP_EQUAL2              = '==';
+    public const OP_NOT_EQUAL2          = '!=';
 
 
     public const ATTR_USER_USERNAME = [
@@ -73,22 +77,22 @@ class AbacBaseModel
         'label' => 'Username',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN, self::OP_NOT_IN, '==', '!=', self::OP_MATCH]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
     public const ATTR_USER_ROLES = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_roles',
         'field' => 'env.user.roles',
-        'label' => 'User roles',
+        'label' => 'User Roles',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
         /*'input' => self::ATTR_INPUT_SELECT,
         'values' => [
             'admin' => 'admin',
             'agent' => 'agent',
-        ],
-        'multiple' => true,*/
+        ],*/
+        'multiple' => false,
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
@@ -96,15 +100,11 @@ class AbacBaseModel
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_projects',
         'field' => 'env.user.projects',
-        'label' => 'User projects',
+        'label' => 'User Projects',
         'type' => self::ATTR_TYPE_STRING,
-        'input' => self::ATTR_INPUT_TEXT,
-        /*'input' => self::ATTR_INPUT_SELECT,
-        'values' => [
-            'hop2' => 'Hop2',
-            'kayak' => 'kayak',
-        ],
-        'multiple' => true,*/
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
@@ -112,11 +112,23 @@ class AbacBaseModel
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_departments',
         'field' => 'env.user.departments',
-        'label' => 'User departments',
+        'label' => 'User Departments',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_SELECT,
         'values' => Department::DEPARTMENT_LIST,
-        'multiple' => true,
+        'multiple' => false,
+        'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+    ];
+
+    public const ATTR_USER_GROUPS = [
+        'optgroup' => self::OPTGROUP_ENV_USER,
+        'id' => 'env_user_groups',
+        'field' => 'env.user.groups',
+        'label' => 'User Groups',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
@@ -132,7 +144,7 @@ class AbacBaseModel
 
         //'values' => Project::getList(),
         //'default_value' => 1,
-        'operators' =>  ['==', '!=', self::OP_IN, self::OP_NOT_IN],
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
 //        'unique' => true,
 //        'description' => 'This filter is "unique", it can be used only once',
         'icon' => 'fa fa-list',
@@ -148,7 +160,7 @@ class AbacBaseModel
         'label' => 'Controller',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN, self::OP_NOT_IN, '==', '!=', self::OP_MATCH]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
     public const ATTR_REQ_ACTION = [
@@ -158,7 +170,7 @@ class AbacBaseModel
         'label' => 'Controller/Action',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN, self::OP_NOT_IN, '==', '!=', self::OP_MATCH]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
     public const ATTR_REQ_URL = [
@@ -168,7 +180,7 @@ class AbacBaseModel
         'label' => 'URL',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, '==', '!=', self::OP_MATCH]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_MATCH]
     ];
 
     public const ATTR_REQ_IP_ADDRESS = [
@@ -178,7 +190,7 @@ class AbacBaseModel
         'label' => 'IP Address',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  ['==', '!=', self::OP_MATCH]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_MATCH]
     ];
 
 
@@ -189,7 +201,7 @@ class AbacBaseModel
         'label' => 'Date',
         'type' => self::ATTR_TYPE_DATE,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN, self::OP_NOT_IN, '==', '!=', self::OP_MATCH]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
     public const ATTR_DT_TIME = [
@@ -199,7 +211,7 @@ class AbacBaseModel
         'label' => 'Time',
         'type' => self::ATTR_TYPE_TIME,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN, self::OP_NOT_IN, '==', '!=', self::OP_MATCH]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
     public const ATTR_DT_YEAR = [
@@ -209,7 +221,7 @@ class AbacBaseModel
         'label' => 'Year',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  ['==', '!=', '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
     ];
 
     public const ATTR_DT_MONTH = [
@@ -219,7 +231,7 @@ class AbacBaseModel
         'label' => 'Month',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  ['==', '!=', '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
     ];
 
     public const ATTR_DT_MONTH_NAME = [
@@ -229,7 +241,7 @@ class AbacBaseModel
         'label' => 'Month name',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  ['==', '!=']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
     public const ATTR_DT_DOW = [
@@ -239,7 +251,7 @@ class AbacBaseModel
         'label' => 'Day of Week',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  ['==', '!=', '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
     ];
 
     public const ATTR_DT_DOW_NAME = [
@@ -249,7 +261,7 @@ class AbacBaseModel
         'label' => 'Day of Week Name',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  ['==', '!=']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
     public const ATTR_DT_DAY = [
@@ -259,7 +271,7 @@ class AbacBaseModel
         'label' => 'Day',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  ['==', '!=', '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
     ];
 
     public const ATTR_DT_HOUR = [
@@ -269,7 +281,7 @@ class AbacBaseModel
         'label' => 'Hour',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  ['==', '!=', '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
     ];
 
 
@@ -280,14 +292,15 @@ class AbacBaseModel
         'label' => 'Minutes',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  ['==', '!=', '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
     ];
 
     public const ATTRIBUTE_LIST = [
         self::ATTR_USER_USERNAME,
         self::ATTR_USER_ROLES,
-        self::ATTR_USER_PROJECTS,
+      //  self::ATTR_USER_PROJECTS,
         self::ATTR_USER_DEPARTMENTS,
+
         self::ATTR_PROJECT_KEY,
 
         self::ATTR_REQ_CONTROLLER,
@@ -312,6 +325,17 @@ class AbacBaseModel
      */
     public static function getDefaultAttributeList(): array
     {
-        return self::ATTRIBUTE_LIST;
+        $attributeList = self::ATTRIBUTE_LIST;
+
+        $ug = self::ATTR_USER_GROUPS;
+        $up = self::ATTR_USER_PROJECTS;
+
+        $ug['values'] = UserGroup::getEnvList();
+        $up['values'] = Project::getEnvList();
+
+        $attributeList[] = $ug;
+        $attributeList[] = $up;
+
+        return $attributeList;
     }
 }

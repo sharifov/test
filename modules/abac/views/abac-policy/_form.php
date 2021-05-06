@@ -138,7 +138,7 @@ $operators = json_encode(Yii::$app->abac->getOperators());
 
 
                     <?php if ($model->getActionList()) : ?>
-                        <?php echo Html::a('Show / hide Action List', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-action-list']) ?>
+                        <?php //echo Html::a('Show / hide Action List', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-action-list']) ?>
                         <div id="div-action-list" style="display: none">
                             <pre><?php \yii\helpers\VarDumper::dump($model->getActionList(), 10, true) ?></pre>
                         </div>
@@ -165,8 +165,13 @@ $operators = json_encode(Yii::$app->abac->getOperators());
 
                     <?php if ($filtersData) : ?>
                         <div id="builder" style="width: 100%"></div>
-                        <?=Html::button('Validate rules', ['class' => 'btn sm-btn btn-warning', 'id' => 'btn-getcode'])?>
-                        <?= $form->field($model, 'ap_subject_json')->textarea(['rows' => 8, 'id' => 'ap_subject_json', 'readonly' => true]) ?>
+                        <br>
+                        <?php echo Html::a('Show / hide JSON rules', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-json-rules']) ?>
+                        <?=Html::button('<i class="fa fa-check-square-o"></i> Validate rules', ['class' => 'btn btn-sm btn-warning', 'id' => 'btn-getcode'])?>
+
+                        <div id="div-json-rules" style="display: none">
+                            <?= $form->field($model, 'ap_subject_json')->textarea(['rows' => 8, 'id' => 'ap_subject_json', 'readonly' => true]) ?>
+                        </div>
                     <?php else : ?>
                         <div class="alert alert-warning" role="alert">
                             <strong>Warning</strong>: ATTRIBUTE list (Filter data) for this object is empty!
@@ -250,6 +255,10 @@ $jsCode2 = <<<JS
         return false;
     });
     
+     $('body').on('click', '#btn-div-json-rules', function() {
+        $('#div-json-rules').toggle();
+        return false;
+    });
 
     function getBuilder()
     {

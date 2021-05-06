@@ -7,7 +7,10 @@ use modules\abac\src\entities\AbacInterface;
 
 class OrderAbacObject extends AbacBaseModel implements AbacInterface
 {
+    /** NAMESPACE */
     private const NS = 'order/order/';
+
+    /** --------------- PERMISSIONS --------------------------- */
 
     /** ALL PERMISSIONS */
     public const ALL = self::NS . '*';
@@ -41,7 +44,7 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
 
 
 
-
+    /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ACT_ALL       => self::ACT_ALL,
         self::ACT_CREATE    => self::ACT_CREATE,
@@ -66,13 +69,14 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_CASE      => self::OBJ_CASE,
     ];
 
-
+    /** --------------- ACTIONS --------------------------- */
     public const ACTION_ACCESS  = 'access';
     public const ACTION_CREATE  = 'create';
     public const ACTION_READ    = 'read';
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
 
+    /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ACT_ALL       => [self::ACTION_ACCESS, self::ACTION_CREATE,
             self::ACTION_READ, self::ACTION_UPDATE, self::ACTION_DELETE],
@@ -80,13 +84,16 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_READ      => [self::ACTION_ACCESS, self::ACTION_READ],
         self::ACT_UPDATE    => [self::ACTION_ACCESS, self::ACTION_UPDATE],
         self::ACT_DELETE    => [self::ACTION_ACCESS, self::ACTION_DELETE],
+        self::OBJ_LEAD      => [self::ACTION_ACCESS, self::ACTION_READ],
     ];
 
 
+    /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_CREATE    =>  [
             [
-                'id' => self::NS . '/test1',
+                'id' => self::NS . 'test1',
+                'field' => 'test1',
                 'label' => 'Test Attr1',
                 'type'  => self::ATTR_TYPE_INTEGER,
                 //'value' => true // boolean
@@ -104,12 +111,26 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
             ],
 
             [
-                'id' => self::NS . '/test2',
+                'id' => self::NS . 'test2',
+                'field' => 'test2',
                 'label' => 'Test Attr2',
                 'type' => 'string',
-                'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN, self::OP_NOT_IN, '==', '!=', self::OP_MATCH]
+                'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN,
+                    self::OP_NOT_IN, self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_MATCH]
             ],
-        ]
+        ],
+
+        self::OBJ_LEAD    =>  [
+            [
+                'id' => self::NS . 'n',
+                'field' => 'n',
+                'label' => 'N',
+                'type' => self::ATTR_TYPE_INTEGER,
+                'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+                    self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+            ],
+        ],
+
     ];
 
     /**

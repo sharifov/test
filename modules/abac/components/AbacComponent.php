@@ -9,6 +9,7 @@
 
 namespace modules\abac\components;
 
+use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
 use Yii;
@@ -40,7 +41,7 @@ class AbacComponent extends Component
 
     public string $abacModelPath = '@common/config/casbin/abac_model.conf';
 
-    private $enforser;
+    private Enforcer $enforser;
 
     private ?array $objectList = null;
     private ?array $objectActionList = null;
@@ -50,12 +51,16 @@ class AbacComponent extends Component
     public function init(): void
     {
         parent::init();
+        $policyListContent = $this->getPolicyListContent();
+        //$policyListContent = file_get_contents(Yii::getAlias("@common/config/casbin/policy_list.csv"));
+
+        $adp = CasbinCacheAdapter::newAdapter($policyListContent);
 
         $this->enforser = new Enforcer(
             Yii::getAlias($this->abacModelPath),
-            Yii::getAlias("@common/config/casbin/policy_list.csv")
+            $adp
+            //Yii::getAlias("@common/config/casbin/policy_list.csv")
         );
-        //$this->initRequest();
     }
 
     /**
@@ -100,12 +105,19 @@ class AbacComponent extends Component
         return $obj;
     }
 
-    public function can(\stdClass $subject, string $object, string $action): bool
+    /**
+     * @param \stdClass $subject
+     * @param string $object
+     * @param string $action
+     * @return bool
+     * @throws \Casbin\Exceptions\CasbinException
+     */
+    final public function can(\stdClass $subject, string $object, string $action): bool
     {
 
         // VarDumper::dump($obj, 10, true);        exit;
 
-       // $sub = new \stdClass();
+        // $sub = new \stdClass();
         $subject->env = $this->getEnv();
         //$sub->data = $subject;
 
@@ -117,7 +129,7 @@ class AbacComponent extends Component
 
 
 
-    public function getObjectList(): array
+    final public function getObjectList(): array
     {
         if ($this->objectList === null) {
             $objectList = [];
@@ -135,7 +147,7 @@ class AbacComponent extends Component
         return $this->objectList;
     }
 
-    public function getObjectActionList(): array
+    final public function getObjectActionList(): array
     {
         if ($this->objectActionList === null) {
             $list = [];
@@ -153,7 +165,7 @@ class AbacComponent extends Component
         return $this->objectActionList;
     }
 
-    public function getObjectAttributeList(): array
+    final public function getObjectAttributeList(): array
     {
         if ($this->objectAttributeList === null) {
             $list = [];
@@ -174,7 +186,7 @@ class AbacComponent extends Component
     /**
      * @return array
      */
-    public function getDefaultAttributeList(): array
+    final public function getDefaultAttributeList(): array
     {
         if ($this->defaultAttributeList === null) {
             $this->defaultAttributeList = AbacBaseModel::getDefaultAttributeList();
@@ -187,11 +199,11 @@ class AbacComponent extends Component
     /**
      * @return array
      */
-    public function getOperators(): array
+    final public function getOperators(): array
     {
         $operators = [
-        'equal',
-        'not_equal',
+            AbacBaseModel::OP_EQUAL,
+            AbacBaseModel::OP_NOT_EQUAL,
         'in',
         'not_in',
         'less',
@@ -211,8 +223,8 @@ class AbacComponent extends Component
         'is_null',
         'is_not_null'];
 
-        $operators[] = ['type' => '==', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-        $operators[] = ['type' => '!=', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => AbacBaseModel::OP_EQUAL2, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => AbacBaseModel::OP_NOT_EQUAL2, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
         $operators[] = ['type' => '<=', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
         $operators[] = ['type' => '>=', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
         $operators[] = ['type' => '<', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
@@ -229,7 +241,7 @@ class AbacComponent extends Component
      * @param string|null $object
      * @return array
      */
-    public function getActionListByObject(?string $object = null): array
+    final public function getActionListByObject(?string $object = null): array
     {
         $data = [];
         if ($object) {
@@ -247,7 +259,7 @@ class AbacComponent extends Component
      * @param string|null $object
      * @return array
      */
-    public function getAttributeListByObject(?string $object = null): array
+    final public function getAttributeListByObject(?string $object = null): array
     {
         $defaultList = $this->getDefaultAttributeList();
         $objList = [];
@@ -265,7 +277,7 @@ class AbacComponent extends Component
     /**
      * @return string
      */
-    public function getPolicyListContentWOCache(): string
+    final public function getPolicyListContentWOCache(): string
     {
         $rows = [];
         $policyModel = AbacPolicy::find()->select([

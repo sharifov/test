@@ -15,6 +15,7 @@ use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -72,8 +73,11 @@ use common\components\validators\IsArrayValidator;
  */
 class Project extends \yii\db\ActiveRecord
 {
-    private ContactInfo $_contactInfo;
 
+    public const CACHE_KEY = 'projects';
+    public const CACHE_TAG_DEPENDENCY = 'projects-tag-dependency';
+
+    private ContactInfo $_contactInfo;
     private ?Params $params = null;
 
     /**
@@ -647,4 +651,64 @@ class Project extends \yii\db\ActiveRecord
     {
         return $this->hasMany(VisitorLog::class, ['vl_project_id' => 'id']);
     }
+
+    /**
+     * @return array
+     */
+    public static function getEnvListWOCache(): array
+    {
+        $data = self::find()->where(['IS NOT', 'project_key', null])->orderBy(['name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'project_key', 'name');
+    }
+
+
+    /**
+     * @return array
+     */
+    public static function getEnvList(): array
+    {
+        TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        if (self::CACHE_KEY) {
+            $list = Yii::$app->cache->get(self::CACHE_KEY);
+            if ($list === false) {
+                $list = self::getEnvListWOCache();
+
+                Yii::$app->cache->set(
+                    self::CACHE_KEY,
+                    $list,
+                    0,
+                    new TagDependency(['tags' => self::CACHE_TAG_DEPENDENCY])
+                );
+            }
+        } else {
+            $list = self::getEnvListWOCache();
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (self::CACHE_TAG_DEPENDENCY) {
+            TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        }
+    }
+
+    /**
+     *
+     */
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        if (self::CACHE_TAG_DEPENDENCY) {
+            TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        }
+    }
+
 }

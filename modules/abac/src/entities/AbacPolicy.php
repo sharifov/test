@@ -147,6 +147,22 @@ class AbacPolicy extends ActiveRecord
     }
 
     /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        $cacheTagDependency = Yii::$app->abac->getCacheTagDependency();
+        if ($cacheTagDependency) {
+            TagDependency::invalidate(Yii::$app->cache, $cacheTagDependency);
+        }
+        return true;
+    }
+
+    /**
      * @return string
      */
     public function getActionListById(): string

@@ -9,6 +9,7 @@ use Yii;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -32,6 +33,9 @@ use yii\helpers\ArrayHelper;
  */
 class UserGroup extends ActiveRecord
 {
+    public const CACHE_KEY = 'user_group';
+    public const CACHE_TAG_DEPENDENCY = 'user_group-tag-dependency';
+
     /**
      * @return string
      */
@@ -154,6 +158,9 @@ class UserGroup extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
+        if (self::CACHE_TAG_DEPENDENCY) {
+            TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        }
         if ($insert) {
             NativeEventDispatcher::recordEvent(UserGroupEvents::class, UserGroupEvents::INSERT, [UserGroupEvents::class, 'webHookInsert'], $this->exportData());
             NativeEventDispatcher::trigger(UserGroupEvents::class, UserGroupEvents::INSERT);
@@ -190,6 +197,9 @@ class UserGroup extends ActiveRecord
     public function afterDelete(): void
     {
         parent::afterDelete();
+        if (self::CACHE_TAG_DEPENDENCY) {
+            TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        }
         NativeEventDispatcher::trigger(UserGroupEvents::class, UserGroupEvents::DELETE);
     }
 
@@ -215,4 +225,39 @@ class UserGroup extends ActiveRecord
         $data = self::find()->orderBy(['ug_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'ug_id', 'ug_name');
     }
+
+    /**
+     * @return array
+     */
+    public static function getEnvListWOCache(): array
+    {
+        $data = self::find()->orderBy(['ug_name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'ug_name', 'ug_name');
+    }
+
+
+    /**
+     * @return array
+     */
+    public static function getEnvList(): array
+    {
+        if (self::CACHE_KEY) {
+            $list = Yii::$app->cache->get(self::CACHE_KEY);
+            if ($list === false) {
+                $list = self::getEnvListWOCache();
+
+                Yii::$app->cache->set(
+                    self::CACHE_KEY,
+                    $list,
+                    0,
+                    new TagDependency(['tags' => self::CACHE_TAG_DEPENDENCY])
+                );
+            }
+        } else {
+            $list = self::getEnvListWOCache();
+        }
+
+        return $list;
+    }
+
 }
