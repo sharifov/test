@@ -257,14 +257,23 @@ $formatter = new \common\components\i18n\Formatter();
                                         <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
                                         <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
                                         <td>
-                                            <?php
-                                            echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
-                                                'data-order-id' => $order->or_id,
-                                                'data-product-quote-id' => $quote->pq_id,
-                                                'class' => 'btn-delete-quote-from-order',
-                                                'data-url' => Url::to(['/order/order-product/delete-ajax'])
-                                            ]);
-                                            ?>
+
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-bars"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <div class="dropdown-divider"></div>
+                                                    <?php echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Delete', null, [
+                                                            'data-order-id' => $order->or_id,
+                                                            'data-product-quote-id' => $quote->pq_id,
+                                                            'class' => 'dropdown-item btn-delete-quote-from-order',
+                                                            'data-url' => Url::to(['/order/order-product/delete-ajax'])
+                                                        ]);
+                                                    ?>
+                                                </div>
+                                            </div>
+
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
