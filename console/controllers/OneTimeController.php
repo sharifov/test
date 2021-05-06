@@ -1096,7 +1096,7 @@ class OneTimeController extends Controller
             ->andWhere(new Expression('log.cl_id = log.cl_group_id'))
             ->andWhere(['log.cl_type_id' => Call::CALL_TYPE_IN])
             ->andWhere(new Expression('log.cl_project_id != client.cl_project_id'))
-            ->with(['case', 'lead'])
+            ->with(['case.client', 'lead.client'])
             ->all();
 
         $count = count($logs);
@@ -1106,9 +1106,9 @@ class OneTimeController extends Controller
 
         foreach ($logs as $log) {
             $clientId = null;
-            if ($log->lead && $log->lead->client_id) {
+            if ($log->lead && $log->lead->client_id && $log->lead->client->cl_project_id === $log->cl_project_id) {
                 $clientId = $log->lead->client_id;
-            } elseif ($log->case && $log->case->cs_client_id) {
+            } elseif ($log->case && $log->case->cs_client_id && $log->case->client->cl_project_id === $log->cl_project_id) {
                 $clientId = $log->case->cs_client_id;
             } else {
                 $client = ClientsQuery::oneByPhoneAndProject($log->cl_phone_from, $log->cl_project_id, null);
