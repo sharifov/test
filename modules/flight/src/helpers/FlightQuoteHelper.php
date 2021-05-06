@@ -1220,6 +1220,22 @@ class FlightQuoteHelper
         return new QuoteNgsDataDto();
     }
 
+    public static function getMainAirline(FlightQuote $flightQuote): array
+    {
+        $result = [];
+        if ($flightQuote->flightQuoteFlights) {
+            foreach ($flightQuote->flightQuoteFlights as $key => $flightQuoteFlight) {
+                $result[$key]['code'] = $flightQuoteFlight->fqf_main_airline ?? '';
+                $result[$key]['name'] = $flightQuoteFlight->mainAirline->name ?? '';
+            }
+            return $result;
+        }
+        $result[0]['code'] = $flightQuote->fq_main_airline ?? '';
+        $result[0]['name'] = $flightQuote->mainAirline->name ?? '';
+
+        return $result;
+    }
+
     /**
      * @param DateTime $departureDateTime
      * @param DateTime $arrivalDateTime
