@@ -1,6 +1,8 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\components\grid\project\ProjectColumn;
+use common\components\grid\UserColumn;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -28,9 +30,21 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
-            'prl_project_id:projectName',
-            'prl_related_project_id:projectName',
-            'prl_created_user_id:userName',
+            [
+                'class' => ProjectColumn::class,
+                'attribute' => 'prl_project_id',
+                'relation' => 'prlProject',
+            ],
+            [
+                'class' => ProjectColumn::class,
+                'attribute' => 'prl_related_project_id',
+                'relation' => 'prlRelatedProject',
+            ],
+            [
+                'class' => UserColumn::class,
+                'attribute' => 'prl_created_user_id',
+                'relation' => 'prlCreatedUser',
+            ],
             ['class' => DateTimeColumn::class, 'attribute' => 'prl_created_dt'],
 
             ['class' => ActionColumn::class],
