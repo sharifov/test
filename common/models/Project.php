@@ -710,5 +710,4 @@ class Project extends \yii\db\ActiveRecord
             TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
         }
     }
-
 }

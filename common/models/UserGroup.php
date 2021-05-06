@@ -259,5 +259,4 @@ class UserGroup extends ActiveRecord
 
         return $list;
     }
-
 }
