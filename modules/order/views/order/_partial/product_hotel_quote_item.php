@@ -351,7 +351,7 @@ JS;
                                 <td><?= Html::encode($room->hqr_amount) ?></td>
                                 <td><?= Html::encode($room->hqr_system_mark_up) ?></td>
                                 <td>
-                                    <?= Editable::widget([
+                                    <!-- <?/*= Editable::widget([
                                         'name' => 'extra_markup[' . $room->hqr_id . ']',
                                         'asPopover' => false,
                                         'pjaxContainerId' => 'pjax-product-quote-' . $model->pq_id,
@@ -368,7 +368,8 @@ JS;
                                         'formOptions' => [
                                             'action' => Url::toRoute(['/hotel/hotel-quote/ajax-update-agent-markup'])
                                         ]
-                                    ]) ?>
+                                    ]) */?>-->
+                                    <?= number_format($room->hqr_agent_mark_up, 2) ?>
                                 </td>
                                 <td><?= Html::encode($room->hqr_service_fee_percent) ?>%</td>
                                 <td><?= $sfs ?></td>
