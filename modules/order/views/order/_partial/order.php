@@ -257,14 +257,33 @@ $formatter = new \common\components\i18n\Formatter();
                                         <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
                                         <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
                                         <td>
-                                            <?php
-                                            echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
-                                                'data-order-id' => $order->or_id,
-                                                'data-product-quote-id' => $quote->pq_id,
-                                                'class' => 'btn-delete-quote-from-order',
-                                                'data-url' => Url::to(['/order/order-product/delete-ajax'])
-                                            ]);
-                                            ?>
+
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-bars"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <?php if ($quote->pq_status_id == ProductQuoteStatus::ERROR && $quote->isHotel()) : ?>
+                                                        <?php echo Html::a('<i class="glyphicon glyphicon-plus-sign text-success" title="Create"></i> Create Failed Booking Lead', null, [
+                                                            'data-product-quote-id' => $quote->pq_id,
+                                                            'data-product-id' => $quote->pq_product_id,
+                                                            'class' => 'dropdown-item btn-create-booking-failed-lead',
+                                                            'data-url' => Url::to(['/order/order-product/create-lead-booking-fail'])
+                                                        ]);
+                                                        ?>
+                                                    <?php endif;?>
+
+                                                    <div class="dropdown-divider"></div>
+                                                    <?php echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Delete', null, [
+                                                            'data-order-id' => $order->or_id,
+                                                            'data-product-quote-id' => $quote->pq_id,
+                                                            'class' => 'dropdown-item btn-delete-quote-from-order',
+                                                            'data-url' => Url::to(['/order/order-product/delete-ajax'])
+                                                        ]);
+                                                    ?>
+                                                </div>
+                                            </div>
+
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -625,6 +644,42 @@ $js = <<<JS
             $('#preloader').addClass('d-none');
         });
     });
+    
+    $('body').off('click', '.btn-create-booking-failed-lead').on('click', '.btn-create-booking-failed-lead', function (e) {
+        e.preventDefault();
+        if(!confirm('Are you sure you want Create Failed Booking Lead?')) {
+            return false;
+        }
+        
+        let menu = $(this);
+        let productQuoteId = menu.data('product-quote-id');       
+        let productId = menu.data('product-id');       
+        let url = menu.data('url');
+        $('#preloader').removeClass('d-none');
+        
+        $.ajax({
+            url: url,
+            type: 'post',
+            data: {'product_quote_id': productQuoteId, 'product_id': productId},
+            dataType: 'json'
+        })
+        .done(function(data) {
+            if (data.error) {
+                 //createNotify('Error: delete quote from order', data.error, 'error');
+            } else {
+                //pjaxReload({container: '#pjax-order-view-' + orderId});
+                createNotify('Create Failed Booking Lead', data.message, 'success');
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log({jqXHR : jqXHR, textStatus : textStatus, errorThrown : errorThrown}); 
+            createNotify('Error', 'Server error. Try again later.', 'error');
+        })
+        .always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
 JS;
 $this->registerJs($js, yii\web\View::POS_END);
 
