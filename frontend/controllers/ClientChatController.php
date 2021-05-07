@@ -2481,7 +2481,7 @@ class ClientChatController extends FController
                     if ($form->toArchive) {
                         foreach ($form->chatIds as $chatId) {
                             /** @var ClientChat $chat  */
-                            if ($chat = ClientChat::findOne(['cch_id' => $chatId]) && !$chat->isInClosedStatusGroup()) {
+                            if (($chat = ClientChat::findOne(['cch_id' => $chatId])) && !$chat->isInClosedStatusGroup()) {
                                 $this->clientChatService->closeFromMultipleUpdate($chatId, Auth::user());
                             } else {
                                 $notUpdatedChats[] = $chatId;
