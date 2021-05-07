@@ -19,4 +19,6 @@ class ApiCodeException
     public const CLIENT_CHAT_FEEDBACK_CREATE_FAILED = Module::API . 109;
     public const UNEXPECTED_ERROR = Module::API . 110;
     public const GET_DATA_NOT_LOADED = Module::API . 111;
+
+    public const COMMUNICATION_ERROR = Module::API . 120;
 }

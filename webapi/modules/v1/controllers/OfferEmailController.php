@@ -15,9 +15,11 @@ use sales\model\airportLang\helpers\AirportLangHelper;
 use sales\repositories\lead\LeadRepository;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
+use webapi\src\ApiCodeException;
 use webapi\src\forms\quote\SendQuoteApiForm;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
+use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\MessageMessage;
@@ -154,7 +156,8 @@ class OfferEmailController extends ApiBaseController
             );
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($sendQuoteApiForm->getErrors())
+                new ErrorsMessage($sendQuoteApiForm->getErrors()),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
             ));
         }
 
@@ -191,10 +194,10 @@ class OfferEmailController extends ApiBaseController
                     ($responseDecoded = JsonHelper::decode($mailPreview['error'])) &&
                     ArrayHelper::keyExists('message', $responseDecoded)
                 ) {
-                    $errorsMessage[] = str_replace('"', "'", $responseDecoded['message']);
-                    throw new \DomainException('Communication error. MailPreview Service');
+                    $errorsMessage[] = 'Communication error. ' . str_replace('"', "'", $responseDecoded['message']);
+                    throw new \DomainException('Communication error. MailPreview Service', ApiCodeException::COMMUNICATION_ERROR);
                 }
-                throw new \DomainException(VarDumper::dumpAsString($mailPreview['error']));
+                throw new \DomainException('Communication error. ' . VarDumper::dumpAsString($mailPreview['error']), ApiCodeException::COMMUNICATION_ERROR);
             }
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
@@ -220,10 +223,10 @@ class OfferEmailController extends ApiBaseController
                     ($responseDecoded = JsonHelper::decode($mailResponse['error'])) &&
                     ArrayHelper::keyExists('message', $responseDecoded)
                 ) {
-                    $errorsMessage[] = str_replace('"', "'", $responseDecoded['message']);
-                    throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
+                    $errorsMessage[] = 'Communication error. ' . str_replace('"', "'", $responseDecoded['message']);
+                    throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.', ApiCodeException::COMMUNICATION_ERROR);
                 }
-                throw new \DomainException(VarDumper::dumpAsString($mailResponse['error']));
+                throw new \DomainException('Communication error. ' . VarDumper::dumpAsString($mailResponse['error']), ApiCodeException::COMMUNICATION_ERROR);
             }
 
             if (!$lead->client_id) {
@@ -237,7 +240,8 @@ class OfferEmailController extends ApiBaseController
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage()),
-                new ErrorsMessage($errorsMessage)
+                new ErrorsMessage($errorsMessage),
+                new CodeMessage($throwable->getCode())
             ));
         }
 
