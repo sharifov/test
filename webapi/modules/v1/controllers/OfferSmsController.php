@@ -129,7 +129,7 @@ class OfferSmsController extends ApiBaseController
      *      "type": "yii\\web\\BadRequestHttpException"
      *   }
      */
-    public function actionSendQuote(): Response
+    public function actionSendQuote()
     {
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
