@@ -679,16 +679,13 @@ class Project extends \yii\db\ActiveRecord
         return $this->hasOne(ProjectRelation::class, ['prl_related_project_id' => 'id']);
     }
 
-    public function getRelatedProjectIds(bool $includeMain = false): array
+    public function getRelatedProjectIds(): array
     {
         $result = [];
         if ($this->projectRelations) {
             foreach ($this->projectRelations as $projectRelations) {
                 $result[] = $projectRelations->prl_related_project_id;
             }
-        }
-        if ($this->projectMainRelation) {
-            $result[] = $this->projectMainRelation->prl_project_id;
         }
         return $result;
     }
