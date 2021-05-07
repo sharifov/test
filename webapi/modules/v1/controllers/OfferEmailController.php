@@ -139,6 +139,7 @@ class OfferEmailController extends ApiBaseController
         $post = Yii::$app->request->post();
         $responseData = [];
         $sendQuoteApiForm = new SendQuoteApiForm();
+        $errorsMessage = [];
 
         if (!$sendQuoteApiForm->load($post)) {
             return $this->endApiLog($apiLog, new ErrorResponse(
@@ -186,6 +187,13 @@ class OfferEmailController extends ApiBaseController
             );
 
             if ($mailPreview['error'] !== false) {
+                if (
+                    ($responseDecoded = JsonHelper::decode($mailPreview['error'])) &&
+                    ArrayHelper::keyExists('message', $responseDecoded)
+                ) {
+                    $errorsMessage[] = str_replace('"', "'", $responseDecoded['message']);
+                    throw new \DomainException('Communication error. MailPreview Service');
+                }
                 throw new \DomainException(VarDumper::dumpAsString($mailPreview['error']));
             }
 
@@ -205,7 +213,18 @@ class OfferEmailController extends ApiBaseController
                 $mailPreview['data']['email_body_html'],
                 $client->id
             );
-            self::sendEmail($mail);
+
+            $mailResponse = $mail->sendMail();
+            if ($mailResponse['error'] !== false) {
+                if (
+                    ($responseDecoded = JsonHelper::decode($mailResponse['error'])) &&
+                    ArrayHelper::keyExists('message', $responseDecoded)
+                ) {
+                    $errorsMessage[] = str_replace('"', "'", $responseDecoded['message']);
+                    throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
+                }
+                throw new \DomainException(VarDumper::dumpAsString($mailResponse['error']));
+            }
 
             if (!$lead->client_id) {
                 $lead->client_id = $client->id;
@@ -214,10 +233,11 @@ class OfferEmailController extends ApiBaseController
 
             $responseData['result'] = 'Email sending. Mail ID(' . $mail->e_id . ')';
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable, true), 'OfferEmailController:actionSendQuote:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'OfferEmailController:actionSendQuote:Throwable');
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage($throwable->getMessage())
+                new MessageMessage($throwable->getMessage()),
+                new ErrorsMessage($errorsMessage)
             ));
         }
 
@@ -264,15 +284,6 @@ class OfferEmailController extends ApiBaseController
         $mail->e_message_id = $mail->generateMessageId();
         $mail->save();
         return $mail;
-    }
-
-    private static function sendEmail(Email $mail): void
-    {
-        $mailResponse = $mail->sendMail();
-
-        if ($mailResponse['error'] !== false) {
-            throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
-        }
     }
 
     /**
