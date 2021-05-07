@@ -453,6 +453,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
                 ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+                ['label' => 'Phone Blacklist Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
