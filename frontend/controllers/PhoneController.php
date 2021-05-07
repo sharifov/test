@@ -797,7 +797,7 @@ class PhoneController extends FController
             $data = [];
 
             if ($type === 'user') {
-                if (!Auth::can('PhoneWidget_TransferToUser')) {
+                if (!Auth::can('PhoneWidget_TransferToUser', ['call' => $originCall])) {
                     throw new ForbiddenHttpException('Access denied.');
                 }
                 $user = Employee::findOne($id);
