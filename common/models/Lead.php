@@ -11,6 +11,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
 use DateTime;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
@@ -3945,6 +3946,7 @@ Reason: {reason}',
      * @param $projectContactInfo
      * @param string|null $lang
      * @return array
+     * @throws \Exception
      */
     public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = []): array
     {
@@ -3957,7 +3959,6 @@ Reason: {reason}',
                 $mailFrom = $upp->upp_email;
             }*/
         }
-
 
         if ($quoteIds && is_array($quoteIds)) {
             foreach ($quoteIds as $qid) {
@@ -3979,8 +3980,15 @@ Reason: {reason}',
 
                     $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2($lang));
 
-                    if ($providerProjects = QuoteProviderProjectHelper::getProviderProjects($quoteModel)) {
-                        $quoteItem['provider'] = $providerProjects;
+                    if ($quoteModel->providerProject && $quoteModel->providerProject->contact_info) {
+                        $providerProjectContactInfo = JsonHelper::decode($quoteModel->providerProject->contact_info);
+                        $quoteItem['provider'] = [
+                            'name' => ArrayHelper::getValue($quoteModel->providerProject, 'name', ''),
+                            'url' => ArrayHelper::getValue($quoteModel->providerProject, 'link', 'https://'),
+                            'address' => ArrayHelper::getValue($providerProjectContactInfo, 'address', ''),
+                            'phone' => ArrayHelper::getValue($providerProjectContactInfo, 'phone', ''),
+                            'email' => ArrayHelper::getValue($providerProjectContactInfo, 'email', ''),
+                        ];
                     }
 
                     $content_data['quotes'][] = $quoteItem;
