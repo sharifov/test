@@ -460,7 +460,11 @@ class QuoteController extends ApiBaseController
         }
 
         if ($this->apiProject) {
-            $projectIds = ArrayHelper::merge([$this->apiProject->id], $this->apiProject->getRelatedProjectIds());
+            $projectIds = [$this->apiProject->id];
+            if ($this->apiProject->projectMainRelation) {
+                $projectIds = ArrayHelper::merge($projectIds, [$this->apiProject->projectMainRelation->prl_project_id]);
+            }
+
             $model = Quote::getQuoteByUidAndProjects($uid, $projectIds);
         } else {
             $model = Quote::find()->where(['uid' => $uid])->one();
