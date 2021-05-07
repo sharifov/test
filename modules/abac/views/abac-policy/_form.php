@@ -45,7 +45,7 @@ $rulesDataStr = json_encode($rulesData);
 //$rulesDataStr = $model->ap_subject_json ?: '{[]}';
 $filtersData = $model->getObjectAttributeList();
 $filtersDataStr = json_encode($filtersData);
-$operators = json_encode(Yii::$app->abac->getOperators());
+$operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators());
 
 ?>
 <style>

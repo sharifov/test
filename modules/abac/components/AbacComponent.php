@@ -17,12 +17,13 @@ use yii\base\Component;
 use yii\caching\TagDependency;
 use yii\httpclient\Request;
 use Casbin\Enforcer;
+use modules\abac\src\entities\AbacInterface;
 
 /**
  * Class AbacComponent
  * @package modules\abac\components
  *
- * @property array $modules
+ * @property AbacInterface[] $modules
  * @property bool $cacheEnabled
  * @property string $cacheKey
  * @property string $cacheTagDependency
@@ -128,13 +129,14 @@ class AbacComponent extends Component
     }
 
 
-
+    /**
+     * @return array
+     */
     final public function getObjectList(): array
     {
         if ($this->objectList === null) {
             $objectList = [];
             if ($this->modules) {
-                /** @var \modules\abac\src\entities\AbacInterface $module */
                 foreach ($this->modules as $module) {
                     $objects = $module::getObjectList();
                     if ($objects) {
@@ -147,12 +149,14 @@ class AbacComponent extends Component
         return $this->objectList;
     }
 
+    /**
+     * @return array
+     */
     final public function getObjectActionList(): array
     {
         if ($this->objectActionList === null) {
             $list = [];
             if ($this->modules) {
-                /** @var \modules\abac\src\entities\AbacInterface $module */
                 foreach ($this->modules as $module) {
                     $objects = $module::getObjectActionList();
                     if ($objects) {
@@ -165,12 +169,14 @@ class AbacComponent extends Component
         return $this->objectActionList;
     }
 
+    /**
+     * @return array
+     */
     final public function getObjectAttributeList(): array
     {
         if ($this->objectAttributeList === null) {
             $list = [];
             if ($this->modules) {
-                /** @var \modules\abac\src\entities\AbacInterface $module */
                 foreach ($this->modules as $module) {
                     $objects = $module::getObjectAttributeList();
                     if ($objects) {
@@ -194,48 +200,6 @@ class AbacComponent extends Component
         return $this->defaultAttributeList;
     }
 
-
-
-    /**
-     * @return array
-     */
-    final public function getOperators(): array
-    {
-        $operators = [
-            AbacBaseModel::OP_EQUAL,
-            AbacBaseModel::OP_NOT_EQUAL,
-        'in',
-        'not_in',
-        'less',
-        'less_or_equal',
-        'greater',
-        'greater_or_equal',
-        'between',
-        'not_between',
-        'begins_with',
-        'not_begins_with',
-        'contains',
-        'not_contains',
-        'ends_with',
-        'not_ends_with',
-        'is_empty',
-        'is_not_empty',
-        'is_null',
-        'is_not_null'];
-
-        $operators[] = ['type' => AbacBaseModel::OP_EQUAL2, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-        $operators[] = ['type' => AbacBaseModel::OP_NOT_EQUAL2, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-        $operators[] = ['type' => '<=', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-        $operators[] = ['type' => '>=', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-        $operators[] = ['type' => '<', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-        $operators[] = ['type' => '>', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-
-        $operators[] = ['type' => AbacBaseModel::OP_MATCH, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-        $operators[] = ['type' => AbacBaseModel::OP_IN_ARRAY, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-        $operators[] = ['type' => AbacBaseModel::OP_NOT_IN_ARRAY, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
-
-        return $operators;
-    }
 
     /**
      * @param string|null $object

@@ -10,8 +10,10 @@
 namespace modules\abac\components;
 
 use common\models\Department;
+use common\models\Employee;
 use common\models\Project;
 use common\models\UserGroup;
+use common\models\UserRole;
 
 /**
  * Class AbacBaseModel
@@ -86,12 +88,8 @@ class AbacBaseModel
         'field' => 'env.user.roles',
         'label' => 'User Roles',
         'type' => self::ATTR_TYPE_STRING,
-        'input' => self::ATTR_INPUT_TEXT,
-        /*'input' => self::ATTR_INPUT_SELECT,
-        'values' => [
-            'admin' => 'admin',
-            'agent' => 'agent',
-        ],*/
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
         'multiple' => false,
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
@@ -115,7 +113,7 @@ class AbacBaseModel
         'label' => 'User Departments',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_SELECT,
-        'values' => Department::DEPARTMENT_LIST,
+        'values' => [],
         'multiple' => false,
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
@@ -297,11 +295,11 @@ class AbacBaseModel
 
     public const ATTRIBUTE_LIST = [
         self::ATTR_USER_USERNAME,
-        self::ATTR_USER_ROLES,
-      //  self::ATTR_USER_PROJECTS,
-        self::ATTR_USER_DEPARTMENTS,
+        // self::ATTR_USER_ROLES,
+        // self::ATTR_USER_PROJECTS,
+        // self::ATTR_USER_DEPARTMENTS,
 
-        self::ATTR_PROJECT_KEY,
+        // self::ATTR_PROJECT_KEY,
 
         self::ATTR_REQ_CONTROLLER,
         self::ATTR_REQ_ACTION,
@@ -327,15 +325,100 @@ class AbacBaseModel
     {
         $attributeList = self::ATTRIBUTE_LIST;
 
+        $ur = self::ATTR_USER_ROLES;
         $ug = self::ATTR_USER_GROUPS;
         $up = self::ATTR_USER_PROJECTS;
+        $ud = self::ATTR_USER_DEPARTMENTS;
 
-        $ug['values'] = UserGroup::getEnvList();
-        $up['values'] = Project::getEnvList();
+        $ur['values'] = self::getUserRoleList();
+        $ug['values'] = self::getUserGroupList();
+        $up['values'] = self::getProjectList();
+        $ud['values'] = self::getDepartmentList();
 
+        $attributeList[] = $ur;
         $attributeList[] = $ug;
         $attributeList[] = $up;
+        $attributeList[] = $ud;
 
         return $attributeList;
+    }
+
+
+    /**
+     * @return array
+     */
+    public static function getUserRoleList(): array
+    {
+        return UserRole::getEnvList();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getProjectList(): array
+    {
+        return Project::getEnvList();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getUserGroupList(): array
+    {
+        return UserGroup::getEnvList();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getDepartmentList(): array
+    {
+        return Department::getEnvList();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getOperators(): array
+    {
+        $operators = [
+            self::OP_EQUAL,
+            self::OP_NOT_EQUAL,
+            self::OP_IN,
+            self::OP_NOT_IN,
+            self::OP_LESS,
+            self::OP_LESS_OR_EQUAL,
+
+            self::OP_GREATER,
+            self::OP_GREATER_OR_EQUAL,
+            self::OP_BETWEEN,
+            self::OP_NOT_BETWEEN,
+
+            self::OP_BEGINS_WITH,
+            self::OP_NOT_BEGINS_WITH,
+            self::OP_CONTAINS,
+            self::OP_NOT_CONTAINS,
+
+            self::OP_ENDS_WITH,
+            self::OP_NOT_ENDS_WITH,
+            self::OP_IS_EMPTY,
+            self::OP_IS_NOT_EMPTY,
+
+            self::OP_IS_NULL,
+            self::OP_IS_NOT_NULL,
+        ];
+
+        $operators[] = ['type' => self::OP_EQUAL2, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => self::OP_NOT_EQUAL2, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => '<=', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => '>=', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => '<', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => '>', 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+
+        $operators[] = ['type' => self::OP_MATCH, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => self::OP_IN_ARRAY, 'optgroup' => 'Array', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => self::OP_NOT_IN_ARRAY, 'optgroup' => 'Array', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+
+        return $operators;
     }
 }
