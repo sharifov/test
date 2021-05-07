@@ -188,10 +188,10 @@ class OfferEmailController extends ApiBaseController
 
             if ($mailPreview['error'] !== false) {
                 if (
-                    ($smsResponseDecoded = JsonHelper::decode($mailPreview['error'])) &&
-                    ArrayHelper::keyExists('message', $smsResponseDecoded)
+                    ($responseDecoded = JsonHelper::decode($mailPreview['error'])) &&
+                    ArrayHelper::keyExists('message', $responseDecoded)
                 ) {
-                    $errorsMessage[] = str_replace('"', "'", $smsResponseDecoded['message']);
+                    $errorsMessage[] = str_replace('"', "'", $responseDecoded['message']);
                     throw new \DomainException('Communication error. MailPreview Service');
                 }
                 throw new \DomainException(VarDumper::dumpAsString($mailPreview['error']));
@@ -217,10 +217,10 @@ class OfferEmailController extends ApiBaseController
             $mailResponse = $mail->sendMail();
             if ($mailResponse['error'] !== false) {
                 if (
-                    ($smsResponseDecoded = JsonHelper::decode($mailResponse['error'])) &&
-                    ArrayHelper::keyExists('message', $smsResponseDecoded)
+                    ($responseDecoded = JsonHelper::decode($mailResponse['error'])) &&
+                    ArrayHelper::keyExists('message', $responseDecoded)
                 ) {
-                    $errorsMessage[] = str_replace('"', "'", $smsResponseDecoded['message']);
+                    $errorsMessage[] = str_replace('"', "'", $responseDecoded['message']);
                     throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
                 }
                 throw new \DomainException(VarDumper::dumpAsString($mailResponse['error']));
