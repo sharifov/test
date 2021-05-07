@@ -2,6 +2,7 @@
 
 use common\components\i18n\Formatter;
 use frontend\widgets\clientChat\ClientChatWidgetAsset;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use yii\helpers\Html;
 
 /** @var $this \yii\web\View */
@@ -9,6 +10,7 @@ use yii\helpers\Html;
 /** @var $open bool */
 /** @var $formatter Formatter */
 /** @var $page int */
+/** @var $userChatData UserClientChatData */
 
 ClientChatWidgetAsset::register($this);
 
@@ -24,6 +26,15 @@ $totalRequest = count($access);
                     <?= Html::img('/img/user.png')?>
                 </div>
                 <span id="_cc-box-title">Client Chat Request</span> <br>
+
+                <span class="_chat_status">
+                    <?= Html::input('checkbox', '', '', [
+                        'checked' => !$userChatData->isStatusBusy(),
+                        'class' => 'chat-status-switch',
+                        'data-switchery' => 'true'
+                    ]) ?>
+<!--                    <input type="checkbox" class="js-switch" data-switchery="true">-->
+                </span>
             </div>
         </div>
         <div class="_cc-box-body" id="_cc-box-body">
@@ -51,6 +62,7 @@ $totalRequest = count($access);
 
 <?php
 $url = \yii\helpers\Url::to(['/client-chat/chat-requests']);
+$updateChatStatusUrl = \yii\helpers\Url::to('/client-chat/ajax-update-chat-status');
 $js = <<<JS
     
 let _ccWgStatus = localStorage.getItem('_cc_wg_status');
@@ -97,6 +109,39 @@ $(document).on('click', '#_cc_load_requests', function()
     var ds = new DataStore();
     window.chat = new Chat('$url', ds, $page);
 })(window);
+
+let chatStatusSwitchElem = document.querySelector('.chat-status-switch');
+let chatSwitcher = new Switchery(chatStatusSwitchElem, {size: 'small'});
+
+chatStatusSwitchElem.onchange = function () {
+    $.ajax({
+        url: '$updateChatStatusUrl',
+        type: 'post',
+        dataType: 'json',
+        data: {chatStatus: chatStatusSwitchElem.checked},
+        beforeSend: function () {
+           chatSwitcher.disable(); 
+        },
+        success: function (res) {
+            if (res.error) {
+                createNotify('Error', res.message, 'error');
+            } else {
+                window.chat.db.removeAll();
+                window.chat.firstRequest(0);
+                setTimeout(function () {
+                    openWidget();
+                }, 100);
+            }
+        },
+        complete: function () {
+           chatSwitcher.enable(); 
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+            chatSwitcher.markAsSwitched(!chatStatusSwitchElem.checked);
+        }
+    })
+}
 JS;
 
 $this->registerJs($js);

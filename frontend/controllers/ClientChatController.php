@@ -70,6 +70,7 @@ use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\model\userClientChatData\service\UserClientChatDataService;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
@@ -98,6 +99,7 @@ use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -269,6 +271,7 @@ class ClientChatController extends FController
                     'ajax-multiple-close',
                     'validate-multiple-assign',
                     'validate-multiple-close',
+                    'ajax-update-chat-status'
                 ],
             ],
         ];
@@ -1748,6 +1751,33 @@ class ClientChatController extends FController
             'data' => $widget->fetchItems(),
             'page' => $page + 1,
             'totalItems' => $widget->getTotalItems()
+        ]);
+    }
+
+    public function actionAjaxUpdateChatStatus()
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException('Not POST data', 1);
+        }
+        $chatStatus = Yii::$app->request->post('chatStatus');
+
+        $chatPermission = new ClientChatActionPermission();
+
+        if (!$chatPermission->canUpdateChatStatus()) {
+            throw new ForbiddenHttpException('You do not have access to perform this action');
+        }
+
+        $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => Auth::id()]);
+        if (!$userClientChatData) {
+            throw new NotFoundException('User client chat data not found');
+        }
+
+        $userClientChatData->uccd_chat_status_id = $chatStatus === 'true' ? UserClientChatData::CHAT_STATUS_READY : UserClientChatData::CHAT_STATUS_BUSY;
+        $userClientChatData->save();
+
+        return $this->asJson([
+            'error' => false,
+            'message' => ''
         ]);
     }
 

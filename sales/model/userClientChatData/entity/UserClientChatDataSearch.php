@@ -15,6 +15,7 @@ class UserClientChatDataSearch extends UserClientChatData
             ['uccd_employee_id', 'integer'],
             ['uccd_active', 'boolean'],
             ['uccd_id', 'integer'],
+            ['uccd_chat_status_id', 'integer'],
             ['uccd_updated_user_id', 'integer'],
             [['uccd_created_dt', 'uccd_updated_dt', 'uccd_token_expired'], 'date', 'format' => 'php:Y-m-d'],
             [['uccd_auth_token'], 'string', 'max' => 50],
@@ -51,6 +52,7 @@ class UserClientChatDataSearch extends UserClientChatData
             'uccd_updated_user_id' => $this->uccd_updated_user_id,
             'uccd_auth_token' => $this->uccd_auth_token,
             'uccd_rc_user_id' => $this->uccd_rc_user_id,
+            'uccd_chat_status_id' => $this->uccd_chat_status_id,
         ]);
 
         $query->andFilterWhere(['like', 'uccd_username', $this->uccd_username])

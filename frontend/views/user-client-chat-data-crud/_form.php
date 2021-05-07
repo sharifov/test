@@ -1,6 +1,7 @@
 <?php
 
 use dosamigos\datetimepicker\DateTimePicker;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
@@ -27,6 +28,8 @@ use dosamigos\datepicker\DatePicker;
         <?php echo $form->field($model, 'uccd_token_expired')->widget(DateTimePicker::class, ['clientOptions' => ['format' => 'yyyy-mm-dd hh:ii:ss']]) ?>
 
         <?php echo $form->field($model, 'uccd_active')->dropDownList([1 => 'Yes', 0 => 'No']) ?>
+
+        <?php echo $form->field($model, 'uccd_chat_status_id')->dropDownList(UserClientChatData::getChatStatusList()) ?>
 
         <div class="form-group">
             <?php echo Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

@@ -82,6 +82,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => [1 => 'Yes', 0 => 'No'],
                 'format' => 'raw',
             ],
+            [
+                'attribute' => 'uccd_chat_status_id',
+                'value' => static function (UserClientChatData $model) {
+                    return $model->chatStatusName();
+                },
+                'filter' => UserClientChatData::getChatStatusList(),
+                'format' => 'raw',
+            ],
             ['class' => DateTimeColumn::class, 'attribute' => 'uccd_created_dt'],
             [
                 'class' => UserSelect2Column::class,
