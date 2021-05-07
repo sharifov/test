@@ -169,6 +169,11 @@ class SettingHelper
         return Yii::$app->params['settings']['order_complete_email_template_key'] ?? 'order_status';
     }
 
+    public static function clientChatUserAccessHistoryDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['client_chat_user_access_history_days'] ?? 5);
+    }
+
     public static function getTimeStartCallUserAccessGeneral(?Department $department, $phone): int
     {
         $key = 'time_start_call_user_access_general';
