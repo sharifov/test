@@ -62,6 +62,7 @@ class FlightRequestApiForm extends Model
             }],
             [['flights'], 'checkFlights'],
 
+            [['options'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['options'], 'checkOptions'],
         ];
     }
@@ -94,7 +95,7 @@ class FlightRequestApiForm extends Model
 
     public function checkOptions($attribute): void
     {
-        if (!empty($this->options) && JsonHelper::isValidJson($this->options) && $options = JsonHelper::decode($this->options)) {
+        if (!empty($this->options) && $options = JsonHelper::decode($this->options)) {
             foreach ($options as $key => $option) {
                 $optionApiForm = new OptionApiForm($option);
                 if (!$optionApiForm->load($option)) {
