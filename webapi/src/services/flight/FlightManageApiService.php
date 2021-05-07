@@ -361,7 +361,7 @@ class FlightManageApiService
             foreach ($flightRequestApiForm->optionApiForms as $key => $optionApiForm) {
                 $productQuoteOption = ProductQuoteOption::create(
                     $newFlightQuote->fq_product_quote_id,
-                    $optionApiForm->productOption->po_id,
+                    $optionApiForm->getProductOption()->po_id,
                     $optionApiForm->pqo_name,
                     $optionApiForm->pqo_description,
                     $optionApiForm->pqo_price,
