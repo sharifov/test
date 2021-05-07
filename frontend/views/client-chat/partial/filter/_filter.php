@@ -31,7 +31,7 @@ use yii\web\JsExpression;
 
 ?>
 
-<?= Html::beginForm(Url::to(['/client-chat/index']), 'GET', ['id' => $filter->getId()]); ?>
+<?= Html::beginForm(Url::to(['/client-chat/dashboard-v2']), 'GET', ['id' => $filter->getId()]); ?>
     <div class="col-md-12" style="margin-top: 10px">
 
         <?php echo Html::hiddenInput(Html::getInputName($filter, 'resetAdditionalFilter'), 0, ['id' => 'resetAdditionalFilter']); ?>

@@ -65,7 +65,7 @@ class FilterShortCodeToLink implements Filter
     private function processChat(): void
     {
         $this->content = preg_replace_callback('|{chat-([\d]+)}|iU', function ($matches) {
-            return Html::a('Chat Link', $this->host . '/client-chat/index?chid=' . $matches[1]);
+            return Html::a('Chat Link', $this->host . '/client-chat/dashboard-v2?chid=' . $matches[1]);
         }, $this->content);
     }
     private function processNotification(): void
