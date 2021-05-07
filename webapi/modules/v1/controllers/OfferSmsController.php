@@ -15,9 +15,11 @@ use sales\model\airportLang\helpers\AirportLangHelper;
 use sales\repositories\lead\LeadRepository;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
+use webapi\src\ApiCodeException;
 use webapi\src\forms\quote\SendSmsQuoteApiForm;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
+use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\MessageMessage;
@@ -150,8 +152,10 @@ class OfferSmsController extends ApiBaseController
                 'OfferSmsController:actionSendQuote:sendQuoteApiForm'
             );
             return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
                 new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($sendQuoteApiForm->getErrors())
+                new ErrorsMessage($sendQuoteApiForm->getErrors()),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
             ));
         }
 
@@ -188,10 +192,10 @@ class OfferSmsController extends ApiBaseController
                     ($smsResponseDecoded = JsonHelper::decode($smsPreview['error'])) &&
                     ArrayHelper::keyExists('message', $smsResponseDecoded)
                 ) {
-                    $errorsMessage[] = str_replace('"', "'", $smsResponseDecoded['message']);
-                    throw new \DomainException('Communication error. SmsPreview Service');
+                    $errorsMessage[] = 'Communication error. ' . str_replace('"', "'", $smsResponseDecoded['message']);
+                    throw new \DomainException('Communication error. SmsPreview Service', ApiCodeException::COMMUNICATION_ERROR);
                 }
-                throw new \DomainException(VarDumper::dumpAsString($smsPreview['error']));
+                throw new \DomainException(VarDumper::dumpAsString($smsPreview['error']), ApiCodeException::COMMUNICATION_ERROR);
             }
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
@@ -234,7 +238,7 @@ class OfferSmsController extends ApiBaseController
 
             if (!$sms->save()) {
                 $errorsMessage[] = $sms->getErrors();
-                throw new \DomainException('Sms model saving is failed');
+                throw new \DomainException('Sms model saving is failed', ApiCodeException::FAILED_FORM_VALIDATE);
             }
 
             $smsResponse = $sms->sendSms();
@@ -243,10 +247,10 @@ class OfferSmsController extends ApiBaseController
                     ($smsResponseDecoded = JsonHelper::decode($smsResponse['error'])) &&
                     ArrayHelper::keyExists('message', $smsResponseDecoded)
                 ) {
-                    $errorsMessage[] = str_replace('"', "'", $smsResponseDecoded['message']);
-                    throw new \DomainException('Communication error. SendSms Service');
+                    $errorsMessage[] = 'Communication error. ' . str_replace('"', "'", $smsResponseDecoded['message']);
+                    throw new \DomainException('Communication error. SendSms Service', ApiCodeException::COMMUNICATION_ERROR);
                 }
-                throw new \DomainException(VarDumper::dumpAsString($smsResponse['error']));
+                throw new \DomainException(VarDumper::dumpAsString($smsResponse['error']), ApiCodeException::COMMUNICATION_ERROR);
             }
 
             if (!$lead->client_id) {
@@ -260,7 +264,8 @@ class OfferSmsController extends ApiBaseController
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage()),
-                new ErrorsMessage($errorsMessage)
+                new ErrorsMessage($errorsMessage),
+                new CodeMessage($throwable->getCode())
             ));
         }
 
