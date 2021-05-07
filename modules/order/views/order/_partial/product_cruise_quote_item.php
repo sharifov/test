@@ -274,7 +274,7 @@ JS;
                         <th><?= $model->cruiseQuote->crq_amount ?></th>
                         <th><?= $model->cruiseQuote->crq_system_mark_up ?></th>
                         <td>
-                            <?= Editable::widget([
+                            <!--<?/*= Editable::widget([
                                 'name' => 'extra_markup[' . $model->cruiseQuote->crq_id . ']',
                                 'asPopover' => false,
                                 'pjaxContainerId' => 'pjax-product-quote-' . $model->pq_id,
@@ -291,7 +291,8 @@ JS;
                                 'formOptions' => [
                                     'action' => Url::toRoute(['/cruise/cruise-quote/ajax-update-agent-markup'])
                                 ]
-                            ]) ?>
+                            ]) */?>-->
+                            <?= number_format($model->cruiseQuote->crq_agent_mark_up, 2)?>
                         </td>
                         <th><?= $model->cruiseQuote->crq_service_fee_percent ?></th>
                         <th><?= $sfs ?></th>
