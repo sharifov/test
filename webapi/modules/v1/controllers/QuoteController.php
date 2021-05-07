@@ -35,6 +35,7 @@ use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
 use sales\services\quote\addQuote\AddQuoteService;
 use sales\services\quote\addQuote\TripService;
+use webapi\src\ApiCodeException;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
@@ -1272,6 +1273,13 @@ class QuoteController extends ApiBaseController
         try {
             $lead = $this->leadRepository->find($form->lead_id);
 
+            if (!$this->apiProject) {
+                throw new \RuntimeException(
+                    'ApiProject not detected. Create quota is not possible.',
+                    ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER
+                );
+            }
+
             $projectProviderId = null;
             if ($form->provider_project_key) {
                 $projectRelation = $this->projectRelationRepository->findByRelatedProjectKey($this->apiProject->id, $form->provider_project_key);
@@ -1414,6 +1422,13 @@ class QuoteController extends ApiBaseController
 
         try {
             $lead = $this->leadRepository->find($form->lead_id);
+
+            if (!$this->apiProject) {
+                throw new \RuntimeException(
+                    'ApiProject not detected. Create quota is not possible.',
+                    ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER
+                );
+            }
 
             $projectProviderId = null;
             if ($form->provider_project_key) {
