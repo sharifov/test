@@ -129,13 +129,14 @@ class OfferSmsController extends ApiBaseController
      *      "type": "yii\\web\\BadRequestHttpException"
      *   }
      */
-    public function actionSendQuote()
+    public function actionSendQuote(): Response
     {
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
         $post = Yii::$app->request->post();
         $responseData = [];
         $sendQuoteApiForm = new SendSmsQuoteApiForm();
+        $errorsMessage = [];
 
         if (!$sendQuoteApiForm->load($post)) {
             return $this->endApiLog($apiLog, new ErrorResponse(
@@ -183,7 +184,14 @@ class OfferSmsController extends ApiBaseController
             );
 
             if ($smsPreview['error'] !== false) {
-                throw new \DomainException($smsPreview['error']);
+                if (
+                    ($smsResponseDecoded = JsonHelper::decode($smsPreview['error'])) &&
+                    ArrayHelper::keyExists('message', $smsResponseDecoded)
+                ) {
+                    $errorsMessage[] = str_replace('"', "'", $smsResponseDecoded['message']);
+                    throw new \DomainException('Communication error. SmsPreview Service');
+                }
+                throw new \DomainException(VarDumper::dumpAsString($smsPreview['error']));
             }
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
@@ -225,11 +233,19 @@ class OfferSmsController extends ApiBaseController
             $sms->s_created_user_id = null;
 
             if (!$sms->save()) {
-                throw new \DomainException(ErrorsToStringHelper::extractFromModel($sms));
+                $errorsMessage[] = $sms->getErrors();
+                throw new \DomainException('Sms model saving is failed');
             }
 
             $smsResponse = $sms->sendSms();
             if (isset($smsResponse['error']) && $smsResponse['error']) {
+                if (
+                    ($smsResponseDecoded = JsonHelper::decode($smsResponse['error'])) &&
+                    ArrayHelper::keyExists('message', $smsResponseDecoded)
+                ) {
+                    $errorsMessage[] = str_replace('"', "'", $smsResponseDecoded['message']);
+                    throw new \DomainException('Communication error. SendSms Service');
+                }
                 throw new \DomainException(VarDumper::dumpAsString($smsResponse['error']));
             }
 
@@ -240,10 +256,11 @@ class OfferSmsController extends ApiBaseController
 
             $responseData['result'] = 'Sms sending. Sms ID(' . $sms->s_id . ')';
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable, true), 'OfferSmsController:actionSendQuote:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'OfferSmsController:actionSendQuote:Throwable');
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage($throwable->getMessage())
+                new MessageMessage($throwable->getMessage()),
+                new ErrorsMessage($errorsMessage)
             ));
         }
 
