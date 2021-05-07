@@ -734,7 +734,6 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public function getJwtTokenCache($username = '', $deleteCache = false)
     {
         $cacheKey = 'jwt_token_' . $username;
-
         if ($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
         }
@@ -743,8 +742,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
         if ($out === false) {
             $out = $this->getJwtToken($username);
 
-            if ($out && isset($out['data']['token']) && $out['data']['token']) {
-                $expired = isset($out['data']['expire']) ? strtotime($out['data']['expire']) - time() : 60 * 30;
+            if ($out && !empty($out['data']['token'])) {
+                $expired = 60 * 15;
+                /*if (!empty($out['data']['expire'])) {
+                    $expired = strtotime($out['data']['expire']) - time();
+                }*/
                 \Yii::$app->cache->set($cacheKey, $out, $expired);
             }
         }
