@@ -143,12 +143,17 @@ JS;
                 'label' => 'Types',
                 'value' => static function (Order $order) {
                     $out = '';
+                    $productIds = [];
                     foreach ($order->productQuotes as $quote) {
+                        if (in_array($quote->pqProduct->pr_id, $productIds)) {
+                            continue;
+                        }
                         $out .= '&nbsp;&nbsp;&nbsp;' . Html::a(
                             '<i class="' . $quote->pqProduct->prType->pt_icon_class . '"></i>',
-                            ['/product/product-quote-crud/view', 'id' => $quote->pq_id],
+                            ['/product/product-crud/view', 'id' => $quote->pqProduct->pr_id],
                             ['target' => '_blank', 'data-pjax' => 0]
                         );
+                        $productIds[] = $quote->pqProduct->pr_id;
                     }
                     return $out;
                 },
