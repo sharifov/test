@@ -2477,17 +2477,25 @@ class ClientChatController extends FController
                     if (!Auth::can('client-chat/multiple/archive/manage')) {
                         throw new ForbiddenHttpException('Access denied', -1);
                     }
+                    $notUpdatedChats = [];
                     if ($form->toArchive) {
                         foreach ($form->chatIds as $chatId) {
-                            if ($chat = ClientChat::findOne(['cch_id' => $chatId])) {
+                            /** @var ClientChat $chat  */
+                            if ($chat = ClientChat::findOne(['cch_id' => $chatId]) && !$chat->isInClosedStatusGroup()) {
                                 $this->clientChatService->closeFromMultipleUpdate($chatId, Auth::user());
+                            } else {
+                                $notUpdatedChats[] = $chatId;
                             }
                         }
                     }
-                    return '<script>sessionStorage.selectedChats = "{}"; 
+                    $response = '<script>sessionStorage.selectedChats = "{}"; 
                         $("#modal-sm").modal("hide"); 
                         createNotify("Success", "Chats updated successfully", "success"); 
                         setTimeout(()=>{window.location.reload();}, 1000);</script>';
+                    if ($notUpdatedChats) {
+                        $response .= "<script>createNotify('Warning', 'Not All chats were updated because they already closed or archived: " . implode(',', $notUpdatedChats) . "')</script>";
+                    }
+                    return $response;
                 } catch (\Throwable $throwable) {
                     $alertMessage .= VarDumper::dumpAsString($throwable->getMessage()) . '<br />';
                     \Yii::error(
