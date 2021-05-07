@@ -27,14 +27,15 @@ $totalRequest = count($access);
                 </div>
                 <span id="_cc-box-title">Client Chat Request</span> <br>
 
-                <span class="_chat_status">
-                    <?= Html::input('checkbox', '', '', [
-                        'checked' => !$userChatData->isStatusBusy(),
-                        'class' => 'chat-status-switch',
-                        'data-switchery' => 'true'
-                    ]) ?>
-<!--                    <input type="checkbox" class="js-switch" data-switchery="true">-->
-                </span>
+                <?php if ($userChatData) : ?>
+                    <span class="_chat_status">
+                        <?= Html::input('checkbox', '', '', [
+                            'checked' => !$userChatData->isStatusBusy(),
+                            'class' => 'chat-status-switch',
+                            'data-switchery' => 'true'
+                        ]) ?>
+                    </span>
+                <?php endif; ?>
             </div>
         </div>
         <div class="_cc-box-body" id="_cc-box-body">
@@ -58,7 +59,7 @@ $totalRequest = count($access);
         </div>
     </a>
 </div>
-<?php // yii\widgets\Pjax::end() ?>
+<?php // yii\widgets\Pjax::end()?>
 
 <?php
 $url = \yii\helpers\Url::to(['/client-chat/chat-requests']);
