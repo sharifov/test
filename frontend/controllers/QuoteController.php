@@ -198,11 +198,14 @@ class QuoteController extends FController
             $key = Yii::$app->request->post('key');
             $keyCache = Yii::$app->request->post('keyCache', '');
             $createFromQuoteSearch = Yii::$app->request->post('createFromQuoteSearch', 0);
-            $projectId = (int) Yii::$app->request->post('projectId');
-
+            $providerProjectId = Yii::$app->request->post('projectId');
             $addQuoteService = Yii::createObject(AddQuoteService::class);
 
             if ($key && $lead) {
+                if ((int) $providerProjectId === (int) $lead->project_id) {
+                    $providerProjectId = null;
+                }
+
                 $keyCache = empty($keyCache) ? sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey()) : $keyCache;
                 $resultSearch = Yii::$app->cacheFile->get($keyCache);
 
@@ -228,7 +231,7 @@ class QuoteController extends FController
                             $quote->employee_name = Yii::$app->user->identity->username;
                             $quote->origin_search_data = json_encode($entry);
                             $quote->gds_offer_id = $entry['gdsOfferId'] ?? null;
-                            $quote->provider_project_id = $projectId ?? null;
+                            $quote->provider_project_id = $providerProjectId;
                             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
                             if (isset($entry['tickets'])) {
