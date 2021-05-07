@@ -634,6 +634,8 @@ class EmployeeSearch extends Employee
             $users->andWhere(['NOT IN', 'id', $subQuery]);
         }
 
+        $users->hasPermission('client-chat/accept-pending');
+
         if ($limit) {
             $users->limit($limit);
 
