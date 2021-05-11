@@ -387,12 +387,10 @@ class QuoteController extends ApiBaseController
                 $projectIds = ArrayHelper::merge($projectIds, [$this->apiProject->projectMainRelation->prl_project_id]);
             }
 
-            $model = Quote::getQuoteByUidAndProjects($uid, $projectIds);
-        } else {
-            $model = Quote::find()->where(['uid' => $uid])->one();
-        }
-
-        if (!$model) {
+            if (!$model = Quote::getQuoteByUidAndProjects($uid, $projectIds)) {
+                throw new NotFoundHttpException('Not found Quote UID (' . $uid . ') ProjectIds (' . implode(',', $projectIds) . ')', 2);
+            }
+        } elseif (!$model = Quote::find()->where(['uid' => $uid])->one()) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $uid, 2);
         }
 
