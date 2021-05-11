@@ -49,6 +49,7 @@ use sales\repositories\NotFoundException;
 use sales\services\call\CallService;
 use sales\services\cleaner\cleaners\CallCleaner;
 use sales\services\cleaner\form\DbCleanerParamsForm;
+use sales\services\phone\blackList\PhoneBlackListManageService;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
@@ -73,6 +74,7 @@ use yii\web\Response;
  * @property CallUserAccessRepository $callUserAccessRepository
  * @property CallNoteRepository $callNoteRepository
  * @property CurrentQueueCallsService $currentQueueCalls
+ * @property PhoneBlackListManageService $phoneBlackListManageService
  */
 class CallController extends FController
 {
@@ -81,6 +83,7 @@ class CallController extends FController
     private $callUserAccessRepository;
     private $callNoteRepository;
     private $currentQueueCalls;
+    private $phoneBlackListManageService;
 
     public function __construct(
         $id,
@@ -90,6 +93,7 @@ class CallController extends FController
         CallUserAccessRepository $callUserAccessRepository,
         CallNoteRepository $callNoteRepository,
         CurrentQueueCallsService $currentQueueCalls,
+        PhoneBlackListManageService $phoneBlackListManageService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -98,6 +102,7 @@ class CallController extends FController
         $this->callUserAccessRepository = $callUserAccessRepository;
         $this->callNoteRepository = $callNoteRepository;
         $this->currentQueueCalls = $currentQueueCalls;
+        $this->phoneBlackListManageService = $phoneBlackListManageService;
     }
 
     public function behaviors()
@@ -1453,13 +1458,24 @@ class CallController extends FController
             throw new MethodNotAllowedHttpException('Request is not post');
         }
 
-        $phone = Yii::$app->request->post('phone');
-
-        $phoneBlackList = PhoneBlacklist::create($phone);
-        if (!$phoneBlackList->save()) {
+        $phone = Yii::$app->request->post('phone', '');
+        try {
+            $phoneBlackList = PhoneBlacklist::findOne(['pbl_phone' => $phone]);
+            if ($phoneBlackList) {
+                $this->phoneBlackListManageService->enableWithExpiredDateTime($phoneBlackList, new \DateTime());
+            } else {
+                $this->phoneBlackListManageService->add($phone, new \DateTime());
+            }
+        } catch (\RuntimeException $e) {
             return $this->asJson([
                 'error' => true,
-                'message' => $phoneBlackList->getErrorSummary(true)[0]
+                'message' => $e->getMessage()
+            ]);
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e, true), 'CallController::actionAjaxAddPhoneBlackList::Throwable');
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Internal server Error'
             ]);
         }
 

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use sales\entities\EventTrait;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -24,6 +25,10 @@ use yii\db\ActiveRecord;
  */
 class PhoneBlacklist extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
+    public const SCENARIO_INSERT = 'insert';
+
     /**
      * @return array
      */
@@ -65,13 +70,14 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
         return [
             ['pbl_phone', 'required'],
             ['pbl_phone', 'string', 'max' => 30],
-            ['pbl_phone', 'unique'],
+            ['pbl_phone', 'unique', 'on' => self::SCENARIO_DEFAULT],
 //            ['pbl_phone', 'filter', 'filter' => static function($value) {
 //                return $value === null ? null : str_replace(['-', ' '], '', trim($value));
 //            }, 'skipOnError' => true],
             ['pbl_phone', 'match', 'pattern' => '/^\+[0-9\.\*]+$/', 'message' => 'The format of "{attribute}" is invalid. Allowed: "+", "[0-9]", ".", "*"'],
             ['pbl_enabled', 'boolean'],
-            ['pbl_expiration_date', 'date', 'format' => 'php:Y-m-d'],
+            ['pbl_expiration_date', 'date', 'format' => 'php:Y-m-d H:i:s'],
+            ['pbl_expiration_date', 'validateExpirationDate', 'on' => self::SCENARIO_INSERT, 'skipOnError' => true],
             ['pbl_description', 'string', 'max' => 255],
         ];
     }
@@ -109,11 +115,31 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
         return new PhoneBlacklistQuery(static::class);
     }
 
-    public static function create(string $phone): self
+    public static function create(string $phone, string $date): self
     {
         $self = new self();
         $self->pbl_phone = $phone;
         $self->pbl_enabled = true;
+        $self->pbl_expiration_date = $date;
         return $self;
+    }
+
+    public function validateExpirationDate(): bool
+    {
+        $row = self::findOne(['pbl_phone' => $this->pbl_phone, 'pbl_enabled' => true]);
+
+        if ($row && $row->pbl_expiration_date) {
+            $expirationDate = new \DateTimeImmutable($row->pbl_expiration_date);
+            $date = new \DateTimeImmutable();
+            if ($date <= $expirationDate) {
+                $this->addError('pbl_expiration_date', 'Еhe expiration time has not yet expired');
+                return false;
+            }
+
+            $this->addError('pbl_phone', 'This phone number already in the blacklist');
+            return false;
+        }
+
+        return true;
     }
 }

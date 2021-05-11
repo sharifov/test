@@ -1,6 +1,7 @@
 <?php
 
 use borales\extensions\phoneInput\PhoneInput;
+use frontend\widgets\DateTimePickerWidget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -29,7 +30,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'pbl_enabled')->checkbox([1 => 'Yes', 0 => 'No']) ?>
 
-    <?= $form->field($model, 'pbl_expiration_date')->textInput()->input('date', ['pattern' => '[0-9]{4}-[0-9]{2}-[0-9]{2}']) ?>
+    <?= $form->field($model, 'pbl_expiration_date')->widget(DateTimePickerWidget::class, [
+            'clientOptions' => [
+                'format' => 'yyyy-mm-dd hh:ii:ss',
+                'todayBtn' => true
+            ]
+    ]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

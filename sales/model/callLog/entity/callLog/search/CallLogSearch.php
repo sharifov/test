@@ -338,7 +338,7 @@ class CallLogSearch extends CallLog
         $query->leftJoin(CallLogLead::tableName(), 'cll_cl_id = cl_id');
         $query->leftJoin(CallLogCase::tableName(), 'clc_cl_id = cl_id');
         $query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
-        $query->leftJoin(PhoneBlacklist::tableName(), new Expression('pbl_phone = (if (call_log.cl_type_id = 1, cl_phone_to, cl_phone_from))'));
+        $query->leftJoin(PhoneBlacklist::tableName(), new Expression('pbl_phone = (if (call_log.cl_type_id = 1, cl_phone_to, cl_phone_from)) and pbl_enabled = 1 and pbl_expiration_date > now()'));
         $query->andWhere(['cl_user_id' => $userId]);
         $query->andWhere(['call_log.cl_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]]);
         $query->groupBy([
