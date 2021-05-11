@@ -54,7 +54,7 @@ class WebPhone extends \yii\bootstrap\Widget
         //VarDumper::dump($userProfile, 10, true);        exit;
 
         $clientId = UserCallIdentity::getId($user_id);
-        $tokenData = \Yii::$app->communication->getJwtTokenCache($clientId, true);
+        $tokenData = \Yii::$app->communication->getJwtTokenCache($clientId);
 
 
         if ($tokenData && isset($tokenData['data']['token'])) {

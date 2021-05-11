@@ -135,7 +135,7 @@ use yii\helpers\Html;
                         <td><i class="fa fa-user"></i> <b><?=Html::encode($userModel->username)?></b></td>
                         <td><?=( is_array($roles) ? implode(', ', $roles) : '-')?></td>
                         <td class="text-center">
-                            <?php if (Auth::can('PhoneWidget_TransferToUser')) : ?>
+                            <?php if (Auth::can('PhoneWidget_TransferToUser', ['call' => $call])) : ?>
                                 <?= Html::button('<i class="fa fa-forward"></i> Redirect', [
                                         'class' => 'btn btn-xs ' . $btnClass . ' btn-transfer',
                                         'data-type' => 'user',
