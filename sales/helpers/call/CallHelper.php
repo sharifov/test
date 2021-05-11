@@ -208,8 +208,16 @@ class CallHelper
             $tpl .= ' - ' . (\common\models\Call::SOURCE_LIST[$call['cl_category_id']] ?? 'undefined');
         }
         $tpl .= ' </span>
+                       <div class="d-flex">
                         <small><i class="contact-info-card__call-info fa fa-info btn-history-call-info" data-call-sid="' . $call['cl_call_sid'] . '"> </i></small>
-                    </div>';
+                    ';
+
+        if (!$call['in_blacklist']) {
+            $tpl .= '<small style="margin-left: 10px;" class="contact-info-card__call-info btn-add-in-blacklist" data-phone="' . $call['phone_to_blacklist'] . '" title="Add in blacklist"><i class="fas fa-address-book"></i></small>';
+        }
+
+        $tpl .= '</div></div>';
+
         if ($call['callNote']) {
             $tpl .= '<div class="contact-info-card__line history-details">
                         <div class="contact-info-card__note">

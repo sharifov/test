@@ -36,6 +36,7 @@ class ActivePane extends React.Component {
                     <CallBtns call={call}/>
                     <SoundIndication/>
                     <RecordIndicator call={call} canRecordingDisabled={this.props.controls.canRecordingDisabled}/>
+                    <AddInBlacklist call={call}/>
                 </div>
                 <ActivePaneControls call={call} controls={this.props.controls}/>
             </React.Fragment>
@@ -200,6 +201,25 @@ function RecordIndicator(props) {
                     : <i className={faIcon} style={style}> </i>
                 }
                 <div style={{"marginLeft":"10px", "color": "#fff"}}> Record {text}</div>
+            </div>
+        </div>
+    );
+}
+
+function AddInBlacklist(props) {
+    let call = props.call;
+
+    if (call.data.contact.isPhoneInBlackList) {
+        return ('');
+    }
+
+    return (
+        <div className="sound-indication">
+            <div className="sound-control-wrap">
+                <small className="contact-info-card__call-info btn-add-in-blacklist" data-phone={call.data.contact.phone}>
+                    <i className="fas fa-address-book"/>
+                    <span style={{"marginLeft":"10px", "color": "#fff"}}> Add in black list</span>
+                </small>
             </div>
         </div>
     );

@@ -108,4 +108,12 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
     {
         return new PhoneBlacklistQuery(static::class);
     }
+
+    public static function create(string $phone): self
+    {
+        $self = new self();
+        $self->pbl_phone = $phone;
+        $self->pbl_enabled = true;
+        return $self;
+    }
 }

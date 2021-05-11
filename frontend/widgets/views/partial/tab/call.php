@@ -214,6 +214,7 @@ $ajaxRecordingEnableUrl = Url::to(['/phone/ajax-recording-enable']);
 $ajaxRecordingDisableUrl = Url::to(['/phone/ajax-recording-disable']);
 $ajaxAcceptPriorityCallUrl = Url::to(['/call/ajax-accept-priority-call']);
 $ajaxAcceptWarmTransferCallUrl = Url::to(['/call/ajax-accept-warm-transfer-call']);
+$ajaxAddPhoneToBlackList = Url::to(['/call/ajax-add-phone-black-list']);
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
@@ -251,6 +252,7 @@ PhoneWidgetCall.init({
     'canRecordingDisabled': $canRecordingDisabled,
     'acceptPriorityCallUrl': '$ajaxAcceptPriorityCallUrl',
     'acceptWarmTransferCallUrl': '$ajaxAcceptWarmTransferCallUrl',
+    'addPhoneBlackListUrl': '$ajaxAddPhoneToBlackList'
 });
 JS;
 $this->registerJs($js);

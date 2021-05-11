@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\validators\PhoneValidator;
 use common\models\CallUserAccess;
 use common\models\Conference;
 use common\models\Department;
@@ -9,6 +10,7 @@ use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
+use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\query\CallQuery;
@@ -51,12 +53,14 @@ use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
 use yii\base\InvalidConfigException;
+use yii\base\UnknownMethodException;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -108,7 +112,7 @@ class CallController extends FController
             ],
             'access' => [
                 'allowActions' => [
-                    'get-users-for-call', 'list-api', 'static-data-api', 'record'
+                    'get-users-for-call', 'list-api', 'static-data-api', 'record', 'ajax-add-phone-blackList'
                 ],
             ],
         ];
@@ -1440,6 +1444,27 @@ class CallController extends FController
         return $this->renderAjax('monitor/_call_info', [
             'call' => $call,
             'callGuard' => $callGuard
+        ]);
+    }
+
+    public function actionAjaxAddPhoneBlackList(): Response
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new MethodNotAllowedHttpException('Request is not post');
+        }
+
+        $phone = Yii::$app->request->post('phone');
+
+        $phoneBlackList = PhoneBlacklist::create($phone);
+        if (!$phoneBlackList->save()) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $phoneBlackList->getErrorSummary(true)[0]
+            ]);
+        }
+
+        return $this->asJson([
+            'error' => false
         ]);
     }
 

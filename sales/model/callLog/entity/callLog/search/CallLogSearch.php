@@ -5,6 +5,7 @@ namespace sales\model\callLog\entity\callLog\search;
 use common\models\Call;
 use common\models\Client;
 use common\models\Employee;
+use common\models\PhoneBlacklist;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
 use sales\auth\Auth;
@@ -330,10 +331,14 @@ class CallLogSearch extends CallLog
 				if (cl_phone_from regexp '" . $clientPrefix . "' = 1, substring(cl_phone_from from " . $length . "), if (cl_phone_from regexp '" . $oldClientPrefix . "' = 1, substring(cl_phone_from from " . $lengthOld . "),null))
             ) AS user_id"
         ]);
+        $query->addSelect([
+            "phone_blacklist.pbl_enabled as in_blacklist"
+        ]);
         $query->leftJoin($clientTableName, $clientTableName . '.id = cl_client_id');
         $query->leftJoin(CallLogLead::tableName(), 'cll_cl_id = cl_id');
         $query->leftJoin(CallLogCase::tableName(), 'clc_cl_id = cl_id');
         $query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
+        $query->leftJoin(PhoneBlacklist::tableName(), new Expression('pbl_phone = (if (call_log.cl_type_id = 1, cl_phone_to, cl_phone_from))'));
         $query->andWhere(['cl_user_id' => $userId]);
         $query->andWhere(['call_log.cl_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]]);
         $query->groupBy([
@@ -378,6 +383,8 @@ class CallLogSearch extends CallLog
             'cl_project_id',
             'cl_department_id',
             'cl_client_id',
+            'in_blacklist',
+            new Expression('if (cl_type_id = 1, cl_phone_to, cl_phone_from) as phone_to_blacklist'),
             Employee::tableName() . '.nickname as nickname',
             new Expression('if (client_name is not null, client_name, if (cl_type_id = 1, if(' . $userTableName . '.nickname is not null, ' . $userTableName . '.nickname, cl_phone_to), if(' . $userTableName . '.nickname is not null, ' . $userTableName . '.nickname, cl_phone_from))) as formatted'),
         ])
