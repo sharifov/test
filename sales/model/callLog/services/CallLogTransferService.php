@@ -8,8 +8,10 @@ use common\models\Client;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
+use common\models\PhoneBlacklist;
 use common\models\UserParams;
 use sales\entities\cases\Cases;
+use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\call\CallHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -494,13 +496,18 @@ class CallLogTransferService
             } elseif (strpos($call['cl_phone_to'], $oldClientPrefix, 0) === 0) {
                 $call['user_id'] = (int)substr($call['cl_phone_to'], $lengthOld);
             }
+            $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $call['cl_phone_to'], 'pbl_enabled' => true])->exists();
+            $call['phone_to_blacklist'] = $call['cl_phone_to'];
         } else {
             if (strpos($call['cl_phone_from'], $clientPrefix, 0) === 0) {
                 $call['user_id'] = (int)substr($call['cl_phone_from'], $length);
             } elseif (strpos($call['cl_phone_from'], $oldClientPrefix, 0) === 0) {
                 $call['user_id'] = (int)substr($call['cl_phone_from'], $lengthOld);
             }
+            $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $call['cl_phone_from'], 'pbl_enabled' => true])->exists();
+            $call['phone_to_blacklist'] = $call['cl_phone_from'];
         }
+        $call['in_blacklist'] = $isPhoneInBlackList;
         $call['nickname'] = null;
         if ($call['user_id']) {
             if ($user = Employee::find()->select(['nickname'])->andWhere(['id' => $call['user_id']])->asArray()->one()) {
@@ -546,7 +553,7 @@ class CallLogTransferService
             ['user_id' => (int)$call['cl_user_id']],
             ['data' => [
                 'command' => 'addCallToHistory',
-                'call' => CallHelper::formCallToHistoryTab($call)]
+                'call' => CallHelper::formCallToHistoryTab($call, PhoneBlackListGuard::canAdd($toUserId))]
             ]
         );
     }

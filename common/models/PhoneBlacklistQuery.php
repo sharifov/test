@@ -29,6 +29,11 @@ class PhoneBlacklistQuery extends \yii\db\ActiveQuery
         ]);
     }
 
+    public function byPhone(string $phone): self
+    {
+        return $this->andWhere(['pbl_phone' => $phone]);
+    }
+
     /**
      * @param string $phone
      * @return bool
@@ -36,7 +41,7 @@ class PhoneBlacklistQuery extends \yii\db\ActiveQuery
     public function isExists(string $phone): bool
     {
         $query = $this->select(['pbl_phone']);
-            //->where(['pbl_phone' => $phone]);
+        //->where(['pbl_phone' => $phone]);
 
         // $sql = "REGEXP_LIKE(:phone, CONCAT('^', REPLACE(REPLACE(REPLACE(pbl_phone, '.', '[0-9]'), '*', '[0-9]*'), '+', '\\\\+'), '$')) = 1"; // TODO Mysql8
         $sql = ":phone REGEXP CONCAT('^', REPLACE(REPLACE(REPLACE(pbl_phone, '.', '[0-9]'), '*', '[0-9]*'), '+', '\\\\+'), '$') = 1";
@@ -46,5 +51,12 @@ class PhoneBlacklistQuery extends \yii\db\ActiveQuery
         $query->active()->activeByExpired();
 
         return $query->exists();
+    }
+
+    public function getCountOfRowsByPhone(string $phone)
+    {
+        $query = PhoneBlacklist::find();
+        $query->byPhone($phone);
+        $query->active();
     }
 }

@@ -5,6 +5,8 @@ namespace sales\model\call\socket;
 use common\models\Call;
 use common\models\Department;
 use common\models\Employee;
+use common\models\PhoneBlacklist;
+use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\call\services\currentQueueCalls\ActiveConference;
@@ -143,6 +145,8 @@ class CallUpdateMessage
 
         $auth = \Yii::$app->authManager;
 
+        $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $phone, 'pbl_enabled' => true])->exists();
+
         return [
             'id' => $callId,
             'callSid' => $callSid,
@@ -175,12 +179,14 @@ class CallUpdateMessage
                 'canContactDetails' => $auth->checkAccess($userId, '/client/ajax-get-info'),
                 'canCallInfo' => $auth->checkAccess($userId, '/call/ajax-call-info'),
                 'callSid' => $callSid,
+                'isPhoneInBlackList' => $isPhoneInBlackList
             ],
             'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
             'queue' => Call::getQueueName($call),
             'conference' => $conference !== null ? $conference->getData() : null,
             'isConferenceCreator' => $isConferenceCreator,
             'recordingDisabled' => $call->c_recording_disabled,
+            'blacklistBtnEnabled' => PhoneBlackListGuard::canAdd($userId)
         ];
     }
 }
