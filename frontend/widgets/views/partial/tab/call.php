@@ -31,6 +31,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
                 <?php
 
                 use common\models\UserCallStatus;
+                use sales\guards\phone\PhoneBlackListGuard;
                 use yii\bootstrap4\Html;
                 use yii\helpers\Url;
                 use yii\web\View;
@@ -221,6 +222,7 @@ $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 $btnHoldShow = Auth::can('PhoneWidget_OnHold') ? 'true' : 'false';
 $btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
 $canRecordingDisabled = Auth::can('PhoneWidget_CallRecordingDisabled') ? 'true' : 'false';
+$canAddBlockList = PhoneBlackListGuard::canAdd(Auth::id()) ? 'true' : 'false';
 
 
 $js = <<<JS
@@ -252,7 +254,8 @@ PhoneWidgetCall.init({
     'canRecordingDisabled': $canRecordingDisabled,
     'acceptPriorityCallUrl': '$ajaxAcceptPriorityCallUrl',
     'acceptWarmTransferCallUrl': '$ajaxAcceptWarmTransferCallUrl',
-    'addPhoneBlackListUrl': '$ajaxAddPhoneToBlackList'
+    'addPhoneBlackListUrl': '$ajaxAddPhoneToBlackList',
+    'canAddBlockList': $canAddBlockList,
 });
 JS;
 $this->registerJs($js);

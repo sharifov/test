@@ -27,6 +27,7 @@ use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\guards\call\CallDisplayGuard;
+use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
 use sales\helpers\setting\SettingHelper;
@@ -117,7 +118,7 @@ class CallController extends FController
             ],
             'access' => [
                 'allowActions' => [
-                    'get-users-for-call', 'list-api', 'static-data-api', 'record', 'ajax-add-phone-blackList'
+                    'get-users-for-call', 'list-api', 'static-data-api', 'record', 'ajax-add-phone-black-list'
                 ],
             ],
         ];
@@ -1456,6 +1457,10 @@ class CallController extends FController
     {
         if (!Yii::$app->request->isPost) {
             throw new MethodNotAllowedHttpException('Request is not post');
+        }
+
+        if (!PhoneBlackListGuard::canAdd(Auth::id())) {
+            throw new ForbiddenHttpException('You do not have access to perform this action');
         }
 
         $phone = Yii::$app->request->post('phone', '');

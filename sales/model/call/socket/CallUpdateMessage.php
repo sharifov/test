@@ -6,6 +6,7 @@ use common\models\Call;
 use common\models\Department;
 use common\models\Employee;
 use common\models\PhoneBlacklist;
+use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\call\services\currentQueueCalls\ActiveConference;
@@ -185,6 +186,7 @@ class CallUpdateMessage
             'conference' => $conference !== null ? $conference->getData() : null,
             'isConferenceCreator' => $isConferenceCreator,
             'recordingDisabled' => $call->c_recording_disabled,
+            'blacklistBtnEnabled' => PhoneBlackListGuard::canAdd($userId)
         ];
     }
 }

@@ -52,7 +52,7 @@ var PhoneWidgetCall = function () {
 
         setCountMissedCalls(options.countMissedCalls);
 
-        panes.active.setup(options.btnHoldShow, options.btnTransferShow, options.canRecordingDisabled);
+        panes.active.setup(options.btnHoldShow, options.btnTransferShow, options.canRecordingDisabled, options.canAddBlockList);
 
         muteBtnClickEvent();
         transferCallBtnClickEvent();

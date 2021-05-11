@@ -11,6 +11,7 @@ use common\models\Notifications;
 use common\models\PhoneBlacklist;
 use common\models\UserParams;
 use sales\entities\cases\Cases;
+use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\call\CallHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -552,7 +553,7 @@ class CallLogTransferService
             ['user_id' => (int)$call['cl_user_id']],
             ['data' => [
                 'command' => 'addCallToHistory',
-                'call' => CallHelper::formCallToHistoryTab($call)]
+                'call' => CallHelper::formCallToHistoryTab($call, PhoneBlackListGuard::canAdd($toUserId))]
             ]
         );
     }

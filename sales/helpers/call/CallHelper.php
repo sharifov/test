@@ -5,6 +5,7 @@ namespace sales\helpers\call;
 use common\models\Call;
 use common\models\Department;
 use DateTime;
+use sales\guards\phone\PhoneBlackListGuard;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use yii\bootstrap4\Dropdown;
@@ -134,7 +135,7 @@ class CallHelper
         return $result;
     }
 
-    public static function formCallToHistoryTab($call): string
+    public static function formCallToHistoryTab($call, bool $canAddBlackList): string
     {
         $callType = (int)$call['cl_type_id'];
         $title = '';
@@ -212,7 +213,7 @@ class CallHelper
                         <small><i class="contact-info-card__call-info fa fa-info btn-history-call-info" data-call-sid="' . $call['cl_call_sid'] . '"> </i></small>
                     ';
 
-        if (!$call['in_blacklist']) {
+        if (!$call['in_blacklist'] && $canAddBlackList) {
             $tpl .= '<small style="margin-left: 10px;" class="contact-info-card__call-info btn-add-in-blacklist" data-phone="' . $call['phone_to_blacklist'] . '" title="Add in blacklist"><i class="fas fa-address-book"></i></small>';
         }
 
