@@ -2738,12 +2738,19 @@ class Quote extends \yii\db\ActiveRecord
     {
         /** @var Quote $quote */
         $quote = self::find()
-            ->alias('quote')
-            ->select('quote.*')
-            ->innerJoin(Lead::tableName() . ' AS lead', 'lead.id = quote.lead_id')
-            ->andWhere(['quote.uid' => $uid])
+            ->alias('quotes')
+            ->select('quotes.*')
+            ->innerJoin(Lead::tableName() . ' AS lead', 'lead.id = quotes.lead_id')
+            ->andWhere(['quotes.uid' => $uid])
+            ->andWhere(
+                ['OR',
+                    ['IN', 'lead.project_id', $projectIds],
+                    ['IN', 'quotes.provider_project_id', $projectIds]
+                ]
+            )
             ->andWhere(['IN', 'lead.project_id', $projectIds])
             ->one();
+
         return $quote;
     }
 }
