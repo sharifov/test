@@ -36,6 +36,8 @@ class OptionApiForm extends Model
     public function rules(): array
     {
         return [
+            [['pqo_key', 'pqo_name', 'pqo_description', 'pqo_price', 'pqo_markup'], 'required'],
+
             [['pqo_key'], 'string'],
             [['pqo_key'], 'checkProductOption'],
 
