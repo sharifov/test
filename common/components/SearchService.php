@@ -193,6 +193,22 @@ class SearchService
         return $result;
     }
 
+    public static function getOnlineQuoteByKey(string $key)
+    {
+        $response = \Yii::$app->airsearch->searchQuoteByKey('SAL101', $key);
+
+        if (!$result['data'] = $response['data']) {
+            $result['error'] = $response['error'];
+            \Yii::error(
+                [
+                    'key' => $key,
+                    'message' => $response['error']],
+                'SearchService::getOnlineQuotesByKey'
+            );
+        }
+        return $result;
+    }
+
     /**
      * @param $result
      * @return array

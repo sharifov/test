@@ -5,10 +5,22 @@ namespace webapi\modules\v2\controllers;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\offer\src\entities\offerViewLog\CreateDto;
 use modules\offer\src\exceptions\OfferCodeException;
+use modules\offer\src\services\OfferService;
 use modules\offer\src\services\OfferViewLogService;
+use modules\offer\src\useCases\offer\api\confirmAlternative\OfferConfirmAlternativeForm;
 use modules\offer\src\useCases\offer\api\view\OfferViewForm;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\processManager\OrderProcessManagerFactory;
+use sales\helpers\app\AppHelper;
+use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
+use webapi\src\logger\behaviors\SimpleLoggerBehavior;
+use webapi\src\logger\behaviors\TechnicalInfoBehavior;
 use webapi\src\Messages;
+use webapi\src\response\behaviors\RequestBehavior;
+use webapi\src\response\behaviors\ResponseStatusCodeBehavior;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\ErrorsMessage;
@@ -22,11 +34,19 @@ use webapi\src\response\SuccessResponse;
  *
  * @property OfferRepository $offerRepository
  * @property OfferViewLogService $offerViewLogService
+ * @property OfferService $offerService
+ * @property TransactionManager $transactionManager
+ * @property OrderProcessManagerFactory $orderProcessManagerFactory
+ * @property OrderRepository $orderRepository
  */
 class OfferController extends BaseController
 {
     private $offerRepository;
     private $offerViewLogService;
+    private OfferService $offerService;
+    private TransactionManager $transactionManager;
+    private OrderProcessManagerFactory $orderProcessManagerFactory;
+    private OrderRepository $orderRepository;
 
     public function __construct(
         $id,
@@ -34,11 +54,33 @@ class OfferController extends BaseController
         ApiLogger $logger,
         OfferRepository $offerRepository,
         OfferViewLogService $offerViewLogService,
+        OfferService $offerService,
+        TransactionManager $transactionManager,
+        OrderProcessManagerFactory $orderProcessManagerFactory,
+        OrderRepository $orderRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
         $this->offerRepository = $offerRepository;
         $this->offerViewLogService = $offerViewLogService;
+        $this->offerService = $offerService;
+        $this->transactionManager = $transactionManager;
+        $this->orderProcessManagerFactory = $orderProcessManagerFactory;
+        $this->orderRepository = $orderRepository;
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['request'] = [
+            'class' => RequestBehavior::class,
+            'except' => ['confirm-alternative'],
+        ];
+        $behaviors['technical'] = [
+            'class' => TechnicalInfoBehavior::class,
+            'except' => ['confirm-alternative'],
+        ];
+        return $behaviors;
     }
 
     /**
@@ -570,5 +612,145 @@ class OfferController extends BaseController
         return new SuccessResponse(
             new Message('offer', $offer->serialize())
         );
+    }
+
+    /**
+     * @api {post} /v2/offer/confirm-alternative Confirm Alternative Offer
+     * @apiVersion 0.2.0
+     * @apiName ConfirmAlternativeOffer
+     * @apiGroup Offer
+     * @apiPermission Authorized User
+     * @apiDescription Offer can only be confirmed if it is in the Pending status
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{max 32}}       gid            Offer gid
+     *
+     * @apiParamExample {json} Request-Example:
+     *
+     * {
+     *     "gid": "04d3fe3fc74d0514ee93e208a52bcf90",
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *  {
+            "status": 200,
+            "message": "OK",
+        }
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Error",
+            "errors": [
+                "Not found Offer"
+            ],
+            "code": "18402"
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Validation Error
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "gid": [
+                    "Gid should contain at most 32 characters."
+                ]
+            },
+            "code": "18401"
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Validation Error
+     * {
+            "status": 422,
+            "message": "Error",
+            "errors": [
+                "Offer does not contain quotes that can be confirmed"
+            ],
+            "code": "18404"
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+            "status": 400,
+            "message": "Load data error",
+            "errors": [
+                "Not found Offer data on POST request"
+            ],
+            "code": "18400"
+        }
+     */
+    public function actionConfirmAlternative()
+    {
+        $form = new OfferConfirmAlternativeForm();
+
+        if (!$form->load(\Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found Offer data on POST request'),
+                new CodeMessage(OfferCodeException::API_OFFER_CA_NOT_FOUND_DATA_ON_REQUEST)
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+                new CodeMessage(OfferCodeException::API_OFFER_CA_VALIDATE)
+            );
+        }
+
+        if (!$offer = $this->offerRepository->getByGid($form->gid)) {
+            return new ErrorResponse(
+                new ErrorsMessage('Not found Offer'),
+                new CodeMessage(OfferCodeException::API_OFFER_CA_NOT_FOUND)
+            );
+        }
+
+        if (!$offer->isAlternative()) {
+            return new ErrorResponse(
+                new ErrorsMessage('Offer is not alternative'),
+                new CodeMessage(OfferCodeException::API_OFFER_CA_NOT_ALTERNATIVE)
+            );
+        }
+
+        try {
+            $this->transactionManager->wrap(function () use ($offer) {
+                $dto = $this->offerService->confirmAlternative($offer);
+
+                if ($dto->orderId) {
+                    $order = $this->orderRepository->find($dto->orderId);
+                    $this->orderProcessManagerFactory->create($dto->orderId, $order->or_type_id);
+                }
+            });
+        } catch (\RuntimeException | \DomainException $e) {
+            return new ErrorResponse(
+                new StatusCodeMessage(422),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage(OfferCodeException::API_OFFER_CA_QUOTE_NOT_PROCESSED)
+            );
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'API:OfferController:actionConfirmAlternative:Throwable');
+            return new ErrorResponse(
+                new ErrorsMessage('Internal Server Error'),
+                new CodeMessage($e->getCode())
+            );
+        }
+
+        return new SuccessResponse();
     }
 }

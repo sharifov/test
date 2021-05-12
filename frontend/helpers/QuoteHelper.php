@@ -145,6 +145,19 @@ class QuoteHelper
         return $out;
     }
 
+    public static function formattedProviderProject(Quote $quote, string $class = 'quote__badge bg-secondary'): string
+    {
+        if ($quote->providerProject) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . $quote->providerProject->name . '">
+                    P
+            </span>';
+        }
+        return '';
+    }
+
     public static function checkPenaltiesInfo(array $penalties): bool
     {
         return (!empty($penalties['exchange']) || !empty($penalties['refund']));

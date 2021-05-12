@@ -565,6 +565,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         return $this->fq_service_fee_percent ?? 0.00;
     }
 
+    public function setServiceFeePercent(float $percent): float
+    {
+        return $this->fq_service_fee_percent = $percent;
+    }
+
     /**
      * @return float
      */

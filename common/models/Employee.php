@@ -41,7 +41,6 @@ use yii\web\NotFoundHttpException;
  * @property string $username
  * @property string $full_name
  * @property string $nickname
- * @property string $nickname_client_chat
  * @property string $auth_key
  * @property string $password_hash
  * @property string $password_reset_token
@@ -394,10 +393,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
-            [['email', 'password', 'username', 'full_name', 'nickname', 'nickname_client_chat'], 'trim'],
+            [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
             [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
-            [['password_hash', 'password_reset_token', 'email', 'nickname_client_chat'], 'string', 'max' => 255],
+            [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
@@ -433,7 +432,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'make_user_project_params' => 'Make user project params (automatic)',
             'full_name' => 'Full Name',
             'client_chat_user_channel' => 'Client chat user channel',
-            'nickname_client_chat' => 'Nickname Client Chat',
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use common\components\validators\CheckJsonValidator;
+use common\models\Airline;
 use common\models\Client;
 use common\models\Lead;
 use common\models\Project;
@@ -13,6 +14,7 @@ use modules\product\src\interfaces\ProductDataInterface;
 use sales\behaviors\StringToJsonBehavior;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -37,6 +39,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property FlightQuote $fqfFq
  * @property FlightQuoteBooking[] $flightQuoteBookings
+ * @property Airline $mainAirline
  */
 class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
 {
@@ -93,34 +96,39 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function getFlightQuotePaxPrices(): \yii\db\ActiveQuery
+    public function getFlightQuotePaxPrices(): ActiveQuery
     {
         return $this->hasMany(FlightQuotePaxPrice::class, ['qpp_flight_id' => 'fqf_id']);
     }
 
-    public function getFlightQuoteSegmentStops(): \yii\db\ActiveQuery
+    public function getFlightQuoteSegmentStops(): ActiveQuery
     {
         return $this->hasMany(FlightQuoteSegmentStop::class, ['qss_flight_id' => 'fqf_id']);
     }
 
-    public function getFlightQuoteSegments(): \yii\db\ActiveQuery
+    public function getFlightQuoteSegments(): ActiveQuery
     {
         return $this->hasMany(FlightQuoteSegment::class, ['fqs_flight_id' => 'fqf_id']);
     }
 
-    public function getFlightQuoteTrips(): \yii\db\ActiveQuery
+    public function getFlightQuoteTrips(): ActiveQuery
     {
         return $this->hasMany(FlightQuoteTrip::class, ['fqp_flight_id' => 'fqf_id']);
     }
 
-    public function getFlightQuoteBookings(): \yii\db\ActiveQuery
+    public function getFlightQuoteBookings(): ActiveQuery
     {
         return $this->hasMany(FlightQuoteBooking::class, ['fqb_fqf_id' => 'fqf_id']);
     }
 
-    public function getFqfFq(): \yii\db\ActiveQuery
+    public function getFqfFq(): ActiveQuery
     {
         return $this->hasOne(FlightQuote::class, ['fq_id' => 'fqf_fq_id']);
+    }
+
+    public function getMainAirline(): ActiveQuery
+    {
+        return $this->hasOne(Airline::class, ['iata' => 'fqf_main_airline']);
     }
 
     public function attributeLabels(): array

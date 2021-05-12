@@ -176,6 +176,23 @@ use yii\widgets\Pjax;
             });
         });
      });
+    
+    $('body').on('click','.btn-hotel-quote-details', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');       
+        $('#modal-lg-label').html($(this).data('title'));        
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
+        });
+    });
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
@@ -220,6 +237,13 @@ JS;
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                     <div class="dropdown-menu" role="menu">
                         <h6 class="dropdown-header">Quote Q<?=($model->pq_id)?></h6>
+                        <?= Html::a('<i class="fa fa-search"></i> Details', null, [
+                            'class' => 'btn-hotel-quote-details dropdown-item',
+                            'data-id' => $model->pq_id,
+                            'data-title' => '<i class="fa fa-hotel"></i> ' . $model->hotelQuote->hq_hotel_name,
+                            'data-url' => Url::to(['/hotel/hotel-quote/ajax-quote-details', 'id' => $model->pq_id]),
+                            'title' => 'Details'
+                        ]) ?>
 
                         <!--<?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                             'class' => 'dropdown-item text-warning btn-clone-product-quote',

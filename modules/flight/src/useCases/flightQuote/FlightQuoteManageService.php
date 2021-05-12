@@ -4,6 +4,8 @@ namespace modules\flight\src\useCases\flightQuote;
 
 use common\models\Lead;
 use modules\flight\models\FlightPax;
+use modules\flight\models\FlightQuoteBooking;
+use modules\flight\models\FlightQuoteFlight;
 use modules\flight\models\FlightQuoteStatusLog;
 use modules\flight\models\FlightSegment;
 use modules\flight\models\forms\ItineraryEditForm;
@@ -11,6 +13,7 @@ use modules\flight\src\dto\flightSegment\SegmentDTO;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\exceptions\FlightCodeException;
 use modules\flight\src\repositories\flight\FlightRepository;
+use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
 use modules\flight\src\services\flightQuote\FlightQuotePriceCalculator;
@@ -62,6 +65,7 @@ use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
+use webapi\src\services\flight\FlightManageApiService;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
@@ -84,6 +88,7 @@ use yii\helpers\VarDumper;
  * @property ProductHolderRepository $productHolderRepository
  * @property ProductOptionRepository $productOptionRepository
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
+ * @property FlightQuoteFlightRepository $flightQuoteFlightRepository
  */
 class FlightQuoteManageService implements ProductQuoteService
 {
@@ -152,6 +157,8 @@ class FlightQuoteManageService implements ProductQuoteService
      */
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
 
+    private FlightQuoteFlightRepository $flightQuoteFlightRepository;
+
     public function __construct(
         FlightQuoteRepository $flightQuoteRepository,
         ProductQuoteRepository $productQuoteRepository,
@@ -167,7 +174,8 @@ class FlightQuoteManageService implements ProductQuoteService
         OrderPriceUpdater $orderPriceUpdater,
         ProductHolderRepository $productHolderRepository,
         ProductOptionRepository $productOptionRepository,
-        ProductQuoteOptionRepository $productQuoteOptionRepository
+        ProductQuoteOptionRepository $productQuoteOptionRepository,
+        FlightQuoteFlightRepository $flightQuoteFlightRepository
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -184,6 +192,7 @@ class FlightQuoteManageService implements ProductQuoteService
         $this->productHolderRepository = $productHolderRepository;
         $this->productOptionRepository = $productOptionRepository;
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
+        $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
     }
 
     /**
@@ -215,6 +224,8 @@ class FlightQuoteManageService implements ProductQuoteService
             $this->calcProductQuotePrice($productQuote, $flightQuote);
 
             $this->createFlightTrip($flightQuote, $quote);
+
+            $this->createFlightQuoteFlight($flightQuote);
         });
     }
 
@@ -509,5 +520,22 @@ class FlightQuoteManageService implements ProductQuoteService
             );
             throw new OrderC2BException($dto, $e->getMessage(), FlightCodeException::API_C2B_HANDLE);
         }
+    }
+
+    private function createFlightQuoteFlight(FlightQuote $flightQuote): FlightQuoteFlight
+    {
+        $flightQuoteFlight = FlightQuoteFlight::create(
+            $flightQuote->getId(),
+            $flightQuote->fqFlight->fl_trip_type_id,
+            $flightQuote->fq_main_airline,
+            null,
+            null,
+            null,
+            $flightQuote->fq_main_airline,
+            null
+        );
+        $this->flightQuoteFlightRepository->save($flightQuoteFlight);
+
+        return $flightQuoteFlight;
     }
 }

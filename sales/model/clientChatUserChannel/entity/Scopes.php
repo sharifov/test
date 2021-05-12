@@ -28,7 +28,7 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->join('INNER JOIN', Employee::tableName(), 'ccuc_user_id = id');
     }
 
-    public function hasRcProfile(): Scopes
+    public function joinRcProfile(): Scopes
     {
         return $this->join(
             'INNER JOIN',

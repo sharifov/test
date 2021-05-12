@@ -11,6 +11,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
 use DateTime;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
@@ -48,6 +49,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\helpers\quote\QuoteProviderProjectHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\interfaces\Objectable;
 use sales\model\airportLang\service\AirportLangService;
@@ -3944,8 +3946,9 @@ Reason: {reason}',
      * @param $projectContactInfo
      * @param string|null $lang
      * @return array
+     * @throws \Exception
      */
-    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null): array
+    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = []): array
     {
         $project = $this->project;
 
@@ -3956,7 +3959,6 @@ Reason: {reason}',
                 $mailFrom = $upp->upp_email;
             }*/
         }
-
 
         if ($quoteIds && is_array($quoteIds)) {
             foreach ($quoteIds as $qid) {
@@ -3978,6 +3980,17 @@ Reason: {reason}',
 
                     $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2($lang));
 
+                    if ($quoteModel->providerProject && $quoteModel->providerProject->contact_info) {
+                        $providerProjectContactInfo = JsonHelper::decode($quoteModel->providerProject->contact_info);
+                        $quoteItem['provider'] = [
+                            'name' => ArrayHelper::getValue($quoteModel->providerProject, 'name', ''),
+                            'url' => ArrayHelper::getValue($quoteModel->providerProject, 'link', 'https://'),
+                            'address' => ArrayHelper::getValue($providerProjectContactInfo, 'address', ''),
+                            'phone' => ArrayHelper::getValue($providerProjectContactInfo, 'phone', ''),
+                            'email' => ArrayHelper::getValue($providerProjectContactInfo, 'email', ''),
+                        ];
+                    }
+
                     $content_data['quotes'][] = $quoteItem;
                 }
             }
@@ -3998,12 +4011,10 @@ Reason: {reason}',
         ];
 
         $content_data['agent'] = [
-            'name'  => Yii::$app->user->identity->full_name,
-            'username'  => Yii::$app->user->identity->username,
-            'nickname' => Yii::$app->user->identity->nickname,
-//            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+            'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : Yii::$app->user->identity->full_name,
+            'username'  => array_key_exists('username', $agent) ? $agent['username'] : Yii::$app->user->identity->username,
+            'nickname' => array_key_exists('nickname', $agent) ? $agent['nickname'] : Yii::$app->user->identity->nickname,
             'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
-//            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
             'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
 
@@ -4013,10 +4024,8 @@ Reason: {reason}',
             'lastName'     => $this->client ? $this->client->last_name : '',
         ];
 
-
         $arriveCity = '';
         $departCity = '';
-
         $arriveIATA = '';
         $departIATA = '';
 

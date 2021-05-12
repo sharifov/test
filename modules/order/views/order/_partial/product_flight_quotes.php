@@ -54,3 +54,27 @@ $dataProvider = new ArrayDataProvider([
     </div>
 </div>
 <?php Pjax::end() ?>
+
+<?php
+$js = <<<JS
+    $('body').on('click','.btn-flight-quote-details', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+        //var modal = $('#modal-info-d');
+        $('#modal-lg-label').html($(this).data('title'));
+        //modal.find('.modal-header h2').text($(this).data('title'));
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
+        });
+    });
+JS;
+$this->registerJs($js);
+?>

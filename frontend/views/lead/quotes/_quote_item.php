@@ -298,6 +298,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
             <?php echo QuoteHelper::formattedMetaRank($model->getMetaInfo())?>
 
+            <?php echo QuoteHelper::formattedProviderProject($model) ?>
         </div>
         <div class="quote__actions">
             <?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_prices-' . $model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>

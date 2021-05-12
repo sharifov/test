@@ -51,7 +51,7 @@ class FlightQuotePaxPriceApiBoDto
         $this->clientTax = ProductQuoteHelper::calcClientPrice($this->tax, $productQuote->pqProduct);
         $this->clientCurrency = $productQuote->pq_client_currency;
 
-        $this->systemMarkUp = 0.00;
+        $this->systemMarkUp = $priceDetailApiForm->taxes - $priceDetailApiForm->baseTaxes;
         $this->agentMarkUp = 0.00;
         $this->cnt = $priceDetailApiForm->tickets;
     }

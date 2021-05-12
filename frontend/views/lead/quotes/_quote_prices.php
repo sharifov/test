@@ -26,14 +26,14 @@ use yii\helpers\VarDumper;
         <tr>
             <th><?= $paxCode?></th>
             <td>x <?= $price['tickets']?></td>
-            <td><?= number_format($price['net'] / $price['tickets'], 2) ?></td>
-            <td><?= number_format($price['mark_up'] / $price['tickets'], 2) ?></td>
+            <td><?= number_format($price['net'], 2) ?></td>
+            <td><?= number_format($price['mark_up'], 2) ?></td>
             <td><?php if ($quote->isEditable()) :?>
                 <?= Editable::widget([
                         'name' => 'extra_markup[' . strtolower($paxCode) . '][' . $quote->id . ']',
                         'asPopover' => false,
                         'pjaxContainerId' => 'pjax-quote_prices-' . $quote->id,
-                        'value' => number_format($price['extra_mark_up'] / $price['tickets'], 2),
+                        'value' => number_format($price['extra_mark_up'], 2),
                         'header' => 'Extra markup',
                         'size' => 'sm',
                         'inputType' => Editable::INPUT_TEXT,
@@ -45,10 +45,10 @@ use yii\helpers\VarDumper;
                         'options' => ['class' => 'form-control','style' => 'width:50px;', 'placeholder' => 'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>']
                     ]);?>
                 <?php else :?>
-                    <?= number_format($price['extra_mark_up'] / $price['tickets'], 2)?>
+                    <?= number_format($price['extra_mark_up'], 2)?>
                 <?php endif;?>
             </td>
-            <td><?= number_format($price['selling'] / $price['tickets'], 2) ?></td>
+            <td><?= number_format($price['selling'], 2) ?></td>
         </tr>
         <?php endforeach;?>
     </tbody>

@@ -78,12 +78,11 @@ class ClientChatUserChannelSearch extends ClientChatUserChannel
     {
         $query = self::find()->select([
             'user_id' => 'ccuc_user_id',
-            new Expression('if (nickname_client_chat is null or nickname_client_chat = \'\', username, nickname_client_chat) as `nickname`')
+            new Expression('if (uccd_name is null or uccd_name = \'\', uccd_username, uccd_name) as `nickname`')
         ]);
 
         $query->byChannelId($channelId);
-        $query->joinUser();
-        $query->hasRcProfile();
+        $query->joinRcProfile();
         $query->onlineUsers();
 
         return $query->asArray()->all();

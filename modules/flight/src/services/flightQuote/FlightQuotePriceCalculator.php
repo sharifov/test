@@ -3,6 +3,7 @@
 namespace modules\flight\src\services\flightQuote;
 
 use modules\flight\models\FlightQuote;
+use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use sales\services\CurrencyHelper;
 
@@ -22,5 +23,16 @@ class FlightQuotePriceCalculator
             'appMarkup' => $appMarkup,
             'agentMarkup' => $agentMarkup,
         ];
+    }
+
+    public static function pricesDataC2b(FlightQuote $flightQuote)
+    {
+        $paxPricesSummary = FlightQuotePaxPrice::find()
+            ->select([
+                'minus_percent_profit' => 'SUM(ps.ps_percent)', /* TODO::  */
+            ])
+            ->andWhere(['qpp_flight_quote_id' => $flightQuote->fq_id])
+            ->orderBy(['qpp_flight_pax_code_id' => SORT_ASC])
+            ->all();
     }
 }

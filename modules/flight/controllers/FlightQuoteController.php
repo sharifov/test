@@ -329,7 +329,7 @@ class FlightQuoteController extends FController
 
             $quotes = \Yii::$app->cacheFile->get($flight->fl_request_hash_key);
 
-            if ($quotes === false && empty($quotes['results'])) {
+            if (empty($quotes['results'])) {
                 throw new \DomainException('Not found Quote from Search result from Cache. Please update search request!');
             }
 
@@ -379,7 +379,7 @@ class FlightQuoteController extends FController
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
         $lead = $productQuote->pqProduct->prLead;
 
-        if ($lead->isInTrash() && Auth::user()->isAgent()) {
+        if ($lead && $lead->isInTrash() && Auth::user()->isAgent()) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 

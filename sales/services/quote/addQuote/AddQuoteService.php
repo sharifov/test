@@ -11,6 +11,7 @@ use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
 use common\models\QuoteSegmentStop;
 use common\models\QuoteTrip;
+use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChatLead\entity\ClientChatLead;
@@ -115,6 +116,23 @@ class AddQuoteService
             if ($chat) {
                 ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
             }
+        });
+    }
+
+    public function createByData(array $data, Lead $lead, ?int $providerProjectId): string
+    {
+        return $this->transactionManager->wrap(function () use ($data, $lead, $providerProjectId) {
+            $quote = Quote::createQuoteFromSearch($data, $lead, null);
+            $quote->provider_project_id = $providerProjectId;
+            $this->quoteRepository->save($quote);
+
+            $this->createQuoteTripsFromSearch($data['trips'] ?? [], $quote);
+            $this->createQuotePriceFromSearch($data['passengers'] ?? [], $quote);
+            if ($lead->called_expert) {
+                $quote->sendUpdateBO();
+            }
+
+            return $quote->uid;
         });
     }
 

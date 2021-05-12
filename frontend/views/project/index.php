@@ -1,7 +1,10 @@
 <?php
 
+use common\components\grid\Select2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\StringHelper;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 
@@ -40,8 +43,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ];
             }
         },
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
 
             ['attribute' => 'id',
                 'headerOptions' => ['style' => 'width:70px'],
@@ -76,71 +79,93 @@ $this->params['breadcrumbs'][] = $this->title;
             //'project_key',
             'name:projectName',
             [
+                'class' => Select2Column::class,
+                'attribute' => 'related_projects',
+                'format' => 'raw',
+                'value' => static function (\common\models\Project $project) {
+                    if (!$project->projectRelations) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+                    $result = [];
+                    foreach ($project->projectRelations as $key => $value) {
+                        $result[] = '<span>' . Yii::$app->formatter->asProjectName($value->prl_related_project_id) . '</span>';
+                    }
+                    return implode(' ', $result);
+                },
+                'data' => \common\models\Project::getList(),
+                'id' => 'related_projects-filter',
+                'options' => ['width' => '200px', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true, '']
+            ],
+            [
                 'label' => 'Sources',
                 'value' => static function (\common\models\Project $model) {
                     return $model->sources ? Html::a(count($model->sources), ['sources/index', 'SourcesSearch[project_id]' => $model->id], ['title' => 'Sources', 'target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw'
             ],
-            //'link',
-
-            [
-                'attribute' => 'link',
-                'value' => static function (\common\models\Project $model) {
-                    return Html::a($model->link, $model->link, ['target' => '_blank']);
-                },
-                'format' => 'raw'
-            ],
-
-
-            //'api_key',
+            'link:url',
             'email_postfix',
             'closed:boolean',
             'sort_order',
-            //'api_key',
-            //'contact_info:ntext',
             [
                 'attribute' => 'contact_info',
+                'format' => 'raw',
                 'value' => static function (\common\models\Project $model) {
-                    return \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($model->contact_info), 5);
-                },
-//                'format' => 'raw'
-            ],
+                    $resultStr = '-';
+                    if ($decodedData = @json_decode($model->contact_info, true, 512, JSON_THROW_ON_ERROR)) {
+                        $truncatedStr = StringHelper::truncate(
+                            Html::encode(VarDumper::dumpAsString($decodedData)),
+                            1200,
+                            '...',
+                            null,
+                            false
+                        );
 
+                        $detailData = VarDumper::dumpAsString($decodedData, 10, true);
+                        $detailBox = '<div id="detail_' . $model->id . '" style="display: none;">' . $detailData . '</div>';
+                        $detailBtn = ' <i class="fas fa-eye green showDetail" style="cursor: pointer;" data-idt="' . $model->id . '"></i>';
+
+                        $resultStr = $truncatedStr . $detailBox . $detailBtn;
+                    }
+                    return '<small>' . $resultStr . '</small>';
+                },
+            ],
             [
                 'attribute' => 'p_update_user_id',
                 'value' => static function (\common\models\Project $model) {
                     return $model->pUpdateUser ? $model->pUpdateUser->username : ' - ';
                 },
             ],
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'last_update'
             ],
-
-            /*[
-                'attribute' => 'last_update',
-                'value' => static function (\common\models\Project $model) {
-                    return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'last_update',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
-            ],*/
-
-
         ],
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+yii\bootstrap4\Modal::begin([
+    'title' => 'Log detail',
+    'id' => 'modal',
+    'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
+]);
+yii\bootstrap4\Modal::end();
+
+$jsCode = <<<JS
+    $(document).on('click', '.showDetail', function(){
+        
+        let logId = $(this).data('idt');
+        let detailEl = $('#detail_' + logId);
+        let modalBodyEl = $('#modal .modal-body');
+        
+        modalBodyEl.html(detailEl.html()); 
+        $('#modal-label').html('Detail Api Log (' + logId + ')');       
+        $('#modal').modal('show');
+        return false;
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);

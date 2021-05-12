@@ -1,7 +1,9 @@
 <?php
 
 use common\components\SearchService;
+use common\models\Lead;
 use frontend\helpers\QuoteHelper;
+use sales\auth\Auth;
 use yii\bootstrap\Html;
 
 /**
@@ -11,6 +13,7 @@ use yii\bootstrap\Html;
  * @var $locations []
  * @var $flightQuotes array
  * @var $keyCache string
+ * @var Lead $lead
  */
 
 $user = Yii::$app->user->identity;
@@ -28,10 +31,19 @@ $bagFilter = $result['bagFilter'];
 //$isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuotes, $result['key']);
 $isQuoteAssignedToFlight = false;
 ?>
-<div class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>" data-price="<?= $result['price']?>"
-     data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>"
-     data-stop="<?= json_encode($stops)?>" data-time='<?= json_encode($time)?>' data-fareType="<?= (isset($result['fareType'])) ? $result['fareType'] : ''?>"
-     data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $resultKey?>" data-changeairport="<?= $airportChange ?>" data-baggage="<?= isset($bagFilter) ? $bagFilter : '' ?>">
+<div
+    class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>"
+    data-price="<?= $result['price']?>"
+    data-durationmax="<?= max($totalDuration)?>"
+    data-duration="<?= json_encode($totalDuration)?>"
+    data-stop="<?= json_encode($stops)?>"
+    data-time='<?= json_encode($time)?>'
+    data-fareType="<?= (isset($result['fareType'])) ? $result['fareType'] : ''?>"
+    data-airline="<?= $result['validatingCarrier']?>"
+    id="search-result__quote-<?= $resultKey?>"
+    data-changeairport="<?= $airportChange ?>" data-baggage="<?= isset($bagFilter) ? $bagFilter : '' ?>"
+    style="z-index: inherit;"
+    >
     <div class="quote__heading">
         <div class="quote__heading-left">
             <span class="quote__id"><strong># <?= $resultKey + 1 ?></strong></span>
@@ -424,7 +436,36 @@ $isQuoteAssignedToFlight = false;
                     'data-gds' => $result['gds'],
                     'data-key-cache' => $keyCache,
                     'data-result' => 'search-result__quote-' . $resultKey,
+                    'data-project' => $lead->project_id,
+
                 ]) ?>
+
+                <?php if (Auth::can('quote/addQuote/projectRelations') && $projectRelations = $lead->project->projectRelations) : ?>
+                    <div class="btn-group js-btn-box" style="margin-left: 7px; height: 32px;">
+                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <div class="dropdown-menu small " style="background: transparent;">
+                            <?php foreach ($projectRelations as $relatedProject) : ?>
+                                <?php echo
+                                    Html::button(
+                                        '<i class="fa fa-plus"></i>&nbsp; <span>Add Quote to ' . $relatedProject->prlRelatedProject->name . '</span>',
+                                        [
+                                            'class' => 'btn btn-success search_create_quote__btn',
+                                            'style' => 'width: 180px; margin-left: 0; margin-bottom: 2px; text-align: left;',
+                                            'data-title' => implode(', ', $tripsInfo),
+                                            'data-key' => $result['key'],
+                                            'data-gds' => $result['gds'],
+                                            'data-key-cache' => $keyCache,
+                                            'data-result' => 'search-result__quote-' . $resultKey,
+                                            'data-project' => $relatedProject->prl_related_project_id,
+                                        ]
+                                    )
+                                ?>
+                            <?php endforeach ?>
+                        </div>
+                    </div>
+                <?php endif ?>
             <?php endif; ?>
         </div>
     </div>

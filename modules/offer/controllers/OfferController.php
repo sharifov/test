@@ -5,8 +5,10 @@ namespace modules\offer\controllers;
 use common\models\Currency;
 use common\models\LeadPreferences;
 use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\offer\src\services\OfferService;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\services\TransactionManager;
 use Yii;
 use common\models\Lead;
 use frontend\controllers\FController;
@@ -21,8 +23,30 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
+/**
+ * Class OfferController
+ * @package modules\offer\controllers
+ *
+ * @property-read OfferService $offerService
+ * @property-read TransactionManager $transactionManager
+ */
 class OfferController extends FController
 {
+    private OfferService $offerService;
+    private TransactionManager $transactionManager;
+
+    public function __construct(
+        $id,
+        $module,
+        OfferService $offerService,
+        TransactionManager $transactionManager,
+        $config = []
+    ) {
+        parent::__construct($id, $module, $config);
+        $this->offerService = $offerService;
+        $this->transactionManager = $transactionManager;
+    }
+
     /**
      * @return array
      */
@@ -238,6 +262,29 @@ class OfferController extends FController
         }
 
         return ['message' => 'Successfully removed offer (' . $model->of_id . ')'];
+    }
+
+    public function actionAjaxConfirmAlternative()
+    {
+        $offerId = Yii::$app->request->post('offerId');
+
+        $offer = $this->findModel($offerId);
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $this->transactionManager->wrap(function () use ($offer) {
+                $this->offerService->confirmAlternative($offer);
+            });
+        } catch (\Throwable $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($result);
     }
 
     /**
