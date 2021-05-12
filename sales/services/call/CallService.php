@@ -136,6 +136,25 @@ class CallService
 
     /**
      * @param CallUserAccess $callUserAccess
+     * @param int $userId
+     * @return bool
+     */
+    public function acceptWarmTransferCall(CallUserAccess $callUserAccess, int $userId): bool
+    {
+        $callUserAccess->acceptCall();
+        $this->callUserAccessRepository->save($callUserAccess);
+        $call = $callUserAccess->cuaCall;
+        if ($call) {
+            if (Call::applyWarmTransferCallToAgent($call, $userId)) {
+                Notifications::pingUserMap();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param CallUserAccess $callUserAccess
      * @param Employee $user
      */
     public function busyCall(CallUserAccess $callUserAccess, Employee $user): void

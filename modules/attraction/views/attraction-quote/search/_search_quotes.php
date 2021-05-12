@@ -37,9 +37,9 @@ use yii\widgets\Pjax;
         ],*/
         'summary' => false,
         'emptyText' => '<div class="text-center">Not found any hotels</div><br>',
-        'itemView' => function ($dataHotel, $key, $index, $widget) use ($attraction) {
+        'itemView' => function ($dataAttraction, $key, $index, $widget) use ($attraction) {
             //\yii\helpers\VarDumper::dump($dataHotel, 10, true); exit;
-            return $this->render('_list_attraction_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'attraction' => $attraction]);
+            return $this->render('_list_attraction_quotes', ['dataAttraction' => $dataAttraction, 'index' => $index, 'key' => $key, 'attraction' => $attraction]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
         'itemOptions' => [
@@ -138,11 +138,11 @@ $('body').off('click', '.btn-availability-quote').on('click', '.btn-availability
       })
           .done(function(data) {
               if (data.error) {
-                  alert(data.error);
+                  //alert(data.error);
                   new PNotify({
-                        title: 'Error: fail to get Quotes',
-                        type: 'error',
-                        text: data.error,
+                        title: 'Info: fail to get availability data',
+                        type: 'info',
+                        text: data.message,
                         hide: true
                     });
                   btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-stop');

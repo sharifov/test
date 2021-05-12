@@ -29,6 +29,7 @@ use sales\model\clientChat\entity\ClientChatQuery;
  * @property bool|null $canCreateCase
  * @property bool|null $canLinkCase
  * @property bool|null $canLinkLead
+ * @property bool|null $canUpdateChatStatus
  */
 class ClientChatActionPermission
 {
@@ -61,6 +62,8 @@ class ClientChatActionPermission
 
     private ?bool $canLinkCase = null;
     private ?bool $canLinkLead = null;
+
+    private ?bool $canUpdateChatStatus = null;
 
     public function canClose(ClientChat $chat): bool
     {
@@ -216,7 +219,7 @@ class ClientChatActionPermission
             return $this->canTake;
         }
 
-        $systemRuleValid = !$chat->isClosed() && !$chat->isArchive() && !$chat->isOwner(Auth::id());
+        $systemRuleValid = !$chat->isClosed() && !$chat->isArchive() && !$chat->isTransfer() && !$chat->isOwner(Auth::id());
         if (!$systemRuleValid) {
             $this->canTake = false;
             return $this->canTake;
@@ -362,5 +365,15 @@ class ClientChatActionPermission
 
         $this->canLinkLead = Auth::can('/lead/link-chat') && Auth::can('client-chat/manage', ['chat' => $chat]);
         return $this->canLinkLead;
+    }
+
+    public function canUpdateChatStatus(): bool
+    {
+        if ($this->canUpdateChatStatus !== null) {
+            return $this->canUpdateChatStatus;
+        }
+
+        $this->canUpdateChatStatus = Auth::can('client-chat/accept-pending');
+        return $this->canUpdateChatStatus;
     }
 }

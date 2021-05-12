@@ -278,7 +278,7 @@ class IncomingCallNotificationItem extends React.Component {
                                 */}
                                  <a href="#"
                                     className="incoming-notification__action incoming-notification__action--phone btn-item-call-queue"
-                                    data-type-action={notification.queue === 'hold' ? 'return' : (notification.isInternal ? 'acceptInternal' :'accept')}
+                                    data-type-action={notification.queue === 'hold' ? 'return' : (notification.isInternal ? 'acceptInternal' : (notification.isWarmTransfer ? 'acceptWarmTransfer' : 'accept'))}
                                     data-call-sid={notification.callSid}
                                     data-from-internal={notification.fromInternal}
                                  >

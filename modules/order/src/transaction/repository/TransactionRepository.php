@@ -29,4 +29,11 @@ class TransactionRepository
         }
         $this->eventDispatcher->dispatchAll($transaction->releaseEvents());
     }
+
+    public function remove(Transaction $transaction): void
+    {
+        if (!$transaction->delete()) {
+            throw new \RuntimeException('Transaction remove is fail');
+        }
+    }
 }

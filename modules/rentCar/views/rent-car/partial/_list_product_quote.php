@@ -42,6 +42,23 @@ use yii\widgets\Pjax;
             });
         });
      });
+
+    $('body').on('click','.btn-rentcar-quote-details', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');       
+        $('#modal-lg-label').html($(this).data('title'));        
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
+        });
+    });
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
@@ -81,6 +98,14 @@ JS;
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <h6 title="RCQuoteID: <?php echo $modelQuote->rcq_id ?>" class="dropdown-header">Quote Q<?=($modelQuote->rcq_product_quote_id)?></h6>
+
+                    <?= Html::a('<i class="fa fa-search"></i> Details', null, [
+                        'class' => 'btn-rentcar-quote-details dropdown-item',
+                        'data-id' => $modelQuote->rcq_product_quote_id,
+                        'data-title' => '<i class="fa fa-car"></i> ' . $modelQuote->rcq_vendor_name,
+                        'data-url' => Url::to(['/rent-car/rent-car-quote/ajax-quote-details', 'id' => $modelQuote->rcq_product_quote_id]),
+                        'title' => 'Details'
+                    ]) ?>
 
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',

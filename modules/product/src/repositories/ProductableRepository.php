@@ -22,12 +22,9 @@ use yii\helpers\VarDumper;
  *
  * @property FlightRepository $flightRepository
  * @property HotelRepository $hotelRepository
-<<<<<<< HEAD
  * @property AttractionRepository $attractionRepository
-=======
  * @property RentCarRepository $rentCarRepository
  * @property CruiseRepository $cruiseRepository
->>>>>>> release/Release-3.9.0-stage
  */
 class ProductableRepository
 {

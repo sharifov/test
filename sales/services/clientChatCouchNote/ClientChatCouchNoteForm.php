@@ -31,7 +31,7 @@ class ClientChatCouchNoteForm extends Model
     {
         parent::__construct($config);
         $this->rid = $clientChat ? $clientChat->cch_rid : null;
-        $this->alias = $employee ? $employee->nickname_client_chat : null;
+        $this->alias = $employee && $employee->userClientChatData ? $employee->userClientChatData->uccd_username : null;
     }
 
     public function rules(): array

@@ -66,7 +66,7 @@ class PriceApiForm extends Model
     public function checkDetail($attribute): void
     {
         foreach ($this->detail as $paxType => $value) {
-            $priceDetailApiForm = new PriceDetailApiForm($paxType);
+            $priceDetailApiForm = new PriceDetailApiForm($paxType, $this->currency);
             if (!$priceDetailApiForm->load($value)) {
                 $this->addError($attribute, 'PriceDetailApiForm is not loaded');
                 break;
@@ -82,5 +82,10 @@ class PriceApiForm extends Model
     public function getPriceDetailApiForms(): array
     {
         return $this->priceDetailApiForms;
+    }
+
+    public function formName(): string
+    {
+        return '';
     }
 }

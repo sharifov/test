@@ -62,25 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'attribute' => 'fq_ticket_json',
-                        'format' => 'raw',
-                        'value' => static function (FlightQuote $model) {
-                            if (!$model->fq_ticket_json) {
-                                return Yii::$app->formatter->nullDisplay;
-                            }
-                            return VarDumper::dumpAsString($model->fq_ticket_json, 20, true);
-                        }
-                    ],
-                ],
-            ]) ?>
-        </div>
-    </div>
+
     <div class="row">
         <div class="col-md-6">
             <?= DetailView::widget([

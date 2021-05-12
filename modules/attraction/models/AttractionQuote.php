@@ -199,7 +199,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
                                 $pricingCategory->atqpc_max_participants = $category['maxParticipants'];
                                 $pricingCategory->atqpc_quantity = $category['value'];
                                 $pricingCategory->atqpc_price = $category['price'];
-                                $pricingCategory->atqpc_currency = $category['currency'];
+                                //$pricingCategory->atqpc_currency = $category['currency'];
 
                                 if (!$pricingCategory->save()) {
                                     Yii::error(

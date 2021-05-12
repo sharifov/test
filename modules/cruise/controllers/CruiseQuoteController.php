@@ -22,22 +22,26 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 
 class CruiseQuoteController extends FController
 {
     private CreateQuoteService $createQuoteService;
     private CruiseMarkupService $cruiseMarkupService;
+    private ProductQuoteRepository $productQuoteRepository;
 
     public function __construct(
         $id,
         $module,
         CreateQuoteService $createQuoteService,
         CruiseMarkupService $cruiseMarkupService,
+        ProductQuoteRepository $productQuoteRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->createQuoteService = $createQuoteService;
         $this->cruiseMarkupService = $cruiseMarkupService;
+        $this->productQuoteRepository = $productQuoteRepository;
     }
 
     /**
@@ -313,5 +317,15 @@ class CruiseQuoteController extends FController
         }
 
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxQuoteDetails(): string
+    {
+        $productQuoteId = Yii::$app->request->get('id');
+        $productQuote = $this->productQuoteRepository->find($productQuoteId);
+
+        return $this->renderAjax('partial/_quote_view_details', [
+            'cruiseQuote' => $productQuote->cruiseQuote
+        ]);
     }
 }

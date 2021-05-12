@@ -27,6 +27,24 @@ class HotelRoom extends \yii\db\ActiveRecord
     private $_adults    = null;
     private $_children  = null;
 
+    public static function clone(HotelRoom $room, int $hotelId): self
+    {
+        $clone = new static();
+        $clone->hr_hotel_id = $hotelId;
+        $clone->hr_room_name = $room->hr_room_name;
+        return $clone;
+    }
+
+    public static function create(
+        int $hotelId,
+        ?string $roomName
+    ): self {
+        $self = new self();
+        $self->hr_hotel_id = $hotelId;
+        $self->hr_room_name = $roomName;
+        return $self;
+    }
+
     /**
      * @return string
      */

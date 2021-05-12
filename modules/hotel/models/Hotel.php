@@ -63,6 +63,26 @@ class Hotel extends ActiveRecord implements Productable
         return $hotel;
     }
 
+    public static function clone(Hotel $hotel, int $productId): self
+    {
+        $clone = new static();
+        $clone->ph_product_id = $productId;
+        $clone->ph_check_in_date = $hotel->ph_check_in_date;
+        $clone->ph_check_out_date = $hotel->ph_check_out_date;
+        $clone->ph_zone_code = $hotel->ph_zone_code;
+        $clone->ph_hotel_code = $hotel->ph_hotel_code;
+        $clone->ph_destination_code = $hotel->ph_destination_code;
+        $clone->ph_destination_label = $hotel->ph_destination_label;
+        $clone->ph_min_star_rate = $hotel->ph_min_star_rate;
+        $clone->ph_max_star_rate = $hotel->ph_max_star_rate;
+        $clone->ph_min_price_rate = $hotel->ph_min_price_rate;
+        $clone->ph_max_price_rate = $hotel->ph_max_price_rate;
+        $clone->ph_request_hash_key = $hotel->ph_request_hash_key;
+        $clone->ph_holder_name = $hotel->ph_holder_name;
+        $clone->ph_holder_surname = $hotel->ph_holder_surname;
+        return $clone;
+    }
+
     public function updateRequest(HotelUpdateRequestForm $form): void
     {
         $this->attributes = $form->attributes;

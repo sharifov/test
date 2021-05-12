@@ -4,6 +4,7 @@ namespace sales\helpers\setting;
 
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use frontend\helpers\JsonHelper;
 use Yii;
 use yii\helpers\VarDumper;
 
@@ -169,6 +170,11 @@ class SettingHelper
         return Yii::$app->params['settings']['order_complete_email_template_key'] ?? 'order_status';
     }
 
+    public static function clientChatUserAccessHistoryDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['client_chat_user_access_history_days'] ?? 5);
+    }
+
     public static function getTimeStartCallUserAccessGeneral(?Department $department, $phone): int
     {
         $key = 'time_start_call_user_access_general';
@@ -256,5 +262,49 @@ class SettingHelper
     public static function getWebhookOrderUpdateHybridEndpoint()
     {
         return Yii::$app->params['settings']['webhook_order_update_hybrid_endpoint'] ?? null;
+    }
+
+    public static function warmTransferTimeout(): int
+    {
+        return (int)(\Yii::$app->params['settings']['warm_transfer_timeout'] ?? 30);
+    }
+
+    public static function warmTransferAutoUnholdEnabled(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['warm_transfer_auto_unhold_enabled'] ?? false);
+    }
+
+    public static function isPhoneBlacklistEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['phone_blacklist_enabled'] ?? true);
+    }
+
+    public static function getPhoneBlacklistLastTimePeriod(): int
+    {
+        return (int)(Yii::$app->params['settings']['phone_blacklist_last_time_period'] ?? 1440);
+    }
+
+    public static function getPhoneBlacklistPeriodList(): array
+    {
+        $list = Yii::$app->params['settings']['phone_blacklist_period'] ?? [];
+        if ($list) {
+            return JsonHelper::decode($list);
+        }
+        return [
+            1 => 5,
+            2 => 10,
+            3 => 60
+        ];
+    }
+
+    public static function getPhoneBlacklistPeriodByIndex(int $index): int
+    {
+        $period = self::getPhoneBlacklistPeriodList();
+        foreach ($period as $count => $minutes) {
+            if ($index <= $count) {
+                return $minutes;
+            }
+        }
+        return $period[array_key_last($period)];
     }
 }

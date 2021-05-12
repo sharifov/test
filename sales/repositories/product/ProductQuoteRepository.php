@@ -4,6 +4,7 @@ namespace sales\repositories\product;
 
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\dispatchers\EventDispatcher;
+use yii\web\NotFoundHttpException;
 
 /**
  * Class ProductQuoteRepository
@@ -33,5 +34,13 @@ class ProductQuoteRepository
         }
         $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
         return $productQuote->pq_id;
+    }
+
+    public function find(int $productQuoteId): ProductQuote
+    {
+        if ($productQuote = ProductQuote::findOne($productQuoteId)) {
+            return $productQuote;
+        }
+        throw new NotFoundHttpException('Product Quote not found');
     }
 }

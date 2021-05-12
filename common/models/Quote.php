@@ -56,6 +56,7 @@ use yii\helpers\VarDumper;
  * @property string $origin_search_data
  * @property string $gds_offer_id
  * @property float $agent_processing_fee
+ * @property int|null $provider_project_id
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -63,6 +64,7 @@ use yii\helpers\VarDumper;
  * @property Lead $lead
  * @property QuoteTrip[] $quoteTrips
  * @property Airline[] $mainAirline
+ * @property Project $providerProject
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -285,6 +287,9 @@ class Quote extends \yii\db\ActiveRecord
             ['gds', 'string', 'max' => 1],
 
             [['agent_processing_fee'], 'number'],
+
+            ['provider_project_id', 'integer'],
+            ['provider_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['provider_project_id' => 'id']],
         ];
     }
 
@@ -389,7 +394,7 @@ class Quote extends \yii\db\ActiveRecord
         return $quote;
     }
 
-    public static function createQuoteFromSearch(array $quoteData, Lead $lead, Employee $employee): Quote
+    public static function createQuoteFromSearch(array $quoteData, Lead $lead, ?Employee $employee): Quote
     {
         $quote = new self();
         $quote->uid = uniqid();
@@ -403,8 +408,8 @@ class Quote extends \yii\db\ActiveRecord
         $quote->main_airline_code = $quoteData['validatingCarrier'] ?? null;
         $quote->last_ticket_date = $quoteData['prices']['lastTicketDate'] ?? null;
         $quote->reservation_dump = str_replace('&nbsp;', ' ', SearchService::getItineraryDump($quoteData));
-        $quote->employee_id = $employee->id;
-        $quote->employee_name = $employee->username;
+        $quote->employee_id = $employee->id ?? null;
+        $quote->employee_name = $employee->username ?? null;
         $quote->origin_search_data = json_encode($quoteData);
         $quote->gds_offer_id = $quoteData['gdsOfferId'] ?? null;
         $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
@@ -1589,7 +1594,6 @@ class Quote extends \yii\db\ActiveRecord
         return Airline::findIdentity($this->main_airline_code);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -1598,6 +1602,10 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasOne(Airline::class, ['iata' => 'main_airline_code']);
     }
 
+    public function getProviderProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'provider_project_id']);
+    }
 
     public function getQuoteTripsData()
     {
@@ -2724,5 +2732,25 @@ class Quote extends \yii\db\ActiveRecord
     public static function getOriginalQuoteByLeadId(int $leadId): ?Quote
     {
         return self::findOne(['lead_id' => $leadId, 'type_id' => self::TYPE_ORIGINAL]);
+    }
+
+    public static function getQuoteByUidAndProjects(string $uid, array $projectIds): ?Quote
+    {
+        /** @var Quote $quote */
+        $quote = self::find()
+            ->alias('quotes')
+            ->select('quotes.*')
+            ->innerJoin(Lead::tableName() . ' AS lead', 'lead.id = quotes.lead_id')
+            ->andWhere(['quotes.uid' => $uid])
+            ->andWhere(
+                ['OR',
+                    ['IN', 'lead.project_id', $projectIds],
+                    ['IN', 'quotes.provider_project_id', $projectIds]
+                ]
+            )
+            ->andWhere(['IN', 'lead.project_id', $projectIds])
+            ->one();
+
+        return $quote;
     }
 }

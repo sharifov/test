@@ -691,15 +691,24 @@ $js = <<<JS
     
     $(document).on('click', '.search_create_quote__btn', function (e) {
         e.preventDefault();
+        let createQuoteBtn = $(this);
         var key = $(this).data('key');
         var gds = $(this).data('gds');
         var keyCache = $(this).data('key-cache');
         var searchResId = $(this).data('result');
+        let projectId = createQuoteBtn.data('project');
+        
         $('#preloader').removeClass('d-none');
         $.ajax({
             url: '$urlCreateQuoteFromSearch',
             type: 'post',
-            data: {'key': key, 'gds': gds, 'keyCache': keyCache, 'createFromQuoteSearch':1},
+            data: {
+                'key': key, 
+                'gds': gds, 
+                'keyCache': keyCache, 
+                'createFromQuoteSearch':1,
+                'projectId': projectId
+            },
             beforeSend: function () {
               $('#'+searchResId).addClass('loading');
             },
@@ -709,8 +718,14 @@ $js = <<<JS
                 $('#preloader').addClass('d-none');
                 if(data.status == true){
                     $('#modal-lg').modal('hide');
-                    $('#'+searchResId).addClass('quote--selected').find('.flight_create_quote__btn').remove();
-
+                    
+                    createQuoteBtn.remove();
+                    
+                    let btnBox = $('#'+searchResId).find('.js-btn-box:first');
+                    if (btnBox.find('.search_create_quote__btn').length === 0) {
+                        btnBox.remove();
+                    }
+                    
                     $.pjax.reload({container: '#quotes_list', async: false});
                     $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
                     

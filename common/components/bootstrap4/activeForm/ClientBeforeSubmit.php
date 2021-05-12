@@ -10,6 +10,7 @@ namespace common\components\bootstrap4\activeForm;
  * @property string $doneSuccessScript
  * @property string $doneErrorScript
  * @property string $doneAlwaysScript
+ * @property string $submitBtnId
  * @property bool $notify
  *
  * ActiveForm
@@ -34,6 +35,7 @@ class ClientBeforeSubmit
     public $doneSuccessScript;
     public $doneErrorScript;
     public $doneAlwaysScript;
+    public $submitBtnId;
 
     public $notify = true;
 
@@ -43,7 +45,8 @@ class ClientBeforeSubmit
         ?string $modalId,
         ?string $doneSuccessScript,
         ?string $doneErrorScript,
-        ?string $doneAlwaysScript
+        ?string $doneAlwaysScript,
+        string $submitBtnId = 'client_submit_btn'
     ) {
         $this->header = $header;
         $this->notify = $notify ? 1 : 0;
@@ -51,6 +54,7 @@ class ClientBeforeSubmit
         $this->doneSuccessScript = $doneSuccessScript;
         $this->doneErrorScript = $doneErrorScript;
         $this->doneAlwaysScript = $doneAlwaysScript;
+        $this->submitBtnId = $submitBtnId;
     }
 
     /**
@@ -65,7 +69,7 @@ class ClientBeforeSubmit
         $js = <<< JS
 $('#{$widgetId}').on('beforeSubmit', function (e) {
         e.preventDefault();
-        let btn = document.getElementById("update_product_btn")        
+        let btn = document.getElementById("{$this->submitBtnId}")        
         if (btn.disabled === false){
             btn.disabled = true
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing'  

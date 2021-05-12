@@ -12,7 +12,7 @@ use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\services\flight\FlightManageService;
 use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
-use modules\flight\src\services\flightQuote\FlightQuotePdfService;
+use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
@@ -329,7 +329,7 @@ class FlightQuoteController extends FController
 
             $quotes = \Yii::$app->cacheFile->get($flight->fl_request_hash_key);
 
-            if ($quotes === false && empty($quotes['results'])) {
+            if (empty($quotes['results'])) {
                 throw new \DomainException('Not found Quote from Search result from Cache. Please update search request!');
             }
 
@@ -379,7 +379,7 @@ class FlightQuoteController extends FController
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
         $lead = $productQuote->pqProduct->prLead;
 
-        if ($lead->isInTrash() && Auth::user()->isAgent()) {
+        if ($lead && $lead->isInTrash() && Auth::user()->isAgent()) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 
@@ -571,19 +571,17 @@ class FlightQuoteController extends FController
             if (!$flightQuote->isBooked()) {
                 throw new \DomainException('Quote should have Booked status.');
             }
-
-            FlightQuotePdfService::guard($flightQuote);
-            $flightQuotePdfService = new FlightQuotePdfService($flightQuote);
-            $flightQuotePdfService->setProductQuoteId($flightQuote->fq_product_quote_id);
-            if ($flightQuotePdfService->processingFile()) {
-                $result['status'] = 1;
-                $result['message'] = 'Document have been successfully generated';
-                return $result;
+            if (!$flightQuote->flightQuoteFlights) {
+                throw new NotFoundException('FlightQuoteFlights not found in FlightQuote Id(' . $flightQuoteId . ')');
             }
-            throw new \DomainException('Document generate failed.');
+
+            FlightQuoteTicketIssuedService::generateTicketIssued($flightQuote);
+
+            $result['status'] = 1;
+            $result['message'] = 'Document have been successfully generated';
         } catch (\Throwable $throwable) {
             $result['message'] = $throwable->getMessage();
-            \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxFileGenerate');
+            \Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxFileGenerate');
         }
         return $result;
     }

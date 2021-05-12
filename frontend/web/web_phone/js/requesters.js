@@ -16,7 +16,9 @@
             'clientInfoUrl': '',
             'recordingEnableUrl': '',
             'recordingDisableUrl': '',
-            'acceptPriorityCallUrl': ''
+            'acceptPriorityCallUrl': '',
+            'acceptWarmTransferCallUrl': '',
+            'addPhoneBlackListUrl': ''
         };
 
         this.init = function (settings) {
@@ -72,6 +74,33 @@
                 dataType: 'json',
                 data: {
                     act: 'accept',
+                    call_sid: call.data.callSid
+                }
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Accept Call', data.message, 'error');
+                        call.unSetAcceptCallRequestState();
+                        window.phoneWidget.notifier.on(call.data.callSid);
+                        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                    }
+                })
+                .fail(function () {
+                    createNotify('Accept Call', 'Server error', 'error');
+                    call.unSetAcceptCallRequestState();
+                    window.phoneWidget.notifier.on(call.data.callSid);
+                    PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                })
+        };
+
+        this.acceptWarmTransfer = function (call) {
+            window.phoneWidget.notifier.off(call.data.callSid);
+            PhoneWidgetCall.audio.incoming.off(call.data.callSid);
+            $.ajax({
+                type: 'post',
+                url: this.settings.acceptWarmTransferCallUrl,
+                dataType: 'json',
+                data: {
                     call_sid: call.data.callSid
                 }
             })
@@ -276,6 +305,35 @@
                 .fail(function (xhr, textStatus, errorThrown) {
                     createNotify('Call info', xhr.responseText, 'error');
                 });
+        };
+
+        this.addPhoneBlackList = function (phone) {
+            if (confirm('Confirm adding ' + phone + ' number to blacklist')) {
+                let btnIcon = $('.btn-add-in-blacklist').html();
+                $.ajax({
+                    url: this.settings.addPhoneBlackListUrl,
+                    type: 'post',
+                    data: {phone: phone},
+                    dataType: 'json',
+                    beforeSend: function () {
+                        $('.btn-add-in-blacklist').html('<i class="fa fa-spin fa-spinner"></i>').prop('disabled', true);
+                    },
+                    success: function (resp) {
+                        if (resp.error) {
+                            createNotify('Error', resp.message, 'error');
+                        } else {
+                            createNotify('Success', 'Phone number: ' + phone + ' added to blacklist', 'success');
+                            $('.btn-add-in-blacklist[data-phone="'+phone+'"]').remove();
+                        }
+                    },
+                    error: function (xhr) {
+                        createNotify('Error', xhr.responseText, 'error');
+                    },
+                    complete: function () {
+                        $('.btn-add-in-blacklist').html(btnIcon).prop('disabled', false);
+                    }
+                });
+            }
         };
 
         this.clientInfo = function (id, isClient) {

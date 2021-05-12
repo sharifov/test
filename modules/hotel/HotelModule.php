@@ -64,6 +64,7 @@ class HotelModule extends \yii\base\Module
             ['label' => 'Hotel Request Rooms Pax', 'url' => ['/' . $modulePath . '/hotel-room-pax/index']],
             ['label' => 'Hotel Quote', 'url' => ['/' . $modulePath . '/hotel-quote/index']],
             ['label' => 'Hotel Quote Rooms', 'url' => ['/' . $modulePath . '/hotel-quote-room/index']],
+            ['label' => 'Hotel Quote Rooms Pax', 'url' => ['/' . $modulePath . '/hotel-quote-room-pax-crud/index']],
             ['label' => 'Hotel Quote Service log', 'url' => ['/' . $modulePath . '/hotel-quote-service-log-crud/index']],
             ['label' => 'Hotel List', 'url' => ['/' . $modulePath . '/hotel-list/index']],
         ];

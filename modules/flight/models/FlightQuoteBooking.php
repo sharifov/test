@@ -2,6 +2,14 @@
 
 namespace modules\flight\models;
 
+use common\models\Client;
+use common\models\Lead;
+use common\models\Project;
+use modules\flight\models\query\FlightQuoteBookingQuery;
+use modules\flight\src\entities\flightQuoteBooking\serializer\FlightQuoteBookingSerializer;
+use modules\order\src\entities\order\Order;
+use modules\product\src\interfaces\ProductDataInterface;
+use sales\entities\serializer\Serializable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -25,7 +33,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteFlight $fqbFqf
  * @property FlightPax[] $fqtPaxes
  */
-class FlightQuoteBooking extends \yii\db\ActiveRecord
+class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDataInterface
 {
     public function rules(): array
     {
@@ -95,9 +103,9 @@ class FlightQuoteBooking extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function find(): \modules\flight\models\query\FlightQuoteBookingQuery
+    public static function find(): FlightQuoteBookingQuery
     {
-        return new \modules\flight\models\query\FlightQuoteBookingQuery(static::class);
+        return new FlightQuoteBookingQuery(static::class);
     }
 
     public static function tableName(): string
@@ -121,5 +129,35 @@ class FlightQuoteBooking extends \yii\db\ActiveRecord
         $model->fqb_gds_pcc = $gdsPss;
         $model->fqb_validating_carrier = $validatingCarrier;
         return $model;
+    }
+
+    public function serialize(): array
+    {
+        return (new FlightQuoteBookingSerializer($this))->getData();
+    }
+
+    public function getProject(): ?Project
+    {
+        return $this->fqbFqf->getProject();
+    }
+
+    public function getLead(): ?Lead
+    {
+        return $this->fqbFqf->getLead();
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->fqbFqf->getClient();
+    }
+
+    public function getOrder(): ?Order
+    {
+        return $this->fqbFqf->getOrder();
+    }
+
+    public function getId(): int
+    {
+        return $this->fqb_id;
     }
 }

@@ -3,6 +3,7 @@
 use common\models\Employee;
 use dosamigos\datetimepicker\DateTimePicker;
 use sales\auth\Auth;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\model\userClientChatData\service\UserClientChatDataService;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
@@ -32,6 +33,8 @@ use dosamigos\datepicker\DatePicker;
                 ->textInput(['maxlength' => true, 'title' => 'Username for the user', 'id' => 'rcUserName']) ?>
 
             <?php echo $form->field($model, 'uccd_password')->passwordInput(['maxlength' => true]) ?>
+
+            <?php echo $form->field($model, 'uccd_chat_status_id')->dropDownList(UserClientChatData::getChatStatusList()) ?>
 
             <div class="form-group">
                 <?php echo Html::submitButton('<i class="fa fa-rocket"></i> Save and register to Rocket Chat', ['class' => 'btn btn-success']) ?>

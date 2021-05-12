@@ -141,6 +141,9 @@ class OfferProductController extends FController
                         $offer->of_client_currency = $defaultCurrency['cur_code'];
                     }
                 }
+                if ($offer->isAlternative()) {
+                    $offer->pending();
+                }
                 $offer->updateOfferTotalByCurrency();
 
                 if (!$offer->save()) {

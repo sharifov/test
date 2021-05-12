@@ -4,14 +4,14 @@ use yii\data\ArrayDataProvider;
 use yii\web\View;
 
 /* @var $this yii\web\View */
-/* @var $dataHotel array */
+/* @var $dataAttraction array */
 /* @var $index int */
 /* @var $key int */
 
 /* @var $attraction \modules\attraction\models\Attraction */
 
-$roomDataProvider = new ArrayDataProvider([
-    'allModels' => $dataHotel ?? [],
+$dataProvider = new ArrayDataProvider([
+    'allModels' => $dataAttraction ?? [],
     'pagination' => [
         'pageSize' => 15,
         'pageParam' => 'qh-page' . $key
@@ -21,23 +21,19 @@ $roomDataProvider = new ArrayDataProvider([
     ],*/
 ]);
 
-//\yii\helpers\VarDumper::dump($dataHotel, 10, true); exit;
 ?>
 <table class="table table-striped table-bordered">
-    <?php //\yii\helpers\VarDumper::dump($dataHotel, 3, true); die();?>
-
-    <?php //\yii\widgets\Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
     <?= \yii\widgets\ListView::widget([
-        'dataProvider' => $roomDataProvider,
+        'dataProvider' => $dataProvider,
         'options' => [
             'tag' => 'table',
             'class' => 'table table-bordered',
         ],
         'emptyText' => '<div class="text-center">No any search results at this moment</div><br>',
-        'itemView' => function ($modelRoom, $key, $index, $widget) use ($dataHotel, $attraction) {
+        'itemView' => function ($model, $key, $index, $widget) use ($dataAttraction, $attraction) {
             return $this->render('_list_attraction_item', [
-                'dataRoom' => $modelRoom,
-                'dataHotel' => $dataHotel,
+                //'model' => $model,
+                'dataAttraction' => $dataAttraction,
                 'index' => $index,
                 'key' => $key,
                 'attraction' => $attraction

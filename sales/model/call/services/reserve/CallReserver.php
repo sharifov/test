@@ -35,4 +35,9 @@ class CallReserver
         $userId = $this->redis->get($key->getValue());
         return $userId ? (int)$userId : null;
     }
+
+    public function isReserved(Key $key): bool
+    {
+        return $this->redis->exists($key->getValue());
+    }
 }

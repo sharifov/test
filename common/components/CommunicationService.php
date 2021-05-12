@@ -13,6 +13,7 @@ use common\models\Project;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\project\entity\projectLocale\ProjectLocale;
+use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
@@ -733,7 +734,6 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public function getJwtTokenCache($username = '', $deleteCache = false)
     {
         $cacheKey = 'jwt_token_' . $username;
-
         if ($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
         }
@@ -742,8 +742,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
         if ($out === false) {
             $out = $this->getJwtToken($username);
 
-            if ($out && isset($out['data']['token']) && $out['data']['token']) {
-                $expired = isset($out['data']['expire']) ? strtotime($out['data']['expire']) - time() : 60 * 30;
+            if ($out && !empty($out['data']['token'])) {
+                $expired = 60 * 15;
+                /*if (!empty($out['data']['expire'])) {
+                    $expired = strtotime($out['data']['expire']) - time();
+                }*/
                 \Yii::$app->cache->set($cacheKey, $out, $expired);
             }
         }
@@ -806,8 +809,17 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled, $phoneListId, $toNumber): array
-    {
+    public function acceptConferenceCall(
+        $id,
+        $sid,
+        $to,
+        $from,
+        $userId,
+        $callRecordingDisabled,
+        $phoneListId,
+        $toNumber,
+        $friendlyName
+    ): array {
         $data = [
             'call_id' => $id,
             'call_sid' => $sid,
@@ -817,9 +829,44 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'call_recording_disabled' => $callRecordingDisabled,
             'phone_list_id' => $phoneListId,
             'to_number' => $toNumber,
+            'friendly_name' => $friendlyName,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function acceptWarmTransferCall(
+        $id,
+        $sid,
+        $to,
+        $from,
+        $userId,
+        $callRecordingDisabled,
+        $phoneListId,
+        $toNumber,
+        $friendlyName,
+        $dep_id,
+        $oldCallOwnerId,
+        $callGroupId
+    ): array {
+        $data = [
+            'call_id' => $id,
+            'call_sid' => $sid,
+            'to' => $to,
+            'from' => $from,
+            'user_id' => $userId,
+            'call_recording_disabled' => $callRecordingDisabled,
+            'phone_list_id' => $phoneListId,
+            'to_number' => $toNumber,
+            'friendly_name' => $friendlyName,
+            'dep_id' => $dep_id,
+            'old_call_owner_id' => $oldCallOwnerId,
+            'call_group_id' => $callGroupId,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/accept-warm-transfer-call', $data);
 
         return $this->processConferenceResponse($response);
     }

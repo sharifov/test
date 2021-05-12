@@ -21,7 +21,8 @@ use common\components\bootstrap4\activeForm\ActiveForm;
             'modal-sm',
             'let cont = $("#pjax-case-coupons-table").length; if (cont) { pjaxReload({container: \'#pjax-case-coupons-table\'}) }',
             null,
-            null
+            null,
+            'coupon_request_submit_btn'
         ),
         'enableAjaxValidation' => false,
     ]);
@@ -34,7 +35,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
     <?= $form->field($model, 'code')->dropDownList($model->getCodeList()) ?>
 
     <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-save"></i> Send', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('<i class="fa fa-save"></i> Send', ['class' => 'btn btn-success', 'id' => 'coupon_request_submit_btn']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

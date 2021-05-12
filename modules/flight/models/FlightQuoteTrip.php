@@ -104,7 +104,7 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
      * @param string $duration
      * @return FlightQuoteTrip
      */
-    public static function create(FlightQuote $flightQuote, string $duration): self
+    public static function create(FlightQuote $flightQuote, ?string $duration): self
     {
         $trip = new self();
 

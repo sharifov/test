@@ -1975,6 +1975,12 @@ class OrderController extends BaseController
      * @apiParam {integer}                          [quotes.hotelPaxData.age]                   Age
      * @apiParam {string}                           quotes.hotelPaxData.hotelRoomKey            Hotel Room Key
      *
+     * @apiParam {Object}       quotes.hotelRequest                     Hotel Request data <code>required for hotel quotes</code>
+     * @apiParam {string}       quotes.hotelRequest.destinationName     Destination Name
+     * @apiParam {string}       quotes.hotelRequest.destinationCode     Destination Code
+     * @apiParam {string}       quotes.hotelRequest.checkIn             Check In Date <code>format: yyyy-mm-dd</code>
+     * @apiParam {string}       quotes.hotelRequest.checkOut            Check Out Date <code>format: yyyy-mm-dd</code>
+     *
      * @apiParam {Object}               [billingInfo]               BillingInfo
      * @apiParam {string{max 30}}       [billingInfo.first_name]      First Name
      * @apiParam {string{max 30}}       [billingInfo.last_name]       Last Name
@@ -2078,7 +2084,13 @@ class OrderController extends BaseController
                             "age": "32",
                             "type": "ADT"
                         }
-                    ]
+                    ],
+                    "hotelRequest": {
+                        "destinationCode": "BGO",
+                        "destinationName": "Norway, Bergen",
+                        "checkIn": "2021-09-10",
+                        "checkOut": "2021-09-30"
+                    }
                 }
             ],
             "creditCard": {
@@ -2245,17 +2257,26 @@ class OrderController extends BaseController
                 );
 
                 if (isset($form->creditCard)) {
-                    $creditCard = CreditCard::create(
-                        $form->creditCard->number,
-                        $form->creditCard->holder_name,
-                        $form->creditCard->expiration_month,
-                        $form->creditCard->expiration_year,
-                        $form->creditCard->cvv,
-                        $form->creditCard->type_id,
-                    );
-                    $creditCard->updateSecureCardNumber();
-                    $creditCard->updateSecureCvv();
-                    $this->creditCardRepository->save($creditCard);
+                    if (
+                        !$creditCard = CreditCard::getCreditCardByParams(
+                            $form->creditCard->expiration_month,
+                            $form->creditCard->expiration_year,
+                            $form->creditCard->holder_name,
+                            $form->creditCard->type_id
+                        )
+                    ) {
+                        $creditCard = CreditCard::create(
+                            $form->creditCard->number,
+                            $form->creditCard->holder_name,
+                            $form->creditCard->expiration_month,
+                            $form->creditCard->expiration_year,
+                            $form->creditCard->cvv,
+                            $form->creditCard->type_id,
+                        );
+                        $creditCard->updateSecureCardNumber();
+                        $creditCard->updateSecureCvv();
+                        $this->creditCardRepository->save($creditCard);
+                    }
                 }
 
                 if (isset($form->billingInfo)) {
@@ -2321,13 +2342,15 @@ class OrderController extends BaseController
                 new CodeMessage($e->getCode())
             );
         } catch (\Throwable $e) {
+            $code = $e->getCode();
+            $message = $code >= 500 ? 'Internal Server Error. Try again letter.' : $e->getMessage();
             Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::Throwable');
 
             $response = new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage($e->getMessage()),
-                new ErrorsMessage($e->getMessage()),
-                new CodeMessage($e->getCode())
+                new MessageMessage($message),
+                new ErrorsMessage($message),
+                new CodeMessage($code)
             );
         }
 

@@ -41,6 +41,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'uccd_employee_id:username',
                 'uccd_token_expired:byUserDateTime',
                 'uccd_active:booleanByLabel',
+                [
+                    'attribute' => 'uccd_chat_status_id',
+                    'value' => static function (UserClientChatData $model) {
+                        return $model->chatStatusName();
+                    },
+                    'filter' => UserClientChatData::getChatStatusList(),
+                    'format' => 'raw',
+                ],
                 'uccd_created_dt:byUserDateTime',
                 'uccd_updated_dt:byUserDateTime',
                 'uccd_created_user_id:username',

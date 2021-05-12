@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\models\ApiLog;
 use common\models\ApiUser;
 use common\models\Project;
+use webapi\src\behaviors\ApiUserProjectAccessBehavior;
 use Yii;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBasicAuth;
@@ -66,30 +67,7 @@ class ApiBaseController extends Controller
         ];
 
         if ($apiKey) {
-            $apiUser = null;
-            $apiProject = Project::find()->where(['api_key' => $apiKey])->one();
-            if ($apiProject) {
-                $apiUser = ApiUser::findOne([
-                    'au_project_id' => $apiProject->id
-                ]);
-
-                if ($apiUser) {
-                    if ($apiUser->au_enabled) {
-                        $this->apiUser = $apiUser;
-                        $this->apiProject = $apiProject;
-                    } else {
-                        throw new NotAcceptableHttpException('ApiUser is disabled', 10);
-                    }
-                }
-            } else {
-                throw new NotAcceptableHttpException('Not init Project', 9);
-            }
-
-            if (!$apiUser) {
-                throw new NotAcceptableHttpException('Not init User', 8);
-            }
-
-            Yii::$app->getUser()->login($apiUser);
+            $behaviors['apiUserProjectAccessBehavior'] = ['class' => ApiUserProjectAccessBehavior::class, 'apiKey' => $apiKey];
         } else {
             $behaviors['authenticator'] = [
                 'class' => HttpBasicAuth::class,

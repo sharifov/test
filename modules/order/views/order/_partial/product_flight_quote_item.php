@@ -7,9 +7,11 @@
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
 use modules\flight\models\FlightQuote;
+use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
@@ -118,17 +120,17 @@ $totalAmountQuote = 0.0;
                             <?php endforeach;?>
 
 
-                            <!--<?/*= Html::a('<i class="fa fa-search"></i> Details', null, [
+                            <?= Html::a('<i class="fa fa-search"></i> Details', null, [
                                 'class' => 'btn-flight-quote-details dropdown-item',
                                 'data-id' => $model->pq_id,
                                 'data-title' => implode(', ', $tripsInfo),
                                 'data-url' => Url::to(['/flight/flight-quote/ajax-quote-details', 'id' => $model->pq_id]),
                                 //'data-target' => '#quote_detail_'.$model->uid,
                                 'title' => 'Details'
-                            ]) */?>
+                            ]) ?>
 
 
-                            <?/*= Html::a('<i class="fa fa-clone"></i> Clone', null, [
+                            <!--<?/*= Html::a('<i class="fa fa-clone"></i> Clone', null, [
                                 'class' => 'dropdown-item btn-clone-product-quote',
                                 'data-product-quote-id' => $model->pq_id,
                                 'data-flight-quote-id' => $model->flightQuote->fq_id,
@@ -237,24 +239,48 @@ $totalAmountQuote = 0.0;
                     <?php endif;?>
 
 
-                    <?php if ($model->pq_clone_id) : ?>
+                    <?php if (ProductQuoteRelation::isClone($model->pq_id)) : ?>
                         <td>
                             <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
+                        </td>
+                    <?php elseif (ProductQuoteRelation::isReplace($model->pq_id)) : ?>
+                        <td>
+                            <span class="badge badge-warning" style="padding-left: 5px">REPLACE</span>
                         </td>
                     <?php endif;?>
 
                     <td>
-                        <span class="quote__vc" title="Main Airline">
-                            <span class="quote__vc-logo">
-                                <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $flightQuote->fq_main_airline ?>.png" alt="" class="quote__vc-img">
-                            </span>
+                        <?php if ($mainAirlines = FlightQuoteHelper::getMainAirline($flightQuote)) : ?>
+                            <?php if (count($mainAirlines) === 1) : ?>
+                                <span class="quote__vc" title="Main Airline">
+                                    <span class="quote__vc-logo">
+                                        <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $mainAirlines[0]['code'] ?>.png"
+                                            alt="<?= $mainAirlines[0]['code'] ?>" class="quote__vc-img" />
+                                    </span>
+                                    <?= $mainAirlines[0]['name'] ?> &nbsp;[<strong><?= $mainAirlines[0]['code'] ?></strong>]
+                                </span>
+                            <?php else : ?>
+                                <?php $dataHtml = ""; ?>
+                                    <?php foreach ($mainAirlines as $mainAirline) : ?>
+                                        <?php $dataHtml .= "<span class='quote__vc' title='Main Airline'>" ?>
+                                        <?php $dataHtml .= "<span class='quote__vc-logo'>" ?>
+                                        <?php $dataHtml .= "<img src='//www.gstatic.com/flights/airline_logos/70px/" . $mainAirline['code'] . ".png'
+                                                alt=" . $mainAirline['code'] . " class='quote__vc-img' />" ?>
+                                        <?php $dataHtml .= "</span>" ?>
 
-                            <?php $airline = $flightQuote->mainAirline;
-                            if ($airline) {
-                                echo \yii\helpers\Html::encode($airline->name);
-                            }
-                            ?> &nbsp;[<strong><?= $flightQuote->fq_main_airline?></strong>]
-                        </span>
+                                        <?php $dataHtml .= $mainAirline['name'] . "&nbsp;[<strong>" . $mainAirline['code'] . "</strong>]" ?>
+                                        <?php $dataHtml .= "</span>" ?>
+                                    <?php endforeach ?>
+                                <span class="light-tooltip-box">
+                                    <b
+                                        data-toggle="tooltip"
+                                        data-type="light-tooltip-box"
+                                        data-html="true"
+                                        data-template='<div class="tooltip light-tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
+                                        title="<?php echo $dataHtml ?>">Multiple</b>
+                                </span>
+                            <?php endif ?>
+                        <?php endif ?>
                     </td>
 
                     <td>
@@ -471,8 +497,18 @@ $totalAmountQuote = 0.0;
 
             <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model]) ?>
 
-
-
         </div>
     </div>
 <?php Pjax::end(); ?>
+
+<?php
+$css = <<<CSS
+    .tooltip.light-tooltip .tooltip-inner {
+      background-color: #e8e8e8 !important;
+      color: #596b7d !important;
+    }
+    .tooltip.light-tooltip .arrow::before, .bs-tooltip-auto[x-placement^="top"] .arrow::before {
+      border-top-color: #e8e8e8 !important;
+    }
+CSS;
+$this->registerCss($css);

@@ -21,7 +21,7 @@ class ClientChatAccessMessage
     {
         return [
             'command' => self::COMMAND_ACCEPT,
-            'url' => Url::toRoute(['/client-chat/index', 'chid' => $chatId]),
+            'url' => Url::toRoute(['/client-chat/dashboard-v2', 'chid' => $chatId]),
             'userId' => $userId,
             'chatId' => $chatId,
             'chatUserAccessId' => $chatUserAccessId

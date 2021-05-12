@@ -8,6 +8,8 @@ use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadRepository;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\fileStorage\src\entity\fileOrder\FileOrderRepository;
+use modules\fileStorage\src\entity\fileProductQuote\FileProductQuote;
+use modules\fileStorage\src\entity\fileProductQuote\FileProductQuoteRepository;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
@@ -35,7 +37,10 @@ use yii\helpers\VarDumper;
  * @property string $fileOrderCategory
  *
  * @property string $extension
+ * @property string|null $fileName
+ * @property string|null $fileTitle
  *
+ * @property FileProductQuoteRepository $fileProductQuoteRepository
  * @property FileStorageRepository $fileStorageRepository
  * @property FileClientRepository $fileClientRepository
  * @property FileOrderRepository $fileOrderRepository
@@ -57,13 +62,16 @@ abstract class PdfBaseService
     public ?int $productQuoteId = null;
     public ?array $communicationData = null;
 
-    public FileStorageRepository $fileStorageRepository;
-    public FileClientRepository $fileClientRepository;
-    public FileOrderRepository $fileOrderRepository;
-    public FileLeadRepository $fileLeadRepository;
-    public EventDispatcher $eventDispatcher;
-    public FileSystem $fileSystem;
+    private FileProductQuoteRepository $fileProductQuoteRepository;
+    private FileStorageRepository $fileStorageRepository;
+    private FileClientRepository $fileClientRepository;
+    private FileOrderRepository $fileOrderRepository;
+    private FileLeadRepository $fileLeadRepository;
+    private EventDispatcher $eventDispatcher;
+    private FileSystem $fileSystem;
 
+    private ?string $fileName = null;
+    private ?string $fileTitle = null;
     private string $extension = 'pdf';
 
     public function __construct(ProductDataInterface $object)
@@ -74,6 +82,7 @@ abstract class PdfBaseService
         $this->projectKey = $object->getProject()->project_key;
         $this->orderId = $object->getOrder() ? $object->getOrder()->or_id : null;
 
+        $this->fileProductQuoteRepository = Yii::createObject(FileProductQuoteRepository::class);
         $this->fileStorageRepository = Yii::createObject(FileStorageRepository::class);
         $this->fileClientRepository = Yii::createObject(FileClientRepository::class);
         $this->fileOrderRepository = Yii::createObject(FileOrderRepository::class);
@@ -91,8 +100,8 @@ abstract class PdfBaseService
         if ($this->clientId) {
             $this->fileToClient($fileStorageId);
         }
-        if ($this->leadId) {
-            $this->fileToLead($fileStorageId);
+        if ($this->getProductQuoteId()) {
+            $this->fileToProductQuote($fileStorageId);
         }
         if ($this->orderId) {
             $this->fileToOrder($fileStorageId);
@@ -105,12 +114,12 @@ abstract class PdfBaseService
 
     public function generateAsFile(): string
     {
-        return GeneratorPdfService::generateAsFile($this->generateContent(), $this->generateName());
+        return GeneratorPdfService::generateAsFile($this->generateContent(), $this->getName());
     }
 
     public function generateForBrowserOutput()
     {
-        return GeneratorPdfService::generateForBrowserOutput($this->generateContent(), $this->generateName());
+        return GeneratorPdfService::generateForBrowserOutput($this->generateContent(), $this->getName());
     }
 
     public function fillData()
@@ -142,14 +151,14 @@ abstract class PdfBaseService
         return $this;
     }
 
-    private function unlinkLocalFile(string $patchToLocalFile): void
+    public function unlinkLocalFile(string $patchToLocalFile): void
     {
         if (file_exists($patchToLocalFile)) {
             FileHelper::unlink($patchToLocalFile);
         }
     }
 
-    private function fileToOrder(int $fileStorageId): void
+    public function fileToOrder(int $fileStorageId): void
     {
         $this->fileOrderRepository->save(
             FileOrder::create(
@@ -172,19 +181,24 @@ abstract class PdfBaseService
         );
     }
 
-    private function fileToClient(int $fileStorageId): void
+    public function fileToClient(int $fileStorageId): void
     {
         $this->fileClientRepository->save(FileClient::create($fileStorageId, $this->clientId));
     }
 
-    private function fileToLead(int $fileStorageId): void
+    public function fileToLead(int $fileStorageId): void
     {
         $this->fileLeadRepository->save(FileLead::create($fileStorageId, $this->leadId));
     }
 
-    private function fileStorage($patchToLocalFile)
+    private function fileToProductQuote(int $fileStorageId): void
     {
-        $createDto = new CreateByLocalFileDto($patchToLocalFile, $this->clientId, $this->projectKey, $this->generateTitle(), $this->orderId);
+        $this->fileProductQuoteRepository->save(FileProductQuote::create($fileStorageId, $this->getProductQuoteId()));
+    }
+
+    public function fileStorage($patchToLocalFile)
+    {
+        $createDto = new CreateByLocalFileDto($patchToLocalFile, $this->clientId, $this->projectKey, $this->getTitle(), $this->orderId);
         $fileStorage = FileStorage::createByLocalFile($createDto);
 
         $this->fileSystem->write($fileStorage->fs_path, file_get_contents($patchToLocalFile));
@@ -193,18 +207,51 @@ abstract class PdfBaseService
         return $fileStorage->fs_id;
     }
 
-    public function generateName(): string
+    public function getName(): string
     {
-        return $this->templateKey . '_' . $this->object->getId() . '.' . $this->extension;
+        if ($this->fileName) {
+            return $this->fileName . '.' . $this->getExtension();
+        }
+        return $this->templateKey . '_' . $this->object->getId() . '.' . $this->getExtension();
     }
 
-    private function generateTitle(): string
+    private function getTitle(): string
     {
-        return Inflector::camelize($this->templateKey) . '-' . $this->object->getId() . '.' . $this->extension;
+        if ($this->fileTitle) {
+            return $this->fileTitle;
+        }
+        return Inflector::camelize($this->templateKey) . '-' . $this->object->getId() . '.' . $this->getExtension();
     }
 
     public function getCommunicationData(): ?array
     {
         return $this->communicationData;
+    }
+
+    /**
+     * @param int|null $leadId
+     * @return PdfBaseService
+     */
+    public function setLeadId(?int $leadId): PdfBaseService
+    {
+        $this->leadId = $leadId;
+        return $this;
+    }
+
+    public function getExtension(): string
+    {
+        return $this->extension;
+    }
+
+    public function setFileName(?string $fileName): PdfBaseService
+    {
+        $this->fileName = $fileName;
+        return $this;
+    }
+
+    public function setFileTitle(?string $fileTitle): PdfBaseService
+    {
+        $this->fileTitle = $fileTitle;
+        return $this;
     }
 }

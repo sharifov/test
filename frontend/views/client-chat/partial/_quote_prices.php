@@ -21,10 +21,10 @@
         <tr>
             <th><?= $paxCode?></th>
             <td>x <?= $price['tickets']?></td>
-            <td><?= number_format($price['net'] / $price['tickets'], 2) ?></td>
-            <td><?= number_format($price['mark_up'] / $price['tickets'], 2) ?></td>
-            <td><?= number_format($price['extra_mark_up'] / $price['tickets'], 2)?></td>
-            <td><?= number_format($price['selling'] / $price['tickets'], 2) ?></td>
+            <td><?= number_format($price['net'], 2) ?></td>
+            <td><?= number_format($price['mark_up'], 2) ?></td>
+            <td><?= number_format($price['extra_mark_up'], 2)?></td>
+            <td><?= number_format($price['selling'], 2) ?></td>
         </tr>
         <?php endforeach;?>
     </tbody>

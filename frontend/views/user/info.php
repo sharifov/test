@@ -88,10 +88,6 @@ $this->params['breadcrumbs'][] = $this->title;
                             <i class="fa fa-user user-profile-icon"></i> Full
                             Name: <?= Html::encode($model->full_name) ?>
                         </li>
-                        <li>
-                            <i class="fa fa-user user-profile-icon"></i> Nickname Client
-                            Chat: <?= Html::encode($model->nickname_client_chat) ?>
-                        </li>
 
                         <!--                        <li class="m-top-xs">-->
                         <!--                            <i class="fa fa-external-link user-profile-icon"></i>-->

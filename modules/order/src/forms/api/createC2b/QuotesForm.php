@@ -18,6 +18,7 @@ use sales\forms\CompositeForm;
  * @property string $bookingId
  *
  * @property ProductHolderForm $holder
+ * @property HotelRequestForm $hotelRequest
  * @property ProductType $productType
  * @property FlightPaxDataForm[] $flightPaxData
  * @property HotelPaxDataForm[] $hotelPaxData
@@ -58,6 +59,7 @@ class QuotesForm extends CompositeForm
         $this->holder = new ProductHolderForm();
         $this->createFlightPaxDataForm($data);
         $this->createHotelPaxDataForm($data);
+        $this->createHotelRequestForm($data);
         $this->createOptionsForm($data);
         return parent::load($data, $formName);
     }
@@ -72,7 +74,7 @@ class QuotesForm extends CompositeForm
      */
     protected function internalForms(): array
     {
-        return ['holder', 'flightPaxData', 'hotelPaxData', 'options'];
+        return ['holder', 'flightPaxData', 'hotelPaxData', 'options', 'hotelRequest'];
     }
 
     public function validateProductType(): bool
@@ -81,6 +83,12 @@ class QuotesForm extends CompositeForm
             $this->addError('productKey', 'Product type not found by key: ' . $this->productKey);
             return false;
         }
+
+        if ($this->productType->isHotel() && empty($this->hotelRequest)) {
+            $this->addError('hotelRequest', 'Hotel request not found');
+            return false;
+        }
+
         return true;
     }
 
@@ -105,6 +113,14 @@ class QuotesForm extends CompositeForm
                 $paxData[] = new HotelPaxDataForm();
             }
             $this->hotelPaxData = $paxData;
+        }
+    }
+
+    private function createHotelRequestForm(array $data): void
+    {
+        $this->hotelRequest = [];
+        if (isset($data['hotelRequest'])) {
+            $this->hotelRequest = new HotelRequestForm();
         }
     }
 

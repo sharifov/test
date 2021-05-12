@@ -10,6 +10,7 @@ use modules\hotel\src\entities\hotelQuoteServiceLog\CreateDto;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus as LogStatus;
+use modules\lead\src\services\LeadFailBooking;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
@@ -26,34 +27,33 @@ use yii\helpers\ArrayHelper;
  * @property  ApiHotelService $apiService
  * @property ProductQuoteRepository $productQuoteRepository
  * @property TransactionManager $transactionManager
+ * @property-read LeadFailBooking $leadFailBooking
  */
 class HotelQuoteBookService
 {
     public $status = 0; // 0 failed : 1 success
     public $message = '';
-    /**
-     * @var TransactionManager
-     */
+
     private $transactionManager;
-    /**
-     * @var ProductQuoteRepository
-     */
     private $productQuoteRepository;
-    /**
-     * @var ApiHotelService
-     */
     private $apiService;
+    private LeadFailBooking $leadFailBooking;
 
     /**
      * HotelQuoteBookService constructor.
      * @param ProductQuoteRepository $productQuoteRepository
      * @param TransactionManager $transactionManager
+     * @param LeadFailBooking $leadFailBooking
      */
-    public function __construct(ProductQuoteRepository $productQuoteRepository, TransactionManager $transactionManager)
-    {
+    public function __construct(
+        ProductQuoteRepository $productQuoteRepository,
+        TransactionManager $transactionManager,
+        LeadFailBooking $leadFailBooking
+    ) {
         $this->apiService = \Yii::$app->getModule('hotel')->apiService;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->transactionManager = $transactionManager;
+        $this->leadFailBooking = $leadFailBooking;
     }
 
     /**
@@ -64,7 +64,6 @@ class HotelQuoteBookService
     public function book(HotelQuote $model): self
     {
         $rooms = [];
-        $client = $this->getClient($model);
         $productQuote = $model->hqProductQuote;
         $userId = Auth::id();
         $productQuote->inProgress($userId);
@@ -111,11 +110,9 @@ class HotelQuoteBookService
             }
         } else {
             $this->message = $apiResponse['message'];
-            $this->transactionManager->wrap(function () use ($model, $apiResponse, $userId) {
-                $productQuote = $model->hqProductQuote;
-                $productQuote->error($userId, $apiResponse['message']);
-                $this->productQuoteRepository->save($productQuote);
-            });
+            $productQuote = $model->hqProductQuote;
+            $productQuote->error($userId, $apiResponse['message']);
+            $this->productQuoteRepository->save($productQuote);
         }
 
         $hotelQuoteServiceLog->setStatus($apiResponse['statusApi'])

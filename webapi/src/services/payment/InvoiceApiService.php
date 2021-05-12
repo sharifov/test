@@ -17,10 +17,7 @@ class InvoiceApiService
         ?int $billingInfoId,
         string $description = 'Created automatically from InvoiceApiService'
     ): ?Invoice {
-        if (
-            ArrayHelper::isIn($form->pay_type, [$form::TYPE_CAPTURE]) &&
-            !TransactionApiService::existTransactionByCode((string) $form->pay_auth_id)
-        ) {
+        if (ArrayHelper::isIn($form->pay_type, [$form::TYPE_CAPTURE])) {
             return Invoice::create(
                 $orderId,
                 (float) $form->pay_amount,
@@ -30,10 +27,5 @@ class InvoiceApiService
             );
         }
         return null;
-    }
-
-    private static function getByOrderAndSum(int $orderId, float $sum): ?Invoice
-    {
-        return Invoice::findOne(['inv_order_id' => $orderId, 'inv_sum' => $sum]);
     }
 }

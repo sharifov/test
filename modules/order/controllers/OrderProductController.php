@@ -3,6 +3,7 @@
 namespace modules\order\controllers;
 
 use frontend\controllers\FController;
+use modules\lead\src\services\LeadFailBooking;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderSourceType;
@@ -22,12 +23,14 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\filters\VerbFilter;
 use yii\web\Response;
+use sales\model\leadProduct\entity\LeadProductRepository;
 
 /**
  * @property ProductQuoteRepository $productQuoteRepository
  * @property EventDispatcher $eventDispatcher
  * @property OrderManageService $orderManageService
  * @property OrderPriceUpdater $orderPriceUpdater
+ * @property LeadProductRepository $leadProductRepository
  */
 class OrderProductController extends FController
 {
@@ -42,6 +45,7 @@ class OrderProductController extends FController
     private $productQuoteRepository;
 
     private OrderPriceUpdater $orderPriceUpdater;
+    private LeadProductRepository $leadProductRepository;
 
     public function __construct(
         $id,
@@ -50,6 +54,7 @@ class OrderProductController extends FController
         OrderManageService $orderManageService,
         EventDispatcher $eventDispatcher,
         OrderPriceUpdater $orderPriceUpdater,
+        LeadProductRepository $leadProductRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -57,6 +62,7 @@ class OrderProductController extends FController
         $this->orderManageService = $orderManageService;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->orderPriceUpdater = $orderPriceUpdater;
+        $this->leadProductRepository = $leadProductRepository;
     }
 
 
@@ -166,5 +172,24 @@ class OrderProductController extends FController
         }
 
         return ['message' => 'Successfully removed product quote (' . $productQuoteId . ') from order (' . $orderId . ')'];
+    }
+
+    public function actionCreateLeadBookingFail(): Response
+    {
+        $productQuoteId = (int) Yii::$app->request->post('product_quote_id');
+        $productId = (int) Yii::$app->request->post('product_id');
+
+        try {
+            $service = \Yii::createObject(LeadFailBooking::class);
+            if ($this->leadProductRepository->exist($productId)) {
+                return $this->asJson(['message' => 'Lead Exist for Product Quote ( ' . $productQuoteId . ' ) ']);
+            }
+            $service->create($productQuoteId, Auth::id());
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), 'OrderProductController:' . __FUNCTION__);
+            return $this->asJson(['message' => 'Info: ' . $throwable->getMessage()]);
+        }
+
+        return $this->asJson(['message' => 'For Product Quote (' . $productQuoteId . ')']);
     }
 }

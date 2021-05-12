@@ -52,7 +52,7 @@ var PhoneWidgetCall = function () {
 
         setCountMissedCalls(options.countMissedCalls);
 
-        panes.active.setup(options.btnHoldShow, options.btnTransferShow, options.canRecordingDisabled);
+        panes.active.setup(options.btnHoldShow, options.btnTransferShow, options.canRecordingDisabled, options.canAddBlockList);
 
         muteBtnClickEvent();
         transferCallBtnClickEvent();
@@ -71,6 +71,7 @@ var PhoneWidgetCall = function () {
         hideNotificationEvent();
         muteIncomingAudioEvent();
         recordingClickEvent();
+        addPhoneBlacklistEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -639,7 +640,16 @@ var PhoneWidgetCall = function () {
     {
         $(document).on('click', '#btn-accept-call', function () {
             let btn = $(this);
-            acceptCall(btn.attr('data-call-sid'), btn.attr('data-from-internal'));
+            let action = $(this).attr('data-type-action');
+            if (action === 'acceptWarmTransfer') {
+                acceptWarmTransfer(btn.attr('data-call-sid'));
+                return false;
+            }
+            if (action === 'accept') {
+                acceptCall(btn.attr('data-call-sid'), btn.attr('data-from-internal'));
+                return false;
+            }
+            console.log('Undefined type action');
         });
         $(document).on('click', '.btn-item-call-queue', function () {
             let btn = $(this);
@@ -667,6 +677,11 @@ var PhoneWidgetCall = function () {
 
             if (action === 'return') {
                 returnHoldCall(btn.attr('data-call-sid'));
+                return false;
+            }
+
+            if (action === 'acceptWarmTransfer') {
+                acceptWarmTransfer(btn.attr('data-call-sid'));
                 return false;
             }
             console.log('Undefined type action');
@@ -725,6 +740,25 @@ var PhoneWidgetCall = function () {
 
             callRequester.accept(call);
         }
+    }
+
+    function acceptWarmTransfer(callSid)
+    {
+        if (!checkDevice('Accept Call')) {
+            return false;
+        }
+
+        let call = waitQueue.one(callSid);
+        if (call === null) {
+            createNotify('Error', 'Not found call on Wait Queue', 'error');
+            return false;
+        }
+
+        if (!call.setAcceptCallRequestState()) {
+            return false;
+        }
+
+        callRequester.acceptWarmTransfer(call);
     }
 
     function acceptPriorityCall()
@@ -847,6 +881,19 @@ var PhoneWidgetCall = function () {
             }
             callRequester.callLogInfo(callSid);
         });
+    }
+
+    function addPhoneBlacklistEvent() {
+        $(document).on('click', '.btn-add-in-blacklist', function (e) {
+            e.preventDefault();
+            let phone = $(this).data('phone');
+            if (typeof phone === 'undefined') {
+                createNotify('Call Info', 'Phone number not found', 'error');
+                return false;
+            }
+
+            callRequester.addPhoneBlackList(phone);
+        })
     }
 
     function callInfoEvent() {
@@ -1209,7 +1256,8 @@ var PhoneWidgetCall = function () {
             'isInternal': call.data.isInternal,
             'fromInternal': call.data.fromInternal,
             'eventName': call.getEventUpdateName(),
-            'isShow': isShow
+            'isShow': isShow,
+            'isWarmTransfer': call.data.isWarmTransfer
         };
     }
 

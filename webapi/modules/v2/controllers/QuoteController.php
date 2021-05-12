@@ -13,6 +13,7 @@ use common\models\UserProjectParams;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
+use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -22,7 +23,6 @@ use yii\web\UnprocessableEntityHttpException;
 
 class QuoteController extends ApiBaseController
 {
-
     /**
      *
      * @return array
@@ -459,7 +459,16 @@ class QuoteController extends ApiBaseController
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
 
-        $model = Quote::find()->where(['uid' => $uid])->one();
+        if ($this->apiProject) {
+            $projectIds = [$this->apiProject->id];
+            if ($this->apiProject->projectMainRelation) {
+                $projectIds = ArrayHelper::merge($projectIds, [$this->apiProject->projectMainRelation->prl_project_id]);
+            }
+
+            $model = Quote::getQuoteByUidAndProjects($uid, $projectIds);
+        } else {
+            $model = Quote::find()->where(['uid' => $uid])->one();
+        }
 
         if (!$model) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $uid, 2);

@@ -190,19 +190,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'user'
         ];
 
-        //      $menuItems[] = [
-        //          'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
-        //          'url' => ['/client-chat/index'],
-        //          'icon' => 'comments'
-        //      ];
-
-
         $menuItems[] = [
             'label' => 'Client Chat' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
             'url' => 'javascript:',
             'icon' => 'comments',
             'items' => [
-                ['label' => 'My Client Chat', 'url' => ['/client-chat/index']],
                 ['label' => 'My Client Chat v2', 'url' => ['/client-chat/dashboard-v2']],
                 ['label' => 'Real Time Visitors', 'url' => ['/client-chat/real-time']],
             ]
@@ -357,6 +349,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
                 ['label' => 'Product Quote Relation', 'url' => ['/product/product-quote-relation-crud/index']],
+                ['label' => 'Product Quote Lead', 'url' => ['/product/product-quote-lead/index']],
+                ['label' => 'Product Quote Origin', 'url' => ['/product/product-quote-origin/index']],
 
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
                     ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
@@ -369,6 +363,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Order Data', 'url' => ['/order/order-data-crud/index']],
                     ['label' => 'Case Order Relation', 'url' => ['/case-order-crud/index']],
                     ['label' => 'Lead Order Relation', 'url' => ['/lead-order-crud/index']],
+                    ['label' => 'Lead Product Relation', 'url' => ['/lead-product-crud/index']],
                     ['label' => 'Order Contact', 'url' => ['/order/order-contact-crud/index']],
                     ['label' => 'Order Email', 'url' => ['/order/order-email-crud/index']],
                 ], 'hasChild' => true],
@@ -417,6 +412,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Project Sources', 'url' => ['/sources/index']],
                         ['label' => 'Project Settings', 'url' => ['/settings/projects']],
                         ['label' => 'Project Locales', 'url' => ['/project-locale/index']],
+                        ['label' => 'Project Relation', 'url' => ['/project-relation-crud/index']],
                     ]
                 ],
 
@@ -457,6 +453,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
                 ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+                ['label' => 'Phone Blacklist Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],

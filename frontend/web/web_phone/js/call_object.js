@@ -7,7 +7,7 @@
             if (!conferenceBase) {
                 return this.data.status === 'In progress';
             }
-            return this.data.typeId !== 3 && this.data.status === 'In progress' && !this.data.isInternal;
+            return this.data.typeId !== 3 && this.data.status === 'In progress' && !this.data.isInternal && !this.data.isHold;
         };
 
         this.block = function () {

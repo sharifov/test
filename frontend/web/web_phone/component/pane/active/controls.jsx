@@ -35,7 +35,7 @@ function ButtonHold(props) {
 
 function ButtonTransfer(props) {
     return (
-        <li className="in-call-controls__item wg-transfer-call" data-call-sid={props.call.data.callSid} data-active={props.controls.transfer.active}>
+        <li className="in-call-controls__item wg-transfer-call" data-call-sid={props.call.data.callSid} data-active={!props.call.data.isHold && props.controls.transfer.active}>
             <a href="#" className="in-call-controls__action">
                 <i className="fa fa-random"> </i>
                 <span>Transfer</span>

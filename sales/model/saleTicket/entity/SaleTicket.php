@@ -130,7 +130,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
             ['st_client_name', 'string', 'max' => 50],
 
-            ['st_original_fop', 'string', 'max' => 5],
+            ['st_original_fop', 'string', 'max' => 20],
 
             ['st_penalty_amount', 'string', 'max' => 50],
             ['st_penalty_amount', 'trim'],

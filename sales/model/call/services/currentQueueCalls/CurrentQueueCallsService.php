@@ -367,11 +367,16 @@ class CurrentQueueCallsService
         $query = CallUserAccess::find()
             ->with(['cuaCall', 'cuaCall.cProject', 'cuaCall', 'cuaCall.cClient'])
             ->joinWith(['cuaCall'])
-            ->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
+            ->where(['cua_user_id' => $this->userId, 'cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING, CallUserAccess::STATUS_TYPE_WARM_TRANSFER]])
             ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD]);
 
         if ($generalLinePriorityIsEnabled) {
-            $query = $query->andWhere(['NOT IN', 'c_source_type_id', [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]]);
+            $query = $query
+                ->andWhere([
+                    'OR',
+                    ['cua_status_id' => [CallUserAccess::STATUS_TYPE_WARM_TRANSFER]],
+                    ['NOT IN', 'c_source_type_id', [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]],
+                ]);
         }
 
         if ($excludeCallSid) {
@@ -388,9 +393,9 @@ class CurrentQueueCallsService
                 'status' => $call->getStatusName(),
                 'duration' => time() - strtotime($call->c_updated_dt),
                 'leadId' => $call->c_lead_id,
-                'typeId' => $call->c_call_type_id,
-                'type' => CallHelper::getTypeDescription($call),
-                'source_type_id' => $call->c_source_type_id,
+                'typeId' => $item->isWarmTransfer() ? Call::CALL_TYPE_IN : $call->c_call_type_id,
+                'type' => $item->isWarmTransfer() ? 'Incoming' : CallHelper::getTypeDescription($call),
+                'source_type_id' => $item->isWarmTransfer() ? Call::SOURCE_DIRECT_CALL : $call->c_source_type_id,
                 'fromInternal' => false,
                 'isInternal' => $call->isInternal(),
                 'isHold' => false,
@@ -401,17 +406,18 @@ class CurrentQueueCallsService
                 'isBarge' => false,
                 'isJoin' => $call->isJoin(),
                 'project' => $call->c_project_id ? $call->cProject->name : '',
-                'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                'source' => $item->isWarmTransfer() ? Call::SOURCE_LIST[Call::SOURCE_DIRECT_CALL] : ($call->c_source_type_id ? $call->getSourceName() : ''),
                 'phone' => $call->c_from,
                 'name' => $call->cClient ? $call->cClient->getShortName() : '------',
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
-                'queue' => Call::getQueueName($call),
+                'queue' => $item->isWarmTransfer() ? Call::QUEUE_DIRECT : Call::getQueueName($call),
                 'canContactDetails' => $this->canContactDetails,
                 'canCallInfo' => $this->canCallInfo,
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+                'isWarmTransfer' => $item->isWarmTransfer(),
             ]);
             $last_time = strtotime($item->cua_updated_dt);
         }

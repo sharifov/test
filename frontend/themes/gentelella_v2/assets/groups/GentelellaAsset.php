@@ -9,6 +9,7 @@ use frontend\assets\groups\AllSharedGroupAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAllAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAsset;
 use frontend\themes\gentelella_v2\assets\SentryAsset;
+use frontend\themes\gentelella_v2\assets\SwitcheryAsset;
 use frontend\widgets\notification\NotificationSocketAsset;
 
 class GentelellaAsset extends \yii\web\AssetBundle
@@ -21,5 +22,6 @@ class GentelellaAsset extends \yii\web\AssetBundle
         SentryAsset::class,
         CentrifugeAsset::class,
         NotificationSocketAsset::class,
+        SwitcheryAsset::class
     ];
 }

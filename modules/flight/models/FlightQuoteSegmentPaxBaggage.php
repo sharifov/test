@@ -122,4 +122,28 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
     {
         return (new FlightQuoteSegmentPaxBaggageSerializer($this))->getData();
     }
+
+    public static function createByParams(
+        int $flightPaxCodeId,
+        int $flightQuoteSegmentId,
+        ?bool $carryOn,
+        ?string $airlineCode,
+        ?int $allowPieces,
+        ?int $allowWeight = null,
+        ?string $allowUnit = null,
+        ?string $allowMaxWeight = null,
+        ?string $allowMaxSize = null
+    ): FlightQuoteSegmentPaxBaggage {
+        $baggage = new self();
+        $baggage->qsb_flight_pax_code_id = $flightPaxCodeId;
+        $baggage->qsb_flight_quote_segment_id = $flightQuoteSegmentId;
+        $baggage->qsb_carry_one = $carryOn;
+        $baggage->qsb_airline_code = $airlineCode;
+        $baggage->qsb_allow_pieces = $allowPieces;
+        $baggage->qsb_allow_weight = $allowWeight;
+        $baggage->qsb_allow_unit = $allowUnit;
+        $baggage->qsb_allow_max_weight = $allowMaxWeight;
+        $baggage->qsb_allow_max_size = $allowMaxSize;
+        return $baggage;
+    }
 }

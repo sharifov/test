@@ -53,4 +53,15 @@ class FlightQuotePaxPriceRepository
             throw new \RuntimeException('Removing error', FlightCodeException::FLIGHT_QUOTE_PAX_PRICE_REMOVE);
         }
     }
+
+    public function removeByFlightQuoteId(int $flightQuoteId): array
+    {
+        $removedIds = [];
+        foreach (FlightQuotePaxPrice::findAll(['qpp_flight_quote_id' => $flightQuoteId]) as $model) {
+            $id = $model->qpp_id;
+            $this->remove($model);
+            $removedIds[] = $id;
+        }
+        return $removedIds;
+    }
 }

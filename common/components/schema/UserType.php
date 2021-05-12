@@ -32,9 +32,6 @@ class UserType extends ObjectType
                     'nickname' => [
                         'type' => Type::string(),
                     ],
-                    'nickname_client_chat' => [
-                        'type' => Type::string(),
-                    ],
                     'status' => [
                         'type' => Type::int(),
                     ],

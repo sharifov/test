@@ -40,6 +40,8 @@ class ProductOption extends ActiveRecord implements Serializable
 {
     use EventTrait;
 
+    public const TRAVEL_GUARD_FLIGHT_KEY = 'travelGuard';
+
     /**
      * @return string
      */
@@ -155,5 +157,17 @@ class ProductOption extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new ProductOptionSerializer($this))->getData();
+    }
+
+    public static function create(
+        string $key,
+        string $name,
+        int $productTypeId
+    ): ProductOption {
+        $model = new self();
+        $model->po_key = $key;
+        $model->po_name = $name;
+        $model->po_product_type_id = $productTypeId;
+        return $model;
     }
 }

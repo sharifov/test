@@ -56,7 +56,7 @@ use yii\web\View;
         </div>
 
         <div class="quote__wrapper">
-            <div class="">
+            <div class="col-md-12">
                 <div class="row">
                     <div class="col-3">
                         <img

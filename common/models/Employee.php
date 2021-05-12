@@ -41,7 +41,6 @@ use yii\web\NotFoundHttpException;
  * @property string $username
  * @property string $full_name
  * @property string $nickname
- * @property string $nickname_client_chat
  * @property string $auth_key
  * @property string $password_hash
  * @property string $password_reset_token
@@ -394,10 +393,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
-            [['email', 'password', 'username', 'full_name', 'nickname', 'nickname_client_chat'], 'trim'],
+            [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
             [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
-            [['password_hash', 'password_reset_token', 'email', 'nickname_client_chat'], 'string', 'max' => 255],
+            [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
@@ -433,7 +432,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'make_user_project_params' => 'Make user project params (automatic)',
             'full_name' => 'Full Name',
             'client_chat_user_channel' => 'Client chat user channel',
-            'nickname_client_chat' => 'Nickname Client Chat',
         ];
     }
 
@@ -2674,7 +2672,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $last_hours . ' hours'));
 
-        $onCall = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])->exists();
+        $onCall = Call::find()
+            ->andWhere(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+            ->innerJoin(
+                ConferenceParticipant::tableName(),
+                'cp_call_id = c_id AND cp_status_id != :status AND cp_type_id = :type',
+                [
+                    ':status' => ConferenceParticipant::STATUS_LEAVE,
+                    ':type' => ConferenceParticipant::TYPE_AGENT,
+                ]
+            )
+            ->exists();
         $glCallCount = (int) Call::find()->select('COUNT(*)')->where(['c_created_user_id' => $this->id, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_status_id' => Call::STATUS_COMPLETED])
             ->andWhere(['IS NOT', 'c_parent_id', null])
             ->andWhere(['>=', 'c_created_dt', $date_time])

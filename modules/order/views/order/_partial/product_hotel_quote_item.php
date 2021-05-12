@@ -13,6 +13,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use sales\auth\Auth;
+use sales\helpers\product\ProductQuoteHelper;
 use sales\services\CurrencyHelper;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
@@ -175,6 +176,23 @@ use yii\widgets\Pjax;
             });
         });
      });
+    
+    $('body').on('click','.btn-hotel-quote-details', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');       
+        $('#modal-lg-label').html($(this).data('title'));        
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
+        });
+    });
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
@@ -183,6 +201,8 @@ JS;
     <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
     <div class="x_panel">
         <div class="x_title">
+
+            <?= ProductQuoteHelper::displayOriginOrAlternativeIcon($model) ?>
 
             <span class="badge badge-white">Q<?=($model->pq_id)?></span> Hotel "<b><?=\yii\helpers\Html::encode($model->hotelQuote->hqHotelList->hl_name)?></b>"
             (<?=\yii\helpers\Html::encode($model->hotelQuote->hqHotelList->hl_star)?>),
@@ -217,6 +237,13 @@ JS;
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                     <div class="dropdown-menu" role="menu">
                         <h6 class="dropdown-header">Quote Q<?=($model->pq_id)?></h6>
+                        <?= Html::a('<i class="fa fa-search"></i> Details', null, [
+                            'class' => 'btn-hotel-quote-details dropdown-item',
+                            'data-id' => $model->pq_id,
+                            'data-title' => '<i class="fa fa-hotel"></i> ' . $model->hotelQuote->hq_hotel_name,
+                            'data-url' => Url::to(['/hotel/hotel-quote/ajax-quote-details', 'id' => $model->pq_id]),
+                            'title' => 'Details'
+                        ]) ?>
 
                         <!--<?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                             'class' => 'dropdown-item text-warning btn-clone-product-quote',
@@ -324,7 +351,7 @@ JS;
                                 <td><?= Html::encode($room->hqr_amount) ?></td>
                                 <td><?= Html::encode($room->hqr_system_mark_up) ?></td>
                                 <td>
-                                    <?= Editable::widget([
+                                    <!-- <?/*= Editable::widget([
                                         'name' => 'extra_markup[' . $room->hqr_id . ']',
                                         'asPopover' => false,
                                         'pjaxContainerId' => 'pjax-product-quote-' . $model->pq_id,
@@ -341,7 +368,8 @@ JS;
                                         'formOptions' => [
                                             'action' => Url::toRoute(['/hotel/hotel-quote/ajax-update-agent-markup'])
                                         ]
-                                    ]) ?>
+                                    ]) */?>-->
+                                    <?= number_format($room->hqr_agent_mark_up, 2) ?>
                                 </td>
                                 <td><?= Html::encode($room->hqr_service_fee_percent) ?>%</td>
                                 <td><?= $sfs ?></td>

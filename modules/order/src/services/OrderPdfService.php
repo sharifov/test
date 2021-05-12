@@ -21,4 +21,23 @@ class OrderPdfService extends PdfBaseService
         $this->communicationData['order'] = $this->object->getOrder() ? $this->object->getOrder()->serialize() : null;
         return $this;
     }
+
+    public function processingFileWithoutEvent(): bool
+    {
+        $patchToLocalFile = $this->generateAsFile();
+
+        $fileStorageId = $this->fileStorage($patchToLocalFile);
+        if ($this->clientId) {
+            $this->fileToClient($fileStorageId);
+        }
+        if ($this->leadId) {
+            $this->fileToLead($fileStorageId);
+        }
+        if ($this->orderId) {
+            $this->fileToOrder($fileStorageId);
+        }
+        $this->unlinkLocalFile($patchToLocalFile);
+
+        return true;
+    }
 }

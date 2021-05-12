@@ -174,6 +174,23 @@ use yii\widgets\Pjax;
             });
         });
      });
+    
+    $('body').on('click','.btn-hotel-quote-details', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');       
+        $('#modal-lg-label').html($(this).data('title'));        
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
+        });
+    });
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
@@ -182,6 +199,10 @@ JS;
     <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
+
+        <?php if ($model->hqProductQuote->isAlternative()) : ?>
+            <i class="fab fa-autoprefixer" title="Alternative Quote" data-toggle="tooltip" data-placement="top"></i>
+        <?php endif;?>
 
         <span class="badge badge-white">Q<?=($model->hq_product_quote_id)?></span> Hotel "<b><?=\yii\helpers\Html::encode($model->hqHotelList->hl_name)?></b>"
             (<?=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>),
@@ -243,6 +264,14 @@ JS;
 <!--                            </div>-->
 <!--                        </li>-->
 <!--                    </ul>-->
+
+                    <?= Html::a('<i class="fa fa-search"></i> Details', null, [
+                        'class' => 'btn-hotel-quote-details dropdown-item',
+                        'data-id' => $model->hq_product_quote_id,
+                        'data-title' => '<i class="fa fa-hotel"></i> ' . $model->hqHotel->ph_destination_label,
+                        'data-url' => Url::to(['/hotel/hotel-quote/ajax-quote-details', 'id' => $model->hq_product_quote_id]),
+                        'title' => 'Details'
+                    ]) ?>
 
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                         'class' => 'dropdown-item text-warning btn-clone-product-quote',

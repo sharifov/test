@@ -2,15 +2,9 @@
 
 namespace modules\flight\src\services\flightQuote;
 
-use common\components\BackOffice;
 use modules\flight\models\FlightQuote;
 use modules\order\src\events\OrderFileGeneratedEvent;
-use sales\services\pdf\GeneratorPdfService;
 use sales\services\pdf\processingPdf\PdfBaseService;
-use Yii;
-use yii\helpers\ArrayHelper;
-use yii\helpers\FileHelper;
-use yii\helpers\VarDumper;
 
 /**
  * Class FlightQuotePdfService

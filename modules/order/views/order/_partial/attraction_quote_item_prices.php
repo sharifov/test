@@ -38,7 +38,7 @@ use yii\web\View;
             <td>x <?= $count ?></td>
             <td><?= number_format($price->net / $count, 2) ?></td>
             <td><?= number_format($price->markUp / $count, 2) ?></td>
-            <td><?php if ($quote->isNew()) :?>
+            <td><?php if (/*$quote->isNew()*/ false) :?>
                     <?= Editable::widget([
                         'name' => 'extra_markup[' . $attractionQuote->atnq_id  . '][' . $paxCode . ']',
                         'asPopover' => false,

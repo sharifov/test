@@ -2,6 +2,7 @@
 
 namespace modules\order\src\services;
 
+use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -75,5 +76,54 @@ class OrderPriceUpdater
             $userProfit->updateAmount($order->or_profit_amount ?? 0.00);
             $this->orderUserProfitRepository->save($userProfit);
         }
+    }
+
+    public function updateC2b(Order $order): Order
+    {
+        $appTotal = 0;
+        $appMarkUp = 0;
+        $agentMarkup = 0;
+        $profitAmount = 0;
+        foreach ($order->productQuotesActive as $quote) {
+            if ($quote->pq_price) {
+                $appTotal += $quote->pq_price;
+            }
+            foreach ($quote->productQuoteOptions as $option) {
+                if ($option->pqo_price) {
+                    $appTotal += $option->pqo_price;
+                }
+                if ($option->pqo_extra_markup) {
+                    $appTotal += $option->pqo_extra_markup;
+                    $agentMarkup += $option->pqo_extra_markup;
+                    $profitAmount += $option->pqo_extra_markup;
+                }
+            }
+            if ($quote->pq_app_markup) {
+                $appMarkUp += $quote->pq_app_markup;
+            }
+            if ($quote->pq_agent_markup) {
+                $agentMarkup += $quote->pq_agent_markup;
+            }
+            if ($quote->pq_profit_amount) {
+                $profitAmount += $quote->pq_profit_amount;
+            }
+        }
+        $order->or_app_total = $appTotal;
+        $order->or_app_markup = $appMarkUp;
+        $order->or_agent_markup = $agentMarkup;
+        $order->or_profit_amount = $profitAmount;
+
+        $order->or_app_total += $order->getOrderTipsAmount();
+
+        if ($order->or_client_currency_rate) {
+            if ($order->or_app_total) {
+                $order->or_client_total = CurrencyHelper::convertFromBaseCurrency($order->or_app_total, $order->or_client_currency_rate);
+            }
+        } else {
+            $order->or_client_total = $order->or_app_total;
+        }
+        $this->orderRepository->save($order);
+
+        return $order;
     }
 }

@@ -27,14 +27,11 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => SerialColumn::class],
-
             'fqt_pax_id',
             'fqt_fqb_id',
             'fqt_ticket_number',
             ['class' => DateTimeColumn::class, 'attribute' => 'fqt_created_dt'],
             ['class' => DateTimeColumn::class, 'attribute' => 'fqt_updated_dt'],
-
 
             ['class' => ActionColumn::class],
         ],

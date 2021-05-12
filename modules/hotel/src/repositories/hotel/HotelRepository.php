@@ -29,6 +29,14 @@ class HotelRepository
         throw new NotFoundException('Hotel is not found', HotelCodeException::HOTEL_NOT_FOUND);
     }
 
+    public function findByProduct(int $id): Hotel
+    {
+        if ($hotel = Hotel::find()->byProduct($id)->one()) {
+            return $hotel;
+        }
+        throw new NotFoundException('Hotel is not found', HotelCodeException::HOTEL_NOT_FOUND);
+    }
+
     public function save(Hotel $hotel): int
     {
         if (!$hotel->save(false)) {

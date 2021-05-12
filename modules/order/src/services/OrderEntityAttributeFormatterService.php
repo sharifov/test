@@ -2,6 +2,7 @@
 
 namespace modules\order\src\services;
 
+use sales\logger\formatter\Formatter;
 use sales\services\EntityAttributeFormatService;
 
 class OrderEntityAttributeFormatterService extends EntityAttributeFormatService
@@ -31,6 +32,28 @@ class OrderEntityAttributeFormatterService extends EntityAttributeFormatService
             \Yii::error($e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine(), 'Console:LoggerController:formAttr:Throwable');
 
             return null;
+        }
+    }
+
+    /**
+     * @param Formatter $formatter
+     * @param array $formattedAttr
+     * @param string|null $oldAttr
+     * @param string|null $newAttr
+     */
+    protected function formatByFormatter(Formatter $formatter, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
+    {
+        if ($newAttr) {
+            $oldAttr = json_decode($oldAttr, true);
+            $newAttr = json_decode($newAttr, true);
+            foreach ($newAttr as $attr => $value) {
+                if (!in_array($attr, $formatter->getExceptedAttributes(), false) && $oldAttr[$attr] != $newAttr[$attr]) {
+                    $formattedAttr[$formatter->getFormattedAttributeLabel($attr)][1] = $formatter->getFormattedAttributeValue($attr, $value);
+                    if (isset($oldAttr[$attr])) {
+                        $formattedAttr[$formatter->getFormattedAttributeLabel($attr)][0] = $formatter->getFormattedAttributeValue($attr, $oldAttr[$attr]);
+                    }
+                }
+            }
         }
     }
 }

@@ -130,7 +130,9 @@ class QuoteHelper
                 <span class="inside_icon">' . (int) $meta['bags'] . '</span>
             </span>';
         }
-        return '';
+        return '<span class="' . $class . ' quote__badge--disabled" data-toggle="tooltip" title="" data-original-title="No free baggage">
+                <i class="fa fa-suitcase"></i>
+            </span>';
     }
 
     public static function formattedMetaRank(?array $meta): string
@@ -141,6 +143,19 @@ class QuoteHelper
         $out .= self::formattedFastest($meta);
         $out .= self::formattedBest($meta);
         return $out;
+    }
+
+    public static function formattedProviderProject(Quote $quote, string $class = 'quote__badge bg-secondary'): string
+    {
+        if ($quote->providerProject) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . $quote->providerProject->name . '">
+                    P
+            </span>';
+        }
+        return '';
     }
 
     public static function checkPenaltiesInfo(array $penalties): bool

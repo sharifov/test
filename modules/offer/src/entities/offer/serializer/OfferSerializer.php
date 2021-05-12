@@ -4,6 +4,10 @@ namespace modules\offer\src\entities\offer\serializer;
 
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use sales\entities\serializer\Serializer;
 
 /**
@@ -61,7 +65,21 @@ class OfferSerializer extends Serializer
                     //$quoteData['productQuoteData'] = $quote->serialize();
                     $quoteData['productQuoteOptions'] = $productQuoteOptionsData;
 
+                    if ($productQuoteOrigin = ProductQuoteQuery::getOriginProductQuoteByAlternative($quote->pq_id)) {
+                        $quoteData['origin'] = $productQuoteOrigin->serialize();
+                        $quoteData['origin']['product'] = $productQuoteOrigin->pqProduct->serialize();
+
+                        $productQuoteOriginOptionsData = [];
+
+                        if ($productQuoteOptions = $productQuoteOrigin->productQuoteOptions) {
+                            foreach ($productQuoteOptions as $productQuoteOption) {
+                                $productQuoteOriginOptionsData[] = $productQuoteOption->serialize();
+                            }
+                        }
+                        $quoteData['origin']['productQuoteOptions'] = $productQuoteOriginOptionsData;
+                    }
                     $data['quotes'][] = $quoteData;
+
                     //$sum += $quote->totalCalcSum + $quote->pq_service_fee_sum;
                 }
             }

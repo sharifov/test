@@ -11,4 +11,22 @@ class OrderTipsRepository
         }
         return $orderTips;
     }
+
+    public function remove(OrderTips $model): void
+    {
+        if (!$model->delete()) {
+            throw new \RuntimeException('OrderTips remove fail');
+        }
+    }
+
+    public function removeByOrderId(int $orderId): array
+    {
+        $removedIds = [];
+        foreach (OrderTips::findAll(['ot_order_id' => $orderId]) as $model) {
+            $id = $model->ot_order_id;
+            $this->remove($model);
+            $removedIds[] = $id;
+        }
+        return $removedIds;
+    }
 }

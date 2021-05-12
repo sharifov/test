@@ -27,6 +27,7 @@ use sales\events\call\CallCreatedEvent;
 use sales\helpers\cases\CasesUrlHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\model\call\entity\call\events\CallEvents;
+use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
@@ -39,6 +40,7 @@ use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\FindWeightParams;
 use sales\services\lead\qcall\QCallService;
+use thamtech\uuid\helpers\UuidHelper;
 use webapi\src\services\communication\RequestDataDTO;
 use Yii;
 use DateTime;
@@ -914,17 +916,41 @@ class Call extends \yii\db\ActiveRecord
         if (!$insert) {
             if ($isChangedStatus && ($this->isStatusInProgress() || $this->isEnded())) {
                 $callUserAccessAny = CallUserAccess::find()->where([
-                    'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING,
+                    'cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING, CallUserAccess::STATUS_TYPE_WARM_TRANSFER],
                     'cua_call_id' => $this->c_id
                 ])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
+                        $sendWarmTransferMissedNotification = $callAccess->isWarmTransfer();
                         $callAccess->noAnsweredCall();
                         if ($callAccess->update() === false) {
                             Yii::error(
                                 VarDumper::dumpAsString($callAccess->errors),
                                 'Call:afterSave:CallUserAccess:update'
                             );
+                        } else {
+                            if ($sendWarmTransferMissedNotification) {
+                                $message = 'Missed Call (' . self::SOURCE_LIST[self::SOURCE_TRANSFER_CALL] . ')  from ' . $this->c_from;
+                                if ($this->c_lead_id && $this->cLead) {
+                                    $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
+                                }
+                                if ($this->c_case_id && $this->cCase) {
+                                    $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
+                                }
+
+                                if (
+                                    $ntf = Notifications::create(
+                                        $callAccess->cua_user_id,
+                                        'Missed Call (' . self::SOURCE_LIST[self::SOURCE_TRANSFER_CALL] . ')',
+                                        $message,
+                                        Notifications::TYPE_WARNING,
+                                        true
+                                    )
+                                ) {
+                                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                    Notifications::publish('getNewNotification', ['user_id' => $callAccess->cua_user_id], $dataNotification);
+                                }
+                            }
                         }
                         Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($this->c_call_sid));
                     }
@@ -1420,7 +1446,7 @@ class Call extends \yii\db\ActiveRecord
 
                 $call->c_created_user_id = $user_id;
 
-                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $call->c_id])->andWhere(['!=', 'cua_user_id', $call->c_created_user_id])->all();
+                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING, CallUserAccess::STATUS_TYPE_WARM_TRANSFER], 'cua_call_id' => $call->c_id])->andWhere(['!=', 'cua_user_id', $call->c_created_user_id])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
@@ -1472,7 +1498,8 @@ class Call extends \yii\db\ActiveRecord
                         $user_id,
                         $call->isRecordingDisable(),
                         $call->getDataPhoneListId(),
-                        $call->c_to
+                        $call->c_to,
+                        FriendlyName::nextWithSid($call->c_call_sid)
                     );
 
                     if ($res) {
@@ -1531,6 +1558,131 @@ class Call extends \yii\db\ActiveRecord
         return false;
     }
 
+    /**
+     * @param Call $call
+     * @param int $user_id
+     * @return bool
+     */
+    public static function applyWarmTransferCallToAgent(Call $call, int $user_id): bool
+    {
+        try {
+            if (!$call->isStatusDelay() && !$call->isStatusInProgress() && !$call->isHold()) {
+                throw new \DomainException('Call is Not in status Delay or In-progress or Hold');
+            }
+
+//                $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
+
+//            if ($call->c_created_user_id) {
+//                $user = Employee::findOne($user_id);
+//                $message = 'Warm transfer accepted successfully.';
+//                if (
+//                    $ntf = Notifications::create(
+//                        $call->c_created_user_id,
+//                        'Warm transfer',
+//                        $message,
+//                        Notifications::TYPE_SUCCESS,
+//                        true
+//                    )
+//                ) {
+//                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+//                    Notifications::publish('getNewNotification', ['user_id' => $call->c_created_user_id], $dataNotification);
+//                }
+//            }
+
+//                $call->c_created_user_id = $user_id;
+
+            $callUserAccessAny = CallUserAccess::find()->where([
+                'cua_status_id' => [
+                    CallUserAccess::STATUS_TYPE_PENDING,
+                    CallUserAccess::STATUS_TYPE_WARM_TRANSFER
+                ],
+                'cua_call_id' => $call->c_id
+            ])->all();
+            if ($callUserAccessAny) {
+                foreach ($callUserAccessAny as $callAccess) {
+                    $callAccess->noAnsweredCall();
+                    if ($callAccess->update() === false) {
+                        Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyWarmTransferCallToAgent');
+                    }
+                    Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
+                }
+            }
+
+            $isDisabledRecord = (RecordManager::acceptCall(
+                $user_id,
+                $call->c_project_id,
+                $call->c_dep_id,
+                null,
+                $call->c_client_id
+            ))->isDisabledRecord();
+
+            $oldRecordingDisabled = $call->c_recording_disabled;
+
+            if ($isDisabledRecord) {
+                $call->recordingDisable();
+            } else {
+                $call->recordingEnable();
+            }
+
+            if ($call->update() === false) {
+                Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyWarmTransferCallToAgent:call:update');
+            } else {
+//                $delay = abs((int)(Yii::$app->params['settings']['call_accept_check_conference_status_seconds'] ?? 0));
+//                if ($delay) {
+//                    $checkJob = new CheckClientCallJoinToConferenceJob();
+//                    $checkJob->callId = $call->c_id;
+//                    $checkJob->dateTime = date('Y-m-d H:i:s');
+//                    Yii::$app->queue_job->delay($delay)->push($checkJob);
+//                }
+            }
+
+            $departmentId = null;
+            $userDepartment = UserProjectParams::find()->select(['upp_dep_id'])->andWhere(['IS NOT', 'upp_dep_id', null])->byUserId($user_id)->byProject($call->c_project_id)->asArray()->one();
+            if ($userDepartment) {
+                $departmentId = $userDepartment['upp_dep_id'];
+            }
+
+            $res = \Yii::$app->communication->acceptWarmTransferCall(
+                $call->c_id,
+                $call->c_call_sid,
+                UserCallIdentity::getClientId($user_id),
+                $call->c_from,
+                $user_id,
+                $call->isRecordingDisable(),
+                $call->getDataPhoneListId(),
+                $call->c_to,
+                FriendlyName::nextWithSid($call->c_call_sid),
+                $departmentId,
+                $call->c_created_user_id,
+                $call->c_group_id
+            );
+
+            $isError = (bool)($res['error'] ?? true);
+            if ($isError) {
+                if ($oldRecordingDisabled) {
+                    $call->recordingDisable();
+                } else {
+                    $call->recordingEnable();
+                }
+                $call->update();
+
+                if (!empty($res['message']) && $res['message'] === 'Call status is Completed') {
+                    Notifications::publish('showNotification', ['user_id' => $user_id], [
+                        'data' => [
+                            'title' => 'Accept call',
+                            'message' => 'The other side hung up',
+                            'type' => 'warning',
+                        ]
+                    ]);
+                }
+                return false;
+            }
+            return true;
+        } catch (\Throwable $e) {
+            \Yii::error($e, 'Call:applyCallToAgent');
+        }
+        return false;
+    }
 
     /**
      * @param Call $call
@@ -1561,6 +1713,33 @@ class Call extends \yii\db\ActiveRecord
         } catch (\Throwable $e) {
             \Yii::error($e, 'Call:applyCallToAgentAccess');
 //            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgentAccess');
+        }
+        return false;
+    }
+
+    public static function applyCallToAgentAccessWarmTransfer(Call $call, int $user_id): bool
+    {
+        try {
+            $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $user_id, 'cua_call_id' => $call->c_id])->one();
+            if (!$callUserAccess) {
+                $callUserAccess = new CallUserAccess();
+                $callUserAccess->cua_call_id = $call->c_id;
+                $callUserAccess->cua_user_id = $user_id;
+                $callUserAccess->warmTransfer();
+                $callUserAccess->cua_priority = $call->getDataPriority();
+            } else {
+                $callUserAccess->warmTransfer();
+                $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
+                $callUserAccess->cua_priority = $call->getDataPriority();
+            }
+
+            if (!$callUserAccess->save()) {
+                Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'Call:applyCallToAgentAccessWarmTransfer');
+            } else {
+                return true;
+            }
+        } catch (\Throwable $e) {
+            \Yii::error($e, 'Call:applyCallToAgentAccessWarmTransfer');
         }
         return false;
     }
@@ -1888,6 +2067,16 @@ class Call extends \yii\db\ActiveRecord
         return (int) $this->c_call_type_id === self::CALL_TYPE_RETURN;
     }
 
+    public function direct(): void
+    {
+        $this->c_source_type_id = self::SOURCE_DIRECT_CALL;
+    }
+
+    public function isDirect(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_DIRECT_CALL;
+    }
+
 
     /**
      * @param string $statusName
@@ -2199,10 +2388,14 @@ class Call extends \yii\db\ActiveRecord
         $this->c_is_conference = true;
     }
 
-    public function getCallerName(string $fromNumber)
+    public function getCallerName(?string $fromNumber)
     {
         if ($this->cClient) {
             return $this->cClient->getShortName();
+        }
+
+        if (!$fromNumber) {
+            return 'ClientName';
         }
 
         $phone = PhoneList::find()->byPhone($fromNumber)->enabled()->one();

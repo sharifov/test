@@ -1,7 +1,7 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $dataHotel array */
+/* @var $dataAttraction array */
 /* @var $index int */
 /* @var $key int */
 
@@ -11,7 +11,7 @@
 
 ?>
 
-<?php if ($dataHotel) : ?>
+<?php if ($dataAttraction) : ?>
 <tr>
   <div class="quote">
     <div class="quote__heading">
@@ -19,8 +19,8 @@
         <span class="quote__id">
           <strong># <?= $key + 1?></strong>
         </span>
-        <span class="quote__vc" title="<?= $dataHotel[$key]['id'] ?>">
-            Attraction / <?= $dataHotel[$key]['name'] ?? '' ?>
+        <span class="quote__vc" title="<?= $dataAttraction[$key]['id'] ?>">
+            Attraction / <?= $dataAttraction[$key]['name'] ?? '' ?>
         </span>
       </div>
       <div class="quote__heading-right">
@@ -31,7 +31,7 @@
             </strong>
           </span>
           <strong class="text-success">
-            <?= $dataHotel[$key]['guidePriceFormattedText'] ?? '' ?>
+            <?= $dataAttraction[$key]['guidePriceFormattedText'] ?? '' ?>
           </strong>
         </span>
       </div>
@@ -42,8 +42,8 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-2">
-            <?php if (isset($dataHotel[$key]['previewImage']['url'])) : ?>
-                <img src="<?= $dataHotel[$key]['previewImage']['url'] ?>" alt="Attraction Name" class="img-thumbnail" style="max-width: 200px;">
+            <?php if (isset($dataAttraction[$key]['previewImage']['url'])) : ?>
+                <img src="<?= $dataAttraction[$key]['previewImage']['url'] ?>" alt="Attraction Name" class="img-thumbnail" style="max-width: 200px;">
             <?php else : ?>
               <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve"> <g transform="translate(1 1)"> <g>
                     <g>
@@ -68,14 +68,28 @@
             <?php endif; ?>
           </div>
           <div class="col-8">
-            <h5 class="mb-8"><?= $dataHotel[$key]['name'] ?? '' ?></h5>
-            <div class="mb-2"><small><?= $dataHotel[$key]['supplierName'] ?? '' ?></small></div>
-            <?php if (isset($dataHotel[$key]['duration'], $dataHotel[$key]['formatted'])) : ?>
-            <div class="mb-3"><i class="fa fa-clock"></i> <span><? //= $dataHotel[$key]['formatted'] ?></span></div>
+            <h5 class="mb-2"><?= $dataAttraction[$key]['name'] ?? '' ?></h5>
+              <div class="mb-4">
+                  <span title="supplier"><i class="fas fa-hands-helping mr-1 text-info"></i><?= $dataAttraction[$key]['supplierName'] ?? '' ?></span><br>
+                  <span title="location"><i class="fas fa-map-marked-alt mr-1 text-info"></i>
+                      <?= $dataAttraction[$key]['place']['countryName'] ?? '' ?>,
+                      <?= $dataAttraction[$key]['place']['cityName'] ?? '' ?>
+                  </span>
+                  <?php if (!empty($dataAttraction[$key]['categoryList']['nodes'])) : ?>
+                      <br>
+                      <span title="category">
+                        <?php foreach ($dataAttraction[$key]['categoryList']['nodes'] as $category) : ?>
+                            <?= $category['name'] ? '<span class= "badge badge-secondary">' . $category['name'] . '</span>' : '' ?>
+                        <?php endforeach; ?>
+                      </span>
+                  <?php endif; ?>
+              </div>
+            <?php if (isset($dataAttraction[$key]['duration'], $dataAttraction[$key]['formatted'])) : ?>
+            <div class="mb-3"><i class="fa fa-clock"></i> <span><? //= $dataAttraction[$key]['formatted'] ?></span></div>
             <?php endif; ?>
             <div style="font-size: 13px">
               <p>
-                <?= $dataHotel[$key]['abstract'] ?? '' ?>
+                <?= $dataAttraction[$key]['abstract'] ?? '' ?>
               </p>
             </div>
           </div>
@@ -86,14 +100,14 @@
                   <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> Get Quotes List', null, [
                       'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/availability-list-ajax']),
                       'data-atn-id' => $attraction->atn_id,
-                      'data-attraction-key' => $dataHotel[$key]['id'] ?? '',
+                      'data-attraction-key' => $dataAttraction[$key]['id'] ?? '',
                       'class' => 'btn btn-success btn-sm btn-availability-list-quote'
                   ]) ?>
               <?php endif; ?>
           </div>
         </div>
           <div class="row">
-              <div id="<?= $dataHotel[$key]['id'] ?>" class="col-12">
+              <div id="<?= $dataAttraction[$key]['id'] ?>" class="col-12">
 
               </div>
           </div>

@@ -155,7 +155,7 @@ class OrderActionsController extends FController
         $order = $this->findModel($orderId);
 
         try {
-            (new OrderPdfService($order))->processingFile();
+            (new OrderPdfService($order))->processingFileWithoutEvent();
             return [
                 'error' => false,
                 'message' => 'OK',

@@ -24,7 +24,8 @@ $modalId = 'modal-sm';
                 'modal-sm',
                 'pjaxReload({container: \'#pjax-product-\' + \'' . $model->productId . '\'}); ',
                 null,
-                null
+                null,
+                'update_product_btn'
             ),
         ]);
         ?>

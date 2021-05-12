@@ -19,6 +19,7 @@ use yii\httpclient\Response;
  * @property string $username
  * @property string $password
  * @property string $searchQuoteEndpoint
+ * @property string $searchQuoteByKeyEndpoint
  * @property Request $request
  */
 class AirSearchService extends Component
@@ -27,6 +28,7 @@ class AirSearchService extends Component
     public string $password;
     public string $url;
     public string $searchQuoteEndpoint;
+    public string $searchQuoteByKeyEndpoint;
 
     public array $options = [CURLOPT_ENCODING => 'gzip'];
     public Request $request;
@@ -209,6 +211,27 @@ class AirSearchService extends Component
     {
         $result = ['data' => [], 'error' => ''];
         $response = $this->sendRequest($this->searchQuoteEndpoint, $params, $method);
+
+        if ($response->isOk) {
+            $result['data'] = $response->data;
+        } else {
+            $result['error'] = $response->content;
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $cid
+     * @param string $key
+     * @param string $method
+     * @return array
+     * @throws Exception
+     */
+    public function searchQuoteByKey(string $cid, string $key, string $method = 'GET'): array
+    {
+        $result = ['data' => [], 'error' => ''];
+        $url = $this->searchQuoteByKeyEndpoint . '/' . $cid . '/' . $key;
+        $response = $this->sendRequest($url, [], $method);
 
         if ($response->isOk) {
             $result['data'] = $response->data;

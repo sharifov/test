@@ -180,6 +180,23 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
             $('#preloader').addClass('d-none');
         });
     });
+    
+    $('body').on('click','.btn-attraction-quote-details', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');       
+        $('#modal-lg-label').html($(this).data('title'));        
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
+        });
+    });
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
@@ -188,7 +205,7 @@ JS;
     <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->atnqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
-        <span class="badge badge-white">Q<?=($model->atnq_product_quote_id)?></span> Attraction "<b><?=\yii\helpers\Html::encode($model->atnq_attraction_name)?></b>"
+        <span class="badge badge-white">Q<?=($model->atnq_product_quote_id)?></span> Attraction "<b><?=\yii\helpers\Html::encode($model->atnq_product_details_json['product']['name'])?></b>"
             <?php //=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>
             <?php //=\yii\helpers\Html::encode($model->atnqProductQuote->pq_name)?>
             <?php //=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
@@ -224,6 +241,14 @@ JS;
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <h6 class="dropdown-header">Quote Q<?=($model->atnq_product_quote_id)?></h6>
+
+                    <?= Html::a('<i class="fa fa-search"></i> Details', null, [
+                        'class' => 'btn-attraction-quote-details dropdown-item',
+                        'data-id' => $model->atnq_product_quote_id,
+                        'data-title' => '<i class="fas fa-archway"></i> ' . $model->atnqAttraction->atn_destination,
+                        'data-url' => Url::to(['/attraction/attraction-quote/ajax-quote-details', 'id' => $model->atnq_product_quote_id]),
+                        'title' => 'Details'
+                    ]) ?>
 
                     <!--<?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                         'class' => 'dropdown-item text-warning btn-clone-product-quote',

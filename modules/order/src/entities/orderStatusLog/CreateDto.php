@@ -35,7 +35,11 @@ class CreateDto
         $this->orderId = $orderId;
         $this->startStatusId = $startStatusId;
         $this->endStatusId = $endStatusId;
-        $this->description = $description;
+        if ($description) {
+            $this->description = mb_substr($description, 0, 255);
+        } else {
+            $this->description = null;
+        }
         $this->actionId = $actionId;
         $this->ownerId = $ownerId;
         $this->creatorId = $creatorId;

@@ -8,9 +8,12 @@ use modules\flight\models\FlightQuote;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\entities\productType\ProductType;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\FlightApiForm;
+use webapi\src\forms\flight\options\OptionApiForm;
+use webapi\src\services\flight\FlightManageApiService;
 use yii\base\Model;
 
 /**
@@ -20,10 +23,12 @@ use yii\base\Model;
  * @property $flights
  * @property $parentId
  * @property $parentBookingId
+ * @property $options
  *
  * @property Order $order
  * @property FlightQuote $flightQuote
  * @property FlightApiForm[] $flightApiForms
+ * @property OptionApiForm[] $optionApiForms
  */
 class FlightRequestApiForm extends Model
 {
@@ -31,10 +36,12 @@ class FlightRequestApiForm extends Model
     public $flights;
     public $parentId;
     public $parentBookingId;
+    public $options;
 
     private $order;
     private $flightQuote;
     private array $flightApiForms = [];
+    private array $optionApiForms = [];
 
     public function rules(): array
     {
@@ -54,6 +61,9 @@ class FlightRequestApiForm extends Model
                 return JsonHelper::decode($value);
             }],
             [['flights'], 'checkFlights'],
+
+            [['options'], CheckJsonValidator::class, 'skipOnEmpty' => true],
+            [['options'], 'checkOptions'],
         ];
     }
 
@@ -62,7 +72,7 @@ class FlightRequestApiForm extends Model
         if (!$this->order = Order::findOne(['or_fare_id' => $this->fareId])) {
             $this->addError($attribute, 'Order not found by fareId(' . $this->fareId . ')');
         }
-        if ($this->order && !$this->flightQuote = self::getFlightQuoteByOrderId($this->order->getId())) {
+        if ($this->order && !$this->flightQuote = FlightManageApiService::getFlightQuoteByOrderId($this->order->getId())) {
             $this->addError($attribute, 'FlightQuote not found in Order fareId(' . $this->fareId . ')');
         }
     }
@@ -83,22 +93,27 @@ class FlightRequestApiForm extends Model
         }
     }
 
+    public function checkOptions($attribute): void
+    {
+        if (!empty($this->options) && $options = JsonHelper::decode($this->options)) {
+            foreach ($options as $key => $option) {
+                $optionApiForm = new OptionApiForm($option);
+                if (!$optionApiForm->load($option)) {
+                    $this->addError($attribute, 'OptionApiForm is not loaded');
+                    break;
+                }
+                if (!$optionApiForm->validate()) {
+                    $this->addError($attribute, 'OptionApiForm error: ' . ErrorsToStringHelper::extractFromModel($optionApiForm));
+                    break;
+                }
+                $this->optionApiForms[$key] = $optionApiForm;
+            }
+        }
+    }
+
     public function formName(): string
     {
         return '';
-    }
-
-    public static function getFlightQuoteByOrderId(int $orderId): ?FlightQuote
-    {
-        $flightQuote = FlightQuote::find()
-            ->innerJoin(ProductQuote::tableName(), 'pq_id = fq_product_quote_id')
-            ->innerJoin(Product::tableName(), 'pr_id = pq_product_id')
-            ->andWhere(['pq_order_id' => $orderId])
-            ->andWhere(['pr_type_id' => ProductType::PRODUCT_FLIGHT])
-            ->orderBy(['fq_id' => SORT_DESC])
-            ->one();
-        /** @var FlightQuote|null $flightQuote */
-        return $flightQuote;
     }
 
     public function getOrder(): Order
@@ -117,5 +132,13 @@ class FlightRequestApiForm extends Model
     public function getFlightQuote(): FlightQuote
     {
         return $this->flightQuote;
+    }
+
+    /**
+     * @return OptionApiForm[]
+     */
+    public function getOptionApiForms(): array
+    {
+        return $this->optionApiForms;
     }
 }
