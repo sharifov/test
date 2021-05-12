@@ -109,6 +109,10 @@ class OfferProductController extends FController
                 $offerProduct = OfferProduct::find()->where(['op_offer_id' => $offer->of_id, 'op_product_quote_id' => $productQuoteId])->one();
 
                 if ($offerProduct) {
+                    if ($offer->isConfirm()) {
+                        throw new \DomainException('Quote cannot be deleted because offer in status Confirm');
+                    }
+
                     if (!$offerProduct->delete()) {
 //                        throw new Exception('Product Quote ID (' . $productQuoteId . ') is already exist in Offer ID (' . $offerId . ')',
 //                            15);
@@ -123,6 +127,10 @@ class OfferProductController extends FController
                     $this->offerPriceUpdater->update($offer->of_id);
 
                     return ['message' => 'Successfully deleted Product Quote ID (' . $productQuoteId . ') from offer: "' . Html::encode($offer->of_name) . '" (' . $offer->of_id . ')'];
+                }
+
+                if ($offer->isConfirm()) {
+                    throw new \DomainException('Quote cannot be added because offer in status Confirm');
                 }
             } else {
                 $offer = new Offer();
@@ -183,6 +191,9 @@ class OfferProductController extends FController
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $model = $this->offerProductRepository->find($offerId, $productQuoteId);
+            if ($model->opOffer && $model->opOffer->isConfirm()) {
+                throw new \DomainException('Product Quote cannot be deleted because related offer is in status Confirm');
+            }
             $this->offerProductRepository->remove($model);
             $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
             $transaction->commit();
