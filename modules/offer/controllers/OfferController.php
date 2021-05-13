@@ -291,6 +291,29 @@ class OfferController extends FController
         return $this->asJson($result);
     }
 
+    public function actionAjaxCancelAlternative()
+    {
+        $offerId = Yii::$app->request->post('offerId');
+
+        $offer = $this->findModel($offerId);
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $this->transactionManager->wrap(function () use ($offer) {
+                $this->offerService->cancelAlternative($offer);
+            });
+        } catch (\Throwable $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($result);
+    }
+
     /**
      * @param $id
      * @return Offer

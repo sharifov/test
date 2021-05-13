@@ -150,7 +150,7 @@ use yii\bootstrap4\Html;
                     <tr>
                         <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?> <br> <?= ProductQuoteHelper::displayOriginOrAlternativeIcon($quote) ?></td>
 
-                        <td title="<?=Html::encode($quote->pq_product_id)?>">
+                        <td title="Product ID: <?=Html::encode($quote->pq_product_id)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
                             <?=Html::encode($quote->pqProduct->prType->pt_name)?>
                             <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
