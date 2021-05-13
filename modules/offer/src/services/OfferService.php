@@ -4,11 +4,15 @@ namespace modules\offer\src\services;
 
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferRepository;
+use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\services\OrderPriceUpdater;
+use modules\product\controllers\ProductQuoteRelationCrudController;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use modules\product\src\services\ProductQuoteService;
 
 /**
@@ -50,17 +54,29 @@ class OfferService
         }
 
         $dto = new OfferConfirmAlternativeResultDTO();
-        foreach ($offer->offerProducts as $offerProduct) {
-            $productQuote = $offerProduct->opProductQuote;
-            if (($originQuote = ProductQuoteQuery::getOriginProductQuoteByAlternative($productQuote->pq_id)) && $originQuote->pq_order_id) {
-                $dto->orderId = $productQuote->pq_order_id = $originQuote->pq_order_id;
-                $this->productQuoteService->detachProductQuoteFromOrder($originQuote);
-                $this->productQuoteRepository->save($productQuote);
-                $dto->cntConfirmedQuotes++;
+
+        $productQuoteRelations = ProductQuoteRelationQuery::getAlternativeJoinedOffer($offer->of_id);
+
+        foreach ($productQuoteRelations as $productQuoteRelation) {
+            $alternativeProductQuote = $productQuoteRelation->alternativeProductQuote;
+            $originProductQuote = $productQuoteRelation->originProductQuote;
+
+            if ($originProductQuote->pq_order_id && !$dto->orderId) {
+                $dto->orderId = $originProductQuote->pq_order_id;
             }
+            $this->productQuoteService->detachProductQuoteFromOrder($originProductQuote);
+
+            $alternativeProductQuote->pq_order_id = $dto->orderId;
+            $this->productQuoteRepository->save($alternativeProductQuote);
+            $dto->cntConfirmedQuotes++;
         }
 
         if ($dto->orderId) {
+            foreach ($offer->opProductQuotes as $productQuote) {
+                $productQuote->pq_order_id = $dto->orderId;
+                $this->productQuoteRepository->save($productQuote);
+            }
+
             $this->orderPriceUpdater->update($dto->orderId);
         }
 
@@ -73,5 +89,30 @@ class OfferService
         }
 
         return $dto;
+    }
+
+    public function cancelAlternative(Offer $offer): void
+    {
+        $offerProductQuotes = $offer->opProductQuotes;
+
+        if ($offerProductQuotes) {
+            foreach ($offerProductQuotes as $offerProductQuote) {
+                if ($order = $offerProductQuote->pqOrder) {
+                    $originQuote = ProductQuoteQuery::getOriginProductQuoteByAlternative($offerProductQuote->pq_id);
+                    if ($originQuote) {
+                        $originQuote->pq_order_id = $order->or_id;
+                        $this->productQuoteRepository->save($originQuote);
+                        $offerProductQuote->pq_order_id = null;
+                        $this->productQuoteRepository->save($offerProductQuote);
+                    } else {
+                        $offerProductQuote->pq_order_id = null;
+                        $this->productQuoteRepository->save($offerProductQuote);
+                    }
+                }
+            }
+        }
+
+        $offer->pending();
+        $this->offerRepository->save($offer);
     }
 }

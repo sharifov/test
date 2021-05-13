@@ -2,6 +2,8 @@
 
 namespace modules\product\src\entities\productQuoteRelation;
 
+use modules\offer\src\entities\offerProduct\OfferProduct;
+
 class ProductQuoteRelationQuery
 {
     public static function isRelatedAlternativeQuoteExists(int $relatedQuoteId): bool
@@ -24,5 +26,19 @@ class ProductQuoteRelationQuery
         $query->byParentQuoteId($originQuoteId)
             ->alternative();
         return $query->exists();
+    }
+
+    /**
+     * @param int $offerId
+     * @return ProductQuoteRelation[]
+     */
+    public static function getAlternativeJoinedOffer(int $offerId): array
+    {
+        $query = ProductQuoteRelation::find();
+        $query->innerJoin(OfferProduct::tableName(), 'op_offer_id = :offerId and op_product_quote_id = pqr_related_pq_id', [
+            'offerId' => $offerId
+        ]);
+        $query->andWhere(['pqr_type_id' => ProductQuoteRelation::TYPE_ALTERNATIVE]);
+        return $query->all();
     }
 }
