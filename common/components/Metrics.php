@@ -32,6 +32,7 @@ class Metrics extends Component
     private array $gaugeList = [];
     private CollectorRegistry $registry;
     private bool $isMetricsEnabled = false;
+    private array $defaultBuckets = [0.2, 0.4, 0.6, 0.8, 1, 3, 5, 7, 10, 15];
 
     public function init(): void
     {
@@ -168,7 +169,7 @@ class Metrics extends Component
             $labels = self::prepareLabels($labels);
             try {
                 $counter = $this->registry->getOrRegisterCounter(
-                    $namespace,
+                    self::stringToMetricStandard($namespace),
                     self::keyFormatter($name, 'cnt', $prefix),
                     self::helpFormatter($name, $prefix),
                     array_keys($labels)
@@ -178,6 +179,36 @@ class Metrics extends Component
                 \Yii::error(
                     ArrayHelper::merge(AppHelper::throwableLog($throwable), func_get_args()),
                     'Metrics:counterMetrics:Throwable'
+                );
+            }
+        }
+    }
+
+    public function histogramMetric(
+        string $name,
+        float $value,
+        array $labels,
+        string $namespace = '',
+        string $prefix = '',
+        array $buckets = []
+    ): void {
+        if ($this->isMetricsEnabled) {
+            $histogramBuckets = !empty($buckets) ? $buckets : $this->getDefaultBuckets();
+            $labels = self::prepareLabels($labels);
+
+            try {
+                $histogram = $this->registry->getOrRegisterHistogram(
+                    self::stringToMetricStandard($namespace),
+                    self::keyFormatter($name, 'seconds', $prefix),
+                    self::helpFormatter($name, $prefix),
+                    array_keys($labels),
+                    $histogramBuckets
+                );
+                $histogram->observe($value, array_values($labels));
+            } catch (\Throwable $throwable) {
+                \Yii::error(
+                    ArrayHelper::merge(AppHelper::throwableLog($throwable), func_get_args()),
+                    'Metrics:histogramMetric:Throwable'
                 );
             }
         }
@@ -205,9 +236,9 @@ class Metrics extends Component
     private static function helpFormatter(string $name, string $prefix = ''): string
     {
         if ($prefix) {
-            return $prefix . ' ' . $name;
+            return $prefix . ' ' . strtolower($name);
         }
-        return $name;
+        return strtolower($name);
     }
 
     /**
@@ -262,5 +293,10 @@ class Metrics extends Component
     private function setGaugeMetric(string $key, Gauge $gauge): void
     {
         $this->gaugeList[$key] = $gauge;
+    }
+
+    public function getDefaultBuckets(): array
+    {
+        return $this->defaultBuckets;
     }
 }
