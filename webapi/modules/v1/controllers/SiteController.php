@@ -67,6 +67,12 @@ class SiteController extends Controller
             'headers'   => $headers
         ];
 
+        if ($delay = Yii::$app->request->get('delay')) {
+            $delay = (float) $delay;
+            usleep(round($delay * 1000000));
+            $out['delay_seconds'] = $delay;
+        }
+
         Yii::info(VarDumper::dumpAsString($out), 'info\API:v1:AppController:Test');
         //VarDumper::dump($out);
         return $out;
