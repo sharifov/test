@@ -106,7 +106,8 @@ class BackOffice
             $metrics->serviceCounter('back_office', ['type' => 'error', 'action' => $endpoint]);
         }
         $seconds = round(microtime(true) - $timeStart, 1);
-        $metrics->histogramMetric('back_office', $seconds, ['action' => $endpoint]);
+        $action = $action = str_replace('/', '_', $endpoint);
+        $metrics->histogramMetric('back_office', $seconds, ['action' => $action]);
         unset($metrics);
 
         //VarDumper::dump($response->content, 10, true); exit;
