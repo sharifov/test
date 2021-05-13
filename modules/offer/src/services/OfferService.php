@@ -74,6 +74,7 @@ class OfferService
         if ($dto->orderId) {
             foreach ($offer->opProductQuotes as $productQuote) {
                 $productQuote->pq_order_id = $dto->orderId;
+                $productQuote->applied();
                 $this->productQuoteRepository->save($productQuote);
             }
 
