@@ -104,9 +104,11 @@ class OfferService
                         $originQuote->pq_order_id = $order->or_id;
                         $this->productQuoteRepository->save($originQuote);
                         $offerProductQuote->pq_order_id = null;
+                        $offerProductQuote->pending();
                         $this->productQuoteRepository->save($offerProductQuote);
                     } else {
                         $offerProductQuote->pq_order_id = null;
+                        $offerProductQuote->pending();
                         $this->productQuoteRepository->save($offerProductQuote);
                     }
                 }
