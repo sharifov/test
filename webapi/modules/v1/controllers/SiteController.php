@@ -73,7 +73,7 @@ class SiteController extends Controller
             $out['delay_seconds'] = $delay;
         }
 
-        Yii::info(VarDumper::dumpAsString($out), 'info\API:v1:AppController:Test');
+        Yii::warning(VarDumper::dumpAsString($out), 'info\API:v1:AppController:Test');
         //VarDumper::dump($out);
         return $out;
     }
