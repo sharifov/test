@@ -104,7 +104,6 @@ class BackOffice
             $metrics->serviceCounter('back_office', ['type' => 'success', 'action' => $endpoint]);
         } else {
             $metrics->serviceCounter('back_office', ['type' => 'error', 'action' => $endpoint]);
-
         }
         $seconds = round(microtime(true) - $timeStart, 1);
         $metrics->histogramMetric('back_office', $seconds, ['action' => $endpoint]);
