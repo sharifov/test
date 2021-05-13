@@ -11,7 +11,12 @@ use modules\offer\src\useCases\offer\api\confirmAlternative\OfferConfirmAlternat
 use modules\offer\src\useCases\offer\api\view\OfferViewForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\order\OrderStatusAction;
+use modules\order\src\processManager\clickToBook\OrderProcessManagerRepository;
+use modules\order\src\processManager\events\CreatedEvent;
+use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerFactory;
+use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
@@ -38,6 +43,7 @@ use webapi\src\response\SuccessResponse;
  * @property TransactionManager $transactionManager
  * @property OrderProcessManagerFactory $orderProcessManagerFactory
  * @property OrderRepository $orderRepository
+ * @property EventDispatcher $eventDispatcher
  */
 class OfferController extends BaseController
 {
@@ -47,6 +53,11 @@ class OfferController extends BaseController
     private TransactionManager $transactionManager;
     private OrderProcessManagerFactory $orderProcessManagerFactory;
     private OrderRepository $orderRepository;
+    private EventDispatcher $eventDispatcher;
+    /**
+     * @var OrderProcessManagerRepository
+     */
+    private OrderProcessManagerRepository $processManager;
 
     public function __construct(
         $id,
@@ -58,6 +69,8 @@ class OfferController extends BaseController
         TransactionManager $transactionManager,
         OrderProcessManagerFactory $orderProcessManagerFactory,
         OrderRepository $orderRepository,
+        EventDispatcher $eventDispatcher,
+        OrderProcessManagerRepository $processManager,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -67,6 +80,8 @@ class OfferController extends BaseController
         $this->transactionManager = $transactionManager;
         $this->orderProcessManagerFactory = $orderProcessManagerFactory;
         $this->orderRepository = $orderRepository;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->processManager = $processManager;
     }
 
     public function behaviors(): array
@@ -732,10 +747,9 @@ class OfferController extends BaseController
             $this->transactionManager->wrap(function () use ($offer) {
                 $dto = $this->offerService->confirmAlternative($offer);
 
-                if ($dto->orderId) {
-                    $order = $this->orderRepository->find($dto->orderId);
-                    $this->orderProcessManagerFactory->create($dto->orderId, $order->or_type_id);
-                }
+                $order = $this->orderRepository->find($dto->orderId);
+                $order->processing(null, OrderStatusAction::API, null);
+                $this->orderRepository->save($order);
             });
         } catch (\RuntimeException | \DomainException $e) {
             return new ErrorResponse(
