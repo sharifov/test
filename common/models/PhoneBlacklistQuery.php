@@ -25,7 +25,7 @@ class PhoneBlacklistQuery extends \yii\db\ActiveQuery
         return $this->andWhere([
             'OR',
             ['IS', 'pbl_expiration_date', null],
-            ['>=', 'pbl_expiration_date', date('Y-m-d')]
+            ['>=', 'pbl_expiration_date', date('Y-m-d H:i:s')]
         ]);
     }
 
