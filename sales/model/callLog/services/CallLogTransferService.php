@@ -66,15 +66,13 @@ class CallLogTransferService
         ]);
 
         try {
-            if (!$callLogRecord->save()) {
-                Yii::error(VarDumper::dumpAsString([
-                    'category' => 'saveRecord',
-                    'model' => $callLogRecord->toArray(),
-                    'errors' => $callLogRecord->getErrors()
-                ]), 'CallLogTransferService');
-            }
+            $callLogRecord->save(false);
         } catch (\Throwable $e) {
-            Yii::error(VarDumper::dumpAsString(['category' => 'saveRecord', 'error' => $e->getMessage()]), 'CallLogTransferService');
+            Yii::error(VarDumper::dumpAsString([
+                'category' => 'saveRecord',
+                'error' => $e->getMessage(),
+                'model' => $callLogRecord->toArray(),
+            ]), 'CallLogTransferService');
         }
     }
 
