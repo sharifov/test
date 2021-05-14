@@ -90,6 +90,7 @@ class MetricsController extends Controller
             $adapter->flushRedis();
         } catch (\Throwable $throwable) {
             \yii\helpers\VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
+            exit();
         }
         return PHP_EOL . 'Done';
     }
@@ -108,6 +109,7 @@ class MetricsController extends Controller
             exit();
         } catch (\Throwable $throwable) {
             \yii\helpers\VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
+            exit();
         }
     }
 
@@ -136,6 +138,7 @@ class MetricsController extends Controller
             exit();
         } catch (\Throwable $throwable) {
             \yii\helpers\VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
+            exit();
         }
     }
 }
