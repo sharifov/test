@@ -29,6 +29,7 @@ use sales\helpers\setting\SettingHelper;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 
 $c_type_id = $comForm->c_type_id;
@@ -176,10 +177,14 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                             ])
                         ?>
 
-                        <div style="max-height: 800px; overflow-x: auto;">
-                            <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
-                                style="width: 100%; height: 800px; border: 0;"></iframe>
-                        </div>
+                        <?php if ($previewEmailForm->keyCache) : ?>
+                            <div style="max-height: 800px; overflow-x: auto;">
+                                <iframe
+                                    id="email_view"
+                                    src="<?php echo Url::to(['/lead/get-template', 'key_cache' => $previewEmailForm->keyCache]) ?>"
+                                    style="width: 100%; height: 800px; border: 0;"></iframe>
+                            </div>
+                        <?php endif ?>
 
                     </div>
                     <?php if ($isAdmin) :?>
