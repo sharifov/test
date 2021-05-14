@@ -3,6 +3,7 @@
 namespace webapi\controllers;
 
 use kartik\select2\ThemeDefaultAsset;
+use sales\helpers\app\AppHelper;
 use webapi\models\PrometheusUser;
 use Yii;
 use yii\filters\AccessControl;
@@ -88,7 +89,7 @@ class MetricsController extends Controller
             $adapter::setDefaultOptions(Yii::$app->prometheus->redisOptions);
             $adapter->flushRedis();
         } catch (\Throwable $throwable) {
-            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            \yii\helpers\VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
         }
         return PHP_EOL . 'Done';
     }
@@ -106,7 +107,7 @@ class MetricsController extends Controller
             \yii\helpers\VarDumper::dump($prometeusRedis->keys('*'), 20, true);
             exit();
         } catch (\Throwable $throwable) {
-            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            \yii\helpers\VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
         }
     }
 
@@ -134,7 +135,7 @@ class MetricsController extends Controller
             ], 20, true);
             exit();
         } catch (\Throwable $throwable) {
-            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            \yii\helpers\VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
         }
     }
 }
