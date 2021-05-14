@@ -128,7 +128,7 @@ class MetricsController extends Controller
                 exit('Key not found.');
             }
             $dump = $prometeusRedis->dump($key);
-            $prometeusRedis->unlink($key);
+            $prometeusRedis->del($key);
 
             \yii\helpers\VarDumper::dump([
                 'status' => 'Metric deleted',
