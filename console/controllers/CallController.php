@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use common\components\Metrics;
 use common\models\Call;
 use common\models\Employee;
 use common\models\ProjectEmployeeAccess;
@@ -161,6 +162,7 @@ class CallController extends Controller
         $errors = [];
 
         if ($items) {
+            $metrics = \Yii::$container->get(Metrics::class);
             $this->outputHelper->printInfo('Find ' . count($items) . ' items for update', 'Count');
 
             /** @var Call $call */
@@ -185,6 +187,7 @@ class CallController extends Controller
                                 'call' => $call->getAttributes(),
                             ]), 'CallController:actionTerminator:HangUpResult');
                         } else {
+                            $metrics->serviceCounter('call_terminator', ['status' => $old_status]);
                             Yii::info(VarDumper::dumpAsString(['callId' => $call->c_id]), 'info\CallTerminatorCompleteCall');
                         }
                     } catch (\Throwable $e) {
@@ -197,6 +200,7 @@ class CallController extends Controller
                     $errors[] = $call->errors;
                 }
             }
+            unset($metrics);
         } else {
             $this->outputHelper->printInfo('No items to update', 'Count:noItems');
         }
