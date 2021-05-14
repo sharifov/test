@@ -48,6 +48,10 @@ class SiteController extends Controller
      */
     public function actionTest(): array
     {
+
+        $start_microtime = microtime(true);
+        $start_memory_usage = memory_get_usage();
+
         $headers = [];
         foreach ($_SERVER as $name => $value) {
             if (strpos($name, 'HTTP_') === 0) {
@@ -58,9 +62,9 @@ class SiteController extends Controller
         $out = [
             'message'   => 'Server Name: ' . Yii::$app->request->serverName,
             'code'      => 0,
-            'date'      => date('Y-m-d'),
-            'time'      => date('H:i:s'),
+            'datetime'      => date('Y-m-d H:i:s'),
             'ip'        => Yii::$app->request->getUserIP(),
+            'remoteIP'  => Yii::$app->request->getRemoteIP(),
             'get'       => Yii::$app->request->get(),
             'post'      => Yii::$app->request->post(),
             'files'     => $_FILES,
@@ -72,6 +76,32 @@ class SiteController extends Controller
             usleep(round($delay * 1000000));
             $out['delay_seconds'] = $delay;
         }
+
+        $end_microtime = microtime(true);
+        $end_memory_usage = memory_get_usage();
+
+        if ($start_microtime) {
+            $time = round($end_microtime - $start_microtime, 3);
+        } else {
+            $time = 0;
+        }
+
+        if ($time > 999) {
+            $time = 999;
+        }
+
+        if ($start_memory_usage) {
+            $memory_usage = $end_memory_usage - $start_memory_usage;
+        } else {
+            $memory_usage = 0;
+        }
+
+
+        //VarDumper::dump($time);exit;
+
+        $out['execution_time'] = $time;
+        $out['memory_usage'] = Yii::$app->formatter->asShortSize($memory_usage);
+        $out['memory_peak_usage'] = Yii::$app->formatter->asShortSize(memory_get_peak_usage());
 
         Yii::warning(VarDumper::dumpAsString($out), 'info\API:v1:AppController:Test');
         //VarDumper::dump($out);
