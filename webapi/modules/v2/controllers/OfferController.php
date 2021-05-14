@@ -44,6 +44,7 @@ use webapi\src\response\SuccessResponse;
  * @property OrderProcessManagerFactory $orderProcessManagerFactory
  * @property OrderRepository $orderRepository
  * @property EventDispatcher $eventDispatcher
+ * @property OrderProcessManagerRepository $processManagerRepository
  */
 class OfferController extends BaseController
 {
@@ -54,10 +55,7 @@ class OfferController extends BaseController
     private OrderProcessManagerFactory $orderProcessManagerFactory;
     private OrderRepository $orderRepository;
     private EventDispatcher $eventDispatcher;
-    /**
-     * @var OrderProcessManagerRepository
-     */
-    private OrderProcessManagerRepository $processManager;
+    private OrderProcessManagerRepository $processManagerRepository;
 
     public function __construct(
         $id,
@@ -70,7 +68,7 @@ class OfferController extends BaseController
         OrderProcessManagerFactory $orderProcessManagerFactory,
         OrderRepository $orderRepository,
         EventDispatcher $eventDispatcher,
-        OrderProcessManagerRepository $processManager,
+        OrderProcessManagerRepository $processManagerRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -81,7 +79,7 @@ class OfferController extends BaseController
         $this->orderProcessManagerFactory = $orderProcessManagerFactory;
         $this->orderRepository = $orderRepository;
         $this->eventDispatcher = $eventDispatcher;
-        $this->processManager = $processManager;
+        $this->processManagerRepository = $processManagerRepository;
     }
 
     public function behaviors(): array
@@ -747,9 +745,9 @@ class OfferController extends BaseController
             $this->transactionManager->wrap(function () use ($offer) {
                 $dto = $this->offerService->confirmAlternative($offer);
 
-                $order = $this->orderRepository->find($dto->orderId);
-                $order->processing(null, OrderStatusAction::API, null);
-                $this->orderRepository->save($order);
+                $manager = $this->processManagerRepository->find($dto->orderId);
+                $manager->retry(new \DateTimeImmutable());
+                $this->processManagerRepository->save($manager);
             });
         } catch (\RuntimeException | \DomainException $e) {
             return new ErrorResponse(
