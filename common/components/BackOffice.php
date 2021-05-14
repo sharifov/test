@@ -52,6 +52,7 @@ class BackOffice
      */
     public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30, string $host = '', bool $addBasicAuth = false): \yii\httpclient\Response
     {
+        $timeStart = microtime(true);
         $host = $host ?: Yii::$app->params['backOffice']['serverUrl'];
 
         $uri = $host . '/' . $endpoint;
@@ -104,6 +105,9 @@ class BackOffice
         } else {
             $metrics->serviceCounter('back_office', ['type' => 'error', 'action' => $endpoint]);
         }
+        $seconds = round(microtime(true) - $timeStart, 1);
+        $action = $action = str_replace('/', '_', $endpoint);
+        $metrics->histogramMetric('back_office', $seconds, ['action' => $action]);
         unset($metrics);
 
         //VarDumper::dump($response->content, 10, true); exit;
