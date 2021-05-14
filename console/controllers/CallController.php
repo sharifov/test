@@ -22,7 +22,8 @@ use yii\helpers\VarDumper;
  * @property string $shortClassName
  * @property int $defaultRingingMinutes
  * @property int $defaultQueueMinutes
- * @property int defaultInProgressMinutes
+ * @property int $defaultInProgressMinutes
+ * @property int $defaultIvrMinutes
  * @property OutputHelper $outputHelper
  */
 class CallController extends Controller
@@ -30,6 +31,7 @@ class CallController extends Controller
     public $defaultRingingMinutes = 5;
     public $defaultQueueMinutes = 60;
     public $defaultInProgressMinutes = 90;
+    public $defaultIvrMinutes = 3;
 
     private $shortClassName;
     private $terminatorEnable = false;
@@ -101,6 +103,7 @@ class CallController extends Controller
         $inProgressMinutes = $inProgressMinutes ?? $this->terminatorParams['in_progress_minutes'];
         $delayMinutesDefault = $this->terminatorParams['in_progress_minutes'] ?? 120;
         $delayMinutes = $delayMinutes ?? $delayMinutesDefault;
+        $inIvrMinutes = $this->terminatorParams['ivr_minutes'];
 
         $point = $this->shortClassName . ':' . $this->action->id;
 
@@ -115,8 +118,9 @@ class CallController extends Controller
         $dtQueue = (new \DateTime('now'))->modify('-' . $queueMinutes . ' minutes')->format('Y-m-d H:i:s');
         $dtInProgress = (new \DateTime('now'))->modify('-' . $inProgressMinutes . ' minutes')->format('Y-m-d H:i:s');
         $dtDelay = (new \DateTime('now'))->modify('-' . $delayMinutes . ' minutes')->format('Y-m-d H:i:s');
+        $dtIvr = (new \DateTime('now'))->modify('-' . $inIvrMinutes . ' minutes')->format('Y-m-d H:i:s');
 
-        $items = Call::find()
+        $itemsQuery = Call::find()
             ->where(['OR',
                 ['AND',
                     ['c_status_id' => Call::STATUS_QUEUE],
@@ -136,8 +140,17 @@ class CallController extends Controller
                     ['c_status_id' =>  Call::STATUS_DELAY],
                     ['<=', 'c_created_dt', $dtDelay],
                 ],
-            ])
-            ->orderBy(['c_id' => SORT_ASC])
+            ]);
+
+        if ($inIvrMinutes > 0) {
+            $itemsQuery->orWhere(
+                ['AND',
+                    ['c_status_id' => Call::STATUS_IVR],
+                    ['<=', 'c_created_dt', $dtIvr],
+                ]
+            );
+        }
+        $items = $itemsQuery->orderBy(['c_id' => SORT_ASC])
             ->indexBy('c_id')
             ->all();
 
@@ -146,6 +159,7 @@ class CallController extends Controller
 
         $out = [];
         $errors = [];
+
         if ($items) {
             $this->outputHelper->printInfo('Find ' . count($items) . ' items for update', 'Count');
 
@@ -190,8 +204,6 @@ class CallController extends Controller
         $resultInfo = 'Processed: ' . count($out) . ' Total execution time: ' .
             number_format(round(microtime(true) - $timeStart, 2), 2);
         $this->outputHelper->printInfo($resultInfo, $point);
-        //$resultInfo = count($out) ? VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo : $resultInfo;
-        //Yii::info(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo,'info\Console:CallController::end');
     }
 
     public function actionUsers()
@@ -303,17 +315,19 @@ class CallController extends Controller
 
         try {
             $this->terminatorParams = [
-                'ringing_minutes' => (int)$settings['console_call_terminator_params']['ringing_minutes'],
-                'queue_minutes' => (int)$settings['console_call_terminator_params']['queue_minutes'],
-                'in_progress_minutes' => (int)$settings['console_call_terminator_params']['in_progress_minutes'],
+                'ringing_minutes' => (int) $settings['console_call_terminator_params']['ringing_minutes'],
+                'queue_minutes' => (int) $settings['console_call_terminator_params']['queue_minutes'],
+                'in_progress_minutes' => (int) $settings['console_call_terminator_params']['in_progress_minutes'],
+                'ivr_minutes' => (int) $settings['console_call_terminator_params']['ivr_minutes'],
             ];
         } catch (\Throwable $throwable) {
             $this->terminatorParams = [
                 'ringing_minutes' => $this->defaultRingingMinutes,
                 'queue_minutes' => $this->defaultQueueMinutes,
                 'in_progress_minutes' => $this->defaultInProgressMinutes,
+                'ivr_minutes' => $this->defaultIvrMinutes,
             ];
-            Yii::error(AppHelper::throwableFormatter($throwable), $this->shortClassName . ':' . __FUNCTION__ . ':Failed');
+            Yii::warning(AppHelper::throwableFormatter($throwable), 'CallController:setSettings:Throwable');
         }
         return $this;
     }
