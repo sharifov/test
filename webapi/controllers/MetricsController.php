@@ -2,12 +2,14 @@
 
 namespace webapi\controllers;
 
+use kartik\select2\ThemeDefaultAsset;
 use webapi\models\PrometheusUser;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\auth\HttpBasicAuth;
 use yii\web\Controller;
 use yii\web\NotAcceptableHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\ServerErrorHttpException;
 
@@ -89,5 +91,50 @@ class MetricsController extends Controller
             \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
         }
         return PHP_EOL . 'Done';
+    }
+
+    public function actionKeys()
+    {
+        try {
+            $redisOptions = Yii::$app->prometheus->redisOptions;
+            $prometeusRedis = new \yii\redis\Connection([
+                'hostname' => $redisOptions['host'],
+                'port' => $redisOptions['port'],
+                'database' => $redisOptions['database'],
+                'password' => $redisOptions['password'],
+            ]);
+            \yii\helpers\VarDumper::dump($prometeusRedis->keys('*'), 20, true);
+            exit();
+        } catch (\Throwable $throwable) {
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+        }
+    }
+
+    public function actionRemoveByKey(string $key)
+    {
+        try {
+            $redisOptions = Yii::$app->prometheus->redisOptions;
+            $prometeusRedis = new \yii\redis\Connection([
+                'hostname' => $redisOptions['host'],
+                'port' => $redisOptions['port'],
+                'database' => $redisOptions['database'],
+                'password' => $redisOptions['password'],
+            ]);
+
+            if (!(bool) $prometeusRedis->exists($key)) {
+                exit('Key not found.');
+            }
+            $dump = $prometeusRedis->dump($key);
+            $prometeusRedis->unlink($key);
+
+            \yii\helpers\VarDumper::dump([
+                'status' => 'Metric deleted',
+                'key' => $key,
+                'dump' => $dump,
+            ], 20, true);
+            exit();
+        } catch (\Throwable $throwable) {
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+        }
     }
 }
