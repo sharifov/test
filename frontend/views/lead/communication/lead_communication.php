@@ -31,6 +31,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 
 $c_type_id = $comForm->c_type_id;
@@ -176,10 +177,14 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
                         <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(['style' => 'display:none', 'id' => 'e_email_message']) ?>
 
-                                <div style="max-height: 800px; overflow-x: auto;">
-                                    <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
+                                <?php if ($previewEmailForm->keyCache) : ?>
+                                    <div style="max-height: 800px; overflow-x: auto;">
+                                        <iframe
+                                            id="email_view"
+                                            src="<?php echo Url::to(['/lead/get-template', 'key_cache' => $previewEmailForm->keyCache]) ?>"
                                             style="width: 100%; height: 800px; border: 0;"></iframe>
-                                </div>
+                                    </div>
+                                <?php endif ?>
 
                             </div>
                             <?php if ($isAdmin) :?>
