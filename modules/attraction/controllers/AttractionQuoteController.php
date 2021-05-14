@@ -10,6 +10,7 @@ use modules\attraction\models\AttractionQuote;
 use modules\attraction\models\AttractionQuotePricingCategory;
 use modules\attraction\models\forms\AttractionOptionsFrom;
 use modules\attraction\models\forms\AvailabilityPaxFrom;
+use modules\attraction\models\forms\BookingAnswersForm;
 use modules\attraction\models\search\AttractionQuoteSearch;
 use modules\attraction\src\services\attractionQuote\AttractionQuotePriceCalculator;
 use modules\attraction\src\services\AttractionQuotePdfService;
@@ -370,63 +371,31 @@ class AttractionQuoteController extends FController
         return $this->redirect(['index']);
     }
 
-    /**
-     * @return array
-     */
-    public function actionAjaxBookOld(): array
+    public function actionAjaxBook(): Response
     {
-        Yii::$app->response->format = Response::FORMAT_JSON;
         $id = (int) Yii::$app->request->post('id', 0);
-        $checkRate = Yii::$app->request->post('check_rate', 1);
-        $result = ['status' => 0, 'message' => '', 'data' => []];
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
+        $answerModel = new BookingAnswersForm();
+        $answerModel->quoteId = $id;
 
         try {
             $model = $this->findModel($id);
-            HotelQuoteBookGuard::guard($model);
-
-            /** @var HotelQuoteBookService $bookService */
-            $bookService = Yii::$container->get(HotelQuoteBookService::class);
-
-            if ($checkRate) {
-                /** @var HotelQuoteCheckRateService $checkRateService */
-                $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
-                $checkResult = $checkRateService->checkRateByHotelQuote($model);
-
-                if ($checkResult->status) {
-                    $bookService->book($model);
-                    $result['status'] = $bookService->status;
-                    $result['message'] = $bookService->message;
-                } else {
-                    $result['status'] = $checkResult->status;
-                    $result['message'] = $checkResult->message;
-                }
-            } else {
-                $bookService->book($model);
-                $result['status'] = $bookService->status;
-                $result['message'] = $bookService->message;
-            }
-        } catch (\Throwable $throwable) {
-            $result['message'] = $throwable->getMessage();
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'Controller:HotelQuoteController:AjaxBook:Throwable');
-        }
-        return $result;
-    }
-
-    public function actionAjaxBook(): array
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $id = (int) Yii::$app->request->post('id', 0);
-
-        try {
-            $model = $this->findModel($id);
-            $model->atnq_booking_id = strtoupper(substr(md5(mt_rand()), 0, 7));
+            $resultCreate = $apiAttractionService->createBooking();
+            $bookingData = $resultCreate['data'];
+            $model->atnq_booking_id = $bookingData['bookingCreate']['id'];
             $model->save();
             $productQuote = $model->atnqProductQuote;
-            $productQuote->booked(Auth::id());
+            $productQuote->inProgress(Auth::id());
             $this->productQuoteRepository->save($productQuote);
+            $resultAdd = $apiAttractionService->bookingAddAvailability($model->atnq_booking_id, $model->atnq_availability_id);
+            $bookingDetails = $apiAttractionService->fetchBooking($model->atnq_booking_id);
             $result = [
-                'message' => 'Attraction quote booked successful',
+                'message' => 'Attraction quote booking opened successful',
                 'status' => 1,
+                'html' => $this->renderAjax('booking_answers', [
+                    'model' => $answerModel,
+                    'bookingDetails' => $bookingDetails['data']['booking']
+                ])
             ];
         } catch (\Throwable $e) {
             $result = [
@@ -435,7 +404,45 @@ class AttractionQuoteController extends FController
             ];
         }
 
-        return $result;
+        return $this->asJson($result);
+    }
+
+    public function actionInputBookAnswers()
+    {
+        $answerModel = new BookingAnswersForm();
+        $answerModel->load(Yii::$app->request->post());
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
+
+        $bookingDetails = $apiAttractionService->inputAnswersToBooking($answerModel);
+        $result = [
+            'message' => '',
+            'status' => 1,
+            'html' => $this->renderAjax('booking_summary', ['bookingDetails' => $bookingDetails['data']['booking']]),
+        ];
+        return $this->asJson($result);
+    }
+
+    public function actionCheckBookingConfirmation()
+    {
+        $bookId = Yii::$app->request->post('id', 0);
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
+        $bookingDetails = $apiAttractionService->fetchBooking($bookId);
+        $booking = $bookingDetails['data']['booking'];
+
+        if (!empty($booking['reference']) && strtolower($booking['state']) === 'confirmed') {
+            $model = $this->findModel($booking['reference']);
+            $productQuote = $model->atnqProductQuote;
+            $productQuote->booked(Auth::id());
+            $this->productQuoteRepository->save($productQuote);
+        }
+
+        $result = [
+            'message' => '',
+            'status' => 1,
+            'productID' => !empty($productQuote->pq_product_id) ? $productQuote->pq_product_id : 0,
+            'html' => $this->renderAjax('booking_summary', ['bookingDetails' => $booking]),
+        ];
+        return $this->asJson($result);
     }
 
     public function actionAjaxCancelBook(): array

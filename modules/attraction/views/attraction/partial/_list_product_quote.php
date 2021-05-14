@@ -34,6 +34,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
         $('#preloader').removeClass('d-none');
         let quoteId = $(this).data('attraction-quote-id');
         let productId = $(this).data('product-id');
+        let modal = $('#modal-lg');        
         
         $.ajax({
           url: $(this).data('url'),
@@ -43,21 +44,23 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                modal.find('.modal-body').html(data.html);
+                modal.modal('show');
+                /*new PNotify({
                     title: 'The quote was successfully booking',
                     type: 'success',
                     text: data.message,
                     hide: true
-                });
+                });*/
                 pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
-                 pjaxReload({container: "#pjax-lead-offers"});
-                 pjaxReload({container: "#pjax-lead-orders"});
-                 /*pjaxReload({container: "#pjax-lead-products-wrap"});*/
+                pjaxReload({container: "#pjax-lead-offers"});
+                pjaxReload({container: "#pjax-lead-orders"});
+                /*pjaxReload({container: "#pjax-lead-products-wrap"});*/
             } else {
                 new PNotify({
-                    title: 'Booking failed',
+                    title: 'Booking process failed',
                     type: 'error',
                     text: data.message,
                     hide: true
@@ -197,6 +200,99 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
             }
         });
     });
+    
+    $('#bk-answer-form').on('beforeSubmit', function (e) {
+        e.preventDefault();
+        let modal = $('#modal-lg');        
+        
+       $.ajax({
+       type: $(this).attr('method'),
+       url: $(this).attr('action'),
+       data: $(this).serializeArray(),
+       cache: false,
+       dataType: 'json',
+       success: function(data) {            
+           if (parseInt(data.status) === 1) {
+                modal.find('.modal-body').html(data.html);
+           }
+           
+            /*if (!data.error) {
+                $.pjax.reload({container: '#pjax-client-info', timeout: 10000, async: false});
+                
+                let clientLocale = $('#casesclientupdateform-locale').val();
+                if (typeof clientLocale !== typeof undefined && clientLocale.length && $('#language option[value=' + clientLocale + ']').length) {
+                    $('#language option[value=' + clientLocale + ']').prop('selected', true);
+                }
+                
+                $('#modalCaseSm').modal('hide');
+                
+                new PNotify({
+                    title: 'Client info successfully updated',
+                    text: data.message,
+                    type: 'success'
+                });
+            }*/
+       },
+       error: function (error) {
+            new PNotify({
+                title: 'Error',
+                text: 'Internal Server Error. Try again letter.',
+                type: 'error'                
+            });
+       }
+    })
+    return false;
+    });
+    
+    $('body').off('click', '.js-btn-booking-confirmation').on('click', '.js-btn-booking-confirmation', function (e) {
+
+        e.preventDefault();
+        
+        if(!confirm('Are you sure you want to check booking confirmation ?')) {
+            return '';
+        }
+        
+        let bookId = $(this).data('book-id');
+        let modal = $('#modal-lg');
+                
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': bookId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                modal.find('.modal-body').html(data.html);
+                if (data.productID) {
+                    pjaxReload({
+                        container: '#pjax-product-quote-list-' + data.productID
+                    });
+                }
+                
+                new PNotify({
+                    title: 'Booking Info',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });               
+                              
+            } else {
+                new PNotify({
+                    title: 'Please check later',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });                
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
