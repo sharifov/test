@@ -108,10 +108,30 @@ function refreshClientChatWidget(obj) {
                 window.chat.db.addBatch(data.items)
                     .then(() => {window.chat.db.sortData(); window.chat.totalItems = parseInt(data.totalItems)})
                     .then(() => {window.chat.displayAllRequests(2)})
-                    .then(() => {window.enableTimer(); toggleClientChatAccess(true)});
+                    .then(() => {window.enableTimer(); toggleClientChatAccess(true)})
+                    .then(() => {
+                        console.log(data.widgetEnabled);
+                        if (data.widgetEnabled !== 'undefined') {
+                            if (data.widgetEnabled) {
+                                window.chat.widgetEnable();
+                            } else {
+                                window.chat.widgetDisable();
+                            }
+                        }
+                    });
             } else {
                 window.chat.db.removeAll()
-                    .then(() => {window.chat.hasNoRequests()});
+                    .then(() => {window.chat.hasNoRequests()})
+                    .then(() => {
+                        console.log(data.widgetEnabled);
+                        if (data.widgetEnabled !== 'undefined') {
+                            if (data.widgetEnabled) {
+                                window.chat.widgetEnable();
+                            } else {
+                                window.chat.widgetDisable();
+                            }
+                        }
+                    })
             }
             break;
         default:

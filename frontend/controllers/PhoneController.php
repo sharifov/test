@@ -1770,12 +1770,13 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid);
         }
 
-        if (!$call->c_conference_id) {
+        $conferenceId = $call->c_conference_id ?: $participant->cp_cf_id;
+        if (!$conferenceId) {
             throw new BadRequestHttpException('Call not updated. Please wait some seconds.');
         }
 
-        if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
-            throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+        if (!$conference = Conference::findOne(['cf_id' => $conferenceId])) {
+            throw new BadRequestHttpException('Not found conference. Id: ' . $conferenceId);
         }
 
         if (!$conference->isCreator($userId)) {

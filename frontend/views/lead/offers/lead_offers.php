@@ -224,7 +224,7 @@ $js = <<<JS
         });
      });
      
-     $('body').off('click', '.btn-confirm-alternative-offer').on('click', '.btn-confirm-alternative-offer', function (e) {
+     $('body').off('click', '.btn-action-alternative-offer').on('click', '.btn-action-alternative-offer', function (e) {
         e.preventDefault();
         let url = $(this).data('url');
         let id = $(this).data('offer-id');

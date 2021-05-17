@@ -2,6 +2,9 @@
 
 namespace modules\product\src\entities\productQuote;
 
+use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productType\ProductType;
+
 /**
  * @see ProductQuote
  */
@@ -25,6 +28,16 @@ class Scopes extends \yii\db\ActiveQuery
     public function booked(): self
     {
         return $this->andWhere(['pq_status_id' => ProductQuoteStatus::BOOKED]);
+    }
+
+    public function flightQuotes(): self
+    {
+        return $this->innerJoin(Product::tableName(), 'pq_product_id = pr_id and pr_type_id = :productTypeId', ['productTypeId' => ProductType::PRODUCT_FLIGHT]);
+    }
+
+    public function exceptFlightQuotes(): self
+    {
+        return $this->innerJoin(Product::tableName(), 'pq_product_id = pr_id and pr_type_id <> :productTypeId', ['productTypeId' => ProductType::PRODUCT_FLIGHT]);
     }
 
     /**

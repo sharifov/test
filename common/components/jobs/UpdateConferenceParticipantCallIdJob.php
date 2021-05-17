@@ -14,24 +14,38 @@ use yii\queue\JobInterface;
  *
  * @property string $callSid
  * @property string $conferenceSid
+ * @property int $conferenceId
  */
 class UpdateConferenceParticipantCallIdJob implements JobInterface
 {
     public string $callSid;
     public string $conferenceSid;
+    public int $conferenceId;
 
-    public function __construct(string $callSid, string $conferenceSid)
+    public function __construct(string $callSid, string $conferenceSid, int $conferenceId)
     {
         $this->callSid = $callSid;
         $this->conferenceSid = $conferenceSid;
+        $this->conferenceId = $conferenceId;
     }
 
     public function execute($queue)
     {
         try {
-            $callId = $this->getCallId($this->callSid);
+            $call = $this->getCall($this->callSid);
+            if ($call->c_conference_id !== $this->conferenceId) {
+                $call->c_conference_sid = $this->conferenceSid;
+                $call->c_conference_id = $this->conferenceId;
+                if (!$call->save()) {
+                    \Yii::error(VarDumper::dumpAsString([
+                        'errors' => $call->getErrors(),
+                        'model' => $call->getAttributes(),
+                    ]), 'UpdateConferenceParticipantCallIdJob:Call:save');
+                }
+            }
+
             $participant = $this->getParticipant($this->callSid, $this->conferenceSid);
-            $participant->cp_call_id = $callId;
+            $participant->cp_call_id = $call->c_id;
             if (!$participant->save()) {
                 throw new \DomainException('Participant saving error. Errors: ' .
                     VarDumper::dumpAsString($participant->getErrors()));
@@ -75,12 +89,12 @@ class UpdateConferenceParticipantCallIdJob implements JobInterface
         return $participant;
     }
 
-    private function getCallId(string $callSid): int
+    private function getCall(string $callSid): Call
     {
-        $call = Call::find()->select(['c_id'])->andWhere(['c_call_sid' => $callSid])->asArray()->one();
+        $call = Call::find()->andWhere(['c_call_sid' => $callSid])->one();
         if (!$call) {
             throw new \DomainException('Call SID: ' . $callSid . ' not found.');
         }
-        return $call['c_id'];
+        return $call;
     }
 }

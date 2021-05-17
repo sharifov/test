@@ -13,6 +13,7 @@ class Status
     public const WAIT_BO_RESPONSE = 13;
     public const FLIGHT_PRODUCT_PROCESSED = 14;
     public const STOPPED = 15;
+    public const RETRY = 16;
 
     public const LIST = [
         self::NEW => 'New',
@@ -24,6 +25,7 @@ class Status
         self::WAIT_BO_RESPONSE => 'Wait BO response',
         self::FLIGHT_PRODUCT_PROCESSED => 'Flight product processed',
         self::STOPPED => 'Stopped',
+        self::RETRY => 'Retrying',
     ];
 
     public static function getName(?int $id): string

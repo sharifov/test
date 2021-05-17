@@ -4,6 +4,7 @@ namespace modules\offer\controllers;
 
 use common\models\Currency;
 use common\models\LeadPreferences;
+use modules\offer\src\entities\offer\OfferStatus;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\services\OfferService;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
@@ -166,7 +167,7 @@ class OfferController extends FController
                 throw new Exception('Lead (' . $leadId . ') not found', 4);
             }
 
-            $offers = Offer::find()->where(['of_lead_id' => $lead->id])->orderBy(['of_id' => SORT_DESC])->all();
+            $offers = Offer::find()->where(['of_lead_id' => $lead->id])->exceptStatuses([OfferStatus::CONFIRM])->orderBy(['of_id' => SORT_DESC])->all();
 
             if ($offers) {
                 foreach ($offers as $offer) {
@@ -250,6 +251,9 @@ class OfferController extends FController
 
         try {
             $model = $this->findModel($id);
+            if ($model->isConfirm()) {
+                throw new \DomainException('Offer in the "Confirm" status cannot be deleted');
+            }
             if (!$model->delete()) {
                 throw new Exception('Offer (' . $id . ') not deleted', 2);
             }
@@ -278,6 +282,29 @@ class OfferController extends FController
         try {
             $this->transactionManager->wrap(function () use ($offer) {
                 $this->offerService->confirmAlternative($offer);
+            });
+        } catch (\Throwable $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxCancelAlternative()
+    {
+        $offerId = Yii::$app->request->post('offerId');
+
+        $offer = $this->findModel($offerId);
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $this->transactionManager->wrap(function () use ($offer) {
+                $this->offerService->cancelAlternative($offer);
             });
         } catch (\Throwable $e) {
             $result['error'] = true;

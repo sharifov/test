@@ -182,7 +182,10 @@ class OrderProductController extends FController
         try {
             $service = \Yii::createObject(LeadFailBooking::class);
             if ($this->leadProductRepository->exist($productId)) {
-                return $this->asJson(['message' => 'Lead Exist for Product Quote ( ' . $productQuoteId . ' ) ']);
+                return $this->asJson([
+                    'status' => 0,
+                    'message' => 'Error for Creating Fail Booking Lead. Lead already Exist for Product Quote ( ' . $productQuoteId . ' )'
+                ]);
             }
             $service->create($productQuoteId, Auth::id());
         } catch (\Throwable $throwable) {
@@ -190,6 +193,9 @@ class OrderProductController extends FController
             return $this->asJson(['message' => 'Info: ' . $throwable->getMessage()]);
         }
 
-        return $this->asJson(['message' => 'For Product Quote (' . $productQuoteId . ')']);
+        return $this->asJson([
+            'status' => 1,
+            'message' => 'Success: Fail Booking Lead is created'
+        ]);
     }
 }

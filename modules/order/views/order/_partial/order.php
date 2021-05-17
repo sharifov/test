@@ -664,11 +664,12 @@ $js = <<<JS
             dataType: 'json'
         })
         .done(function(data) {
-            if (data.error) {
+            if (data.status) {
                  //createNotify('Error: delete quote from order', data.error, 'error');
+                  createNotify('Create Lead', data.message, 'success');
             } else {
                 //pjaxReload({container: '#pjax-order-view-' + orderId});
-                createNotify('Create Failed Booking Lead', data.message, 'success');
+                createNotify('Create Lead', data.message, 'error');
             }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {

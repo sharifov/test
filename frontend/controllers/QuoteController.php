@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
+use common\components\Metrics;
 use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\Notifications;
@@ -27,6 +28,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\services\metrics\MetricsService;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
@@ -80,7 +82,15 @@ class QuoteController extends FController
                     $result = Yii::$app->cacheFile->get($keyCache);
 
                     if ($result === false) {
+                        $timeStart = microtime(true);
+                        $metricsService = \Yii::$container->get(MetricsService::class);
+
                         $result = SearchService::getOnlineQuotes($lead);
+
+                        $metricsService->addQuoteSearchHistogram($timeStart, 'quick_search');
+                        $metricsService->addQuoteSearchCounter('quick_search');
+                        unset($metricsService);
+
                         if ($result && !empty($result['data']) && empty($result['error'])) {
                             Yii::$app->cacheFile->set($keyCache, $result, 600);
                         }
@@ -124,7 +134,15 @@ class QuoteController extends FController
                 $quotes = \Yii::$app->cacheFile->get($keyCache);
 
                 if ($quotes === false) {
+                    $timeStart = microtime(true);
+                    $metricsService = \Yii::$container->get(MetricsService::class);
+
                     $quotes = SearchService::getOnlineQuotes($lead);
+
+                    $metricsService->addQuoteSearchHistogram($timeStart, 'quote_search');
+                    $metricsService->addQuoteSearchCounter('quote_search');
+                    unset($metricsService);
+
                     if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
                         \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
                     } else {
@@ -511,7 +529,15 @@ class QuoteController extends FController
             $quotes = \Yii::$app->cacheFile->get($keyCache);
 
             if ($quotes === false) {
+                $timeStart = microtime(true);
+                $metricsService = \Yii::$container->get(MetricsService::class);
+
                 $quotes = SearchService::getOnlineQuotes($lead);
+
+                $metricsService->addQuoteSearchHistogram($timeStart, 'auto_select_quotes');
+                $metricsService->addQuoteSearchCounter('auto_select_quotes');
+                unset($metricsService);
+
                 if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
                     \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
                 } else {

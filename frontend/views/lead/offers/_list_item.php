@@ -54,18 +54,28 @@ use yii\bootstrap4\Html;
                             ])*/ ?>
 
                     <?php if ($offer->isAlternative()) : ?>
-                        <?= Html::a('<i class="glyphicon glyphicon-ok text-success"></i> Confirm alternative', null, [
-                            'class' => 'dropdown-item text-success btn-confirm-alternative-offer',
-                            'data-offer-id' => $offer->of_id,
-                            'data-url' => \yii\helpers\Url::to(['/offer/offer/ajax-confirm-alternative']),
-                        ]) ?>
+                        <?php if ($offer->isPending()) : ?>
+                            <?= Html::a('<i class="glyphicon glyphicon-ok text-success"></i> Confirm alternative', null, [
+                                'class' => 'dropdown-item text-success btn-action-alternative-offer',
+                                'data-offer-id' => $offer->of_id,
+                                'data-url' => \yii\helpers\Url::to(['/offer/offer/ajax-confirm-alternative']),
+                            ]) ?>
+                        <?php elseif ($offer->isConfirm()) : ?>
+                            <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Cancel alternative', null, [
+                                'class' => 'dropdown-item text-danger btn-action-alternative-offer',
+                                'data-offer-id' => $offer->of_id,
+                                'data-url' => \yii\helpers\Url::to(['/offer/offer/ajax-cancel-alternative']),
+                            ]) ?>
+                        <?php endif; ?>
                     <?php endif; ?>
 
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete offer', null, [
-                        'class' => 'dropdown-item text-danger btn-delete-offer',
-                        'data-offer-id' => $offer->of_id,
-                        'data-url' => \yii\helpers\Url::to(['/offer/offer/delete-ajax']),
-                    ]) ?>
+                    <?php if (!$offer->isConfirm()) : ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete offer', null, [
+                            'class' => 'dropdown-item text-danger btn-delete-offer',
+                            'data-offer-id' => $offer->of_id,
+                            'data-url' => \yii\helpers\Url::to(['/offer/offer/delete-ajax']),
+                        ]) ?>
+                    <?php endif; ?>
 
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> Status log', null, [
                         'class' => 'dropdown-item text-success btn-offer-status-log',
@@ -140,7 +150,7 @@ use yii\bootstrap4\Html;
                     <tr>
                         <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?> <br> <?= ProductQuoteHelper::displayOriginOrAlternativeIcon($quote) ?></td>
 
-                        <td title="<?=Html::encode($quote->pq_product_id)?>">
+                        <td title="Product ID: <?=Html::encode($quote->pq_product_id)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
                             <?=Html::encode($quote->pqProduct->prType->pt_name)?>
                             <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
@@ -156,14 +166,15 @@ use yii\bootstrap4\Html;
                         <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_price * $offer->of_client_currency_rate, 2)?> <?=Html::encode($offer->of_client_currency)?></td>
                         <td>
-                            <?php
-                              echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
-                                    'data-offer-id' => $offer->of_id,
-                                    'data-product-quote-id' => $quote->pq_id,
-                                    'class' => 'btn-delete-quote-from-offer',
-                                    'data-url' => \yii\helpers\Url::to(['/offer/offer-product/delete-ajax'])
-                                ]);
-                            ?>
+                            <?php if (!$offer->isConfirm()) : ?>
+                                <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
+                                        'data-offer-id' => $offer->of_id,
+                                        'data-product-quote-id' => $quote->pq_id,
+                                        'class' => 'btn-delete-quote-from-offer',
+                                        'data-url' => \yii\helpers\Url::to(['/offer/offer-product/delete-ajax'])
+                                    ]);
+                                ?>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

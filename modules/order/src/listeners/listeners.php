@@ -118,6 +118,11 @@ return [
     processManager\clickToBook\events\FlightProductProcessedErrorEvent::class => [
         processManager\clickToBook\listeners\FlightProductProcessedErrorListener::class,
     ],
+    processManager\events\RetryEvent::class => [
+        processManager\listeners\RetryOrderProcessManagerListener::class,
+        processManager\listeners\LogStatusListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
 
     OrderUpdateEvent::class => [
         OrderListeners\OrderSendWebhookBOListener::class

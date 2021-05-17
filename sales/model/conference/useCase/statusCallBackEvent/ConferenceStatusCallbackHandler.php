@@ -301,7 +301,7 @@ class ConferenceStatusCallbackHandler
         if ($call = $this->findAndUpdateCall($form->CallSid, $conference)) {
             $participant->cp_call_id = $call->c_id;
         } else {
-            $job = new UpdateConferenceParticipantCallIdJob($participant->cp_call_sid, $participant->cp_cf_sid);
+            $job = new UpdateConferenceParticipantCallIdJob($participant->cp_call_sid, $participant->cp_cf_sid, $participant->cp_cf_id);
             \Yii::$app->queue_job->delay(5)->push($job);
         }
         return $participant;

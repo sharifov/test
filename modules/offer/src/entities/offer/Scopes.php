@@ -11,4 +11,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['of_gid' => $gid]);
     }
+
+    public function exceptStatuses(array $statuses): self
+    {
+        return $this->andWhere(['NOT IN', 'of_status_id', $statuses]);
+    }
 }

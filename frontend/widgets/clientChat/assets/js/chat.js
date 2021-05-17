@@ -8,8 +8,9 @@
     var wrapLoadMoreRequests = $('#_wrap_cc_load_requests');
     var boxHeader = $('._cc-box-header');
     var circleWrapper = $('#_circle_wrapper');
+    var chatStatusSwitchElem = document.querySelector('.chat-status-switch');
 
-    function Chat(dataLoadUrl, db, page)
+    function Chat(dataLoadUrl, db, page, updateChatStatusUrl)
     {
         this.dataLoadUrl = dataLoadUrl;
         this.db = db;
@@ -62,6 +63,45 @@
                 });
         }
         this.firstRequest(page);
+
+        this.chatSwitcher = new Switchery(chatStatusSwitchElem, {size: 'small'});
+        chatStatusSwitchElem.onchange = function () {
+            $.ajax({
+                url: updateChatStatusUrl,
+                type: 'post',
+                dataType: 'json',
+                data: {chatStatus: chatStatusSwitchElem.checked},
+                beforeSend: function () {
+                    this.chatSwitcher.disable();
+                }.bind(this),
+                success: function (res) {
+                    if (res.error) {
+                        createNotify('Error', res.message, 'error');
+                    }
+                }.bind(this),
+                complete: function () {
+                    this.chatSwitcher.enable();
+                }.bind(this),
+                error: function (xhr) {
+                    createNotify('Error', xhr.responseText, 'error');
+                    this.setSwitchery(!chatStatusSwitchElem.checked);
+                }.bind(this)
+            });
+        }.bind(this);
+
+        this.widgetEnable = function () {
+            this.setSwitchery(true);
+        };
+
+        this.widgetDisable = function () {
+            this.setSwitchery(false);
+        };
+
+        this.setSwitchery = function (checkedBool) {
+            if((checkedBool && !this.chatSwitcher.isChecked()) || (!checkedBool && this.chatSwitcher.isChecked())) {
+                this.chatSwitcher.setPosition(true);
+            }
+        };
     }
 
     Chat.prototype.loadData = function (page)

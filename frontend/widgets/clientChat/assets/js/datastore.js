@@ -4,66 +4,68 @@
 
     function DataStore()
     {
-        this.data = [];
+        this.initData = function () {
+            this.data = [];
 
-        this.data.keySort = function (keys) {
-            keys = keys || {};
+            this.data.keySort = function (keys) {
+                keys = keys || {};
 
-            var obLen = function(obj) {
-                var size = 0, key;
-                for (key in obj) {
-                    if (obj.hasOwnProperty(key))
-                        size++;
-                }
-                return size;
-            };
-
-            var obIx = function(obj, ix) {
-                var size = 0, key;
-                for (key in obj) {
-                    if (obj.hasOwnProperty(key)) {
-                        if (size == ix)
-                            return key;
-                        size++;
+                var obLen = function(obj) {
+                    var size = 0, key;
+                    for (key in obj) {
+                        if (obj.hasOwnProperty(key))
+                            size++;
                     }
+                    return size;
+                };
+
+                var obIx = function(obj, ix) {
+                    var size = 0, key;
+                    for (key in obj) {
+                        if (obj.hasOwnProperty(key)) {
+                            if (size == ix)
+                                return key;
+                            size++;
+                        }
+                    }
+                    return false;
+                };
+
+                var keySort = function(a, b, d) {
+                    d = d !== null ? d : 1;
+                    if (a == b)
+                        return 0;
+                    return a > b ? 1 * d : -1 * d;
+                };
+
+                var KL = obLen(keys);
+
+                if (!KL)
+                    return this.sort(keySort);
+
+                for ( var k in keys) {
+                    keys[k] =
+                        keys[k] == 'desc' || keys[k] == -1  ? -1
+                            : (keys[k] == 'skip' || keys[k] === 0 ? 0
+                            : 1);
                 }
-                return false;
-            };
 
-            var keySort = function(a, b, d) {
-                d = d !== null ? d : 1;
-                if (a == b)
-                    return 0;
-                return a > b ? 1 * d : -1 * d;
-            };
+                this.sort(function(a, b) {
+                    var sorted = 0, ix = 0;
 
-            var KL = obLen(keys);
-
-            if (!KL)
-                return this.sort(keySort);
-
-            for ( var k in keys) {
-                keys[k] =
-                    keys[k] == 'desc' || keys[k] == -1  ? -1
-                        : (keys[k] == 'skip' || keys[k] === 0 ? 0
-                        : 1);
+                    while (sorted === 0 && ix < KL) {
+                        var k = obIx(keys, ix);
+                        if (k) {
+                            var dir = keys[k];
+                            sorted = keySort(a[k], b[k], dir);
+                            ix++;
+                        }
+                    }
+                    return sorted;
+                });
+                return this;
             }
-
-            this.sort(function(a, b) {
-                var sorted = 0, ix = 0;
-
-                while (sorted === 0 && ix < KL) {
-                    var k = obIx(keys, ix);
-                    if (k) {
-                        var dir = keys[k];
-                        sorted = keySort(a[k], b[k], dir);
-                        ix++;
-                    }
-                }
-                return sorted;
-            });
-            return this;
-        }
+        }.bind(this);
 
         this.existInData = function (prop, val)
         {
@@ -97,6 +99,8 @@
             'ccua_created_t': 'asc',
             'cch_created_t': 'asc'
         }
+
+        this.initData();
     }
 
     DataStore.prototype.add = function (item) {
@@ -154,7 +158,7 @@
 
     DataStore.prototype.removeAll = function() {
         var promise = new Promise(function(resolve, reject) {
-            this.data = [];
+            this.initData();
             resolve();
         }.bind(this));
         return promise;

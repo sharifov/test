@@ -1774,6 +1774,7 @@ class ClientChatController extends FController
 
         $userClientChatData->uccd_chat_status_id = $chatStatus === 'true' ? UserClientChatData::CHAT_STATUS_READY : UserClientChatData::CHAT_STATUS_BUSY;
         $userClientChatData->save();
+        $this->clientChatUserAccessRepository->resetChatUserAccessWidget(Auth::id());
 
         return $this->asJson([
             'error' => false,

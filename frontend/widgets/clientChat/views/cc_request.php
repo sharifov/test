@@ -108,41 +108,9 @@ $(document).on('click', '#_cc_load_requests', function()
     var Chat = ChatApp.Chat;
 
     var ds = new DataStore();
-    window.chat = new Chat('$url', ds, $page);
+    window.chat = new Chat('$url', ds, $page, '$updateChatStatusUrl');
 })(window);
 
-let chatStatusSwitchElem = document.querySelector('.chat-status-switch');
-let chatSwitcher = new Switchery(chatStatusSwitchElem, {size: 'small'});
-
-chatStatusSwitchElem.onchange = function () {
-    $.ajax({
-        url: '$updateChatStatusUrl',
-        type: 'post',
-        dataType: 'json',
-        data: {chatStatus: chatStatusSwitchElem.checked},
-        beforeSend: function () {
-           chatSwitcher.disable(); 
-        },
-        success: function (res) {
-            if (res.error) {
-                createNotify('Error', res.message, 'error');
-            } else {
-                window.chat.db.removeAll();
-                window.chat.firstRequest(0);
-                setTimeout(function () {
-                    openWidget();
-                }, 100);
-            }
-        },
-        complete: function () {
-           chatSwitcher.enable(); 
-        },
-        error: function (xhr) {
-            createNotify('Error', xhr.responseText, 'error');
-            chatSwitcher.markAsSwitched(!chatStatusSwitchElem.checked);
-        }
-    })
-}
 JS;
 
 $this->registerJs($js);
