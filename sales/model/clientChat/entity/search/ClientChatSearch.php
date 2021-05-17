@@ -526,6 +526,9 @@ class ClientChatSearch extends ClientChat
         $query->leftJoin(ClientChatUnread::tableName(), 'ccu_cc_id = cch_id');
         $query->leftJoin(['owner' => Employee::tableName()], 'cch_owner_user_id = owner.id');
         $query->leftJoin(['last_message' => ClientChatLastMessage::tableName()], 'cch_id = last_message.cclm_cch_id');
+
+        $query->limit(1000);
+
         return $query;
     }
 
