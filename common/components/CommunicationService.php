@@ -743,10 +743,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
             $out = $this->getJwtToken($username);
 
             if ($out && !empty($out['data']['token'])) {
-                $expired = 60 * 15;
-                /*if (!empty($out['data']['expire'])) {
-                    $expired = strtotime($out['data']['expire']) - time();
-                }*/
+                $expired = 60 * 5;
+                if (!empty($out['data']['expire'])) {
+                    $expired = strtotime($out['data']['expire']) - time() - 60;
+                }
                 \Yii::$app->cache->set($cacheKey, $out, $expired);
             }
         }
