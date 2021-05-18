@@ -474,6 +474,31 @@ class ClientManageService
     }
 
     /**
+     * @param int $projectId
+     * @param string|null $uuId
+     * @param string|null $email
+     * @param string|null $rcVisitorId
+     * @param string|null $phone
+     * @return Client|null
+     */
+    public function detectClient(
+        int $projectId,
+        ?string $uuId,
+        ?string $email,
+        ?string $rcVisitorId,
+        ?string $phone
+    ) {
+        if ($client = $this->detectClientFromChatRequest($projectId, $uuId, $email, $rcVisitorId)) {
+            return $client;
+        }
+        if (!empty($phone) && $client = ClientsQuery::oneByPhoneAndProject($phone, $projectId)) {
+            /** @var Client $client */
+            return $client;
+        }
+        return null;
+    }
+
+    /**
      * Find or create Client
      *
      * @param PhoneCreateForm[] $phones
@@ -484,7 +509,7 @@ class ClientManageService
      */
     public function getOrCreate(array $phones, array $emails, ClientCreateForm $clientForm, ?string $uuid = null): Client
     {
-        if (!(!empty($uuid) && $client = Client::findOne(['uuid' => $uuid]))) {
+        if (!(($uuid !== null) && $client = Client::findOne(['uuid' => $uuid]))) {
             try {
                 $client = $this->getOrCreateByPhones($phones, $clientForm);
             } catch (InternalPhoneException $e) {
