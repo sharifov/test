@@ -5,6 +5,7 @@ namespace common\models\query;
 use common\models\Client;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use sales\model\clientVisitor\entity\ClientVisitor;
 use yii\db\ActiveQuery;
 
 /**
@@ -31,6 +32,15 @@ class ClientQuery extends ActiveQuery
     {
         return $this->join('INNER JOIN', ClientChatVisitor::tableName(), 'ccv_client_id = id')
             ->join('INNER JOIN', ClientChatVisitorData::tableName(), 'cvd_visitor_rc_id = :visitorId and ccv_cvd_id = cvd_id', ['visitorId' => $visitorId]);
+    }
+
+    public function byVisitor(string $visitorId): self
+    {
+        return $this->innerJoin(
+            ClientVisitor::tableName(),
+            'cv_client_id = id AND cv_visitor_id = :visitorId',
+            ['visitorId' => $visitorId]
+        );
     }
 
     public function byProject(int $projectId): ClientQuery
