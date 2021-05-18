@@ -8,6 +8,8 @@ use common\models\ClientPhone;
 use common\models\UserContactList;
 use modules\order\src\entities\orderContact\OrderContact;
 use sales\model\clientAccount\entity\ClientAccount;
+use sales\model\clientVisitor\entity\ClientVisitor;
+use sales\model\clientVisitor\repository\ClientVisitorRepository;
 use sales\repositories\client\ClientsCollection;
 use sales\repositories\client\ClientsQuery;
 use sales\forms\lead\EmailCreateForm;
@@ -31,6 +33,7 @@ use yii\db\ActiveRecord;
  * @property InternalPhoneGuard $internalPhoneGuard
  * @property ServiceFinder $finder
  * @property ClientChatVisitorRepository $clientChatVisitorRepository
+ * @property ClientVisitorRepository $clientVisitorRepository
  */
 class ClientManageService
 {
@@ -44,6 +47,8 @@ class ClientManageService
      */
     private ClientChatVisitorRepository $clientChatVisitorRepository;
 
+    private ClientVisitorRepository $clientVisitorRepository;
+
     /**
      * ClientManageService constructor.
      * @param ClientRepository $clientRepository
@@ -52,6 +57,7 @@ class ClientManageService
      * @param InternalPhoneGuard $internalPhoneGuard
      * @param ServiceFinder $finder
      * @param ClientChatVisitorRepository $clientChatVisitorRepository
+     * @param ClientVisitorRepository $clientVisitorRepository
      */
     public function __construct(
         ClientRepository $clientRepository,
@@ -59,7 +65,8 @@ class ClientManageService
         ClientEmailRepository $clientEmailRepository,
         InternalPhoneGuard $internalPhoneGuard,
         ServiceFinder $finder,
-        ClientChatVisitorRepository $clientChatVisitorRepository
+        ClientChatVisitorRepository $clientChatVisitorRepository,
+        ClientVisitorRepository $clientVisitorRepository
     ) {
         $this->clientRepository = $clientRepository;
         $this->clientPhoneRepository = $clientPhoneRepository;
@@ -67,6 +74,7 @@ class ClientManageService
         $this->internalPhoneGuard = $internalPhoneGuard;
         $this->finder = $finder;
         $this->clientChatVisitorRepository = $clientChatVisitorRepository;
+        $this->clientVisitorRepository = $clientVisitorRepository;
     }
 
     /**
@@ -123,6 +131,16 @@ class ClientManageService
             return $phone;
         }
         return null;
+    }
+
+    public function addVisitorId(Client $client, ?string $visitorId): ?int
+    {
+        if ($client->clientVisitor || $visitorId === null) {
+            return null;
+        }
+
+        $clientVisitor = ClientVisitor::create($client->id, $visitorId);
+        return $this->clientVisitorRepository->save($clientVisitor);
     }
 
     /**
@@ -429,6 +447,7 @@ class ClientManageService
 
         $this->addEmail($client, $clientEmailForm);
         $this->addPhone($client, $clientPhoneForm);
+        $this->addVisitorId($client, $rcId);
 
         return $client;
     }
@@ -437,18 +456,18 @@ class ClientManageService
      * @param int $projectId
      * @param string|null $uuId
      * @param string|null $email
-     * @param string|null $rcId
+     * @param string|null $rcVisitorId
      * @return Client|ActiveRecord|null
      */
-    public function detectClientFromChatRequest(int $projectId, ?string $uuId, ?string $email, ?string $rcId)
+    public function detectClientFromChatRequest(int $projectId, ?string $uuId, ?string $email, ?string $rcVisitorId)
     {
         if (!empty($uuId) && $client = Client::find()->byProject($projectId)->byUuid($uuId)->one()) {
             return $client;
         }
-        if (!empty($email) && $client = ClientsQuery::oneByEmailAndProject($email, $projectId)) {
+        if (!empty($rcVisitorId) && $client = Client::find()->byProject($projectId)->byVisitor($rcVisitorId)->one()) {
             return $client;
         }
-        if (!empty($rcId) && $client = Client::find()->byProject($projectId)->joinWithCcVisitor($rcId)->one()) {
+        if (!empty($email) && $client = ClientsQuery::oneByEmailAndProject($email, $projectId)) {
             return $client;
         }
         return null;

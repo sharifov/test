@@ -12,6 +12,7 @@ use sales\model\client\entity\events\ClientChangeIpEvent;
 use sales\model\client\entity\events\ClientCreatedEvent;
 use sales\model\client\entity\events\ClientExcludedEvent;
 use sales\model\clientAccount\entity\ClientAccount;
+use sales\model\clientVisitor\entity\ClientVisitor;
 use thamtech\uuid\helpers\UuidHelper;
 use thamtech\uuid\validators\UuidValidator;
 use yii\behaviors\TimestampBehavior;
@@ -61,6 +62,8 @@ use yii\helpers\ArrayHelper;
  * @property UserContactList $contact
  * @property Project|null $project
  * @property ClientAccount|null $clientAccount
+ * @property ClientVisitor|null $clientVisitor
+ *
  * @method clientPhonesByType(array $array)
  */
 class Client extends ActiveRecord
@@ -321,6 +324,11 @@ class Client extends ActiveRecord
     public function getClientAccount(): ActiveQuery
     {
         return $this->hasOne(ClientAccount::class, ['ca_id' => 'cl_ca_id']);
+    }
+
+    public function getClientVisitor(): ActiveQuery
+    {
+        return $this->hasOne(ClientVisitor::class, ['cv_client_id' => 'id']);
     }
 
     public function beforeSave($insert): bool
