@@ -1462,12 +1462,16 @@ class CallController extends FController
         if (!PhoneBlackListGuard::canAdd(Auth::id())) {
             throw new ForbiddenHttpException('You do not have access to perform this action');
         }
-
+        $enableNotifier = true;
         $phone = Yii::$app->request->post('phone', '');
         try {
             $phoneBlackList = PhoneBlacklist::findOne(['pbl_phone' => $phone]);
             if ($phoneBlackList) {
-                $this->phoneBlackListManageService->enableWithExpiredDateTime($phoneBlackList, new \DateTime());
+                if (!$phoneBlackList->pbl_enabled && (!$phoneBlackList->pbl_expiration_date || strtotime($phoneBlackList->pbl_expiration_date) < time())) {
+                    $this->phoneBlackListManageService->enableWithExpiredDateTime($phoneBlackList, new \DateTime());
+                } else {
+                    $enableNotifier = false;
+                }
             } else {
                 $this->phoneBlackListManageService->add($phone, new \DateTime());
             }
@@ -1485,7 +1489,8 @@ class CallController extends FController
         }
 
         return $this->asJson([
-            'error' => false
+            'error' => false,
+            'notifier' => $enableNotifier
         ]);
     }
 

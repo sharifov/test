@@ -322,7 +322,9 @@
                         if (resp.error) {
                             createNotify('Error', resp.message, 'error');
                         } else {
-                            createNotify('Success', 'Phone number: ' + phone + ' added to blacklist', 'success');
+                            if (resp.notifier) {
+                                createNotify('Success', 'Phone number: ' + phone + ' added to blacklist', 'success');
+                            }
                             $('.btn-add-in-blacklist[data-phone="'+phone+'"]').remove();
                         }
                     },
