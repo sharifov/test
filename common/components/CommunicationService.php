@@ -1154,10 +1154,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function getCallPrice(string $callSid): array
+    public function getCallPrice(array $callSids): array
     {
         $data = [
-            'callSid' => $callSid,
+            'callSids' => $callSids,
         ];
 
         $response = $this->sendRequest('twilio/get-call-price', $data);
@@ -1165,10 +1165,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processResponseGetPrice($response);
     }
 
-    public function getSmsPrice(string $smsSid): array
+    public function getSmsPrice(array $smsSids): array
     {
         $data = [
-            'smsSid' => $smsSid,
+            'smsSids' => $smsSids,
         ];
 
         $response = $this->sendRequest('twilio/get-sms-price', $data);

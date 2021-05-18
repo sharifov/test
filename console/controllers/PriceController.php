@@ -51,15 +51,15 @@ class PriceController extends Controller
 
         $this->outputHelper->printInfo('Count calls for update', count($calls));
 
-        foreach ($calls as $call) {
-            try {
-                $this->updateCallPrice->update($call['c_call_sid']);
-                printf('%s', $this->ansiFormat('.', Console::FG_GREEN));
-            } catch (\Throwable $e) {
-                printf('%s', $this->ansiFormat('.', Console::FG_RED));
+        try {
+            $sids = array_column($calls, 'c_call_sid');
+            $this->updateCallPrice->update($sids);
+            printf('%s', $this->ansiFormat('.', Console::FG_GREEN));
+        } catch (\Throwable $e) {
+            printf('%s', $this->ansiFormat('.', Console::FG_RED));
 //                \Yii::error($e->getMessage(), 'PriceController:actionUpdateCallsPrice:update');
-            }
         }
+
 
         $this->outputHelper->printInfo('End. Duration: ' . (time() - $start) . ' sec', $point);
     }
@@ -85,15 +85,15 @@ class PriceController extends Controller
 
         $this->outputHelper->printInfo('Count sms for update', count($smses));
 
-        foreach ($smses as $sms) {
-            try {
-                $this->updateSmsPrice->update($sms['s_tw_message_sid']);
-                printf('%s', $this->ansiFormat('.', Console::FG_GREEN));
-            } catch (\Throwable $e) {
-                printf('%s', $this->ansiFormat('.', Console::FG_RED));
+        try {
+            $sids = array_column($smses, 's_tw_message_sid');
+            $this->updateSmsPrice->update($sids);
+            printf('%s', $this->ansiFormat('.', Console::FG_GREEN));
+        } catch (\Throwable $e) {
+            printf('%s', $this->ansiFormat('.', Console::FG_RED));
 //                \Yii::error($e->getMessage(), 'PriceController:actionUpdateSmsPrice:update');
-            }
         }
+
 
         $this->outputHelper->printInfo('End. Duration: ' . (time() - $start) . ' sec', $point);
     }
