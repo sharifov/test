@@ -15,6 +15,7 @@ use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
+use yii\web\View;
 use yii\widgets\Pjax;
 
 $flightQuote = FlightQuote::findByProductQuoteId($model);
@@ -512,3 +513,13 @@ $css = <<<CSS
     }
 CSS;
 $this->registerCss($css);
+
+$js = <<<JS
+    $(document).on('pjax:end', function() {
+         $('[data-toggle="tooltip"]').tooltip({html:true});
+    });
+
+    $('[data-toggle="tooltip"]').tooltip({html:true});
+JS;
+$this->registerJs($js, View::POS_READY);
+
