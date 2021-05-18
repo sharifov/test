@@ -24,6 +24,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 
@@ -2198,12 +2199,21 @@ class Quote extends \yii\db\ActiveRecord
     public function getPricePerPax()
     {
         $priceData = $this->getPricesData();
+        $unknownType = null;
         if (isset($priceData['prices'])) {
             foreach ($priceData['prices'] as $paxCode => $priceEntry) {
                 if ($paxCode == QuotePrice::PASSENGER_ADULT) {
                     return round($priceEntry['selling'] / $priceEntry['tickets'], 2);
                 }
+                if (!ArrayHelper::keyExists($paxCode, QuotePrice::PASSENGER_TYPE_LIST)) {
+                    $unknownType = $paxCode;
+                }
             }
+        }
+        if (!empty($priceData['prices']) && $unknownType) {
+            $selling = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.selling', 0);
+            $tickets = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.tickets', 1);
+            return round($selling / $tickets, 2);
         }
 
         return 0;
