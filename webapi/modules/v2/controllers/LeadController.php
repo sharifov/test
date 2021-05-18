@@ -7,6 +7,7 @@ use common\models\ClientPhone;
 use sales\model\lead\LeadCodeException;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
 use sales\model\lead\useCases\lead\api\create\LeadCreateValue;
+use unclead\multipleinput\assets\FontAwesomeAsset;
 use webapi\src\Messages;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
@@ -58,23 +59,24 @@ class LeadController extends BaseController
      * @apiParam {object}               lead                                        Lead data array
      * @apiParam {string{20}}           lead.source_code                            Source Code
      * @apiParam {int{0..9}}            lead.adults                                 Adult count
-     * @apiParam {int{0..9}}            lead.children                               Children count
-     * @apiParam {int{0..9}}            lead.infants                                Infants count
+     * @apiParam {int{0..9}}            [lead.children]                             Children count (by default 0)
+     * @apiParam {int{0..9}}            [lead.infants]                              Infants count (by default 0)
      * @apiParam {string{50}}           [lead.request_ip]                           Request IP
      * @apiParam {string{32}}           [lead.discount_id]                          Discount ID
-     * @apiParam {string{15}}           lead.uid                                    UID value
+     * @apiParam {string{15}}           [lead.uid]                                  UID value
      * @apiParam {text}                 [lead.user_agent]                           User agent info
      * @apiParam {object[]}             lead.flights                                Flights
      * @apiParam {string{3}}            lead.flights.origin                         Flight Origin location Airport IATA-code
      * @apiParam {string{3}}            lead.flights.destination                    Flight Destination location Airport IATA-code
      * @apiParam {datetime{YYYY-MM-DD}} lead.flights.departure                      Flight Departure DateTime (format YYYY-MM-DD)
      * @apiParam {object}               lead.client                                 Client
-     * @apiParam {string{20}}           lead.client.phone                           Client phone or Client email is required
-     * @apiParam {string{160}}          lead.client.email                           Client email or Client phone is required
-     * @apiParam {string{50}}           [lead.client.uuid]                           Client uuid
-     * @apiParam {int{2}=14-BOOK_FAILED, 15-ALTERNATIVE}   lead.status              Status
-     * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} lead.cabin   Cabin
-     * @apiParam {int}                  lead.flight_id                              BO Flight ID
+     * @apiParam {string{20}}           lead.client.phone                           Client phone or Client email or Client chat_visitor_id is required
+     * @apiParam {string{160}}          lead.client.email                           Client email or Client phone or Client chat_visitor_id is required
+     * @apiParam {string{50}}           lead.client.chat_visitor_id                 Client chat_visitor_id or Client email or Client phone is required
+     * @apiParam {string{50}}           [lead.client.uuid]                          Client uuid
+     * @apiParam {int{2}=14-BOOK_FAILED, 15-ALTERNATIVE, 1-PENDING}   [lead.status]   Status (by default 1-PENDING)
+     * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} [lead.cabin]   Cabin (by default E)
+     * @apiParam {int}                  [lead.flight_id]                            BO Flight ID
      * @apiParam {string{5}}            lead.user_language                          User Language
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  [lead.expire_at]                    Expire at
      *
@@ -85,7 +87,8 @@ class LeadController extends BaseController
      *           "client": {
      *               "phone": "+37369333333",
      *               "email": "email@email.com",
-     *               "uuid" : "af5246f1-094f-4fde-ada3-bd7298621613"
+     *               "uuid" : "af5246f1-094f-4fde-ada3-bd7298621613",
+     *               "chat_visitor_id" : "6b811a3e-41c4-4d49-a99a-afw3e4rtf3tfregf"
      *           },
      *           "uid": "WD6q53PO3b",
      *           "status": 14,

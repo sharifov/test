@@ -3483,7 +3483,7 @@ Reason: {reason}',
             $this->adults = (int) $this->adults;
             $this->children = (int) $this->children;
             $this->infants = (int) $this->infants;
-            $this->bo_flight_id = (int) $this->bo_flight_id;
+
             if (($this->isBooked() || $this->isSold()) && $quote = $this->getBookedQuote()) {
                 $this->agents_processing_fee = $quote->agent_processing_fee;
             } else {

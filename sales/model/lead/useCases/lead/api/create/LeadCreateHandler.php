@@ -56,12 +56,24 @@ class LeadCreateHandler
             $clientForm->typeCreate = Client::TYPE_CREATE_LEAD;
             $clientForm->ip = $form->request_ip;
 
-            $client = $this->clientManageService->getOrCreate(
-                [new PhoneCreateForm(['phone' => $form->clientForm->phone])],
-                [new EmailCreateForm(['email' => $form->clientForm->email])],
-                $clientForm,
-                $form->clientForm->uuid
+            $client = $this->clientManageService->detectClient(
+                $form->project_id,
+                $form->clientForm->uuid,
+                $form->clientForm->email,
+                $form->clientForm->chat_visitor_id,
+                $form->clientForm->phone
             );
+
+            if (!$client) {
+                $client = $this->clientManageService->getOrCreate(
+                    [new PhoneCreateForm(['phone' => $form->clientForm->phone])],
+                    [new EmailCreateForm(['email' => $form->clientForm->email])],
+                    $clientForm,
+                    $form->clientForm->uuid
+                );
+            }
+
+            $this->clientManageService->addVisitorId($client, $form->clientForm->chat_visitor_id);
 
             $lead = Lead::createByApiBO($form, $client);
 
