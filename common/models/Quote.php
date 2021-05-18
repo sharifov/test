@@ -2559,6 +2559,9 @@ class Quote extends \yii\db\ActiveRecord
     public function getCheckoutUrlPage(): string
     {
         $url = '#';
+        if (($providerProject = $this->providerProject) && $providerProject->link) {
+            return $providerProject->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->uid;
+        }
         if ($this->lead && $this->lead->project && $this->lead->project->link) {
             $url = $this->lead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->uid;
         }
