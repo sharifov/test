@@ -65,15 +65,21 @@ class LeadCreateHandler
             );
 
             if (!$client) {
-                $client = $this->clientManageService->getOrCreate(
-                    [new PhoneCreateForm(['phone' => $form->clientForm->phone])],
-                    [new EmailCreateForm(['email' => $form->clientForm->email])],
-                    $clientForm,
-                    $form->clientForm->uuid
-                );
+                if ($form->clientForm->phone || $form->clientForm->email) {
+                    $client = $this->clientManageService->getOrCreate(
+                        [new PhoneCreateForm(['phone' => $form->clientForm->phone])],
+                        [new EmailCreateForm(['email' => $form->clientForm->email])],
+                        $clientForm,
+                        $form->clientForm->uuid
+                    );
+                } else {
+                    $client = $this->clientManageService->create($clientForm, null);
+                }
             }
 
-            $this->clientManageService->addVisitorId($client, $form->clientForm->chat_visitor_id);
+            if ($form->clientForm->chat_visitor_id) {
+                $this->clientManageService->addVisitorId($client, $form->clientForm->chat_visitor_id);
+            }
 
             $lead = Lead::createByApiBO($form, $client);
 
