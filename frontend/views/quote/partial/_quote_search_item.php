@@ -4,6 +4,7 @@ use common\components\SearchService;
 use common\models\Lead;
 use frontend\helpers\QuoteHelper;
 use sales\auth\Auth;
+use sales\helpers\quote\ImageHelper;
 use yii\bootstrap\Html;
 
 /**
@@ -49,7 +50,12 @@ $isQuoteAssignedToFlight = false;
             <span class="quote__id"><strong># <?= $resultKey + 1 ?></strong></span>
             <span class="quote__vc">
                 <span class="quote__vc-logo">
-                    <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $result['validatingCarrier']?>.png" alt="<?= $result['validatingCarrier']?>" class="quote__vc-img">
+                    <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $result['validatingCarrier'] . '.png' ?>
+                    <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                        <span class="quote__vc-logo">
+                            <img src="<?php echo $airlineLogo ?>" alt="<?= $result['validatingCarrier']?>" class="quote__vc-img">
+                        </span>
+                    <?php endif ?>
                 </span>
                 <span class="quote__vc-name"><?= (!isset($airlines[$result['validatingCarrier']])) ?: $airlines[$result['validatingCarrier']];?><strong> [<?= $result['validatingCarrier']?>]</strong></span>
             </span>
@@ -141,8 +147,13 @@ $isQuoteAssignedToFlight = false;
                 ?>
                 <div class="quote__segment">
                     <div class="quote__info">
-                        <?php if (count($marketingAirlines) == 1) :?>
-                            <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $marketingAirlines[0]?>.png" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
+                        <?php if (count($marketingAirlines) === 1) :?>
+                            <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
+                            <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                                <span class="quote__vc-logo">
+                                    <img src="<?php echo $airlineLogo ?>" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
+                                </span>
+                            <?php endif ?>
                         <?php else :?>
                             <img src="/img/multiple_airlines.png" alt="<?= implode(', ', $marketingAirlines)?>" class="quote__airline-logo">
                         <?php endif;?>
