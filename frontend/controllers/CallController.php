@@ -1467,7 +1467,7 @@ class CallController extends FController
         try {
             $phoneBlackList = PhoneBlacklist::findOne(['pbl_phone' => $phone]);
             if ($phoneBlackList) {
-                if (!$phoneBlackList->pbl_enabled && (!$phoneBlackList->pbl_expiration_date || !(strtotime($phoneBlackList->pbl_expiration_date) > time()))) {
+                if (!$phoneBlackList->pbl_enabled || (!$phoneBlackList->pbl_expiration_date || !(strtotime($phoneBlackList->pbl_expiration_date) > time()))) {
                     $this->phoneBlackListManageService->enableWithExpiredDateTime($phoneBlackList, new \DateTime());
                 } else {
                     $enableNotifier = false;
