@@ -20,7 +20,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
 
 $pjaxId = 'pjax-product-' . $product->pr_id;
 ?>
-<?php \yii\widgets\Pjax::begin([
+<?php Pjax::begin([
     'id' => $pjaxId,
     'enablePushState' => false,
     'enableReplaceState' => false,
@@ -138,9 +138,8 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: none">
-            <?php //php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel):?>
-            <?php \yii\widgets\Pjax::begin([
+        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax && Yii::$app->request->get('_pjax') == '#' . $pjaxId) ? 'block' : 'none'?>">
+            <?php Pjax::begin([
                 'id' => 'pjax-product-search-' . $product->pr_id,
                 'enablePushState' => false,
                 'timeout' => 5000
@@ -150,11 +149,11 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                 //'dataProviderQuotes' => $dataProviderQuotes
                 //'dataProviderRooms'
             ]) ?>
-            <?php \yii\widgets\Pjax::end(); ?>
-            <?php //php endif;?>
+            <?php Pjax::end(); ?>
+
         </div>
     </div>
-<?php \yii\widgets\Pjax::end() ?>
+<?php Pjax::end() ?>
 
 
 <?php
