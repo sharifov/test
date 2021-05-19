@@ -145,8 +145,9 @@ class CallUpdateMessage
 
         $auth = \Yii::$app->authManager;
 
-        $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $phone, 'pbl_enabled' => true])->exists();
-
+        //$isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $phone, 'pbl_enabled' => true])->exists();
+        $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $phone])->andWhere('pbl_expiration_date > now()')->exists();
+        //var_dump($isPhoneInBlackList); die();
         return [
             'id' => $callId,
             'callSid' => $callSid,
