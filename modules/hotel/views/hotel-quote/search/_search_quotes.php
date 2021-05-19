@@ -71,7 +71,7 @@ The SPA service at Christmas is closed on December 25 and January 1.'
         </div>
     </div>
 
-    <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
+    <?php Pjax::begin(['id' => 'hotel-search-results-grid', 'timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 <div class="row">
     <?php if (!$showFilters) :?>
@@ -162,6 +162,10 @@ The SPA service at Christmas is closed on December 25 and January 1.'
 //$deleteRoomUrl = \yii\helpers\Url::to(['/hotel/hotel-room/delete-ajax']);
 
 $js = <<<JS
+
+    $('#hotel-search-results-grid').on('pjax:success', function() {            
+       $('#modal-lg').scrollTop(0);
+    });
     
     $('body').off('click', '.btn-add-hotel-quote').on('click', '.btn-add-hotel-quote', function (e) {
         
