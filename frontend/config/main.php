@@ -178,6 +178,9 @@ return [
                 return hash('md4', $path . $appVersion);
             },
             'bundles' => array_merge($bundles, [
+                JqueryAsset::class => [
+                    'class' => \frontend\assets\JqueryAsset::class,
+                ],
 
                 \yii\bootstrap4\BootstrapAsset::class => [
                     'class' => BootstrapGroupAsset::class,
@@ -193,6 +196,7 @@ return [
                 BootstrapPluginAsset::class => [
                   'class' => BootstrapGroupAsset::class,
                 ],
+
 //                AssetLeadCommunication::class => [
 //                    'basePath' => '@webroot',
 //                    'baseUrl' => '@web',
