@@ -33,7 +33,7 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
     public const LOGIC_ALL         = self::NS . 'logic/*';
     public const LOGIC_SEND_MAIL   = self::NS . 'logic/send_mail';
 
-    /** LOGIC PERMISSION */
+    /** COMMAND PERMISSION */
     public const CMD_ALL                    = self::NS . 'cmd/*';
     public const CMD_RECALCULATE_PRICE      = self::NS . 'cmd/recalculate_price';
 

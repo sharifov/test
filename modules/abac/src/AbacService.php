@@ -8,9 +8,10 @@ class AbacService
 {
     /**
      * @param array $rules
+     * @param string|null $prefix
      * @return string
      */
-    public static function conditionDecode(array $rules = []): string
+    public static function conditionDecode(array $rules = [], ?string $prefix = 'r.sub.'): string
     {
         //$str = '';
         $strArr = [];
@@ -81,7 +82,10 @@ class AbacService
 
                     //$field = '$var[\'' . $rule['id'] . '\']';
                     $field = $rule['field'] ?? $rule['id'];
-                    $field = 'r.sub.' . $field;
+
+                    if ($prefix) {
+                        $field = $prefix . $field;
+                    }
 
                     switch ($rule['operator']) {
                         case AbacBaseModel::OP_EQUAL:

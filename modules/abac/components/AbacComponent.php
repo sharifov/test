@@ -12,6 +12,7 @@ namespace modules\abac\components;
 use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
+use stdClass;
 use Yii;
 use yii\base\Component;
 use yii\caching\TagDependency;
@@ -29,6 +30,9 @@ use modules\abac\src\entities\AbacInterface;
  * @property string $cacheTagDependency
  * @property string $abacModelPath
  * @property Enforcer $enforser
+ * @property-read stdClass $env
+ * @property-read string $policyListContent
+ * @property-read string $policyListContentWOCache
  * @property Request $request
  */
 
@@ -84,7 +88,7 @@ class AbacComponent extends Component
         $request->action = Yii::$app->controller->action->uniqueId;
         $request->url = Yii::$app->request->url;
         $request->ip = Yii::$app->request->getUserIP();
-        $request->get = Yii::$app->request->get();
+        // $request->get = Yii::$app->request->get();
 
         $dt = new \stdClass();
         $dt->date = date('Y-m-d');

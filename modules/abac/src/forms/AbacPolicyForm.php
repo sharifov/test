@@ -88,7 +88,7 @@ class AbacPolicyForm extends Model
         $code = '';
         $rules = @json_decode($this->ap_subject_json, true);
         if (is_array($rules)) {
-            $code = AbacService::conditionDecode($rules);
+            $code = AbacService::conditionDecode($rules, '');
         }
         return $code;
     }
