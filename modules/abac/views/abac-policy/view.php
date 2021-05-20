@@ -33,8 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'ap_id',
-            'ap_title',
-            'ap_rule_type',
+
             'ap_subject',
             //'ap_subject_json',
             'ap_object',
@@ -49,26 +48,20 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             'ap_sort_order',
+            'ap_title',
+            'ap_rule_type',
             'ap_created_dt:byUserDateTime',
             'ap_updated_dt:byUserDateTime',
-            //'ap_created_user_id:userName',
-            [
-                'class' => \common\components\grid\UserColumn::class,
-                'attribute' => 'ap_created_user_id',
-                'relation' => 'apCreatedUser',
-            ],
-            [
-                'class' => \common\components\grid\UserColumn::class,
-                'attribute' => 'ap_updated_user_id',
-                'relation' => 'apUpdatedUser',
-            ],
-            //'ap_updated_user_id:userName',
-
+            'ap_created_user_id:username',
+            'ap_updated_user_id:username',
 
         ],
     ]) ?>
     </div>
         <div class="col-md-6">
+            <h2>Subject</h2>
+            <pre><?php echo Html::encode(str_replace('r.sub.', '', $model->ap_subject)); ?></pre>
+            <p class="text-info"><i class="fa fa-info-circle"></i> Params w/o "r.sub." prefix</p>
             <h2>Subject JSON</h2>
             <pre><?php
                 $subjectData = @json_decode($model->ap_subject_json, true);

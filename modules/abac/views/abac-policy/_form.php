@@ -14,35 +14,8 @@ use yii\widgets\Pjax;
 \frontend\assets\QueryBuilderAsset::register($this);
 
 
-//$filtersData = [
-//    [
-//        'id' => 'id1',
-//        'label' => 'ID1',
-//        'type'  => "integer",
-//        //'value' => true // boolean
-//        'input' => 'radio',
-//        'values' => [
-//            1 => 'Yes',
-//            0 => 'No'
-//        ],
-//        'default_value' => 1,
-//        'operators' =>  ['equal'],
-//        'unique' => true,
-//        'description' => 'This filter is "unique", it can be used only once'
-//    ],
-//
-//    [
-//        'id' => 'id2',
-//        'label' => 'ID2',
-//        'type' => 'string',
-//        'operators' =>  ['equal', 'not_equal', 'in', 'not_in', '==', '!=', 'match']
-//    ],
-//];
-
 $rulesData = @json_decode($model->ap_subject_json);
 $rulesDataStr = json_encode($rulesData);
-
-//$rulesDataStr = $model->ap_subject_json ?: '{[]}';
 $filtersData = $model->getObjectAttributeList();
 $filtersDataStr = json_encode($filtersData);
 $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators());
@@ -97,7 +70,7 @@ $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators())
             <?php endif; ?>
             <?php /* //$form->field($model, 'ap_action')->textInput(['maxlength' => true])*/ ?>
 
-            <?php /*= $form->field($model, 'ap_action_json')->textarea()*///// ?>
+            <?php /*= $form->field($model, 'ap_action_json')->textarea()*/////?>
 
 
 
@@ -138,7 +111,7 @@ $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators())
 
 
                     <?php if ($model->getActionList()) : ?>
-                        <?php //echo Html::a('Show / hide Action List', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-action-list']) ?>
+                        <?php //echo Html::a('Show / hide Action List', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-action-list'])?>
                         <div id="div-action-list" style="display: none">
                             <pre><?php \yii\helpers\VarDumper::dump($model->getActionList(), 10, true) ?></pre>
                         </div>
@@ -190,8 +163,9 @@ $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators())
         select_placeholder: '-- Select Attribute --',
         allow_empty: true,
         plugins: [
-            
+            //'bt-tooltips-errors',
             //'bt-selectpicker',
+            // 'chosen-selectpicker'
                 'sortable',
             //'filter-description',
             'unique-filter',
