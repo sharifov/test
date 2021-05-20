@@ -12,7 +12,7 @@ use yii\queue\JobInterface;
  */
 class CallPriceJob implements JobInterface
 {
-    public array $callSids;
+    public array $callSids = [];
 
     public function execute($queue)
     {
