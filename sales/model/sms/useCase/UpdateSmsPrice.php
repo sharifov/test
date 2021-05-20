@@ -20,31 +20,46 @@ class UpdateSmsPrice
         $this->repo = $repo;
     }
 
-    public function update(string $smsSid): void
+    public function update(array $smsSids): void
     {
         $result = [];
+
         try {
-            $sms = $this->repo->findBySid($smsSid);
-            $result = \Yii::$app->communication->getSmsPrice($sms->s_tw_message_sid);
+            $result = \Yii::$app->communication->getSmsPrice($smsSids);
+
             if ($result['error']) {
                 throw new \DomainException($result['message']);
             }
-            if (!isset($result['result']['price'])) {
+
+// for test sms records for update price not finish
+//            if (empty($result['result'])){
+//                foreach ($smsSids as $sid) {
+//                    $sms = $this->repo->findBySid($sid);
+//                    $sms->s_updated_dt = date('Y-m-d H:i:s');
+//                    $this->repo->save($sms);
+//                }
+//            }
+
+            foreach ($result['result'] as $sid => $smsData) {
+                if (!isset($smsData['price'])) {
 //                \Yii::info(VarDumper::dumpAsString([
 //                    'smsSid' => $smsSid,
 //                    'message' => 'Not found price',
 //                ]), 'info\UpdateSmsPrice');
-                return;
+                    continue;
+                }
+
+                $sms = $this->repo->findBySid($sid);
+                $price = $smsData['price'];
+                $validator = new NumberValidator();
+                if (!$validator->validate($price, $error)) {
+                    throw new \DomainException('Price Error: ' . $error);
+                }
+                $sms->setPrice(abs($price));
+                $this->repo->save($sms);
             }
-            $price = $result['result']['price'];
-            $validator = new NumberValidator();
-            if (!$validator->validate($price, $error)) {
-                throw new \DomainException('Price Error: ' . $error);
-            }
-            $sms->setPrice(abs($price));
-            $this->repo->save($sms);
         } catch (\Throwable $e) {
-            throw new \Exception(VarDumper::dumpAsString(['smsSid' => $smsSid, 'message' => $e->getMessage(), 'result' => $result]));
+            throw new \Exception(VarDumper::dumpAsString(['smsSid' => $sid, 'message' => $e->getMessage(), 'result' => $result]));
         }
     }
 }

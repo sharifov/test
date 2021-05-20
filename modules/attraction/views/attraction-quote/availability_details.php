@@ -172,8 +172,7 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
        dataType: 'json',
        success: function(data) {
             if (!data.error) {
-                $('#' + data.availabilityID).html(data.html);                
-                //$('#modal-client-manage-info').modal('hide');                
+                $('#' + data.availabilityID).html(data.html);  
                 new PNotify({
                     title: 'Quote successfully added',
                     text: data.message,

@@ -709,7 +709,7 @@ class Sms extends \yii\db\ActiveRecord
             $createJob = (bool)(Yii::$app->params['settings']['sms_price_job'] ?? false);
             if ($createJob) {
                 $job = new SmsPriceJob();
-                $job->smsSid = $this->s_tw_message_sid;
+                $job->smsSids = [$this->s_tw_message_sid];
                 Yii::$app->queue_job->delay(60)->priority(10)->push($job);
             }
         }

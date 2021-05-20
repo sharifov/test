@@ -10,10 +10,7 @@ use yii\widgets\Pjax;
 
 $pjaxId = 'pjax-product-' . $product->pr_id;
 ?>
-<?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 4000])?>
-
-
-
+<?php Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 4000])?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
@@ -101,17 +98,17 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: none">
+        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax && Yii::$app->request->get('_pjax') == '#' . $pjaxId) ? 'block' : 'none'?>">
 
-                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
+                <?php Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
                 <?= $this->render('_view_search', [
                     'model' => $product->rentCar,
                 ]) ?>
-                <?php \yii\widgets\Pjax::end();?>
+                <?php Pjax::end();?>
 
         </div>
     </div>
-<?php \yii\widgets\Pjax::end()?>
+<?php Pjax::end()?>
 
 <?php
 

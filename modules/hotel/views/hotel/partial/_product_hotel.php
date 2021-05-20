@@ -136,7 +136,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: none">
+        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax && Yii::$app->request->get('_pjax') == '#' . $pjaxId) ? 'block' : 'none'?>">
             <?php //php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
                 <?= $this->render('_view_search', [

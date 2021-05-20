@@ -257,6 +257,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         return $this->decodedData['visitorId'] ?? '';
     }
 
+    public function getLeadIds()
+    {
+        return $this->decodedData['visitor']['leadIds'] ?? [];
+    }
+
     public function getPageUrl(): string
     {
         return $this->decodedData['page']['url'] ?? '';
