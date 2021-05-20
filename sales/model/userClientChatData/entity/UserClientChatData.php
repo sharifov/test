@@ -29,9 +29,18 @@ use yii\db\ActiveRecord;
  * @property Employee $uccdEmployee
  * @property Employee $createdUser
  * @property Employee $updatedUser
+ * @property int $uccd_chat_status_id
  */
 class UserClientChatData extends \yii\db\ActiveRecord
 {
+    public const CHAT_STATUS_READY = 1;
+    public const CHAT_STATUS_BUSY = 2;
+
+    private const CHAT_STATUS_LIST = [
+        self::CHAT_STATUS_READY => 'Ready',
+        self::CHAT_STATUS_BUSY => 'Busy'
+    ];
+
     public static function tableName(): string
     {
         return 'user_client_chat_data';
@@ -65,6 +74,10 @@ class UserClientChatData extends \yii\db\ActiveRecord
             [['uccd_password'], 'string', 'min' => 8, 'max' => 50],
 
             [['uccd_token_expired'], 'date', 'format' => 'php:Y-m-d H:i:s'],
+
+            [['uccd_chat_status_id'], 'integer'],
+            [['uccd_chat_status_id'], 'default', 'value' => self::CHAT_STATUS_READY],
+            [['uccd_chat_status_id'], 'in', 'range' => array_keys(self::getChatStatusList())],
 
             [['uccd_name'], 'string', 'max' => 255],
             [['uccd_username'], 'string', 'min' => 3, 'max' => 50],
@@ -122,6 +135,7 @@ class UserClientChatData extends \yii\db\ActiveRecord
             'uccd_token_expired' => 'Token expired',
             'uccd_username' => 'Username',
             'uccd_name' => 'Name',
+            'uccd_chat_status_id' => 'Chat Status',
         ];
     }
 
@@ -163,5 +177,20 @@ class UserClientChatData extends \yii\db\ActiveRecord
     public function getAuthToken(): ?string
     {
         return $this->uccd_auth_token;
+    }
+
+    public static function getChatStatusList(): array
+    {
+        return self::CHAT_STATUS_LIST;
+    }
+
+    public function chatStatusName(): string
+    {
+        return self::getChatStatusList()[$this->uccd_chat_status_id] ?? 'Unknown status';
+    }
+
+    public function isStatusBusy(): bool
+    {
+        return $this->uccd_chat_status_id === self::CHAT_STATUS_BUSY;
     }
 }

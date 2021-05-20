@@ -59,6 +59,20 @@ class OrderProcessManager extends BaseProcessManager
         $this->recordEvent(new events\CanceledEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
     }
 
+    public function retry(\DateTimeImmutable $date): void
+    {
+        if ($this->isRetrying()) {
+            throw new \DomainException('OrderProcessManager is already Retrying. Id: ' . $this->opm_id);
+        }
+        $this->opm_status = Status::RETRY;
+        $this->recordEvent(new events\RetryEvent($this, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function isRetrying(): bool
+    {
+        return $this->opm_status === Status::RETRY;
+    }
+
     public function isNew(): bool
     {
         return $this->opm_status === Status::NEW;

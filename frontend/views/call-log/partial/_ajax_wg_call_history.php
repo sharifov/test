@@ -2,8 +2,10 @@
 
 /** @var array $callHistory */
 /** @var int $page */
+/** @var int $userId */
 use sales\helpers\call\CallHelper;
 
+$userCanAddPhoneBlackList = \sales\guards\phone\PhoneBlackListGuard::canAdd($userId);
 ?>
 
 <?php foreach ($callHistory as $key => $day) : ?>
@@ -15,7 +17,7 @@ use sales\helpers\call\CallHelper;
             <?php
             foreach ($day as $call) {
                 $call['cl_call_created_dt'] = \Yii::$app->formatter->asDate(strtotime($call['cl_call_created_dt']), 'php:h:i A');
-                echo CallHelper::formCallToHistoryTab($call);
+                echo CallHelper::formCallToHistoryTab($call, $userCanAddPhoneBlackList);
             }
             ?>
         </ul>

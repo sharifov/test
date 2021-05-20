@@ -52,7 +52,7 @@ var PhoneWidgetCall = function () {
 
         setCountMissedCalls(options.countMissedCalls);
 
-        panes.active.setup(options.btnHoldShow, options.btnTransferShow, options.canRecordingDisabled);
+        panes.active.setup(options.btnHoldShow, options.btnTransferShow, options.canRecordingDisabled, options.canAddBlockList);
 
         muteBtnClickEvent();
         transferCallBtnClickEvent();
@@ -71,6 +71,7 @@ var PhoneWidgetCall = function () {
         hideNotificationEvent();
         muteIncomingAudioEvent();
         recordingClickEvent();
+        addPhoneBlacklistEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -880,6 +881,19 @@ var PhoneWidgetCall = function () {
             }
             callRequester.callLogInfo(callSid);
         });
+    }
+
+    function addPhoneBlacklistEvent() {
+        $(document).on('click', '.btn-add-in-blacklist', function (e) {
+            e.preventDefault();
+            let phone = $(this).data('phone');
+            if (typeof phone === 'undefined') {
+                createNotify('Call Info', 'Phone number not found', 'error');
+                return false;
+            }
+
+            callRequester.addPhoneBlackList(phone);
+        })
     }
 
     function callInfoEvent() {

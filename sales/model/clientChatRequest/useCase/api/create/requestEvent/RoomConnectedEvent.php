@@ -2,9 +2,14 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create\requestEvent;
 
+use common\models\Lead;
 use common\models\Notifications;
+use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatVisitorData\service\ChatVisitorDataService;
@@ -24,6 +29,7 @@ use yii\helpers\Html;
  * @property ChatVisitorDataService $chatVisitorDataService
  * @property ClientChatMessageService $clientChatMessageService
  * @property TransactionManager $transactionManager
+ * @property ClientChatLeadRepository $clientChatLeadRepository
  */
 class RoomConnectedEvent implements ChatRequestEvent
 {
@@ -52,13 +58,16 @@ class RoomConnectedEvent implements ChatRequestEvent
      */
     private TransactionManager $transactionManager;
 
+    private ClientChatLeadRepository $clientChatLeadRepository;
+
     public function __construct(
         ClientChatRepository $clientChatRepository,
         ClientManageService $clientManageService,
         ClientChatService $clientChatService,
         ChatVisitorDataService $chatVisitorDataService,
         ClientChatMessageService $clientChatMessageService,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        ClientChatLeadRepository $clientChatLeadRepository
     ) {
         $this->clientChatRepository = $clientChatRepository;
         $this->clientManageService = $clientManageService;
@@ -66,6 +75,7 @@ class RoomConnectedEvent implements ChatRequestEvent
         $this->chatVisitorDataService = $chatVisitorDataService;
         $this->clientChatMessageService = $clientChatMessageService;
         $this->transactionManager = $transactionManager;
+        $this->clientChatLeadRepository = $clientChatLeadRepository;
     }
 
     public function getClassName(): string
@@ -118,6 +128,22 @@ class RoomConnectedEvent implements ChatRequestEvent
                     'isOnline' => (int)$clientChat->cch_client_online,
                     'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
                 ]);
+            }
+
+            if (($leadIds = $clientChatRequest->getLeadIds()) && is_array($leadIds)) {
+                foreach ($leadIds as $leadId) {
+                    if (Lead::find()->where(['id' => $leadId])->exists()) {
+                        $clientChatLead = ClientChatLead::create($clientChat->cch_id, $leadId, new \DateTimeImmutable('now'));
+                        if ($clientChatLead->validate()) {
+                            $this->clientChatLeadRepository->save($clientChatLead);
+                        } else {
+                            \Yii::warning(
+                                ErrorsToStringHelper::extractFromModel($clientChatLead),
+                                'RoomConnectedEvent:process:clientChatLead:validate'
+                            );
+                        }
+                    }
+                }
             }
 
             if ($clientChatCreated) {

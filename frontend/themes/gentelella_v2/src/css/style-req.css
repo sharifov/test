@@ -6027,3 +6027,7 @@ td.selected-cell {
 .panel_toolbox {
     min-width: 0px;
 }
+
+.x_title h2 {
+  overflow: visible !important;
+}

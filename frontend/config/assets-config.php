@@ -37,6 +37,7 @@ use frontend\themes\gentelella_v2\assets\FontAwesomeAllAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAsset;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaCrudGroupAsset;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaGroupAsset;
+use frontend\themes\gentelella_v2\assets\SwitcheryAsset;
 use frontend\widgets\clientChat\ClientChatWidgetAsset;
 use frontend\widgets\cronExpression\CronExpressionAssets;
 use frontend\widgets\newWebPhone\NewWebPhoneGroupAsset;
@@ -170,7 +171,9 @@ return [
         LajaxLanguageItemPluginAsset::class,
 
         CronExpressionAssets::class,
-        HotelAsset::class
+        HotelAsset::class,
+
+        SwitcheryAsset::class
 
 //        MomentAsset::class
     ],

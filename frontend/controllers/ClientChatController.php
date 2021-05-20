@@ -70,6 +70,7 @@ use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\model\userClientChatData\service\UserClientChatDataService;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
@@ -98,6 +99,7 @@ use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -269,143 +271,12 @@ class ClientChatController extends FController
                     'ajax-multiple-close',
                     'validate-multiple-assign',
                     'validate-multiple-close',
+                    'ajax-update-chat-status'
                 ],
             ],
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
-
-    public function actionIndex()
-    {
-        $filter = new FilterForm($this->channels);
-
-        if (!$filter->load(Yii::$app->request->get()) || !$filter->validate()) {
-            $filter->loadDefaultValues();
-        }
-
-        $filter->loadDefaultValuesByPermissions();
-
-        $page = (int)\Yii::$app->request->get('page');
-        if ($page < 1) {
-            $page = 1;
-        }
-
-        if ($filter->resetAdditionalFilter) {
-            $filter->resetAdditionalAttributes();
-        }
-
-        $countFreeToTake = 0;
-        $dataProvider = null;
-
-        if ($this->channels) {
-            if (Yii::$app->request->get('act') === 'select-all') {
-                $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($this->channels), $filter);
-                return $this->asJson($chatIds);
-            }
-
-            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter);
-
-            if ($filter->group === GroupFilter::FREE_TO_TAKE) {
-                $countFreeToTake = $dataProvider->getTotalCount();
-            } else {
-                $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($this->channels), $filter);
-            }
-        }
-
-        $clientChat = null;
-        $accessChatError = false;
-        $resetUnreadMessagesChatId = null;
-        $chid = (int)Yii::$app->request->get('chid');
-
-        if ($chid) {
-            try {
-                $clientChat = $this->clientChatRepository->findById($chid);
-
-                if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
-                    $accessChatError = true;
-                    throw new \DomainException('You do not have access to this chat');
-                }
-
-                if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
-                    $this->clientChatMessageService->discardUnreadMessages(
-                        $clientChat->cch_id,
-                        $clientChat->cch_owner_user_id
-                    );
-                    $resetUnreadMessagesChatId = $clientChat->cch_rid;
-                }
-            } catch (NotFoundException $e) {
-                $clientChat = null;
-            } catch (\DomainException $e) {
-                $clientChat = null;
-            }
-        }
-
-        $loadingChannels = \Yii::$app->request->get('loadingChannels');
-        if ($dataProvider) {
-            if ($loadingChannels) {
-                $dataProvider->pagination->setPage($page - 1);
-//            if (\Yii::$app->request->post('loadingChannels')) {
-//                $dataProvider->pagination->page = $filter->page;
-//            } else {
-//                $dataProvider->pagination->page = $filter->page = 0;
-//            }
-                $alreadyLoadedCount = $dataProvider->getPagination()->getPageSize() * ($page - 1) + $dataProvider->getCount();
-                $response = [
-                    'html' => '',
-                    'page' => $page,
-                    'isFullList' => $alreadyLoadedCount >= $dataProvider->getTotalCount(),
-                    'moreCount' => $dataProvider->getTotalCount() - $alreadyLoadedCount,
-                ];
-
-                if ($dataProvider->getCount()) {
-                    $formatter = new Formatter();
-                    $formatter->timeZone = Auth::user()->timezone;
-                    $response['html'] = $this->renderPartial('partial/_client-chat-item', [
-                        'clientChats' => $dataProvider->getModels(),
-                        'clientChatId' => $clientChat ? $clientChat->cch_id : '',
-                        'formatter' => $formatter,
-                        'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
-                        'user' => Auth::user(),
-                    ]);
-                    $response['page'] = $page + 1;
-                }
-
-                return $this->asJson($response);
-            } else {
-                if ($page > 1) {
-                    $dataProvider->pagination->setPage(0);
-                    $dataProvider->pagination->pageSize = $page * $dataProvider->pagination->pageSize;
-                } else {
-                    $dataProvider->pagination->setPage($page - 1);
-                }
-            }
-        }
-
-        $isFullList = $dataProvider ? ($dataProvider->getCount() === $dataProvider->getTotalCount()) : false;
-        if ($isFullList || !$dataProvider) {
-            $moreCount = 0;
-        } else {
-            $moreCount = $dataProvider->getTotalCount() - $dataProvider->getCount();
-        }
-
-        return $this->render('index', [
-            'dataProvider' => $dataProvider,
-            'clientChat' => $clientChat,
-            'client' => $clientChat->cchClient ?? null,
-            'history' => null,
-            'filter' => $filter,
-            'actionPermissions' => $this->actionPermissions,
-            'countFreeToTake' => $countFreeToTake,
-            'accessChatError' => $accessChatError,
-            'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
-            'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
-            'listParams' => [
-                'page' => $page + 1,
-                'isFullList' => $isFullList,
-                'moreCount' => $moreCount,
-            ]
-        ]);
     }
 
     public function actionDashboardV2()
@@ -1883,6 +1754,33 @@ class ClientChatController extends FController
         ]);
     }
 
+    public function actionAjaxUpdateChatStatus()
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException('Not POST data', 1);
+        }
+        $chatStatus = Yii::$app->request->post('chatStatus');
+
+        $chatPermission = new ClientChatActionPermission();
+
+        if (!$chatPermission->canUpdateChatStatus()) {
+            throw new ForbiddenHttpException('You do not have access to perform this action');
+        }
+
+        $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => Auth::id()]);
+        if (!$userClientChatData) {
+            throw new NotFoundException('User client chat data not found');
+        }
+
+        $userClientChatData->uccd_chat_status_id = $chatStatus === 'true' ? UserClientChatData::CHAT_STATUS_READY : UserClientChatData::CHAT_STATUS_BUSY;
+        $userClientChatData->save();
+
+        return $this->asJson([
+            'error' => false,
+            'message' => ''
+        ]);
+    }
+
     private function createQuoteMessage(ClientChat $chat, array $captures): array
     {
         $attachments = [];
@@ -2579,17 +2477,25 @@ class ClientChatController extends FController
                     if (!Auth::can('client-chat/multiple/archive/manage')) {
                         throw new ForbiddenHttpException('Access denied', -1);
                     }
+                    $notUpdatedChats = [];
                     if ($form->toArchive) {
                         foreach ($form->chatIds as $chatId) {
-                            if ($chat = ClientChat::findOne(['cch_id' => $chatId])) {
+                            /** @var ClientChat $chat  */
+                            if (($chat = ClientChat::findOne(['cch_id' => $chatId])) && !$chat->isInClosedStatusGroup()) {
                                 $this->clientChatService->closeFromMultipleUpdate($chatId, Auth::user());
+                            } else {
+                                $notUpdatedChats[] = $chatId;
                             }
                         }
                     }
-                    return '<script>sessionStorage.selectedChats = "{}"; 
+                    $response = '<script>sessionStorage.selectedChats = "{}"; 
                         $("#modal-sm").modal("hide"); 
                         createNotify("Success", "Chats updated successfully", "success"); 
                         setTimeout(()=>{window.location.reload();}, 1000);</script>';
+                    if ($notUpdatedChats) {
+                        $response .= "<script>createNotify('Warning', 'Not All chats were updated because they already closed or archived: " . implode(',', $notUpdatedChats) . "')</script>";
+                    }
+                    return $response;
                 } catch (\Throwable $throwable) {
                     $alertMessage .= VarDumper::dumpAsString($throwable->getMessage()) . '<br />';
                     \Yii::error(

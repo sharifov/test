@@ -190,19 +190,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'user'
         ];
 
-        //      $menuItems[] = [
-        //          'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
-        //          'url' => ['/client-chat/index'],
-        //          'icon' => 'comments'
-        //      ];
-
-
         $menuItems[] = [
             'label' => 'Client Chat' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
             'url' => 'javascript:',
             'icon' => 'comments',
             'items' => [
-                ['label' => 'My Client Chat', 'url' => ['/client-chat/index']],
                 ['label' => 'My Client Chat v2', 'url' => ['/client-chat/dashboard-v2']],
                 ['label' => 'Real Time Visitors', 'url' => ['/client-chat/real-time']],
             ]
@@ -338,6 +330,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Stats', 'url' => ['/client/stats'], 'icon' => 'users'],
                 ['label' => 'Client Accounts', 'url' => ['/client-account-crud/index'], 'icon' => 'user'],
                 ['label' => 'Client Account Social', 'url' => ['/client-account-social-crud/index'], 'icon' => 'odnoklassniki'],
+                ['label' => 'Client Visitor', 'url' => ['/client-visitor-crud/index'], 'icon' => 'comments'],
             ]
         ];
 
@@ -461,6 +454,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
                 ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+                ['label' => 'Phone Blacklist Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],

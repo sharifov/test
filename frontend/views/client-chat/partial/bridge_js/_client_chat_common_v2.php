@@ -23,7 +23,6 @@ $clientChatOwnerId = ($clientChat && $clientChat->cch_owner_user_id) ? $clientCh
 $readAll = ReadUnreadFilter::ALL;
 
 $rcUrl = Yii::$app->rchat->host . '/home';
-//$loadChannelsUrl = Url::to('/client-chat/index');
 $clientChatInfoUrl = Url::toRoute('/client-chat/info');
 $clientChatNoteUrl = Url::toRoute('/client-chat/note');
 $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
@@ -48,7 +47,7 @@ $clientChatCouchNoteViewUrl = Url::toRoute(['/client-chat/ajax-couch-note-view']
 $clientChatReloadChatUrl = Url::toRoute(['/client-chat/ajax-reload-chat']);
 $moveOfferUrl = Url::to(['/client-chat/move-offer']);
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
-$selectAllUrl = Url::to(['client-chat/index']);
+$selectAllUrl = Url::to(['client-chat/dashboard-v2']);
 $clientChatMultipleUpdate = Url::to(['client-chat/ajax-multiple-update']);
 $cannedResponseSendMessageUrl = Url::to(['client-chat/ajax-send-canned-response']);
 

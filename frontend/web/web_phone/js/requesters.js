@@ -17,7 +17,8 @@
             'recordingEnableUrl': '',
             'recordingDisableUrl': '',
             'acceptPriorityCallUrl': '',
-            'acceptWarmTransferCallUrl': ''
+            'acceptWarmTransferCallUrl': '',
+            'addPhoneBlackListUrl': ''
         };
 
         this.init = function (settings) {
@@ -304,6 +305,37 @@
                 .fail(function (xhr, textStatus, errorThrown) {
                     createNotify('Call info', xhr.responseText, 'error');
                 });
+        };
+
+        this.addPhoneBlackList = function (phone) {
+            if (confirm('Confirm adding ' + phone + ' number to blacklist')) {
+                let btnIcon = $('.btn-add-in-blacklist').html();
+                $.ajax({
+                    url: this.settings.addPhoneBlackListUrl,
+                    type: 'post',
+                    data: {phone: phone},
+                    dataType: 'json',
+                    beforeSend: function () {
+                        $('.btn-add-in-blacklist').html('<i class="fa fa-spin fa-spinner"></i>').prop('disabled', true);
+                    },
+                    success: function (resp) {
+                        if (resp.error) {
+                            createNotify('Error', resp.message, 'error');
+                        } else {
+                            if (resp.notifier) {
+                                createNotify('Success', 'Phone number: ' + phone + ' added to blacklist', 'success');
+                            }
+                            $('.btn-add-in-blacklist[data-phone="'+phone+'"]').remove();
+                        }
+                    },
+                    error: function (xhr) {
+                        createNotify('Error', xhr.responseText, 'error');
+                    },
+                    complete: function () {
+                        $('.btn-add-in-blacklist').html(btnIcon).prop('disabled', false);
+                    }
+                });
+            }
         };
 
         this.clientInfo = function (id, isClient) {

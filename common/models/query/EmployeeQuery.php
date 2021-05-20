@@ -54,8 +54,19 @@ class EmployeeQuery extends \yii\db\ActiveQuery
     {
         return $this->innerJoin(
             UserClientChatData::tableName(),
-            "uccd_employee_id = id AND uccd_rc_user_id IS NOT NULL AND uccd_rc_user_id <> ''"
+            "uccd_employee_id = id AND uccd_rc_user_id IS NOT NULL AND uccd_rc_user_id <> '' and uccd_chat_status_id = :chatStatusId",
+            ['chatStatusId' => UserClientChatData::CHAT_STATUS_READY]
         );
+    }
+
+    public function hasPermission(string $permission): self
+    {
+        return $this->innerJoin('auth_assignment', 'auth_assignment.user_id = id')
+            ->innerJoin(
+                'auth_item_child',
+                'auth_item_child.child = :permission and auth_item_child.parent = auth_assignment.item_name',
+                ['permission' => $permission]
+            );
     }
 
 //    public function supervisorsByGroups(array $groups)

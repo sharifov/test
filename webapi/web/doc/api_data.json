@@ -2560,17 +2560,17 @@
             "group": "Parameter",
             "type": "int",
             "size": "0..9",
-            "optional": false,
+            "optional": true,
             "field": "lead.children",
-            "description": "<p>Children count</p>"
+            "description": "<p>Children count (by default 0)</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "size": "0..9",
-            "optional": false,
+            "optional": true,
             "field": "lead.infants",
-            "description": "<p>Infants count</p>"
+            "description": "<p>Infants count (by default 0)</p>"
           },
           {
             "group": "Parameter",
@@ -2592,7 +2592,7 @@
             "group": "Parameter",
             "type": "string",
             "size": "15",
-            "optional": false,
+            "optional": true,
             "field": "lead.uid",
             "description": "<p>UID value</p>"
           },
@@ -2647,7 +2647,7 @@
             "size": "20",
             "optional": false,
             "field": "lead.client.phone",
-            "description": "<p>Client phone or Client email is required</p>"
+            "description": "<p>Client phone or Client email or Client chat_visitor_id is required</p>"
           },
           {
             "group": "Parameter",
@@ -2655,7 +2655,15 @@
             "size": "160",
             "optional": false,
             "field": "lead.client.email",
-            "description": "<p>Client email or Client phone is required</p>"
+            "description": "<p>Client email or Client phone or Client chat_visitor_id is required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "lead.client.chat_visitor_id",
+            "description": "<p>Client chat_visitor_id or Client email or Client phone is required</p>"
           },
           {
             "group": "Parameter",
@@ -2671,11 +2679,12 @@
             "size": "2",
             "allowedValues": [
               "14-BOOK_FAILED",
-              "15-ALTERNATIVE"
+              "15-ALTERNATIVE",
+              "1-PENDING"
             ],
-            "optional": false,
+            "optional": true,
             "field": "lead.status",
-            "description": "<p>Status</p>"
+            "description": "<p>Status (by default 1-PENDING)</p>"
           },
           {
             "group": "Parameter",
@@ -2687,14 +2696,14 @@
               "F-FIRST",
               "P-PREMIUM"
             ],
-            "optional": false,
+            "optional": true,
             "field": "lead.cabin",
-            "description": "<p>Cabin</p>"
+            "description": "<p>Cabin (by default E)</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
-            "optional": false,
+            "optional": true,
             "field": "lead.flight_id",
             "description": "<p>BO Flight ID</p>"
           },
@@ -2719,7 +2728,7 @@
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"expire_at\": \"2020-01-20 12:12:12\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ]\n      }\n}",
+          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\",\n              \"chat_visitor_id\" : \"6b811a3e-41c4-4d49-a99a-afw3e4rtf3tfregf\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"expire_at\": \"2020-01-20 12:12:12\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ]\n      }\n}",
           "type": "json"
         }
       ]
@@ -6290,13 +6299,6 @@
             "optional": true,
             "field": "market_country_code",
             "description": "<p>Market country code</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": true,
-            "field": "apiKey",
-            "description": "<p>API Key for Project (if not use Basic-Authorization)</p>"
           }
         ]
       },
@@ -6423,13 +6425,6 @@
             "optional": true,
             "field": "market_country_code",
             "description": "<p>Market country code</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": true,
-            "field": "apiKey",
-            "description": "<p>API Key for Project (if not use Basic-Authorization)</p>"
           }
         ]
       },

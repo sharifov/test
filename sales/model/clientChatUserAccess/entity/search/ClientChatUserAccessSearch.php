@@ -9,6 +9,7 @@ use PHPUnit\Framework\Constraint\Count;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatUserAccess\entity\Scopes;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\db\Expression;
@@ -109,6 +110,10 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
         $query->leftJoin(Project::tableName() . ' as project', 'cch_project_id = project.id');
         $query->leftJoin(ClientChatChannel::tableName(), 'cch_channel_id = ccc_id');
         $query->leftJoin(Employee::tableName() . ' as owner', 'cch_owner_user_id = owner.id');
+        $query->innerJoin(
+            UserClientChatData::tableName(),
+            'ccua_user_id = uccd_employee_id and uccd_chat_status_id = :chatStatusId'
+        );
 
         $query->pending();
         $query->andWhere([
@@ -138,6 +143,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
             ':statusTransfer' => ClientChat::STATUS_TRANSFER,
             ':statusPending' => ClientChat::STATUS_PENDING,
             ':statusIdle' => ClientChat::STATUS_IDLE,
+            ':chatStatusId' => UserClientChatData::CHAT_STATUS_READY
         ]);
 
         return $query;

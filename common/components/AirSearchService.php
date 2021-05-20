@@ -95,11 +95,9 @@ class AirSearchService extends Component
         $response = $this->request->send();
 
         $metrics = \Yii::$container->get(Metrics::class);
-        if ($response->isOk) {
-            $metrics->serviceCounter('air_search', ['type' => 'success', 'action' => $action]);
-        } else {
-            $metrics->serviceCounter('air_search', ['type' => 'error', 'action' => $action]);
-        }
+        $labels['action'] = implode('/', array_slice(explode('/', $action), 0, 2));
+        $labels['type'] = ($response->isOk) ? 'success' : 'error';
+        $metrics->serviceCounter('air_search_service', $labels);
         unset($metrics);
 
         return $response;

@@ -56,7 +56,7 @@ $rentCarQuote = $productQuote->rentCarQuote;
             <?php echo $rentCarQuote->rcq_system_mark_up ?>
         </td>
         <td>
-            <?php if ($productQuote->isNew()) :?>
+            <?php if (/*$productQuote->isNew()*/ false) :?>
                 <?= Editable::widget([
                     'name' => 'extra_markup[' . $rentCarQuote->getId() . ']',
                     'asPopover' => false,

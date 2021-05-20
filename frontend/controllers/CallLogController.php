@@ -109,7 +109,8 @@ class CallLogController extends FController
             $result = [
                 'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
                     'callHistory' => CallHelper::formatCallHistoryByDate($rows, $userTimezone),
-                    'page' => ($page + 1)
+                    'page' => ($page + 1),
+                    'userId' => Auth::id()
                 ]),
                 'page' => $page + 1,
                 'rows' => empty($rows)

@@ -50,6 +50,7 @@ use yii\helpers\Url;
                     <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fa fa-bars"></i>
                     </button>
+                    <?php if (Auth::can('/order/transaction-actions/update') || Auth::can('/order/transaction-actions/delete')) : ?>
                     <div class="dropdown-menu">
                         <?php
                         if (Auth::can('/order/transaction-actions/update')) {
@@ -83,6 +84,7 @@ use yii\helpers\Url;
                         }
                         ?>
                     </div>
+                    <?php endif;?>
                 </div>
             </td>
         </tr>
