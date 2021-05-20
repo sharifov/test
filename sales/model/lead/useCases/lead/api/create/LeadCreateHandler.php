@@ -77,8 +77,9 @@ class LeadCreateHandler
                 }
             }
 
-            if ($form->clientForm->chat_visitor_id) {
-                $this->clientManageService->addVisitorId($client, $form->clientForm->chat_visitor_id);
+            $visitorId = null;
+            if ($visitorId = $form->clientForm->chat_visitor_id) {
+                $this->clientManageService->addVisitorId($client, $visitorId);
             }
 
             $lead = Lead::createByApiBO($form, $client);
@@ -91,7 +92,8 @@ class LeadCreateHandler
                 $form->infants,
                 $form->cabin,
                 [$form->clientForm->phone],
-                $this->getSegments($form->flightsForm)
+                $this->getSegments($form->flightsForm),
+                $visitorId
             );
 
             $lead->setRequestHash($hash);

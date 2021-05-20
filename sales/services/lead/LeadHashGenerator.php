@@ -4,7 +4,6 @@ namespace sales\services\lead;
 
 class LeadHashGenerator
 {
-
     /**
      * @param $requestIp
      * @param $projectId
@@ -14,10 +13,20 @@ class LeadHashGenerator
      * @param $cabin
      * @param $phones
      * @param $segments
+     * @param string|null $visitorId
      * @return string
      */
-    public function generate($requestIp, $projectId, $adults, $children, $infants, $cabin, $phones, $segments): string
-    {
+    public function generate(
+        $requestIp,
+        $projectId,
+        $adults,
+        $children,
+        $infants,
+        $cabin,
+        $phones,
+        $segments,
+        ?string $visitorId = null
+    ): string {
         $hashArray = [];
         $hashArray[] = $requestIp;
         $hashArray[] = $projectId;
@@ -32,13 +41,15 @@ class LeadHashGenerator
                 $hashArray[] = $phone;
             }
         }
-
         if ($segments) {
             foreach ($segments as $segment) {
                 $hashArray[] = $segment['origin'];
                 $hashArray[] = $segment['destination'];
                 $hashArray[] = $segment['departure'];
             }
+        }
+        if ($visitorId) {
+            $hashArray[] = $visitorId;
         }
 
         return md5(implode('|', $hashArray));
