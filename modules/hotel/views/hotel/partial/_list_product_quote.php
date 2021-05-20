@@ -484,7 +484,7 @@ JS;
                         </td>
                         <td class="text-right"></td>
                         <td class="text-right"><?= number_format($totalNp * $model->getCountDays(), 2) ?></td>
-                        <td class="text-right"><?= number_format($totalMkp * $model->getCountDays(), 2) ?></td>
+                        <td class="text-right"><?= CurrencyHelper::roundUp($totalMkp * $model->getCountDays()) ?></td>
                         <td class="text-right"><?= number_format($totalExMkp * $model->getCountDays(), 2) ?></td>
                         <td class="text-right"></td>
                         <?php

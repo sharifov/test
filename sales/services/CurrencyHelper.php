@@ -29,8 +29,7 @@ class CurrencyHelper
 
     public static function roundUp(float $price, int $precision = 2)
     {
-        //return ceil(($price) * (10 ** $precision)) / (10 ** $precision);
-        return ($price) * (10 ** $precision) / (10 ** $precision);
+        return ceil(($price) * (10 ** $precision)) / (10 ** $precision);
     }
 
     public static function roundDown(float $price, int $precision = 2)
