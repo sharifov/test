@@ -74,9 +74,10 @@ class AbacService
                         $values = [];
                     }
 
-                    if ($rule['type'] === 'string') {
+                    if ($rule['type'] === 'string' || $rule['type'] === 'date' || $rule['type'] === 'time') {
                         $value = '"' . $value . '"';
                     }
+
 
                     //$field = '$var[\'' . $rule['id'] . '\']';
                     $field = $rule['field'] ?? $rule['id'];
@@ -186,6 +187,7 @@ class AbacService
         }
 
         $str = implode(' ' . $and_or_value . ' ', $strArr);
+
         return $str;
     }
 

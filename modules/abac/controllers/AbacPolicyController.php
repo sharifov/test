@@ -70,7 +70,6 @@ class AbacPolicyController extends FController
      */
     public function actionCreate()
     {
-
         $model = new AbacPolicyForm();
 
         if (Yii::$app->request->isPjax) {
@@ -139,7 +138,6 @@ class AbacPolicyController extends FController
      */
     public function actionUpdate($id)
     {
-
         $ap = $this->findModel($id);
         $model = new AbacPolicyForm();
         $model->ap_id = $ap->ap_id;

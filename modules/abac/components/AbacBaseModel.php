@@ -188,6 +188,8 @@ class AbacBaseModel
         'label' => 'IP Address',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
+        'placeholder' => '___:___:___:___',
+        'validation' =>  ['format' => '/^[0-9]{1,3}:[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/'],
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_MATCH]
     ];
 
@@ -199,6 +201,7 @@ class AbacBaseModel
         'label' => 'Date',
         'type' => self::ATTR_TYPE_DATE,
         'input' => self::ATTR_INPUT_TEXT,
+        'placeholder' => '____-__-__',
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
@@ -209,6 +212,7 @@ class AbacBaseModel
         'label' => 'Time',
         'type' => self::ATTR_TYPE_TIME,
         'input' => self::ATTR_INPUT_TEXT,
+        'placeholder' => '__:__',
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
@@ -217,9 +221,11 @@ class AbacBaseModel
         'id' => 'env_dt_year',
         'field' => 'env.dt.year',
         'label' => 'Year',
+        'placeholder' => '____',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN],
+        'validation' => ['min' => 2020, 'max' => 2030, 'step' => 1]
     ];
 
     public const ATTR_DT_MONTH = [
@@ -229,7 +235,8 @@ class AbacBaseModel
         'label' => 'Month',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN],
+        'validation' => ['min' => 1, 'max' => 12, 'step' => 1]
     ];
 
     public const ATTR_DT_MONTH_NAME = [
@@ -239,7 +246,8 @@ class AbacBaseModel
         'label' => 'Month name',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+        'placeholder' => 'Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec',
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN]
     ];
 
     public const ATTR_DT_DOW = [
@@ -249,7 +257,7 @@ class AbacBaseModel
         'label' => 'Day of Week',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN]
     ];
 
     public const ATTR_DT_DOW_NAME = [
@@ -259,7 +267,7 @@ class AbacBaseModel
         'label' => 'Day of Week Name',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN]
     ];
 
     public const ATTR_DT_DAY = [
@@ -269,7 +277,9 @@ class AbacBaseModel
         'label' => 'Day',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN],
+        'validation' => ['min' => 1, 'max' => 31, 'step' => 1],
+        'description' => 'This filter is "day"',
     ];
 
     public const ATTR_DT_HOUR = [
@@ -279,7 +289,8 @@ class AbacBaseModel
         'label' => 'Hour',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN],
+        'validation' => ['min' => 0, 'max' => 23, 'step' => 1]
     ];
 
 
@@ -290,7 +301,8 @@ class AbacBaseModel
         'label' => 'Minutes',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<']
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN],
+        'validation' => ['min' => 0, 'max' => 59, 'step' => 1]
     ];
 
     public const ATTRIBUTE_LIST = [

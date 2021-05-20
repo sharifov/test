@@ -2,13 +2,10 @@
 
 namespace modules\abac\src\forms;
 
-use common\models\Employee;
+use modules\abac\src\AbacService;
 use Yii;
 use yii\base\Model;
-use yii\behaviors\BlameableBehavior;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * This is the Form class for table "abac_policy".
@@ -23,7 +20,6 @@ use yii\db\ActiveRecord;
  */
 class AbacPolicyForm extends Model
 {
-
     public $ap_id;
     public $ap_subject_json;
     public $ap_object;
@@ -42,6 +38,7 @@ class AbacPolicyForm extends Model
             [['ap_subject_json', 'ap_action_list'], 'safe'],
             [['ap_effect', 'ap_sort_order', 'ap_id'], 'integer'],
             [['ap_object', 'ap_title'], 'string', 'max' => 255],
+            [['ap_subject_json'], 'validateSubject', 'skipOnEmpty' => false, 'skipOnError' => false],
         ];
     }
 
@@ -81,5 +78,51 @@ class AbacPolicyForm extends Model
     {
         $list = Yii::$app->abac->getAttributeListByObject($this->ap_object);
         return $list;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDecodeCode(): string
+    {
+        $code = '';
+        $rules = @json_decode($this->ap_subject_json, true);
+        if (is_array($rules)) {
+            $code = AbacService::conditionDecode($rules);
+        }
+        return $code;
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     */
+    public function validateSubject($attribute, $params)
+    {
+
+        //$ap->ap_action_json = \yii\helpers\Json::encode($actionData);
+        $code = $this->getDecodeCode();
+
+        if (!$code) {
+            $this->addError('ap_subject_json', 'Invalid Expression Language: "' . $code . '"');
+        }
+
+//        $expressionLanguage = new ExpressionLanguage();
+//
+//        $r = new \stdClass();
+//        $sub = new \stdClass();
+//        $env = new \stdClass();
+//        $user = new \stdClass();
+//        $user->username = 'test';
+//        $env->user = $user;
+//        $sub->env = $env;
+//        $r->sub = $sub;
+//
+//        if ($expressionLanguage->evaluate($code, ['r' => $r])) {
+//            $this->addError('ap_subject_json', 'Invalid Expression Language: "' . $code . '"');
+//        }
+
+        // var_dump($expressionLanguage->evaluate('1 + 2')); // displays 3
+        // var_dump($expressionLanguage->compile('1 + 2')); // displays (1 + 2)
     }
 }
