@@ -537,6 +537,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
                 ['label' => 'User Monitor', 'url' => ['/user-monitor/index'], 'icon' => 'list'],
                 ['label' => 'User Monitor Stats', 'url' => ['/user-monitor/stats'], 'icon' => 'list'],
+                [
+                    'label' => 'User model setting crud',
+                    'url' => ['/user-model-setting-crud/index'],
+                    'icon' => 'list',
+                ],
             ]
         ];
 
@@ -677,7 +682,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'items' => [
                         ['label' => Yii::t('menu', 'Incoming Call'), 'url' => ['/monitor/call-incoming']],
                     ]
-                ]
+                ],
+                ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
             ]
         ];
 
