@@ -46,6 +46,13 @@ return [
         'wsConnectionUrl' => '{{ common.config.params.centrifugo.wsConnectionUrl:str }}',
     ],
 
+    'search' => [
+        'host' => '{{ common.config.params.search.host:str }}',
+        'sid' => '{{ common.config.params.search.sid:str }}',
+        'username' => '{{ common.config.params.search.username:str }}',
+        'password' => '{{ common.config.params.search.password:str }}'
+    ],
+
     'clientChat' => [
         'projectConfig' => [
             'params' => [
