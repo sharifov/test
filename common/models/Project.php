@@ -16,6 +16,7 @@ use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -77,8 +78,11 @@ use common\components\validators\IsArrayValidator;
  */
 class Project extends \yii\db\ActiveRecord
 {
-    private ContactInfo $_contactInfo;
 
+    public const CACHE_KEY = 'projects';
+    public const CACHE_TAG_DEPENDENCY = 'projects-tag-dependency';
+
+    private ContactInfo $_contactInfo;
     private ?Params $params = null;
 
     public $relatedProjects;
@@ -105,18 +109,32 @@ class Project extends \yii\db\ActiveRecord
             [['email_postfix'], 'string', 'max' => 100],
             [['project_key'], 'string', 'max' => 50],
             [['project_key'], 'unique'],
-            [['p_update_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['p_update_user_id' => 'id']],
+            [
+                ['p_update_user_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => Employee::class,
+                'targetAttribute' => ['p_update_user_id' => 'id']
+            ],
             ['p_params_json', IsArrayValidator::class],
 
-            [['contact_info'], 'filter', 'filter' => static function ($value) {
-                return JsonHelper::encode($value);
-            }],
+            [
+                ['contact_info'],
+                'filter',
+                'filter' => static function ($value) {
+                    return JsonHelper::encode($value);
+                }
+            ],
             [['contact_info'], 'string'],
 
             ['relatedProjects', IsArrayValidator::class],
-            ['relatedProjects', 'filter', 'filter' => static function ($value) {
-                return empty($value) ? [] : $value;
-            }],
+            [
+                'relatedProjects',
+                'filter',
+                'filter' => static function ($value) {
+                    return empty($value) ? [] : $value;
+                }
+            ],
         ];
     }
 
@@ -244,7 +262,14 @@ class Project extends \yii\db\ActiveRecord
 
     public static function getListByUserWithProjectKeys(int $user_id = 0): array
     {
-        return self::find()->select(['project' => 'name', 'projectKey' => 'project_key'])->innerJoin(ProjectEmployeeAccess::tableName(), 'project_id = id and employee_id = :userId', ['userId' => $user_id])->asArray()->all();
+        return self::find()->select([
+            'project' => 'name',
+            'projectKey' => 'project_key'
+        ])->innerJoin(
+            ProjectEmployeeAccess::tableName(),
+            'project_id = id and employee_id = :userId',
+            ['userId' => $user_id]
+        )->asArray()->all();
     }
 
 
@@ -335,7 +360,10 @@ class Project extends \yii\db\ActiveRecord
         $out['error'] = false;
 
         $uri = Yii::$app->params['backOffice']['serverUrl'] . '/default/projects';
-        $signature = self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver']);
+        $signature = self::getSignatureBO(
+            Yii::$app->params['backOffice']['apiKey'],
+            Yii::$app->params['backOffice']['ver']
+        );
 
         $client = new \yii\httpclient\Client([
             'transport' => CurlTransport::class,
@@ -355,7 +383,7 @@ class Project extends \yii\db\ActiveRecord
 
 
         $headers = [
-            'version'   => Yii::$app->params['backOffice']['ver'],
+            'version' => Yii::$app->params['backOffice']['ver'],
             'signature' => $signature
         ];
 
@@ -486,7 +514,10 @@ class Project extends \yii\db\ActiveRecord
      */
     public function getCpClients(): ActiveQuery
     {
-        return $this->hasMany(Client::class, ['id' => 'cp_client_id'])->viaTable('client_project', ['cp_project_id' => 'id']);
+        return $this->hasMany(Client::class, ['id' => 'cp_client_id'])->viaTable(
+            'client_project',
+            ['cp_project_id' => 'id']
+        );
     }
 
     /**
@@ -646,7 +677,10 @@ class Project extends \yii\db\ActiveRecord
      */
     public function getUppUsers(): ActiveQuery
     {
-        return $this->hasMany(Employee::class, ['id' => 'upp_user_id'])->viaTable('user_project_params', ['upp_project_id' => 'id']);
+        return $this->hasMany(Employee::class, ['id' => 'upp_user_id'])->viaTable(
+            'user_project_params',
+            ['upp_project_id' => 'id']
+        );
     }
 
     /**
@@ -669,16 +703,82 @@ class Project extends \yii\db\ActiveRecord
         return $this->hasMany(VisitorLog::class, ['vl_project_id' => 'id']);
     }
 
+    /**
+     * @return array
+     */
+    public static function getEnvListWOCache(): array
+    {
+        $data = self::find()->where(['IS NOT', 'project_key', null])->orderBy(['name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'project_key', 'name');
+    }
+
+
+    /**
+     * @return array
+     */
+    public static function getEnvList(): array
+    {
+        TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        if (self::CACHE_KEY) {
+            $list = Yii::$app->cache->get(self::CACHE_KEY);
+            if ($list === false) {
+                $list = self::getEnvListWOCache();
+
+                Yii::$app->cache->set(
+                    self::CACHE_KEY,
+                    $list,
+                    0,
+                    new TagDependency(['tags' => self::CACHE_TAG_DEPENDENCY])
+                );
+            }
+        } else {
+            $list = self::getEnvListWOCache();
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (self::CACHE_TAG_DEPENDENCY) {
+            TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        }
+    }
+
+
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        if (self::CACHE_TAG_DEPENDENCY) {
+            TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        }
+    }
+
+    /**
+     * @return ActiveQuery
+     */
     public function getProjectRelations(): ActiveQuery
     {
         return $this->hasMany(ProjectRelation::class, ['prl_project_id' => 'id']);
     }
 
+    /**
+     * @return ActiveQuery
+     */
     public function getProjectMainRelation(): ActiveQuery
     {
         return $this->hasOne(ProjectRelation::class, ['prl_related_project_id' => 'id']);
     }
 
+    /**
+     * @return array
+     */
     public function getRelatedProjectIds(): array
     {
         $result = [];
@@ -690,11 +790,19 @@ class Project extends \yii\db\ActiveRecord
         return $result;
     }
 
+    /**
+     * @return string
+     * @throws \JsonException
+     */
     public function getEmailNoReply(): string
     {
         return $this->getContactInfo()->getEmailNoReply() . '@' . $this->email_postfix;
     }
 
+    /**
+     * @return string|null
+     * @throws \JsonException
+     */
     public function getEmailFromName(): ?string
     {
         return $this->getContactInfo()->getEmailFromName();

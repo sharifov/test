@@ -208,6 +208,13 @@ return [
             'secret' => '',
             'apikey' => '',
         ],
+        'abac' => require __DIR__ . '/abac.php',
+//        'abac' => [
+//            'class' => \modules\abac\components\AbacComponent::class,
+//            'modules' => [
+//                'order' => \modules\order\src\abac\OrderAbacObject::class
+//            ],
+//        ],
     ],
     'bootstrap' => [
         'queue_sms_job',

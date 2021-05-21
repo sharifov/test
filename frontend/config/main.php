@@ -4,6 +4,7 @@ use frontend\assets\groups\BootstrapGroupAsset;
 use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
+use modules\abac\AbacModule;
 use modules\cruise\CruiseModule;
 use modules\email\EmailModule;
 use modules\fileStorage\FileStorageModule;
@@ -16,6 +17,7 @@ use modules\order\OrderModule;
 use modules\product\ProductModule;
 use modules\qaTask\QaTaskModule;
 use common\components\i18n\Formatter;
+use modules\rentCar\RentCarModule;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
@@ -176,6 +178,9 @@ return [
                 return hash('md4', $path . $appVersion);
             },
             'bundles' => array_merge($bundles, [
+                JqueryAsset::class => [
+                    'class' => \frontend\assets\JqueryAsset::class,
+                ],
 
                 \yii\bootstrap4\BootstrapAsset::class => [
                     'class' => BootstrapGroupAsset::class,
@@ -191,6 +196,7 @@ return [
                 BootstrapPluginAsset::class => [
                   'class' => BootstrapGroupAsset::class,
                 ],
+
 //                AssetLeadCommunication::class => [
 //                    'basePath' => '@webroot',
 //                    'baseUrl' => '@web',
@@ -275,34 +281,47 @@ return [
 
         'attraction' => [
             'class' => AttractionModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
         'flight' => [
             'class' => FlightModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
         'hotel' => [
             'class' => HotelModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
         'product' => [
             'class' => ProductModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
         'offer' => [
             'class' => OfferModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
         'order' => [
             'class' => OrderModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
+
+        'abac' => [
+            'class' => AbacModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
         'invoice' => [
             'class' => InvoiceModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
         'qa-task' => [
             'class' => QaTaskModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
         'rbac-import-export' => [
             'class' => RbacImportExportModule::class,
@@ -337,12 +356,15 @@ return [
         ],
         'file-storage' => [
             'class' => FileStorageModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
         'rent-car' => [
-            'class' => \modules\rentCar\RentCarModule::class,
+            'class' => RentCarModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
         'cruise' => [
             'class' => CruiseModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
     ],
     'as beforeRequest' => [
