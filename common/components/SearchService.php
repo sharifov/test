@@ -140,7 +140,7 @@ class SearchService
 
         $params = [
             'cabin' => self::getCabinRealCode($lead->cabin),
-            'cid' => 'SAL101',
+            'cid' => \Yii::$app->params['search']['sid'],
             'adt' => $lead->adults,
             'chd' => $lead->children,
             'inf' => $lead->infants,
@@ -195,7 +195,8 @@ class SearchService
 
     public static function getOnlineQuoteByKey(string $key)
     {
-        $response = \Yii::$app->airsearch->searchQuoteByKey('SAL101', $key);
+        $sid = \Yii::$app->params['search']['sid'];
+        $response = \Yii::$app->airsearch->searchQuoteByKey($sid, $key);
 
         if (!$result['data'] = $response['data']) {
             $result['error'] = $response['error'];
