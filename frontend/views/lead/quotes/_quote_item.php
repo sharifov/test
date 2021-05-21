@@ -227,6 +227,8 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                         <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
                         <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
                             <img src="<?php echo $airlineLogo ?>" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
+                        <?php else : ?>
+                            <img src="/img/_blank.png" class="quote__airline-logo" alt=" " />
                         <?php endif ?>
                     <?php else :?>
                         <img src="/img/multiple_airlines.png" alt="<?= implode(', ', $marketingAirlines)?>" class="quote__airline-logo">
