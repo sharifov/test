@@ -66,12 +66,6 @@ class OrderController extends FController
 
     public function actionSearch()
     {
-        echo Yii::$app->request->url; //controller->uniqueId;
-        //echo Yii::$app->controller->action->uniqueId;
-        //echo Yii::$app->controller->action->uniqueId;
-        exit;
-
-
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
