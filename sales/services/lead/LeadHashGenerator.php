@@ -54,4 +54,20 @@ class LeadHashGenerator
 
         return md5(implode('|', $hashArray));
     }
+
+    public function simple(
+        $projectId,
+        $adults,
+        $cabin,
+        $clientId
+    ): string {
+        $hashArray = [];
+        $hashArray[] = $projectId;
+        $hashArray[] = $adults;
+        $hashArray[] = $cabin;
+        $hashArray[] = date('Y-m-d');
+        $hashArray[] = $clientId;
+
+        return md5(implode('|', $hashArray));
+    }
 }

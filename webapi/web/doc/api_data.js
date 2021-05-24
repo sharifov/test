@@ -2909,6 +2909,69 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v1/lead-request/adwords",
+    "title": "Lead create from request",
+    "version": "0.1.0",
+    "name": "Lead_create_adwords",
+    "group": "Leads",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "google_key",
+            "description": "<p>Google key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "is_test",
+            "description": "<p>Is test</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "user_column_data",
+            "description": "<p>A repeated key-value tuple transmitting user submitted data</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n {\n   \"google_key\":\"examplekey\",\n   \"is_test\":true,\n   \"user_column_data\": [\n        {\n          \"string_value\":\"john@doe.com\",\n          \"column_id\": \"EMAIL\"\n        },\n        {\n          \"string_value\":\"+11234567890\",\n          \"column_id\":\"PHONE_NUMBER\"\n        }\n  ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"resultMessage\": \"LeadRequest created. ID(123)\"\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"email\": [\n            \"Email cannot be blank\"\n       ]\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/LeadRequestController.php",
+    "groupTitle": "Leads"
+  },
+  {
+    "type": "post",
     "url": "/v1/lead/update",
     "title": "Update Lead",
     "version": "0.1.0",

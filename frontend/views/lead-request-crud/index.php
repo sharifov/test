@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'value' => static function (LeadRequest $model) {
                     $resultStr = '-';
-                    if ($decodedData = @json_decode($model->lr_json_data, true, 512, JSON_THROW_ON_ERROR)) {
+                    if ($decodedData = \frontend\helpers\JsonHelper::decode($model->lr_json_data)) {
                         $truncatedStr = StringHelper::truncate(
                             Html::encode(VarDumper::dumpAsString($decodedData)),
                             1200,
