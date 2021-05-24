@@ -199,7 +199,6 @@ class UserStatsSearch extends Model
                     ->andWhere(LeadFlow::tableName() . '.created BETWEEN :startDt AND :endDt', [
                         ':startDt' => $this->startDt, ':endDt' => $this->endDt,
                     ])
-                    ->groupBy([LeadFlow::tableName() . '.lead_id', LeadFlow::tableName() . '.lf_owner_id'])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_CHAT_ACTIVE)) {
