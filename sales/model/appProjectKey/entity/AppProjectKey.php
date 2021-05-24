@@ -34,6 +34,7 @@ class AppProjectKey extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
+            ['apk_key', 'required'],
             ['apk_key', 'string', 'max' => 50],
             ['apk_key', 'unique'],
 
@@ -44,12 +45,20 @@ class AppProjectKey extends \yii\db\ActiveRecord
             ['apk_project_source_id', 'required'],
             ['apk_project_source_id', 'integer'],
             ['apk_project_source_id', 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['apk_project_source_id' => 'id']],
+            ['apk_project_source_id', 'checkProject'],
 
             [['apk_updated_dt', 'apk_created_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             [['apk_updated_user_id', 'apk_created_user_id'], 'integer'],
             [['apk_updated_user_id', 'apk_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['apk_updated_user_id' => 'id']],
         ];
+    }
+
+    public function checkProject($attribute): void
+    {
+        if (($source = Sources::findOne(['id' => $this->apk_project_source_id])) && ((int) $source->project_id !== (int)$this->apk_project_id)) {
+            $this->addError($attribute, 'Project Source not related to Project');
+        }
     }
 
     public function getApkCreatedUser(): ActiveQuery
@@ -86,7 +95,7 @@ class AppProjectKey extends \yii\db\ActiveRecord
             'user' => [
                 'class' => BlameableBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['apk_created_user_id'],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['apk_created_user_id', 'apk_updated_user_id'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['apk_updated_user_id'],
                 ]
             ],
@@ -99,12 +108,12 @@ class AppProjectKey extends \yii\db\ActiveRecord
         return [
             'apk_id' => 'ID',
             'apk_key' => 'Key',
-            'apk_project_id' => 'Project ID',
-            'apk_project_source_id' => 'Project Source ID',
+            'apk_project_id' => 'Project',
+            'apk_project_source_id' => 'Project Source',
             'apk_created_dt' => 'Created Dt',
             'apk_updated_dt' => 'Updated Dt',
-            'apk_created_user_id' => 'Created User ID',
-            'apk_updated_user_id' => 'Updated User ID',
+            'apk_created_user_id' => 'Created User',
+            'apk_updated_user_id' => 'Updated User',
         ];
     }
 

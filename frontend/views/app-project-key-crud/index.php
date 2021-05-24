@@ -33,7 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'apk_id',
             'apk_key',
             'apk_project_id:projectName',
-            'apk_project_source_id',
             [
                 'attribute' => 'apk_project_source_id',
                 'format' => 'raw',
@@ -43,7 +42,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                     return $model->apkProjectSource->name;
                 },
-                'filter' => \common\models\Sources::getList(true)
+                'filter' => \common\models\Sources::getList(true),
+                'label' => 'Project Source Name',
             ],
             [
                 'class' => DateTimeColumn::class,
