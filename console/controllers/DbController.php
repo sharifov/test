@@ -35,6 +35,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
+use sales\model\airline\service\AirlineService;
 
 /**
  * Class DbController
@@ -271,7 +272,8 @@ class DbController extends Controller
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-        Airline::syncCabinClasses();
+        //Airline::syncCabinClasses();
+        AirlineService::synchronization();
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
