@@ -39,7 +39,7 @@ class VueAsset extends AssetBundle
 
         //vue(.runtime).global(.prod).js
 
-        $this->js[] = [$jsFile, 'position' => \yii\web\View::POS_END];
+        $this->js[] = [$jsFile, 'position' => \yii\web\View::POS_BEGIN];
         $this->js[] = ['https://cdn.jsdelivr.net/npm/axios@0.21/dist/axios.min.js', 'position' => \yii\web\View::POS_END];
         $this->js[] = ['https://cdn.jsdelivr.net/npm/moment@2.29/moment.min.js', 'position' => \yii\web\View::POS_END];
 
