@@ -768,6 +768,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'cogs',
             'items' => [
                 ['label' => 'ABAC Policy List', 'url' => ['/abac/abac-policy']],
+                ['label' => 'Policy List Content', 'url' => ['/abac/abac-policy/list-content']],
             ],
         ];
 

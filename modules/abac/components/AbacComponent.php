@@ -12,10 +12,12 @@ namespace modules\abac\components;
 use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
+use sales\helpers\app\AppHelper;
 use stdClass;
 use Yii;
 use yii\base\Component;
 use yii\caching\TagDependency;
+use yii\helpers\VarDumper;
 use yii\httpclient\Request;
 use Casbin\Enforcer;
 use modules\abac\src\entities\AbacInterface;
@@ -111,24 +113,27 @@ class AbacComponent extends Component
     }
 
     /**
-     * @param \stdClass $subject
+     * @param stdClass $subject
      * @param string $object
      * @param string $action
-     * @return bool
-     * @throws \Casbin\Exceptions\CasbinException
+     * @return bool|null
      */
-    final public function can(\stdClass $subject, string $object, string $action): bool
+    final public function can(\stdClass $subject, string $object, string $action): ?bool
     {
-
-        // VarDumper::dump($obj, 10, true);        exit;
-
         // $sub = new \stdClass();
-        $subject->env = $this->getEnv();
-        //$sub->data = $subject;
+        try {
+            $subject->env = $this->getEnv();
+            //$sub->data = $subject;
 
-        if ($this->enforser->enforce($subject, $object, $action) === true) {
-            return true;
+            if ($this->enforser->enforce($subject, $object, $action) === true) {
+                return true;
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'AbacComponent::can');
+            VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
+            return null;
         }
+
         return false;
     }
 

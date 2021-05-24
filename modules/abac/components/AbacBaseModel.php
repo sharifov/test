@@ -21,27 +21,27 @@ use common\models\UserRole;
  */
 class AbacBaseModel
 {
-    public const ATTR_TYPE_INTEGER  = 'integer';
-    public const ATTR_TYPE_STRING   = 'string';
-    public const ATTR_TYPE_DOUBLE   = 'double';
-    public const ATTR_TYPE_DATE   = 'date';
-    public const ATTR_TYPE_TIME   = 'time';
-    public const ATTR_TYPE_DATETIME   = 'datetime';
-    public const ATTR_TYPE_BOOLEAN   = 'boolean';
+    protected const ATTR_TYPE_INTEGER  = 'integer';
+    protected const ATTR_TYPE_STRING   = 'string';
+    protected const ATTR_TYPE_DOUBLE   = 'double';
+    protected const ATTR_TYPE_DATE   = 'date';
+    protected const ATTR_TYPE_TIME   = 'time';
+    protected const ATTR_TYPE_DATETIME   = 'datetime';
+    protected const ATTR_TYPE_BOOLEAN   = 'boolean';
 
 
-    public const ATTR_INPUT_RADIO       = 'radio';
-    public const ATTR_INPUT_CHECKBOX    = 'checkbox';
-    public const ATTR_INPUT_SELECT      = 'select';
-    public const ATTR_INPUT_TEXT      = 'text';
-    public const ATTR_INPUT_NUMBER      = 'number';
-    public const ATTR_INPUT_TEXTAREA      = 'textarea';
+    protected const ATTR_INPUT_RADIO       = 'radio';
+    protected const ATTR_INPUT_CHECKBOX    = 'checkbox';
+    protected const ATTR_INPUT_SELECT      = 'select';
+    protected const ATTR_INPUT_TEXT      = 'text';
+    protected const ATTR_INPUT_NUMBER      = 'number';
+    protected const ATTR_INPUT_TEXTAREA      = 'textarea';
 
 
-    private const OPTGROUP_ENV_USER = 'ENV - USER';
-    private const OPTGROUP_ENV_DT    = 'ENV - DATE & TIME';
-    private const OPTGROUP_ENV_REQUEST = 'ENV - REQUEST';
-    private const OPTGROUP_ENV_PROJECT = 'ENV - PROJECT';
+    protected const OPTGROUP_ENV_USER = 'ENV - USER';
+    protected const OPTGROUP_ENV_DT    = 'ENV - DATE & TIME';
+    protected const OPTGROUP_ENV_REQUEST = 'ENV - REQUEST';
+    protected const OPTGROUP_ENV_PROJECT = 'ENV - PROJECT';
 
 
     public const OP_EQUAL               = 'equal';
@@ -72,7 +72,7 @@ class AbacBaseModel
     public const OP_NOT_EQUAL2          = '!=';
 
 
-    public const ATTR_USER_USERNAME = [
+    protected const ATTR_USER_USERNAME = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_username',
         'field' => 'env.user.username',
@@ -82,7 +82,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
-    public const ATTR_USER_ROLES = [
+    protected const ATTR_USER_ROLES = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_roles',
         'field' => 'env.user.roles',
@@ -94,7 +94,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
-    public const ATTR_USER_PROJECTS = [
+    protected const ATTR_USER_PROJECTS = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_projects',
         'field' => 'env.user.projects',
@@ -106,7 +106,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
-    public const ATTR_USER_DEPARTMENTS = [
+    protected const ATTR_USER_DEPARTMENTS = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_departments',
         'field' => 'env.user.departments',
@@ -118,7 +118,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
-    public const ATTR_USER_GROUPS = [
+    protected const ATTR_USER_GROUPS = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_groups',
         'field' => 'env.user.groups',
@@ -130,7 +130,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
-    public const ATTR_PROJECT_KEY = [
+    protected const ATTR_PROJECT_KEY = [
         'optgroup' => self::OPTGROUP_ENV_PROJECT,
         'id' => 'env_project_key',
         'field' => 'env.project.key',
@@ -151,7 +151,7 @@ class AbacBaseModel
 
 
 
-    public const ATTR_REQ_CONTROLLER = [
+    protected const ATTR_REQ_CONTROLLER = [
         'optgroup' => self::OPTGROUP_ENV_REQUEST,
         'id' => 'env_controller',
         'field' => 'env.req.controller',
@@ -161,7 +161,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
-    public const ATTR_REQ_ACTION = [
+    protected const ATTR_REQ_ACTION = [
         'optgroup' => self::OPTGROUP_ENV_REQUEST,
         'id' => 'env_action',
         'field' => 'env.req.action',
@@ -171,7 +171,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
-    public const ATTR_REQ_URL = [
+    protected const ATTR_REQ_URL = [
         'optgroup' => self::OPTGROUP_ENV_REQUEST,
         'id' => 'env_url',
         'field' => 'env.req.url',
@@ -181,7 +181,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_MATCH]
     ];
 
-    public const ATTR_REQ_IP_ADDRESS = [
+    protected const ATTR_REQ_IP_ADDRESS = [
         'optgroup' => self::OPTGROUP_ENV_REQUEST,
         'id' => 'env_ip',
         'field' => 'env.req.ip',
@@ -194,7 +194,7 @@ class AbacBaseModel
     ];
 
 
-    public const ATTR_DT_DATE = [
+    protected const ATTR_DT_DATE = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_date',
         'field' => 'env.dt.date',
@@ -205,7 +205,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
-    public const ATTR_DT_TIME = [
+    protected const ATTR_DT_TIME = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_time',
         'field' => 'env.dt.time',
@@ -216,7 +216,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
-    public const ATTR_DT_YEAR = [
+    protected const ATTR_DT_YEAR = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_year',
         'field' => 'env.dt.year',
@@ -228,7 +228,7 @@ class AbacBaseModel
         'validation' => ['min' => 2020, 'max' => 2030, 'step' => 1]
     ];
 
-    public const ATTR_DT_MONTH = [
+    protected const ATTR_DT_MONTH = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_month',
         'field' => 'env.dt.month',
@@ -239,7 +239,7 @@ class AbacBaseModel
         'validation' => ['min' => 1, 'max' => 12, 'step' => 1]
     ];
 
-    public const ATTR_DT_MONTH_NAME = [
+    protected const ATTR_DT_MONTH_NAME = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_month_name',
         'field' => 'env.dt.month_name',
@@ -250,7 +250,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN]
     ];
 
-    public const ATTR_DT_DOW = [
+    protected const ATTR_DT_DOW = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_dow',
         'field' => 'env.dt.dow',
@@ -260,7 +260,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN]
     ];
 
-    public const ATTR_DT_DOW_NAME = [
+    protected const ATTR_DT_DOW_NAME = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_dow_name',
         'field' => 'env.dt.dow_name',
@@ -270,7 +270,7 @@ class AbacBaseModel
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN]
     ];
 
-    public const ATTR_DT_DAY = [
+    protected const ATTR_DT_DAY = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_day',
         'field' => 'env.dt.day',
@@ -282,7 +282,7 @@ class AbacBaseModel
         'description' => 'This filter is "day"',
     ];
 
-    public const ATTR_DT_HOUR = [
+    protected const ATTR_DT_HOUR = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_hour',
         'field' => 'env.dt.hour',
@@ -294,7 +294,7 @@ class AbacBaseModel
     ];
 
 
-    public const ATTR_DT_MIN = [
+    protected const ATTR_DT_MIN = [
         'optgroup' => self::OPTGROUP_ENV_DT,
         'id' => 'env_dt_min',
         'field' => 'env.dt.min',
@@ -305,7 +305,7 @@ class AbacBaseModel
         'validation' => ['min' => 0, 'max' => 59, 'step' => 1]
     ];
 
-    public const ATTRIBUTE_LIST = [
+    protected const ATTRIBUTE_LIST = [
         self::ATTR_USER_USERNAME,
         // self::ATTR_USER_ROLES,
         // self::ATTR_USER_PROJECTS,
@@ -359,7 +359,7 @@ class AbacBaseModel
     /**
      * @return array
      */
-    public static function getUserRoleList(): array
+    protected static function getUserRoleList(): array
     {
         return UserRole::getEnvList();
     }
@@ -367,7 +367,7 @@ class AbacBaseModel
     /**
      * @return array
      */
-    public static function getProjectList(): array
+    protected static function getProjectList(): array
     {
         return Project::getEnvList();
     }
@@ -375,7 +375,7 @@ class AbacBaseModel
     /**
      * @return array
      */
-    public static function getUserGroupList(): array
+    protected static function getUserGroupList(): array
     {
         return UserGroup::getEnvList();
     }
@@ -383,7 +383,7 @@ class AbacBaseModel
     /**
      * @return array
      */
-    public static function getDepartmentList(): array
+    protected static function getDepartmentList(): array
     {
         return Department::getEnvList();
     }

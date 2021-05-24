@@ -223,4 +223,16 @@ class AbacPolicyController extends FController
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+    /**
+     * @return string
+     */
+    public function actionListContent()
+    {
+        $policyListContent = Yii::$app->abac->getPolicyListContent();
+
+        return $this->render('list_content', [
+            'policyListContent' => $policyListContent
+        ]);
+    }
 }

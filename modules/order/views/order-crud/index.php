@@ -1,6 +1,7 @@
 <?php
 
 use modules\lead\src\grid\columns\LeadColumn;
+use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\search\OrderCrudSearch;
 use modules\order\src\grid\columns\OrderPayStatusColumn;
@@ -18,17 +19,29 @@ use yii\widgets\Pjax;
 
 $this->title = 'Orders';
 $this->params['breadcrumbs'][] = $this->title;
+
+
+$abac = Yii::$app->abac;
+
+$data = new \stdClass();
+$data->n = 101;
+$data->profit_amount = 0;
+$data->status_id = 0;
+
+
+
 ?>
 <div class="order-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
     <p>
-        <?= Html::a('Create Order', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php if (Yii::$app->abac->can($data, OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_CREATE)) : ?>
+            <?= Html::a('Create Order', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php endif; ?>
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -124,7 +137,52 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => DateTimeColumn::class,
                 'attribute' => 'or_updated_dt',
             ],
-            ['class' => 'yii\grid\ActionColumn'],
+            //['class' => 'yii\grid\ActionColumn'],
+
+            ['class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {delete}',
+                'visibleButtons' => [
+                    'view' => function (Order $model, $key, $index) {
+                        $data = new \stdClass();
+                        $data->profit_amount = $model->or_profit_amount;
+                        $data->status_id = $model->or_status_id;
+                        $data->n = 0;
+
+                        return Yii::$app->abac->can(
+                            $data,
+                            OrderAbacObject::OBJ_ORDER_ITEM,
+                            OrderAbacObject::ACTION_READ
+                        );
+                    },
+                    'update' => static function (Order $model, $key, $index) {
+                        $data = new \stdClass();
+                        $data->profit_amount = $model->or_profit_amount;
+                        $data->status_id = $model->or_status_id;
+                        $data->n = 0;
+
+                        return Yii::$app->abac->can(
+                            $data,
+                            OrderAbacObject::OBJ_ORDER_ITEM,
+                            OrderAbacObject::ACTION_UPDATE
+                        );
+                    },
+
+                    'delete' => static function (Order $model, $key, $index) {
+                        $data = new \stdClass();
+                        $data->profit_amount = $model->or_profit_amount;
+                        $data->status_id = $model->or_status_id;
+                        $data->n = 0;
+
+                        return Yii::$app->abac->can(
+                            $data,
+                            OrderAbacObject::OBJ_ORDER_ITEM,
+                            OrderAbacObject::ACTION_DELETE
+                        );
+                    },
+
+                ],
+            ]
+
         ],
     ]) ?>
 

@@ -4,6 +4,8 @@ namespace modules\order\src\abac;
 
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderStatus;
 
 class OrderAbacObject extends AbacBaseModel implements AbacInterface
 {
@@ -41,6 +43,7 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_ALL            = self::NS . 'obj/*';
     public const OBJ_LEAD           = self::NS . 'obj/lead';
     public const OBJ_CASE           = self::NS . 'obj/case';
+    public const OBJ_ORDER_ITEM     = self::NS . 'obj/order_item';
 
 
 
@@ -67,6 +70,7 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_ALL       => self::OBJ_ALL,
         self::OBJ_LEAD      => self::OBJ_LEAD,
         self::OBJ_CASE      => self::OBJ_CASE,
+        self::OBJ_ORDER_ITEM      => self::OBJ_ORDER_ITEM,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -85,52 +89,51 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_UPDATE    => [self::ACTION_ACCESS, self::ACTION_UPDATE],
         self::ACT_DELETE    => [self::ACTION_ACCESS, self::ACTION_DELETE],
         self::OBJ_LEAD      => [self::ACTION_ACCESS, self::ACTION_READ],
+        self::OBJ_ORDER_ITEM    => [self::ACTION_CREATE, self::ACTION_READ, self::ACTION_UPDATE, self::ACTION_DELETE],
+        self::UI_BLOCK_PAYMENTS      => [self::ACTION_ACCESS, self::ACTION_READ],
+    ];
+
+
+    protected const ATTR_ORDER_STATUS = [
+        //'optgroup' => self::OPTGROUP_ENV_USER,
+        'id' => self::NS . 'status_id',
+        'field' => 'status_id',
+        'label' => 'Status',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_ORDER_PROFIT_AMOUNT = [
+            'id' => self::NS . 'profit_amount',
+            'field' => 'profit_amount',
+            'label' => 'Profit amount',
+            'type' => self::ATTR_TYPE_DOUBLE,
+            'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+                self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_ORDER_N = [
+            'id' => self::NS . 'n',
+            'field' => 'n',
+            'label' => 'N',
+            'type' => self::ATTR_TYPE_INTEGER,
+            'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+                self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::ACT_CREATE    =>  [
-            [
-                'id' => self::NS . 'test1',
-                'field' => 'test1',
-                'label' => 'Test Attr1',
-                'type'  => self::ATTR_TYPE_INTEGER,
-                //'value' => true // boolean
-                'input' => 'radio',
-                'values' => [
-
-                    1 => 'Yes',
-                    0 => 'No'
-                ],
-                'default_value' => 1,
-                'operators' =>  [self::OP_EQUAL],
-                'unique' => true,
-                'description' => 'This filter is "unique", it can be used only once',
-                'icon' => 'fa fa-ticket',
-            ],
-
-            [
-                'id' => self::NS . 'test2',
-                'field' => 'test2',
-                'label' => 'Test Attr2',
-                'type' => 'string',
-                'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN,
-                    self::OP_NOT_IN, self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_MATCH]
-            ],
+//        self::ACT_CREATE    =>  [
+//        ],
+        self::OBJ_ORDER_ITEM    =>  [
+            self::ATTR_ORDER_N,
+            self::ATTR_ORDER_PROFIT_AMOUNT,
         ],
-
-        self::OBJ_LEAD    =>  [
-            [
-                'id' => self::NS . 'n',
-                'field' => 'n',
-                'label' => 'N',
-                'type' => self::ATTR_TYPE_INTEGER,
-                'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
-                    self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
-            ],
-        ],
-
     ];
 
     /**
@@ -154,6 +157,14 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
-        return self::OBJECT_ATTRIBUTE_LIST;
+        $attrStatus = self::ATTR_ORDER_STATUS;
+        $attrStatus['values'] = OrderStatus::getList();
+
+        $attributeList = self::OBJECT_ATTRIBUTE_LIST;
+        $attributeList[self::OBJ_ORDER_ITEM][] = $attrStatus;
+
+        //$attributeList[self::OBJ_ORDER_ITEM][] = self::ATTR_ORDER_PROFIT_AMOUNT;
+
+        return $attributeList;
     }
 }
