@@ -86,7 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'enableSorting' => false,
         ],
         [
-            'label' => 'Opening hours',
+            'label' => 'Shift Hours',
             'format' => 'raw',
             'filter' => false,
             'enableSorting' => false,
