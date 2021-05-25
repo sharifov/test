@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 if ($idleState === null) {
                     return '<span class="label label-danger">Offline</span>';
                 }
-                if ($idleState === 1) {
+                if ($idleState === '1') {
                     return '<span class="label label-warning">Idle</span>';
                 }
                 return '<span class="label label-success">Online</span>';
