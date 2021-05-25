@@ -108,7 +108,7 @@ class UserStatsSearch extends Model
             'up_timezone',
         ]);
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_NICKNAME)) {
-            $query->addSelect(Employee::tableName() . '.nickname');
+            $query->addSelect([UserModelSettingDictionary::FIELD_NICKNAME => Employee::tableName() . '.nickname']);
         }
 
         $query->from(Employee::tableName());
