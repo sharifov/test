@@ -16,9 +16,11 @@ use yii\helpers\Url;
                     <h2>Booking</h2>
 
                     <ul class="nav navbar-right panel_toolbox">
+                        <?php if (strtolower($bookingDetails['paymentState']) !== 'on_account') : ?>
                         <li>
                             <a href="<?= $bookingDetails['partnerChannelBookingUrl'] . '/booking/' . $bookingDetails['id']?>" target="_blank" class="text-success"><i class="fas fa-credit-card"></i> Payment </a>
                         </li>
+                        <?php endif; ?>
                         <li>
                             <?= Html::a(
                                 '<i class="fa fa-refresh"></i> Check Confirmation',
