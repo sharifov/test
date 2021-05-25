@@ -17,6 +17,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     <p><i class="fa fa-info-circle"></i> from Cache for Casbin</p>
+    <p>
+        <?= Html::a('<i class="fa fa-remove"></i> Reset Cache', ['invalidate-cache'], ['class' => 'btn btn-warning']) ?>
+    </p>
     <pre><?php
             echo Html::encode($policyListContent);
     ?>

@@ -1,6 +1,7 @@
 <?php
 
 use modules\lead\src\grid\columns\LeadColumn;
+use modules\order\src\abac\dto\OrderAbacDto;
 use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\search\OrderCrudSearch;
@@ -23,11 +24,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $abac = Yii::$app->abac;
 
-$data = new \stdClass();
-$data->n = 101;
-$data->profit_amount = 0;
-$data->status_id = 0;
+$data = new OrderAbacDto(new Order());
 
+//$data = new stdClass();
+//$data->status_id = 1;
+//$data->profit_amount = 0;
+//$data->n = 0;
 
 
 ?>
@@ -143,38 +145,23 @@ $data->status_id = 0;
                 'template' => '{view} {update} {delete}',
                 'visibleButtons' => [
                     'view' => function (Order $model, $key, $index) {
-                        $data = new \stdClass();
-                        $data->profit_amount = $model->or_profit_amount;
-                        $data->status_id = $model->or_status_id;
-                        $data->n = 0;
-
                         return Yii::$app->abac->can(
-                            $data,
+                            new OrderAbacDto($model),
                             OrderAbacObject::OBJ_ORDER_ITEM,
                             OrderAbacObject::ACTION_READ
                         );
                     },
                     'update' => static function (Order $model, $key, $index) {
-                        $data = new \stdClass();
-                        $data->profit_amount = $model->or_profit_amount;
-                        $data->status_id = $model->or_status_id;
-                        $data->n = 0;
-
                         return Yii::$app->abac->can(
-                            $data,
+                            new OrderAbacDto($model),
                             OrderAbacObject::OBJ_ORDER_ITEM,
                             OrderAbacObject::ACTION_UPDATE
                         );
                     },
 
                     'delete' => static function (Order $model, $key, $index) {
-                        $data = new \stdClass();
-                        $data->profit_amount = $model->or_profit_amount;
-                        $data->status_id = $model->or_status_id;
-                        $data->n = 0;
-
                         return Yii::$app->abac->can(
-                            $data,
+                            new OrderAbacDto($model),
                             OrderAbacObject::OBJ_ORDER_ITEM,
                             OrderAbacObject::ACTION_DELETE
                         );
