@@ -172,10 +172,28 @@ $this->params['breadcrumbs'][] = $this->title;
     }
     ?>
     <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_LEAD_PROCESSING)) {
+        $row = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_LEAD_PROCESSING);
+        $row['value'] = static function ($model) {
+            return Html::encode($model[UserModelSettingDictionary::FIELD_LEAD_PROCESSING]);
+        };
+        $columns[] = $row;
+    }
+    ?>
+    <?php
     if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_CHAT_ACTIVE)) {
         $row = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_CLIENT_CHAT_ACTIVE);
         $row['value'] = static function ($model) {
             return (int) $model[UserModelSettingDictionary::FIELD_CLIENT_CHAT_ACTIVE];
+        };
+        $columns[] = $row;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_CHAT_PROGRESS)) {
+        $row = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_CLIENT_CHAT_PROGRESS);
+        $row['value'] = static function ($model) {
+            return (int) $model[UserModelSettingDictionary::FIELD_CLIENT_CHAT_PROGRESS];
         };
         $columns[] = $row;
     }
