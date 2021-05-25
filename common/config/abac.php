@@ -7,4 +7,5 @@ return [
     'modules' => [
         'order' => \modules\order\src\abac\OrderAbacObject::class
     ],
+    'cacheEnabled' => true
 ];

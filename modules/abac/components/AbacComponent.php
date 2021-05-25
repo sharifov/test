@@ -59,7 +59,13 @@ class AbacComponent extends Component
     {
         parent::init();
         $policyListContent = $this->getPolicyListContent();
-        //$policyListContent = file_get_contents(Yii::getAlias("@common/config/casbin/policy_list.csv"));
+        // $policyListContent = file_get_contents(Yii::getAlias("@common/config/casbin/policy_list.csv"));
+
+        // VarDumper::dump($policyListContent);
+
+        if (!$policyListContent) {
+            $policyListContent = 'p, true, *, (access), deny';
+        }
 
         $adp = CasbinCacheAdapter::newAdapter($policyListContent);
 
@@ -113,14 +119,16 @@ class AbacComponent extends Component
     }
 
     /**
-     * @param stdClass $subject
+     * @param stdClass|null $subject
      * @param string $object
      * @param string $action
      * @return bool|null
      */
-    final public function can(\stdClass $subject, string $object, string $action): ?bool
+    final public function can(?\stdClass $subject, string $object, string $action): ?bool
     {
-        // $sub = new \stdClass();
+        if (!$subject) {
+            $subject = new \stdClass();
+        }
         try {
             $subject->env = $this->getEnv();
             //$sub->data = $subject;
@@ -276,7 +284,7 @@ class AbacComponent extends Component
             }
         }
         unset($policyModel);
-        return implode("\r\n", $rows);
+        return implode(PHP_EOL, $rows);
     }
 
     /**
@@ -289,12 +297,14 @@ class AbacComponent extends Component
             if ($policyListContent === false) {
                 $policyListContent = $this->getPolicyListContentWOCache();
 
-                Yii::$app->cache->set(
-                    $this->getCacheKey(),
-                    $policyListContent,
-                    0,
-                    new TagDependency(['tags' => $this->getCacheTagDependency()])
-                );
+                if ($policyListContent) {
+                    Yii::$app->cache->set(
+                        $this->getCacheKey(),
+                        $policyListContent,
+                        0,
+                        new TagDependency(['tags' => $this->getCacheTagDependency()])
+                    );
+                }
             }
         } else {
             $policyListContent = $this->getPolicyListContentWOCache();
@@ -324,5 +334,18 @@ class AbacComponent extends Component
     final public function getCacheEnabled(): bool
     {
         return $this->cacheEnabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function invalidatePolicyCache(): bool
+    {
+        $cacheTagDependency = $this->getCacheTagDependency();
+        if ($cacheTagDependency) {
+            TagDependency::invalidate(Yii::$app->cache, $cacheTagDependency);
+            return true;
+        }
+        return false;
     }
 }

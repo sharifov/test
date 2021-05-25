@@ -235,4 +235,18 @@ class AbacPolicyController extends FController
             'policyListContent' => $policyListContent
         ]);
     }
+
+    /**
+     * @return \yii\web\Response
+     */
+    public function actionInvalidateCache()
+    {
+        if (Yii::$app->abac->invalidatePolicyCache()) {
+            Yii::$app->session->setFlash('success', 'Success invalidate Policy Cache');
+        } else {
+            Yii::$app->session->setFlash('warning', 'Policy Cache is disable');
+        }
+
+        return $this->redirect(['list-content']);
+    }
 }
