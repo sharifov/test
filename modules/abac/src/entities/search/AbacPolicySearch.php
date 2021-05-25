@@ -18,7 +18,7 @@ class AbacPolicySearch extends AbacPolicy
     {
         return [
             [['ap_id', 'ap_effect', 'ap_sort_order', 'ap_created_user_id', 'ap_updated_user_id'], 'integer'],
-            [['ap_rule_type', 'ap_subject', 'ap_subject_json', 'ap_object', 'ap_action', 'ap_action_json', 'ap_title', 'ap_created_dt', 'ap_updated_dt'], 'safe'],
+            [['ap_rule_type', 'ap_subject', 'ap_subject_json', 'ap_object', 'ap_action', 'ap_action_json', 'ap_title', 'ap_created_dt', 'ap_updated_dt', 'ap_enabled'], 'safe'],
         ];
     }
 
@@ -65,6 +65,7 @@ class AbacPolicySearch extends AbacPolicy
             'ap_updated_dt' => $this->ap_updated_dt,
             'ap_created_user_id' => $this->ap_created_user_id,
             'ap_updated_user_id' => $this->ap_updated_user_id,
+            'ap_enabled' => $this->ap_enabled,
         ]);
 
         $query->andFilterWhere(['like', 'ap_rule_type', $this->ap_rule_type])

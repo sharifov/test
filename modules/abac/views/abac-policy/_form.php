@@ -95,8 +95,7 @@ $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators())
 
 
             <?= $form->field($model, 'ap_title')->textInput(['maxlength' => true]) ?>
-
-
+            <?= $form->field($model, 'ap_enabled')->checkbox() ?>
 
         </div>
 

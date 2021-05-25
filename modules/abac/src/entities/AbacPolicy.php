@@ -2,6 +2,7 @@
 
 namespace modules\abac\src\entities;
 
+use BaconQrCode\Renderer\Text\Html;
 use common\models\Employee;
 use modules\abac\src\AbacService;
 use Yii;
@@ -28,6 +29,7 @@ use yii\db\ActiveRecord;
  * @property string|null $ap_updated_dt
  * @property int|null $ap_created_user_id
  * @property int|null $ap_updated_user_id
+ * @property bool|null $ap_enabled
  *
  * @property Employee $apCreatedUser
  * @property Employee $apUpdatedUser
@@ -64,6 +66,7 @@ class AbacPolicy extends ActiveRecord
             [['ap_rule_type'], 'string', 'max' => 2],
             [['ap_subject'], 'string', 'max' => 10000],
             [['ap_object', 'ap_action', 'ap_title'], 'string', 'max' => 255],
+            [['ap_enabled'], 'boolean'],
             [['ap_created_user_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Employee::class, 'targetAttribute' => ['ap_created_user_id' => 'id']],
             [['ap_updated_user_id'], 'exist', 'skipOnError' => true,
@@ -113,6 +116,7 @@ class AbacPolicy extends ActiveRecord
             'ap_updated_dt' => 'Updated Dt',
             'ap_created_user_id' => 'Created User ID',
             'ap_updated_user_id' => 'Updated User ID',
+            'ap_enabled' => 'Enabled',
         ];
     }
 
@@ -196,7 +200,7 @@ class AbacPolicy extends ActiveRecord
     /**
      * Gets query for [[ApCreatedUser]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getApCreatedUser(): ActiveQuery
     {
@@ -206,7 +210,7 @@ class AbacPolicy extends ActiveRecord
     /**
      * Gets query for [[ApUpdatedUser]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getApUpdatedUser(): ActiveQuery
     {
@@ -227,6 +231,16 @@ class AbacPolicy extends ActiveRecord
     public function getEffectName(): string
     {
         return self::EFFECT_LIST[$this->ap_effect] ?? '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getEffectLabel(): string
+    {
+        $name = $this->getEffectName();
+        $class = $this->ap_effect === self::EFFECT_ALLOW ? 'success' : 'danger';
+        return $name ? '<span class="badge badge-' . $class . '">' . \yii\helpers\Html::encode($name) . '</span>' :  '-';
     }
 
     /**

@@ -29,6 +29,16 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+        'rowOptions' => static function (AbacPolicy $model) {
+            if (!$model->ap_enabled) {
+                return ['class' => 'danger'];
+            }
+
+//            if ($model->ap_effect === $model::EFFECT_DENY) {
+//                return ['class' => 'danger'];
+//            }
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
@@ -38,6 +48,17 @@ $this->params['breadcrumbs'][] = $this->title;
                     'style' => 'width:80px'
                 ],
             ],
+            ['class' => 'yii\grid\ActionColumn'],
+
+            //'ap_object',
+
+            [
+                'attribute' => 'ap_object',
+                'value' => static function (AbacPolicy $model) {
+                    return $model->ap_object ? '<span class="badge badge-primary">' . Html::encode($model->ap_object) . '</span>' : '-';
+                },
+                'format' => 'raw',
+            ],
 
             [
                 'attribute' => 'ap_sort_order',
@@ -45,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'style' => 'width:80px'
                 ],
             ],
-            'ap_object',
+
             //'ap_rule_type',
             'ap_subject',
             //'ap_subject_json',
@@ -56,10 +77,12 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ap_effect',
                 'value' => static function (AbacPolicy $model) {
-                    return $model->getEffectName();
+                    return $model->getEffectLabel();
                 },
+                'format' => 'raw',
                 'filter' => AbacPolicy::getEffectList()
             ],
+            'ap_enabled:boolean',
             //'ap_title',
 
 //            'ap_created_dt',
@@ -91,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'ap_created_user_id',
             //'ap_updated_user_id',
 
-            ['class' => 'yii\grid\ActionColumn'],
+
         ],
     ]); ?>
 

@@ -17,6 +17,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
  * @property int $ap_effect
  * @property string|null $ap_title
  * @property int|null $ap_sort_order
+ * @property bool|null ap_enabled
  */
 class AbacPolicyForm extends Model
 {
@@ -27,6 +28,7 @@ class AbacPolicyForm extends Model
     public $ap_effect;
     public $ap_title;
     public $ap_sort_order;
+    public $ap_enabled;
 
     /**
      * @return array
@@ -38,6 +40,7 @@ class AbacPolicyForm extends Model
             [['ap_subject_json', 'ap_action_list'], 'safe'],
             [['ap_effect', 'ap_sort_order', 'ap_id'], 'integer'],
             [['ap_object', 'ap_title'], 'string', 'max' => 255],
+            [['ap_enabled'], 'boolean'],
             [['ap_subject_json'], 'validateSubject', 'skipOnEmpty' => false, 'skipOnError' => false],
         ];
     }
@@ -56,6 +59,7 @@ class AbacPolicyForm extends Model
             'ap_effect' => 'Effect',
             'ap_title' => 'Title',
             'ap_sort_order' => 'Sort Order',
+            'ap_enabled' => 'Enabled',
         ];
     }
 

@@ -124,21 +124,21 @@ $data = new OrderAbacDto(new Order());
                 'placeholder' => 'Select User',
             ],
 
-            [
-                'class' => UserSelect2Column::class,
-                'attribute' => 'or_updated_user_id',
-                'relation' => 'orUpdatedUser',
-                'placeholder' => 'Select User',
-            ],
+    //            [
+    //                'class' => UserSelect2Column::class,
+    //                'attribute' => 'or_updated_user_id',
+    //                'relation' => 'orUpdatedUser',
+    //                'placeholder' => 'Select User',
+    //            ],
 
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'or_created_dt',
             ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'or_updated_dt',
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'or_updated_dt',
+//            ],
             //['class' => 'yii\grid\ActionColumn'],
 
             ['class' => 'yii\grid\ActionColumn',

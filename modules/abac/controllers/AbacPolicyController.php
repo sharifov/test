@@ -87,6 +87,7 @@ class AbacPolicyController extends FController
             $ap->ap_effect = $model->ap_effect;
             $ap->ap_sort_order = $model->ap_sort_order;
             $ap->ap_title = $model->ap_title;
+            $ap->ap_enabled = $model->ap_enabled;
             //VarDumper::dump($model->ap_action_list, 10, true); exit;
 
             $actionData = [];
@@ -121,6 +122,7 @@ class AbacPolicyController extends FController
         } else {
             $model->ap_sort_order = 50;
             $model->ap_effect = AbacPolicy::EFFECT_ALLOW;
+            $model->ap_enabled = true;
         }
 
         return $this->render('create', [
@@ -147,6 +149,7 @@ class AbacPolicyController extends FController
             $ap->ap_effect = $model->ap_effect;
             $ap->ap_sort_order = $model->ap_sort_order;
             $ap->ap_title = $model->ap_title;
+            $ap->ap_enabled = $model->ap_enabled;
             //VarDumper::dump($model->ap_action_list, 10, true); exit;
 
             $actionData = [];
@@ -185,6 +188,7 @@ class AbacPolicyController extends FController
             $model->ap_title = $ap->ap_title;
             $model->ap_action_list = @json_decode($ap->ap_action_json);
             $model->ap_subject_json = $ap->ap_subject_json;
+            $model->ap_enabled = $ap->ap_enabled;
         }
 
 

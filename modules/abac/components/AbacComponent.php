@@ -267,7 +267,9 @@ class AbacComponent extends Component
             'ap_object',
             'ap_action',
             'ap_effect'
-        ])->orderBy(['ap_sort_order' => SORT_ASC, 'ap_id' => SORT_ASC])->all();
+        ])
+            ->where(['ap_enabled' => true])
+            ->orderBy(['ap_sort_order' => SORT_ASC, 'ap_id' => SORT_ASC])->all();
         if ($policyModel) {
             foreach ($policyModel as $policy) {
                 if (empty($policy->ap_action) || empty($policy->ap_object) || empty($policy->ap_rule_type)) {
