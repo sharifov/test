@@ -249,6 +249,4 @@ class AbacPolicyController extends FController
 
         return $this->redirect(['list-content']);
     }
-
-
 }
