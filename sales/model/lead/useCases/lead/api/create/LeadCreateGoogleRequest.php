@@ -9,6 +9,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\setting\SettingHelper;
 use sales\model\leadRequest\entity\LeadRequest;
 use sales\model\leadRequest\service\LeadRequestDictionary;
 use sales\model\leadRequest\service\LeadRequestService;
@@ -99,8 +100,9 @@ class LeadCreateGoogleRequest
             $lead->cabin = Lead::CABIN_ECONOMY;
             $lead->adults = 1;
             $lead->client_id = $client->id;
-            $lead->status = Lead::STATUS_PENDING;
+            $lead->status = SettingHelper::getLeadApiGoogleStatusId();
             $lead->l_is_test = ArrayHelper::getValue($leadRequest, 'lr_json_data.is_test', false);
+            $lead->l_dep_id = SettingHelper::getLeadApiGoogleDepartmentId();
 
             $hash = $this->hashGenerator->simple(
                 $leadRequest->lr_project_id,

@@ -6,6 +6,7 @@ use common\components\jobs\LeadRequestJob;
 use common\models\ApiLog;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\leadRequest\entity\LeadRequest;
 use sales\model\leadRequest\repository\LeadRequestRepository;
 use webapi\src\ApiCodeException;
@@ -101,6 +102,13 @@ class LeadRequestController extends Controller
      */
     public function actionAdwords()
     {
+        if (!SettingHelper::getLeadApiGoogleAllowCreate()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Service disabled')
+            );
+        }
+
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
         if (!Yii::$app->request->isPost) {

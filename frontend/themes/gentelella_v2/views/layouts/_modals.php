@@ -31,4 +31,7 @@ use yii\bootstrap4\Modal;
     'id' => 'modal-md',
     'title' => '',
     'size' => 'modal-md',
+    'options' => [
+        'tabindex' => false // important for Select2 to work properly
+    ],
 ]);
