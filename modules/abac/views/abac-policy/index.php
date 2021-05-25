@@ -20,6 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Abac Policy', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-list"></i> Policy list content', ['list-content'], ['class' => 'btn btn-default']) ?>
     </p>
 
     <?php Pjax::begin(); ?>

@@ -1347,7 +1347,7 @@ class Call extends \yii\db\ActiveRecord
             $createJob = (bool)(Yii::$app->params['settings']['call_price_job'] ?? false);
             if ($createJob) {
                 $job = new CallPriceJob();
-                $job->callSid = $this->c_call_sid;
+                $job->callSids = [$this->c_call_sid];
                 Yii::$app->queue_job->delay(60)->priority(10)->push($job);
             }
         }
