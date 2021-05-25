@@ -91,6 +91,7 @@ class UserStatsSearch extends Model
         return [
             'id' => 'User',
             'uo_idle_state' => 'Status',
+            'dateTimeType' => 'Created Period',
         ];
     }
 
