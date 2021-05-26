@@ -197,6 +197,7 @@ class UserStatsSearch extends Model
                     ->select(['COUNT(' . LeadFlow::tableName() . '.lead_id)'])
                     ->from(LeadFlow::tableName())
                     ->where(LeadFlow::tableName() . '.lf_owner_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(['lf_description' => LeadFlow::DESCRIPTION_TAKE])
                     ->andWhere(LeadFlow::tableName() . '.created BETWEEN :startDt AND :endDt', [
                         ':startDt' => $this->startDt, ':endDt' => $this->endDt,
                     ])
