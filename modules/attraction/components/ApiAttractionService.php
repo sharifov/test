@@ -212,6 +212,7 @@ class ApiAttractionService extends Component
                                 dataType
                                 dataFormat
                                 isAnswered
+                                isAnswerDefaulted
                                 availableOptions {
                                     label
                                     value

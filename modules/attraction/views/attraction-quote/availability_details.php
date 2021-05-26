@@ -59,10 +59,11 @@ $availabilityID = $availability['id'];
             <h2>Selected Options</h2>
             <table class="table table-bordered caption-top">
                 <thead>
-                <tr class=" bg-info">
+                <tr class="bg-info">
                     <th>Question</th>
                     <th>Answer</th>
                     <th>Is Answered</th>
+                    <th>Is Defaulted</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -71,6 +72,7 @@ $availabilityID = $availability['id'];
                         <td> <?= $option['label'] ?> </td>
                         <td> <?= $option['answerFormattedText'] ?> </td>
                         <td> <?= $option['isAnswered'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?> </td>
+                        <td> <?= $option['isAnswerDefaulted'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?> </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
