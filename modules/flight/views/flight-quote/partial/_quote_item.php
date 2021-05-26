@@ -429,9 +429,6 @@ $totalAmountQuote = 0.0;
 
                             <?php echo FlightQuoteHelper::formattedPenalties($penalties)?>
 
-
-                             <!--TODO:: 1-->
-
                         </td>
 
                     </tr>

@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\db\ActiveQuery;
 use yii\db\Query;
+use yii\db\QueryInterface;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
@@ -83,6 +84,24 @@ class QueryHelper
         $clone = clone $model;
         self::resetProperties($clone);
         return self::getQueryCountValidModel($clone, $prefix, $query, $duration);
+    }
+
+    public static function getColumnsAndCnt(string $column, ?QueryInterface $query): array
+    {
+        $result = [];
+        if (!$query) {
+            return $result;
+        }
+        $resultQuery = $query->select([$column => $column, 'cnt' => 'COUNT(*)'])
+            ->groupBy($column)
+            ->indexBy($column)
+            ->asArray()
+            ->all();
+
+        foreach ($resultQuery as $key => $value) {
+            $result[$key] = $value[$column] . ' - [' . $value['cnt'] . ']';
+        }
+        return $result;
     }
 
     private static function resetProperties(Model $model): void
