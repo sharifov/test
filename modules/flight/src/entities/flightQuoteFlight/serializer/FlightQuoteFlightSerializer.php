@@ -52,8 +52,8 @@ class FlightQuoteFlightSerializer extends Serializer
         $data['flight'] = $flightQuote->fqFlight ? $flightQuote->fqFlight->serialize() : [];
 
         $data['trips'] = [];
-        if ($flightQuote->flightQuoteTrips) {
-            foreach ($flightQuote->flightQuoteTrips as $keyTrip => $flightQuoteTrip) {
+        if ($this->model->flightQuoteTrips) {
+            foreach ($this->model->flightQuoteTrips as $keyTrip => $flightQuoteTrip) {
                 $data['trips'][$keyTrip] = $flightQuoteTrip->serialize();
                 foreach ($flightQuoteTrip->flightQuoteSegments as $keySegment => $flightQuoteSegment) {
                     ArrayHelper::setValue(

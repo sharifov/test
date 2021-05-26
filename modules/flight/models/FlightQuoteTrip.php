@@ -14,7 +14,7 @@ use yii\db\ActiveQuery;
  * @property string|null $fqt_key
  * @property int $fqt_flight_quote_id
  * @property int|null $fqt_duration
- * @property int|null $fqp_flight_id
+ * @property int|null $fqt_flight_id
  *
  * @property FlightQuoteSegment[] $flightQuoteSegments
  * @property FlightQuote $fqtFlightQuote
@@ -42,8 +42,8 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
             [['fqt_uid'], 'string', 'max' => 20],
             [['fqt_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqt_flight_quote_id' => 'fq_id']],
 
-            [['fqp_flight_id'], 'integer'],
-            [['fqp_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqp_flight_id' => 'fqf_id']],
+            [['fqt_flight_id'], 'integer'],
+            [['fqt_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqt_flight_id' => 'fqf_id']],
         ];
     }
 
@@ -53,11 +53,11 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'fqt_id' => 'Fqt ID',
-            'fqt_key' => 'Fqt Key',
-            'fqt_flight_quote_id' => 'Fqt Flight Quote ID',
-            'fqt_duration' => 'Fqt Duration',
-            'fqp_flight_id' => 'Quote Flight',
+            'fqt_id' => 'ID',
+            'fqt_key' => 'Key',
+            'fqt_flight_quote_id' => 'Flight Quote ID',
+            'fqt_duration' => 'Duration',
+            'fqt_flight_id' => 'Flight Quote Flight',
         ];
     }
 
@@ -71,7 +71,7 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
 
     public function getFlightQuoteFlight(): ActiveQuery
     {
-        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'fqp_flight_id']);
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'fqt_flight_id']);
     }
 
     /**
@@ -101,15 +101,17 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
 
     /**
      * @param FlightQuote $flightQuote
-     * @param string $duration
+     * @param int|null $duration
+     * @param int|null $flightId
      * @return FlightQuoteTrip
      */
-    public static function create(FlightQuote $flightQuote, ?string $duration): self
+    public static function create(FlightQuote $flightQuote, ?int $duration, ?int $flightId = null): self
     {
         $trip = new self();
 
         $trip->fqt_flight_quote_id = $flightQuote->fq_id;
         $trip->fqt_duration = $duration;
+        $trip->fqt_flight_id = $flightId;
 
         return $trip;
     }

@@ -1974,7 +1974,7 @@ class TestController extends FController
         try {
             $adapter = Yii::createObject(\Prometheus\Storage\Redis::class);
             $adapter::setDefaultOptions(Yii::$app->prometheus->redisOptions);
-            $adapter->flushRedis();
+            $adapter->wipeStorage();
         } catch (\Throwable $throwable) {
             \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
         }
@@ -2156,10 +2156,6 @@ class TestController extends FController
 
     public function actionZ()
     {
-
-
-
-
         return $this->render('z');
     }
 

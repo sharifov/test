@@ -348,7 +348,7 @@ class FlightQuoteManageService implements ProductQuoteService
             $tripNr = (int)$tripKey + 1;
             $segmentNr = 1;
 
-            $flightTrip = FlightQuoteTrip::create($flightQuote, $trip['duration']);
+            $flightTrip = FlightQuoteTrip::create($flightQuote, (int) $trip['duration']);
             $this->flightQuoteTripRepository->save($flightTrip);
 
             $this->createSegment($trip, $flightQuote, $flightTrip, $tripNr, $segmentNr);
