@@ -9,10 +9,10 @@ return [
         'order' => \modules\order\src\abac\OrderAbacObject::class
     ],
     'scanDirs' => [
-        '@root/modules/',
-        '@root/frontend/',
-        '@root/common/',
-        '@root/sales/',
+        '/modules/',
+        '/frontend/',
+        '/common/',
+        '/sales/',
     ],
     'scanExtMask' => ['*.php'],
 ];

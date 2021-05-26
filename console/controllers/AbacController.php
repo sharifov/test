@@ -2,16 +2,12 @@
 
 namespace console\controllers;
 
-use modules\abac\components\AbacComponent;
-use modules\abac\src\entities\abacDoc\AbacDoc;
 use modules\abac\src\services\AbacDocService;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
-use yii\helpers\FileHelper;
 use yii\helpers\VarDumper;
 
 /**
