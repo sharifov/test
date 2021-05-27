@@ -6,8 +6,6 @@ use modules\hotel\models\HotelQuote;
 use modules\order\src\entities\order\Order;
 use yii\helpers\ArrayHelper;
 
-use function Amp\Promise\timeoutWithDefault;
-
 /**
  * Class HotelQuoteBookGuard
  * @package modules\hotel\src\useCases\api\bookQuote

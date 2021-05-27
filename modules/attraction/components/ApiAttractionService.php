@@ -12,6 +12,7 @@ namespace modules\attraction\components;
 use modules\attraction\models\Attraction;
 use modules\attraction\models\forms\AttractionOptionsFrom;
 use modules\attraction\models\forms\AvailabilityPaxFrom;
+use modules\attraction\models\forms\BookingAnswersForm;
 use yii\base\Component;
 use yii\httpclient\Request;
 use Datetime;
@@ -422,13 +423,256 @@ class ApiAttractionService extends Component
                     }
                 }
             }',
-            'variables' => '{"term":"' . $attraction->atn_destination . '"}',
-            'operationName' => 'holibob',
+            'variables' => '{"term":"' . $attraction->atn_destination . '"}'
         ];
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
         return $data['data'] ?? [];
+    }
+
+    public function createBooking()
+    {
+        $query = [
+            'query' => 'mutation CreateBooking {
+                bookingCreate
+                {
+                    id
+                    state
+                    isComplete
+                }
+            }'
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        //VarDumper::dump($data, 10, true); exit();
+        return $data;
+    }
+
+    public function bookingAddAvailability($bookingId, $availabilityId)
+    {
+        $query = [
+            'query' => 'mutation holibob($bookingId: String!, $availabilityId: String!) {
+                bookingAddAvailability(
+                    input: {
+                        bookingSelector: {
+                            id: $bookingId
+                        }, 
+                        id: $availabilityId
+                    }
+                ) {
+                    id
+                    state
+                    isComplete
+                    isSandboxed
+                    paymentState
+                    isQuestionsComplete
+                  }
+            }',
+            'variables' => '{"bookingId":"' . $bookingId . '", "availabilityId":"' . $availabilityId . '"}'
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        //VarDumper::dump($data, 10, true); exit();
+        return $data;
+    }
+
+    public function fetchBooking($bookingId)
+    {
+        $query = [
+            'query' => 'query holibob($bookingId: String!) {
+                booking(id: $bookingId) {
+                    id
+                    code
+                    leadPassengerName
+                    reference
+                    isComplete
+                    paymentState
+                    isQuestionsComplete
+                    isSandboxed
+                    state
+                    ticketUrl
+                    partnerChannelBookingUrl
+                
+                    questionList {
+                        nodes {
+                            id
+                            label
+                            answerValue
+                            isRequired
+                            isAnswered
+                            dataType
+                            availableOptions {
+                                label
+                                value
+                            }
+                        }
+                    }
+                    availabilityList {
+                        nodes {
+                            id
+                            date
+                            product {
+                                id
+                                name
+                                previewImage {
+                                    url
+                                }
+                            }
+                            optionList {
+                                nodes {
+                                    label
+                                    answerValue
+                                    answerFormattedText
+                                }
+                            }
+                            questionList {
+                                nodes {
+                                    id
+                                    label
+                                    answerValue
+                                    isRequired
+                                    isAnswered
+                                    dataType
+                                    availableOptions {
+                                      label
+                                      value
+                                    }
+                                }
+                            }
+                            personList {
+                                nodes {
+                                    id
+                                    pricingCategoryLabel
+                                    isQuestionsComplete
+                                    questionList {
+                                        nodes {
+                                            id
+                                            label
+                                            answerValue
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }',
+            'variables' => '{"bookingId":"' . $bookingId . '"}'
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        //VarDumper::dump($data, 10, true); exit();
+        return $data;
+    }
+
+    public function inputAnswersToBooking(BookingAnswersForm $booking): array
+    {
+        $queryParamsDefinition = '$bookingId: String! $leadPassengerName: String! $reference: String!';
+        $queryInputAnswerListParamsDefinition = '';
+        $queryVariables = '{"bookingId":"' . $booking->bookingId . '", "leadPassengerName": "' . $booking->leadPassengerName . '", "reference": "' . $booking->quoteId . '"';
+
+        $answers = $booking->booking_answers;
+
+        foreach ($answers as $key => $answer) {
+            $queryParamsDefinition .= ' $questionId' . $key . ': String! $questionValue' . $key . ': String!';
+            $queryInputAnswerListParamsDefinition .=  '{questionId: $questionId' . $key . ' value: $questionValue' . $key . '} ';
+            $queryVariables .= ', "questionId' . $key . '":"' . key($answer) . '", "questionValue' . $key . '":"' . $answer[key($answer)] . '"';
+        }
+        $queryVariables .= '}';
+
+        $query = [
+            'query' => 'query holibob (
+                    ' . $queryParamsDefinition . '
+                ){
+                booking(
+                    id: $bookingId 
+                    input: {            
+                        leadPassengerName: $leadPassengerName
+                        reference: $reference
+                        answerList: [ 
+                            ' . $queryInputAnswerListParamsDefinition . '        
+                        ]
+                    }
+                ) {
+                    id
+                    code
+                    canCommit
+                    leadPassengerName
+                    reference
+                    isComplete
+                    isQuestionsComplete
+                    paymentState
+                    state
+                    partnerChannelBookingUrl
+                
+                    questionList {
+                        nodes {
+                            id
+                            label
+                            answerValue
+                            isRequired
+                            isAnswered
+                            dataType
+                            dataFormat        
+                            availableOptions {
+                                label
+                                value
+                            }
+                        }
+                    }
+                    availabilityList {
+                        nodes {
+                            id
+                            date
+                            product {
+                                id
+                                name
+                                previewImage {
+                                    url
+                                }
+                            }
+                            optionList {
+                                nodes {
+                                    label
+                                    answerValue
+                                    answerFormattedText
+                                }
+                            }
+                            questionList {
+                                nodes {
+                                    label
+                                    defaultValue
+                                    answerValue
+                                }
+                            }
+                            personList {
+                                nodes {
+                                    id
+                                    pricingCategoryLabel
+                                    isQuestionsComplete
+                                    questionList {
+                                        nodes {
+                                            label
+                                            answerValue
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }',
+            'variables' => $queryVariables
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        //VarDumper::dump($query, 10, true); exit();
+        return $data;
     }
 
     public function checkApi()

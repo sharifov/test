@@ -8,9 +8,10 @@
         xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
     <projectFiles>
-        <directory name="webapi" />
+        <directory name="/" />
         <ignoreFiles>
-            <directory name="./vendor" />
+            <directory name="vendor" />
+            <directory name="docker" />
             <directory name="webapi/tests" />
         </ignoreFiles>
     </projectFiles>

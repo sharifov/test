@@ -1,0 +1,18 @@
+
+
+p, r.sub.env.user.username == 'alex.connor2', data2, (write), allow
+p, 'admin2' in r.sub.env.user.roles, data2, (read), allow
+p, 'arangrant2' in r.sub.env.user.projects, data2, (read), allow
+p, 'office test2' in r.sub.env.user.groups, data2, (read), allow
+p, r.sub.env.req.ip == '127.0.0.2', data2, (read), allow
+p, r.sub.env.req.action == 'local-test/abac2', data2, (read), allow
+p, r.sub.env.req.action == 'local-test/abac', data3*, (read)|(write), allow
+p, r.sub.env.req.action matches "|local-test/abaC|i", data2, (read)|(write), deny
+
+
+p, r.sub.env.req.action == 'local-test/abac' && true, data4, (read)|(write), allow
+p, r.sub.env.req.action == 'local-test/abac', data4, (read)|(write), deny
+
+
+
+

@@ -8,16 +8,16 @@ use yii\queue\JobInterface;
 /**
  * Class SmsPriceJob
  *
- * @property string $smsSid
+ * @property array $smsSids
  */
 class SmsPriceJob implements JobInterface
 {
-    public string $smsSid;
+    public array $smsSids;
 
     public function execute($queue)
     {
         try {
-            (\Yii::createObject(UpdateSmsPrice::class))->update($this->smsSid);
+            (\Yii::createObject(UpdateSmsPrice::class))->update($this->smsSids);
         } catch (\Throwable $e) {
             \Yii::info($e->getMessage(), 'info\SmsPriceJob');
         }

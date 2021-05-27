@@ -13,8 +13,6 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
-use function Amp\Promise\timeoutWithDefault;
-
 /**
  * This is the model class for table "call_command".
  *

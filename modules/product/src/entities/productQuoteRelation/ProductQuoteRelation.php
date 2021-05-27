@@ -6,6 +6,7 @@ use common\models\Employee;
 use modules\product\src\entities\productQuote\ProductQuote;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -20,6 +21,8 @@ use yii\db\ActiveRecord;
  * @property Employee $pqrCreatedUser
  * @property ProductQuote $pqrParentPq
  * @property ProductQuote $pqrRelatedPq
+ * @property ProductQuote $originProductQuote
+ * @property ProductQuote $alternativeProductQuote
  */
 class ProductQuoteRelation extends \yii\db\ActiveRecord
 {
@@ -87,17 +90,27 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getPqrCreatedUser(): \yii\db\ActiveQuery
+    public function getPqrCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'pqr_created_user_id']);
     }
 
-    public function getPqrParentPq(): \yii\db\ActiveQuery
+    public function getPqrParentPq(): ActiveQuery
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqr_parent_pq_id']);
     }
 
-    public function getPqrRelatedPq(): \yii\db\ActiveQuery
+    public function getPqrRelatedPq(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqr_related_pq_id']);
+    }
+
+    public function getOriginProductQuote(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqr_parent_pq_id']);
+    }
+
+    public function getAlternativeProductQuote(): ActiveQuery
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqr_related_pq_id']);
     }

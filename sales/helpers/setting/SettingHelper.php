@@ -4,8 +4,10 @@ namespace sales\helpers\setting;
 
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use common\models\Lead;
 use frontend\helpers\JsonHelper;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 class SettingHelper
@@ -306,5 +308,20 @@ class SettingHelper
             }
         }
         return $period[array_key_last($period)];
+    }
+
+    public static function getLeadApiGoogleAllowCreate(): int
+    {
+        return (bool) ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.allow_create', false);
+    }
+
+    public static function getLeadApiGoogleStatusId(): int
+    {
+        return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.default_status_id', Lead::STATUS_PENDING);
+    }
+
+    public static function getLeadApiGoogleDepartmentId(): int
+    {
+        return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.default_department_id', Department::DEPARTMENT_SALES);
     }
 }

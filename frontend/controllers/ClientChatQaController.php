@@ -22,8 +22,6 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
-use function Amp\Promise\timeoutWithDefault;
-
 /**
  * ClientChatQaController implements the CRUD actions for ClientChat model.
  *

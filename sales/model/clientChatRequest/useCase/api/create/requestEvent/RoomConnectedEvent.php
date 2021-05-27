@@ -4,6 +4,7 @@ namespace sales\model\clientChatRequest\useCase\api\create\requestEvent;
 
 use common\models\Lead;
 use common\models\Notifications;
+use mysql_xdevapi\Warning;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\clientChat\entity\ClientChat;

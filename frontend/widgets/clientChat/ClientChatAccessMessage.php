@@ -52,7 +52,8 @@ class ClientChatAccessMessage
         return [
             'command' => self::COMMAND_RESET,
             'items' => $data['items'],
-            'totalItems' => $data['totalItems']
+            'totalItems' => $data['totalItems'],
+            'widgetEnabled' => $data['widgetEnabled']
         ];
     }
 
@@ -190,7 +191,8 @@ class ClientChatAccessMessage
         $widget->userId = $userId;
         return [
             'items' => $widget->fetchItems(),
-            'totalItems' => $widget->getTotalItems()
+            'totalItems' => $widget->getTotalItems(),
+            'widgetEnabled' => $widget->detectWidgetStatus()
         ];
     }
 

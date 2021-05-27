@@ -7,6 +7,7 @@ use common\models\ClientPhone;
 use sales\model\lead\LeadCodeException;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
 use sales\model\lead\useCases\lead\api\create\LeadCreateValue;
+use unclead\multipleinput\assets\FontAwesomeAsset;
 use webapi\src\Messages;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;

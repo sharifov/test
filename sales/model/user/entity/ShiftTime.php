@@ -2,6 +2,9 @@
 
 namespace sales\model\user\entity;
 
+use common\models\Employee;
+use kartik\select2\ThemeDefaultAsset;
+
 /**
  * Class ShiftTime
  *
@@ -23,7 +26,7 @@ class ShiftTime
     public $endUtcDt;
     public $endLastPeriodDt;
 
-    public function __construct(?StartTime $startTime = null, ?int $workSeconds = null, ?string $timeZone = null)
+    public function __construct(?StartTime $startTime = null, ?int $workSeconds = null, ?string $timeZone = null, string $resultFormat = 'Y-m-d H:i:s')
     {
         if ($startTime === null || $workSeconds === null || $timeZone === null) {
             return;
@@ -56,9 +59,9 @@ class ShiftTime
         $this->endUtcTs = $endShiftTimeUTC->getTimestamp();
         $this->endLastPeriodTs = $this->endUtcTs - self::SECONDS_ON_DAY;
 
-        $this->startUtcDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
-        $this->endUtcDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
-        $this->endLastPeriodDt = date('Y-m-d H:i:s', $this->endLastPeriodTs);
+        $this->startUtcDt = $startShiftTimeUTC->format($resultFormat);
+        $this->endUtcDt = $endShiftTimeUTC->format($resultFormat);
+        $this->endLastPeriodDt = date($resultFormat, $this->endLastPeriodTs);
     }
 
     /**
@@ -72,5 +75,25 @@ class ShiftTime
             && $this->startUtcDt === null
             && $this->endUtcDt === null
             && $this->endLastPeriodDt === null;
+    }
+
+    /**
+     * @param Employee $user
+     * @return ShiftTime
+     */
+    public static function getByUser(Employee $user): ShiftTime
+    {
+        $user->userParams->up_work_minutes = $user->userParams->up_work_minutes ?: 480;
+        $startTime = $user->userParams->up_work_start_tm;
+        $workSeconds = (int) $user->userParams->up_work_minutes * 60;
+
+        if ($startTime && $workSeconds) {
+            return new self(
+                new StartTime($startTime),
+                $workSeconds,
+                ($user->userParams->up_timezone ?: 'UTC')
+            );
+        }
+        throw new \DomainException('User id (' . $user->getId() . ') has no parameters (startTime,workSeconds) set');
     }
 }

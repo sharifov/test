@@ -2631,6 +2631,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $projects[$project->id] = [
                 'id' => $project->id,
                 'name' => $project->name,
+                'key' => $project->project_key,
                 'closed' => $project->closed,
             ];
         }
@@ -2727,5 +2728,63 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function can(string $permission, array $params = []): bool
     {
         return Yii::$app->authManager->checkAccess($this->id, $permission, $params);
+    }
+
+
+    /**
+     * @param bool $onlyNames
+     * @return array
+     */
+    public function getRoleList(): array
+    {
+        if ($this->rolesName === null) {
+            //todo
+            $query = (new Query())->select('b.*')
+                ->from(['a' => 'auth_assignment', 'b' => 'auth_item'])
+                ->where('{{a}}.[[item_name]]={{b}}.[[name]]')
+                ->andWhere(['a.user_id' => (string) $this->id])
+                ->andWhere(['b.type' => 1]);
+            $this->rolesName = ArrayHelper::map($query->all(), 'name', 'description');
+//            $this->rolesName = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
+        }
+        if ($onlyNames) {
+            return array_keys($this->rolesName);
+        }
+        return $this->rolesName;
+    }
+
+
+    /**
+     * @return array
+     */
+    public static function getEnvListWOCache(): array
+    {
+        $data = self::find()->orderBy(['ug_name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'ug_name', 'ug_name');
+    }
+
+
+    /**
+     * @return array
+     */
+    public static function getEnvList(): array
+    {
+        if (self::CACHE_KEY) {
+            $list = Yii::$app->cache->get(self::CACHE_KEY);
+            if ($list === false) {
+                $list = self::getEnvListWOCache();
+
+                Yii::$app->cache->set(
+                    self::CACHE_KEY,
+                    $list,
+                    0,
+                    new TagDependency(['tags' => self::CACHE_TAG_DEPENDENCY])
+                );
+            }
+        } else {
+            $list = self::getEnvListWOCache();
+        }
+
+        return $list;
     }
 }

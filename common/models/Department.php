@@ -4,9 +4,11 @@ namespace common\models;
 
 use common\models\query\DepartmentQuery;
 use sales\model\department\department\Params;
+use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\bootstrap4\Html;
+use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
@@ -50,6 +52,9 @@ class Department extends \yii\db\ActiveRecord
         self::DEPARTMENT_SCHEDULE_CHANGE    => 'primary',
         self::DEPARTMENT_FRAUD_PREVENTION    => 'secondary',
     ];
+
+    public const CACHE_KEY = 'department';
+    public const CACHE_TAG_DEPENDENCY = 'department-tag-dependency';
 
     private static function getCssClass(?int $value): string
     {
@@ -246,6 +251,63 @@ class Department extends \yii\db\ActiveRecord
         } catch (\Throwable $e) {
             \Yii::error($e->getMessage(), 'Department:getParams');
             return null;
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public static function getEnvListWOCache(): array
+    {
+        $data = self::find()->orderBy(['dep_id' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'dep_key', 'dep_name');
+    }
+
+    /**
+     * @return array
+     */
+    public static function getEnvList(): array
+    {
+        //Yii::$app->cache->delete(self::CACHE_KEY);
+        if (self::CACHE_KEY) {
+            $list = Yii::$app->cache->get(self::CACHE_KEY);
+            if ($list === false) {
+                $list = self::getEnvListWOCache();
+
+                Yii::$app->cache->set(
+                    self::CACHE_KEY,
+                    $list,
+                    0,
+                    new TagDependency(['tags' => self::CACHE_TAG_DEPENDENCY])
+                );
+            }
+        } else {
+            $list = self::getEnvListWOCache();
+        }
+        return $list;
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (self::CACHE_TAG_DEPENDENCY) {
+            TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
+        }
+    }
+
+    /**
+     *
+     */
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        if (self::CACHE_TAG_DEPENDENCY) {
+            TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG_DEPENDENCY);
         }
     }
 }

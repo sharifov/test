@@ -62,6 +62,12 @@ return [
         'enabled' => false,
         'wsConnectionUrl' => 'wss://app.sales.com/centrifugo/connection/websocket',
     ],
+    'search' => [
+        'host' => '',
+        'sid' => '',
+        'username' => '',
+        'password' => ''
+    ],
     'clientChat' => [
         'projectConfig' => [
             'params' => [

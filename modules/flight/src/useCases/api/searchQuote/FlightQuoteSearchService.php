@@ -42,7 +42,7 @@ class FlightQuoteSearchService
 
         $params = [
             'cabin' => $flight->getCabinRealCode($flight->fl_cabin_class),
-            'cid' => 'SAL101',
+            'cid' => \Yii::$app->params['search']['sid'],
             'adt' => $flight->fl_adults,
             'chd' => $flight->fl_children,
             'inf' => $flight->fl_infants,

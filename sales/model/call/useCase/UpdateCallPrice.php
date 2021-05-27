@@ -20,40 +20,44 @@ class UpdateCallPrice
         $this->repo = $repo;
     }
 
-    public function update(string $callSid): void
+    public function update(array $callSids): void
     {
         $result = [];
         try {
-            $call = $this->repo->findBySid($callSid);
-            $result = \Yii::$app->communication->getCallPrice($call->c_call_sid);
+            $result = \Yii::$app->communication->getCallPrice($callSids);
+
             if ($result['error']) {
                 throw new \DomainException($result['message']);
             }
 
-            if (isset($result['result']['status']) && $result['result']['status'] === 'busy') {
-                $call->setPrice(0);
+            foreach ($result['result'] as $sid => $callData) {
+                $call = $this->repo->findBySid($sid);
+
+                if (isset($callData['status']) && $callData['status'] === 'busy') {
+                    $call->setPrice(0);
+                    $this->repo->save($call);
+                    continue;
+                }
+
+                if (!isset($callData['price'])) {
+    //                \Yii::info(VarDumper::dumpAsString([
+    //                    'callSid' => $callSid,
+    //                    'message' => 'Not found price',
+    //                ]), 'info\UpdateCallPrice');
+                    continue;
+                }
+
+                $price = $callData['price'];
+                $validator = new NumberValidator();
+                if (!$validator->validate($price, $error)) {
+                    throw new \DomainException('Price Error: ' . $error);
+                }
+
+                $call->setPrice(abs($price));
                 $this->repo->save($call);
-                return;
             }
-
-            if (!isset($result['result']['price'])) {
-//                \Yii::info(VarDumper::dumpAsString([
-//                    'callSid' => $callSid,
-//                    'message' => 'Not found price',
-//                ]), 'info\UpdateCallPrice');
-                return;
-            }
-
-            $price = $result['result']['price'];
-            $validator = new NumberValidator();
-            if (!$validator->validate($price, $error)) {
-                throw new \DomainException('Price Error: ' . $error);
-            }
-
-            $call->setPrice(abs($price));
-            $this->repo->save($call);
         } catch (\Throwable $e) {
-            throw new \Exception(VarDumper::dumpAsString(['callSid' => $callSid, 'message' => $e->getMessage(), 'result' => $result]));
+            throw new \Exception(VarDumper::dumpAsString(['callSid' => $sid, 'message' => $e->getMessage(), 'result' => $result]));
         }
     }
 }

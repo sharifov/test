@@ -309,6 +309,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
                         ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate']],
                         ['label' => 'Export Leads', 'url' => ['/leads/export']],
+                        ['label' => 'Lead Request', 'url' => ['/lead-request-crud']],
+                        ['label' => 'Lead Data', 'url' => ['/lead-data-crud']],
                     ]
                 ]
             ]
@@ -414,6 +416,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Project Settings', 'url' => ['/settings/projects']],
                         ['label' => 'Project Locales', 'url' => ['/project-locale/index']],
                         ['label' => 'Project Relation', 'url' => ['/project-relation-crud/index']],
+                        ['label' => 'App Project key', 'url' => ['/app-project-key-crud/index']],
                     ]
                 ],
 
@@ -537,6 +540,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
                 ['label' => 'User Monitor', 'url' => ['/user-monitor/index'], 'icon' => 'list'],
                 ['label' => 'User Monitor Stats', 'url' => ['/user-monitor/stats'], 'icon' => 'list'],
+                [
+                    'label' => 'User model setting crud',
+                    'url' => ['/user-model-setting-crud/index'],
+                    'icon' => 'list',
+                ],
             ]
         ];
 
@@ -677,7 +685,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'items' => [
                         ['label' => Yii::t('menu', 'Incoming Call'), 'url' => ['/monitor/call-incoming']],
                     ]
-                ]
+                ],
+                ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
             ]
         ];
 
@@ -750,6 +759,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Permission', 'url' => ['/rbac/permission']],
                 ['label' => 'Role', 'url' => ['/rbac/role']],
                 ['label' => 'Import / Export', 'url' => ['/rbac-import-export/log']],
+            ],
+        ];
+
+        $menuItems[] = [
+            'label' => 'ABAC',
+            'url' => 'javascript:',
+            'icon' => 'cogs',
+            'items' => [
+                ['label' => 'ABAC Policy List', 'url' => ['/abac/abac-policy']],
+                ['label' => 'Policy List Content', 'url' => ['/abac/abac-policy/list-content']],
             ],
         ];
 

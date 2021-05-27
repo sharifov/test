@@ -12,6 +12,7 @@ use common\models\Quote;
 use common\models\Airline;
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
+use sales\helpers\quote\ImageHelper;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 
@@ -51,9 +52,13 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
             <span class="quote__id" title="<?php echo $model->check_payment ?>">QUID: <strong><?= $model->uid ?></strong></span>
             <span class="quote__vc" title="Main Airline">
-                <span class="quote__vc-logo">
-                    <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $model->main_airline_code?>.png" alt="" class="quote__vc-img">
-                </span>
+
+                <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $model->main_airline_code . '.png' ?>
+                <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                    <span class="quote__vc-logo">
+                        <img src="<?php echo $airlineLogo ?>" alt="" class="quote__vc-img">
+                    </span>
+                <?php endif ?>
 
                 <?php $airline = $model->mainAirline;
                 if ($airline) {
@@ -218,10 +223,15 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 ?>
             <div class="quote__segment">
                 <div class="quote__info">
-                    <?php if (count($marketingAirlines) == 1) :?>
-                    <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $marketingAirlines[0]?>.png" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
+                    <?php if (count($marketingAirlines) === 1) :?>
+                        <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
+                        <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                            <img src="<?php echo $airlineLogo ?>" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
+                        <?php else : ?>
+                            <img src="/img/_blank.png" class="quote__airline-logo" alt=" " />
+                        <?php endif ?>
                     <?php else :?>
-                    <img src="/img/multiple_airlines.png" alt="<?= implode(', ', $marketingAirlines)?>" class="quote__airline-logo">
+                        <img src="/img/multiple_airlines.png" alt="<?= implode(', ', $marketingAirlines)?>" class="quote__airline-logo">
                     <?php endif;?>
                     <div class="quote__info-options">
                         <div class="quote__duration"><?= SearchService::durationInMinutes($trip->qt_duration)?></div>

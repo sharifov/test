@@ -58,6 +58,11 @@ class ClientChatAccessWidget extends Widget
      */
     public bool $open = false;
 
+    /**
+     * @var bool
+     */
+    public bool $enabled = true;
+
     public static function getInstance(): ClientChatAccessWidget
     {
         if (null === self::$instance) {
@@ -141,6 +146,23 @@ class ClientChatAccessWidget extends Widget
         $accessItem['cch_created_t'] = strtotime($accessItem['cch_created_dt']);
 
         return $accessItem;
+    }
+
+    public function detectWidgetStatus(): bool
+    {
+        $user = Employee::findOne(['id' => $this->userId]);
+
+        if (!$user) {
+            return $this->enabled = false;
+        }
+
+        $userChatData = $user->userClientChatData;
+
+        if (!$userChatData) {
+            return $this->enabled = false;
+        }
+
+        return $this->enabled = !$userChatData->isStatusBusy();
     }
 
     private function getOffset()
