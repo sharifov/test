@@ -32,6 +32,9 @@ class AbacDocSearch extends AbacDoc
             'sort' => [
                 'defaultOrder' => ['ad_id' => SORT_DESC]
             ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
