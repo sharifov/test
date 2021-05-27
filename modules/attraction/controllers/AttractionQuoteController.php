@@ -414,10 +414,16 @@ class AttractionQuoteController extends FController
         $apiAttractionService = AttractionModule::getInstance()->apiService;
 
         $bookingDetails = $apiAttractionService->inputAnswersToBooking($answerModel);
+        $booking = $bookingDetails['data']['booking'];
+
+        if (strtolower($booking['state']) === 'open') {
+            $apiAttractionService->commitBooking($booking['id']);
+        }
+
         $result = [
             'message' => '',
             'status' => 1,
-            'html' => $this->renderAjax('booking_summary', ['bookingDetails' => $bookingDetails['data']['booking']]),
+            'html' => $this->renderAjax('booking_summary', ['bookingDetails' => $booking]),
         ];
         return $this->asJson($result);
     }
