@@ -389,6 +389,7 @@ class AttractionQuoteController extends FController
             $this->productQuoteRepository->save($productQuote);
             $resultAdd = $apiAttractionService->bookingAddAvailability($model->atnq_booking_id, $model->atnq_availability_id);
             $bookingDetails = $apiAttractionService->fetchBooking($model->atnq_booking_id);
+            //Yii::error(VarDumper::dumpAsString($bookingDetails['data']['booking']), 'AttractionQuoteController:actionAjaxBook:Throwable');
             $result = [
                 'message' => 'Attraction quote booking opened successful',
                 'status' => 1,

@@ -645,9 +645,16 @@ class ApiAttractionService extends Component
                             }
                             questionList {
                                 nodes {
+                                    id
                                     label
-                                    defaultValue
                                     answerValue
+                                    isRequired
+                                    isAnswered
+                                    dataType
+                                    availableOptions {
+                                      label
+                                      value
+                                    }
                                 }
                             }
                             personList {

@@ -6,6 +6,8 @@ use yii\helpers\Url;
 /**
  * @var $bookingDetails array
  */
+
+$answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['questionList']['nodes'] : $bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'];
 ?>
 <div class="container border border-dark rounded p-3">
     <div class="row">
@@ -49,8 +51,8 @@ use yii\helpers\Url;
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content" style="display: block">
-                    <?php foreach ($bookingDetails['questionList']['nodes'] as $question) : ?>
-                        <?= '<span class="badge badge-white">' . $question['label'] . '</span>: <b>' . $question['answerValue'] . '</b><br>' ?>
+                    <?php foreach ($answers as $answer) : ?>
+                        <?= '<span class="badge badge-white">' . $answer['label'] . '</span>: <b>' . $answer['answerValue'] . '</b><br>' ?>
                     <?php endforeach; ?>
                 </div>
             </div>

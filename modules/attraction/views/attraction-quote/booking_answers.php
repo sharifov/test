@@ -9,7 +9,7 @@ use yii\widgets\Pjax;
  * @var $model \modules\attraction\models\forms\BookingAnswersForm
  * @var $bookingDetails array
  */
-
+$answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['questionList']['nodes'] : $bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'];
 ?>
 <div class="container">
     <div class="row">
@@ -42,7 +42,7 @@ use yii\widgets\Pjax;
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content" style="display: block">
-                    <?php foreach ($bookingDetails['questionList']['nodes'] as $answerKey => $answer) :
+                    <?php foreach ($answers as $answerKey => $answer) :
                          $mappedOptions = ArrayHelper::map($answer['availableOptions'], 'value', 'label');
                         ?>
 
