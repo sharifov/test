@@ -199,6 +199,7 @@ class UserStatsSearch extends Model
                     ->from(LeadFlow::tableName())
                     ->where(LeadFlow::tableName() . '.lf_owner_id = ' . Employee::tableName() . '.id')
                     ->andWhere(['status' => Lead::STATUS_PROCESSING])
+                    ->andWhere(['NOT', ['lf_from_status_id' => null]])
                     ->andWhere(LeadFlow::tableName() . '.created BETWEEN :startDt AND :endDt', [
                         ':startDt' => $this->startDt, ':endDt' => $this->endDt,
                     ])
