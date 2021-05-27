@@ -9,7 +9,7 @@ use yii\widgets\Pjax;
  * @var $model \modules\attraction\models\forms\BookingAnswersForm
  * @var $bookingDetails array
  */
-$answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['questionList']['nodes'] : $bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'];
+//$answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['questionList']['nodes'] : $bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'];
 ?>
 <div class="container">
     <div class="row">
@@ -35,28 +35,54 @@ $answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['q
                     <?= $form->field($model, 'leadPassengerName') ?>
                 </div>
             </div>
+            <?php if (!empty($bookingDetails['questionList']['nodes'])) : ?>
+                <div class="x_panel rounded">
+                    <div class="x_title">
+                        <h2>Lead Person Details</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content" style="display: block">
+                        <?php foreach ($bookingDetails['questionList']['nodes'] as $answerKey => $answer) :
+                             $mappedOptions = ArrayHelper::map($answer['availableOptions'], 'value', 'label');
+                            ?>
 
+                            <?php if ($answer['dataType'] === 'BOOLEAN') : ?>
+                                  <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
+                            <?php elseif ($answer['dataType'] === 'TEXT') : ?>
+                                   <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                            <?php else : ?>
+                                   <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
+                            <?php endif; ?>
+
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'])) : ?>
             <div class="x_panel rounded">
                 <div class="x_title">
-                    <h2>Lead Person Details</h2>
+                    <h2>Additional Details</h2>
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content" style="display: block">
-                    <?php foreach ($answers as $answerKey => $answer) :
-                         $mappedOptions = ArrayHelper::map($answer['availableOptions'], 'value', 'label');
+                    <?php foreach ($bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'] as $answerKey => $answer) :
+                        $mappedOptions = ArrayHelper::map($answer['availableOptions'], 'value', 'label');
                         ?>
 
                         <?php if ($answer['dataType'] === 'BOOLEAN') : ?>
-                              <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
+                            <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
                         <?php elseif ($answer['dataType'] === 'TEXT') : ?>
-                               <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                            <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
                         <?php else : ?>
-                               <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
+                            <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
                         <?php endif; ?>
 
                     <?php endforeach; ?>
                 </div>
             </div>
+            <?php endif; ?>
+
             <div class="form-group text-center">
                   <?= Html::submitButton('<i class="fa fa-plus"></i> Answer', ['class' => 'btn btn-success btn-book-answer']) ?>
             </div>
