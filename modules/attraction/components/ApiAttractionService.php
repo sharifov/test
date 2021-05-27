@@ -683,6 +683,26 @@ class ApiAttractionService extends Component
         return $data;
     }
 
+    public function commitBooking(string $bookingId): array
+    {
+        $query = [
+            'query' => 'mutation holibob($bookingId: String!) {
+                bookingCommit(bookingSelector: {id: $bookingId}) {
+                    id
+                    state
+                    voucherUrl
+                    ticketUrl
+                }
+            }',
+            'variables' => '{"bookingId":"' . $bookingId . '"}'
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        //VarDumper::dump($data, 10, true); exit();
+        return $data;
+    }
+
     public function checkApi()
     {
         //$query = '{"query":"query {welcome}"}';

@@ -15,7 +15,7 @@ use yii\helpers\ArrayHelper;
 $paxForm->availability_id = $availability['id'];
 $model->availability_id = $availability['id'];
 $availabilityID = $availability['id'];
-
+$errorFormGeneration = false;
 ?>
 
 <?php if (!$availability['optionList']['isComplete']) : ?>
@@ -39,12 +39,24 @@ $availabilityID = $availability['id'];
                     <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->checkbox()->label($option['label']) ?>
                 <?php elseif ($option['dataType'] === 'TEXT') : ?>
                     <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->textInput()->label($option['label']) ?>
-                <?php else : ?>
+                <?php elseif ($option['dataType'] === 'OPTIONS') :
+                    $errorFormGeneration = empty($mappedOptions);
+                    ?>
                     <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->dropdownList($mappedOptions)->label($option['label']) ?>
+                <?php else : ?>
+                    <?= 'Unknown field datatype' ?>
                 <?php endif;?>
             </div>
         <?php endforeach; ?>
     </div>
+
+    <?php if ($errorFormGeneration) :?>
+        <div class="alert alert-warning" role="alert">
+            <p>Partner service returned inconsistent data.
+            Your may try to change answer for previous question and update.
+            If you still receive this message try other availability or new Attraction product.</p>
+        </div>
+    <?php endif; ?>
 
     <div class="form-group text-center">
         <?= Html::submitButton('<i class="fa fa-save"></i> Answer ', ['class' => 'btn btn-success .btn-add-attraction-answer']) ?>

@@ -147,10 +147,11 @@ class UserStatsSearch extends Model
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEAD_CREATED)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEAD_CREATED => (new Query())
-                    ->select(['COUNT(' . Lead::tableName() . '.id)'])
-                    ->from(Lead::tableName())
-                    ->where(Lead::tableName() . '.employee_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
+                    ->select(['COUNT(' . LeadFlow::tableName() . '.lead_id)'])
+                    ->from(LeadFlow::tableName())
+                    ->where(LeadFlow::tableName() . '.employee_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(['IN', 'lf_description', [LeadFlow::DESCRIPTION_MANUAL_CREATE, LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE]])
+                    ->andWhere(LeadFlow::tableName() . '.created BETWEEN :startDt AND :endDt', [
                         ':startDt' => $this->startDt, ':endDt' => $this->endDt,
                     ])
             ]);
@@ -197,7 +198,7 @@ class UserStatsSearch extends Model
                     ->select(['COUNT(' . LeadFlow::tableName() . '.lead_id)'])
                     ->from(LeadFlow::tableName())
                     ->where(LeadFlow::tableName() . '.lf_owner_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(['lf_description' => LeadFlow::DESCRIPTION_TAKE])
+                    ->andWhere(['status' => Lead::STATUS_PROCESSING])
                     ->andWhere(LeadFlow::tableName() . '.created BETWEEN :startDt AND :endDt', [
                         ':startDt' => $this->startDt, ':endDt' => $this->endDt,
                     ])
