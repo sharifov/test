@@ -7,7 +7,7 @@ use yii\helpers\Url;
  * @var $bookingDetails array
  */
 
-$answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['questionList']['nodes'] : $bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'];
+//$answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['questionList']['nodes'] : $bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'];
 ?>
 <div class="container border border-dark rounded p-3">
     <div class="row">
@@ -47,17 +47,34 @@ $answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['q
                 </div>
             </div>
 
-            <div class="x_panel rounded">
-                <div class="x_title">
-                    <h2>Lead Person Details</h2>
-                    <div class="clearfix"></div>
+            <?php if (!empty($bookingDetails['questionList']['nodes'])) : ?>
+                <div class="x_panel rounded">
+                    <div class="x_title">
+                        <h2>Lead Person Details</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content" style="display: block">
+                        <?php foreach ($bookingDetails['questionList']['nodes'] as $answer) : ?>
+                            <?= '<span class="badge badge-white">' . $answer['label'] . '</span>: <b>' . $answer['answerValue'] . '</b><br>' ?>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-                <div class="x_content" style="display: block">
-                    <?php foreach ($answers as $answer) : ?>
-                        <?= '<span class="badge badge-white">' . $answer['label'] . '</span>: <b>' . $answer['answerValue'] . '</b><br>' ?>
-                    <?php endforeach; ?>
+            <?php endif; ?>
+
+            <?php if (!empty($bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'])) : ?>
+                <div class="x_panel rounded">
+                    <div class="x_title">
+                        <h2>Additional Details</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content" style="display: block">
+                        <?php foreach ($bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'] as $answer) : ?>
+                            <?= '<span class="badge badge-white">' . $answer['label'] . '</span>: <b>' . $answer['answerValue'] . '</b><br>' ?>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
+
         </div>
         <div class="col-8">
             <div class="x_panel rounded">
