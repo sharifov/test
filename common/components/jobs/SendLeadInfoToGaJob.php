@@ -25,6 +25,7 @@ class SendLeadInfoToGaJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         try {
             if ($this->checkParams() && $gaLead = new GaLead($this->lead)) {
                 $gaLead->send();
@@ -36,7 +37,6 @@ class SendLeadInfoToGaJob extends BaseJob implements JobInterface
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'SendLeadInfoToGaJob:execute:Throwable');
         }
-        $this->executionTimeRegister();
         return false;
     }
 

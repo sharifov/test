@@ -25,6 +25,7 @@ class ClientChatEndConversationJob extends BaseJob implements RetryableJobInterf
      */
     public function execute($queue): void
     {
+        $this->executionTimeRegister();
         try {
             ClientChatEndConversationService::endConversation($this->clientChatId, $this->shallowClose);
         } catch (NotFoundException $throwable) {
@@ -33,10 +34,8 @@ class ClientChatEndConversationJob extends BaseJob implements RetryableJobInterf
                 'ClientChatEndConversationJob:Execute:Throwable'
             );
         } catch (\Throwable $throwable) {
-            $this->executionTimeRegister();
             throw new \Exception($throwable->getMessage());
         }
-        $this->executionTimeRegister();
     }
 
     /**

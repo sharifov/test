@@ -14,8 +14,11 @@ class LeadRequestJob extends BaseJob implements RetryableJobInterface
 {
     public $leadRequest;
 
+
+
     public function execute($queue)
     {
+        $this->executionTimeRegister();
         try {
             $leadCreateGoogleRequest = \Yii::$container->get(LeadCreateGoogleRequest::class);
             $leadCreateGoogleRequest->handle($this->leadRequest);
@@ -24,10 +27,8 @@ class LeadRequestJob extends BaseJob implements RetryableJobInterface
                 'message' => $throwable->getMessage(),
                 'leadRequest' => $this->leadRequest,
             ], 'LeadRequestJob:Throwable');
-            $this->executionTimeRegister();
             throw new \Exception($throwable->getMessage());
         }
-        $this->executionTimeRegister();
     }
 
     /**

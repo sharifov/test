@@ -27,6 +27,7 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         try {
             if ($this->user_id && $telegramChatId = TelegramService::getTelegramChatIdByUserId($this->user_id)) {
                 $tgm = Yii::$app->telegram;
@@ -35,9 +36,7 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                     'text' => strip_tags($this->text . PHP_EOL . '_Environment: ' . strtoupper(YII_ENV) . '_'),
                     'parse_mode' => 'markdown'
                 ]);
-
                 unset($tgm);
-                $this->executionTimeRegister();
                 return true;
             }
         } catch (\Throwable $throwable) {
@@ -66,7 +65,6 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                 ]), 'TelegramJob:execute:catch');
             }
         }
-        $this->executionTimeRegister();
         return false;
     }
 

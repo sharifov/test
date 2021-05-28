@@ -57,7 +57,7 @@ class AgentCallQueueJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
-
+        $this->executionTimeRegister();
         try {
 //            $this->casesCreateService = Yii::createObject(CasesCreateService::class);
 //            $this->clientManageService = Yii::createObject(ClientManageService::class);
@@ -118,7 +118,6 @@ class AgentCallQueueJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'AgentCallQueueJob:execute:Throwable');
         }
-        $this->executionTimeRegister();
         return false;
     }
 
