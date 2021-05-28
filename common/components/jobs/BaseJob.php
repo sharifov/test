@@ -16,7 +16,7 @@ class BaseJob extends BaseObject
     public float $timeStart;
     public Metrics $metrics;
 
-    private array $defaultBuckets = [1, 3, 5, 7, 10, 15, 30, 45, 60, 90];
+    private array $defaultBuckets = [1, 3, 5, 7, 10, 15, 30, 60, 300];
 
     /**
      * @param Metrics $metrics
@@ -29,7 +29,7 @@ class BaseJob extends BaseObject
         parent::__construct($config);
     }
 
-    public function executionTimeRegister(array $buckets = null): bool
+    public function executionTimeRegister(?array $buckets = null): bool
     {
         if (!$limitExecution = SettingHelper::getMetricJobTimeExecution()) {
             return false;
