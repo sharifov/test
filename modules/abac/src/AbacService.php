@@ -3,6 +3,7 @@
 namespace modules\abac\src;
 
 use modules\abac\components\AbacBaseModel;
+use yii\helpers\VarDumper;
 
 class AbacService
 {
@@ -76,7 +77,19 @@ class AbacService
                     }
 
                     if ($rule['type'] === 'string' || $rule['type'] === 'date' || $rule['type'] === 'time') {
-                        $value = '"' . $value . '"';
+
+                        if (!is_array($value)) {
+                            $value = '"' . $value . '"';
+                        } else {
+                           // VarDumper::dump($value); exit;
+                        }
+
+                    }
+
+
+                    if (($rule['operator'] === '==' || $rule['operator'] === '===') && is_array($value)) {
+                        $rule['operator'] = AbacBaseModel::OP_IN;
+                        $values = $value;
                     }
 
 
@@ -150,12 +163,12 @@ class AbacService
                                     $valArr[] = $val;
                                 }
                             }
-                            $operator = $field . ' in (' . implode(', ', $valArr) . ')';
+                            $operator = $field . ' in [' . implode(',', $valArr) . ']';
                             break;
                         case AbacBaseModel::OP_IN_ARRAY:
-//                            if ($rule['type'] === 'string') {
-//                                $value = '"' . $value . '"';
-//                            }
+                            if ($rule['type'] === 'string') {
+                                $value = '"' . $value . '"';
+                            }
                             $operator = $value . ' in ' . $field;
                             break;
                         case AbacBaseModel::OP_NOT_IN:
@@ -169,7 +182,7 @@ class AbacService
                                     $valArr[] = $val;
                                 }
                             }
-                            $operator = $field . ' not in (' . implode(', ', $valArr) . ')';
+                            $operator = $field . ' not in [' . implode(',', $valArr) . ']';
                             break;
                         case AbacBaseModel::OP_NOT_IN_ARRAY:
 //                            if ($rule['type'] === 'string') {
