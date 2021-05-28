@@ -112,6 +112,8 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
             'field' => 'profit_amount',
             'label' => 'Profit amount',
             'type' => self::ATTR_TYPE_DOUBLE,
+            'input' => self::ATTR_INPUT_NUMBER,
+            'validation' => ['step' => 0.01],
             'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
                 self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
