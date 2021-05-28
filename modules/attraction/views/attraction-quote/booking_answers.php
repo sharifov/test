@@ -10,6 +10,8 @@ use yii\widgets\Pjax;
  * @var $bookingDetails array
  */
 //$answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['questionList']['nodes'] : $bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'];
+
+$formFieldIndex = 0;
 ?>
 <div class="container">
     <div class="row">
@@ -43,6 +45,7 @@ use yii\widgets\Pjax;
                     </div>
                     <div class="x_content" style="display: block">
                         <?php foreach ($bookingDetails['questionList']['nodes'] as $answerKey => $answer) :
+                             ++$formFieldIndex;
                              $mappedOptions = ArrayHelper::map($answer['availableOptions'], 'value', 'label');
                             ?>
 
@@ -71,11 +74,11 @@ use yii\widgets\Pjax;
                         ?>
 
                         <?php if ($answer['dataType'] === 'BOOLEAN') : ?>
-                            <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
+                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
                         <?php elseif ($answer['dataType'] === 'TEXT') : ?>
-                            <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
                         <?php else : ?>
-                            <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
+                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
                         <?php endif; ?>
 
                     <?php endforeach; ?>

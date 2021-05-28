@@ -390,7 +390,7 @@ class AttractionQuoteController extends FController
             $resultAdd = $apiAttractionService->bookingAddAvailability($model->atnq_booking_id, $model->atnq_availability_id);
             $bookingDetails = $apiAttractionService->fetchBooking($model->atnq_booking_id);
 
-            //Yii::error(VarDumper::dumpAsString($bookingDetails), 'AttractionQuoteController:actionAjaxBook:bookingDetails');
+            //Yii::warning(VarDumper::dumpAsString($bookingDetails), 'AttractionQuoteController:actionAjaxBook:bookingDetails');
 
             $result = [
                 'message' => 'Attraction quote booking opened successful',
@@ -446,13 +446,49 @@ class AttractionQuoteController extends FController
             $productQuote->booked(Auth::id());
             $this->productQuoteRepository->save($productQuote);
         }
-        //Yii::error(VarDumper::dumpAsString($bookingDetails, 100), 'AttractionQuoteController:actionCheckBookingConfirmation:bookingDetails');
+
+        //Yii::warning(VarDumper::dumpAsString($bookingDetails, 100), 'AttractionQuoteController:actionCheckBookingConfirmation:bookingDetails');
+
         $result = [
-            'message' => '',
             'status' => 1,
+            'message' => 'Booking status: ' . $booking['state'],
             'productID' => !empty($productQuote->pq_product_id) ? $productQuote->pq_product_id : 0,
             'html' => $this->renderAjax('booking_summary', ['bookingDetails' => $booking]),
         ];
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxBookingState()
+    {
+        $quoteId = Yii::$app->request->post('id', 0);
+        $model = $this->findModel($quoteId);
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
+        $bookingDetails = $apiAttractionService->fetchBooking($model->atnq_booking_id);
+        $booking = $bookingDetails['data']['booking'];
+
+        //Yii::warning(VarDumper::dumpAsString($bookingDetails, 100), 'AttractionQuoteController:actionAjaxBookingState:bookingDetails');
+
+        if (!$booking['canCommit'] && strtolower($booking['state']) !== 'open') {
+            $result = [
+                'status' => 1,
+                'message' => 'Booking status: ' . $booking['state'],
+                //'productID' => !empty($model->atnqAttraction->atn_product_id) ? $model->atnqAttraction->atn_product_id : 0,
+                'html' => $this->renderAjax('booking_summary', ['bookingDetails' => $booking]),
+            ];
+        } else {
+            $answerModel = new BookingAnswersForm();
+            $answerModel->quoteId = $quoteId;
+            $result = [
+                'message' => '',
+                'status' => 1,
+                'productID' => !empty($model->atnqAttraction->atn_product_id) ? $model->atnqAttraction->atn_product_id : 0,
+                'html' => $this->renderAjax('booking_answers', [
+                    'model' => $answerModel,
+                    'bookingDetails' => $bookingDetails['data']['booking']
+                ])
+            ];
+        }
+
         return $this->asJson($result);
     }
 
