@@ -32,6 +32,7 @@ class TestJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         $metrics = \Yii::$container->get(Metrics::class);
         $timeStart = microtime(true);
 
@@ -41,7 +42,6 @@ class TestJob extends BaseJob implements JobInterface
         $seconds = round(microtime(true) - $timeStart, 1);
         $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds);
         unset($metrics);
-        $this->executionTimeRegister();
         return true;
     }
 

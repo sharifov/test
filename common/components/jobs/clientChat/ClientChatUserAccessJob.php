@@ -22,7 +22,7 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
      */
     public function execute($queue)
     {
-
+        $this->executionTimeRegister();
         $service = \Yii::createObject(ClientChatService::class);
 
         try {
@@ -40,6 +40,5 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
         } catch (\Throwable $e) {
             AppHelper::throwableLogger($e, 'ClientChatUserAccessJob:Execute:Throwable', false);
         }
-        $this->executionTimeRegister();
     }
 }

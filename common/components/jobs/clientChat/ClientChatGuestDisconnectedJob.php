@@ -25,6 +25,7 @@ class ClientChatGuestDisconnectedJob extends BaseJob implements JobInterface
 
     public function execute($queue): void
     {
+        $this->executionTimeRegister();
         try {
             /** @var ChatRequestEvent $requestEvent */
             $requestEvent = Yii::createObject($this->requestEventClass);
@@ -33,6 +34,5 @@ class ClientChatGuestDisconnectedJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             AppHelper::throwableLogger($e, 'ClientChatRequestCreateJob:Execute:Throwable', false);
         }
-        $this->executionTimeRegister();
     }
 }

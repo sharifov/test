@@ -38,6 +38,7 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
+        $this->executionTimeRegister();
         try {
             $call = $this->findCall();
             if (
@@ -68,7 +69,6 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
                 'departmentPhoneProjectId' => $this->departmentPhoneProjectId,
             ], 'CallQueueLongTimeNotificationJob');
         }
-        $this->executionTimeRegister();
     }
 
     private function sendNotifications(array $users, Call $call): void

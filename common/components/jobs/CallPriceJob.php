@@ -16,11 +16,11 @@ class CallPriceJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
+        $this->executionTimeRegister();
         try {
             (\Yii::createObject(UpdateCallPrice::class))->update($this->callSids);
         } catch (\Throwable $e) {
             \Yii::info($e->getMessage(), 'info\CallPriceJob');
         }
-        $this->executionTimeRegister();
     }
 }

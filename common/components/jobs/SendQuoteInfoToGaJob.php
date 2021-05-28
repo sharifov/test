@@ -25,6 +25,7 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         try {
             if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
                 $gaQuote->send();
@@ -36,7 +37,6 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'SendQuoteInfoToGaJob:execute:Throwable');
         }
-        $this->executionTimeRegister();
         return false;
     }
 
