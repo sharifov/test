@@ -53,6 +53,7 @@ class UpdateSaleFromBOJob extends BaseJob implements JobInterface
                     ) {
                         Yii::$app->cache->set($cacheKeySale, $refreshSaleData, $this->cacheDuration);
                     } else {
+                        $this->executionTimeRegister();
                         throw new \RuntimeException('Response from detailRequestToBackOffice is empty. SaleId (' . $this->saleId . ')', -1);
                     }
                 }
@@ -61,6 +62,7 @@ class UpdateSaleFromBOJob extends BaseJob implements JobInterface
                     $casesSaleService->saveAdditionalData($caseSale, $case, $refreshSaleData, false);
                     $saleTicketService->refreshSaleTicketBySaleData((int) $this->caseId, $caseSale, $refreshSaleData);
                 } else {
+                    $this->executionTimeRegister();
                     throw new \RuntimeException('CaseSale (' . $this->caseId . '/' . $this->saleId . ') not found.', -2);
                 }
             } else {

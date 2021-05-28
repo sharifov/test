@@ -37,6 +37,7 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                 ]);
 
                 unset($tgm);
+                $this->executionTimeRegister();
                 return true;
             }
         } catch (\Throwable $throwable) {
