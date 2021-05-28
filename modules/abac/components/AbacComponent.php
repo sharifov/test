@@ -95,6 +95,7 @@ class AbacComponent extends Component
         $user->roles =  $me->getRoles(true);
         $user->projects = $me->access->getAllProjects('key'); //getProjects();
         $user->groups = $me->access->getAllGroups();
+        $user->departments = $me->access->getDepartments();
 
         $request = new \stdClass();
         $request->controller = Yii::$app->controller->uniqueId;
