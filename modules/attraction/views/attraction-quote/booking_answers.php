@@ -3,7 +3,7 @@
 use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\widgets\Pjax;
+use borales\extensions\phoneInput\PhoneInput;
 
 /**
  * @var $model \modules\attraction\models\forms\BookingAnswersForm
@@ -50,11 +50,39 @@ $formFieldIndex = 0;
                             ?>
 
                             <?php if ($answer['dataType'] === 'BOOLEAN') : ?>
-                                  <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
+                                <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
                             <?php elseif ($answer['dataType'] === 'TEXT') : ?>
-                                   <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                                <?php if ($answer['dataFormat'] === 'PHONE_NUMBER') : ?>
+                                    <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->widget(PhoneInput::class, [
+                                    'options' => [
+                                        'required' => true,
+                                    ],
+                                    'jsOptions' => [
+                                        'nationalMode' => false,
+                                        'preferredCountries' => ['us'],
+                                        'customContainer' => 'intl-tel-input'
+                                    ]
+                                ])->label($answer['label']) ?>
+                                <?php else : ?>
+                                    <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                                <?php endif; ?>
+                            <?php elseif ($answer['dataType'] === 'OPTIONS') : ?>
+                                <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
+                            <?php elseif ($answer['dataType'] === 'DATE') : ?>
+                                <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->widget(
+                                    \dosamigos\datepicker\DatePicker::class,
+                                    [
+                                    'inline' => false,
+                                    //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                                    'clientOptions' => [
+                                        'autoclose' => true,
+                                        'format' => 'dd/mm/yyyy',
+                                        'todayBtn' => true
+                                    ]
+                                    ]
+                                )->label($answer['label']) ?>
                             <?php else : ?>
-                                   <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
+                                <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
                             <?php endif; ?>
 
                         <?php endforeach; ?>
@@ -76,9 +104,37 @@ $formFieldIndex = 0;
                         <?php if ($answer['dataType'] === 'BOOLEAN') : ?>
                             <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
                         <?php elseif ($answer['dataType'] === 'TEXT') : ?>
-                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
-                        <?php else : ?>
+                            <?php if ($answer['dataFormat'] === 'PHONE_NUMBER') : ?>
+                                <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->widget(PhoneInput::class, [
+                                'options' => [
+                                    'required' => true,
+                                ],
+                                'jsOptions' => [
+                                    'nationalMode' => false,
+                                    'preferredCountries' => ['us'],
+                                    'customContainer' => 'intl-tel-input'
+                                ]
+                            ])->label($answer['label']) ?>
+                            <?php else : ?>
+                                <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                            <?php endif; ?>
+                        <?php elseif ($answer['dataType'] === 'OPTIONS') : ?>
                             <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
+                        <?php elseif ($answer['dataType'] === 'DATE') : ?>
+                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->widget(
+                                \dosamigos\datepicker\DatePicker::class,
+                                [
+                                    'inline' => false,
+                                    //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                                    'clientOptions' => [
+                                        'autoclose' => true,
+                                        'format' => 'dd/mm/yyyy',
+                                        'todayBtn' => true
+                                    ]
+                                ]
+                            )->label($answer['label']) ?>
+                        <?php else : ?>
+                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
                         <?php endif; ?>
 
                     <?php endforeach; ?>
