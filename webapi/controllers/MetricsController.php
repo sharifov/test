@@ -87,7 +87,7 @@ class MetricsController extends Controller
         try {
             $adapter = Yii::createObject(\Prometheus\Storage\Redis::class);
             $adapter::setDefaultOptions(Yii::$app->prometheus->redisOptions);
-            $adapter->flushRedis();
+            $adapter->wipeStorage();
         } catch (\Throwable $throwable) {
             \yii\helpers\VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
             exit();
@@ -115,6 +115,7 @@ class MetricsController extends Controller
 
     public function actionRemoveByKey(string $key)
     {
+        exit('Not use this action');
         try {
             $redisOptions = Yii::$app->prometheus->redisOptions;
             $prometeusRedis = new \yii\redis\Connection([
