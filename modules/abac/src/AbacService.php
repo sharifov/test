@@ -77,13 +77,11 @@ class AbacService
                     }
 
                     if ($rule['type'] === 'string' || $rule['type'] === 'date' || $rule['type'] === 'time') {
-
                         if (!is_array($value)) {
                             $value = '"' . $value . '"';
                         } else {
                            // VarDumper::dump($value); exit;
                         }
-
                     }
 
 
