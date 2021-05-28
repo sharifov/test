@@ -22,7 +22,7 @@ use yii\queue\Queue;
  * @property int $lead_id
  */
 
-class UpdateLeadBOJob extends BaseObject implements JobInterface
+class UpdateLeadBOJob extends BaseJob implements JobInterface
 {
     public $lead_id;
 
@@ -62,6 +62,7 @@ class UpdateLeadBOJob extends BaseObject implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'UpdateLeadBOJob:execute:catch');
         }
+        $this->executionTimeRegister();
         return false;
     }
 

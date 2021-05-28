@@ -14,7 +14,7 @@ use yii\queue\JobInterface;
  * @property $departmentPhoneProjectId
  * @property $createdTime
  */
-class CallQueueRepeatMessageJob implements JobInterface
+class CallQueueRepeatMessageJob extends BaseJob implements JobInterface
 {
     public $callId;
     public $departmentPhoneProjectId;
@@ -25,6 +25,7 @@ class CallQueueRepeatMessageJob implements JobInterface
         $this->callId = $callId;
         $this->departmentPhoneProjectId = $departmentPhoneProjectId;
         $this->createdTime = $createdTime;
+        parent::__construct();
     }
 
     public function execute($queue)
@@ -74,6 +75,7 @@ class CallQueueRepeatMessageJob implements JobInterface
                 'departmentPhoneProjectId' => $this->departmentPhoneProjectId,
             ], 'CallQueueRepeatMessageJob');
         }
+        $this->executionTimeRegister();
     }
 
     private function findCall(): Call

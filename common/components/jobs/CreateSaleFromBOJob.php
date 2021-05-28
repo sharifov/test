@@ -18,7 +18,7 @@ use yii\queue\Queue;
  * @property string|null $phone
  * @property CasesSaleService $casesSaleService
  */
-class CreateSaleFromBOJob extends BaseObject implements JobInterface
+class CreateSaleFromBOJob extends BaseJob implements JobInterface
 {
     public $case_id;
     public $order_uid;
@@ -53,6 +53,7 @@ class CreateSaleFromBOJob extends BaseObject implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CreateSaleFromBOJob:execute:catch');
         }
+        $this->executionTimeRegister();
         return false;
     }
 

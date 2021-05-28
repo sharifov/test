@@ -14,7 +14,7 @@ use yii\queue\Queue;
  * @property string $userId
  * @property array $data
  */
-class RocketChatUserUpdateJob extends BaseObject implements JobInterface
+class RocketChatUserUpdateJob extends BaseJob implements JobInterface
 {
     public string $userId;
     public array $data;
@@ -39,6 +39,7 @@ class RocketChatUserUpdateJob extends BaseObject implements JobInterface
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'RocketChatUserUpdateJob:execute:Throwable');
         }
+        $this->executionTimeRegister();
         return false;
     }
 

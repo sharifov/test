@@ -15,7 +15,7 @@ use yii\queue\Queue;
  *
  * @property float|int $ttr
  */
-class SendLeadInfoToGaJob extends BaseObject implements JobInterface
+class SendLeadInfoToGaJob extends BaseJob implements JobInterface
 {
     public Lead $lead;
 
@@ -36,6 +36,7 @@ class SendLeadInfoToGaJob extends BaseObject implements JobInterface
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'SendLeadInfoToGaJob:execute:Throwable');
         }
+        $this->executionTimeRegister();
         return false;
     }
 

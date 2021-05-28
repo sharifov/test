@@ -2,6 +2,7 @@
 
 namespace common\components\jobs\clientChat;
 
+use common\components\jobs\BaseJob;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\requestEvent\ChatRequestEvent;
@@ -13,7 +14,7 @@ use Yii;
  * @property int $requestId
  * @property string $requestEventClass
  */
-class ClientChatRequestCreateJob implements JobInterface
+class ClientChatRequestCreateJob extends BaseJob implements JobInterface
 {
     public int $requestId;
 
@@ -32,5 +33,6 @@ class ClientChatRequestCreateJob implements JobInterface
         } catch (\Throwable $e) {
             AppHelper::throwableLogger($e, 'ClientChatRequestCreateJob:Execute:Throwable', false);
         }
+        $this->executionTimeRegister();
     }
 }

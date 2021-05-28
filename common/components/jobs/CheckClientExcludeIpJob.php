@@ -11,7 +11,7 @@ use yii\queue\JobInterface;
  * @property int $clientId
  * @property string $ip
  */
-class CheckClientExcludeIpJob implements JobInterface
+class CheckClientExcludeIpJob extends BaseJob implements JobInterface
 {
     public $clientId;
     public $ip;
@@ -20,6 +20,7 @@ class CheckClientExcludeIpJob implements JobInterface
     {
         $this->clientId = $clientId;
         $this->ip = $ip;
+        parent::__construct();
     }
 
     public function execute($queue)
@@ -34,5 +35,6 @@ class CheckClientExcludeIpJob implements JobInterface
                 'ip' => $this->ip,
             ], 'CheckClientExcludeIpJob');
         }
+        $this->executionTimeRegister();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace common\components\jobs\clientChat;
 
+use common\components\jobs\BaseJob;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\repositories\NotFoundException;
@@ -13,7 +14,7 @@ use sales\services\clientChatService\ClientChatService;
  *
  * @property int $chatId
  */
-class ClientChatUserAccessJob implements \yii\queue\JobInterface
+class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
 {
     public $chatId = 0;
     /**
@@ -39,5 +40,6 @@ class ClientChatUserAccessJob implements \yii\queue\JobInterface
         } catch (\Throwable $e) {
             AppHelper::throwableLogger($e, 'ClientChatUserAccessJob:Execute:Throwable', false);
         }
+        $this->executionTimeRegister();
     }
 }
