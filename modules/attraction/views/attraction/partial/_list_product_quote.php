@@ -245,7 +245,6 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
     });
     
     $('body').off('click', '.js-btn-booking-confirmation').on('click', '.js-btn-booking-confirmation', function (e) {
-
         e.preventDefault();
         
         if(!confirm('Are you sure you want to check booking confirmation ?')) {
@@ -263,6 +262,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
+                modal.find('.modal-title').html('Check Booking Status');
                 modal.find('.modal-body').html(data.html);
                 if (data.productID) {
                     pjaxReload({
@@ -277,6 +277,48 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
                     hide: true
                 });               
                               
+            } else {
+                new PNotify({
+                    title: 'Please check later',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });                
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
+    $('body').off('click', '.js-btn-attraction-booking-state').on('click', '.js-btn-attraction-booking-state', function (e) {
+        e.preventDefault();
+        
+        if(!confirm('Are you sure you want to review booking state ?')) {
+            return '';
+        }
+        
+        let quoteId = $(this).data('quote-id');
+        let modal = $('#modal-lg');
+                
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                modal.find('.modal-title').html(data.productID ? 'Answer for booking questions' : 'Check Booking Status');
+                modal.find('.modal-body').html(data.html);
+                modal.modal('show');
+                if (data.productID) {
+                    pjaxReload({
+                        container: '#pjax-product-quote-list-' + data.productID
+                    });
+                }           
             } else {
                 new PNotify({
                     title: 'Please check later',
@@ -366,6 +408,18 @@ JS;
                             ]
                         ) ?>
                     <?php endif; ?>
+                    <?php if (!$model->atnqProductQuote->isNew()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Check Booking Status',
+                            null,
+                            [
+                            'class' => 'dropdown-item js-btn-attraction-booking-state',
+                            'data-url' => Url::to('/attraction/attraction-quote/ajax-booking-state'),
+                            'data-quote-id' => $model->atnq_id,
+                            ]
+                        ) ?>
+                    <?php endif; ?>
+
                     <?php if ($model->isBooking()) : ?>
                         <?= Html::a(
                             '<i class="fa fa-share-square"></i> Cancel Book',

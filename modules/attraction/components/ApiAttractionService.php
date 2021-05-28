@@ -486,6 +486,7 @@ class ApiAttractionService extends Component
             'query' => 'query holibob($bookingId: String!) {
                 booking(id: $bookingId) {
                     id
+                    canCommit
                     code
                     leadPassengerName
                     reference
@@ -505,6 +506,7 @@ class ApiAttractionService extends Component
                             isRequired
                             isAnswered
                             dataType
+                            dataFormat
                             availableOptions {
                                 label
                                 value
@@ -537,6 +539,7 @@ class ApiAttractionService extends Component
                                     isRequired
                                     isAnswered
                                     dataType
+                                    dataFormat
                                     availableOptions {
                                       label
                                       value
