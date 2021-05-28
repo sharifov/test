@@ -34,7 +34,7 @@ use yii\queue\Queue;
  * @property CasesRepository $casesRepository
  */
 
-class CallUserAccessJob extends BaseObject implements JobInterface
+class CallUserAccessJob extends BaseJob implements JobInterface
 {
     public $call_id;
     public $delay;
@@ -110,6 +110,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CallUserAccessJob:execute:catch');
         }
+        $this->executionTimeRegister();
         return false;
     }
 

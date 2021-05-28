@@ -3,8 +3,6 @@
 namespace common\components\jobs;
 
 use sales\model\lead\useCases\lead\api\create\LeadCreateGoogleRequest;
-use sales\model\leadRequest\entity\LeadRequest;
-use Yii;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -12,7 +10,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property $leadRequest
  */
-class LeadRequestJob implements RetryableJobInterface
+class LeadRequestJob extends BaseJob implements RetryableJobInterface
 {
     public $leadRequest;
 
@@ -28,6 +26,7 @@ class LeadRequestJob implements RetryableJobInterface
             ], 'LeadRequestJob:Throwable');
             throw new \Exception($throwable->getMessage());
         }
+        $this->executionTimeRegister();
     }
 
     /**

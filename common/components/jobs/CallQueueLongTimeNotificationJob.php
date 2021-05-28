@@ -22,7 +22,7 @@ use yii\queue\JobInterface;
  * @property $departmentPhoneProjectId
  * @property $createdTime
  */
-class CallQueueLongTimeNotificationJob implements JobInterface
+class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
 {
     public $callId;
     public $departmentPhoneProjectId;
@@ -33,6 +33,7 @@ class CallQueueLongTimeNotificationJob implements JobInterface
         $this->callId = $callId;
         $this->departmentPhoneProjectId = $departmentPhoneProjectId;
         $this->createdTime = $createdTime;
+        parent::__construct();
     }
 
     public function execute($queue)
@@ -67,6 +68,7 @@ class CallQueueLongTimeNotificationJob implements JobInterface
                 'departmentPhoneProjectId' => $this->departmentPhoneProjectId,
             ], 'CallQueueLongTimeNotificationJob');
         }
+        $this->executionTimeRegister();
     }
 
     private function sendNotifications(array $users, Call $call): void

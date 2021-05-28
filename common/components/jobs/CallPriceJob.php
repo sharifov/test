@@ -10,7 +10,7 @@ use yii\queue\JobInterface;
  *
  * @property array $callSids
  */
-class CallPriceJob implements JobInterface
+class CallPriceJob extends BaseJob implements JobInterface
 {
     public array $callSids = [];
 
@@ -21,5 +21,6 @@ class CallPriceJob implements JobInterface
         } catch (\Throwable $e) {
             \Yii::info($e->getMessage(), 'info\CallPriceJob');
         }
+        $this->executionTimeRegister();
     }
 }

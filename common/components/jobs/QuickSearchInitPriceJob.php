@@ -22,7 +22,7 @@ use yii\queue\Queue;
  * @property int $lead_id
  */
 
-class QuickSearchInitPriceJob extends BaseObject implements JobInterface
+class QuickSearchInitPriceJob extends BaseJob implements JobInterface
 {
     public $lead_id;
 
@@ -48,7 +48,7 @@ class QuickSearchInitPriceJob extends BaseObject implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'QuickSearchInitPriceJob:execute:catch');
         }
-
+        $this->executionTimeRegister();
         return false;
     }
 

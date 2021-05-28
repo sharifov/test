@@ -10,7 +10,7 @@ use yii\queue\JobInterface;
  *
  * @property array $smsSids
  */
-class SmsPriceJob implements JobInterface
+class SmsPriceJob extends BaseJob implements JobInterface
 {
     public array $smsSids;
 
@@ -21,5 +21,6 @@ class SmsPriceJob implements JobInterface
         } catch (\Throwable $e) {
             \Yii::info($e->getMessage(), 'info\SmsPriceJob');
         }
+        $this->executionTimeRegister();
     }
 }

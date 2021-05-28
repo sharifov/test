@@ -32,4 +32,11 @@ class MetricsService
     {
         $this->metrics->counterMetric('quote_search', '', ['type' => $type]);
     }
+
+    public function addJobExecuteHistogram(float $timeStart, string $jobName, array $buckets = []): void
+    {
+        $seconds = round(microtime(true) - $timeStart, 1);
+        $buckets = empty($buckets) ? [1, 3, 5, 7, 10, 15, 30, 45, 60, 90] : $buckets;
+        $this->metrics->histogramMetric('job_execute', $seconds, ['jobName' => $jobName], '', '', $buckets);
+    }
 }

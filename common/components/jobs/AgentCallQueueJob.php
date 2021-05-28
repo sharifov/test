@@ -35,7 +35,7 @@ use yii\queue\Queue;
  * @property CasesRepository $casesRepository
  */
 
-class AgentCallQueueJob extends BaseObject implements JobInterface
+class AgentCallQueueJob extends BaseJob implements JobInterface
 {
     public $user_id;
 
@@ -118,6 +118,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'AgentCallQueueJob:execute:Throwable');
         }
+        $this->executionTimeRegister();
         return false;
     }
 

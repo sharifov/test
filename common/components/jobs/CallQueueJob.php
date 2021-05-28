@@ -49,7 +49,7 @@ use yii\queue\Queue;
  * @property CasesSaleService $casesSaleService
  */
 
-class CallQueueJob extends BaseObject implements JobInterface
+class CallQueueJob extends BaseJob implements JobInterface
 {
     public int $call_id;
     public ?int $source_id = null;
@@ -333,6 +333,8 @@ class CallQueueJob extends BaseObject implements JobInterface
         $seconds = round(microtime(true) - $timeStart, 1);
         $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds, ['type' => 'execute']);
         unset($metrics);
+
+        $this->executionTimeRegister();
 
         return false;
     }

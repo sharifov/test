@@ -2,6 +2,7 @@
 
 namespace common\components\jobs\clientChat;
 
+use common\components\jobs\BaseJob;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use yii\queue\JobInterface;
@@ -13,7 +14,7 @@ use yii\queue\Queue;
  * @property string|null $comment
  * @property int|null $rating
  */
-class ClientChatFeedbackJob implements JobInterface
+class ClientChatFeedbackJob extends BaseJob implements JobInterface
 {
     public $rid;
     public $comment;
@@ -34,5 +35,6 @@ class ClientChatFeedbackJob implements JobInterface
                 false
             );
         }
+        $this->executionTimeRegister();
     }
 }

@@ -16,8 +16,7 @@ use common\models\Notifications;
  * @property int $user_id
  * @property string $text
  */
-
-class TelegramSendMessageJob implements RetryableJobInterface
+class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
 {
     public $user_id;
     public $text;
@@ -66,6 +65,7 @@ class TelegramSendMessageJob implements RetryableJobInterface
                 ]), 'TelegramJob:execute:catch');
             }
         }
+        $this->executionTimeRegister();
         return false;
     }
 

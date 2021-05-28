@@ -17,7 +17,7 @@ use yii\queue\JobInterface;
  * @property int $callId
  * @property string $dateTime
  */
-class CheckClientCallJoinToConferenceJob implements JobInterface
+class CheckClientCallJoinToConferenceJob extends BaseJob implements JobInterface
 {
     private const STATUS_COMPLETED = 'completed';
 
@@ -80,6 +80,7 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
         if (!$data->queueLongTime->isEmpty()) {
             $this->createCallQueueLongTimeJob($jobId, $call, $data->queueLongTime->departmentPhoneId);
         }
+        $this->executionTimeRegister();
     }
 
     private function createRepeatMessageJob($jobId, $call, $depPhoneId): void

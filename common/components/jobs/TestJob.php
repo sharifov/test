@@ -22,7 +22,7 @@ use yii\queue\Queue;
  * @property array $data
  */
 
-class TestJob extends BaseObject implements JobInterface
+class TestJob extends BaseJob implements JobInterface
 {
     public array $data = [];
 
@@ -41,6 +41,7 @@ class TestJob extends BaseObject implements JobInterface
         $seconds = round(microtime(true) - $timeStart, 1);
         $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds);
         unset($metrics);
+        $this->executionTimeRegister();
         return true;
     }
 
