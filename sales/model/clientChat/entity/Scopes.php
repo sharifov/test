@@ -254,11 +254,6 @@ class Scopes extends \yii\db\ActiveQuery
         ]);
     }
 
-    public function orOwner(Employee $user): self
-    {
-        return $this->orWhere(['cch_owner_user_id' => $user->getId()]);
-    }
-
     public function orChannelEmployee(Employee $user): self
     {
         return $this->orWhere([
@@ -266,6 +261,29 @@ class Scopes extends \yii\db\ActiveQuery
             'cch_channel_id',
             ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($user->getId())->column()
         ]);
+    }
+
+    public function andProjectEmployee(Employee $user): self
+    {
+        return $this->andWhere([
+            'IN',
+            'cch_project_id',
+            array_keys(EmployeeProjectAccess::getProjects($user))
+        ]);
+    }
+
+    public function andChannelEmployee(Employee $user): self
+    {
+        return $this->andWhere([
+            'IN',
+            'cch_channel_id',
+            ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($user->getId())->column()
+        ]);
+    }
+
+    public function orOwner(Employee $user): self
+    {
+        return $this->orWhere(['cch_owner_user_id' => $user->getId()]);
     }
 
     /**
