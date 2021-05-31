@@ -300,8 +300,8 @@ class ClientChatController extends FController
         $employee = Auth::user();
         $chatsRestriction = ClientChat::find()
             ->select(['cch_id'])
-            ->orProjectEmployee($employee)
-            ->orChannelEmployee($employee)
+            ->andProjectEmployee($employee)
+            ->andChannelEmployee($employee)
             ->orOwner($employee)
             ->column();
         $clientChat = ClientChat::find()->byId($id)->andWhere(['IN', 'cch_id', $chatsRestriction])->one();
