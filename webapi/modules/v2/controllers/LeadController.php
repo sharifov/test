@@ -79,6 +79,9 @@ class LeadController extends BaseController
      * @apiParam {int}                  [lead.flight_id]                            BO Flight ID
      * @apiParam {string{5}}            lead.user_language                          User Language
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  [lead.expire_at]                    Expire at
+     * @apiParam {object[]}             [lead.lead_data]                         Array of Lead Data
+     * @apiParam {string{50}}           [lead.lead_data.field_key]               Lead Data Key
+     * @apiParam {string{500}}          [lead.lead_data.field_value]             Lead Data Value
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -119,7 +122,13 @@ class LeadController extends BaseController
      *                   "destination": "NYC",
      *                   "departure": "2019-12-18"
      *               }
-     *           ]
+     *           ],
+      *          "lead_data": [
+     *               {
+     *                  "field_key": "example_key",
+     *                  "field_value": "example_value"
+     *              }
+     *          ]
      *       }
      * }
      *
@@ -148,8 +157,16 @@ class LeadController extends BaseController
      *                      "example@test.com",
      *                      "bah@gmail.com"
      *                  ]
-     *              }
-     *           }
+     *              },
+     *              "leadDataInserted": [
+     *                  {
+     *                      "ld_field_key": "kayakclickid",
+     *                      "ld_field_value": "example_value",
+     *                      "ld_id": 3
+     *                  }
+     *              ],
+     *              "warnings": []
+     *          }
      *       }
      *       "request": {
      *           "lead": {
@@ -328,6 +345,8 @@ class LeadController extends BaseController
                                 ]
                             ),
                         ],
+                        'leadDataInserted' => $this->leadCreateHandler->getLeadDataInserted(),
+                        'warnings' => $this->leadCreateHandler->getWarnings(),
                     ])
                 )
             )
