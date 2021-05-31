@@ -17,16 +17,8 @@ class LeadDataService
             return $result;
         }
         foreach ($lead->leadData as $leadData) {
-            $result[] = self::getVisibleData($leadData);
+            $result[] = $leadData->serialize();
         }
         return $result;
-    }
-
-    public static function getVisibleData(LeadData $leadData): array
-    {
-        return [
-            'ld_field_key' => $leadData->ld_field_key,
-            'ld_field_value' => $leadData->ld_field_value,
-        ];
     }
 }

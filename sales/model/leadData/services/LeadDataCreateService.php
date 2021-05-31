@@ -29,7 +29,7 @@ class LeadDataCreateService
 
             if ($leadData->validate()) {
                 $leadDataRepository->save($leadData);
-                $this->inserted[] = LeadDataService::getVisibleData($leadData);
+                $this->inserted[] = $leadData->serialize();
             } else {
                 $warning = [
                     'message' => ErrorsToStringHelper::extractFromModel($leadData),

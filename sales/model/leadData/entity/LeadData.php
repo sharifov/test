@@ -3,6 +3,8 @@
 namespace sales\model\leadData\entity;
 
 use common\models\Lead;
+use sales\entities\serializer\Serializable;
+use sales\model\leadData\serializer\LeadDataSerializer;
 use sales\model\leadData\services\LeadDataDictionary;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -20,7 +22,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property Lead $ldLead
  */
-class LeadData extends \yii\db\ActiveRecord
+class LeadData extends ActiveRecord implements Serializable
 {
     public static function tableName(): string
     {
@@ -93,5 +95,10 @@ class LeadData extends \yii\db\ActiveRecord
         $model->ld_field_value = $fieldValue;
 
         return $model;
+    }
+
+    public function serialize(): array
+    {
+        return (new LeadDataSerializer($this))->getData();
     }
 }
