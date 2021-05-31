@@ -86,9 +86,9 @@ class ClientChatQaSearch extends ClientChat
     public function searchCommon($params, Employee $employee): ActiveDataProvider
     {
         $query = ClientChat::find();
-        $query->orProjectEmployee($employee);
+        $query->andProjectEmployee($employee);
+        $query->andChannelEmployee($employee);
         $query->orOwner($employee);
-        $query->orChannelEmployee($employee);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
