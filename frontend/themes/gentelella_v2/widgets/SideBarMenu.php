@@ -310,8 +310,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
                         ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate']],
                         ['label' => 'Export Leads', 'url' => ['/leads/export']],
-                        ['label' => 'Lead Request', 'url' => ['/lead-request-crud']],
-                        ['label' => 'Lead Data', 'url' => ['/lead-data-crud']],
+                        ['label' => 'Lead Request', 'url' => ['/lead-request-crud/index']],
+                        ['label' => 'Lead Data', 'url' => ['/lead-data-crud/index']],
                     ]
                 ]
             ]
