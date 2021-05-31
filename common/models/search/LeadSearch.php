@@ -239,6 +239,7 @@ class LeadSearch extends Lead
             [['expiration_dt'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
 
             [['lead_data_key', 'lead_data_value'], 'string', 'max' => 50],
+            [['lead_data_key', 'lead_data_value'], 'trim'],
         ];
     }
 
@@ -626,7 +627,7 @@ class LeadSearch extends Lead
              ]);
         }
 
-        if ($this->lead_data_value) {
+        if ($this->lead_data_value !== '') {
              $query->andWhere([
                 'IN',
                 'leads.id',
