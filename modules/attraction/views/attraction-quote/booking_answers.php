@@ -9,9 +9,7 @@ use borales\extensions\phoneInput\PhoneInput;
  * @var $model \modules\attraction\models\forms\BookingAnswersForm
  * @var $bookingDetails array
  */
-//$answers = !empty($bookingDetails['questionList']['nodes']) ? $bookingDetails['questionList']['nodes'] : $bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'];
 
-$formFieldIndex = 0;
 ?>
 <div class="container">
     <div class="row">
@@ -43,46 +41,46 @@ $formFieldIndex = 0;
                         <h2>Lead Person Details</h2>
                         <div class="clearfix"></div>
                     </div>
+
                     <div class="x_content" style="display: block">
                         <?php foreach ($bookingDetails['questionList']['nodes'] as $answerKey => $answer) :
-                             ++$formFieldIndex;
-                             $mappedOptions = ArrayHelper::map($answer['availableOptions'], 'value', 'label');
+                            $mappedOptions = ArrayHelper::map($answer['availableOptions'], 'value', 'label');
                             ?>
 
                             <?php if ($answer['dataType'] === 'BOOLEAN') : ?>
-                                <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
+                                <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
                             <?php elseif ($answer['dataType'] === 'TEXT') : ?>
                                 <?php if ($answer['dataFormat'] === 'PHONE_NUMBER') : ?>
-                                    <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->widget(PhoneInput::class, [
-                                    'options' => [
-                                        'required' => true,
-                                    ],
-                                    'jsOptions' => [
-                                        'nationalMode' => false,
-                                        'preferredCountries' => ['us'],
-                                        'customContainer' => 'intl-tel-input'
-                                    ]
-                                ])->label($answer['label']) ?>
+                                    <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->widget(PhoneInput::class, [
+                                        'options' => [
+                                            'required' => true,
+                                        ],
+                                        'jsOptions' => [
+                                            'nationalMode' => false,
+                                            'preferredCountries' => ['us'],
+                                            'customContainer' => 'intl-tel-input'
+                                        ]
+                                    ])->label($answer['label']) ?>
                                 <?php else : ?>
-                                    <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                                    <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
                                 <?php endif; ?>
                             <?php elseif ($answer['dataType'] === 'OPTIONS') : ?>
-                                <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
+                                <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
                             <?php elseif ($answer['dataType'] === 'DATE') : ?>
-                                <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->widget(
+                                <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->widget(
                                     \dosamigos\datepicker\DatePicker::class,
                                     [
-                                    'inline' => false,
-                                    //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                                    'clientOptions' => [
-                                        'autoclose' => true,
-                                        'format' => 'dd/mm/yyyy',
-                                        'todayBtn' => true
-                                    ]
+                                        'inline' => false,
+                                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                                        'clientOptions' => [
+                                            'autoclose' => true,
+                                            'format' => 'dd/mm/yyyy',
+                                            'todayBtn' => true
+                                        ]
                                     ]
                                 )->label($answer['label']) ?>
                             <?php else : ?>
-                                <?= $form->field($model, 'booking_answers[' . $answerKey . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                                <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
                             <?php endif; ?>
 
                         <?php endforeach; ?>
@@ -96,32 +94,33 @@ $formFieldIndex = 0;
                     <h2>Additional Details</h2>
                     <div class="clearfix"></div>
                 </div>
+
                 <div class="x_content" style="display: block">
                     <?php foreach ($bookingDetails['availabilityList']['nodes'][0]['questionList']['nodes'] as $answerKey => $answer) :
                         $mappedOptions = ArrayHelper::map($answer['availableOptions'], 'value', 'label');
                         ?>
 
                         <?php if ($answer['dataType'] === 'BOOLEAN') : ?>
-                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
+                            <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->checkbox()->label($answer['label']) ?>
                         <?php elseif ($answer['dataType'] === 'TEXT') : ?>
                             <?php if ($answer['dataFormat'] === 'PHONE_NUMBER') : ?>
-                                <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->widget(PhoneInput::class, [
-                                'options' => [
-                                    'required' => true,
-                                ],
-                                'jsOptions' => [
-                                    'nationalMode' => false,
-                                    'preferredCountries' => ['us'],
-                                    'customContainer' => 'intl-tel-input'
-                                ]
-                            ])->label($answer['label']) ?>
+                                <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->widget(PhoneInput::class, [
+                                    'options' => [
+                                        'required' => true,
+                                    ],
+                                    'jsOptions' => [
+                                        'nationalMode' => false,
+                                        'preferredCountries' => ['us'],
+                                        'customContainer' => 'intl-tel-input'
+                                    ]
+                                ])->label($answer['label']) ?>
                             <?php else : ?>
-                                <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                                <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
                             <?php endif; ?>
                         <?php elseif ($answer['dataType'] === 'OPTIONS') : ?>
-                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
+                            <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->dropdownList($mappedOptions)->label($answer['label']) ?>
                         <?php elseif ($answer['dataType'] === 'DATE') : ?>
-                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->widget(
+                            <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->widget(
                                 \dosamigos\datepicker\DatePicker::class,
                                 [
                                     'inline' => false,
@@ -134,7 +133,7 @@ $formFieldIndex = 0;
                                 ]
                             )->label($answer['label']) ?>
                         <?php else : ?>
-                            <?= $form->field($model, 'booking_answers[' . ($answerKey + $formFieldIndex) . '][' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
+                            <?= $form->field($model, strtolower(str_replace(' ', '_', $answer['label'])) . '[' . $answer['id'] . ']')->textInput()->label($answer['label']) ?>
                         <?php endif; ?>
 
                     <?php endforeach; ?>
