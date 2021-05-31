@@ -5,6 +5,7 @@ namespace sales\services\lead;
 use common\models\Lead;
 use sales\dispatchers\EventDispatcher;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
+use sales\model\leadData\services\LeadDataCloneService;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
 use sales\services\ServiceFinder;
@@ -67,6 +68,8 @@ class LeadCloneService
                 $cloneSegment = $segment->createClone($clone->id);
                 $this->leadSegmentRepository->save($cloneSegment);
             }
+
+            LeadDataCloneService::cloneByLead($lead, $clone->id);
 
             return $clone;
         });

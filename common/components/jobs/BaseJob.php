@@ -36,9 +36,10 @@ class BaseJob extends BaseObject
         }
 
         try {
+            $metrics = \Yii::$container->get(Metrics::class);
             $seconds = round(microtime(true) - $this->timeStart, 1);
             $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
-            $this->metrics->histogramMetric(
+            $metrics->histogramMetric(
                 'job_execute',
                 $seconds,
                 ['jobName' => self::runInClass()],

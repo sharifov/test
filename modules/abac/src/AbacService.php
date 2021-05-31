@@ -79,8 +79,6 @@ class AbacService
                     if ($rule['type'] === 'string' || $rule['type'] === 'date' || $rule['type'] === 'time') {
                         if (!is_array($value)) {
                             $value = '"' . $value . '"';
-                        } else {
-                           // VarDumper::dump($value); exit;
                         }
                     }
 
@@ -164,9 +162,9 @@ class AbacService
                             $operator = $field . ' in [' . implode(',', $valArr) . ']';
                             break;
                         case AbacBaseModel::OP_IN_ARRAY:
-                            if ($rule['type'] === 'string') {
-                                $value = '"' . $value . '"';
-                            }
+//                            if ($rule['type'] === 'string') {
+//                                $value = '"' . $value . '"';
+//                            }
                             $operator = $value . ' in ' . $field;
                             break;
                         case AbacBaseModel::OP_NOT_IN:

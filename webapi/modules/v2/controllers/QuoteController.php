@@ -13,6 +13,7 @@ use common\models\UserProjectParams;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
+use sales\model\leadData\services\LeadDataService;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -420,6 +421,12 @@ class QuoteController extends ApiBaseController
      *              "passengers": [],
      *              "paxInfo": []
      *          }
+     *      ],
+     *      "lead_data": [
+     *          {
+     *              "ld_field_key": "kayakclickid",
+     *              "ld_field_value": "example_value132"
+     *          }
      *      ]
      *   },
      *   "action": "v2/quote/get-info",
@@ -563,6 +570,11 @@ class QuoteController extends ApiBaseController
                     $response,
                     'lead.additionalInformation',
                     $lead->additional_information ? JsonHelper::decode($lead->additional_information) : ''
+                );
+                ArrayHelper::setValue(
+                    $response,
+                    'lead.lead_data',
+                    LeadDataService::getByLeadForApi($lead)
                 );
             }
 

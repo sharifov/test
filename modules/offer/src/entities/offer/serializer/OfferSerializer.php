@@ -9,6 +9,8 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use sales\entities\serializer\Serializer;
+use sales\model\leadData\services\LeadDataService;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class OfferExtraData
@@ -85,6 +87,12 @@ class OfferSerializer extends Serializer
             }
             //$sum = round($sum, 2);
         }
+
+        ArrayHelper::setValue(
+            $data,
+            'lead.lead_data',
+            LeadDataService::getByLeadForApi($this->model->ofLead)
+        );
 
         return $data;
     }

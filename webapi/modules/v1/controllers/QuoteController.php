@@ -27,6 +27,7 @@ use sales\forms\quote\QuoteCreateKeyForm;
 use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\leadData\services\LeadDataService;
 use sales\model\project\entity\projectRelation\ProjectRelation;
 use sales\model\project\entity\projectRelation\ProjectRelationQuery;
 use sales\model\project\entity\projectRelation\ProjectRelationRepository;
@@ -339,6 +340,12 @@ class QuoteController extends ApiBaseController
      *              "passengers": [],
      *              "paxInfo": []
      *          }
+     *      ],
+     *      "lead_data": [
+     *          {
+     *              "ld_field_key": "kayakclickid",
+     *              "ld_field_value": "example_value132"
+     *          }
      *      ]
      *  },
      *   "action": "v1/quote/get-info",
@@ -470,6 +477,11 @@ class QuoteController extends ApiBaseController
                     $response,
                     'lead.additionalInformation',
                     $model->lead->additional_information ? JsonHelper::decode($model->lead->additional_information) : ''
+                );
+                ArrayHelper::setValue(
+                    $response,
+                    'lead.lead_data',
+                    LeadDataService::getByLeadForApi($model->lead)
                 );
             }
 
