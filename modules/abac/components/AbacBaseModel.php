@@ -189,7 +189,14 @@ class AbacBaseModel
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
         'placeholder' => '___.___.___.___',
-        //'validation' =>  ['format' => '/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/'],
+
+//        'validation' => [
+//            'format' => '/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/',
+//            'messages' => [
+//                'format' => 'The provided IP is not valid'
+//            ]
+//        ],
+
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_MATCH]
     ];
 
