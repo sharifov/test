@@ -59,8 +59,17 @@ use yii\widgets\ActiveForm;
                 <div class="col-md-8">
                     <?= $form->field($model, 'client_name') ?>
                 </div>
+
             </div>
 
+            <div class="row">
+                    <div class="col-md-6">
+                        <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataDictionary::KEY_LIST, ['prompt' => '-']) ?>
+                    </div>
+                    <div class="col-md-6">
+                        <?php echo $form->field($model, 'lead_data_value') ?>
+                    </div>
+                </div>
 
 
             <div class="row">
@@ -211,15 +220,6 @@ use yii\widgets\ActiveForm;
                         ]
                     ])->label('Depart From / To');
 ?>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataDictionary::KEY_LIST, ['prompt' => '-']) ?>
-                </div>
-                <div class="col-md-6">
-                    <?php echo $form->field($model, 'lead_data_value') ?>
                 </div>
             </div>
 
