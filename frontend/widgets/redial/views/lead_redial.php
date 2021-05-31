@@ -49,7 +49,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
 
             <div class="col-md-9">
                 <div id="redial-lead-view-block">
-                    <?= LeadRedialViewWidget::widget(['lead' => $lead]) ?>
+                    <?php /*= LeadRedialViewWidget::widget(['lead' => $lead])*/ ?>
                 </div>
             </div>
             <div class="col-md-3"></div>
