@@ -1683,7 +1683,7 @@ class LeadSearch extends Lead
              ]);
         }
 
-        if ($this->lead_data_value) {
+        if ($this->lead_data_value !== '') {
              $query->andWhere([
                 'IN',
                 'leads.id',
