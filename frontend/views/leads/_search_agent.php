@@ -2,6 +2,7 @@
 
 use common\models\Quote;
 use kartik\select2\Select2;
+use sales\model\leadData\services\LeadDataDictionary;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -213,6 +214,14 @@ use yii\widgets\ActiveForm;
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataDictionary::KEY_LIST, ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-6">
+                    <?php echo $form->field($model, 'lead_data_value') ?>
+                </div>
+            </div>
 
         <?php  //echo $form->field($model, 'notes_for_experts')?>
 

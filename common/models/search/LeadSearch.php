@@ -27,6 +27,7 @@ use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\leadData\entity\LeadData;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
 use yii\base\Model;
@@ -73,6 +74,8 @@ use sales\auth\Auth;
  * @property int|null $quoteTypeId
  * @property string|null $expiration_dt
  * @property integer|null $lead_type
+ * @property string|null $lead_data_key
+ * @property string|null $lead_data_value
  *
  * @property $count_files
  * @property int|null $includedFiles
@@ -159,6 +162,8 @@ class LeadSearch extends Lead
     public $quoteTypeId;
     public $expiration_dt;
     public $lead_type;
+    public $lead_data_key;
+    public $lead_data_value;
 
     private $leadBadgesRepository;
 
@@ -232,6 +237,8 @@ class LeadSearch extends Lead
             ['includedFiles', 'in', 'range' => [0, 1]],
 
             [['expiration_dt'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
+
+            [['lead_data_key', 'lead_data_value'], 'string', 'max' => 50],
         ];
     }
 
@@ -246,7 +253,9 @@ class LeadSearch extends Lead
             'quoteTypeId' => 'Quote Type',
             'includedFiles' => 'Included Files',
             'origin_airport' => 'Origin Location Code',
-            'destination_airport' => 'Destination Location Code'
+            'destination_airport' => 'Destination Location Code',
+            'lead_data_key' => 'Data Key',
+            'lead_data_value' => 'Data Value',
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }
@@ -398,7 +407,7 @@ class LeadSearch extends Lead
             'request_ip'    => $this->request_ip,
             'l_is_test'     => $this->l_is_test,
             'hybrid_uid' => $this->hybrid_uid,
-            'l_type' => $this->l_type
+            'l_type' => $this->l_type,
         ]);
 
         if ($this->statuses) {
@@ -603,6 +612,28 @@ class LeadSearch extends Lead
                     ->select(['DISTINCT(lead_id)'])
                     ->where(['type_id' => $this->quoteTypeId])
                     ->groupBy('lead_id')
+             ]);
+        }
+
+        if ($this->lead_data_key) {
+             $query->andWhere([
+                'IN',
+                'leads.id',
+                LeadData::find()
+                    ->select(['DISTINCT(ld_lead_id)'])
+                    ->where(['ld_field_key' => $this->lead_data_key])
+                    ->groupBy('ld_lead_id')
+             ]);
+        }
+
+        if ($this->lead_data_value) {
+             $query->andWhere([
+                'IN',
+                'leads.id',
+                LeadData::find()
+                    ->select(['DISTINCT(ld_lead_id)'])
+                    ->where(['ld_field_value' => $this->lead_data_value])
+                    ->groupBy('ld_lead_id')
              ]);
         }
 
@@ -1638,6 +1669,28 @@ class LeadSearch extends Lead
                 'DATE(l_expiration_dt) = :date',
                 [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
             ));
+        }
+
+        if ($this->lead_data_key) {
+             $query->andWhere([
+                'IN',
+                'leads.id',
+                LeadData::find()
+                    ->select(['DISTINCT(ld_lead_id)'])
+                    ->where(['ld_field_key' => $this->lead_data_key])
+                    ->groupBy('ld_lead_id')
+             ]);
+        }
+
+        if ($this->lead_data_value) {
+             $query->andWhere([
+                'IN',
+                'leads.id',
+                LeadData::find()
+                    ->select(['DISTINCT(ld_lead_id)'])
+                    ->where(['ld_field_value' => $this->lead_data_value])
+                    ->groupBy('ld_lead_id')
+             ]);
         }
 
         return $dataProvider;
