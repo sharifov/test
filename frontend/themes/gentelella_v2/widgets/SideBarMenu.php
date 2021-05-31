@@ -228,7 +228,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'icon' => 'comments warning',
                     'items' => [
                         ['label' => 'Project config', 'url' => ['/client-chat-project-config/index']],
-                        ['label' => 'Client Chat', 'url' => ['/client-chat-crud/index']],
+                        ['label' => 'Client Chat CRUD', 'url' => ['/client-chat-crud/index']],
+                        ['label' => 'Clients Chat', 'url' => ['/client-chat/index']],
                         ['label' => 'Request', 'url' => ['/client-chat-request-crud/index']],
                         ['label' => 'Channel', 'url' => ['/client-chat-channel-crud/index']],
                         ['label' => 'Channel Translate', 'url' => ['/client-chat-channel-translate/index']],
