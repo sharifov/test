@@ -24,7 +24,6 @@ use yii\data\ArrayDataProvider;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -375,8 +374,6 @@ class AttractionQuoteController extends FController
     {
         $id = (int) Yii::$app->request->post('id', 0);
         $apiAttractionService = AttractionModule::getInstance()->apiService;
-        $answerModel = new BookingAnswersForm();
-        $answerModel->quoteId = $id;
 
         try {
             $model = $this->findModel($id);
@@ -389,15 +386,20 @@ class AttractionQuoteController extends FController
             $this->productQuoteRepository->save($productQuote);
             $resultAdd = $apiAttractionService->bookingAddAvailability($model->atnq_booking_id, $model->atnq_availability_id);
             $bookingDetails = $apiAttractionService->fetchBooking($model->atnq_booking_id);
+            $booking = $bookingDetails['data']['booking'];
 
-            //Yii::warning(VarDumper::dumpAsString($bookingDetails), 'AttractionQuoteController:actionAjaxBook:bookingDetails');
+            Yii::warning(VarDumper::dumpAsString($booking), 'AttractionQuoteController:actionAjaxBook:$booking');
+
+            $answerModel = new BookingAnswersForm();
+            $answerModel->initDynamicFields($booking);
+            $answerModel->quoteId = $id;
 
             $result = [
                 'message' => 'Attraction quote booking opened successful',
                 'status' => 1,
                 'html' => $this->renderAjax('booking_answers', [
                     'model' => $answerModel,
-                    'bookingDetails' => $bookingDetails['data']['booking']
+                    'bookingDetails' => $booking
                 ])
             ];
         } catch (\Throwable $e) {
@@ -412,14 +414,10 @@ class AttractionQuoteController extends FController
 
     public function actionInputBookAnswers()
     {
-        $answerModel = new BookingAnswersForm();
-        $answerModel->load(Yii::$app->request->post());
+        $answerModel = Yii::$app->request->post('BookingAnswersForm');
         $apiAttractionService = AttractionModule::getInstance()->apiService;
-
         $bookingDetails = $apiAttractionService->inputAnswersToBooking($answerModel);
         $booking = $bookingDetails['data']['booking'];
-
-        //Yii::error(VarDumper::dumpAsString($booking), 'AttractionQuoteController:actionInputBookAnswers:booking');
 
         if (strtolower($booking['state']) === 'open') {
             $apiAttractionService->commitBooking($booking['id']);
@@ -466,25 +464,24 @@ class AttractionQuoteController extends FController
         $bookingDetails = $apiAttractionService->fetchBooking($model->atnq_booking_id);
         $booking = $bookingDetails['data']['booking'];
 
-        //Yii::warning(VarDumper::dumpAsString($bookingDetails, 100), 'AttractionQuoteController:actionAjaxBookingState:bookingDetails');
-
         if (!$booking['canCommit'] && strtolower($booking['state']) !== 'open') {
             $result = [
                 'status' => 1,
                 'message' => 'Booking status: ' . $booking['state'],
-                //'productID' => !empty($model->atnqAttraction->atn_product_id) ? $model->atnqAttraction->atn_product_id : 0,
                 'html' => $this->renderAjax('booking_summary', ['bookingDetails' => $booking]),
             ];
         } else {
             $answerModel = new BookingAnswersForm();
+            $answerModel->initDynamicFields($booking);
             $answerModel->quoteId = $quoteId;
+
             $result = [
                 'message' => '',
                 'status' => 1,
                 'productID' => !empty($model->atnqAttraction->atn_product_id) ? $model->atnqAttraction->atn_product_id : 0,
                 'html' => $this->renderAjax('booking_answers', [
                     'model' => $answerModel,
-                    'bookingDetails' => $bookingDetails['data']['booking']
+                    'bookingDetails' => $booking
                 ])
             ];
         }
