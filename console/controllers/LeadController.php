@@ -21,7 +21,6 @@ use Yii;
  */
 class LeadController extends Controller
 {
-
     private $leadRepository;
 
     public function __construct($id, $module, LeadRepository $leadRepository, $config = [])
@@ -133,10 +132,11 @@ class LeadController extends Controller
             ->where(['offset_gmt' => null])
             ->andWhere(['status' => [Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]])
             ->andWhere(['IS NOT', 'request_ip', null])
+            ->andWhere(['<>', 'request_ip', ''])
             ->orderBy(['id' => SORT_DESC])
             ->limit(20)->all();
 
-            //print_r($leads->createCommand()->getRawSql());
+        //print_r($leads->createCommand()->getRawSql());
 
         if ($leads) {
             foreach ($leads as $lead) {
@@ -206,39 +206,39 @@ class LeadController extends Controller
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-       /* $swiftMailer = \Yii::$app->mailer2;
-        $body = 'Hi! '.date('Y-m-d H:i:s');
-        $subject = '✈ ⚠ [Sales] Default subject';
+        /* $swiftMailer = \Yii::$app->mailer2;
+         $body = 'Hi! '.date('Y-m-d H:i:s');
+         $subject = '✈ ⚠ [Sales] Default subject';
 
-        try {
-            $isSend = $swiftMailer
-                ->compose()//'sendDeliveryEmailForClient', ['order' => $this])
-                //->setTo(['alex.connor@techork.com', 'ac@zeit.style'])
-                ->setTo('ac@zeit.style')
-                ->setBcc(['alex.connor@techork.com'])
-                ->setFrom(\Yii::$app->params['email_from']['sales'])
-                ->setSubject($subject)
-                ->setTextBody($body)
-                ->send();
-            if($isSend) {
-                echo ' - Send';
-            }
+         try {
+             $isSend = $swiftMailer
+                 ->compose()//'sendDeliveryEmailForClient', ['order' => $this])
+                 //->setTo(['alex.connor@techork.com', 'ac@zeit.style'])
+                 ->setTo('ac@zeit.style')
+                 ->setBcc(['alex.connor@techork.com'])
+                 ->setFrom(\Yii::$app->params['email_from']['sales'])
+                 ->setSubject($subject)
+                 ->setTextBody($body)
+                 ->send();
+             if($isSend) {
+                 echo ' - Send';
+             }
 
-        } catch (\Throwable $e) {
-            print_r($e->getMessage());
-        }*/
+         } catch (\Throwable $e) {
+             print_r($e->getMessage());
+         }*/
 
 
-       /*
-        'lt_lead_id' => '12008'
-        'lt_user_id' => '1'
-        'status' => '8'
-        'l_answered' => '1'
-        't_category_id' => '2'
-        'checked_cnt' => '1'
-        'all_cnt' => '4'
-        'last_task_date' => '2018-10-06'
-       */
+        /*
+         'lt_lead_id' => '12008'
+         'lt_user_id' => '1'
+         'status' => '8'
+         'l_answered' => '1'
+         't_category_id' => '2'
+         'checked_cnt' => '1'
+         'all_cnt' => '4'
+         'last_task_date' => '2018-10-06'
+        */
 
         $repo = Yii::createObject(LeadRepository::class);
 
@@ -261,7 +261,7 @@ class LeadController extends Controller
                         } catch (\Throwable $e) {
                             Yii::error($e->getMessage(), 'ConsoleLeadController:UpdateByTask:FollowUp');
                         }
-                                                    //    status_description - Was deleted
+                        //    status_description - Was deleted
  //                       $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
  //                       if ($lead->employee_id && !$lead->sendNotification('lead-status-follow-up', $lead->employee_id, null, $lead)) {
  //                           Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
@@ -292,7 +292,7 @@ class LeadController extends Controller
                             Yii::error($e->getMessage(), 'ConsoleLeadController:UpdateByTask:Snooze');
                         }
 
-                                                // status_description-  Was deleted
+                        // status_description-  Was deleted
 //                        $lead->status_description = 'System AutoChange status to SNOOZE ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
                     }
                     /*else {
