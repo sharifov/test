@@ -2597,6 +2597,43 @@ class Lead extends ActiveRecord implements Objectable
         return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
     }
 
+
+    private function updateGmtByFlight(): void
+    {
+        if (!$this->offset_gmt && $this->leadFlightSegments) {
+            /*Yii::warning(['offset_gmt' => $this->offset_gmt, 'lead_id' => $this->id,
+                'firstSegment' =>  VarDumper::dumpAsString($this->leadFlightSegments[0])], 'updateGmtByFlight-1');*/
+            $firstSegment = $this->leadFlightSegments[0];
+            $airport = Airports::findByIata($firstSegment->origin);
+            if ($airport && is_numeric($airport->dst)) {
+                $offset = $airport->dst;
+                $offsetStr = null;
+
+                if ($offset > 0) {
+                    if ($offset < 10) {
+                        $offsetStr = '+0' . $offset . ':00';
+                    } else {
+                        $offsetStr = '+' . $offset . ':00';
+                    }
+                } elseif ($offset < 0) {
+                    if ($offset > -10) {
+                        $offsetStr = '-0' . abs($offset) . ':00';
+                    } else {
+                        $offsetStr = $offset . ':00';
+                    }
+                } else {
+                    $offsetStr = '-00:00';
+                }
+
+                if ($offsetStr) {
+                    $this->offset_gmt = $offsetStr;
+                    self::updateAll(['offset_gmt' => $this->offset_gmt], ['id' => $this->id]);
+                    //Yii::warning(['offset_gmt' => $this->offset_gmt, 'lead_id' => $this->id], 'updateGmtByFlight-2');
+                }
+            }
+        }
+    }
+
     /**
      * @return array
      */
@@ -2604,76 +2641,49 @@ class Lead extends ActiveRecord implements Objectable
     {
         $out = ['error' => false, 'data' => []];
 
-        if (empty($this->offset_gmt) && !empty($this->request_ip)) {
-            $ip = $this->request_ip; //'217.26.162.22';
-            $key = Yii::$app->params['ipinfodb_key'] ?? '';
-            $url = 'http://api.ipinfodb.com/v3/ip-city/?format=json&key=' . $key . '&ip=' . $ip;
+        if (empty($this->offset_gmt)) {
+            if (empty($this->request_ip)) {
+                $this->updateGmtByFlight();
+            } else {
+                $ip = $this->request_ip; //'217.26.162.22';
+                $key = Yii::$app->params['ipinfodb_key'] ?? '';
 
-            $ctx = stream_context_create(['http' =>
-                ['timeout' => 5]  //Seconds
-            ]);
-
-            try {
-                $jsonData = file_get_contents($url, false, $ctx);
-
-                if ($jsonData) {
-                    $data = @json_decode($jsonData, true);
-
-
-                    if ($data && isset($data['timeZone'])) {
-                        if (isset($data['statusCode'])) {
-                            unset($data['statusCode']);
-                        }
-
-                        if (isset($data['statusMessage'])) {
-                            unset($data['statusMessage']);
-                        }
-
-                        $this->offset_gmt = $data['timeZone'];
-                        $this->request_ip_detail = json_encode($data);
-
-                        self::updateAll(['offset_gmt' => $this->offset_gmt, 'request_ip_detail' => $this->request_ip_detail], ['id' => $this->id]);
-
-                        $out['data'] = $data;
-                    }
+                if (!$key) {
+                    Yii::warning('Params ipinfodb_key is empty', 'Lead:updateIpInfo');
                 }
-            } catch (\Throwable $throwable) {
-                $out['error'] = $throwable->getMessage();
+                $url = 'http://api.ipinfodb.com/v3/ip-city/?format=json&key=' . $key . '&ip=' . $ip;
 
-                if (!$this->offset_gmt && $this->leadFlightSegments) {
-                    $firstSegment = $this->leadFlightSegments[0];
-                    $airport = Airports::findByIata($firstSegment->origin);
-                    if ($airport && $airport->dst) {
-                        $offset = $airport->dst;
-                        if (is_numeric($offset)) {
-                            $offsetStr = null;
+                $ctx = stream_context_create(['http' =>
+                    ['timeout' => 5]  //Seconds
+                ]);
 
-                            if ($offset > 0) {
-                                if ($offset < 10) {
-                                    $offsetStr = '+0' . $offset . ':00';
-                                } else {
-                                    $offsetStr = '+' . $offset . ':00';
-                                }
+                try {
+                    $jsonData = file_get_contents($url, false, $ctx);
+
+                    if ($jsonData) {
+                        $data = @json_decode($jsonData, true);
+
+
+                        if ($data && isset($data['timeZone'])) {
+                            if (isset($data['statusCode'])) {
+                                unset($data['statusCode']);
                             }
 
-                            if ($offset < 0) {
-                                if ($offset > -10) {
-                                    $offsetStr = '-0' . abs($offset) . ':00';
-                                } else {
-                                    $offsetStr = $offset . ':00';
-                                }
+                            if (isset($data['statusMessage'])) {
+                                unset($data['statusMessage']);
                             }
 
-                            if ($offset === 0) {
-                                $offsetStr = '-00:00';
-                            }
+                            $this->offset_gmt = $data['timeZone'];
+                            $this->request_ip_detail = json_encode($data);
 
-                            if ($offsetStr) {
-                                $this->offset_gmt = $offsetStr;
-                                self::updateAll(['offset_gmt' => $this->offset_gmt], ['id' => $this->id]);
-                            }
+                            self::updateAll(['offset_gmt' => $this->offset_gmt, 'request_ip_detail' => $this->request_ip_detail], ['id' => $this->id]);
+
+                            $out['data'] = $data;
                         }
                     }
+                } catch (\Throwable $throwable) {
+                    $out['error'] = $throwable->getMessage();
+                    $this->updateGmtByFlight();
                 }
             }
         }
