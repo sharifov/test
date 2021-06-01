@@ -129,7 +129,7 @@ class LeadController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         $leads = Lead::find()
-            ->where(['offset_gmt' => null])
+            ->where(['OR', ['offset_gmt' => null], ['offset_gmt' => '']])
             ->andWhere(['status' => [Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]])
             //->andWhere(['OR', ['IS NOT', 'request_ip', null], ['request_ip' => '']])
             ->orderBy(['id' => SORT_DESC])
