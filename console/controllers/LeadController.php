@@ -133,7 +133,7 @@ class LeadController extends Controller
             ->andWhere(['status' => [Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]])
             //->andWhere(['OR', ['IS NOT', 'request_ip', null], ['request_ip' => '']])
             ->orderBy(['id' => SORT_DESC])
-            ->limit(200)->all();
+            ->limit(50)->all();
 
         //print_r($leads->createCommand()->getRawSql());
 
