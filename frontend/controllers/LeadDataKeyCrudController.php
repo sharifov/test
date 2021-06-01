@@ -3,16 +3,18 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\leadData\entity\LeadData;
-use sales\model\leadData\entity\LeadDataSearch;
-use yii\web\Controller;
+use sales\model\leadDataKey\entity\LeadDataKey;
+use sales\model\leadDataKey\entity\LeadDataKeySearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 
-class LeadDataCrudController extends FController
+/**
+ * Class LeadDataKeyCrudController
+ */
+class LeadDataKeyCrudController extends FController
 {
     public function init(): void
     {
@@ -38,7 +40,7 @@ class LeadDataCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new LeadDataSearch();
+        $searchModel = new LeadDataKeySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -64,10 +66,10 @@ class LeadDataCrudController extends FController
      */
     public function actionCreate()
     {
-        $model = new LeadData();
+        $model = new LeadDataKey();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ld_id]);
+            return $this->redirect(['view', 'id' => $model->ldk_id]);
         }
 
         return $this->render('create', [
@@ -85,7 +87,7 @@ class LeadDataCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ld_id]);
+            return $this->redirect(['view', 'id' => $model->ldk_id]);
         }
 
         return $this->render('update', [
@@ -109,15 +111,15 @@ class LeadDataCrudController extends FController
 
     /**
      * @param integer $id
-     * @return LeadData
+     * @return LeadDataKey
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): LeadData
+    protected function findModel($id): LeadDataKey
     {
-        if (($model = LeadData::findOne($id)) !== null) {
+        if (($model = LeadDataKey::findOne($id)) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('LeadData not found by ID(' . $id . ')');
+        throw new NotFoundHttpException('LeadDataKey not found by ID(' . $id . ')');
     }
 }

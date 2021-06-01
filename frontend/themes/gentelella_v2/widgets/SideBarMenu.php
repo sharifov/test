@@ -312,6 +312,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Export Leads', 'url' => ['/leads/export']],
                         ['label' => 'Lead Request', 'url' => ['/lead-request-crud/index']],
                         ['label' => 'Lead Data', 'url' => ['/lead-data-crud/index']],
+                        ['label' => 'Lead Data Key', 'url' => ['/lead-data-key-crud/index']],
                     ]
                 ]
             ]
