@@ -271,7 +271,7 @@ class LeadQcallSearch extends LeadQcall
             $query->addSelect(['is_in_day_time_hours' =>
                 new Expression('if (' . $expressionNull . ' OR (' . $expression . ' > ' . $freshTime . '  AND ' .
                     $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' .
-                    $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . ')\', 1, 0) ')
+                    $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\'), 1, 0) ')
             ]);
 //            $query->addOrderBy([
 //                'is_in_day_time_hours' => SORT_DESC
