@@ -269,7 +269,7 @@ class LeadQcallSearch extends LeadQcall
             $expressionNull = Lead::tableName() . '.offset_gmt IS NULL OR ' . Lead::tableName() . '.offset_gmt = "" ';
 
             $query->addSelect(['is_in_day_time_hours' =>
-                new Expression('if (' . $expressionNull . ' OR (' . $expression . ' > ' . $freshTime . '  AND ' .
+                new Expression('if ( (' . $expression . ' > ' . $freshTime . '  AND ' .
                     $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' .
                     $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\'), 1, 0) ')
             ]);
@@ -278,7 +278,7 @@ class LeadQcallSearch extends LeadQcall
 //            ]);
 
             $query->addSelect(['is_in_client_current_time' =>
-                new Expression('if (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+                new Expression('if (' . $expressionNull . ' OR (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\'), 1, 0) ')
             ]);
             $query->andHaving([
                 'OR',
