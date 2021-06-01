@@ -390,9 +390,11 @@ class ClientChatController extends FController
 
         $filter->loadDefaultValuesByPermissions();
 
-        $page = (int)\Yii::$app->request->get('page');
-        if ($page < 1) {
-            $page = 1;
+        $page = $queryPage = (int)\Yii::$app->request->get('page');
+        $increaseLimit = false;
+        if (!Yii::$app->request->isAjax && $page > 0) {
+            $queryPage++;
+            $increaseLimit = true;
         }
 
         if ($filter->resetAdditionalFilter) {
@@ -408,7 +410,7 @@ class ClientChatController extends FController
                 return $this->asJson($chatIds);
             }
 
-            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter);
+            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter, $queryPage, $increaseLimit);
 
             if ($filter->group === GroupFilter::FREE_TO_TAKE) {
                 $countFreeToTake = $dataProvider->getTotalCount();
@@ -448,25 +450,25 @@ class ClientChatController extends FController
         $loadingChannels = \Yii::$app->request->get('loadingChannels');
         if ($dataProvider) {
             if ($loadingChannels) {
-                $dataProvider->pagination->setPage($page - 1);
+//                $dataProvider->pagination->setPage($page - 1);
 //            if (\Yii::$app->request->post('loadingChannels')) {
 //                $dataProvider->pagination->page = $filter->page;
 //            } else {
 //                $dataProvider->pagination->page = $filter->page = 0;
 //            }
-                $alreadyLoadedCount = $dataProvider->getPagination()->getPageSize() * ($page - 1) + $dataProvider->getCount();
+                $alreadyLoadedCount = $dataProvider->getPagination()->getPageSize() * ($page + 1);
                 $response = [
                     'html' => '',
-                    'page' => $page,
+                    'page' => $page + 1,
                     'isFullList' => $alreadyLoadedCount >= $dataProvider->getTotalCount(),
                     'moreCount' => $dataProvider->getTotalCount() - $alreadyLoadedCount,
                 ];
 
-                if ($dataProvider->getCount()) {
+                if ($dataProvider->allModels) {
                     $formatter = new Formatter();
                     $formatter->timeZone = Auth::user()->timezone;
                     $response['html'] = $this->renderPartial('partial/_client-chat-item', [
-                        'clientChats' => $dataProvider->getModels(),
+                        'clientChats' => $dataProvider->allModels,
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
                         'formatter' => $formatter,
                         'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
@@ -486,11 +488,12 @@ class ClientChatController extends FController
             }
         }
 
-        $isFullList = $dataProvider ? ($dataProvider->getCount() === $dataProvider->getTotalCount()) : false;
+        $countAllModels = count($dataProvider->allModels);
+        $isFullList = $dataProvider ? ($countAllModels === (int)$dataProvider->getTotalCount()) : false;
         if ($isFullList || !$dataProvider) {
             $moreCount = 0;
         } else {
-            $moreCount = $dataProvider->getTotalCount() - $dataProvider->getCount();
+            $moreCount = $dataProvider->getTotalCount() - $countAllModels;
         }
 
         return $this->render('dashboard-v2', [

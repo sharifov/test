@@ -339,7 +339,7 @@ class ClientChatSearch extends ClientChat
         return $clientChats;
     }
 
-    public function getListOfChats(Employee $user, array $channelsIds, FilterForm $filter): ArrayDataProvider
+    public function getListOfChats(Employee $user, array $channelsIds, FilterForm $filter, int $page, bool $increaseLimit): ArrayDataProvider
     {
         if (GroupFilter::isNothing($filter->group)) {
             return new ArrayDataProvider([
@@ -348,7 +348,18 @@ class ClientChatSearch extends ClientChat
         }
 
         $query = $this->listOfChatsQuery($filter, $user, $channelsIds);
+        $totalCount = $query->count();
 
+
+        $limit = $this->pageSize;
+        $offset = $this->pageSize * $page;
+        if ($increaseLimit) {
+            $limit *= ($page);
+            $offset = 0;
+        }
+//        $limit = $increaseLiVmit ? $this->pageSize * (($page === 0) ? $page+1 : $page)  : $this->pageSize;
+
+        $query->limit($limit)->offset($offset);
         $data = $query->asArray()->all();
 //        $data = ArrayHelper::index($data, 'cch_id');
 //        $chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
@@ -367,6 +378,7 @@ class ClientChatSearch extends ClientChat
         $dataProvider = new ArrayDataProvider([
             'allModels' => $data,
             'pagination' => ['pageSize' => $this->pageSize],
+            'totalCount' => $totalCount
             //            'sort' => [
             //                'defaultOrder' => [
             //                    'count_unread_messages' => SORT_DESC,
