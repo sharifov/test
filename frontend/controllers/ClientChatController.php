@@ -2177,8 +2177,8 @@ class ClientChatController extends FController
             foreach ($form->chatIds as $chatId) {
                 $chat = ClientChat::findOne(['cch_id' => $chatId]);
                 if ($chat) {
-                    $chat->cch_status_id = $form->statusId;
-                    $chat->save();
+                    $chat->updateStatus(Auth::id(), $form->statusId, ClientChatStatusLog::ACTION_MULTIPLE_UPDATE_STATUS);
+                    $this->clientChatRepository->save($chat);
                 }
             }
 

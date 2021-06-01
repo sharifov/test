@@ -14,6 +14,7 @@ use sales\model\clientChat\event\ClientChatIdleEvent;
 use sales\model\clientChat\event\ClientChatInProgressEvent;
 use sales\model\clientChat\event\ClientChatPendingEvent;
 use sales\model\clientChat\event\ClientChatTransferEvent;
+use sales\model\clientChat\event\ClientChatUpdateStatusEvent;
 use sales\model\clientChat\event\listener\ClientChatArchiveStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatCloseStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatEndConversationListener;
@@ -24,6 +25,7 @@ use sales\model\clientChat\event\listener\ClientChatPendingStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatRefreshListListener;
 use sales\model\clientChat\event\listener\ClientChatRemoveLastMessageListener;
 use sales\model\clientChat\event\listener\ClientChatTransferStatusLogListener;
+use sales\model\clientChat\event\listener\ClientChatUpdateStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatUserAccessSetStatusCancelListener;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetEvent;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetListener;
@@ -74,6 +76,9 @@ return [
     ClientChangeIpEvent::class => [
         ClientCreatedCheckExcludeListener::class,
     ],
+    ClientChatUpdateStatusEvent::class => [
+        ClientChatUpdateStatusLogListener::class
+    ]
 
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
 ];

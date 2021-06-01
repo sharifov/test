@@ -21,6 +21,7 @@ use sales\model\clientChat\event\ClientChatInProgressEvent;
 use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
 use sales\model\clientChat\event\ClientChatPendingEvent;
 use sales\model\clientChat\event\ClientChatTransferEvent;
+use sales\model\clientChat\event\ClientChatUpdateStatusEvent;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -348,6 +349,19 @@ class ClientChat extends \yii\db\ActiveRecord
     public function getSourceTypeName(): ?string
     {
         return $this->cch_source_type_id ? self::getSourceTypeList()[$this->cch_source_type_id] : null;
+    }
+
+    public function updateStatus(int $userId, int $statusId, int $actionType): void
+    {
+        $this->recordEvent(new ClientChatUpdateStatusEvent(
+            $this->cch_id,
+            $this->cch_status_id,
+            $statusId,
+            $userId,
+            $actionType,
+            $this->cch_channel_id
+        ));
+        $this->cch_status_id = $statusId;
     }
 
     public function pending(?int $userId, int $action, ?string $description = null): void
