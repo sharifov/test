@@ -2594,6 +2594,8 @@ class Lead extends ActiveRecord implements Objectable
     private function updateGmtByFlight(): void
     {
         if (!$this->offset_gmt && $this->leadFlightSegments) {
+            Yii::warning(['offset_gmt' => $this->offset_gmt, 'lead_id' => $this->id,
+                'firstSegment' =>  VarDumper::dumpAsString($this->leadFlightSegments[0])], 'updateGmtByFlight-1');
             $firstSegment = $this->leadFlightSegments[0];
             $airport = Airports::findByIata($firstSegment->origin);
             if ($airport && $airport->dst) {
@@ -2624,6 +2626,7 @@ class Lead extends ActiveRecord implements Objectable
                     if ($offsetStr) {
                         $this->offset_gmt = $offsetStr;
                         self::updateAll(['offset_gmt' => $this->offset_gmt], ['id' => $this->id]);
+                        Yii::warning(['offset_gmt' => $this->offset_gmt, 'lead_id' => $this->id], 'updateGmtByFlight-2');
                     }
                 }
             }

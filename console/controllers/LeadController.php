@@ -154,7 +154,7 @@ class LeadController extends Controller
                     VarDumper::dump($out);
                     echo "\r\n";
                 } else {
-                    echo $lead->id . ' OK - ';
+                    echo $lead->id . ' -  offset_gmt: ' . $lead->offset_gmt . ' -  ip: ' . $lead->request_ip . ' - OK - ';
                     if (isset($out['data']['timeZone'])) {
                         VarDumper::dump($out['data']['timeZone']);
                     }
