@@ -1439,14 +1439,18 @@ $(document).on('click', '.multiple-checkbox', function(e) {
    
     $.each( checked, function( key, value ) {
         if (typeof data[value] === 'undefined') {
-          data[value] = value;
+            data[value] = value;
+            let uncheckedIndex = unchecked[unchecked.findIndex((elem) => elem === value)];
+            if (uncheckedIndex !== 'undefined') {
+                delete(unchecked[uncheckedIndex]);
+            }
         }
     });
     
-   $.each( unchecked, function( key, value ) {
-      if (typeof data[value] !== 'undefined') {
+    $.each( unchecked, function( key, value ) {
+        if (typeof data[value] !== 'undefined') {
             delete(data[value]);
-      }
+        }
     });
    
    sessionStorage.selectedChats = JSON.stringify(data);
