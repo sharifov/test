@@ -29,6 +29,7 @@ class LeadDataSearch extends LeadData
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['ld_id' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
         ]);
 
         $this->load($params);
