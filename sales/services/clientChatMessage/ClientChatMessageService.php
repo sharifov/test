@@ -205,7 +205,7 @@ class ClientChatMessageService
             }
             (Yii::createObject(ClientChatLastMessageRepository::class))->createOrUpdateByMessage($message);
         } elseif ($message->isAgentUttered()) {
-            $this->touchUnreadMessage($clientChat->cch_id);
+            $this->discardUnreadMessages($clientChat->cch_id, $ownerUserId);
             if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userClientChatData->isRegisteredInRc()) {
                 Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
                     'data' => [
