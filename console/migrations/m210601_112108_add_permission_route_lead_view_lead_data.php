@@ -16,6 +16,11 @@ class m210601_112108_add_permission_route_lead_view_lead_data extends Migration
     private $roles = [
         Employee::ROLE_SUPER_ADMIN,
         Employee::ROLE_ADMIN,
+        Employee::ROLE_AGENT,
+        Employee::ROLE_SUPERVISION,
+        Employee::ROLE_EX_AGENT,
+        Employee::ROLE_EX_SUPER,
+        Employee::ROLE_QA,
     ];
 
     /**
