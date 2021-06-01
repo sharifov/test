@@ -141,12 +141,16 @@ class LeadController extends Controller
             ->andWhere(['status' => [Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]])
             ->andWhere(['OR', ['IS NOT', 'request_ip', null], ['<>', 'request_ip', '']])
             ->orderBy(['id' => SORT_DESC])
-            ->limit(20)->all();
+            ->limit(100)->all();
 
         //print_r($leads->createCommand()->getRawSql());
 
         if ($leads) {
             foreach ($leads as $lead) {
+                if ($lead->request_ip) {
+                    sleep(1);
+                }
+
                 $out = $lead->updateIpInfo();
 
                 if (isset($out['error']) && $out['error']) {
@@ -160,8 +164,6 @@ class LeadController extends Controller
                     }
                     echo "\r\n";
                 }
-
-                sleep(1);
             }
         }
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
