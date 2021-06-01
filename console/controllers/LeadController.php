@@ -128,11 +128,18 @@ class LeadController extends Controller
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
+//
+//        $cntLeads = Lead::find()->select('count(*)')
+//            ->where(['offset_gmt' => null])
+//            ->andWhere(['status' => [Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]])
+//            ->andWhere(['OR', ['IS NOT', 'request_ip', null], ['<>', 'request_ip', '']])
+//            ->orderBy(['id' => SORT_DESC])
+//            ->all();
+
         $leads = Lead::find()
             ->where(['offset_gmt' => null])
             ->andWhere(['status' => [Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]])
-            ->andWhere(['IS NOT', 'request_ip', null])
-            ->andWhere(['<>', 'request_ip', ''])
+            ->andWhere(['OR', ['IS NOT', 'request_ip', null], ['<>', 'request_ip', '']])
             ->orderBy(['id' => SORT_DESC])
             ->limit(20)->all();
 
