@@ -265,8 +265,13 @@ class LeadQcallSearch extends LeadQcall
             $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
             $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
 //            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+
+            $expressionNull = Lead::tableName() . '.offset_gmt IS NULL OR ' . Lead::tableName() . '.offset_gmt = "" ';
+
             $query->addSelect(['is_in_day_time_hours' =>
-                new Expression('if ( ' . $expression . ' > ' . $freshTime . '  AND ' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+                new Expression('if (' . $expressionNull . ' OR (' . $expression . ' > ' . $freshTime . '  AND ' .
+                    $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' .
+                    $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . ')\', 1, 0) ')
             ]);
 //            $query->addOrderBy([
 //                'is_in_day_time_hours' => SORT_DESC
@@ -333,7 +338,7 @@ class LeadQcallSearch extends LeadQcall
         }
 
 //        $query->addOrderBy([
-////            'expired' => SORT_DESC,
+        ////            'expired' => SORT_DESC,
 //            'deadline' => SORT_ASC,
 //            'attempts' => SORT_ASC,
 //            'lqc_dt_from' => SORT_ASC
