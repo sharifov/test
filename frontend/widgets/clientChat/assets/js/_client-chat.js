@@ -61,8 +61,6 @@ $(document).on('click', '._cc-access-action', function (e) {
                 $btn.html(btnHtml);
             } else {
                 setTimeout(function () {
-                    console.log(wrapperId);
-                    console.log($('#'+wrapperId).length);
                     if ($('#'+wrapperId).length) {
                         checkChatAccessAction(ccuaId, accessAction, checkAccessUrl, function () {
                             actionBtns.each(function (i, elem) {
