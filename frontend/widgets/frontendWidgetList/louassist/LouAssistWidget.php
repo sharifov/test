@@ -24,12 +24,6 @@ class LouAssistWidget extends \yii\bootstrap\Widget
     public function init()
     {
         parent::init();
-
-        /* TODO:: add if properties empty */
-        if ($this->enabled === null) {
-            
-        }
-
     }
 
     public function run()

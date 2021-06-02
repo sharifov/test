@@ -21,4 +21,3 @@ $js = <<<JS
     LOU.identify('{$identify}', {$paramsEncoded})
 JS;
 $this->registerJs($js);
-?>
