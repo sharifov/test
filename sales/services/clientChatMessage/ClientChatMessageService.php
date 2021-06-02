@@ -11,6 +11,7 @@ use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUnread\entity\ClientChatUnreadRepository;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\repositories\call\CallRepository;
 use Yii;
 use yii\db\ActiveQuery;
@@ -177,7 +178,8 @@ class ClientChatMessageService
     {
         $ownerUserId = null;
         if ($message->isAgentUttered()) {
-            $ownerUserId = $clientChat->cch_owner_user_id;
+            $agent = UserClientChatData::find()->byRcId($message->getAgentId())->one();
+            $ownerUserId = $agent->uccd_employee_id ?? $clientChat->cch_owner_user_id;
         }
         $message->assignToChat($clientChat->cch_id, $clientChat->cch_client_id, $ownerUserId);
         $this->clientChatMessageRepository->save($message, 0);

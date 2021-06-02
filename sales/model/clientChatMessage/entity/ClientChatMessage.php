@@ -198,6 +198,11 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         return $this->ccm_body['u']['username'] ?? 'NoName';
     }
 
+    public function getAgentId(): string
+    {
+        return $this->ccm_body['u']['_id'] ?? '';
+    }
+
     public static function find(): Scopes
     {
         return new Scopes(static::class);

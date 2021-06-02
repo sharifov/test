@@ -22,4 +22,9 @@ class UserClientChatDataScopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byRcId(string $id): self
+    {
+        return $this->andWhere(['uccd_rc_user_id' => $id]);
+    }
 }
