@@ -36,7 +36,7 @@ $(document).on('click', '._cc-access-action', function (e) {
     let checkAccessUrl = $btn.attr('data-check-access-url');
     let ccuaId = $btn.attr('data-ccua-id');
     let accessAction = $btn.attr('data-access-action');
-    let wrapperId = $btn.closest('_cc-box-item-wrapper').attr('id');
+    let wrapperId = $btn.closest('._cc-box-item-wrapper').attr('id');
 
     let actionBtns = $btn.closest('._cc-action').find('._cc-access-action');
 
