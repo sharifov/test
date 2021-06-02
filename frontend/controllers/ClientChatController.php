@@ -809,7 +809,9 @@ class ClientChatController extends FController
         $result = [
             'error' => false,
             'message' => '',
-            'widgetData' => null
+            'widgetData' => [
+                'data' => null
+            ]
         ];
 
         try {
@@ -818,7 +820,7 @@ class ClientChatController extends FController
             $eventDispatcher = Yii::createObject(EventDispatcher::class);
             if ($userAccess->ccua_status_id === $accessAction) {
                 $eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($userAccess->ccuaCch, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $userAccess->ccua_user_id);
-                $result['widgetData'] = $this->clientChatUserAccessRepository->getUserAccessWidgetCommandData($userAccess->ccua_cch_id, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey());
+                $result['widgetData']['data'] = $this->clientChatUserAccessRepository->getUserAccessWidgetCommandData($userAccess->ccua_cch_id, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey());
             } else {
                 $result['error'] = true;
                 $result['message'] = 'The action was performed incorrectly, please try again';
