@@ -82,7 +82,7 @@ class ClientChatRepository
 
     public function findNotClosed(string $rid): ClientChat
     {
-        if ($clientChat = ClientChat::find()->byRid($rid)->notClosed()->orderBy(['cch_id' => SORT_DESC])->one()) {
+        if ($clientChat = ClientChat::find()->byRid($rid)->notClosed()->notArchived()->orderBy(['cch_id' => SORT_DESC])->one()) {
             return $clientChat;
         }
         throw new NotFoundException('unable to find client chat that is not closed by rid: ' . $rid);
