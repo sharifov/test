@@ -30,9 +30,8 @@ $availabilitiesDataProvider = new ArrayDataProvider([
             'tag' => 'table',
             'class' => 'table table-bordered',
         ],
-        'emptyText' => '<div class="text-center">No availabilities at this moment</div><br>',
+        'emptyText' => '<div class="alert alert-warning" role="alert"><div class="text-center">No availabilities at this moment.</div></div>',
         'itemView' => function ($availabilityItem, $key, $index, $widget) use ($attraction, $productKey) {
-            //\yii\helpers\VarDumper::dump($availabilityItem, 10, true); exit;
             return $this->render('_list_availabilities_item', [
                 'availabilityItem' => $availabilityItem,
                 'index' => $index,

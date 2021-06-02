@@ -104,7 +104,6 @@ class AttractionQuoteController extends FController
         ]);
     }
 
-
     /**
      * Lists all AttractionQuote models.
      * @return mixed
@@ -145,11 +144,9 @@ class AttractionQuoteController extends FController
     {
         $attractionId = (int) Yii::$app->request->post('atn_id');
         $productKey = (string) Yii::$app->request->post('product_key');
-
         $result = [];
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $attraction = $this->attractionRepository->find($attractionId);
 
+        $attraction = $this->attractionRepository->find($attractionId);
         $apiAttractionService = AttractionModule::getInstance()->apiService;
         if ($attraction) {
             try {
@@ -168,11 +165,15 @@ class AttractionQuoteController extends FController
             ],
         ]);
 
-        return $this->renderAjax('search/_list_availabilities', [
+        $response['error'] = false;
+        $response['result'] = empty($availabilityList);
+        $response['html'] = $this->renderAjax('search/_list_availabilities', [
             'dataProvider' => $dataProvider,
             'attraction'   => $attraction,
             'productKey' => $productKey
         ]);
+
+        return $this->asJson($response);
     }
 
     public function actionCheckAvailabilityAjax()
@@ -190,8 +191,6 @@ class AttractionQuoteController extends FController
         }
 
         $availability = $result['availability'];
-
-        //VarDumper::dump($result, 10, true);
 
         if ($availability) {
             return $this->renderAjax('options', [
@@ -226,7 +225,6 @@ class AttractionQuoteController extends FController
                 'model' => $optionsModel,
             ]);
         } else {
-            //VarDumper::dump($result, 10, true); die();
             Yii::warning($result['errors'], 'AttractionQuoteController:InputAvailabilityOptions');
             return '<div class="text-center">This availability is not available at this moment check another one<div>';
         }
@@ -510,36 +508,6 @@ class AttractionQuoteController extends FController
             ];
         }
 
-        return $result;
-    }
-
-    /**
-     * @return array
-     */
-    public function actionAjaxCancelBookOld(): array
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $id = (int) Yii::$app->request->post('id', 0);
-
-        try {
-            $model = $this->findModel($id);
-            HotelQuoteCancelBookGuard::guard($model);
-
-            /** @var HotelQuoteCancelBookService $cancelBookService */
-            $cancelBookService = Yii::$container->get(HotelQuoteCancelBookService::class);
-            $resultCancel = $cancelBookService->cancelBook($model);
-
-            $result = [
-                'message' => $resultCancel->message,
-                'status' => $resultCancel->status,
-            ];
-        } catch (\Throwable $throwable) {
-            $result = [
-                'message' => $throwable->getMessage(),
-                'status' => 0,
-            ];
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'Controller:HotelQuoteController:AjaxCancelBook:Throwable');
-        }
         return $result;
     }
 
