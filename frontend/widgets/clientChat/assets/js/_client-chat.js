@@ -90,6 +90,10 @@ function checkChatAccessAction(ccuaId, accessAction, url, callable)
         if (response.error) {
             createNotify('Error', response.message, 'error');
             callable();
+        } else {
+            if (typeof refreshClientChatWidget === "function" && response.widgetData) {
+                refreshClientChatWidget(response.widgetData);
+            }
         }
     }, 'json')
     .fail(function (xhr) {

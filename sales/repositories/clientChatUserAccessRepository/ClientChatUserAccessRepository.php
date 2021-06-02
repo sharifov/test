@@ -68,6 +68,12 @@ class ClientChatUserAccessRepository
 
     public function updateChatUserAccessWidget(int $chatId, int $userId, int $statusId, ?int $chatUserAccessId = null): void
     {
+        $data = $this->getUserAccessWidgetCommandData($chatId, $userId, $statusId, $chatUserAccessId);
+        Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
+    }
+
+    public function getUserAccessWidgetCommandData(int $chatId, int $userId, int $statusId, ?int $chatUserAccessId = null): array
+    {
         $data = [];
         if ($statusId === ClientChatUserAccess::STATUS_TRANSFER_ACCEPT) {
             $data = ClientChatAccessMessage::acceptTransfer($chatId, $userId, (int) $chatUserAccessId);
@@ -81,7 +87,7 @@ class ClientChatUserAccessRepository
             $data = ClientChatAccessMessage::skip($chatId, $userId, (int)$chatUserAccessId);
         }
 
-        Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
+        return $data;
     }
 
     public function resetChatUserAccessWidget(int $userId): void
