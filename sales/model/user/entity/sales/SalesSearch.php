@@ -156,7 +156,7 @@ class SalesSearch extends Model
         return $dataProvider;
     }
 
-    public function qualifiedLeadsTakenQuery(array $params, int $cacheDuration = 180): LeadQuery
+    public function qualifiedLeadsTakenQuery(array $params, int $cacheDuration = 1): LeadQuery
     {
         $query = Lead::find();
         $query->select(Lead::tableName() . '.*');
