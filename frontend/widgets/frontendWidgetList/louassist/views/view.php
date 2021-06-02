@@ -7,17 +7,15 @@ use yii\web\View;
 /** @var int $userId */
 /** @var View $this */
 /** @var string $identify */
-?>
-
-<?php
+/** @var $scriptId */
 
 $paramsEncoded = JsonHelper::encode($params);
 
-$this->registerJsFile('//run.louassist.com/v2.5.1-m?id=' . $userId, [
-    'position' => \yii\web\View::POS_HEAD,
+$this->registerJsFile('//run.louassist.com/v2.5.1-m?id=' . $scriptId, [
+    'position' => View::POS_HEAD,
 ]);
 
 $js = <<<JS
     LOU.identify('{$identify}', {$paramsEncoded})
 JS;
-$this->registerJs($js);
+$this->registerJs($js, View::POS_HEAD);

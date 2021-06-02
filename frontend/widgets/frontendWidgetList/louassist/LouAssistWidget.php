@@ -2,7 +2,6 @@
 
 namespace frontend\widgets\frontendWidgetList\louassist;
 
-use common\models\UserConnection;
 use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
 use Yii;
@@ -14,16 +13,19 @@ use yii\helpers\ArrayHelper;
  * @property bool|null $enabled
  * @property array|null $params
  * @property array|null $routes
+ * @property string|int|null $scriptId
  */
 class LouAssistWidget extends \yii\bootstrap\Widget
 {
     public $enabled;
     public $params;
     public $routes;
+    public $scriptId;
 
     public function init()
     {
         parent::init();
+        $this->fillSettings();
     }
 
     public function run()
@@ -41,7 +43,7 @@ class LouAssistWidget extends \yii\bootstrap\Widget
         return $this->render('view', [
             'params' => $this->params,
             'identify' => $identify,
-            'userId' => Auth::id(),
+            'scriptId' => $this->scriptId,
         ]);
     }
 
@@ -57,5 +59,23 @@ class LouAssistWidget extends \yii\bootstrap\Widget
             return true;
         }
         return false;
+    }
+
+    private function fillSettings(): void
+    {
+        $settings = SettingHelper::getFrontendWidgetByKey('louassist');
+
+        if (($this->scriptId === null) && !$this->scriptId = ArrayHelper::getValue($settings, 'id')) {
+            throw new \RuntimeException('"id" is required in LouAssistWidget settings');
+        }
+        if ($this->enabled === null) {
+            $this->enabled = ArrayHelper::getValue($settings, 'enabled', false);
+        }
+        if ($this->params === null) {
+            $this->params = ArrayHelper::getValue($settings, 'params', []);
+        }
+        if ($this->routes === null) {
+            $this->routes = ArrayHelper::getValue($settings, 'routes', []);
+        }
     }
 }

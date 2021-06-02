@@ -26,6 +26,7 @@ class m210602_075614_add_setting_frontend_widget_list extends Migration
                 's_value' => JsonHelper::encode([
                     'louassist' => [
                         'enabled' => true,
+                        'id' => '253132791080',
                         'params' => [
                             'identify' => '97980cfea0067',
                             'company' => 'Example Company',
