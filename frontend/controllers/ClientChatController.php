@@ -25,6 +25,7 @@ use Markdownify\ConverterExtra;
 use modules\offer\src\entities\offer\OfferQuery;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use sales\auth\Auth;
+use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
 use sales\entities\chat\ChatFeedbackGraphSearch;
@@ -73,6 +74,7 @@ use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\model\userClientChatData\entity\UserClientChatData;
@@ -790,6 +792,38 @@ class ClientChatController extends FController
             $result['notifyMessage'] = 'Internal Server Error';
             $result['notifyTitle'] = 'Error';
             $result['notifyType'] = 'error';
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionCheckAccessAction(): Response
+    {
+        if (!$this->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $chatUserAccessId = (int)Yii::$app->request->post('ccuaId');
+        $accessAction = (int)Yii::$app->request->post('accessAction');
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $userAccess = $this->clientChatUserAccessRepository->findByPrimaryKey($chatUserAccessId);
+
+            $eventDispatcher = Yii::createObject(EventDispatcher::class);
+            if ($userAccess->ccua_status_id === $accessAction) {
+                $eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($userAccess->ccuaCch, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $userAccess->ccua_user_id);
+            } else {
+                $result['error'] = true;
+                $result['message'] = 'The action was performed incorrectly, please try again';
+            }
+        } catch (NotFoundException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
         }
 
         return $this->asJson($result);

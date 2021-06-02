@@ -13,6 +13,7 @@ use yii\helpers\Html;
 /** @var $user Employee */
 
 $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
+$checkAccessActionUrl = \yii\helpers\Url::to('/client-chat/check-access-action');
 
 $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_created_dt'];
 ?>
@@ -83,14 +84,16 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
-                    ClientChatUserAccess::STATUS_TRANSFER_ACCEPT
+                    ClientChatUserAccess::STATUS_TRANSFER_ACCEPT,
+                    $checkAccessActionUrl
                 ) ?>
                 <?= ClientChatHelper::displayBtnSkipTransfer(
                     $user,
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
-                    ClientChatUserAccess::STATUS_TRANSFER_SKIP
+                    ClientChatUserAccess::STATUS_TRANSFER_SKIP,
+                    $checkAccessActionUrl
                 ) ?>
             <?php elseif ((int)$access['is_pending']) : ?>
                 <?= ClientChatHelper::displayBtnAcceptPending(
@@ -98,7 +101,8 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
-                    ClientChatUserAccess::STATUS_ACCEPT
+                    ClientChatUserAccess::STATUS_ACCEPT,
+                    $checkAccessActionUrl
                 ) ?>
 
                 <?= ClientChatHelper::displayBtnSkipPending(
@@ -106,14 +110,16 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
-                    ClientChatUserAccess::STATUS_SKIP
+                    ClientChatUserAccess::STATUS_SKIP,
+                    $checkAccessActionUrl
                 ) ?>
             <?php elseif ((int)$access['is_idle']) : ?>
                 <?= ClientChatHelper::displayBtnTakeIdle(
                     $user,
                     $access,
                     $accessUrl,
-                    ClientChatUserAccess::STATUS_TAKE
+                    ClientChatUserAccess::STATUS_TAKE,
+                    $checkAccessActionUrl
                 ) ?>
             <?php endif; ?>
         </div>
