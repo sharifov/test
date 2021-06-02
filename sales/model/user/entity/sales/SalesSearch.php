@@ -81,7 +81,7 @@ class SalesSearch extends Model
 
             [['dateFrom', 'dateTo'], 'date', 'format' => 'php:Y-m-d'],
             ['dateFrom', 'compare', 'compareAttribute' => 'dateTo', 'operator' => '<='],
-            ['dateFrom', 'compare', 'compareValue' => $this->minDate, 'operator' => '>=', 'type' => 'date'],
+            //['dateFrom', 'compare', 'compareValue' => $this->minDate, 'operator' => '>=', 'type' => 'date'],
 
             ['dateFrom', 'default', 'value' => $this->defaultMinDate],
             ['dateTo', 'default', 'value' => $this->maxDate],

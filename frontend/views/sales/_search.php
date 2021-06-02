@@ -38,7 +38,10 @@ use yii\widgets\ActiveForm;
                     'startAttribute' => 'dateFrom',
                     'endAttribute' => 'dateTo',
                     'pluginOptions' => [
-                        'minDate' => $model->minDate,
+                        //'minDate' => $model->minDate,
+                        "maxSpan" => [
+                            "days" => 31
+                        ],
                         'maxDate' => $model->maxDate,
                         'timePicker' => false,
                         'locale' => [
