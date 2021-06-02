@@ -9,8 +9,6 @@ use yii\widgets\Pjax;
 /* @var $attraction \modules\attraction\models\Attraction */
 /* @var $dataProvider yii\data\ArrayDataProvider */
 
-//var_dump($dataProvider->getModels()); die();
-//\yii\helpers\VarDumper::dump($dataProvider->getModels(), 10, true); exit;
 ?>
 <div class="hotel-quote-index">
 
@@ -92,16 +90,27 @@ $js = <<<JS
                       container: '#pjax-product-quote-list-' + data.product_id,
                       push: false, replace: false, timeout: 2000
                   });*/
-                  $('#' + productKey).html(data);
-                  new PNotify({
-                        title: 'Availability was successfully checked',
-                        type: 'success',
-                        text: 'Attraction ID ' + atnId,
-                        hide: true
-                    });
                   
-                  btnAdd.html('<i class="fa fa-check"></i>  Quotes Obtained');
-                  //$('#tr-hotel-quote-' + quoteKey).addClass('bg-success');
+                  $('#' + productKey).html(data.html);
+                  if (data.result) {
+                      new PNotify({
+                        title: 'Check Availability',
+                        type: 'warning',
+                        text: 'No available quotes. For Attraction with ID ' + atnId +'.',
+                        hide: true
+                      });
+                      
+                      btnAdd.addClass('btn-warning').html('<i class="fa fa-stop"></i>  Quotes are not available');
+                  } else {
+                      new PNotify({
+                        title: 'Check Availability',
+                        type: 'success',
+                        text: 'Availability was successfully checked. For Attraction with ID ' + atnId +'.',
+                        hide: true
+                      });
+                  
+                     btnAdd.html('<i class="fa fa-check"></i>  Quotes Obtained');
+                  }                  
               }
           })
         .fail(function( jqXHR, textStatus ) {
