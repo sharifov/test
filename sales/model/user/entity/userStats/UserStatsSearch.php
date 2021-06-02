@@ -27,10 +27,8 @@ use yii\helpers\ArrayHelper;
  * @property bool|null $uo_idle_state
  *
  * @property int|null $dateTimeType
- *
- *
  * @property string|null $startDt
- * @property int|null $endDt
+ * @property string|null $endDt
  */
 class UserStatsSearch extends Model
 {
@@ -288,7 +286,6 @@ class UserStatsSearch extends Model
      */
     private function setRestrictionDateTimeByType(int $type, string $format = 'Y-m-d H:i:s'): void
     {
-        //$currentDT = (new \DateTimeImmutable('now', new \DateTimeZone($this->currentUser->getTimezone())));
         $currentDT = new DateTime('now');
         switch ($type) {
             case UserModelSettingDictionary::DT_TYPE_HOUR:

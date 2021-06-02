@@ -70,7 +70,6 @@ use yii\widgets\ActiveForm;
         <div class="col-md-12">
             <div class="form-group">
                 <?php echo Html::submitButton('Search', ['class' => 'btn btn-primary js-user-stats-btn']) ?>
-                <?php /* echo Html::submitButton('Save settings - TODO', ['class' => 'btn btn-default']) */ ?>
             </div>
         </div>
     </div>
