@@ -123,12 +123,13 @@ $i = 1;
                                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                                                 <div class="dropdown-menu dropdown-menu-right" role="menu">
                                                     <?php if (Auth::can('file-storage/view')) : ?>
-                                                        <?= Html::a('<i class="fa fa-eye"></i> View', $linkView, [
+                                                        <?php echo Html::a('<i class="fa fa-eye"></i> View', null, [
                                                             'class' => 'dropdown-item js-vew-file-btn',
                                                             'target' => 'blank',
                                                             'data-pjax' => '0',
+                                                            'data-url' => $linkView,
                                                         ]) ?>
-                                                        <?= Html::a('<i class="fa fa-download"></i> Download', $linkDownload, [
+                                                        <?php echo Html::a('<i class="fa fa-download"></i> Download', $linkDownload, [
                                                             'class' => 'dropdown-item text-success js-download-file-btn',
                                                             'target' => 'blank',
                                                             'data-pjax' => '0',
@@ -139,7 +140,7 @@ $i = 1;
                                                     <?php endif ?>
                                                     <?php if (FileStorageAccessService::canDeleteFile()) : ?>
                                                         <div class="dropdown-divider"></div>
-                                                        <?= Html::a('<i class="fa fa-times"></i> Delete', null, [
+                                                        <?php echo Html::a('<i class="fa fa-times"></i> Delete', null, [
                                                             'class' => 'dropdown-item text-danger js-delete-file-btn',
                                                             'data-pjax' => '0',
                                                             'data-file_id' => $file->fs_id,
@@ -199,6 +200,13 @@ $js = <<<JS
         .always(function() {
             $('#preloader').addClass('d-none');
         });
+    });
+
+    $(document).on('click', '.js-vew-file-btn', function(e){
+        e.preventDefault();
+        let curTime = new Date().getTime();
+        let url = $(this).data('url') + '&t=' + curTime;
+        window.open(url, '_blank');
     });
 JS;
 $this->registerJs($js, yii\web\View::POS_END);

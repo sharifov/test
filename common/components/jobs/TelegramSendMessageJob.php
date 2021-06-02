@@ -16,8 +16,7 @@ use common\models\Notifications;
  * @property int $user_id
  * @property string $text
  */
-
-class TelegramSendMessageJob implements RetryableJobInterface
+class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
 {
     public $user_id;
     public $text;
@@ -28,6 +27,7 @@ class TelegramSendMessageJob implements RetryableJobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         try {
             if ($this->user_id && $telegramChatId = TelegramService::getTelegramChatIdByUserId($this->user_id)) {
                 $tgm = Yii::$app->telegram;
@@ -36,7 +36,6 @@ class TelegramSendMessageJob implements RetryableJobInterface
                     'text' => strip_tags($this->text . PHP_EOL . '_Environment: ' . strtoupper(YII_ENV) . '_'),
                     'parse_mode' => 'markdown'
                 ]);
-
                 unset($tgm);
                 return true;
             }

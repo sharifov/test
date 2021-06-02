@@ -20,7 +20,7 @@ use yii\queue\JobInterface;
  * @property $keeperSid
  * @property $recordingDisabled
  */
-class CheckWarmTransferTimeExpiredJob implements JobInterface
+class CheckWarmTransferTimeExpiredJob extends BaseJob implements JobInterface
 {
     public $callId;
     public $toUserId;
@@ -40,10 +40,12 @@ class CheckWarmTransferTimeExpiredJob implements JobInterface
         $this->conferenceSid = $conferenceSid;
         $this->keeperSid = $keeperSid;
         $this->recordingDisabled = $recordingDisabled;
+        parent::__construct();
     }
 
     public function execute($queue)
     {
+        $this->executionTimeRegister();
         $access = CallUserAccess::find()->byWarmTransfer()->byCall($this->callId)->byUser($this->toUserId)->one();
         if (!$access) {
             $access = CallUserAccess::find()->accepted()->byCall($this->callId)->byUser($this->toUserId)->one();

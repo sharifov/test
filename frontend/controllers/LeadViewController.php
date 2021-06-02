@@ -727,6 +727,19 @@ class LeadViewController extends FController
         throw new BadRequestHttpException();
     }
 
+    public function actionLeadData(): string
+    {
+        if (Yii::$app->request->isAjax) {
+            $gid = Yii::$app->request->get('gid');
+            if ($lead = $this->findLeadByGid($gid)) {
+                return $this->renderAjax('partial/_lead_data', [
+                    'lead' => $lead,
+                ]);
+            }
+        }
+        throw new BadRequestHttpException();
+    }
+
     /**
      * @throws BadRequestHttpException
      * @throws HttpException

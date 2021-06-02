@@ -329,7 +329,7 @@ class FlightManageApiService
             }
 
             foreach ($flightApiForm->getTripSegments() as $tripKey => $tripSegments) {
-                $flightTrip = FlightQuoteTrip::create($newFlightQuote, 0);
+                $flightTrip = FlightQuoteTrip::create($newFlightQuote, 0, $flightQuoteFlightId);
                 $this->flightQuoteTripRepository->save($flightTrip);
 
                 foreach ($tripSegments as $segmentApiForm) {

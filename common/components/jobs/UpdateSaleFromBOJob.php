@@ -17,7 +17,7 @@ use yii\queue\Queue;
  *
  * @property float|int $ttr
  */
-class UpdateSaleFromBOJob extends BaseObject implements JobInterface
+class UpdateSaleFromBOJob extends BaseJob implements JobInterface
 {
     public int $caseId;
     public int $saleId;
@@ -32,6 +32,7 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         try {
             if ($this->checkParams()) {
                 /** @var CasesSaleService $casesSaleService */
@@ -69,6 +70,7 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'UpdateSaleFromBOJob:execute:Throwable');
         }
+
         return false;
     }
 

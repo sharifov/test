@@ -22,7 +22,7 @@ use yii\queue\Queue;
  * @property int $lead_id
  */
 
-class UpdateLeadBOJob extends BaseObject implements JobInterface
+class UpdateLeadBOJob extends BaseJob implements JobInterface
 {
     public $lead_id;
 
@@ -32,7 +32,7 @@ class UpdateLeadBOJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
-
+        $this->executionTimeRegister();
         try {
             if ($this->lead_id) {
                 $lead = Lead::findOne($this->lead_id);

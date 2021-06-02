@@ -49,7 +49,7 @@ use yii\queue\Queue;
  * @property CasesSaleService $casesSaleService
  */
 
-class CallQueueJob extends BaseObject implements JobInterface
+class CallQueueJob extends BaseJob implements JobInterface
 {
     public int $call_id;
     public ?int $source_id = null;
@@ -75,6 +75,7 @@ class CallQueueJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         $metrics = \Yii::$container->get(Metrics::class);
         $timeStart = microtime(true);
 

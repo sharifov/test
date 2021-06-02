@@ -15,7 +15,7 @@ use yii\queue\Queue;
  *
  * @property float|int $ttr
  */
-class SendLeadInfoToGaJob extends BaseObject implements JobInterface
+class SendLeadInfoToGaJob extends BaseJob implements JobInterface
 {
     public Lead $lead;
 
@@ -25,6 +25,7 @@ class SendLeadInfoToGaJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         try {
             if ($this->checkParams() && $gaLead = new GaLead($this->lead)) {
                 $gaLead->send();

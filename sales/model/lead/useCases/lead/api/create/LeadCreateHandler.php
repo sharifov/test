@@ -7,6 +7,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\model\leadData\services\LeadDataCreateService;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
 use sales\services\client\ClientCreateForm;
@@ -15,6 +16,7 @@ use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\LeadHashGenerator;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class Handler
@@ -24,9 +26,15 @@ use sales\services\TransactionManager;
  * @property LeadHashGenerator $hashGenerator
  * @property LeadRepository $leadRepository
  * @property LeadSegmentRepository $segmentRepository
+ *
+ * @property array $leadDataInserted
+ * @property array $warnings
  */
 class LeadCreateHandler
 {
+    private array $leadDataInserted = [];
+    private array $warnings = [];
+
     private $clientManageService;
     private $transactionManager;
     private $hashGenerator;
@@ -113,6 +121,13 @@ class LeadCreateHandler
 
             $this->createFlightSegments($leadId, $form->flightsForm);
 
+            if (!empty($form->lead_data)) {
+                $leadDataService = new LeadDataCreateService();
+                $leadDataService->createFromApi($form->lead_data, $leadId);
+                $this->warnings = ArrayHelper::merge($this->warnings, $leadDataService->getErrors());
+                $this->leadDataInserted = $leadDataService->getInserted();
+            }
+
             return $lead;
         });
 
@@ -167,5 +182,15 @@ class LeadCreateHandler
         }
 
         return LeadTripTypeCalculator::calculate(...$segmentsDTO);
+    }
+
+    public function getLeadDataInserted(): array
+    {
+        return $this->leadDataInserted;
+    }
+
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 }

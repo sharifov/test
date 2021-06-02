@@ -17,7 +17,7 @@ use yii\queue\JobInterface;
  * @property int $callId
  * @property string $dateTime
  */
-class CheckClientCallJoinToConferenceJob implements JobInterface
+class CheckClientCallJoinToConferenceJob extends BaseJob implements JobInterface
 {
     private const STATUS_COMPLETED = 'completed';
 
@@ -26,6 +26,7 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
 
     public function execute($queue)
     {
+        $this->executionTimeRegister();
         /** @var Call $call */
         $call = Call::find()->andWhere(['c_id' => $this->callId, 'c_status_id' => Call::STATUS_DELAY])->one();
 

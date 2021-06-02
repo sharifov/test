@@ -7,6 +7,7 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "client_chat_user_channel".

@@ -24,10 +24,8 @@ use modules\abac\src\entities\AbacInterface;
 
 /**
  * Class AbacComponent
- * @package modules\abac\components
  *
  * @property AbacInterface[] $modules
- * @property bool $cacheEnabled
  * @property string $cacheKey
  * @property string $cacheTagDependency
  * @property string $abacModelPath
@@ -36,17 +34,24 @@ use modules\abac\src\entities\AbacInterface;
  * @property-read string $policyListContent
  * @property-read string $policyListContentWOCache
  * @property Request $request
+ * @property array $scanDirs
+ * @property array scanExtMask
+ * @property bool $cacheEnable
  */
-
 class AbacComponent extends Component
 {
     public array $modules = [];
-
-    public bool $cacheEnabled = true;
+    public bool $cacheEnable = true;
     public string $cacheKey = 'abac-policy';
     public string $cacheTagDependency = 'abac-tag-dependency';
-
     public string $abacModelPath = '@common/config/casbin/abac_model.conf';
+    public array $scanDirs = [
+        '/modules/',
+        '/frontend/',
+        '/common/',
+        '/sales/',
+    ];
+    public array $scanExtMask = ['*.php'];
 
     private Enforcer $enforser;
 
@@ -90,6 +95,7 @@ class AbacComponent extends Component
         $user->roles =  $me->getRoles(true);
         $user->projects = $me->access->getAllProjects('key'); //getProjects();
         $user->groups = $me->access->getAllGroups();
+        $user->departments = $me->access->getAllDepartments();
 
         $request = new \stdClass();
         $request->controller = Yii::$app->controller->uniqueId;
@@ -335,7 +341,7 @@ class AbacComponent extends Component
      */
     final public function getCacheEnabled(): bool
     {
-        return $this->cacheEnabled;
+        return $this->cacheEnable;
     }
 
     /**

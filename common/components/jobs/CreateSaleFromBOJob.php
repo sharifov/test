@@ -18,7 +18,7 @@ use yii\queue\Queue;
  * @property string|null $phone
  * @property CasesSaleService $casesSaleService
  */
-class CreateSaleFromBOJob extends BaseObject implements JobInterface
+class CreateSaleFromBOJob extends BaseJob implements JobInterface
 {
     public $case_id;
     public $order_uid;
@@ -33,6 +33,7 @@ class CreateSaleFromBOJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         try {
             if ($this->checkParams()) {
                 $this->casesSaleService = Yii::createObject(CasesSaleService::class);

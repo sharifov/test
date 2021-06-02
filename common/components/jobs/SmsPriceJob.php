@@ -10,12 +10,13 @@ use yii\queue\JobInterface;
  *
  * @property array $smsSids
  */
-class SmsPriceJob implements JobInterface
+class SmsPriceJob extends BaseJob implements JobInterface
 {
     public array $smsSids;
 
     public function execute($queue)
     {
+        $this->executionTimeRegister();
         try {
             (\Yii::createObject(UpdateSmsPrice::class))->update($this->smsSids);
         } catch (\Throwable $e) {

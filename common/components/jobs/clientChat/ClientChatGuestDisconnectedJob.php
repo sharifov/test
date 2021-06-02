@@ -2,6 +2,7 @@
 
 namespace common\components\jobs\clientChat;
 
+use common\components\jobs\BaseJob;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\requestEvent\ChatRequestEvent;
@@ -16,7 +17,7 @@ use yii\queue\JobInterface;
  * @property ClientChatRequest $request
  * @property string $requestEventClass
  */
-class ClientChatGuestDisconnectedJob implements JobInterface
+class ClientChatGuestDisconnectedJob extends BaseJob implements JobInterface
 {
     public ClientChatRequest $request;
 
@@ -24,6 +25,7 @@ class ClientChatGuestDisconnectedJob implements JobInterface
 
     public function execute($queue): void
     {
+        $this->executionTimeRegister();
         try {
             /** @var ChatRequestEvent $requestEvent */
             $requestEvent = Yii::createObject($this->requestEventClass);

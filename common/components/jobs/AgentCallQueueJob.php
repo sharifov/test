@@ -35,7 +35,7 @@ use yii\queue\Queue;
  * @property CasesRepository $casesRepository
  */
 
-class AgentCallQueueJob extends BaseObject implements JobInterface
+class AgentCallQueueJob extends BaseJob implements JobInterface
 {
     public $user_id;
 
@@ -57,7 +57,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
-
+        $this->executionTimeRegister();
         try {
 //            $this->casesCreateService = Yii::createObject(CasesCreateService::class);
 //            $this->clientManageService = Yii::createObject(ClientManageService::class);

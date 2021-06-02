@@ -10,12 +10,13 @@ use yii\queue\JobInterface;
  *
  * @property array $callSids
  */
-class CallPriceJob implements JobInterface
+class CallPriceJob extends BaseJob implements JobInterface
 {
     public array $callSids = [];
 
     public function execute($queue)
     {
+        $this->executionTimeRegister();
         try {
             (\Yii::createObject(UpdateCallPrice::class))->update($this->callSids);
         } catch (\Throwable $e) {

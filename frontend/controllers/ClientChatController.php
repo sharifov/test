@@ -47,6 +47,7 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChat\useCase\close\ClientChatCloseForm;
@@ -58,10 +59,14 @@ use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatCouchNote\ClientChatCouchNoteRepository;
 use sales\model\clientChatCouchNote\entity\ClientChatCouchNote;
+use sales\model\clientChatFeedback\entity\ClientChatFeedbackSearch;
 use sales\model\clientChatHold\ClientChatHoldRepository;
 use sales\model\clientChatHold\entity\ClientChatHold;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
+use sales\model\clientChatNote\entity\ClientChatNoteSearch;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
@@ -277,6 +282,102 @@ class ClientChatController extends FController
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function actionIndex()
+    {
+        $searchModel = new ClientChatQaSearch();
+        $dataProvider = $searchModel->searchCommon(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionDetail(int $id): string
+    {
+        $employee = Auth::user();
+        $chatsRestriction = ClientChat::find()
+            ->select(['cch_id'])
+            ->andProjectEmployee($employee)
+            ->andChannelEmployee($employee)
+            ->orOwner($employee)
+            ->column();
+        $clientChat = ClientChat::find()->byId($id)->andWhere(['IN', 'cch_id', $chatsRestriction])->one();
+
+        if (!$clientChat) {
+            throw new NotFoundHttpException('Client chat not found.');
+        }
+
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $searchModel = new ClientChatMessageSearch();
+        $data[$searchModel->formName()]['ccm_cch_id'] = $id;
+        $dataProvider = $searchModel->search($data);
+
+        $searchModelNotes = new ClientChatNoteSearch();
+        $data[$searchModelNotes->formName()]['ccn_chat_id'] = $id;
+        $dataProviderNotes = $searchModelNotes->search($data);
+        $dataProviderNotes->setPagination(['pageSize' => 20]);
+
+        if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
+            $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
+        }
+
+        $requestSearch = new ClientChatRequestSearch();
+        $visitorId = '';
+        if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+            $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+        }
+        $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
+        $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
+        $dataProviderRequest = $requestSearch->search($data);
+        $dataProviderRequest->setPagination(['pageSize' => 10]);
+
+        $searchModelFeedback = new ClientChatFeedbackSearch();
+        $data[$searchModelFeedback->formName()]['ccf_client_chat_id'] = $id;
+        $dataProviderFeedback = $searchModelFeedback->search($data);
+        $dataProviderFeedback->setPagination(['pageSize' => 20]);
+
+        return $this->render('detail', [
+            'model' => $clientChat,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'dataProviderNotes' => $dataProviderNotes,
+            'visitorLog' => $visitorLog ?? null,
+            'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
+            'dataProviderRequest' => $dataProviderRequest,
+            'dataProviderFeedback' => $dataProviderFeedback,
+        ]);
+    }
+
+    public function actionRoom(int $id): string
+    {
+        if (!$clientChat = ClientChat::findOne($id)) {
+            throw new NotFoundHttpException('Client chat not found.');
+        }
+
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('room', [
+                'clientChat' => $clientChat,
+            ]);
+        }
+        return $this->render('room', [
+            'clientChat' => $clientChat,
+        ]);
+    }
+
+    public function actionMessageBodyView($id): string
+    {
+        $model = ClientChatMessage::findOne($id);
+        return $model ? '<pre>' . VarDumper::dumpAsString($model->ccm_body, 10, true) . '</pre>' : '-';
     }
 
     public function actionDashboardV2()

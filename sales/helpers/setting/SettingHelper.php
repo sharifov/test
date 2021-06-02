@@ -324,4 +324,9 @@ class SettingHelper
     {
         return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.default_department_id', Department::DEPARTMENT_SALES);
     }
+
+    public static function getMetricJobTimeExecution(): int
+    {
+        return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'metric_job_time_execution', 60);
+    }
 }

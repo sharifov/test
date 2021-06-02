@@ -37,6 +37,7 @@ $data = new OrderAbacDto(new Order());
 
     <h1><?= Html::encode($this->title) ?></h1>
     <p>
+        <?php /** @abac $data, OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_CREATE, show Order create button */ ?>
         <?php if (Yii::$app->abac->can($data, OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_CREATE)) : ?>
             <?= Html::a('Create Order', ['create'], ['class' => 'btn btn-success']) ?>
         <?php endif; ?>
@@ -145,6 +146,7 @@ $data = new OrderAbacDto(new Order());
                 'template' => '{view} {update} {delete}',
                 'visibleButtons' => [
                     'view' => function (Order $model, $key, $index) {
+                        /** @abac new OrderAbacDto($model), OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_READ, show Order view button */
                         return Yii::$app->abac->can(
                             new OrderAbacDto($model),
                             OrderAbacObject::OBJ_ORDER_ITEM,
@@ -152,6 +154,7 @@ $data = new OrderAbacDto(new Order());
                         );
                     },
                     'update' => static function (Order $model, $key, $index) {
+                        /** @abac new OrderAbacDto($model), OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_UPDATE, show Order update button */
                         return Yii::$app->abac->can(
                             new OrderAbacDto($model),
                             OrderAbacObject::OBJ_ORDER_ITEM,
@@ -160,6 +163,7 @@ $data = new OrderAbacDto(new Order());
                     },
 
                     'delete' => static function (Order $model, $key, $index) {
+                        /** @abac new OrderAbacDto($model), OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_DELETE, show Order delete button */
                         return Yii::$app->abac->can(
                             new OrderAbacDto($model),
                             OrderAbacObject::OBJ_ORDER_ITEM,

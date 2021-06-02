@@ -38,28 +38,7 @@ class ApiAttractionService extends Component
     public function init(): void
     {
         parent::init();
-        //$this->initRequest();
     }
-
-    /**
-     * @return bool
-     */
-    /*private function initRequest(): bool
-    {
-        $authStr = base64_encode($this->username . ':' . $this->password);
-
-        try {
-            $client = new Client();
-            $client->setTransport(CurlTransport::class);
-            $this->request = $client->createRequest();
-            $this->request->addHeaders(['Authorization' => 'Basic ' . $authStr]);
-            return true;
-        } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiAttractionService::initRequest:Throwable');
-        }
-
-        return false;
-    }*/
 
     private function execRequest($query)
     {
@@ -212,6 +191,7 @@ class ApiAttractionService extends Component
                                 dataType
                                 dataFormat
                                 isAnswered
+                                isAnswerDefaulted
                                 availableOptions {
                                     label
                                     value
@@ -250,7 +230,6 @@ class ApiAttractionService extends Component
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
-        //VarDumper::dump($data, 10, true); exit();
         return $data ?? [];
     }
 
@@ -305,7 +284,6 @@ class ApiAttractionService extends Component
         ];
 
         $result = self::execRequest(@json_encode($query));
-        //VarDumper::dump($result, 10, true); die();
         $data = json_decode($result, true);
         return $data['data'] ?? [];
     }
@@ -446,7 +424,6 @@ class ApiAttractionService extends Component
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
-        //VarDumper::dump($data, 10, true); exit();
         return $data;
     }
 
@@ -475,7 +452,6 @@ class ApiAttractionService extends Component
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
-        //VarDumper::dump($data, 10, true); exit();
         return $data;
     }
 
@@ -485,6 +461,7 @@ class ApiAttractionService extends Component
             'query' => 'query holibob($bookingId: String!) {
                 booking(id: $bookingId) {
                     id
+                    canCommit
                     code
                     leadPassengerName
                     reference
@@ -504,6 +481,7 @@ class ApiAttractionService extends Component
                             isRequired
                             isAnswered
                             dataType
+                            dataFormat
                             availableOptions {
                                 label
                                 value
@@ -536,6 +514,7 @@ class ApiAttractionService extends Component
                                     isRequired
                                     isAnswered
                                     dataType
+                                    dataFormat
                                     availableOptions {
                                       label
                                       value
@@ -565,19 +544,20 @@ class ApiAttractionService extends Component
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
-        //VarDumper::dump($data, 10, true); exit();
         return $data;
     }
 
-    public function inputAnswersToBooking(BookingAnswersForm $booking): array
+    public function inputAnswersToBooking(array $booking): array
     {
         $queryParamsDefinition = '$bookingId: String! $leadPassengerName: String! $reference: String!';
         $queryInputAnswerListParamsDefinition = '';
-        $queryVariables = '{"bookingId":"' . $booking->bookingId . '", "leadPassengerName": "' . $booking->leadPassengerName . '", "reference": "' . $booking->quoteId . '"';
+        $queryVariables = '{"bookingId":"' . $booking['bookingId'] . '", "leadPassengerName": "' . $booking['leadPassengerName'] . '", "reference": "' . $booking['quoteId'] . '"';
 
-        $answers = $booking->booking_answers;
+        foreach ($booking as $key => $answer) {
+            if (!is_array($answer)) {
+                continue;
+            }
 
-        foreach ($answers as $key => $answer) {
             $queryParamsDefinition .= ' $questionId' . $key . ': String! $questionValue' . $key . ': String!';
             $queryInputAnswerListParamsDefinition .=  '{questionId: $questionId' . $key . ' value: $questionValue' . $key . '} ';
             $queryVariables .= ', "questionId' . $key . '":"' . key($answer) . '", "questionValue' . $key . '":"' . $answer[key($answer)] . '"';
@@ -644,9 +624,16 @@ class ApiAttractionService extends Component
                             }
                             questionList {
                                 nodes {
+                                    id
                                     label
-                                    defaultValue
                                     answerValue
+                                    isRequired
+                                    isAnswered
+                                    dataType
+                                    availableOptions {
+                                      label
+                                      value
+                                    }
                                 }
                             }
                             personList {
@@ -671,7 +658,25 @@ class ApiAttractionService extends Component
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
-        //VarDumper::dump($query, 10, true); exit();
+        return $data;
+    }
+
+    public function commitBooking(string $bookingId): array
+    {
+        $query = [
+            'query' => 'mutation holibob($bookingId: String!) {
+                bookingCommit(bookingSelector: {id: $bookingId}) {
+                    id
+                    state
+                    voucherUrl
+                    ticketUrl
+                }
+            }',
+            'variables' => '{"bookingId":"' . $bookingId . '"}'
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
         return $data;
     }
 

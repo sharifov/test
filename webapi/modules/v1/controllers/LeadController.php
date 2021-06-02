@@ -15,6 +15,8 @@ use common\models\VisitorLog;
 use frontend\widgets\notification\NotificationMessage;
 use modules\flight\models\FlightSegment;
 use modules\product\src\useCases\product\api\create\flight\Handler;
+use sales\model\leadData\entity\LeadData;
+use sales\model\leadData\services\LeadDataCreateService;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
@@ -24,6 +26,7 @@ use sales\services\TransactionManager;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
@@ -118,6 +121,9 @@ class LeadController extends ApiBaseController
      * @apiParam {string{500}}          lead.visitor_log.vl_location_url
      * @apiParam {string{500}}          lead.visitor_log.vl_user_agent
      * @apiParam {string{39}}           lead.visitor_log.vl_ip_address
+     * @apiParam {object[]}             [lead.lead_data]                         Array of Lead Data
+     * @apiParam {string{50}}           [lead.lead_data.field_key]               Lead Data Key
+     * @apiParam {string{500}}          [lead.lead_data.field_value]             Lead Data Value
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  lead.visitor_log.vl_visit_dt
      * @apiParam {object}               Client
      * @apiParam {string}               [Client.name]                            Client name
@@ -157,6 +163,12 @@ class LeadController extends ApiBaseController
      *        "client_last_name": "Freeman",
      *        "user_language": "en-GB",
      *        "expire_at": "2020-01-20 12:12:12",
+     *        "lead_data": [
+     *               {
+     *                  "field_key": "example_key",
+     *                  "field_value": "example_value"
+     *              }
+     *        ],
      *        "visitor_log": [
      *               {
      *                   "vl_source_cid": "string_abc",
@@ -275,7 +287,15 @@ class LeadController extends ApiBaseController
      *                 "example@test.com",
      *                 "bah@gmail.com"
      *              ]
-     *           }
+     *           },
+     *          "leadDataInserted": [
+     *              {
+     *                  "ld_field_key": "kayakclickid",
+     *                  "ld_field_value": "example_value",
+     *                  "ld_id": 3
+     *              }
+     *          ],
+     *          "warnings": []
      *       },
      *       "request": {
      *           "client_id": null,
@@ -346,10 +366,9 @@ class LeadController extends ApiBaseController
      */
     public function actionCreate()
     {
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
-
+        $warnings = [];
 
         $lead = Yii::$app->request->post('Lead');
 
@@ -467,6 +486,14 @@ class LeadController extends ApiBaseController
             );
         }
 
+        $leadDataInserted = [];
+        if (!empty($modelLead->lead_data)) {
+            $leadDataService = new LeadDataCreateService();
+            $leadDataService->createFromApi($modelLead->lead_data, $lead->id);
+            $warnings = ArrayHelper::merge($warnings, $leadDataService->getErrors());
+            $leadDataInserted = $leadDataService->getInserted();
+        }
+
 //        $transaction = Yii::$app->db->beginTransaction();
 //
 //
@@ -543,18 +570,18 @@ class LeadController extends ApiBaseController
 //            $lead->uid = uniqid();
 //        }
 //
-////
-////        if ($modelLead->flights) {
-////            $flightCount = count($modelLead->flights);
-////
-////            if ($flightCount === 1) {
-////                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
-////            } elseif ($flightCount === 2) {
-////                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
-////            } else {
-////                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
-////            }
-////        }
+        ////
+        ////        if ($modelLead->flights) {
+        ////            $flightCount = count($modelLead->flights);
+        ////
+        ////            if ($flightCount === 1) {
+        ////                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
+        ////            } elseif ($flightCount === 2) {
+        ////                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+        ////            } else {
+        ////                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
+        ////            }
+        ////        }
 //
 //
 //        if (!$lead->cabin) {
@@ -615,22 +642,22 @@ class LeadController extends ApiBaseController
 //            $lead->setRequestHash($request_hash);
 //        }
 //
-////        $request_hash = $modelLead->getRequestHash();
-////
-////        $duplicateLead = Lead::find()
-////            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
-////            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
-////
-////        if($duplicateLead) {
-////            $lead->l_duplicate_lead_id = $duplicateLead->id;
-////            $lead->status = Lead::STATUS_TRASH;
-////            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
-////        }
-////
-////
-////        if(!$lead->l_request_hash && $request_hash) {
-////            $lead->l_request_hash = $request_hash;
-////        }
+        ////        $request_hash = $modelLead->getRequestHash();
+        ////
+        ////        $duplicateLead = Lead::find()
+        ////            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
+        ////            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
+        ////
+        ////        if($duplicateLead) {
+        ////            $lead->l_duplicate_lead_id = $duplicateLead->id;
+        ////            $lead->status = Lead::STATUS_TRASH;
+        ////            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
+        ////        }
+        ////
+        ////
+        ////        if(!$lead->l_request_hash && $request_hash) {
+        ////            $lead->l_request_hash = $request_hash;
+        ////        }
 //
 //
 //
@@ -760,6 +787,9 @@ class LeadController extends ApiBaseController
                     ]
                 ),
             ];
+
+            $response['leadData'] = $leadDataInserted;
+            $response['warnings'] = $warnings;
         } catch (\Throwable $e) {
 //            $transaction->rollBack();
             Yii::error($e->getTraceAsString(), 'API:lead:create:try');
@@ -917,7 +947,6 @@ class LeadController extends ApiBaseController
 
     public function actionUpdate()
     {
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
         $modelLead = new ApiLead();
@@ -1050,7 +1079,7 @@ class LeadController extends ApiBaseController
                 }
             }
 
-        //$transaction->commit();
+            //$transaction->commit();
 
             $response['lead'] = $lead;
             $response['flights'] = $lead->leadFlightSegments;
@@ -1160,7 +1189,6 @@ class LeadController extends ApiBaseController
 
     public function actionGet()
     {
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
@@ -1244,7 +1272,6 @@ class LeadController extends ApiBaseController
 
     public function actionSoldUpdate()
     {
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
@@ -1277,7 +1304,6 @@ class LeadController extends ApiBaseController
                 $response['errors'][] = $lead->getErrors();
             } else {
                 $result = $this->transactionManager->wrap(function () use ($lead, $leadAttributes, $isSold, $isReject, $lastStatus) {
-
                     $response = [];
 
                     if (!$isSold && $lead->isSold()) {

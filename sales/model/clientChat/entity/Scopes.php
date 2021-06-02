@@ -9,6 +9,7 @@ use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\user\UserFinder;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 
@@ -133,7 +134,16 @@ class Scopes extends \yii\db\ActiveQuery
         return $this;
     }
 
-    public function byProjectRestriction(?Employee $user = null): self
+    public function byProjectEmployee(Employee $user): self
+    {
+        return $this->andWhere([
+            'IN',
+            'cch_project_id',
+            array_keys(EmployeeProjectAccess::getProjects($user))
+        ]);
+    }
+
+    public function byProjectRestrictionQa(?Employee $user = null): self
     {
         $user = UserFinder::getOrFind($user);
         $fullAccess = EmployeeAccessHelper::entryInRoles($user, self::ROLES_FULL_ACCESS);
@@ -141,7 +151,7 @@ class Scopes extends \yii\db\ActiveQuery
             $this->andWhere([
                 'IN',
                 'cch_project_id',
-                array_keys(EmployeeProjectAccess::getProjects())
+                array_keys(EmployeeProjectAccess::getProjects($user))
             ]);
         }
         return $this;
@@ -233,6 +243,47 @@ class Scopes extends \yii\db\ActiveQuery
                 ['!=', 'cch_owner_user_id', $userId],
                 ['IS', 'cch_owner_user_id', null]
             ]);
+    }
+
+    public function orProjectEmployee(Employee $user): self
+    {
+        return $this->orWhere([
+            'IN',
+            'cch_project_id',
+            array_keys(EmployeeProjectAccess::getProjects($user))
+        ]);
+    }
+
+    public function orChannelEmployee(Employee $user): self
+    {
+        return $this->orWhere([
+            'IN',
+            'cch_channel_id',
+            ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($user->getId())->column()
+        ]);
+    }
+
+    public function andProjectEmployee(Employee $user): self
+    {
+        return $this->andWhere([
+            'IN',
+            'cch_project_id',
+            array_keys(EmployeeProjectAccess::getProjects($user))
+        ]);
+    }
+
+    public function andChannelEmployee(Employee $user): self
+    {
+        return $this->andWhere([
+            'IN',
+            'cch_channel_id',
+            ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($user->getId())->column()
+        ]);
+    }
+
+    public function orOwner(Employee $user): self
+    {
+        return $this->orWhere(['cch_owner_user_id' => $user->getId()]);
     }
 
     /**

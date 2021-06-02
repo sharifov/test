@@ -113,7 +113,7 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
 
     public function getFlightQuoteTrips(): ActiveQuery
     {
-        return $this->hasMany(FlightQuoteTrip::class, ['fqp_flight_id' => 'fqf_id']);
+        return $this->hasMany(FlightQuoteTrip::class, ['fqt_flight_id' => 'fqf_id']);
     }
 
     public function getFlightQuoteBookings(): ActiveQuery

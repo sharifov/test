@@ -28,6 +28,7 @@ class LeadRedialViewWidget extends Widget
      */
     public function run(): string
     {
-        return $this->render('lead_redial_view', ['lead' => $this->lead]);
+        return '';
+        //return $this->render('lead_redial_view', ['lead' => $this->lead]);
     }
 }

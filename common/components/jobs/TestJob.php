@@ -22,7 +22,7 @@ use yii\queue\Queue;
  * @property array $data
  */
 
-class TestJob extends BaseObject implements JobInterface
+class TestJob extends BaseJob implements JobInterface
 {
     public array $data = [];
 
@@ -32,6 +32,7 @@ class TestJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         $metrics = \Yii::$container->get(Metrics::class);
         $timeStart = microtime(true);
 

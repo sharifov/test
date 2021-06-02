@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use sales\model\leadData\services\LeadDataDictionary;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -27,10 +28,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-
             'ld_id',
             'ld_lead_id',
-            'ld_field_key',
+            [
+                'attribute' => 'ld_field_key',
+                'filter' => LeadDataDictionary::KEY_LIST,
+            ],
             'ld_field_value',
             [
                 'class' => DateTimeColumn::class,

@@ -29,7 +29,7 @@ class FlightQuotePriceCalculator
     {
         $paxPricesSummary = FlightQuotePaxPrice::find()
             ->select([
-                'minus_percent_profit' => 'SUM(ps.ps_percent)', /* TODO::  */
+                'minus_percent_profit' => 'SUM(ps.ps_percent)',
             ])
             ->andWhere(['qpp_flight_quote_id' => $flightQuote->fq_id])
             ->orderBy(['qpp_flight_pax_code_id' => SORT_ASC])

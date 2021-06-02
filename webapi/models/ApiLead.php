@@ -2,6 +2,7 @@
 
 namespace webapi\models;
 
+use common\components\validators\IsArrayValidator;
 use common\models\Client;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
@@ -52,6 +53,7 @@ use yii\base\Model;
  * @property array $visitorLogErrors
  * @property string $clientUuid
  * @property string|null $expire_at
+ * @property array|null $lead_data
  */
 class ApiLead extends Model
 {
@@ -97,6 +99,7 @@ class ApiLead extends Model
     public $visitorLogErrors = [];
     public $clientUuid;
     public $expire_at;
+    public $lead_data;
 
     public function formName()
     {
@@ -161,6 +164,8 @@ class ApiLead extends Model
 
             ['clientUuid', UuidValidator::class],
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
+
+            [['lead_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 

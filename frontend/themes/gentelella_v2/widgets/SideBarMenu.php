@@ -228,7 +228,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'icon' => 'comments warning',
                     'items' => [
                         ['label' => 'Project config', 'url' => ['/client-chat-project-config/index']],
-                        ['label' => 'Client Chat', 'url' => ['/client-chat-crud/index']],
+                        ['label' => 'Client Chat CRUD', 'url' => ['/client-chat-crud/index']],
+                        ['label' => 'Clients Chat', 'url' => ['/client-chat/index']],
                         ['label' => 'Request', 'url' => ['/client-chat-request-crud/index']],
                         ['label' => 'Channel', 'url' => ['/client-chat-channel-crud/index']],
                         ['label' => 'Channel Translate', 'url' => ['/client-chat-channel-translate/index']],
@@ -309,8 +310,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
                         ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate']],
                         ['label' => 'Export Leads', 'url' => ['/leads/export']],
-                        ['label' => 'Lead Request', 'url' => ['/lead-request-crud']],
-                        ['label' => 'Lead Data', 'url' => ['/lead-data-crud']],
+                        ['label' => 'Lead Request', 'url' => ['/lead-request-crud/index']],
+                        ['label' => 'Lead Data', 'url' => ['/lead-data-crud/index']],
                     ]
                 ]
             ]
@@ -769,6 +770,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'items' => [
                 ['label' => 'ABAC Policy List', 'url' => ['/abac/abac-policy']],
                 ['label' => 'Policy List Content', 'url' => ['/abac/abac-policy/list-content']],
+                ['label' => 'ABAC Doc', 'url' => ['/abac/abac-doc/index']],
             ],
         ];
 

@@ -87,6 +87,11 @@ class Access
         return array_column($this->getGroups(), 'ug_name', 'ug_id');
     }
 
+    public function getAllDepartments(): array
+    {
+        return array_column($this->getDepartments(), 'dep_key', 'dep_id');
+    }
+
     public function getActiveGroups(): array
     {
         return array_column(array_filter($this->getGroups(), static function ($v) {

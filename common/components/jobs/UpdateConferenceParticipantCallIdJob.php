@@ -16,7 +16,7 @@ use yii\queue\JobInterface;
  * @property string $conferenceSid
  * @property int $conferenceId
  */
-class UpdateConferenceParticipantCallIdJob implements JobInterface
+class UpdateConferenceParticipantCallIdJob extends BaseJob implements JobInterface
 {
     public string $callSid;
     public string $conferenceSid;
@@ -27,10 +27,12 @@ class UpdateConferenceParticipantCallIdJob implements JobInterface
         $this->callSid = $callSid;
         $this->conferenceSid = $conferenceSid;
         $this->conferenceId = $conferenceId;
+        parent::__construct();
     }
 
     public function execute($queue)
     {
+        $this->executionTimeRegister();
         try {
             $call = $this->getCall($this->callSid);
             if ($call->c_conference_id !== $this->conferenceId) {

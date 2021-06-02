@@ -492,6 +492,12 @@ class OfferController extends BaseController
                     "productQuoteOptions": []
                 }
             }
+        ],
+        "lead_data": [
+           {
+               "ld_field_key": "kayakclickid",
+               "ld_field_value": "example_value132"
+           }
         ]
     },
     "technical": {

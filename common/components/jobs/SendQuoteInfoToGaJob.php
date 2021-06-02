@@ -15,7 +15,7 @@ use yii\queue\Queue;
  *
  * @property float|int $ttr
  */
-class SendQuoteInfoToGaJob extends BaseObject implements JobInterface
+class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
 {
     public Quote $quote;
 
@@ -25,6 +25,7 @@ class SendQuoteInfoToGaJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
+        $this->executionTimeRegister();
         try {
             if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
                 $gaQuote->send();

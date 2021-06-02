@@ -1,6 +1,9 @@
 <?php
 
 use kdn\yii2\JsonEditor;
+use modules\order\src\abac\dto\OrderAbacDto;
+use modules\order\src\abac\OrderAbacObject;
+use modules\order\src\entities\order\Order;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -19,14 +22,21 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->or_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->or_id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+        <?php /** @abac new OrderAbacDto(new Order()), OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_UPDATE, show Order update button in view page */ ?>
+        <?php if (Yii::$app->abac->can(new OrderAbacDto(new Order()), OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_UPDATE)) : ?>
+            <?= Html::a('Update', ['update', 'id' => $model->or_id], ['class' => 'btn btn-primary']) ?>
+        <?php endif ?>
+
+        <?php /** @abac new OrderAbacDto(new Order()), OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_UPDATE, show Order delete button in view page */ ?>
+        <?php if (Yii::$app->abac->can(new OrderAbacDto(new Order()), OrderAbacObject::OBJ_ORDER_ITEM, OrderAbacObject::ACTION_DELETE)) : ?>
+            <?= Html::a('Delete', ['delete', 'id' => $model->or_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+        <?php endif ?>
     </p>
 
     <div class="row">

@@ -188,8 +188,15 @@ class AbacBaseModel
         'label' => 'IP Address',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_TEXT,
-        'placeholder' => '___:___:___:___',
-        'validation' =>  ['format' => '/^[0-9]{1,3}:[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/'],
+        'placeholder' => '___.___.___.___',
+
+//        'validation' => [
+//            'format' => '/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/',
+//            'messages' => [
+//                'format' => 'The provided IP is not valid'
+//            ]
+//        ],
+
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_MATCH]
     ];
 
@@ -234,9 +241,13 @@ class AbacBaseModel
         'field' => 'env.dt.month',
         'label' => 'Month',
         'type' => self::ATTR_TYPE_INTEGER,
-        'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN],
-        'validation' => ['min' => 1, 'max' => 12, 'step' => 1]
+        //'input' => self::ATTR_INPUT_NUMBER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [ 1 => '1 - January',2 => '2 - February',3 => '3 - March',4 => '4 - April',5 => '5 - May',6 => '6 - June',
+            7 => '7 - July',8 => '8 - August',9 => '9 - September',10 => '10 - October',11 => '11 - November',12 => '12 - December'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<'], // , self::OP_IN, self::OP_NOT_IN
+        //'validation' => ['min' => 1, 'max' => 12, 'step' => 1]
     ];
 
     protected const ATTR_DT_MONTH_NAME = [
@@ -245,9 +256,15 @@ class AbacBaseModel
         'field' => 'env.dt.month_name',
         'label' => 'Month name',
         'type' => self::ATTR_TYPE_STRING,
-        'input' => self::ATTR_INPUT_TEXT,
-        'placeholder' => 'Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec',
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN]
+        //'input' => self::ATTR_INPUT_TEXT,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [ 'Jan' => 'January', 'Feb' => 'February', 'Mar' => 'March',
+            'Apr' => 'April', 'May' => 'May', 'Jun' => 'June',
+            'Jul' => 'July', 'Aug' => 'August', 'Sep' => 'September',
+            'Oct' => 'October', 'Nov' => 'November', 'Dec' => 'December'],
+        'multiple' => true,
+        //'placeholder' => 'Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec',
+        'operators' =>  [self::OP_IN, self::OP_NOT_IN] // self::OP_EQUAL2, self::OP_NOT_EQUAL2,
     ];
 
     protected const ATTR_DT_DOW = [
@@ -256,8 +273,12 @@ class AbacBaseModel
         'field' => 'env.dt.dow',
         'label' => 'Day of Week',
         'type' => self::ATTR_TYPE_INTEGER,
-        'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN]
+        //'input' => self::ATTR_INPUT_NUMBER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [ 7 => '7 - Sunday', 1 => '1 - Monday', 2 => '2 - Tuesday',
+            3 => '3 - Wednesday', 4 => '4 - Thursday', 5 => '5 - Friday', 6 => '6 - Saturday'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<'] // self::OP_IN, self::OP_NOT_IN
     ];
 
     protected const ATTR_DT_DOW_NAME = [
@@ -266,8 +287,12 @@ class AbacBaseModel
         'field' => 'env.dt.dow_name',
         'label' => 'Day of Week Name',
         'type' => self::ATTR_TYPE_STRING,
-        'input' => self::ATTR_INPUT_TEXT,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN]
+        //'input' => self::ATTR_INPUT_TEXT,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => ['Sun' => 'Sunday', 'Mon' => 'Monday', 'Tue' => 'Tuesday',
+            'Wed' => 'Wednesday', 'Thu' => 'Thursday', 'Fri' => 'Friday', 'Sat' => 'Saturday'],
+        'multiple' => true,
+        'operators' =>  [self::OP_IN, self::OP_NOT_IN] //self::OP_EQUAL2, self::OP_NOT_EQUAL2,
     ];
 
     protected const ATTR_DT_DAY = [

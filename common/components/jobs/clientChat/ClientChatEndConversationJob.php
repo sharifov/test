@@ -2,6 +2,7 @@
 
 namespace common\components\jobs\clientChat;
 
+use common\components\jobs\BaseJob;
 use sales\helpers\app\AppHelper;
 use sales\repositories\NotFoundException;
 use sales\services\clientChat\ClientChatEndConversationService;
@@ -13,7 +14,7 @@ use yii\queue\RetryableJobInterface;
  * @property int $clientChatId
  * @property bool $shallowClose
  */
-class ClientChatEndConversationJob implements RetryableJobInterface
+class ClientChatEndConversationJob extends BaseJob implements RetryableJobInterface
 {
     public $clientChatId;
     public $shallowClose = true;
@@ -24,6 +25,7 @@ class ClientChatEndConversationJob implements RetryableJobInterface
      */
     public function execute($queue): void
     {
+        $this->executionTimeRegister();
         try {
             ClientChatEndConversationService::endConversation($this->clientChatId, $this->shallowClose);
         } catch (NotFoundException $throwable) {

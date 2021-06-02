@@ -19,12 +19,25 @@ $leadPreferences = $lead->leadPreferences;
 $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPreference($lead, $user);
 ?>
 
-
-
 <div class="x_panel">
     <div class="x_title">
         <h2><i class="fa fa-cog"></i> Lead Preferences</h2>
         <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">
+
+            <?php if ($lead->leadData) : ?>
+                <li>
+                    <?= Html::a('<i class="fa fa-database"></i> Lead Data <sup>(' . count($lead->leadData) . ')</sup>', '#', [
+                        'class' => 'showModalButton',
+                        'title' => 'Lead Data',
+                        'data-modal_id' => 'client-manage-info',
+                        'data-content-url' => Url::to([
+                            'lead-view/lead-data',
+                            'gid' => $lead->gid
+                        ])
+                    ]) ?>
+                </li>
+            <?php endif ?>
+
             <li>
                 <?php if (!$lead->l_answered) : ?>
                     <?php if ($lead->isProcessing()) :?>
