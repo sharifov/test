@@ -15,6 +15,7 @@ use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
@@ -191,6 +192,10 @@ class SalesSearch extends Model
                 ->where(['AND',
                     ['lf_owner_id' => $this->currentUser->getId()],
                     ['lf_description' => LeadFlow::DESCRIPTION_MANUAL_CREATE],
+                ])
+                ->orWhere(['AND',
+                    ['lf_owner_id' => $this->currentUser->getId()],
+                    ['lf_description' => LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE],
                 ])
                 ->orWhere(['AND',
                     ['lf_owner_id' => $this->currentUser->getId()],
