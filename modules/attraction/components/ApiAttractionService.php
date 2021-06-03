@@ -354,11 +354,11 @@ class ApiAttractionService extends Component
         return $data['data'] ?? [];
     }
 
-    public function getProductList(Attraction $attraction): array
+    public function getProductList(Attraction $attraction, int $page): array
     {
         $query = [
             'query' => 'query holibob ($term: String!){
-                productList(filter: {search: $term} pageSize: 100 sort: {isRecommended: desc}) {
+                productList(filter: {search: $term} pageSize: 100 page: ' . $page . ') {
                     recordCount
                     pageCount 
                     nodes {

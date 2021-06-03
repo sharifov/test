@@ -112,20 +112,27 @@ class AttractionQuoteController extends FController
     {
         $attractionId = (int) Yii::$app->request->get('id');
         $attraction = $this->attractionRepository->find($attractionId);
-
-        $result = [];
+        //$attractionsList = [];
 
         $apiAttractionService = AttractionModule::getInstance()->apiService;
 
-        if ($attraction) {
+        $attractionsList = \Yii::$app->cacheFile->get($attraction->atn_request_hash_key);
+
+        if ($attractionsList === false) {
             try {
-                $result = $apiAttractionService->getProductList(AttractionQuoteSearchGuard::guard($attraction));
+                $attractionsList = [];
+                $page = 1;
+                do {
+                    $result = $apiAttractionService->getProductList(AttractionQuoteSearchGuard::guard($attraction), $page);
+                    $attractionsList = array_merge($attractionsList, $result['productList']['nodes'] ?? []);
+                    $page++;
+                    \Yii::info($result, 'info\actionSearchAjax:successfully');
+                } while ($result['productList']['pageCount'] >= $page);
+                \Yii::$app->cacheFile->set($attraction->atn_request_hash_key, $attractionsList, 600);
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
         }
-
-        $attractionsList = $result['productList']['nodes'] ?? [];
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => [$attractionsList] ?? [],
