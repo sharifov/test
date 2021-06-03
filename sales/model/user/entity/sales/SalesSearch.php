@@ -195,6 +195,10 @@ class SalesSearch extends Model
                 ])
                 ->orWhere(['AND',
                     ['lf_owner_id' => $this->currentUser->getId()],
+                    ['lf_description' => LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE],
+                ])
+                ->orWhere(['AND',
+                    ['lf_owner_id' => $this->currentUser->getId()],
                     ['status' => Lead::STATUS_PROCESSING],
                     ['lf_from_status_id' => Lead::STATUS_PENDING],
                 ])
@@ -254,19 +258,11 @@ class SalesSearch extends Model
                 ->cache($cacheDuration)
         ], Lead::tableName() . '.id = calls.cll_lead_id');
 
-        $query->leftJoin([
-            'chat' => ClientChatLead::find()
-                ->select(['ccl_lead_id'])
-                ->groupBy(['ccl_lead_id'])
-                ->cache($cacheDuration)
-        ], Lead::tableName() . '.id = chat.ccl_lead_id');
-
         $query->andWhere([
             'OR',
                 ['IS NOT', 'emails.e_lead_id', null],
                 ['IS NOT', 'sms.s_lead_id', null],
                 ['IS NOT', 'calls.cll_lead_id', null],
-                ['IS NOT', 'chat.ccl_lead_id', null],
         ]);
 
         $query->cache($cacheDuration);
