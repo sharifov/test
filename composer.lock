@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7c73da58b21d89dddd2ae66f6411a3a5",
+    "content-hash": "72572625fb9b50374afd15e8f949a59c",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -6283,6 +6283,58 @@
                 }
             ],
             "time": "2021-02-11T11:37:01+00:00"
+        },
+        {
+            "name": "snowplow/snowplow-tracker",
+            "version": "0.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/snowplow/snowplow-php-tracker.git",
+                "reference": "530ba8f8d76ade19cb6ce4cbd996df6c2fbc62b6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/snowplow/snowplow-php-tracker/zipball/530ba8f8d76ade19cb6ce4cbd996df6c2fbc62b6",
+                "reference": "530ba8f8d76ade19cb6ce4cbd996df6c2fbc62b6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2",
+                "ramsey/uuid": "^3 || ^4"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.1.0",
+                "phpunit/php-token-stream": "^3.1.1",
+                "phpunit/phpunit": "^8.1.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Snowplow\\Tracker\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Snowplow Analytics Ltd"
+                }
+            ],
+            "description": "Snowplow event tracker for PHP. Add analytics into your PHP apps and scripts",
+            "homepage": "http://snowplowanalytics.com/",
+            "keywords": [
+                "analytics",
+                "event analytics",
+                "snowplow"
+            ],
+            "support": {
+                "email": "support@snowplowanalytics.com",
+                "issues": "https://github.com/snowplow/snowplow-php-tracker/issues",
+                "source": "https://github.com/snowplow/snowplow-php-tracker/tree/0.4.0"
+            },
+            "time": "2021-03-05T11:12:38+00:00"
         },
         {
             "name": "sorokinmedia/yii2-centrifugo",
