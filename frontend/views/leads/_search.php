@@ -249,7 +249,7 @@ use frontend\extensions\DatePicker;
 
                         <div class="row" style="padding-left: 10px;">
                             <div class="col-md-6">
-                                <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataKey::getList(), ['prompt' => '-']) ?>
+                                <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataKey::getListCache(), ['prompt' => '-']) ?>
                             </div>
                             <div class="col-md-6">
                                 <?php echo $form->field($model, 'lead_data_value') ?>

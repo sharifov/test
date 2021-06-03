@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ld_lead_id')->textInput() ?>
 
-        <?= $form->field($model, 'ld_field_key')->dropDownList(LeadDataKey::getList(), ['prompt' => '-']) ?>
+        <?= $form->field($model, 'ld_field_key')->dropDownList(LeadDataKey::getListCache(), ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'ld_field_value')->textInput(['maxlength' => true]) ?>
 

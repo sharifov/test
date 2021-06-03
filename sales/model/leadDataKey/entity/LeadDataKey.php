@@ -126,17 +126,8 @@ class LeadDataKey extends ActiveRecord
 
     public static function getListCache(?bool $isEnable = true, int $duration = 60 * 60): array
     {
-        return Yii::$app->cacheFile->getOrSet(self::CACHE_TAG, static function () use ($isEnable) {
-            $query = self::find()->select(['ldk_key', 'ldk_name']);
-            if (is_bool($isEnable)) {
-                $query->where(['ldk_enable' => $isEnable]);
-            }
-
-            return ArrayHelper::map(
-                $query->all(),
-                'ldk_key',
-                'ldk_name'
-            );
+        return Yii::$app->cache->getOrSet(self::CACHE_TAG, static function () use ($isEnable) {
+            return self::getList($isEnable);
         }, $duration, new TagDependency([
             'tags' => self::CACHE_TAG,
         ]));

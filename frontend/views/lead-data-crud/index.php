@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ld_lead_id',
             [
                 'attribute' => 'ld_field_key',
-                'filter' => LeadDataKey::getList(),
+                'filter' => LeadDataKey::getListCache(),
             ],
             'ld_field_value',
             [
