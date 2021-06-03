@@ -10,6 +10,11 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\query\LeadQuery;
 use common\models\Sms;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogLead\CallLogLead;
+use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
@@ -216,30 +221,41 @@ class SalesSearch extends Model
                 ->cache($cacheDuration)
         ], Lead::tableName() . '.id = sms.s_lead_id');
 
+        $fromMonth = date("m", strtotime($this->dateFrom));
+        $fromYear = date("Y", strtotime($this->dateFrom));
+        $toMonth = date("m", strtotime($this->dateTo));
+        $toYear = date("Y", strtotime($this->dateTo));
+
         $query->leftJoin([
-            'calls' => Call::find()
-                ->select(['c_lead_id'])
+            'calls' => CallLog::find()
+                ->select(['cll_lead_id'])
+                ->innerJoin(CallLogLead::tableName(), 'cl_id = cll_cl_id')
+                ->innerJoin(CallLogRecord::tableName(), 'cl_id = clr_cl_id')
                 ->where([
                     'AND',
-                        ['c_call_type_id' => Call::CALL_TYPE_OUT],
-                        ['c_call_status' => Call::STATUS_COMPLETED],
-                        ['>=', 'c_call_duration', 30]
+                        ['cl_type_id' => CallLogType::OUT],
+                        ['cl_status_id' => CallLogStatus::COMPLETE],
+                        ['>=', 'clr_duration', 30]
                 ])
                 ->orWhere([
                     'AND',
-                        ['c_call_type_id' => Call::CALL_TYPE_IN],
-                        ['c_call_status' => Call::STATUS_COMPLETED],
-                        ['>=', 'c_call_duration', 30]
+                        ['cl_type_id' => CallLogType::IN],
+                        ['cl_status_id' => CallLogStatus::COMPLETE],
+                        ['>=', 'clr_duration', 30]
                 ])
-                ->groupBy(['c_lead_id'])
+                ->andWhere(
+                    '(cl_year = :fromYear AND cl_month = :fromMonth) OR (cl_year = :toYear AND cl_month = :toMonth)',
+                    [':fromYear' => $fromYear, ':fromMonth' => $fromMonth, ':toYear' => $toYear, ':toMonth' => $toMonth]
+                )
+                ->groupBy(['cll_lead_id'])
                 ->cache($cacheDuration)
-        ], Lead::tableName() . '.id = calls.c_lead_id');
+        ], Lead::tableName() . '.id = calls.cll_lead_id');
 
         $query->andWhere([
             'OR',
                 ['IS NOT', 'emails.e_lead_id', null],
                 ['IS NOT', 'sms.s_lead_id', null],
-                ['IS NOT', 'calls.c_lead_id', null],
+                ['IS NOT', 'calls.cll_lead_id', null],
         ]);
 
         $query->cache($cacheDuration);
