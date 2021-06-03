@@ -15,9 +15,6 @@ class SalesController extends FController
     public function actionIndex()
     {
         set_time_limit(30);
-        if (isset(Yii::$app->log->targets['debug']->enabled)) {
-            Yii::$app->log->targets['debug']->enabled = false;
-        }
 
         $searchModel = new SalesSearch(Auth::user());
         $dataProvider = $searchModel->searchByUser(Yii::$app->request->queryParams);
