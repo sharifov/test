@@ -111,7 +111,7 @@ class LeadDataKey extends ActiveRecord
         return 'lead_data_key';
     }
 
-    public static function getList(?bool $isEnable = true, int $duration = 60 * 60): array
+    public static function getList(?bool $isEnable = true, int $duration = -1): array
     {
         return Yii::$app->cacheFile->getOrSet(self::CACHE_TAG, static function () use ($isEnable) {
             $query = self::find()->select(['ldk_key', 'ldk_name']);
