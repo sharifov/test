@@ -26,7 +26,7 @@ class SalesController extends FController
         $totalCount = $dataProvider->totalCount;
         $sumGrossProfit = array_sum(array_column($query->all(), 'gross_profit'));
 
-        $qualifiedLeadsTakenQuery = $searchModel->qualifiedLeadsTakenQuery(Yii::$app->request->queryParams, -1);
+        $qualifiedLeadsTakenQuery = $searchModel->qualifiedLeadsTakenQuery(Yii::$app->request->queryParams, $cacheDuration);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
