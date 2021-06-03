@@ -18,6 +18,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\redis\Connection;
 
@@ -43,7 +44,7 @@ class RoomConnectedEvent implements ChatRequestEvent
 
     private const DELAY_EVENT_SECONDS = 1;
 
-    private const EXPIRE_EVENT_SECONDS = 360;
+    private const EXPIRE_EVENT_SECONDS = 300;
 
     /**
      * @var ClientChatRepository
@@ -170,6 +171,7 @@ class RoomConnectedEvent implements ChatRequestEvent
 
                 if ($clientChatCreated) {
                     $this->clientChatMessageService->assignMessagesToChat($clientChat);
+                    \Yii::$app->snowplow->trackAction('chat', 'create', $clientChat->toArray());
                 }
             });
 

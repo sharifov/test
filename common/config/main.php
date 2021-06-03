@@ -215,6 +215,12 @@ return [
 //                'order' => \modules\order\src\abac\OrderAbacObject::class
 //            ],
 //        ],
+        'snowplow' => [
+            'class' => \common\components\SnowplowService::class,
+            'collectorUrl' => 'sp.ovago.com',
+            'appId' => 'crm-app',
+            'enabled' => true,
+        ]
     ],
     'bootstrap' => [
         'queue_sms_job',
