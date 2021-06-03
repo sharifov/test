@@ -14,6 +14,7 @@ use yii\web\View;
 /* @var int $totalCount */
 /* @var float $sumGrossProfit */
 /* @var int $qualifiedLeadsTaken */
+/* @var int $cacheDuration */
 
 $this->title = 'Sales';
 $this->params['breadcrumbs'][] = $this->title;
@@ -23,6 +24,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(['id' => 'pjax-sales', 'timeout' => 90000, 'enablePushState' => true]); ?>
+
+    <?php if ($cacheDuration > 0) : ?>
+        <div class="alert alert-secondary alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <i class="fa fa-info-circle"></i> Report data is updated every <?php echo gmdate("i", $cacheDuration) ?> minutes
+        </div>
+    <?php endif ?>
 
     <div class="x_panel">
         <div class="x_title">
@@ -124,4 +132,3 @@ $css = <<<CSS
     }
 CSS;
 $this->registerCss($css);
-?>

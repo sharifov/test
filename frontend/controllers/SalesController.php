@@ -34,6 +34,7 @@ class SalesController extends FController
             'totalCount' => $totalCount,
             'sumGrossProfit' => $sumGrossProfit,
             'qualifiedLeadsTaken' => $qualifiedLeadsTakenQuery->count(),
+            'cacheDuration' => $cacheDuration
         ]);
     }
 }
