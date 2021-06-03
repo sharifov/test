@@ -279,6 +279,34 @@ use yii\web\JsExpression;
                         ) ?>
                     </div>
                 <?php endif; ?>
+
+                <?php if ($filter->permissions->canUserGroups()) : ?>
+                    <div class="col-md-12">
+                        <?= Html::label('User Groups:', null, ['class' => 'control-label']); ?>
+                        <?= Select2::widget([
+                            'data' => $filter->getUserGroups(),
+                            'name' => Html::getInputName($filter, 'userGroups'),
+                            'size' => Select2::SIZE_SMALL,
+                            'options' => [
+                                'placeholder' => 'Choose the channel...',
+                                'id' => Html::getInputId($filter, 'userGroups'),
+                                'multiple' => true,
+                                'allowClear' => true,
+                            ],
+                            'value' => $filter->userGroups,
+                            'pluginOptions' => [
+                                'width' => '100%',
+                                'allowClear' => true,
+                                'multiple' => true,
+                            ],
+                            'pluginEvents' => [
+                                'select2:close' => new \yii\web\JsExpression('function (e) {
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                }'),
+                            ],
+                        ]); ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
         <?php endif; ?>

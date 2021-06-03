@@ -5,6 +5,7 @@ namespace sales\model\clientChat\dashboard;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
+use common\models\UserGroup;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
@@ -97,6 +98,7 @@ class FilterForm extends Model
     public $clientName;
     public $clientEmail;
     public $sortPriority;
+    public $userGroups;
 
     private array $channels;
 
@@ -109,7 +111,8 @@ class FilterForm extends Model
         'status',
         'clientName',
         'clientEmail',
-        'sortPriority'
+        'sortPriority',
+        'userGroups'
     ];
 
     public function __construct(array $channels, $config = [])
@@ -182,6 +185,12 @@ class FilterForm extends Model
             ['sortPriority', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['sortPriority', 'default', 'value' => self::SORT_PRIORITY_DEFAULT],
             ['sortPriority', 'in', 'range' => array_keys(self::SORT_PRIORITY_LIST)],
+
+            ['userGroups', 'safe'],
+//            ['group', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+//            ['group', 'default', 'value' => $this->getDefaultGroupValue()],
+            ['userGroups', 'each', 'rule' => ['filter', 'filter' => 'intval']],
+            ['userGroups', 'each', 'rule' => ['in', 'range' => array_keys($this->getUserGroups())]],
         ];
     }
 
@@ -320,6 +329,11 @@ class FilterForm extends Model
         return $this->processFilterGroupByPermissions(GroupFilter::LIST);
     }
 
+    public function getUserGroups(): array
+    {
+        return UserGroup::getList();
+    }
+
     public function getDefaultGroupValue(): int
     {
         if ($this->permissions->canGroupMyChats()) {
@@ -403,7 +417,8 @@ class FilterForm extends Model
             'userId' => 'User ID',
             'rangeDate' => 'Created range dates',
             'clientName' => 'Client Name',
-            'clientEmail' => 'Client Email'
+            'clientEmail' => 'Client Email',
+            'userGroups' => 'User Groups'
         ];
     }
 

@@ -7,6 +7,7 @@ use common\models\ClientEmail;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
+use common\models\UserGroupAssign;
 use sales\access\EmployeeGroupAccess;
 use sales\helpers\query\QueryHelper;
 use sales\model\clientChat\dashboard\FilterForm;
@@ -540,6 +541,11 @@ class ClientChatSearch extends ClientChat
         $query->leftJoin(['last_message' => ClientChatLastMessage::tableName()], 'cch_id = last_message.cclm_cch_id');
 
         $query->limit(1000);
+
+        if ($filter->userGroups) {
+            $query->innerJoin(['ownerUserGroupAssign' => UserGroupAssign::tableName()], new Expression('ownerUserGroupAssign.ugs_user_id = owner.id'));
+            $query->andWhere(['ownerUserGroupAssign.ugs_group_id' => $filter->userGroups]);
+        }
 
         return $query;
     }
