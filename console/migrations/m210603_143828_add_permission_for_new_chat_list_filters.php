@@ -9,6 +9,7 @@ class m210603_143828_add_permission_for_new_chat_list_filters extends Migration
 {
     private array $route = [
         'client-chat/dashboard/filter/user_groups',
+        'client-chat/dashboard/filter/chat_id',
     ];
 
     private array $roles = [];

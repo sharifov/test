@@ -521,6 +521,10 @@ class ClientChatSearch extends ClientChat
             ]);
         }
 
+        if ($filter->chatId) {
+            $query->andWhere(['cch_id' => $filter->chatId]);
+        }
+
         if ($filter->clientEmail) {
             $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['=', 'email', $filter->clientEmail]);
             $query->andWhere(['IN', 'cch_client_id', $subQuery]);

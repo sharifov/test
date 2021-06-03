@@ -30,6 +30,8 @@ use yii\helpers\Html;
  * @property $rangeDate
  * @property $showFilter
  * @property $clientName
+ * @property $chatId
+ * @property $userGroups
  * @property $clientEmail
  * @property $resetAdditionalFilter
  * @property $sortPriority
@@ -99,6 +101,7 @@ class FilterForm extends Model
     public $clientEmail;
     public $sortPriority;
     public $userGroups;
+    public $chatId;
 
     private array $channels;
 
@@ -112,7 +115,8 @@ class FilterForm extends Model
         'clientName',
         'clientEmail',
         'sortPriority',
-        'userGroups'
+        'userGroups',
+        'chatId'
     ];
 
     public function __construct(array $channels, $config = [])
@@ -164,6 +168,9 @@ class FilterForm extends Model
             ['userId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['userId', 'default', 'value' => self::DEFAULT_VALUE_USER_ID],
             ['userId', 'validateUser', 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['chatId', 'safe'],
+            ['chatId', 'each', 'rule' => ['filter', 'filter' => 'intval']],
 
             ['createdDate', 'string'],
             ['createdDate', 'date', 'format' => 'php:d-m-Y'],
@@ -418,7 +425,8 @@ class FilterForm extends Model
             'rangeDate' => 'Created range dates',
             'clientName' => 'Client Name',
             'clientEmail' => 'Client Email',
-            'userGroups' => 'User Groups'
+            'userGroups' => 'User Groups',
+            'chatId' => 'Chat Id'
         ];
     }
 
@@ -446,6 +454,8 @@ class FilterForm extends Model
         $this->status = self::DEFAULT_VALUE_STATUS;
         $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
         $this->clientEmail = self::DEFAULT_VALUE_CLIENT_EMAIL;
+        $this->userGroups = null;
+        $this->chatId = null;
         return $this;
     }
 
