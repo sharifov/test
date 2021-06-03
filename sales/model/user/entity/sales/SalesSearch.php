@@ -98,7 +98,7 @@ class SalesSearch extends Model
         return [];
     }
 
-    public function searchByUser(array $params)
+    public function searchByUser(array $params, int $cacheDuration = -1)
     {
         $query = (new Query());
         $query->from(Lead::tableName());
@@ -158,10 +158,12 @@ class SalesSearch extends Model
             $query->andHaving(['=', 'gross_profit', $this->final_profit]);
         }
 
+        $query->cache($cacheDuration);
+
         return $dataProvider;
     }
 
-    public function qualifiedLeadsTakenQuery(array $params, int $cacheDuration = 1): LeadQuery
+    public function qualifiedLeadsTakenQuery(array $params, int $cacheDuration = -1): LeadQuery
     {
         $query = Lead::find();
         $query->select(Lead::tableName() . '.*');
