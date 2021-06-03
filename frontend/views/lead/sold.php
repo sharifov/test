@@ -232,7 +232,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     if (empty($quote)) {
                         $totalProfitTxt = "<strong>$" . number_format(0, 2) . "</strong>";
                     } else {
-                        $model->totalProfit = $quote->getEstimationProfit();
+                        //$model->totalProfit = $quote->getEstimationProfit();
+                        $model->totalProfit = 0;
                         $totalProfitTxt = "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
                     }
                 }
