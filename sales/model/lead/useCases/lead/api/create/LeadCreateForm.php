@@ -173,7 +173,7 @@ class LeadCreateForm extends Model
     private static function getDefaultSource(?string $projectKey): ?array
     {
         return Sources::find()
-            ->select(Sources::tableName(). '.*')
+            ->select(Sources::tableName() . '.*')
             ->innerJoin(
                 Project::tableName(),
                 Project::tableName() . '.id = project_id AND project_key = :projectKey',
@@ -187,7 +187,7 @@ class LeadCreateForm extends Model
     private static function getSource(?string $sourceCode, ?string $projectKey): ?array
     {
         return Sources::find()
-            ->select(Sources::tableName(). '.*')
+            ->select(Sources::tableName() . '.*')
             ->innerJoin(
                 Project::tableName(),
                 Project::tableName() . '.id = project_id AND project_key = :projectKey',
