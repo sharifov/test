@@ -6,6 +6,7 @@ use common\models\Employee;
 use sales\behaviors\cache\CleanCacheFileBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
+use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
@@ -68,6 +69,11 @@ class LeadDataKey extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_INSERT => ['ldk_created_user_id', 'ldk_updated_user_id'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['ldk_updated_user_id'],
                 ]
+            ],
+            'keySlug' => [
+                'class' => SluggableBehavior::class,
+                'attribute' => 'ldk_key',
+                'slugAttribute' => 'ldk_key',
             ],
             'cleanCache' => [
                 'class' => CleanCacheFileBehavior::class,
