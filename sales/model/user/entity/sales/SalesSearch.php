@@ -217,6 +217,7 @@ class SalesSearch extends Model
         $query->leftJoin([
             'emails' => Email::find()
                 ->select(['e_lead_id'])
+                ->where(['e_type_id' => Email::TYPE_INBOX])
                 ->groupBy(['e_lead_id'])
                 ->cache($cacheDuration)
         ], Lead::tableName() . '.id = emails.e_lead_id');
@@ -224,6 +225,7 @@ class SalesSearch extends Model
         $query->leftJoin([
             'sms' => Sms::find()
                 ->select(['s_lead_id'])
+                ->where(['s_type_id' => Sms::TYPE_INBOX])
                 ->groupBy(['s_lead_id'])
                 ->cache($cacheDuration)
         ], Lead::tableName() . '.id = sms.s_lead_id');
