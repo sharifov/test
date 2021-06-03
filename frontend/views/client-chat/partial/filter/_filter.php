@@ -176,6 +176,35 @@ use yii\web\JsExpression;
                     </div>
                 <?php endif; ?>
 
+                <?php if ($filter->permissions->canChatId()) : ?>
+                    <div class="col-md-6">
+                        <?= Html::label('Chat Id:', null, ['class' => 'control-label']); ?>
+                        <?= Select2::widget([
+                            'name' => Html::getInputName($filter, 'chatId'),
+                            'size' => Select2::SIZE_SMALL,
+                            'options' => [
+                                'placeholder' => 'Enter chat ids...',
+                                'id' => Html::getInputId($filter, 'chatId'),
+                                'multiple' => true,
+                                'allowClear' => true,
+                                'tags' => true
+                            ],
+                            'value' => $filter->chatId,
+                            'pluginOptions' => [
+                                'width' => '100%',
+                                'allowClear' => true,
+                                'multiple' => true,
+                                'tags' => true
+                            ],
+                            'pluginEvents' => [
+                                'change' => new \yii\web\JsExpression('function (e) {
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                }'),
+                            ],
+                        ]); ?>
+                    </div>
+                <?php endif; ?>
+
                 <?php if ($filter->permissions->canCreatedDate()) : ?>
                     <div class="col-md-12 js-created_box">
                         <?= Html::label('Created:', null, ['class' => 'control-label']); ?>
@@ -277,6 +306,34 @@ use yii\web\JsExpression;
                                 'onchange' => new JsExpression('window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");'),
                             ]
                         ) ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($filter->permissions->canUserGroups()) : ?>
+                    <div class="col-md-12">
+                        <?= Html::label('User Groups:', null, ['class' => 'control-label']); ?>
+                        <?= Select2::widget([
+                            'data' => $filter->getUserGroups(),
+                            'name' => Html::getInputName($filter, 'userGroups'),
+                            'size' => Select2::SIZE_SMALL,
+                            'options' => [
+                                'placeholder' => 'Choose the user groups...',
+                                'id' => Html::getInputId($filter, 'userGroups'),
+                                'multiple' => true,
+                                'allowClear' => true,
+                            ],
+                            'value' => $filter->userGroups,
+                            'pluginOptions' => [
+                                'width' => '100%',
+                                'allowClear' => true,
+                                'multiple' => true,
+                            ],
+                            'pluginEvents' => [
+                                'change' => new \yii\web\JsExpression('function (e) {
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                }'),
+                            ],
+                        ]); ?>
                     </div>
                 <?php endif; ?>
             </div>

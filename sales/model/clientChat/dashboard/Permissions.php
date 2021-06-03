@@ -22,6 +22,8 @@ use sales\auth\Auth;
  * @property $client_name
  * @property $client_email
  * @property $sort_priority
+ * @property $user_groups
+ * @property $chat_id
  */
 class Permissions
 {
@@ -40,6 +42,8 @@ class Permissions
     private $client_name;
     private $client_email;
     private $sort_priority;
+    private $user_groups;
+    private $chat_id;
 
     public function canChannel(): bool
     {
@@ -184,6 +188,24 @@ class Permissions
         }
         $this->client_email = Auth::can('client-chat/dashboard/filter/client_email');
         return $this->client_email;
+    }
+
+    public function canUserGroups(): bool
+    {
+        if ($this->user_groups !== null) {
+            return $this->user_groups;
+        }
+        $this->user_groups = Auth::can('client-chat/dashboard/filter/user_groups');
+        return $this->user_groups;
+    }
+
+    public function canChatId(): bool
+    {
+        if ($this->chat_id !== null) {
+            return $this->chat_id;
+        }
+        $this->chat_id = Auth::can('client-chat/dashboard/filter/chat_id');
+        return $this->chat_id;
     }
 
     public function canAdditionalFilter(): bool
