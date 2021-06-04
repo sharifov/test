@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\leadData\services\LeadDataDictionary;
+use sales\model\leadDataKey\entity\LeadDataKey;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ld_lead_id')->textInput() ?>
 
-        <?= $form->field($model, 'ld_field_key')->dropDownList(LeadDataDictionary::KEY_LIST, ['prompt' => '-']) ?>
+        <?= $form->field($model, 'ld_field_key')->dropDownList(LeadDataKey::getList(), ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'ld_field_value')->textInput(['maxlength' => true]) ?>
 
