@@ -24,6 +24,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $ldk_updated_dt
  * @property int|null $ldk_created_user_id
  * @property int|null $ldk_updated_user_id
+ * @property bool|null $ldk_is_system
  *
  * @property Employee $ldkCreatedUser
  * @property Employee $ldkUpdatedUser
@@ -49,6 +50,9 @@ class LeadDataKey extends ActiveRecord
             [['ldk_created_user_id', 'ldk_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ldk_updated_user_id' => 'id']],
 
             [['ldk_created_dt', 'ldk_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['ldk_is_system', 'boolean'],
+            ['ldk_is_system', 'default', 'value' => false],
         ];
     }
 
@@ -68,7 +72,8 @@ class LeadDataKey extends ActiveRecord
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['ldk_created_user_id', 'ldk_updated_user_id'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['ldk_updated_user_id'],
-                ]
+                ],
+                'defaultValue' => null,
             ],
             'keySlug' => [
                 'class' => SluggableBehavior::class,
@@ -104,6 +109,7 @@ class LeadDataKey extends ActiveRecord
             'ldk_updated_dt' => 'Updated Dt',
             'ldk_created_user_id' => 'Created User ID',
             'ldk_updated_user_id' => 'Updated User ID',
+            'ldk_is_system' => 'Is System',
         ];
     }
 
@@ -141,6 +147,6 @@ class LeadDataKey extends ActiveRecord
 
     public static function getKeyName(string $key): string
     {
-        return ArrayHelper::getValue(self::getList(), $key, '-');
+        return ArrayHelper::getValue(self::getListCache(), $key, '-');
     }
 }

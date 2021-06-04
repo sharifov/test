@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use sales\model\leadDataKey\entity\LeadDataKey;
 use sales\model\leadDataKey\entity\LeadDataKeySearch;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -86,6 +87,10 @@ class LeadDataKeyCrudController extends FController
     {
         $model = $this->findModel($id);
 
+        if ($model->ldk_is_system) {
+            throw new ForbiddenHttpException('System key cannot be edited.');
+        }
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->ldk_id]);
         }
@@ -104,7 +109,13 @@ class LeadDataKeyCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+
+        if ($model->ldk_is_system) {
+            throw new ForbiddenHttpException('System key cannot be deleted.');
+        }
+
+        $model->delete();
 
         return $this->redirect(['index']);
     }

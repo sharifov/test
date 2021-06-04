@@ -10,7 +10,7 @@ class LeadDataKeySearch extends LeadDataKey
     public function rules(): array
     {
         return [
-            ['ldk_enable', 'boolean'],
+            [['ldk_enable', 'ldk_is_system'], 'boolean'],
 
             ['ldk_id', 'integer'],
 
@@ -42,6 +42,7 @@ class LeadDataKeySearch extends LeadDataKey
         $query->andFilterWhere([
             'ldk_id' => $this->ldk_id,
             'ldk_enable' => $this->ldk_enable,
+            'ldk_is_system' => $this->ldk_is_system,
             'DATE(ldk_created_dt)' => $this->ldk_created_dt,
             'DATE(ldk_updated_dt)' => $this->ldk_updated_dt,
             'ldk_created_user_id' => $this->ldk_created_user_id,

@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ldk_name')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'ldk_enable')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
+        <?= $form->field($model, 'ldk_enable')->dropDownList([1 => 'Yes', 0 => 'No']) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

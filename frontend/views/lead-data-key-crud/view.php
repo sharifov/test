@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ldk_key',
                 'ldk_name',
                 'ldk_enable:booleanByLabel',
+                'ldk_is_system:booleanByLabel',
                 'ldk_created_dt:byUserDateTime',
                 'ldk_updated_dt:byUserDateTime',
                 'ldk_created_user_id:username',
