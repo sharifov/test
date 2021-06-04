@@ -135,7 +135,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canUser()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <?= Html::label('Agent:', null, ['class' => 'control-label']); ?>
                         <?= UserSelect2Widget::widget([
                             'name' => Html::getInputName($filter, 'userId'),
@@ -147,10 +147,12 @@ use yii\web\JsExpression;
                             ],
                             'pluginOptions' => [
                                 'width' => '100%',
+                                'allowClear' => true
                             ],
                             'options' => [
                                 'placeholder' => 'Choose the agent...',
                                 'id' => Html::getInputId($filter, 'userId'),
+                                'multiple' => true
                             ],
                             'value' => $filter->userId,
                             'initValueText' => $filter->userName,

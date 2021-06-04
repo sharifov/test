@@ -166,10 +166,9 @@ class FilterForm extends Model
             ['readUnread', 'default', 'value' => self::DEFAULT_VALUE_READ_UNREAD],
             ['readUnread', 'in', 'range' => array_keys($this->getReadFilter())],
 
-            ['userId', 'integer'],
-            ['userId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['userId', 'default', 'value' => self::DEFAULT_VALUE_USER_ID],
-            ['userId', 'validateUser', 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['userId', 'safe'],
+            ['userId', 'each', 'rule' => ['filter', 'filter' => 'intval']],
+            ['userId', 'each', 'rule' => ['validateUser']],
 
             ['chatId', 'safe'],
             ['chatId', 'each', 'rule' => ['filter', 'filter' => 'intval']],
@@ -203,13 +202,13 @@ class FilterForm extends Model
         ];
     }
 
-    public function validateUser(): void
+    public function validateUser($attribute, $params, $model, $value): void
     {
-        $user = Employee::find()->select(['id', 'username'])->andWhere(['id' => $this->userId])->asArray()->one();
+        $user = Employee::find()->select(['id', 'username'])->andWhere(['id' => $value])->asArray()->one();
         if (!$user) {
             return;
         }
-        $this->userName = $user['username'];
+        $this->userName[$user['id']] = $user['username'];
     }
 
     public function getReadFilter(): array
