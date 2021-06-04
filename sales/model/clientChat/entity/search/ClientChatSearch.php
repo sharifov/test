@@ -481,7 +481,7 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->channelId) {
-            $query->byChannel($filter->channelId);
+            $query->byChannelIds($filter->channelId);
         } else {
             if (!GroupFilter::isMy($filter->group)) {
                 $query->byChannelIds($channelsIds);
@@ -493,7 +493,8 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->project) {
-            $query->byProject($filter->project);
+//            $query->byProject($filter->project);
+            $query->andWhere(['cch_project_id' => $filter->project]);
         }
 
         if ($filter->userId) {
@@ -511,7 +512,7 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->status) {
-            $query->byStatus($filter->status);
+            $query->byStatuses($filter->status);
         }
 
         if ($filter->clientName) {
@@ -585,18 +586,19 @@ class ClientChatSearch extends ClientChat
         $query = ClientChat::find()->freeToTake($user->id);
 
         if ($filter->channelId) {
-            $query->byChannel($filter->channelId);
+            $query->byChannelIds($filter->channelId);
         } else {
             $query->byChannelIds($channelsIds);
         }
         if ($filter->project) {
-            $query->byProject($filter->project);
+//            $query->byProject($filter->project);
+            $query->andWhere(['cch_project_id' => $filter->project]);
         }
         if ($filter->userId) {
             $query->andWhere(['cch_owner_user_id' => $filter->userId]);
         }
         if ($filter->status) {
-            $query->byStatus($filter->status);
+            $query->byStatuses($filter->status);
         }
         if ($filter->clientName) {
             $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');

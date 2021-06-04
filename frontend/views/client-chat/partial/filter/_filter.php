@@ -39,7 +39,7 @@ use yii\web\JsExpression;
             <div class="row">
 
                 <?php if ($filter->permissions->canShow()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-5">
                         <?= Html::label('Show:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getShowFilter(),
@@ -63,7 +63,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canChannel()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-7">
                         <?= Html::label('Channel:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getChannels(),
@@ -76,10 +76,12 @@ use yii\web\JsExpression;
                             ],
                             'pluginOptions' => [
                                 'width' => '100%',
+                                'allowClear' => true
                             ],
                             'options' => [
                                 'placeholder' => 'Choose the channel...',
                                 'id' => Html::getInputId($filter, 'channelId'),
+                                'multiple' => true,
                             ],
                             'value' => $filter->channelId,
                         ]); ?>
@@ -102,22 +104,26 @@ use yii\web\JsExpression;
             <div
                 class="row"
                 id="additional_filters_div"
-                style="margin-bottom: 20px; display: <?php echo $isAdditionalFilterActive ? '' : 'none' ?>;">
+                style="margin-bottom: 20px; display: <?php echo $isAdditionalFilterActive ? 'block' : 'none' ?>; overflow: hidden; overflow-y: scroll; max-height: 450px;">
 
                 <?php if ($filter->permissions->canProject()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <?= Html::label('Project:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getProjects(),
                             'name' => Html::getInputName($filter, 'project'),
                             'size' => Select2::SIZE_SMALL,
                             'options' => [
-                                'placeholder' => 'Choose the channel...',
+                                'placeholder' => 'Choose the projects...',
                                 'id' => Html::getInputId($filter, 'project'),
+                                'multiple' => true,
+                                'allowClear' => true
                             ],
                             'value' => $filter->project,
                             'pluginOptions' => [
                                 'width' => '100%',
+                                'multiple' => true,
+                                'allowClear' => true
                             ],
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
@@ -129,7 +135,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canUser()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <?= Html::label('Agent:', null, ['class' => 'control-label']); ?>
                         <?= UserSelect2Widget::widget([
                             'name' => Html::getInputName($filter, 'userId'),
@@ -141,10 +147,12 @@ use yii\web\JsExpression;
                             ],
                             'pluginOptions' => [
                                 'width' => '100%',
+                                'allowClear' => true
                             ],
                             'options' => [
                                 'placeholder' => 'Choose the agent...',
                                 'id' => Html::getInputId($filter, 'userId'),
+                                'multiple' => true
                             ],
                             'value' => $filter->userId,
                             'initValueText' => $filter->userName,
@@ -254,7 +262,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canStatus()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <?php echo Html::label('Status:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getStatuses(),
@@ -267,10 +275,12 @@ use yii\web\JsExpression;
                             ],
                             'pluginOptions' => [
                                 'width' => '100%',
+                                'allowClear' => true
                             ],
                             'options' => [
                                 'placeholder' => 'Choose the status...',
                                 'id' => Html::getInputId($filter, 'status'),
+                                'multiple' => true
                             ],
                             'value' => $filter->status,
                         ]); ?>
@@ -294,7 +304,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canClientEmail()) : ?>
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <?php echo Html::label('Client Email:', null, ['class' => 'control-label']); ?>
                         <?php echo Html::textInput(
                             Html::getInputName($filter, 'clientEmail'),
