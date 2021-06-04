@@ -260,7 +260,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canStatus()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <?php echo Html::label('Status:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getStatuses(),
@@ -273,10 +273,12 @@ use yii\web\JsExpression;
                             ],
                             'pluginOptions' => [
                                 'width' => '100%',
+                                'allowClear' => true
                             ],
                             'options' => [
                                 'placeholder' => 'Choose the status...',
                                 'id' => Html::getInputId($filter, 'status'),
+                                'multiple' => true
                             ],
                             'value' => $filter->status,
                         ]); ?>
@@ -300,7 +302,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canClientEmail()) : ?>
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <?php echo Html::label('Client Email:', null, ['class' => 'control-label']); ?>
                         <?php echo Html::textInput(
                             Html::getInputName($filter, 'clientEmail'),

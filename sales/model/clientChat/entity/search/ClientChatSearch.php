@@ -512,7 +512,7 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->status) {
-            $query->byStatus($filter->status);
+            $query->byStatuses($filter->status);
         }
 
         if ($filter->clientName) {
@@ -598,7 +598,7 @@ class ClientChatSearch extends ClientChat
             $query->andWhere(['cch_owner_user_id' => $filter->userId]);
         }
         if ($filter->status) {
-            $query->byStatus($filter->status);
+            $query->byStatuses($filter->status);
         }
         if ($filter->clientName) {
             $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');

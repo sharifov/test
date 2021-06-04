@@ -133,10 +133,11 @@ class FilterForm extends Model
             ['channelId', 'each', 'rule' => ['filter', 'filter' => 'intval']],
             ['channelId', 'each', 'rule' => ['in', 'range' => array_keys($this->getChannels())]],
 
-            ['status', 'integer'],
-            ['status', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['status', 'default', 'value' => self::DEFAULT_VALUE_STATUS],
-            ['status', 'in', 'range' => array_keys(ClientChat::getStatusList())],
+            ['status', 'safe'],
+//            ['status', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+//            ['status', 'default', 'value' => self::DEFAULT_VALUE_STATUS],
+            ['status', 'each', 'rule' => ['filter', 'filter' => 'intval']],
+            ['status', 'each', 'rule' => ['in', 'range' => array_keys(ClientChat::getStatusList())]],
 
             ['showFilter', 'integer'],
             ['showFilter', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
@@ -223,7 +224,7 @@ class FilterForm extends Model
 
     public function getStatuses(): array
     {
-        return ArrayHelper::merge(['All'], ClientChat::getStatusList());
+        return ClientChat::getStatusList();
     }
 
     public function getDepartments(): array
@@ -259,11 +260,11 @@ class FilterForm extends Model
     public function loadDefaultValues(): void
     {
 //        if ($this->channelId === null || $this->hasErrors('channelId')) {
-//            $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
+//            $this->channelId = null;
 //        }
-        if ($this->status === null || $this->hasErrors('status')) {
-            $this->status = self::DEFAULT_VALUE_STATUS;
-        }
+//        if ($this->status === null || $this->hasErrors('status')) {
+//            $this->status = null;
+//        }
         if ($this->showFilter === null || $this->hasErrors('showFilter')) {
             $this->showFilter = self::DEFAULT_VALUE_SHOW_FILTER;
         }
@@ -271,7 +272,7 @@ class FilterForm extends Model
             $this->dep = self::DEFAULT_VALUE_DEP;
         }
 //        if ($this->project === null || $this->hasErrors('project')) {
-//            $this->project = self::DEFAULT_VALUE_PROJECT;
+//            $this->project = null;
 //        }
         if ($this->group === null || $this->hasErrors('group')) {
             $this->group = $this->getDefaultGroupValue();
@@ -302,9 +303,9 @@ class FilterForm extends Model
 //        if (!$this->permissions->canChannel()) {
 //            $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
 //        }
-        if (!$this->permissions->canStatus()) {
-            $this->status = self::DEFAULT_VALUE_STATUS;
-        }
+//        if (!$this->permissions->canStatus()) {
+//            $this->status = self::DEFAULT_VALUE_STATUS;
+//        }
         if (!$this->permissions->canShow()) {
             $this->showFilter = ClientChat::TAB_ALL;
         }
@@ -449,11 +450,11 @@ class FilterForm extends Model
 
     public function resetAdditionalAttributes(): FilterForm
     {
-//        $this->project = self::DEFAULT_VALUE_PROJECT;
+        $this->project = null;
         $this->userId = self::DEFAULT_VALUE_USER_ID;
         $this->fromDate = self::DEFAULT_VALUE_FROM_DATE;
         $this->toDate = self::DEFAULT_VALUE_TO_DATE;
-        $this->status = self::DEFAULT_VALUE_STATUS;
+        $this->status = null;
         $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
         $this->clientEmail = self::DEFAULT_VALUE_CLIENT_EMAIL;
         $this->userGroups = null;
