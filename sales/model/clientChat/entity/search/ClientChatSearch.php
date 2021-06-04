@@ -481,7 +481,7 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->channelId) {
-            $query->byChannel($filter->channelId);
+            $query->byChannelIds($filter->channelId);
         } else {
             if (!GroupFilter::isMy($filter->group)) {
                 $query->byChannelIds($channelsIds);
@@ -586,7 +586,7 @@ class ClientChatSearch extends ClientChat
         $query = ClientChat::find()->freeToTake($user->id);
 
         if ($filter->channelId) {
-            $query->byChannel($filter->channelId);
+            $query->byChannelIds($filter->channelId);
         } else {
             $query->byChannelIds($channelsIds);
         }

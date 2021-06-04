@@ -39,7 +39,7 @@ use yii\web\JsExpression;
             <div class="row">
 
                 <?php if ($filter->permissions->canShow()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-5">
                         <?= Html::label('Show:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getShowFilter(),
@@ -63,7 +63,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canChannel()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-7">
                         <?= Html::label('Channel:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getChannels(),
@@ -76,10 +76,12 @@ use yii\web\JsExpression;
                             ],
                             'pluginOptions' => [
                                 'width' => '100%',
+                                'allowClear' => true
                             ],
                             'options' => [
                                 'placeholder' => 'Choose the channel...',
                                 'id' => Html::getInputId($filter, 'channelId'),
+                                'multiple' => true,
                             ],
                             'value' => $filter->channelId,
                         ]); ?>

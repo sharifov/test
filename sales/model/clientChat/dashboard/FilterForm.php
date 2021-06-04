@@ -129,10 +129,9 @@ class FilterForm extends Model
     public function rules(): array
     {
         return [
-            ['channelId', 'integer'],
-            ['channelId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['channelId', 'default', 'value' => self::DEFAULT_VALUE_CHANNEL_ID],
-            ['channelId', 'in', 'range' => array_keys($this->getChannels())],
+            ['channelId', 'safe'],
+            ['channelId', 'each', 'rule' => ['filter', 'filter' => 'intval']],
+            ['channelId', 'each', 'rule' => ['in', 'range' => array_keys($this->getChannels())]],
 
             ['status', 'integer'],
             ['status', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
@@ -247,9 +246,9 @@ class FilterForm extends Model
                 ->andWhere(['IN', 'ccc_id', array_keys($this->channels)])
                 ->indexBy('ccc_id')
                 ->column();
-            return ArrayHelper::merge(['All'], $channels);
+            return $channels;
         }
-        return ArrayHelper::merge(['All'], $this->channels);
+        return $this->channels;
     }
 
     public function isEmptyChannels(): bool
@@ -259,9 +258,9 @@ class FilterForm extends Model
 
     public function loadDefaultValues(): void
     {
-        if ($this->channelId === null || $this->hasErrors('channelId')) {
-            $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
-        }
+//        if ($this->channelId === null || $this->hasErrors('channelId')) {
+//            $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
+//        }
         if ($this->status === null || $this->hasErrors('status')) {
             $this->status = self::DEFAULT_VALUE_STATUS;
         }
@@ -300,9 +299,9 @@ class FilterForm extends Model
 
     public function loadDefaultValuesByPermissions(): FilterForm
     {
-        if (!$this->permissions->canChannel()) {
-            $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
-        }
+//        if (!$this->permissions->canChannel()) {
+//            $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
+//        }
         if (!$this->permissions->canStatus()) {
             $this->status = self::DEFAULT_VALUE_STATUS;
         }
