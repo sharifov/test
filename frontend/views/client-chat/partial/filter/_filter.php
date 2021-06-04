@@ -102,22 +102,26 @@ use yii\web\JsExpression;
             <div
                 class="row"
                 id="additional_filters_div"
-                style="margin-bottom: 20px; display: <?php echo $isAdditionalFilterActive ? '' : 'none' ?>;">
+                style="margin-bottom: 20px; display: <?php echo $isAdditionalFilterActive ? 'block' : 'none' ?>; overflow: hidden; overflow-y: scroll; max-height: 450px;">
 
                 <?php if ($filter->permissions->canProject()) : ?>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <?= Html::label('Project:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getProjects(),
                             'name' => Html::getInputName($filter, 'project'),
                             'size' => Select2::SIZE_SMALL,
                             'options' => [
-                                'placeholder' => 'Choose the channel...',
+                                'placeholder' => 'Choose the projects...',
                                 'id' => Html::getInputId($filter, 'project'),
+                                'multiple' => true,
+                                'allowClear' => true
                             ],
                             'value' => $filter->project,
                             'pluginOptions' => [
                                 'width' => '100%',
+                                'multiple' => true,
+                                'allowClear' => true
                             ],
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {

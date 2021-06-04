@@ -149,10 +149,12 @@ class FilterForm extends Model
             ['dep', 'default', 'value' => self::DEFAULT_VALUE_DEP],
             ['dep', 'in', 'range' => array_keys($this->getDepartments())],
 
-            ['project', 'integer'],
-            ['project', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['project', 'default', 'value' => self::DEFAULT_VALUE_PROJECT],
-            ['project', 'in', 'range' => array_keys($this->getProjects())],
+            ['project', 'safe'],
+//            ['project', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+//            ['project', 'default', 'value' => self::DEFAULT_VALUE_PROJECT],
+            ['project', 'each', 'rule' => ['filter', 'filter' => 'intval']],
+            ['project', 'each', 'rule' => ['in', 'range' => array_keys($this->getProjects())]],
+
 
             ['group', 'integer'],
             ['group', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
@@ -232,7 +234,8 @@ class FilterForm extends Model
 
     public function getProjects(): array
     {
-        return ArrayHelper::merge(['All'], Project::getList());
+        return Project::getList();
+//        return ArrayHelper::merge(['All'], Project::getList());
     }
 
     public function getChannels(): array
@@ -268,9 +271,9 @@ class FilterForm extends Model
         if ($this->dep === null || $this->hasErrors('dep')) {
             $this->dep = self::DEFAULT_VALUE_DEP;
         }
-        if ($this->project === null || $this->hasErrors('project')) {
-            $this->project = self::DEFAULT_VALUE_PROJECT;
-        }
+//        if ($this->project === null || $this->hasErrors('project')) {
+//            $this->project = self::DEFAULT_VALUE_PROJECT;
+//        }
         if ($this->group === null || $this->hasErrors('group')) {
             $this->group = $this->getDefaultGroupValue();
         }
@@ -309,9 +312,9 @@ class FilterForm extends Model
         if (!$this->permissions->canDepartment()) {
             $this->dep = self::DEFAULT_VALUE_DEP;
         }
-        if (!$this->permissions->canProject()) {
-            $this->project = self::DEFAULT_VALUE_PROJECT;
-        }
+//        if (!$this->permissions->canProject()) {
+//            $this->project = self::DEFAULT_VALUE_PROJECT;
+//        }
         if (!$this->permissions->canOneOfGroup()) {
             $this->group = $this->getDefaultGroupValue();
         }
@@ -447,7 +450,7 @@ class FilterForm extends Model
 
     public function resetAdditionalAttributes(): FilterForm
     {
-        $this->project = self::DEFAULT_VALUE_PROJECT;
+//        $this->project = self::DEFAULT_VALUE_PROJECT;
         $this->userId = self::DEFAULT_VALUE_USER_ID;
         $this->fromDate = self::DEFAULT_VALUE_FROM_DATE;
         $this->toDate = self::DEFAULT_VALUE_TO_DATE;

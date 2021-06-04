@@ -493,7 +493,8 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->project) {
-            $query->byProject($filter->project);
+//            $query->byProject($filter->project);
+            $query->andWhere(['cch_project_id' => $filter->project]);
         }
 
         if ($filter->userId) {
@@ -590,7 +591,8 @@ class ClientChatSearch extends ClientChat
             $query->byChannelIds($channelsIds);
         }
         if ($filter->project) {
-            $query->byProject($filter->project);
+//            $query->byProject($filter->project);
+            $query->andWhere(['cch_project_id' => $filter->project]);
         }
         if ($filter->userId) {
             $query->andWhere(['cch_owner_user_id' => $filter->userId]);
