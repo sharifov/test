@@ -522,7 +522,6 @@ class CallLogSearch extends CallLog
             $queryByLogRecordDuration = '';
         }
 
-        //$query = static::find()->joinWith(['record']);
         $query = new Query();
         $query->leftJoin(CallLogRecord::tableName(), static::tableName() . '.cl_id =' . CallLogRecord::tableName() . '.clr_cl_id');
         $query->select(['cl_user_id, DATE(CONVERT_TZ(DATE_SUB(cl_call_created_dt, INTERVAL ' . $timeSub . ' HOUR), "+00:00", "' . $utcOffsetDST . '")) AS createdDate,
@@ -534,9 +533,9 @@ class CallLogSearch extends CallLog
             SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND (cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL) AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsCompleted,
             
             COALESCE(SUM(IF(cl_type_id = ' . CallLogType::IN . ', clr_duration, 0)), 0) as inCallsDuration,
-            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as inCallsCompleted,
-            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ' AND cl_category_id = ' . CallLogCategory::DIRECT_CALL . ', 1, 0)) as inCallsDirectLine,
-            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ' AND cl_category_id = ' . CallLogCategory::GENERAL_LINE . ', 1, 0)) as inCallsGeneralLine,
+            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as inCallsCompleted,
+            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ' AND cl_category_id = ' . CallLogCategory::DIRECT_CALL . ', 1, 0)) as inCallsDirectLine,
+            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ' AND cl_category_id = ' . CallLogCategory::GENERAL_LINE . ', 1, 0)) as inCallsGeneralLine,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', cl_duration, 0)) as redialCallsDuration,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)) as redialCallsTalkTime,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', 1, 0)) as redialCallsTotalAttempts,
@@ -570,8 +569,6 @@ class CallLogSearch extends CallLog
 
         $command = $query->createCommand();
         $data = $command->queryAll();
-
-        //var_dump($data); die();
 
         foreach ($data as $key => $model) {
             if (
@@ -626,7 +623,7 @@ class CallLogSearch extends CallLog
             ],
         ];
 
-        return $dataProvider = new ArrayDataProvider($paramsData);
+        return new ArrayDataProvider($paramsData);
     }
 
     public function searchCallsGraph($params, $user_id): array
