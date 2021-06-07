@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -337,6 +338,6 @@ class SettingHelper
 
     public static function getFrontendWidgetByKey(string $key): array
     {
-        return ArrayHelper::getValue(Yii::$app->params['settings'], 'frontend_widget_list.' . $key);
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'frontend_widget_list.' . $key, []);
     }
 }

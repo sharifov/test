@@ -4,7 +4,6 @@ use frontend\helpers\JsonHelper;
 use yii\web\View;
 
 /** @var array $params */
-/** @var int $userId */
 /** @var View $this */
 /** @var string $identify */
 /** @var $scriptId */

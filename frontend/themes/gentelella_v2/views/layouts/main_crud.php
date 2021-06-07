@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use common\models\Employee;
+use frontend\widgets\frontendWidgetList\FrontendLauncherWidgetList;
 use frontend\widgets\frontendWidgetList\louassist\LouAssistWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
@@ -110,7 +111,9 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
                         </li>
                         <?php echo frontend\widgets\OnlineConnection::widget() ?>
                         <?php echo frontend\widgets\UserMonitor::widget() ?>
-                        <?php echo LouAssistWidget::widget() ?>
+
+                        <?php echo (new FrontendLauncherWidgetList())->getContent() ?>
+
 
                         <?php
                         if (Yii::$app->params['settings']['notification_web_socket']) {
