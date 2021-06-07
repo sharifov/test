@@ -603,7 +603,7 @@ class ClientChatController extends FController
 
             $connectionId = (int)Yii::$app->request->post('socketConnectionId');
 
-            if (UserConnection::find()->andWhere(['uc_id' => $connectionId])->exists() && $clientChat->isOwner(Auth::id())) {
+            if (UserConnection::find()->andWhere(['uc_id' => $connectionId])->exists()) {
                 if (!$this->clientChatService->addActiveConnection($connectionId, $cchId)) {
                     $result['message'][] = 'Active connection save error.';
                 }
