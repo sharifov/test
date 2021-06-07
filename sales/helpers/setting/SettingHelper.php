@@ -329,4 +329,14 @@ class SettingHelper
     {
         return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'metric_job_time_execution', 60);
     }
+
+    public static function getFrontendWidgetList(): array
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'frontend_widget_list');
+    }
+
+    public static function getFrontendWidgetByKey(string $key): array
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'frontend_widget_list.' . $key);
+    }
 }
