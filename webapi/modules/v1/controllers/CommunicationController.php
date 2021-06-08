@@ -1479,11 +1479,13 @@ class CommunicationController extends ApiBaseController
         if (!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
         } else {
+            $delayJob = 7;
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
             $job->callFromInternalPhone = $callFromInternalPhone;
-            $jobId = Yii::$app->queue_job->delay(7)->priority(90)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(90)->push($job);
         }
 
         $project = $callModel->cProject;
@@ -1557,11 +1559,13 @@ class CommunicationController extends ApiBaseController
         if (!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
         } else {
+            $delayJob = 7;
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
             $job->callFromInternalPhone = $callFromInternalPhone;
-            $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(100)->push($job);
         }
 
 
@@ -1676,11 +1680,13 @@ class CommunicationController extends ApiBaseController
                 Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update');
             }
 
+            $delayJob = 7;
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->source_id = $department->dpp_source_id;
             $job->delay = 0;
-            $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(100)->push($job);
 
             try {
                 if (!$jobId) {
@@ -1874,11 +1880,13 @@ class CommunicationController extends ApiBaseController
                         Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update2');
                     }
 
+                    $delayJob = 7;
                     $job = new CallQueueJob();
                     $job->call_id = $callModel->c_id;
                     $job->source_id = $department->dpp_source_id;
                     $job->delay = 0;
-                    $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
+                    $job->delayJob = $delayJob;
+                    $jobId = Yii::$app->queue_job->delay($delayJob)->priority(80)->push($job);
 
                     try {
                         if (!$jobId) {

@@ -51,7 +51,7 @@ class FrontendLauncherWidgetList
                 $this->content .= $widgetClass::widget(['params' => $params]);
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable, true), 'FrontendLauncherWidgetList:runWidgetList:Throwable');
+            \Yii::error(AppHelper::throwableLog($throwable), 'FrontendLauncherWidgetList:runWidgetList:Throwable');
         }
     }
 

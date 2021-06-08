@@ -220,6 +220,7 @@ class ClientChatService
     {
         $job = new ClientChatUserAccessJob();
         $job->chatId = $chatId;
+        $job->delayJob = $delay;
         if (!$jobId = \Yii::$app->queue_client_chat_job->priority(10)->delay($delay)->push($job)) {
             throw new \RuntimeException('ClientChatUserAccessJob not added to queue. ChatId: ' .
                 $chatId);

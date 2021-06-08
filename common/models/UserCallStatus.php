@@ -104,9 +104,11 @@ class UserCallStatus extends \yii\db\ActiveRecord
 
         if ((int) $this->us_type_id === self::STATUS_TYPE_READY) {
             //Call::applyHoldCallToAgent($this->us_user_id);
+            $delayJob = 5;
             $job = new AgentCallQueueJob();
             $job->user_id = $this->us_user_id;
-            $jobId = Yii::$app->queue_job->delay(5)->priority(150)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(150)->push($job);
         }
 
         if ($insert) {

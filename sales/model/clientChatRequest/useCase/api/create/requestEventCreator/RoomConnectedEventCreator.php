@@ -30,6 +30,7 @@ class RoomConnectedEventCreator extends ChatRequestEventCreator
             $job = new ClientChatRequestCreateJob();
             $job->requestId = $this->clientChatRequest->ccr_id;
             $job->requestEventClass = $chatRequestEvent->getClassName();
+            $job->delayJob = $chatRequestEvent->delay;
             if ($jobId = \Yii::$app->queue_client_chat_job->priority(10)->delay($chatRequestEvent->delay)->push($job)) {
                 $this->clientChatRequest->ccr_job_id = $jobId;
                 $this->clientChatRequest->save();

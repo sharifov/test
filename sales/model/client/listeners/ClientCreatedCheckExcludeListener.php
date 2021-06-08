@@ -16,8 +16,10 @@ class ClientCreatedCheckExcludeListener
         }
 
         try {
+            $delayJob = 5;
             $job = new CheckClientExcludeIpJob($client->id, $client->cl_ip);
-            \Yii::$app->queue_job->delay(5)->push($job);
+            $job->delayJob = $delayJob;
+            \Yii::$app->queue_job->delay($delayJob)->push($job);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Client Id: ' . $client->id,

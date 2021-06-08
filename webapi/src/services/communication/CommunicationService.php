@@ -553,11 +553,13 @@ class CommunicationService
                         Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update2');
                     }
 
+                    $delayJob = 7;
                     $job = new CallQueueJob();
                     $job->call_id = $callModel->c_id;
                     $job->source_id = $department->dpp_source_id;
                     $job->delay = 0;
-                    $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
+                    $job->delayJob = $delayJob;
+                    $jobId = Yii::$app->queue_job->delay($delayJob)->priority(80)->push($job);
                 }
 
                 if (isset($ivrParams['hold_play']) && $ivrParams['hold_play']) {
@@ -699,10 +701,12 @@ class CommunicationService
         if (!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
         } else {
+            $delayJob = 7;
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
-            $jobId = Yii::$app->queue_job->delay(7)->priority(90)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(90)->push($job);
         }
 
         $project = $callModel->cProject;
@@ -767,10 +771,12 @@ class CommunicationService
         if (!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
         } else {
+            $delayJob = 7;
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
-            $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(100)->push($job);
         }
 
 

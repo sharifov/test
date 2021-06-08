@@ -10,22 +10,24 @@ use yii\base\BaseObject;
 
 /**
  * Class BaseJob
+ *
+ * @property float $timeStart
+ * @property int $delayJob
  */
 class BaseJob extends BaseObject
 {
     public float $timeStart;
-    public Metrics $metrics;
+    public int $delayJob = 0;
 
     private array $defaultBuckets = [1, 3, 5, 7, 10, 15, 30, 60, 300];
 
     /**
-     * @param Metrics $metrics
+     * @param float|null $timeStart
      * @param array $config
      */
-    public function __construct(?Metrics $metrics = null, $config = [])
+    public function __construct(?float $timeStart = null, $config = [])
     {
-        $this->timeStart = microtime(true);
-        $this->metrics = $metrics ?? \Yii::$container->get(Metrics::class);
+        $this->timeStart = $timeStart ?? microtime(true);
         parent::__construct($config);
     }
 
@@ -48,7 +50,7 @@ class BaseJob extends BaseObject
                 $buckets
             );
 
-            if ($seconds > $limitExecution) {
+            if ($seconds > ($limitExecution + $this->delayJob)) {
                 \Yii::warning(
                     'Warning: (' . self::runInClass() . ') exceeded execution time limit. Execution time (' . $seconds . ') sec',
                     'BaseJob:executionTimeRegister:TimeLimitExceeded'

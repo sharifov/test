@@ -1346,9 +1346,11 @@ class Call extends \yii\db\ActiveRecord
         if ($isChangedTwStatus && $this->isCompletedTw()) {
             $createJob = (bool)(Yii::$app->params['settings']['call_price_job'] ?? false);
             if ($createJob) {
+                $delayJob = 60;
                 $job = new CallPriceJob();
                 $job->callSids = [$this->c_call_sid];
-                Yii::$app->queue_job->delay(60)->priority(10)->push($job);
+                $job->delayJob = $delayJob;
+                Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
             }
         }
 
@@ -1480,6 +1482,7 @@ class Call extends \yii\db\ActiveRecord
                             $checkJob = new CheckClientCallJoinToConferenceJob();
                             $checkJob->callId = $call->c_id;
                             $checkJob->dateTime = date('Y-m-d H:i:s');
+                            $checkJob->delayJob = $delay;
                             Yii::$app->queue_job->delay($delay)->push($checkJob);
                         }
                     }

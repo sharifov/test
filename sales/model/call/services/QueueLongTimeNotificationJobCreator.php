@@ -11,6 +11,7 @@ class QueueLongTimeNotificationJobCreator
     public function create(Call $call, int $depPhoneProjectId, int $delay): void
     {
         $job = new CallQueueLongTimeNotificationJob($call->c_id, $depPhoneProjectId, microtime());
+        $job->delayJob = $delay;
         $jobId = Yii::$app->queue_job->delay($delay)->priority(100)->push($job);
         if ($jobId) {
             $call->setDataQueueLongTime($jobId, $job->departmentPhoneProjectId, $job->createdTime);
