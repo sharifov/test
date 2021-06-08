@@ -75,7 +75,7 @@ class ChangeMarkup extends Model
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
                     if ($this->quote->check_payment) {
-                        $quotePrice->service_fee = round($quotePrice->selling * (new Quote())->serviceFee, 2);
+                        $quotePrice->service_fee = $this->quote->service_fee_percent ? round($quotePrice->selling * $this->quote->getServiceFee(), 2) : 0;
                         $quotePrice->selling += $quotePrice->service_fee;
                     }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;
@@ -85,7 +85,7 @@ class ChangeMarkup extends Model
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
                     if ($this->quote->check_payment) {
-                        $quotePrice->service_fee = round($quotePrice->selling * (new Quote())->serviceFee, 2);
+                        $quotePrice->service_fee = $this->quote->service_fee_percent ? round($quotePrice->selling * $this->quote->getServiceFee(), 2) : 0;
                         $quotePrice->selling += $quotePrice->service_fee;
                     }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;
@@ -95,7 +95,7 @@ class ChangeMarkup extends Model
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
                     if ($this->quote->check_payment) {
-                        $quotePrice->service_fee = round($quotePrice->selling * (new Quote())->serviceFee, 2);
+                        $quotePrice->service_fee = $this->quote->service_fee_percent ? round($quotePrice->selling * $this->quote->getServiceFee(), 2) : 0;
                         $quotePrice->selling += $quotePrice->service_fee;
                     }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;

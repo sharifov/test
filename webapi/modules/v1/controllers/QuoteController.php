@@ -1036,6 +1036,10 @@ class QuoteController extends ApiBaseController
             $quote->employee_id = null;
             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'web_api']);
 
+            if ($checkPayment = ArrayHelper::getValue($quote, 'check_payment', true)) {
+                $quote->changeServiceFeePercent($quote->serviceFeePercent);
+            }
+
             $type = $quoteAttributes['type_id'] ?? null;
             $this->setTypeQuoteInsert($type, $quote, $lead);
 

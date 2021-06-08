@@ -286,7 +286,7 @@ $paxCntTypes = [
                                 'tag' => false,
                             ],
                         ])->checkbox([
-                            'class' => 'alt-quote-price',
+                            'class' => 'alt-quote-price js-check-payment',
                             'template' => '{input}'
                         ])->label(false); ?>
                         <label for="<?= Html::getInputId($quote, 'check_payment') ?>"></label>
@@ -468,12 +468,20 @@ $js = <<<JS
             $(this).val(0);
         }
         
+        let quotePriceUrl = '{$quotePriceUrl}';
+        
+        if ($(this).hasClass('js-check-payment')) {
+            quotePriceUrl = quotePriceUrl + '&refresh=1'
+        }
+        
         var form = $('#$formID');
         $.ajax({
             type: 'post',
-            url: '$quotePriceUrl',
+            url: quotePriceUrl,
             data: form.serialize(),
             success: function (data) {
+            
+                console.log(data); // TODO:: for debug
             
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);

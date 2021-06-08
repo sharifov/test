@@ -653,6 +653,8 @@ class QuoteController extends FController
             return $result;
         }
 
+        $refresh = (bool) Yii::$app->request->get('refresh', false);
+
         $attr = Yii::$app->request->post($model->formName());
         foreach ($attr as $key => $item) {
             $price = QuotePrice::findOne([
@@ -662,7 +664,7 @@ class QuoteController extends FController
                 $price = new QuotePrice();
             }
             $price->attributes = $item;
-            $price->calculatePrice();
+            $price->calculatePrice($quote, $refresh);
 
             $result[Html::getInputId($price, '[' . $key . ']mark_up')] = $price->mark_up;
             $result[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
@@ -789,6 +791,9 @@ class QuoteController extends FController
             }
 
             $quote = Quote::createQuote($postQuote, $lead->id, $lead->originalQuoteExist());
+            if ($checkPayment = ArrayHelper::getValue($quote, 'check_payment', true)) {
+                $quote->changeServiceFeePercent($quote->serviceFeePercent);
+            }
             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'manual']);
 
             if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
@@ -822,7 +827,7 @@ class QuoteController extends FController
                     $price->net = $quotePrice['net'];
                     $price->mark_up = $quotePrice['mark_up'];
                     $price->selling = $quotePrice['selling'];
-                    $price->service_fee = ($quote->check_payment) ? round($price->selling * (new Quote())->serviceFee, 2) : 0;
+                    $price->service_fee = ($quote->service_fee_percent) ? round($price->selling * $quote->getServiceFee(), 2) : 0;
 
                     if (!$price->validate()) {
                         $response['errorsPrices'][$key] = $price->getErrors();

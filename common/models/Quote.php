@@ -402,7 +402,7 @@ class Quote extends \yii\db\ActiveRecord
         $quote->lead_id = $lead->id;
         $quote->cabin = $lead->cabin;
         $quote->trip_type = $lead->trip_type;
-        $quote->check_payment = true;
+        $quote->check_payment = ArrayHelper::getValue($quoteData, 'prices.isCk', true);
         $quote->fare_type = $quoteData['fareType'] ?? null;
         $quote->gds = $quoteData['gds'] ?? null;
         $quote->pcc = $quoteData['pcc'] ?? null;
@@ -2179,7 +2179,12 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getServiceFeePercent()
     {
-        return ($this->check_payment) ? ($this->service_fee_percent ? $this->service_fee_percent : $this->serviceFee * 100) : 0;
+        return $this->service_fee_percent ?: 0;
+    }
+
+    public function getServiceFee()
+    {
+        return $this->service_fee_percent ? $this->serviceFee : 0;
     }
 
     public function getEstimationProfitText()
@@ -2765,5 +2770,11 @@ class Quote extends \yii\db\ActiveRecord
             ->one();
 
         return $quote;
+    }
+
+    public function changeServiceFeePercent(?float $serviceFeePercent): Quote
+    {
+        $this->service_fee_percent = $serviceFeePercent;
+        return $this;
     }
 }
