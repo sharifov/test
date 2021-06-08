@@ -12,6 +12,7 @@ use common\models\Lead;
 use common\models\local\LeadLogMessage;
 use common\models\Log;
 use common\models\Notifications;
+use common\models\Project;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
@@ -1287,6 +1288,8 @@ class QuoteController extends ApiBaseController
         try {
             $lead = $this->leadRepository->find($form->lead_id);
 
+            $this->apiProject = $this->apiProject ?: Project::findOne($lead->project_id);
+
             if (!$this->apiProject) {
                 throw new \RuntimeException(
                     'ApiProject not detected. Create quota is not possible.',
@@ -1436,6 +1439,8 @@ class QuoteController extends ApiBaseController
 
         try {
             $lead = $this->leadRepository->find($form->lead_id);
+
+            $this->apiProject = $this->apiProject ?: Project::findOne($lead->project_id);
 
             if (!$this->apiProject) {
                 throw new \RuntimeException(
