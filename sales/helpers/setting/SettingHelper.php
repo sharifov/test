@@ -340,4 +340,9 @@ class SettingHelper
     {
         return ArrayHelper::getValue(Yii::$app->params['settings'], 'frontend_widget_list.' . $key, []);
     }
+
+    public static function getSecondsLastLoggedIn(): int
+    {
+        return (int)(Yii::$app->params['settings']['last_logged_in_seconds'] ?? 15);
+    }
 }

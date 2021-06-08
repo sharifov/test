@@ -41,6 +41,7 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\helpers\clientChat\ClientChatIframeHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch;
 use sales\helpers\ErrorsToStringHelper;
@@ -48,6 +49,7 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatQuery;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
@@ -1917,6 +1919,10 @@ class ClientChatController extends FController
         $userClientChatData->uccd_chat_status_id = $chatStatus === 'true' ? UserClientChatData::CHAT_STATUS_READY : UserClientChatData::CHAT_STATUS_BUSY;
         $userClientChatData->save();
         $this->clientChatUserAccessRepository->resetChatUserAccessWidget(Auth::id());
+
+        if ($userClientChatData->isStatusReady()) {
+            $this->clientChatService->assignUserAccessToPendingChats(Auth::id());
+        }
 
         return $this->asJson([
             'error' => false,
