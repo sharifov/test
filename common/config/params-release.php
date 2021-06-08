@@ -16,4 +16,3 @@ return [
     'git_branch' => $gitBranch,
     'git_hash' => $gitHash
 ];
-т
