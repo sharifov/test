@@ -193,4 +193,9 @@ class UserClientChatData extends \yii\db\ActiveRecord
     {
         return $this->uccd_chat_status_id === self::CHAT_STATUS_BUSY;
     }
+
+    public function isStatusReady(): bool
+    {
+        return $this->uccd_chat_status_id === self::CHAT_STATUS_READY;
+    }
 }
