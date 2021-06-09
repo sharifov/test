@@ -54,6 +54,7 @@ $pjaxListId = 'pjax-log';
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
+                'layout' => "{errors}\n{pager}\n{summary}\n{items}\n{pager}",
                 'columns' => [
                     //'id',
                     [
