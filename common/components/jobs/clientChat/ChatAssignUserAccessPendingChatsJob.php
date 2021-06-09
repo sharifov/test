@@ -24,7 +24,7 @@ class ChatAssignUserAccessPendingChatsJob extends BaseJob implements JobInterfac
 
     private const REDIS_EXPIRE_S = 1800;
 
-    public function __construct(int $userId, ?Metrics $metrics = null, $config = [])
+    public function __construct(int $userId)
     {
         $this->userId = $userId;
         parent::__construct();
