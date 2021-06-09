@@ -722,6 +722,9 @@ class EmployeeController extends FController
             if ($model->isAttributeChanged('email') && $model->validate(['email'])) {
                 $updateRC['email'] = $model->email;
             }
+            if ($model->isAttributeChanged('nickname') && $model->validate(['nickname'])) {
+                $updateRC['name'] = $model->nickname;
+            }
 
             if ($model->save()) {
                 if ($model->form_roles) {
@@ -815,6 +818,7 @@ class EmployeeController extends FController
                     $job = new RocketChatUserUpdateJob();
                     $job->userId = $userClientChatData->getRcUserId();
                     $job->data = $updateRC;
+                    $job->userClientChatDataId = $userClientChatData->uccd_id;
                     Yii::$app->queue_job->priority(10)->push($job);
                 }
 

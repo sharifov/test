@@ -81,7 +81,7 @@ class UserClientChatData extends \yii\db\ActiveRecord
 
             [['uccd_name'], 'string', 'max' => 255],
             [['uccd_username'], 'string', 'min' => 3, 'max' => 50],
-//            [['uccd_username', 'uccd_name'], 'unique'],
+            [['uccd_username'], 'unique'],
         ];
     }
 
