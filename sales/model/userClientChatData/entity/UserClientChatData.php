@@ -81,7 +81,7 @@ class UserClientChatData extends \yii\db\ActiveRecord
 
             [['uccd_name'], 'string', 'max' => 255],
             [['uccd_username'], 'string', 'min' => 3, 'max' => 50],
-            [['uccd_username', 'uccd_name'], 'unique'],
+//            [['uccd_username', 'uccd_name'], 'unique'],
         ];
     }
 
@@ -154,6 +154,28 @@ class UserClientChatData extends \yii\db\ActiveRecord
         return $model;
     }
 
+    public static function create(
+        int $employeeId,
+        string $username,
+        string $name,
+        string $password,
+        string $rcUserId,
+        string $token,
+        int $status,
+        string $tokenExpiredDate
+    ): self {
+        $self = new self();
+        $self->uccd_employee_id = $employeeId;
+        $self->uccd_username = $username;
+        $self->uccd_name = $name;
+        $self->uccd_password = $password;
+        $self->uccd_rc_user_id = $rcUserId;
+        $self->uccd_auth_token = $token;
+        $self->uccd_chat_status_id = $status;
+        $self->uccd_token_expired = $tokenExpiredDate;
+        return $self;
+    }
+
     public function isActive(): bool
     {
         return (bool) $this->uccd_active;
@@ -197,5 +219,14 @@ class UserClientChatData extends \yii\db\ActiveRecord
     public function isStatusReady(): bool
     {
         return $this->uccd_chat_status_id === self::CHAT_STATUS_READY;
+    }
+
+    public static function generateUsername(int $employeeId): string
+    {
+        $prefix = Yii::$app->params['cc_username_prefix'] ? Yii::$app->params['cc_username_prefix'] . '_' : '';
+
+        $env = Yii::$app->params['appEnv'] ? Yii::$app->params['appEnv'] . '_' : '';
+
+        return $prefix . $env . 'cc_' . random_int(100, 999) . '_' . $employeeId;
     }
 }

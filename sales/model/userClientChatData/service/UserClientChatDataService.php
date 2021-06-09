@@ -5,14 +5,27 @@ namespace sales\model\userClientChatData\service;
 use common\models\Employee;
 use sales\auth\Auth;
 use sales\model\userClientChatData\entity\UserClientChatData;
+use sales\model\userClientChatData\entity\UserClientChatDataRepository;
 use sales\services\clientChat\ClientChatRequesterService;
 use yii\db\Expression;
 
 /**
  * Class UserClientChatDataService
+ *
+ * @property-read UserClientChatDataRepository $repository
  */
 class UserClientChatDataService
 {
+    /**
+     * @var UserClientChatDataRepository
+     */
+    private UserClientChatDataRepository $repository;
+
+    public function __construct(UserClientChatDataRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     public static function getCurrentRcUserId(): ?string
     {
         if (!$userClientChatData = self::getCurrentUserChatData()) {
@@ -73,5 +86,35 @@ class UserClientChatDataService
         if (!$userClientChatData->save(false)) {
             throw new \RuntimeException($userClientChatData->getErrorSummary(false)[0]);
         }
+    }
+
+    public function createAndRegisterRcProfile(
+        string $username,
+        string $nickname,
+        string $email,
+        int $employeeId
+    ): UserClientChatData {
+        $rcPassword = \Yii::$app->rchat::generatePassword();
+
+        $result = ClientChatRequesterService::register(
+            $username,
+            $nickname,
+            $email,
+            $rcPassword
+        );
+
+        $userChatData = UserClientChatData::create(
+            $employeeId,
+            $username,
+            $nickname,
+            $rcPassword,
+            $result['rcUserId'],
+            $result['authToken'],
+            UserClientChatData::CHAT_STATUS_READY,
+            \Yii::$app->rchat::generateTokenExpired(),
+        );
+        $this->repository->save($userChatData);
+
+        return $userChatData;
     }
 }

@@ -25,6 +25,7 @@ use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\emailList\entity\EmailList;
 use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\model\userClientChatData\entity\UserClientChatDataScopes;
+use sales\model\userClientChatData\service\UserClientChatDataService;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\services\clientChat\ClientChatRequesterService;
@@ -49,6 +50,7 @@ use yii\widgets\ActiveForm;
  * @property ClientChatUserAccessService $clientChatUserAccessService
  * @property ClientChatMessageService $clientChatMessageService
  * @property ClientChatUserChannelRepository $clientChatUserChannelRepository
+ * @property UserClientChatDataService $userClientChatDataService
  */
 class EmployeeController extends FController
 {
@@ -64,6 +66,10 @@ class EmployeeController extends FController
      * @var ClientChatUserChannelRepository
      */
     private ClientChatUserChannelRepository $clientChatUserChannelRepository;
+    /**
+     * @var UserClientChatDataService
+     */
+    private UserClientChatDataService $userClientChatDataService;
 
     /**
      * @return array
@@ -87,12 +93,20 @@ class EmployeeController extends FController
         $this->layoutCrud();
     }
 
-    public function __construct($id, $module, ClientChatUserAccessService $clientChatUserAccessService, ClientChatMessageService $clientChatMessageService, ClientChatUserChannelRepository $clientChatUserChannelRepository, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        ClientChatUserAccessService $clientChatUserAccessService,
+        ClientChatMessageService $clientChatMessageService,
+        ClientChatUserChannelRepository $clientChatUserChannelRepository,
+        UserClientChatDataService $userClientChatDataService,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->clientChatUserAccessService = $clientChatUserAccessService;
         $this->clientChatMessageService = $clientChatMessageService;
         $this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
+        $this->userClientChatDataService = $userClientChatDataService;
     }
 
     public function actionSellerContactInfo($employeeId)
@@ -484,7 +498,7 @@ class EmployeeController extends FController
                     if ($model->make_user_project_params) {
                         if (!empty($attr['user_projects'])) {
                             foreach ($attr['user_projects'] as $projectId) {
-                                    //VarDumper::dump($projectId, 10, true);
+                                //VarDumper::dump($projectId, 10, true);
 
                                 $project = Project::findOne($projectId);
                                 if (!$project || $project->closed) {
@@ -566,6 +580,21 @@ class EmployeeController extends FController
                     }
 
                     $transaction->commit();
+
+                    try {
+                        $this->userClientChatDataService->createAndRegisterRcProfile(
+                            UserClientChatData::generateUsername($model->id),
+                            $model->nickname,
+                            $model->email,
+                            $model->id
+                        );
+                    } catch (\RuntimeException $e) {
+                        Yii::$app->getSession()->setFlash('warning', 'RocketChat profile was not created: ' . $e->getMessage());
+                    } catch (\Throwable $e) {
+                        Yii::$app->getSession()->setFlash('warning', 'RocketChat profile was not created: Internal Server Error');
+                        Yii::error(AppHelper::throwableLog($e, true), 'EmployeeController::actionCreate::createAndRegisterRcProfile::Throwable');
+                    }
+
                     Yii::$app->getSession()->setFlash('success', 'User created');
                     return $this->redirect(['update', 'id' => $model->id]);
                 }
