@@ -24,6 +24,8 @@ return [
         'iv'        => '{{ common.config.params.crypt.iv:str }}',
     ],
 
+    'cc_username_prefix' => '{{ common.config.params.cc_username_prefix:str }}',
+
     'telegram' => [
         'webhook_url'   => '{{ common.config.params.telegram.webhook_url:str }}',
     ],
