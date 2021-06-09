@@ -27,7 +27,7 @@ class ChatAssignUserAccessPendingChatsJob extends BaseJob implements JobInterfac
     public function __construct(int $userId, ?Metrics $metrics = null, $config = [])
     {
         $this->userId = $userId;
-        parent::__construct($metrics, $config);
+        parent::__construct();
     }
 
     public function execute($queue)
