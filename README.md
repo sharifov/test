@@ -1,41 +1,9 @@
+Minimal Installation setup for local stage development server:
 
-Installation:
 -------------------
-docker setup
-------------
-1. sudo apt-get install \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    software-properties-common
-
-2. curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-3. sudo add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   $(lsb_release -cs) \
-   stable"
-
-4. sudo apt-get update && sudo apt-get install docker-ce
- to test run sudo docker run hello-world
-5. sudo usermod -aG docker $(whoami)
-
-Docekr-compose:
-1. sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
-
-2. sudo chmod +x /usr/local/bin/docker-compose
-3. docker-compose --version
-
-OR:
-1. sudo apt-get -y install python-pip
-2. pip install docker-compose
-
-
-1). PHP 7.3, 7.4 Install:
+1). Install PHP 7.4 and redis-server :
 ```
-sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-zip php7.4-curl php7.4-gd php7.4-mysql php7.4-xml php7.4-mbstring php7.4-pgsql php7.4-xmlrpc php7.4-sqlite3 php7.4-soap php7.4-tidy php7.4-pspell php7.4-imap php7.4-bcmath php-redis
-
-sudo update-alternatives --config php
+sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-zip php7.4-curl php7.4-gd php7.4-mysql php7.4-xml php7.4-mbstring php7.4-pgsql php7.4-xmlrpc php7.4-sqlite3 php7.4-soap php7.4-tidy php7.4-pspell php7.4-imap php7.4-bcmath php-redis php-ssh2
 ```
 
 1.1) INSTALL swoole 4.4.16 & ext-async v4.4.16 for swoole_redis
@@ -60,28 +28,13 @@ phpize && ./configure
 make -j 4 && sudo make install
 ``` 
  
-Update php-cli php.ini
+Add this in “Dynamic Extensions” section if php-cli config file located at  /ect/php/7.4/cli/php.ini
+
 ```
 extension=swoole
 extension=swoole_async
 ```
 
-1.2) Install Redis server
-```
-sudo apt update
-sudo apt install redis-server
-
-# commands
-redis-cli
-127.0.0.1:6379> MONITOR
-127.0.0.1:6379> PUBSUB CHANNELS
-127.0.0.1:6379> PUBSUB NUMSUB user*
-127.0.0.1:6379> SUBSCRIBE "user-167"
-```
-
-1.3)
-
-sudo apt install php-ssh2
 
 2). Composer INSTALL:
 
@@ -104,7 +57,14 @@ DB pass:
 
 Nginx configuration
 -------------------
-Example config file: ./nginx.conf
+1. Copy example config file from ./nginx.conf to your nginx configs directory located at /etc/nginx/sites-available/
+2. (Optional) You can edit our test hosts from sales.zeit.test and api.sales.zeit.test to anything else (if you want)
+3. Generate self-signed SSL certificate and edit in nginx config their file names for 2 hosts:
+sales.zeit.test
+api.sales.zeit.test
+
+4. Also edit this parameter in nginx config:
+
 ```
 #for API endpoint
 location ~ \.php$ {
@@ -445,49 +405,10 @@ Command must return the time zone of the USA - California ---> America/Los_Angel
 Cetrifugo Server
 -------------------
 *Install on Ubuntu:*
-```
-curl -s https://packagecloud.io/install/repositories/FZambia/centrifugo/script.deb.sh | sudo bash
-sudo apt update
-sudo apt-get install centrifugo=2.4.0-0
-```
-* Centrifugo docs:  ```https://centrifugal.github.io/centrifugo/```
-* Installation docs:  ```https://packagecloud.io/FZambia/centrifugo```
 
-Run PHPStan (LOC Environments) 
-[https://phpstan.org/config-reference#config-file](https://psalm.dev/docs/running_psalm/configuration/)
-```
-./vendor/bin/phpstan analyse -c phpstan.loc.neon
-```
+https://centrifugal.github.io/centrifugo/server/install/
 
-Run Psalm (LOC Environments) 
-[https://psalm.dev/docs/running_psalm/configuration/](https://psalm.dev/docs/running_psalm/configuration/)
-```
-./vendor/bin/psalm -c psalm.loc.xml
-```
 
-*Default local config:*
-```
-cd /etc/centrifugo
-config.json
-   {
-       "token_hmac_secret_key": "",          //generated automatically on installation
-       "admin_password": "",                 //generated automatically on installation
-       "admin_secret": "",                   //generated automatically on installation
-       "api_key": "",                        //generated automatically on installation
-       "admin": true,                        //enable web UI https://localhost:8000
-       "tls": true,                          //enable TLS/SSL layer https://centrifugal.github.io/centrifugo/deploy/tls/
-       "tls_key": "centrifugossl.key",
-       "tls_cert": "centrifugossl.crt"      
-   }     
-```
-*Set ```tls_key``` and ```tls_cert``` on local centrifugo server:*
-```
-cd /var/www/sales
-./self-signed-tls.sh
-mv *all new generated files* /etc/centrifugo
-```
-*Set supervisor to operate with centrifugo:*
-```
 In .. config/supervisor 
 rename file centrifugo.conf.txt 
 sudo service supervisor restart
