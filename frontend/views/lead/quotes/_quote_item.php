@@ -116,7 +116,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
             <?php if ($model->quoteLabel) : ?>
                 <?php $quoteLabels = '' ?>
                 <?php foreach ($model->quoteLabel as $quoteLabel) : ?>
-                    <?php $quoteLabels .= $quoteLabel->ql_label_key . ' : ' . $quoteLabel->getDescription() . '<br />' ?>
+                    <?php $quoteLabels .= $quoteLabel->getDescription() . '<br />' ?>
                 <?php endforeach ?>
                 <a class="popover-class"
                     data-toggle="popover"

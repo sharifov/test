@@ -5,6 +5,7 @@ use frontend\helpers\QuoteHelper;
 use modules\flight\src\dto\ngs\QuoteNgsDataDto;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use yii\bootstrap\Html;
+use yii\helpers\ArrayHelper;
 
 /**
  * @var $resultKey int
@@ -77,6 +78,18 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
           <?php if ($technicalStopCnt) :?>
             <div class="quote__seats" title="Technical Stops">
               <span class="fa fa-warning danger"></span>Tech Stops (<?= $technicalStopCnt?>)
+            </div>
+          <?php endif;?>
+
+          <?php if ($prodTypes = ArrayHelper::getValue($result, 'meta.prod_types')) :?>
+            <div class="quote__seats">
+                <?php if (is_array($prodTypes)) : ?>
+                    <?php foreach ($prodTypes as $label) : ?>
+                        <span class="fa fa-tags text-success"></span> <?php echo $label ?>
+                    <?php endforeach ?>
+                <?php else : ?>
+                    <span class="fa fa-tags text-success"></span> <?php echo $prodTypes ?>
+                <?php endif ?>
             </div>
           <?php endif;?>
 
