@@ -54,6 +54,8 @@ $bundle = \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
+
+/** @abac new CasesAbacDto($model), CasesAbacObject::LOGIC_DISABLE_CLIENT_DATA_MASK, CasesAbacObject::ACTION_SHOW, unmask client data on Case view*/
 $disableMasking = Yii::$app->abac->can(new CasesAbacDto($model), CasesAbacObject::LOGIC_DISABLE_CLIENT_DATA_MASK, CasesAbacObject::ACTION_SHOW);
 
 $clientProjectInfo = $model->client->clientProjects;
