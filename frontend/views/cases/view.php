@@ -8,6 +8,8 @@ use sales\helpers\cases\CasesViewRenderHelper;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 
 /**
  * @var $this yii\web\View
@@ -52,6 +54,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
+$disableMasking = Yii::$app->abac->can(new CasesAbacDto($model), CasesAbacObject::LOGIC_DISABLE_CLIENT_DATA_MASK, CasesAbacObject::ACTION_SHOW);
 
 $clientProjectInfo = $model->client->clientProjects;
 $unsubscribe = false;
@@ -69,8 +72,6 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
 ?>
 
 <div class="cases-view">
-
-
     <h1>
         <?=$model->department ? '<i class="fa fa-sitemap"></i>  <span class="badge badge-warning">' . Html::encode($model->department->dep_name) . '</span>' : ''?>
         <?php /*=$model->project ? ' <span class="label label-warning">' . Html::encode($model->project->name) . '</span>': ''*/?>
@@ -122,6 +123,7 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                 'isAdmin'       => $isAdmin,
                 'unsubscribe' => $unsubscribe,
                 'unsubscribedEmails' => $unsubscribedEmails,
+                'disableMasking' => $disableMasking
             ])
 ?>
             <?php \yii\widgets\Pjax::end(); ?>
@@ -164,6 +166,7 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                         'fromPhoneNumbers' => $fromPhoneNumbers,
                         'smsEnabled' => $smsEnabled,
                         'unsubscribedEmails' => $unsubscribedEmails,
+                        'disableMasking' => $disableMasking
                     ]);
                     ?>
             <?php else : ?>
@@ -222,6 +225,7 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                 'isAdmin'       => $isAdmin,
                 'saleSearchModel' => $saleSearchModel,
                 'saleDataProvider' => $saleDataProvider,
+                'disableMasking' => $disableMasking
             ])
 ?>
         </div>

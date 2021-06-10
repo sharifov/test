@@ -23,7 +23,9 @@ use sales\helpers\phone\MaskPhoneHelper;
 /* @var $caseSaleModel common\models\CaseSale */
 /* @var $caseModel sales\entities\cases\Cases */
 /* @var $additionalData array */
-/* @var $dataProviderCc yii\data\ActiveDataProvider */
+/** @var $dataProviderCc yii\data\ActiveDataProvider
+ * @var $disableMasking bool
+ */
 
 if (Yii::$app->request->isPjax) {
     $this->params['breadcrumbs'][] = ['label' => 'Sales', 'url' => ['search']];
@@ -454,8 +456,8 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <tr>
                                     <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
                                     <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
-                                    <td><?=Html::encode(MaskPhoneHelper::masking($data['customerInfo']['phoneNumber']) ?? '')?></td>
-                                    <td><?=Html::encode(MaskEmailHelper::masking($data['email'] ?? '')) ?></td>
+                                    <td><?=Html::encode(MaskPhoneHelper::masking($data['customerInfo']['phoneNumber']  ?? '', $disableMasking))?></td>
+                                    <td><?=Html::encode(MaskEmailHelper::masking($data['email'] ?? '', $disableMasking)) ?></td>
                                 </tr>
                             </table>
                         <?php endif;?>

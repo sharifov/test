@@ -12,6 +12,7 @@
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
  * @var array $unsubscribedEmails
+ * @var $disableMasking bool
  */
 
 use common\models\Call;
@@ -84,8 +85,8 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                         ],
                         'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
                         'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
-                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView) {
-                            return $this->render($listItemView, ['model' => $model, 'dataProvider' => $dataProvider]);
+                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView, $disableMasking) {
+                            return $this->render($listItemView, ['model' => $model, 'dataProvider' => $dataProvider, 'disableMasking' => $disableMasking]);
                         },
 
                         'itemOptions' => [
@@ -301,7 +302,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
 
                         $clientEmails = $model->client ? $model->client->getEmailList() : [];
                     foreach ($clientEmails as $key => $element) {
-                        $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element);
+                        $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element, $disableMasking);
                     }
                         $clientPhones = $model->client ? $model->client->getPhoneNumbersSms() : [];
 
