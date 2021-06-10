@@ -4,6 +4,7 @@ use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
 use modules\flight\src\dto\ngs\QuoteNgsDataDto;
 use modules\flight\src\helpers\FlightQuoteHelper;
+use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 
@@ -85,10 +86,10 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
             <div class="quote__seats">
                 <?php if (is_array($prodTypes)) : ?>
                     <?php foreach ($prodTypes as $label) : ?>
-                        <span class="fa fa-tags text-success"></span> <?php echo $label ?>
+                        <span class="fa fa-tags text-success"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
                     <?php endforeach ?>
                 <?php else : ?>
-                    <span class="fa fa-tags text-success"></span> <?php echo $prodTypes ?>
+                    <span class="fa fa-tags text-success"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
                 <?php endif ?>
             </div>
           <?php endif;?>

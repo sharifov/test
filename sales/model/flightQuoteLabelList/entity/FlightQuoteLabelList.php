@@ -6,6 +6,7 @@ use common\models\Employee;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -98,5 +99,24 @@ class FlightQuoteLabelList extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'flight_quote_label_list';
+    }
+
+    public static function getDescriptionByKey(?string $key, int $duration = 60): string
+    {
+        if (empty($key) || !is_string($key)) {
+            return '';
+        }
+
+        return Yii::$app->cache->getOrSet('flight_quote_label_list-' . $key, static function () use ($key) {
+            if ($description = self::find()->select('fqll_description')->where(['fqll_label_key' => $key])->scalar()) {
+                return $description;
+            }
+            if ($description = self::find()->select('fqll_origin_description')->where(['fqll_label_key' => $key])->scalar()) {
+                return $description;
+            }
+            return $key;
+        }, $duration, new TagDependency([
+            'tags' => 'flight_quote_label_list-' . $key,
+        ]));
     }
 }
