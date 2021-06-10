@@ -30,11 +30,18 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'id' => self::NS . 'owner',
         'field' => 'owner',
         'label' => 'Is Owner',
+
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
         'values' => [1 => 'Unmask', 2 => 'Mask'],
-        'multiple' => false,
         'operators' =>  [self::OP_EQUAL2]
+
+        /*'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_CHECKBOX,
+        'values' => [1 => 'Unmask'],
+        'multiple' => false,
+        'validation' => ['allow_empty_value' => true],
+        'operators' =>  [self::OP_EQUAL2, self::OP_IN]*/
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
