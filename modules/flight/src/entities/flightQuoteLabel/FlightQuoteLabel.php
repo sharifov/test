@@ -65,7 +65,7 @@ class FlightQuoteLabel extends \yii\db\ActiveRecord
         if (!$this->flightQuoteLabelList) {
             return null;
         }
-        return $this->flightQuoteLabelList->fqll_description ?? $this->flightQuoteLabelList->fqll_origin_description;
+        return $this->flightQuoteLabelList->fqll_description ?? ($this->flightQuoteLabelList->fqll_origin_description ?? $this->fql_label_key);
     }
 
     public static function create(int $quoteId, string $labelKey)

@@ -389,7 +389,7 @@ $totalAmountQuote = 0.0;
                             <?php if ($flightQuote->quoteLabel) : ?>
                                 <?php $quoteLabels = '' ?>
                                 <?php foreach ($flightQuote->quoteLabel as $quoteLabel) : ?>
-                                    <?php $quoteLabels .= $quoteLabel->fql_label_key . ' : ' . $quoteLabel->getDescription() . '<br />' ?>
+                                    <?php $quoteLabels .= $quoteLabel->getDescription() . '<br />' ?>
                                 <?php endforeach ?>
                                 <span class="popover-class"
                                     data-toggle="popover"

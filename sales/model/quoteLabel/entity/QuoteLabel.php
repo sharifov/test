@@ -6,6 +6,7 @@ use common\models\Quote;
 use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use Yii;
 use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "quote_label".
@@ -64,7 +65,7 @@ class QuoteLabel extends \yii\db\ActiveRecord
         if (!$this->flightQuoteLabelList) {
             return null;
         }
-        return $this->flightQuoteLabelList->fqll_description ?? $this->flightQuoteLabelList->fqll_origin_description;
+        return $this->flightQuoteLabelList->fqll_description ?? ($this->flightQuoteLabelList->fqll_origin_description ?? $this->ql_label_key);
     }
 
     public static function create(int $quoteId, string $labelKey): QuoteLabel

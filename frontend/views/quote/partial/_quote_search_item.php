@@ -60,12 +60,14 @@ $isQuoteAssignedToFlight = false;
                 </span>
                 <span class="quote__vc-name"><?= (!isset($airlines[$result['validatingCarrier']])) ?: $airlines[$result['validatingCarrier']];?><strong> [<?= $result['validatingCarrier']?>]</strong></span>
             </span>
+            <?php /* ?>
             <div class="quote__gds">
                 GDS: <strong><?= SearchService::getGDSName($result['gds'])?></strong>
             </div>
             <div class="quote__pcc">
                 PCC: <strong><?= $result['pcc']?></strong>
             </div>
+            <?php */ ?>
             <div class="quote__seats">
                 Seats left: <strong class="text-danger"><i class="fa fa-fire"></i> <?= $result['maxSeats']?></strong>
             </div>
