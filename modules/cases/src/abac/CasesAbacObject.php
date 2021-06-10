@@ -65,14 +65,6 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::LOGIC_DISABLE_CLIENT_DATA_MASK][] = $attrOwner;
 
-        /*$attrStatus = self::ATTR_ORDER_STATUS;
-        $attrStatus['values'] = OrderStatus::getList();
-
-        $attributeList = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::OBJ_ORDER_ITEM][] = $attrStatus;*/
-
-        //$attributeList[self::OBJ_ORDER_ITEM][] = self::ATTR_ORDER_PROFIT_AMOUNT;
-
         return $attributeList;
     }
 }
