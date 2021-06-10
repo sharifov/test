@@ -199,6 +199,12 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         }
                     }
 
+                    if (obj.cmd === 'refreshDialogToken') {
+                        if (typeof refreshDialogToken === "function") {
+                            refreshDialogToken(obj);
+                        }
+                    }
+
 
                     if (obj.cmd === 'callMapUpdate') {
                         $('#btn-user-call-map-refresh').click();

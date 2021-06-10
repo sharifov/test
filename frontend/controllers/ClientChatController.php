@@ -19,7 +19,6 @@ use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
-use http\Exception\RuntimeException;
 use Markdownify\Converter;
 use Markdownify\ConverterExtra;
 use modules\offer\src\entities\offer\OfferQuery;
@@ -89,6 +88,7 @@ use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
 use sales\repositories\quote\QuoteRepository;
 use sales\services\client\ClientManageService;
+use sales\services\clientChat\ClientChatRequesterService;
 use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
@@ -136,12 +136,14 @@ use yii\widgets\ActiveForm;
  * @property ClientChatActionPermission $actionPermissions
  * @property ClientChatCouchNoteRepository  $clientChatCouchNoteRepository
  * @property QuoteRepository $quoteRepository
+ * @property UserClientChatDataService $userClientChatDataService
  * @property array|null $channels
  */
 class ClientChatController extends FController
 {
     private const CLIENT_CHAT_PAGE_SIZE = 10;
     private const RESERVE_CHAT_TO_PROCESS_KEY = 'reserve_chat_to_process_key_';
+    private const RESERVE_PROCESS_REFRESH_TOKEN_KEY = '_process_refresh_token_key';
     /**
      * @var ClientChatRepository
      */
@@ -197,6 +199,7 @@ class ClientChatController extends FController
     private QuoteRepository $quoteRepository;
 
     private ClientChatActionPermission $actionPermissions;
+    private UserClientChatDataService $userClientChatDataService;
     private ?array $channels;
 
     public function __construct(
@@ -220,6 +223,7 @@ class ClientChatController extends FController
         ClientChatActionPermission $actionPermissions,
         ClientChatCouchNoteRepository $clientChatCouchNoteRepository,
         QuoteRepository $quoteRepository,
+        UserClientChatDataService $userClientChatDataService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -242,6 +246,7 @@ class ClientChatController extends FController
         $this->clientChatCouchNoteRepository = $clientChatCouchNoteRepository;
         $this->quoteRepository = $quoteRepository;
         $this->channels = ClientChatChannel::getListByUserId(Auth::id());
+        $this->userClientChatDataService = $userClientChatDataService;
     }
 
     /**
@@ -280,7 +285,8 @@ class ClientChatController extends FController
                     'ajax-multiple-close',
                     'validate-multiple-assign',
                     'validate-multiple-close',
-                    'ajax-update-chat-status'
+                    'ajax-update-chat-status',
+                    'ajax-refresh-user-chat-token'
                 ],
             ],
         ];
@@ -1353,6 +1359,17 @@ class ClientChatController extends FController
         } else {
             throw new \RuntimeException('Chat is already being processed. Please try again in ' . $seconds . ' seconds.');
         }
+    }
+
+    private function guardCanRefreshToken(int $userId, int $seconds = 20): void
+    {
+        $redis = Yii::$app->redis;
+        $key = $userId . self::RESERVE_PROCESS_REFRESH_TOKEN_KEY;
+        if ($redis->exists($key)) {
+            throw new \RuntimeException('Refresh token is being processed...');
+        }
+        $redis->set($key, true);
+        $redis->expire($key, $seconds);
     }
 
     public function actionPjaxUpdateChatWidget()
@@ -2665,5 +2682,46 @@ class ClientChatController extends FController
             'formMultipleClose' => $form,
             'alertMessage' => $alertMessage
         ]);
+    }
+
+    public function actionAjaxRefreshUserChatToken()
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        if (!$this->actionPermissions->canViewChat()) {
+            throw new ForbiddenHttpException('Permission denied');
+        }
+
+        $userClientChatData = Auth::user()->userClientChatData;
+
+        if (!$userClientChatData) {
+            throw new NotFoundException('Agent has no rc profile');
+        }
+
+        try {
+            $this->guardCanRefreshToken(Auth::id());
+
+            $result = [
+                'error' => false,
+                'message' => ''
+            ];
+
+            $this->userClientChatDataService->refreshRocketChatUserToken($userClientChatData);
+
+            Notifications::publish(
+                'refreshDialogToken',
+                ['user_id' => Auth::id()],
+                ['data' => [
+                    'token' => $userClientChatData->uccd_auth_token
+                ]]
+            );
+        } catch (\RuntimeException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($result);
     }
 }

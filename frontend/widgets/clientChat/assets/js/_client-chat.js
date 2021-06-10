@@ -170,6 +170,25 @@ function refreshClientChatWidget(obj) {
     }
 }
 
+function refreshDialogToken(obj)
+{
+    if ((typeof obj !== "object") && !('data' in obj)) {
+        console.error('refreshDialogToken:: provided param is not object or property data is undefined');
+        return false;
+    }
+
+    let data = obj.data;
+
+    $('#refresh-token-processing').removeClass('active');
+    $('#manual-refresh-token').removeClass('active');
+
+    window.chatAgentToken = data.token;
+
+    window.initChatDialog({
+        token: data.token
+    });
+}
+
 function openWidget() {
     $('#_client_chat_access_widget ._cc-box').addClass('is-visible');
     $('#_cc-access-wg').addClass('is-visible');

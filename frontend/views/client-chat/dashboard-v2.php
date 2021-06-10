@@ -108,7 +108,7 @@ $chatApiScriptUrl = Yii::$app->rchat->chatApiScriptUrl;
 
         <div class="col-md-6">
             <div id="_rc-iframe-wrapper">
-                <?php // $iframeData ?: '' ?>
+                <?php // $iframeData ?: ''?>
                 <?= $this->render('partial/_client_chat_dialog', [
                 'agentToken' => $agentToken,
                 'server' => $server,
