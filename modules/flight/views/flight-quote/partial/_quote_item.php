@@ -397,6 +397,7 @@ $totalAmountQuote = 0.0;
                                     data-placement="top"
                                     data-container="body"
                                     data-trigger="hover"
+                                    title="Quote Label"
                                     data-content='<?= Html::encode($quoteLabels) ?>'>
                                         <i class="fa fa-tags fa-border text-info"></i>
                                 </span>

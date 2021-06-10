@@ -5,6 +5,7 @@ use common\models\Lead;
 use frontend\helpers\QuoteHelper;
 use sales\auth\Auth;
 use sales\helpers\quote\ImageHelper;
+use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 
@@ -93,10 +94,10 @@ $isQuoteAssignedToFlight = false;
                 <div class="quote__seats">
                     <?php if (is_array($prodTypes)) : ?>
                         <?php foreach ($prodTypes as $label) : ?>
-                            <span class="fa fa-tags text-success"></span> <?php echo $label ?>
+                            <span class="fa fa-tags text-success"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
                         <?php endforeach ?>
                     <?php else : ?>
-                        <span class="fa fa-tags text-success"></span> <?php echo $prodTypes ?>
+                        <span class="fa fa-tags text-success"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
                     <?php endif ?>
                 </div>
             <?php endif;?>
