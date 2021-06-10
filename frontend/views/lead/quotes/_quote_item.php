@@ -67,6 +67,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 ?> &nbsp;<strong>[<?= $model->main_airline_code?>]</strong>
             </span>
 
+            <?php /* ?>
             <div class="quote__gds" title="GDS / <?php if ($showGdsOfferId && !empty($model->gds_offer_id)) :
                 echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($model->gds_offer_id) . ' /';
                                                  endif; ?> PCC">
@@ -75,7 +76,10 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     <i class="fas fa-passport success"></i>
                 <?php endif; ?>
                 / <i><?= $model->pcc?></i>
+
             </div>
+            <?php */ ?>
+
             <span title="<?= $model->created_by_seller ? 'Agent' : 'Expert'?>: <?= \yii\helpers\Html::encode($model->employee_name)?>">
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
                 <strong><?= $model->employee_name?></strong>
@@ -107,6 +111,25 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
 
             <?php \yii\widgets\Pjax::end(); ?>
+
+
+            <?php if ($model->quoteLabel) : ?>
+                <?php $quoteLabels = '' ?>
+                <?php foreach ($model->quoteLabel as $quoteLabel) : ?>
+                    <?php $quoteLabels .= $quoteLabel->ql_label_key . ' : ' . $quoteLabel->getDescription() . '<br />' ?>
+                <?php endforeach ?>
+                <a class="popover-class"
+                    data-toggle="popover"
+                    data-html="true"
+                    data-placement="top"
+                    data-container="body"
+                    data-trigger="hover"
+                    title="Quote Label"
+                    data-content='<?= Html::encode($quoteLabels) ?>'>
+                        <i class="fa fa-tags"></i>
+                </a>
+            <?php endif ?>
+
         </div>
         <div class="quote__heading-right">
 

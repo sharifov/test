@@ -14,6 +14,7 @@ use sales\events\quote\QuoteSendEvent;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\airportLang\service\AirportLangService;
+use sales\model\quoteLabel\entity\QuoteLabel;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use sales\traits\MetricObjectCounterTrait;
@@ -66,6 +67,7 @@ use yii\helpers\VarDumper;
  * @property QuoteTrip[] $quoteTrips
  * @property Airline[] $mainAirline
  * @property Project $providerProject
+ * @property QuoteLabel[] $quoteLabel
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -1606,6 +1608,11 @@ class Quote extends \yii\db\ActiveRecord
     public function getProviderProject(): ActiveQuery
     {
         return $this->hasOne(Project::class, ['id' => 'provider_project_id']);
+    }
+
+    public function getQuoteLabel(): ActiveQuery
+    {
+        return $this->hasMany(QuoteLabel::class, ['ql_quote_id' => 'id']);
     }
 
     public function getQuoteTripsData()

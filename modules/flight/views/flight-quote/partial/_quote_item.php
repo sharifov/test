@@ -385,6 +385,23 @@ $totalAmountQuote = 0.0;
                         <?php Pjax::end(); ?>
 
                         <td class="text-right">
+
+                            <?php if ($flightQuote->quoteLabel) : ?>
+                                <?php $quoteLabels = '' ?>
+                                <?php foreach ($flightQuote->quoteLabel as $quoteLabel) : ?>
+                                    <?php $quoteLabels .= $quoteLabel->fql_label_key . ' : ' . $quoteLabel->getDescription() . '<br />' ?>
+                                <?php endforeach ?>
+                                <span class="popover-class"
+                                    data-toggle="popover"
+                                    data-html="true"
+                                    data-placement="top"
+                                    data-container="body"
+                                    data-trigger="hover"
+                                    data-content='<?= Html::encode($quoteLabels) ?>'>
+                                        <i class="fa fa-tags fa-border text-info"></i>
+                                </span>
+                            <?php endif ?>
+
                             <?php $baggageInfo = FlightQuoteHelper::getBaggageInfo($flightQuote); ?>
                             <?php $hasAirportChange = FlightQuoteHelper::hasAirportChange($flightQuote); ?>
                             <?php $ticketSegments = FlightQuoteHelper::getTicketSegments($flightQuote); ?>

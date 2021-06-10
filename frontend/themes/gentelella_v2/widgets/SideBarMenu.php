@@ -295,8 +295,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
                 ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                 ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
-                ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'list'],
-                ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
+
+                [
+                    'label' => 'Quotes',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
+                        ['label' => 'Flight Quote Label List', 'url' => ['/flight-quote-label-list-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Label', 'url' => ['/quote-label-crud/index'], 'icon' => 'list'],
+                    ],
+                ],
 
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 [

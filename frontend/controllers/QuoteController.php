@@ -28,6 +28,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\services\metrics\MetricsService;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
@@ -479,6 +480,8 @@ class QuoteController extends FController
                                 if ($chat) {
                                     ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
                                 }
+
+                                QuoteLabelService::processingQuoteLabel($entry, $quote->id);
                             }
 
                             $transaction->commit();

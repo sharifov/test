@@ -11,6 +11,7 @@ use modules\flight\models\FlightSegment;
 use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\dto\flightSegment\SegmentDTO;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\flight\src\entities\flightQuoteLabel\service\FlightQuoteLabelService;
 use modules\flight\src\exceptions\FlightCodeException;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
@@ -226,6 +227,8 @@ class FlightQuoteManageService implements ProductQuoteService
             $this->createFlightTrip($flightQuote, $quote);
 
             $this->createFlightQuoteFlight($flightQuote);
+
+            FlightQuoteLabelService::processingQuoteLabel($quote, $flightQuote->fq_id);
         });
     }
 

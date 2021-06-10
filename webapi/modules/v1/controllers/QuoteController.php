@@ -32,6 +32,7 @@ use sales\model\leadData\services\LeadDataService;
 use sales\model\project\entity\projectRelation\ProjectRelation;
 use sales\model\project\entity\projectRelation\ProjectRelationQuery;
 use sales\model\project\entity\projectRelation\ProjectRelationRepository;
+use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
@@ -906,6 +907,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [Quote.employee_name]       employee_name
      * @apiParam {bool}             [Quote.created_by_seller]   created_by_seller
      * @apiParam {int}              [Quote.type_id]             type_id
+     * @apiParam {object}           [Quote.prod_types[]]        Quote labels
      * @apiParam {object}           QuotePrice[]                QuotePrice data array
      * @apiParam {string}           [QuotePrice.uid]            uid
      * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
@@ -940,7 +942,8 @@ class QuoteController extends ApiBaseController
      *          "fare_type": "TOUR",
      *          "employee_name": "Barry",
      *          "created_by_seller": false,
-     *          "type_id" : 0
+     *          "type_id" : 0,
+     *          "prod_types" : ["SEP", "TOUR"]
      *      },
      *      "QuotePrice": [
      *          {
@@ -1129,6 +1132,8 @@ class QuoteController extends ApiBaseController
                     }
                 }
             }
+
+            QuoteLabelService::processingQuoteLabel($quoteAttributes, $quote->id, 'prod_types');
 
             if (!$quote->hasErrors()) {
                 $response['status'] = 'Success';
