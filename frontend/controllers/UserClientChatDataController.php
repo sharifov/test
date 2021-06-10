@@ -473,7 +473,7 @@ class UserClientChatDataController extends FController
         \Yii::$app->response->format = Response::FORMAT_JSON;
 
         return [
-            'username' => $user->username,
+            'username' => UserClientChatData::generateUsername($user->id),
             'name' => $user->nickname ?? $user->username,
         ];
     }
