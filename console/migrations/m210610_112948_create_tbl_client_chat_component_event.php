@@ -48,6 +48,8 @@ class m210610_112948_create_tbl_client_chat_component_event extends Migration
     public function safeDown()
     {
         $this->dropForeignKey('FK-client_chat_component_event-ccce_chat_channel_id', '{{%client_chat_component_event}}');
+        $this->dropForeignKey('FK-client_chat_component_event-ccce_created_user_id', '{{%client_chat_component_event}}');
+        $this->dropForeignKey('FK-client_chat_component_event-ccce_updated_user_id', '{{%client_chat_component_event}}');
         $this->dropIndex('UQ-client_chat_component_event-cch_id-component-event_type', '{{%client_chat_component_event}}');
         $this->dropTable('{{%client_chat_component_event}}');
     }

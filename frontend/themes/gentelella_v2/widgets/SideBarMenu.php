@@ -258,6 +258,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'User Chat Data CRUD', 'url' => ['/user-client-chat-data-crud/index']],
                         ['label' => 'User Chat Data Manage', 'url' => ['/user-client-chat-data/index']],
                         ['label' => 'Client Chat Component Event CRUD', 'url' => ['/client-chat-component-event-crud/index']],
+                        ['label' => 'Client Chat Component Rule CRUD', 'url' => ['/client-chat-component-rule-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
