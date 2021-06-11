@@ -8,6 +8,7 @@
  */
 
 use common\models\Lead;
+use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
 use sales\services\parsingDump\lib\ParsingDump;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -291,6 +292,7 @@ $paxCntTypes = [
                         ])->label(false); ?>
                         <label for="<?= Html::getInputId($quote, 'check_payment') ?>"></label>
                     </td>
+                    <?php /* ?>
                     <th class="td-input"><label for="fare-type">Fare Type</label></th>
                     <td class="td-input">
                         <div class="select-wrap-label">
@@ -300,6 +302,25 @@ $paxCntTypes = [
                                 ],
                                 'template' => '{input}'
                             ])->dropDownList(Quote::getFareType()) ?>
+                        </div>
+                    </td>
+                    <?php */ ?>
+                    <th class="td-input"><label for="fare-type">Quote label</label></th>
+                    <td class="td-input" width="120">
+                        <div class="select-wrap-label">
+                            <?= Select2::widget([
+                                'data' => FlightQuoteLabelListService::getListKeyDescrition(),
+                                'name' => 'quote_label',
+                                'size' => Select2::SIZE_SMALL,
+                                'pluginOptions' => [
+                                    'width' => '100%',
+                                ],
+                                'options' => [
+                                    'placeholder' => '',
+                                    'id' => 'quote_label',
+                                    'multiple' => true,
+                                ],
+                            ]); ?>
                         </div>
                     </td>
                 </tr>

@@ -884,6 +884,12 @@ class QuoteController extends FController
                 }
             }
 
+            if ($quoteLabels = ArrayHelper::getValue($post, 'quote_label')) {
+                foreach ($quoteLabels as $label) {
+                    QuoteLabelService::createQuoteLabel($quote->id, $label);
+                }
+            }
+
             $this->logQuote($quote);
 
             $transaction->commit();
