@@ -24,7 +24,7 @@ if ($model->project) {
 }
 
 if ($case) {
-    /** @abac new CasesAbacDto($case), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK, Disable mask client data on Case view details popup */
+    /** @abac new CasesAbacDto($case), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK, Disable mask client data on Case details popup */
     $disableMasking = Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK);
 } else {
     $disableMasking = false;
