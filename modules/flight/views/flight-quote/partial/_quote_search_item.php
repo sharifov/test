@@ -86,10 +86,10 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
             <div class="quote__seats">
                 <?php if (is_array($prodTypes)) : ?>
                     <?php foreach ($prodTypes as $label) : ?>
-                        <span class="fa fa-tags text-success"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
+                        <span class="fa fa-tags text-success" title="<?php echo $label ?>"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
                     <?php endforeach ?>
-                <?php else : ?>
-                    <span class="fa fa-tags text-success"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
+                <?php elseif (is_string($prodTypes)) : ?>
+                    <span class="fa fa-tags text-success" title="<?php echo $prodTypes ?>"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
                 <?php endif ?>
             </div>
           <?php endif;?>
