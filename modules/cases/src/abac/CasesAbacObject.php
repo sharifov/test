@@ -8,40 +8,44 @@ use modules\abac\src\entities\AbacInterface;
 class CasesAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'cases/view/';
+    private const NS = 'cases/';
+
+    /** ALL PERMISSIONS */
+    public const ALL = self::NS . '*';
 
     /** LOGIC PERMISSION */
-    public const LOGIC_DISABLE_CLIENT_DATA_MASK   = self::NS . 'logic/disable_client_data_mask';
+    public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
 
     public const OBJECT_LIST = [
-        self::LOGIC_DISABLE_CLIENT_DATA_MASK => self::LOGIC_DISABLE_CLIENT_DATA_MASK,
+        self::LOGIC_CLIENT_DATA => self::LOGIC_CLIENT_DATA,
     ];
 
     /** --------------- ACTIONS --------------------------- */
-    public const ACTION_SHOW    = 'show';
+    public const ACTION_MASK    = 'mask';
+    public const ACTION_UNMASK    = 'unmask';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::LOGIC_DISABLE_CLIENT_DATA_MASK  => [self::ACTION_SHOW],
+        self::LOGIC_CLIENT_DATA  => [self::ACTION_UNMASK],
     ];
 
-    protected const ATTR_CASE_OWNER = [
-        'optgroup' => 'CASE - DATA PRIVACY',
-        'id' => self::NS . 'owner',
-        'field' => 'owner',
+    protected const ATTR_CASE_IS_OWNER = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'is_owner',
+        'field' => 'is_owner',
         'label' => 'Is Owner',
 
-        'type' => self::ATTR_TYPE_INTEGER,
+        /*'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
         'values' => [1 => 'Unmask', 2 => 'Mask'],
-        'operators' =>  [self::OP_EQUAL2]
+        'operators' =>  [self::OP_EQUAL2]*/
 
-        /*'type' => self::ATTR_TYPE_INTEGER,
-        'input' => self::ATTR_INPUT_CHECKBOX,
-        'values' => [1 => 'Unmask'],
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
         'multiple' => false,
-        'validation' => ['allow_empty_value' => true],
-        'operators' =>  [self::OP_EQUAL2, self::OP_IN]*/
+        //'validation' => ['allow_empty_value' => true],
+        'operators' =>  [self::OP_EQUAL2]
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
@@ -68,9 +72,9 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
-        $attrOwner = self::ATTR_CASE_OWNER;
+
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::LOGIC_DISABLE_CLIENT_DATA_MASK][] = $attrOwner;
+        $attributeList[self::LOGIC_CLIENT_DATA][] = self::ATTR_CASE_IS_OWNER;
 
         return $attributeList;
     }

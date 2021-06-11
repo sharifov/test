@@ -41,6 +41,7 @@ class AbacService
         //$rules = json_decode($this->r_rules_data)
 
 
+
         if (!empty($rules['condition'])) {
             switch ($rules['condition']) {
                 case 'AND':
@@ -66,6 +67,8 @@ class AbacService
                 } else {
                     $value = $rule['value'];
 
+
+
                     if (in_array($rule['operator'], [AbacBaseModel::OP_IN, AbacBaseModel::OP_NOT_IN], true)) {
                         if (is_string($value)) {
                             $values = explode(',', $value);
@@ -83,7 +86,9 @@ class AbacService
                     }
 
 
-                    if (($rule['operator'] === '==' || $rule['operator'] === '===') && is_array($value)) {
+
+
+                    if (($rule['operator'] === AbacBaseModel::OP_EQUAL2 || $rule['operator'] === '===') && is_array($value)) {
                         $rule['operator'] = AbacBaseModel::OP_IN;
                         $values = $value;
                     }
@@ -96,16 +101,20 @@ class AbacService
                         $field = $prefix . $field;
                     }
 
+                    if (is_bool($value)) {
+                        $value = $value ? 'true' : 'false';
+                    }
+
                     switch ($rule['operator']) {
                         case AbacBaseModel::OP_EQUAL:
-                        case '==':
+                        case AbacBaseModel::OP_EQUAL2:
                             $operator = $field . ' == ' . $value;
                             break;
                         case '===':
                             $operator = $field . ' === ' . $value;
                             break;
                         case AbacBaseModel::OP_NOT_EQUAL:
-                        case '!=':
+                        case AbacBaseModel::OP_NOT_EQUAL2:
                             $operator = $field . ' != ' . $value;
                             break;
                         case '!==':
@@ -190,17 +199,17 @@ class AbacService
                             $operator = $field;
                     }
 
+
+
                     $strItem .= $operator;
                 }
 
                 $strItem .= ')';
-
                 $strArr[] = $strItem;
             }
         }
 
         $str = implode(' ' . $and_or_value . ' ', $strArr);
-
         return $str;
     }
 
