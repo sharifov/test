@@ -3,6 +3,8 @@
 namespace sales\model\clientChat\componentEvent\entity;
 
 use common\models\Employee;
+use sales\model\clientChat\componentEvent\component\CheckFlizzardSubscription;
+use sales\model\clientChat\componentEvent\component\ComponentEventInterface;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -41,8 +43,12 @@ class ClientChatComponentEvent extends \yii\db\ActiveRecord
         self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => 'CheckFlizzardSubscriptionComponent'
     ];
 
-    private const COMPONENT_EVENT_TYPE_BEFORE_CHAT_CREATION = 1;
-    private const COMPONENT_EVENT_TYPE_AFTER_CHAT_CREATION = 2;
+    private const COMPONENT_CLASS_LIST = [
+        self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => CheckFlizzardSubscription::class
+    ];
+
+    public const COMPONENT_EVENT_TYPE_BEFORE_CHAT_CREATION = 1;
+    public const COMPONENT_EVENT_TYPE_AFTER_CHAT_CREATION = 2;
 
     private const COMPONENT_EVENT_TYPE_LIST = [
         self::COMPONENT_EVENT_TYPE_BEFORE_CHAT_CREATION => 'Before Chat Creation',
@@ -153,6 +159,11 @@ class ClientChatComponentEvent extends \yii\db\ActiveRecord
         return self::COMPONENT_EVENT_TYPE_LIST;
     }
 
+    public static function getComponentClassList(): array
+    {
+        return self::COMPONENT_CLASS_LIST;
+    }
+
     public function getComponentEventName(): string
     {
         return self::getComponentEventList()[$this->ccce_component] ?? 'Unknown component event';
@@ -161,5 +172,18 @@ class ClientChatComponentEvent extends \yii\db\ActiveRecord
     public function getComponentTypeName(): string
     {
         return self::getComponentTypeList()[$this->ccce_event_type] ?? 'Unknown component type';
+    }
+
+    public function getComponentClass(): ?string
+    {
+        return self::getComponentClassList()[$this->ccce_component] ?? null;
+    }
+
+    public function getComponentClassObject(): ComponentEventInterface
+    {
+        if ($componentClass = $this->getComponentClass()) {
+            return Yii::createObject($componentClass);
+        }
+        throw new \RuntimeException('Unknown component class');
     }
 }

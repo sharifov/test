@@ -4,6 +4,7 @@ namespace sales\model\clientChat\componentRule\entity;
 
 use common\models\Employee;
 use sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
+use sales\model\clientChat\componentRule\component\RunnableComponentInterface;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -29,8 +30,6 @@ use yii\db\ActiveRecord;
  */
 class ClientChatComponentRule extends \yii\db\ActiveRecord
 {
-    private const RUNNABLE_COMPONENT = 1;
-
     public function rules(): array
     {
         return [
@@ -127,5 +126,18 @@ class ClientChatComponentRule extends \yii\db\ActiveRecord
     public function getComponentName(): string
     {
         return RunnableComponent::getListName()[$this->cccr_runnable_component] ?? 'Unknown component name';
+    }
+
+    public function getClassName(): ?string
+    {
+        return RunnableComponent::getClassListName()[$this->cccr_runnable_component] ?? null;
+    }
+
+    public function getClassObject(): RunnableComponentInterface
+    {
+        if ($component = $this->getClassName()) {
+            return Yii::createObject($component);
+        }
+        throw new \RuntimeException('Unknown runnable component');
     }
 }
