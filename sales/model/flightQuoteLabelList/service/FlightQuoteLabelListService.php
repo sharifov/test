@@ -10,9 +10,9 @@ use yii\db\Expression;
  */
 class FlightQuoteLabelListService
 {
-    public static function getListKeyDescrition(int $cacheDuration = 30)
+    public static function getListKeyDescrition(?array $labels = null, int $cacheDuration = 30)
     {
-        return FlightQuoteLabelList::find()
+        $query = FlightQuoteLabelList::find()
             ->addSelect([
                 'description' => new Expression("
                     CASE 
@@ -28,8 +28,14 @@ class FlightQuoteLabelListService
                             END
                         ELSE fqll_description 
                     END")
-            ])
-            ->indexBy('fqll_label_key')
+            ]);
+
+        if ($labels) {
+            $query->where(['IN', 'fqll_label_key', $labels]);
+        }
+
+        return $query->indexBy('fqll_label_key')
+            ->orderBy(['fqll_description' => SORT_ASC])
             ->asArray()
             ->cache($cacheDuration)
             ->column();

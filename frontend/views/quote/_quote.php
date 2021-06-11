@@ -8,6 +8,7 @@
  */
 
 use common\models\Lead;
+use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListDictionary;
 use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
 use sales\services\parsingDump\lib\ParsingDump;
 use yii\helpers\Html;
@@ -309,7 +310,7 @@ $paxCntTypes = [
                     <td class="td-input" width="120">
                         <div class="select-wrap-label">
                             <?= Select2::widget([
-                                'data' => FlightQuoteLabelListService::getListKeyDescrition(),
+                                'data' => FlightQuoteLabelListService::getListKeyDescrition(FlightQuoteLabelListDictionary::MANUAL_CREATE_LABELS),
                                 'name' => 'quote_label',
                                 'size' => Select2::SIZE_SMALL,
                                 'pluginOptions' => [
