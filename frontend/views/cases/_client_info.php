@@ -15,6 +15,7 @@ use sales\helpers\phone\MaskPhoneHelper;
 /**
  * @var $isAdmin boolean
  * @var $unsubscribedEmails array
+ * @var $disableMasking bool
  */
 ?>
 
@@ -26,6 +27,7 @@ use sales\helpers\phone\MaskPhoneHelper;
                     <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#', [
                         'id' => 'btn-client-info-details',
                         'data-client-id' => $caseModel->cs_client_id,
+                        'data-case-id' => $caseModel->cs_id,
                         'title' => 'Client Info',
                     ])?>
                 </li>
@@ -144,14 +146,14 @@ use sales\helpers\phone\MaskPhoneHelper;
                                 'project:projectName',
                                 [
                                     'label' => 'Phones',
-                                    'value' => function (\common\models\Client $model) {
+                                    'value' => function (\common\models\Client $model) use ($disableMasking) {
                                         $phones = $model->clientPhones;
                                         $data = [];
                                         if ($phones) {
                                             foreach ($phones as $k => $phone) {
                                                 $data[] = '<i class="fa fa-phone"></i> 
                                                            <code class="' . $phone::getPhoneTypeTextDecoration($phone->type) . '" 
-                                                                 title="' . $phone::getPhoneType($phone->type) . '">' . Html::encode(MaskPhoneHelper::masking($phone->phone)) . '</code> ' . $phone::getPhoneTypeLabel($phone->type); //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                                                                 title="' . $phone::getPhoneType($phone->type) . '">' . Html::encode(MaskPhoneHelper::masking($phone->phone, $disableMasking)) . '</code> ' . $phone::getPhoneTypeLabel($phone->type); //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
                                             }
                                         }
 
@@ -164,7 +166,7 @@ use sales\helpers\phone\MaskPhoneHelper;
 
                                 [
                                     'label' => 'Emails',
-                                    'value' => function (\common\models\Client $model) use ($unsubscribedEmails) {
+                                    'value' => function (\common\models\Client $model) use ($unsubscribedEmails, $disableMasking) {
                                         $emails = $model->clientEmails;
                                         $data = [];
                                         if ($emails) {
@@ -172,7 +174,7 @@ use sales\helpers\phone\MaskPhoneHelper;
                                                 $unsubscribedIcon = in_array($email->email, $unsubscribedEmails) ? ' <i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '';
                                                 $data[] = '<i class="fa fa-envelope"></i> 
                                                            <code class="' . $email::getEmailTypeTextDecoration($email->type) . '"
-                                                                 title="' . $email::getEmailType($email->type) . '">' . Html::encode(MaskEmailHelper::masking($email->email)) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
+                                                                 title="' . $email::getEmailType($email->type) . '">' . Html::encode(MaskEmailHelper::masking($email->email, $disableMasking)) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
                                             }
                                         }
 
@@ -256,11 +258,12 @@ $js = <<<JS
     
     $(document).on('click', '#btn-client-info-details', function(e) {
         e.preventDefault();
-        var client_id = $(this).data('client-id');
+        let client_id = $(this).data('client-id');
+        let case_id = $(this).data('case-id');
         $('#modalCase .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#modalCase-label').html('Client Details (' + client_id + ')');
         $('#modalCase').modal();
-        $.post('$clientInfoUrl', {client_id: client_id},
+        $.post('$clientInfoUrl', {client_id: client_id, case_id: case_id},
             function (data) {
                 $('#modalCase .modal-body').html(data);
             }

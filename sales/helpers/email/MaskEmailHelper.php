@@ -6,9 +6,9 @@ use sales\helpers\setting\SettingHelper;
 
 class MaskEmailHelper
 {
-    public static function masking(?string $email): ?string
+    public static function masking(?string $email, $forceShow = false): ?string
     {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL) && SettingHelper::clientDataPrivacyEnable()) {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) && SettingHelper::clientDataPrivacyEnable() && !$forceShow) {
             list($user, $domains) = explode('@', $email);
 
             $domains = explode('.', $domains);

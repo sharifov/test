@@ -7,12 +7,29 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 use sales\helpers\email\MaskEmailHelper;
 use sales\helpers\phone\MaskPhoneHelper;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 
-/** @var $model Client */
+/**
+ * @var Employee $user
+ * @var $model Client
+ * @var $case \sales\entities\cases\Cases
+ * @var $disableMasking bool
+ */
 
-/** @var Employee $user */
 $user = Yii::$app->user->identity;
-$unsubscribedEmails = array_column($model->project->emailUnsubscribes, 'eu_email');
+$unsubscribedEmails = [];
+if ($model->project) {
+    $unsubscribedEmails = array_column($model->project->emailUnsubscribes, 'eu_email');
+}
+
+if ($case) {
+    /** @abac new CasesAbacDto($case), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK, Disable mask client data on Case details popup */
+    $disableMasking = Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK);
+} else {
+    $disableMasking = false;
+}
+
 ?>
 <div class="row">
     <div class="col-md-6">
@@ -40,10 +57,10 @@ $unsubscribedEmails = array_column($model->project->emailUnsubscribes, 'eu_email
                 'project:projectName',
                 [
                     'label' => 'Phones',
-                    'value' => static function (Client $model) {
+                    'value' => static function (Client $model) use ($disableMasking) {
                         $data = [];
                         foreach ($model->clientPhones as $k => $phone) {
-                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode(MaskPhoneHelper::masking($phone->phone)) . '</code> ' . $phone::getPhoneTypeLabel($phone->type);
+                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode(MaskPhoneHelper::masking($phone->phone, $disableMasking)) . '</code> ' . $phone::getPhoneTypeLabel($phone->type);
                         }
                         return implode('<br>', $data);
                     },
@@ -52,11 +69,11 @@ $unsubscribedEmails = array_column($model->project->emailUnsubscribes, 'eu_email
                 ],
                 [
                     'label' => 'Emails',
-                    'value' => static function (Client $model) use ($unsubscribedEmails) {
+                    'value' => static function (Client $model) use ($unsubscribedEmails, $disableMasking) {
                         $data = [];
                         foreach ($model->clientEmails as $k => $email) {
                             $unsubscribedIcon = in_array($email->email, $unsubscribedEmails) ? ' <i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '';
-                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode(MaskEmailHelper::masking($email->email)) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
+                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode(MaskEmailHelper::masking($email->email, $disableMasking)) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
                         }
                         return implode('<br>', $data);
                     },

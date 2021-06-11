@@ -5,13 +5,15 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $model common\models\Client */
 /* @var $leadsDataProvider yii\data\ActiveDataProvider */
-/* @var $casesDataProvider yii\data\ActiveDataProvider */
+/* @var $casesDataProvider yii\data\ActiveDataProvider
+ * @var $case \sales\entities\cases\Cases
+ */
 
 ?>
 
 <div>
 
-    <?= $this->render('_client_info', ['model' => $model]) ?>
+    <?= $this->render('_client_info', ['model' => $model, 'case' => $case]) ?>
 
     <?php if ($model->isClient()) : ?>
         <?php //if (Yii::$app->user->can('leadSection')): ?>
