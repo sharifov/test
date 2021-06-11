@@ -6,7 +6,6 @@ class ClientChatProjectConfigDefaultParams
 {
     private static $params = [
         "notificationSound" => "https://cdn.travelinsides.com/npmstatic/assets/chime.mp3",
-        "registrationEnabled" => false,
         "autoMessage" => [
             "enabled" => false,
             "repeatDelay" => 3600,
@@ -47,7 +46,8 @@ class ClientChatProjectConfigDefaultParams
         "autoMessageTranslates" => [
             "ru-RU" => "",
             "en-US" => ""
-        ]
+        ],
+        'registrationEnabled' => false
     ];
 
     private static $theme = [

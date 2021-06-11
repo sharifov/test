@@ -64,7 +64,8 @@ class ClientChatChannelDefaultSettings
                         'pastMinutes' => 180,
                         'sortPriority' => 0
                     ]
-                ]
+                ],
+                'autoCloseRoom' => false
             ],
         ]
     ];
