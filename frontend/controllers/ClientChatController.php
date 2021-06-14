@@ -414,19 +414,17 @@ class ClientChatController extends FController
         $countFreeToTake = 0;
         $dataProvider = null;
 
-        if ($this->channels) {
-            if (Yii::$app->request->get('act') === 'select-all') {
-                $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($this->channels), $filter);
-                return $this->asJson($chatIds);
-            }
+        if (Yii::$app->request->get('act') === 'select-all') {
+            $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($this->channels), $filter);
+            return $this->asJson($chatIds);
+        }
 
-            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter, $queryPage, $increaseLimit);
+        $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter, $queryPage, $increaseLimit);
 
-            if ($filter->group === GroupFilter::FREE_TO_TAKE) {
-                $countFreeToTake = $dataProvider->getTotalCount();
-            } else {
-                $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($this->channels), $filter);
-            }
+        if ($filter->group === GroupFilter::FREE_TO_TAKE) {
+            $countFreeToTake = $dataProvider->getTotalCount();
+        } else {
+            $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($this->channels), $filter);
         }
 
         $clientChat = null;
