@@ -54,7 +54,7 @@ class ClientChatQuery
     {
         return ClientChat::find()
             ->byOwner(null)
-            ->pending()
+            ->pendingOrIdle()
             ->joinWithUserChannels($userId)
             ->excludePendingUserAccessByUserId($userId);
     }

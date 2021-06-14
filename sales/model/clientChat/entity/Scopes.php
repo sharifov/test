@@ -208,6 +208,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['cch_status_id' => ClientChat::STATUS_PENDING]);
     }
 
+    public function pendingOrIdle(): self
+    {
+        return $this->andWhere(['cch_status_id' => [ClientChat::STATUS_PENDING, ClientChat::STATUS_IDLE]]);
+    }
+
     public function withUnreadMessage(bool $edgerLoading = false): self
     {
         return $this->innerJoinWith(['unreadMessage' => static function (ActiveQuery $query) {
