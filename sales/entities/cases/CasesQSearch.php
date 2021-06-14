@@ -756,6 +756,49 @@ class CasesQSearch extends Cases
         return $dataProvider;
     }
 
+    public function searchUnidentified($params, Employee $user)
+    {
+        $query = $this->casesQRepository->getUnidentifiedQuery($user);
+        $query->joinWith(['client']);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['cs_status' => SORT_ASC, 'cs_created_dt' => SORT_ASC]],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $dataProvider->sort->attributes['client_locale'] = [
+            'asc' => ['cl_locale' => SORT_ASC],
+            'desc' => ['cl_locale' => SORT_DESC],
+        ];
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
+            'cs_project_id' => $this->cs_project_id,
+            'cs_category_id' => $this->cs_category_id,
+            'cs_dep_id' => $this->cs_dep_id,
+            'cs_user_id' => $this->cs_user_id,
+            'cs_need_action' => $this->cs_need_action,
+            'cs_status' => $this->cs_status,
+        ]);
+
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
+
+        return $dataProvider;
+    }
+
     /**
      * @return array
      */
