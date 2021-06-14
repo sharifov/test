@@ -242,21 +242,17 @@ class ClientChatService
     public static function createJobAssigningUaToPendingChats(int $userId): void
     {
         $job = new ChatAssignUserAccessPendingChatsJob($userId);
-        \Yii::info('createJobAssigningUaToPendingChats', 'info\createJobAssigningUaToPendingChats');
         if (!$job->isRunning()) {
             \Yii::$app->queue_client_chat_job->priority(10)->push($job);
-            \Yii::info('job created', 'info\jobPush');
         }
     }
 
     public function assignUserAccessToPendingChats(int $userId): void
     {
         $chats = ClientChatQuery::findAvailablePendingChatsByUser($userId)->all();
-        \Yii::info(VarDumper::dumpAsString(ArrayHelper::toArray($chats)), 'info\assignUserAccessToPendingChats');
         if ($chats) {
             foreach ($chats as $chat) {
                 if (!\Yii::$app->redis->exists($this->getRedisDistributionLogicKey($chat->cch_id))) {
-                    \Yii::info('send request to user', 'info\sendRequestToUser');
                     $this->sendRequestToUser($chat, $userId);
                 }
             }
