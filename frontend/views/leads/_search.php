@@ -3,6 +3,7 @@
 use common\models\Quote;
 use kartik\select2\Select2;
 use sales\access\ListsAccess;
+use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
 use sales\model\leadDataKey\entity\LeadDataKey;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -253,6 +254,19 @@ use frontend\extensions\DatePicker;
                             </div>
                             <div class="col-md-6">
                                 <?php echo $form->field($model, 'lead_data_value') ?>
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding-left: 10px;">
+                            <div class="col-md-12">
+                                <?php
+                                    echo $form->field($model, 'quote_labels')->widget(Select2::class, [
+                                        'data' => FlightQuoteLabelListService::getListKeyDescrition(),
+                                        'size' => Select2::SMALL,
+                                        'options' => ['placeholder' => 'Select quote labels', 'multiple' => true],
+                                        'pluginOptions' => ['allowClear' => true],
+                                    ]);
+                                    ?>
                             </div>
                         </div>
 

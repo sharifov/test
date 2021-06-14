@@ -28,6 +28,7 @@ use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\leadData\entity\LeadData;
+use sales\model\quoteLabel\entity\QuoteLabel;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
 use yii\base\Model;
@@ -76,6 +77,7 @@ use sales\auth\Auth;
  * @property integer|null $lead_type
  * @property string|null $lead_data_key
  * @property string|null $lead_data_value
+ * @property array|null $quote_labels
  *
  * @property $count_files
  * @property int|null $includedFiles
@@ -164,6 +166,7 @@ class LeadSearch extends Lead
     public $lead_type;
     public $lead_data_key;
     public $lead_data_value;
+    public $quote_labels;
 
     private $leadBadgesRepository;
 
@@ -240,6 +243,8 @@ class LeadSearch extends Lead
 
             [['lead_data_key', 'lead_data_value'], 'string', 'max' => 50],
             [['lead_data_key', 'lead_data_value'], 'trim'],
+
+            [['quote_labels'], 'safe'],
         ];
     }
 
@@ -257,6 +262,7 @@ class LeadSearch extends Lead
             'destination_airport' => 'Destination Location Code',
             'lead_data_key' => 'Data Key',
             'lead_data_value' => 'Data Value',
+            'quote_labels' => 'Quote labels',
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }
@@ -821,6 +827,22 @@ class LeadSearch extends Lead
                     $query->andWhere(['<=', 'calls.cnt', $this->callsQtyTo]);
                 }
             }
+        }
+
+        if ($this->quote_labels) {
+            $quoteLabelSubQuery = Quote::find()
+                ->select([
+                    'lead_id',
+                    new Expression('COUNT(' . Quote::tableName() . '.id) AS cnt')
+                ])
+                ->innerJoin(QuoteLabel::tableName(), Quote::tableName() . '.id = ql_quote_id')
+                ->where(['IN', 'ql_label_key', $this->quote_labels])
+                ->having(['=', 'cnt', count($this->quote_labels)]);
+            $quoteLabelSubQuery->groupBy(['lead_id']);
+
+            $query->innerJoin([
+                'quote_label' => $quoteLabelSubQuery
+            ], 'leads.id = quote_label.lead_id');
         }
 
         return $dataProvider;

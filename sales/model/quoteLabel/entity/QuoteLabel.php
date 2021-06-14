@@ -29,6 +29,7 @@ class QuoteLabel extends \yii\db\ActiveRecord
 
             ['ql_quote_id', 'required'],
             ['ql_quote_id', 'integer'],
+            ['ql_quote_id', 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['ql_quote_id' => 'id']],
         ];
     }
 
