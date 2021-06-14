@@ -7,6 +7,8 @@ use common\models\Notifications;
 use mysql_xdevapi\Warning;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
+use sales\model\clientChat\componentEvent\component\ComponentDTO;
+use sales\model\clientChat\componentEvent\service\ComponentEventsTypeService;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatLead\entity\ClientChatLead;
@@ -33,6 +35,7 @@ use yii\redis\Connection;
  * @property ClientChatMessageService $clientChatMessageService
  * @property TransactionManager $transactionManager
  * @property ClientChatLeadRepository $clientChatLeadRepository
+ * @property ComponentEventsTypeService $componentEventsTypeService
  * @property Connection $redis
  * @property int $delay
  * @property int $countProcesses
@@ -44,7 +47,7 @@ class RoomConnectedEvent implements ChatRequestEvent
 
     private const DELAY_EVENT_SECONDS = 1;
 
-    private const EXPIRE_EVENT_SECONDS = 300;
+    private const EXPIRE_EVENT_SECONDS = 10;
 
     /**
      * @var ClientChatRepository
@@ -73,6 +76,8 @@ class RoomConnectedEvent implements ChatRequestEvent
 
     private ClientChatLeadRepository $clientChatLeadRepository;
 
+    private ComponentEventsTypeService $componentEventsTypeService;
+
     private Connection $redis;
 
     public int $delay = 0;
@@ -88,7 +93,8 @@ class RoomConnectedEvent implements ChatRequestEvent
         ChatVisitorDataService $chatVisitorDataService,
         ClientChatMessageService $clientChatMessageService,
         TransactionManager $transactionManager,
-        ClientChatLeadRepository $clientChatLeadRepository
+        ClientChatLeadRepository $clientChatLeadRepository,
+        ComponentEventsTypeService $componentEventsTypeService
     ) {
         $this->clientChatRepository = $clientChatRepository;
         $this->clientManageService = $clientManageService;
@@ -97,6 +103,7 @@ class RoomConnectedEvent implements ChatRequestEvent
         $this->clientChatMessageService = $clientChatMessageService;
         $this->transactionManager = $transactionManager;
         $this->clientChatLeadRepository = $clientChatLeadRepository;
+        $this->componentEventsTypeService = $componentEventsTypeService;
         $this->redis = \Yii::$app->redis;
     }
 
@@ -121,6 +128,12 @@ class RoomConnectedEvent implements ChatRequestEvent
                     $client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
                     $clientChat->cch_client_id = $client->id;
                 }
+
+                if ($clientChatCreated) {
+                    $beforeChatCreationDto = (new ComponentDTO())->setChannelId($clientChatRequest->getChannelIdFromData())->setClientChatEntity($clientChat);
+                    $this->componentEventsTypeService->beforeChatCreation($beforeChatCreationDto);
+                }
+
                 $clientChat->cch_client_online = 1;
 
                 if (!$clientChat->cch_channel_id) {
@@ -172,6 +185,9 @@ class RoomConnectedEvent implements ChatRequestEvent
                 if ($clientChatCreated) {
                     $this->clientChatMessageService->assignMessagesToChat($clientChat);
                     \Yii::$app->snowplow->trackAction('chat', 'create', $clientChat->toArray());
+
+                    $dto = (new ComponentDTO())->setChannelId($clientChat->cch_channel_id)->setClientChatEntity($clientChat);
+                    $this->componentEventsTypeService->afterChatCreation($dto);
                 }
             });
 
@@ -192,8 +208,8 @@ class RoomConnectedEvent implements ChatRequestEvent
     {
         $this->countProcesses = (int)$this->redis->get($this->eventKey);
 
-        ++$this->countProcesses;
         $this->delay = $this->countProcesses * self::DELAY_EVENT_SECONDS;
+        ++$this->countProcesses;
         if ($this->countProcesses) {
             $this->redis->incr($this->eventKey);
         } else {

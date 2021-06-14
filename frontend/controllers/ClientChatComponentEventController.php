@@ -1,0 +1,135 @@
+<?php
+
+namespace frontend\controllers;
+
+use sales\forms\CompositeFormHelper;
+use sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
+use sales\model\clientChat\componentEvent\entity\search\ClientChatComponentEventSearch;
+use sales\model\clientChat\componentEvent\form\ComponentEventCreateForm;
+use sales\model\clientChat\componentEvent\service\ClientChatComponentEventManageService;
+use sales\repositories\NotFoundException;
+use Yii;
+use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
+use yii\web\Response;
+
+/**
+ * Class ClientChatComponentEventController
+ * @package frontend\controllers
+ * @property-read ClientChatComponentEventManageService $manageService
+ */
+class ClientChatComponentEventController extends \frontend\controllers\FController
+{
+    /**
+     * @var ClientChatComponentEventManageService
+     */
+    private ClientChatComponentEventManageService $manageService;
+
+    public function __construct($id, $module, ClientChatComponentEventManageService $manageService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->manageService = $manageService;
+    }
+
+    public function actionIndex()
+    {
+        $searchModel = new ClientChatComponentEventSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * @return string|Response
+     */
+    public function actionCreate()
+    {
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'ComponentEventCreateForm',
+            ['componentRules' => 'ClientChatComponentRule']
+        );
+        $form = new ComponentEventCreateForm(count($data['post']['ClientChatComponentRule']));
+
+        if (Yii::$app->request->isPost && $form->load($data['post']) && $form->validate()) {
+            $componentEventId = $this->manageService->createWithRules($form);
+            return $this->redirect(['view', 'id' => $componentEventId]);
+        }
+
+        return $this->render('create', [
+            'model' => $form,
+        ]);
+    }
+
+    public function actionView()
+    {
+        $id = Yii::$app->request->get('id');
+
+        $model = $this->findModel($id);
+
+        return $this->render('view', [
+            'model' => $model
+        ]);
+    }
+
+    public function actionUpdate()
+    {
+        $id = Yii::$app->request->get('id');
+
+        $model = $this->findModel($id);
+
+        if (Yii::$app->request->isGet) {
+            $data[$model->formName()] = $model->attributes;
+
+            $componentRules = $model->componentRules;
+            foreach ($componentRules as $componentRule) {
+                $data[$componentRule->formName()][] = $componentRule->attributes;
+            }
+
+            $form = new ComponentEventCreateForm(count($data['ClientChatComponentRule']));
+            $form->load($data);
+
+            return $this->render('update', [
+                'model' => $form
+            ]);
+        }
+
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'ComponentEventCreateForm',
+            ['componentRules' => 'ClientChatComponentRule']
+        );
+        $form = new ComponentEventCreateForm(count($data['post']['ClientChatComponentRule']));
+
+        if (Yii::$app->request->isPost && $form->load($data['post'])) {
+            try {
+                $this->manageService->updateWithRules($model, $form);
+                return $this->redirect(['view', 'id' => $model->ccce_id]);
+            } catch (\RuntimeException $e) {
+                $form->addError('general', $e->getMessage());
+            }
+        }
+
+        return $this->render('update', [
+            'model' => $form
+        ]);
+    }
+
+    public function actionDelete($id)
+    {
+        $this->findModel($id)->delete();
+
+        return $this->redirect(['index']);
+    }
+
+    private function findModel($id): ClientChatComponentEvent
+    {
+        if ($model = ClientChatComponentEvent::findOne($id)) {
+            return $model;
+        }
+        throw new NotFoundException();
+    }
+}
