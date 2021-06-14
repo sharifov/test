@@ -830,18 +830,16 @@ class LeadSearch extends Lead
         }
 
         if ($this->quote_labels) {
-            $quoteLabelSubQuery = Quote::find()
-                ->select([
-                    'lead_id',
-                    new Expression('COUNT(' . Quote::tableName() . '.id) AS cnt')
-                ])
-                ->innerJoin(QuoteLabel::tableName(), Quote::tableName() . '.id = ql_quote_id')
+            $quoteLabelSubQuery = QuoteLabel::find()
+                ->select(['ql_quote_id'])
                 ->where(['IN', 'ql_label_key', $this->quote_labels])
-                ->having(['=', 'cnt', count($this->quote_labels)]);
-            $quoteLabelSubQuery->groupBy(['lead_id']);
+                ->having(['>=', new Expression('COUNT(' . QuoteLabel::tableName() . '.ql_quote_id)'), count($this->quote_labels)])
+                ->groupBy(['ql_quote_id']);
+
+            $quoteSubQuery = Quote::find()->select('lead_id')->where(['IN', 'id', $quoteLabelSubQuery->column()])->groupBy(['lead_id']);
 
             $query->innerJoin([
-                'quote_label' => $quoteLabelSubQuery
+                'quote_label' => $quoteSubQuery
             ], 'leads.id = quote_label.lead_id');
         }
 
