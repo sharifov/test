@@ -293,7 +293,6 @@ $paxCntTypes = [
                         ])->label(false); ?>
                         <label for="<?= Html::getInputId($quote, 'check_payment') ?>"></label>
                     </td>
-                    <?php /* ?>
                     <th class="td-input"><label for="fare-type">Fare Type</label></th>
                     <td class="td-input">
                         <div class="select-wrap-label">
@@ -305,7 +304,8 @@ $paxCntTypes = [
                             ])->dropDownList(Quote::getFareType()) ?>
                         </div>
                     </td>
-                    <?php */ ?>
+                </tr>
+                <tr>
                     <th class="td-input"><label for="fare-type">Quote label</label></th>
                     <td class="td-input" width="120">
                         <div class="select-wrap-label">
