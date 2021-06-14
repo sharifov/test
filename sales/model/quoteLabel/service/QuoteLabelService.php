@@ -2,6 +2,7 @@
 
 namespace sales\model\quoteLabel\service;
 
+use common\models\Quote;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\quoteLabel\entity\QuoteLabel;
 use sales\model\quoteLabel\repository\QuoteLabelRepository;
@@ -32,9 +33,21 @@ class QuoteLabelService
     {
         $quoteLabel = QuoteLabel::create($quoteId, $label);
         if (!$quoteLabel->validate()) {
-            throw new \RuntimeException('QuoteLabel not saved. ' . ErrorsToStringHelper::extractFromModel($quoteLabel));
+            throw new \RuntimeException('QuoteLabel not saved. Quote ID(' . $quoteId . ') ' . ' Label(' . $label . '). ' .
+                ErrorsToStringHelper::extractFromModel($quoteLabel));
         }
         (new QuoteLabelRepository())->save($quoteLabel);
         return $quoteLabel;
+    }
+
+    public static function cloneByQuote(Quote $oldQuote, int $newQuoteId): array
+    {
+        $result = [];
+        if ($oldQuote->quoteLabel) {
+            foreach ($oldQuote->quoteLabel as $quoteLabel) {
+                $result[] = self::createQuoteLabel($newQuoteId, $quoteLabel->ql_label_key);
+            }
+        }
+        return $result;
     }
 }

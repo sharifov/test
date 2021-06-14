@@ -344,7 +344,9 @@ JS;
 $js = <<<JS
     $(document).on('pjax:end', function() {
         $('[data-toggle="tooltip"]').tooltip({html:true});
+        $('.popover-class[data-toggle="popover"]').popover({sanitize: false, html: true});
     });
     $('[data-toggle="tooltip"]').tooltip({html:true});
+    $('.popover-class[data-toggle="popover"]').popover({sanitize: false, html: true});
 JS;
 $this->registerJs($js);

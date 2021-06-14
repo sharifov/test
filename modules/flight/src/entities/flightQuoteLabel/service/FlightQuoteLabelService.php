@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\entities\flightQuoteLabel\service;
 
+use modules\flight\models\FlightQuote;
 use modules\flight\src\entities\flightQuoteLabel\FlightQuoteLabel;
 use modules\flight\src\entities\flightQuoteLabel\repository\FlightQuoteLabelRepository;
 use sales\helpers\ErrorsToStringHelper;
@@ -36,5 +37,16 @@ class FlightQuoteLabelService
         }
         (new FlightQuoteLabelRepository())->save($quoteLabel);
         return $quoteLabel;
+    }
+
+    public static function cloneByQuote(FlightQuote $oldQuote, int $newQuoteId): array
+    {
+        $result = [];
+        if ($oldQuote->quoteLabel) {
+            foreach ($oldQuote->quoteLabel as $quoteLabel) {
+                $result[] = self::createQuoteLabel($newQuoteId, $quoteLabel->fql_label_key);
+            }
+        }
+        return $result;
     }
 }

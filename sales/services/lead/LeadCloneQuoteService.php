@@ -17,6 +17,7 @@ use sales\dispatchers\DeferredEventDispatcher;
 use sales\events\lead\LeadQuoteCloneEvent;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\quote\QuotePriceRepository;
 use sales\repositories\quote\QuoteRepository;
@@ -122,6 +123,10 @@ class LeadCloneQuoteService
 
         if ($lead->called_expert) {
             $this->eventDispatcher->dispatch(new LeadQuoteCloneEvent($quote));
+        }
+
+        if ($currentQuote->quoteLabel) {
+            QuoteLabelService::cloneByQuote($currentQuote, $quote->id);
         }
 
         // todo delete

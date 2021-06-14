@@ -26,7 +26,7 @@ class FlightQuoteLabel extends \yii\db\ActiveRecord
 
             ['fql_label_key', 'required'],
             ['fql_label_key', 'string', 'max' => 50],
-            ['ql_label_key', 'in', 'range' => array_keys(FlightQuoteLabelListService::getListKeyDescription())],
+            ['fql_label_key', 'in', 'range' => array_keys(FlightQuoteLabelListService::getListKeyDescription())],
 
             ['fql_quote_id', 'required'],
             ['fql_quote_id', 'integer'],
