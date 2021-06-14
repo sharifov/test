@@ -34,7 +34,6 @@ use yii\widgets\ActiveForm;
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
 
-        <?php ActiveForm::end(); ?>
 
     </div>
 
@@ -59,5 +58,7 @@ use yii\widgets\ActiveForm;
 
         ?>
     </div>
+
+    <?php ActiveForm::end(); ?>
 
 </div>

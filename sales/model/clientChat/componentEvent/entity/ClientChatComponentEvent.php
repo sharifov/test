@@ -5,10 +5,12 @@ namespace sales\model\clientChat\componentEvent\entity;
 use common\models\Employee;
 use sales\model\clientChat\componentEvent\component\CheckFlizzardSubscription;
 use sales\model\clientChat\componentEvent\component\ComponentEventInterface;
+use sales\model\clientChat\componentRule\entity\ClientChatComponentRule;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -30,6 +32,7 @@ use yii\helpers\ArrayHelper;
  * @property ClientChatChannel $chatChannel
  * @property Employee $createdUser
  * @property Employee $updatedUser
+ * @property ClientChatComponentRule[] $componentRules
  */
 class ClientChatComponentEvent extends \yii\db\ActiveRecord
 {
@@ -120,6 +123,11 @@ class ClientChatComponentEvent extends \yii\db\ActiveRecord
     public function getUpdatedUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'ccce_updated_user_id']);
+    }
+
+    public function getComponentRules(): ActiveQuery
+    {
+        return $this->hasMany(ClientChatComponentRule::class, ['cccr_component_event_id' => 'ccce_id']);
     }
 
     public function attributeLabels(): array

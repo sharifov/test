@@ -9,6 +9,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "client_chat_component_rule".
@@ -30,6 +31,16 @@ use yii\db\ActiveRecord;
  */
 class ClientChatComponentRule extends \yii\db\ActiveRecord
 {
+    public const SCENARIO_CREATE_WITH_RULE = 'create_with_rule';
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $defaultAttributes = $scenarios[self::SCENARIO_DEFAULT];
+        $scenarios[self::SCENARIO_CREATE_WITH_RULE] = $defaultAttributes;
+        return $scenarios;
+    }
+
     public function rules(): array
     {
         return [
@@ -37,7 +48,7 @@ class ClientChatComponentRule extends \yii\db\ActiveRecord
 
             ['cccr_component_config', 'safe'],
 
-            ['cccr_component_event_id', 'required'],
+            ['cccr_component_event_id', 'required', 'on' => self::SCENARIO_DEFAULT],
             ['cccr_component_event_id', 'integer'],
             ['cccr_component_event_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatComponentEvent::class, 'targetAttribute' => ['cccr_component_event_id' => 'ccce_id']],
 

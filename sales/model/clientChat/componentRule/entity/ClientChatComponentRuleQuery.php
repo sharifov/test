@@ -17,4 +17,9 @@ class ClientChatComponentRuleQuery
             ->enabled()
             ->orderBy(['cccr_sort_order' => SORT_ASC])->all();
     }
+
+    public static function deleteByComponentEventId(int $id): int
+    {
+        return ClientChatComponentRule::deleteAll(['cccr_component_event_id' => $id]);
+    }
 }
