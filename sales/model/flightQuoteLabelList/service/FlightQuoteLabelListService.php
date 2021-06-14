@@ -10,7 +10,7 @@ use yii\db\Expression;
  */
 class FlightQuoteLabelListService
 {
-    public static function getListKeyDescrition(?array $labels = null, int $cacheDuration = 30)
+    public static function getListKeyDescription(?array $labels = null, int $cacheDuration = 30): array
     {
         $query = FlightQuoteLabelList::find()
             ->addSelect([

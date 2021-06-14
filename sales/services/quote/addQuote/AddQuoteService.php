@@ -122,7 +122,11 @@ class AddQuoteService
                 ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
             }
 
-            QuoteLabelService::processingQuoteLabel($quoteData, $quote->id);
+            try {
+                QuoteLabelService::processingQuoteLabel($quoteData, $quote->id);
+            } catch (\Throwable $throwable) {
+                \Yii::warning($throwable->getMessage(), 'AddQuoteService:createQuoteFromSearch:QuoteLabel');
+            }
         });
     }
 

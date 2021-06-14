@@ -1133,7 +1133,11 @@ class QuoteController extends ApiBaseController
                 }
             }
 
-            QuoteLabelService::processingQuoteLabel($quoteAttributes, $quote->id, 'prod_types');
+            try {
+                QuoteLabelService::processingQuoteLabel($quoteAttributes, $quote->id, 'prod_types');
+            } catch (\Throwable $throwable) {
+                $warnings[] = $throwable->getMessage();
+            }
 
             if (!$quote->hasErrors()) {
                 $response['status'] = 'Success';
@@ -1262,6 +1266,7 @@ class QuoteController extends ApiBaseController
     public function actionCreateData()
     {
         $form = new QuoteCreateDataForm();
+        $warnings = [];
 
         if (!Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -1327,12 +1332,28 @@ class QuoteController extends ApiBaseController
             $apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         }
-        $response = new SuccessResponse(
+
+        try {
+            if ($quote = Quote::findOne(['uid' => $quoteUid])) {
+                QuoteLabelService::processingQuoteLabel($preparedQuoteData['results'][0], $quote->id);
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::warning($throwable->getMessage(), 'QuoteController:actionCreateData:QuoteLabel');
+            $warnings[] = $throwable->getMessage();
+        }
+
+        $responseObj = new SuccessResponse(
             new DataMessage(
                 new Message('quote_uid', $quoteUid)
             )
         );
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+
+        $response = ArrayHelper::toArray($responseObj);
+        if ($warnings) {
+            ArrayHelper::setValue($response, 'warnings', implode(',', $warnings));
+        }
+
+        $apiLog->endApiLog($response);
         return $response;
     }
 
@@ -1414,6 +1435,7 @@ class QuoteController extends ApiBaseController
     public function actionCreateKey()
     {
         $form = new QuoteCreateKeyForm();
+        $warnings = [];
 
         if (!Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -1483,12 +1505,28 @@ class QuoteController extends ApiBaseController
             $apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         }
-        $response = new SuccessResponse(
+
+        try {
+            if ($quote = Quote::findOne(['uid' => $quoteUid])) {
+                QuoteLabelService::processingQuoteLabel($preparedQuoteData['results'][0], $quote->id);
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::warning($throwable->getMessage(), 'QuoteController:actionCreateKey:QuoteLabel');
+            $warnings[] = $throwable->getMessage();
+        }
+
+        $responseObj = new SuccessResponse(
             new DataMessage(
                 new Message('quote_uid', $quoteUid)
             )
         );
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+
+        $response = ArrayHelper::toArray($responseObj);
+        if ($warnings) {
+            ArrayHelper::setValue($response, 'warnings', implode(',', $warnings));
+        }
+
+        $apiLog->endApiLog($response);
         return $response;
     }
 

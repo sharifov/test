@@ -23,6 +23,7 @@ class QuoteLabelService
                 self::createQuoteLabel($quoteId, $prodTypes);
             } else {
                 \Yii::warning(['error' => 'Unknown data type', 'data' => $prodTypes], 'QuoteLabelService:createQuoteLabel:prodTypes');
+                throw new \RuntimeException('QuoteLabel: Unknown data type');
             }
         }
     }
@@ -31,8 +32,7 @@ class QuoteLabelService
     {
         $quoteLabel = QuoteLabel::create($quoteId, $label);
         if (!$quoteLabel->validate()) {
-            \Yii::warning(ErrorsToStringHelper::extractFromModel($quoteLabel), 'QuoteLabelService:createQuoteLabel:save');
-            return null;
+            throw new \RuntimeException('QuoteLabel not saved. ' . ErrorsToStringHelper::extractFromModel($quoteLabel));
         }
         (new QuoteLabelRepository())->save($quoteLabel);
         return $quoteLabel;

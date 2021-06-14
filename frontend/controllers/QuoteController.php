@@ -481,7 +481,11 @@ class QuoteController extends FController
                                     ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
                                 }
 
-                                QuoteLabelService::processingQuoteLabel($entry, $quote->id);
+                                try {
+                                    QuoteLabelService::processingQuoteLabel($entry, $quote->id);
+                                } catch (\Throwable $throwable) {
+                                    \Yii::warning($throwable->getMessage(), 'QuoteController:actionCreateQuoteFromSearch:QuoteLabel');
+                                }
                             }
 
                             $transaction->commit();

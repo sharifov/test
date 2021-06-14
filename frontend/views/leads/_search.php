@@ -261,7 +261,7 @@ use frontend\extensions\DatePicker;
                             <div class="col-md-12">
                                 <?php
                                     echo $form->field($model, 'quote_labels')->widget(Select2::class, [
-                                        'data' => FlightQuoteLabelListService::getListKeyDescrition(),
+                                        'data' => FlightQuoteLabelListService::getListKeyDescription(),
                                         'size' => Select2::SMALL,
                                         'options' => ['placeholder' => 'Select quote labels', 'multiple' => true],
                                         'pluginOptions' => ['allowClear' => true],

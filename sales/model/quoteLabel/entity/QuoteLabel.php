@@ -4,6 +4,7 @@ namespace sales\model\quoteLabel\entity;
 
 use common\models\Quote;
 use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
+use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
@@ -26,6 +27,7 @@ class QuoteLabel extends \yii\db\ActiveRecord
 
             ['ql_label_key', 'required'],
             ['ql_label_key', 'string', 'max' => 50],
+            ['ql_label_key', 'in', 'range' => array_keys(FlightQuoteLabelListService::getListKeyDescription())],
 
             ['ql_quote_id', 'required'],
             ['ql_quote_id', 'integer'],
