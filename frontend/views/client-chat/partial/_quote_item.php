@@ -55,7 +55,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 }
                 ?> &nbsp;[<strong><?= $model->main_airline_code?></strong>]
             </span>
-
+            <?php /* ?>
             <div class="quote__gds" title="GDS / <?php if ($showGdsOfferId && !empty($model->gds_offer_id)) :
                 echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($model->gds_offer_id) . ' /';
                                                  endif; ?> PCC">
@@ -65,6 +65,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 <?php endif; ?>
                 / <i><?= $model->pcc?></i>
             </div>
+            <?php */ ?>
             <span title="<?= $model->created_by_seller ? 'Agent' : 'Expert'?>: <?= \yii\helpers\Html::encode($model->employee_name)?>">
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
                 <strong><?= $model->employee_name?></strong>
@@ -92,6 +93,12 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                         <?php endif;?>
                     </a>
                 <?php endif;?>
+
+            <?php if ($model->quoteLabel) : ?>
+                <?php foreach ($model->quoteLabel as $quoteLabel) : ?>
+                    <span class="fa fa-tags text-success"></span> <?php echo $quoteLabel->getDescription() ?>
+                <?php endforeach ?>
+            <?php endif ?>
 
         </div>
     </div>
