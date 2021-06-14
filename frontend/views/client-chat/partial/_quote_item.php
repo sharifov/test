@@ -96,7 +96,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
             <?php if ($model->quoteLabel) : ?>
                 <?php foreach ($model->quoteLabel as $quoteLabel) : ?>
-                    <span class="fa fa-tags text-success"></span> <?php echo $quoteLabel->getDescription() ?>
+                    <span class="fa fa-tags text-success"></span> &nbsp;<?php echo $quoteLabel->getDescription() ?>
                 <?php endforeach ?>
             <?php endif ?>
 
