@@ -93,4 +93,16 @@ class CasesQController extends FController
             'isAgent' => Auth::user()->isAgent(),
         ]);
     }
+
+    public function actionUnidentified()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchUnidentified(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('unidentified', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
 }

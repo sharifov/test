@@ -285,6 +285,27 @@ class CasesQRepository
 
     /**
      * @param Employee $user
+     * @return int
+     */
+    public function getUnidentifiedCount(Employee $user): int
+    {
+        return $this->getUnidentifiedQuery($user)->count();
+    }
+
+    public function getUnidentifiedQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]]);
+        $query->andWhere($this->freeCase());
+
+        if (!$user->isAdmin()) {
+            $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+            $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments($user))]);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
      * @return ActiveQuery
      */
     public function getHotQuery(Employee $user): ActiveQuery

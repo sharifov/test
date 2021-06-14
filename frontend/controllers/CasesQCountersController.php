@@ -97,6 +97,11 @@ class CasesQCountersController extends FController
                         $result['need-action'] = $count;
                     }
                     break;
+                case 'unidentified':
+                    if ($count = $this->getUnidentifiedAction()) {
+                        $result['unidentified'] = $count;
+                    }
+                    break;
             }
         }
 
@@ -192,5 +197,15 @@ class CasesQCountersController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->casesQRepository->getNeedActionCount($user);
+    }
+
+    private function getUnidentifiedAction(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/unidentified')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getUnidentifiedCount($user);
     }
 }
