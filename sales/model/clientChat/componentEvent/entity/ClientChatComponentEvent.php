@@ -82,7 +82,7 @@ class ClientChatComponentEvent extends \yii\db\ActiveRecord
             ['ccce_event_type', 'integer'],
             ['ccce_event_type', 'in', 'range' => array_keys(self::getComponentTypeList())],
 
-            ['ccce_sort_order', 'integer', 'max' => 255],
+            ['ccce_sort_order', 'integer', 'max' => 255, 'min' => 0],
 
             ['ccce_updated_dt', 'safe'],
 
