@@ -102,6 +102,11 @@ class CasesQCountersController extends FController
                         $result['unidentified'] = $count;
                     }
                     break;
+                case 'first-priority':
+                    if ($count = $this->getFirstPriorityAction()) {
+                        $result['first-priority'] = $count;
+                    }
+                    break;
             }
         }
 
@@ -207,5 +212,15 @@ class CasesQCountersController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->casesQRepository->getUnidentifiedCount($user);
+    }
+
+    private function getFirstPriorityAction(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/first-priority')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getFirstPriorityCount($user);
     }
 }
