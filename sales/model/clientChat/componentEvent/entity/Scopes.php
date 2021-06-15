@@ -2,6 +2,8 @@
 
 namespace sales\model\clientChat\componentEvent\entity;
 
+use yii\db\Expression;
+
 /**
 * @see ClientChatComponentEvent
 */
@@ -26,6 +28,11 @@ class Scopes extends \yii\db\ActiveQuery
     public function byChannelId(int $id): self
     {
         return $this->andWhere(['ccce_chat_channel_id' => $id]);
+    }
+
+    public function orChannelIdIsNotSet()
+    {
+        return $this->orWhere(['is', 'ccce_chat_channel_id', new Expression('null')]);
     }
 
     public function enabled(): self

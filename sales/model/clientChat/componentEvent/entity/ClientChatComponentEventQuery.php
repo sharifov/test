@@ -12,6 +12,7 @@ class ClientChatComponentEventQuery
     {
         return ClientChatComponentEvent::find()
             ->byChannelId($id)
+            ->orChannelIdIsNotSet()
             ->enabled()
             ->beforeChatCreation()
             ->orderBy(['ccce_sort_order' => SORT_ASC])->all();
@@ -21,6 +22,7 @@ class ClientChatComponentEventQuery
     {
         return ClientChatComponentEvent::find()
             ->byChannelId($id)
+            ->orChannelIdIsNotSet()
             ->enabled()
             ->afterChatCreation()
             ->orderBy(['ccce_sort_order' => SORT_ASC])->all();
