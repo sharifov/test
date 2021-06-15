@@ -295,7 +295,8 @@ class CasesQRepository
     public function getUnidentifiedQuery(Employee $user): ActiveQuery
     {
         $query = CasesQSearch::find()->andWhere(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]]);
-        $query->andWhere($this->freeCase());
+        $query->joinWith(['client', 'caseSale']);
+        $query->andWhere(['css_cs_id' => null]);
 
         if (!$user->isAdmin()) {
             $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
