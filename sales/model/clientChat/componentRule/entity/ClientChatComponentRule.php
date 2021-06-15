@@ -62,7 +62,7 @@ class ClientChatComponentRule extends \yii\db\ActiveRecord
             ['cccr_runnable_component', 'required'],
             ['cccr_runnable_component', 'in', 'range' => array_keys(RunnableComponent::getListName())],
 
-            ['cccr_sort_order', 'integer'],
+            ['cccr_sort_order', 'integer', 'max' => 255],
 
             ['cccr_updated_dt', 'safe'],
 

@@ -89,7 +89,7 @@ class ClientChatComponentEventController extends \frontend\controllers\FControll
                 $data[$componentRule->formName()][] = $componentRule->attributes;
             }
 
-            $form = new ComponentEventCreateForm(count($data['ClientChatComponentRule']));
+            $form = new ComponentEventCreateForm(count($data['ClientChatComponentRule'] ?? []));
             $form->load($data);
 
             return $this->render('update', [
