@@ -146,7 +146,7 @@ class RoomConnectedEvent implements ChatRequestEvent
                     if ($client) {
                         $this->clientManageService->updateClientByChatRequest($client, $clientChatRequest, (int)$clientChat->cch_project_id);
                     } else {
-                        $this->clientManageService->createByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
+                        $client = $this->clientManageService->createByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
                     }
                     $clientChat->cch_client_id = $client->id;
                 }
