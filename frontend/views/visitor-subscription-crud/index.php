@@ -37,7 +37,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => VisitorSubscription::getSubscriptionListName()
             ],
-            'vs_enabled:booleanByLabel',
+            [
+                'attribute' => 'vs_enabled',
+                'value' => static function (VisitorSubscription $model) {
+                    return Yii::$app->formatter->asBooleanByLabel($model->vs_enabled);
+                },
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'format' => 'raw',
+            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'vs_expired_date',
