@@ -53,7 +53,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => ClientChatComponentEvent::getComponentTypeList()
             ],
-            'ccce_enabled:booleanByLabel',
+            [
+                'attribute' => 'ccce_enabled',
+                'value' => static function (ClientChatComponentEvent $model) {
+                    return Yii::$app->formatter->asBooleanByLabel($model->ccce_enabled);
+                },
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'format' => 'raw',
+            ],
             'ccce_sort_order',
             [
                 'class' => UserSelect2Column::class,

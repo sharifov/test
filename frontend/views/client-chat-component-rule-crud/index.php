@@ -45,7 +45,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             'cccr_sort_order',
-            'cccr_enabled:booleanByLabel',
+            [
+                'attribute' => 'cccr_enabled',
+                'value' => static function (ClientChatComponentRule $model) {
+                    return Yii::$app->formatter->asBooleanByLabel($model->cccr_enabled);
+                },
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'format' => 'raw',
+            ],
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'cccr_created_user_id',
