@@ -24,7 +24,7 @@ class JqueryAsset extends AssetBundle
 //    ];
 
     public $js = [
-        'https://code.jquery.com/jquery-3.5.1.min.js',
+        'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
         //'https://code.jquery.com/jquery-3.6.0.min.js',
     ];
 }
