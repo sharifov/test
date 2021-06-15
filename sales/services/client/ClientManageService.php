@@ -402,6 +402,78 @@ class ClientManageService
         return $client;
     }
 
+    public function updateClientByChatRequest(Client $client, ClientChatRequest $clientChatRequest, int $projectId): void
+    {
+        $clientEmailForm = (new EmailCreateForm());
+        $clientEmailForm->email = $clientChatRequest->getEmailFromData();
+
+        $clientPhoneForm = new PhoneCreateForm();
+        $clientPhoneForm->phone = $clientChatRequest->getPhoneFromData();
+
+        $rcId = $clientChatRequest->getClientRcId();
+        $uuId = $clientChatRequest->getClientUuId();
+
+        $ip = null;
+        if ($data = $clientChatRequest->getDecodedData()) {
+            $ip = $data['geo']['ip'] ?? null;
+        }
+        $clientForm = new ClientCreateForm([
+            'firstName' => $clientChatRequest->getNameFromData(),
+            'rcId' => $rcId,
+            'uuid' => $uuId,
+            'typeCreate' => Client::TYPE_CREATE_CLIENT_CHAT,
+            'projectId' => $projectId,
+            'ip' => $ip,
+        ]);
+
+        $this->updateClient($client, $clientForm);
+        $this->addEmail($client, $clientEmailForm);
+        $this->addPhone($client, $clientPhoneForm);
+        $this->addVisitorId($client, $rcId);
+    }
+
+    public function createByClientChatRequest(ClientChatRequest $clientChatRequest, int $projectId): Client
+    {
+        $clientEmailForm = (new EmailCreateForm());
+        $clientEmailForm->email = $clientChatRequest->getEmailFromData();
+
+        $clientPhoneForm = new PhoneCreateForm();
+        $clientPhoneForm->phone = $clientChatRequest->getPhoneFromData();
+
+        $rcId = $clientChatRequest->getClientRcId();
+        $uuId = $clientChatRequest->getClientUuId();
+
+        $ip = null;
+        if ($data = $clientChatRequest->getDecodedData()) {
+            $ip = $data['geo']['ip'] ?? null;
+        }
+        $clientForm = new ClientCreateForm([
+            'firstName' => $clientChatRequest->getNameFromData(),
+            'rcId' => $rcId,
+            'uuid' => $uuId,
+            'typeCreate' => Client::TYPE_CREATE_CLIENT_CHAT,
+            'projectId' => $projectId,
+            'ip' => $ip,
+        ]);
+
+        if (empty($clientForm->projectId)) {
+            throw new \RuntimeException('Cannot create client without Project');
+        }
+
+        $parentId = null;
+        if ($parent = ClientsQuery::findParentByEmail($clientEmailForm->email, $clientForm->projectId)) {
+            /** @var Client $parent */
+            $parentId = $parent->id;
+        }
+        $client = $this->createByRcId($clientForm, $parentId);
+
+        $this->addEmail($client, $clientEmailForm);
+        $this->addPhone($client, $clientPhoneForm);
+        $this->addVisitorId($client, $rcId);
+
+        return $client;
+    }
+
     public function getOrCreateByClientChatRequest(ClientChatRequest $clientChatRequest, int $projectId): Client
     {
         $clientEmailForm = (new EmailCreateForm());

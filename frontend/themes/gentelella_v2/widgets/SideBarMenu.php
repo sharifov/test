@@ -259,6 +259,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Chat Forms', 'url' => ['/client-chat-form-crud/index']],
                         ['label' => 'User Chat Data CRUD', 'url' => ['/user-client-chat-data-crud/index']],
                         ['label' => 'User Chat Data Manage', 'url' => ['/user-client-chat-data/index']],
+                        ['label' => 'Client Chat Component Event', 'url' => ['/client-chat-component-event/index']],
+                        ['label' => 'Client Chat Component Event CRUD', 'url' => ['/client-chat-component-event-crud/index']],
+                        ['label' => 'Client Chat Component Rule CRUD', 'url' => ['/client-chat-component-rule-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
@@ -347,6 +350,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Client Accounts', 'url' => ['/client-account-crud/index'], 'icon' => 'user'],
                 ['label' => 'Client Account Social', 'url' => ['/client-account-social-crud/index'], 'icon' => 'odnoklassniki'],
                 ['label' => 'Client Visitor', 'url' => ['/client-visitor-crud/index'], 'icon' => 'comments'],
+                ['label' => 'Visitor Subscription', 'url' => ['/visitor-subscription-crud/index'], 'icon' => 'bell'],
             ]
         ];
 

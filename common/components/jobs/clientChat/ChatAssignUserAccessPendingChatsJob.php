@@ -38,13 +38,12 @@ class ChatAssignUserAccessPendingChatsJob extends BaseJob implements JobInterfac
 
             $service = \Yii::createObject(ClientChatService::class);
             $service->assignUserAccessToPendingChats($this->userId);
-
-            \Yii::$app->redis->del($this->getRedisKey());
         } catch (NotFoundException $e) {
             \Yii::info($e->getMessage(), 'info\ChatAssignUserAccessPendingChats');
         } catch (\Throwable $e) {
             AppHelper::throwableLogger($e, 'ChatAssignUserAccessPendingChats:Execute:Throwable', false);
         }
+        \Yii::$app->redis->del($this->getRedisKey());
     }
 
     private function getRedisKey(): string

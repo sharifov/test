@@ -114,7 +114,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
         if (ArrayHelper::isIn(Yii::$app->controller->action->uniqueId, self::CHAT_SUBSCRIBE_LIST)) {
             $cchId = Yii::$app->request->get('chid');
             if ($cchId) {
-                $chat = ClientChat::find()->select(['cch_id'])->byId($cchId)->asArray()->one();
+                $chat = ClientChat::find()->select(['cch_id'])->byId((int)$cchId)->asArray()->one();
                 if ($chat && !empty($chat['cch_id'])) {
                     $subList[] = 'chat-' . $chat['cch_id'];
                     unset($chat);
