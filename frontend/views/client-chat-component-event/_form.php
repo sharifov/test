@@ -86,7 +86,10 @@ $select2Properties = [
         ?>
     </div>
 
-    <div>
+    <div class="col-md-12" style="margin-top: 20px;">
+        <hr>
+        <h4>Client Chat Component Rules</h4>
+
         <?= $form->field($model, 'componentRules')->widget(MultipleInput::class, [
             'max' => 10,
 //    'allowEmptyList' => true,
