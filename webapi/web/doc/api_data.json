@@ -736,6 +736,101 @@
   },
   {
     "type": "post",
+    "url": "/v1/client-chat/subscribe",
+    "title": "Client Chat Subscribe",
+    "version": "0.1.0",
+    "name": "ClientChat",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "chat_visitor_id",
+            "description": "<p>Chat visitor Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 100",
+            "optional": false,
+            "field": "subscription_uid",
+            "description": "<p>Subscription Unique id <code>Required</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "chat_room_id",
+            "description": "<p>Chat room id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "expired_date",
+            "description": "<p>Subscription expiration date <code>format yyyy-mm-dd</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example Flizzard Subscription:",
+          "content": "{\n            \"chat_visitor_id\": \"5779293e-dd0f-476f-b0aa-bbbb\",\n            \"subscription_uid\": \"aksdjAICl5mm590vml\",\n            \"chat_room_id\": \"9e06ff33-a3b3-4fa0-aa88-asdw2f45gted54yh\",\n            \"expired_date\": \"2021-10-25\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n            \"status\": 400,\n            \"message\": \"Some errors occurred while creating client chat request\",\n            \"errors\": [\n                \"Visitor subscription saving error: Subscription uid with type has already been taken\"\n            ],\n            \"code\": \"13101\"\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
+    "type": "post",
     "url": "/v1/client-chat-request/feedback",
     "title": "Client Chat Feedback",
     "version": "0.1.0",

@@ -41,7 +41,7 @@ class VisitorSubscription extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['vs_subscription_uid', 'vs_type_id'], 'unique', 'targetAttribute' => ['vs_subscription_uid', 'vs_type_id']],
+            [['vs_subscription_uid', 'vs_type_id'], 'unique', 'targetAttribute' => ['vs_subscription_uid', 'vs_type_id'], 'message' => 'Subscription uid with type has already been taken'],
 
             ['vs_created_dt', 'safe'],
 
@@ -90,5 +90,28 @@ class VisitorSubscription extends \yii\db\ActiveRecord
     public function getSubscriptionName(): string
     {
         return self::getSubscriptionListName()[$this->vs_type_id] ?? 'Unknown subscription';
+    }
+
+    public static function createByApi(string $subscriptionUid, ?string $expiredDate)
+    {
+        $self = new self();
+        $self->vs_subscription_uid = $subscriptionUid;
+        $self->vs_expired_date = $expiredDate;
+        return $self;
+    }
+
+    public function setFlizzardType(): void
+    {
+        $this->vs_type_id = self::SUBSCRIPTION_FLIZZARD;
+    }
+
+    public function enabled(): void
+    {
+        $this->vs_enabled = 1;
+    }
+
+    public function disabled(): void
+    {
+        $this->vs_enabled = 0;
     }
 }
