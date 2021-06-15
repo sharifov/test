@@ -759,7 +759,6 @@ class CasesQSearch extends Cases
     public function searchUnidentified($params, Employee $user)
     {
         $query = $this->casesQRepository->getUnidentifiedQuery($user);
-        $query->joinWith(['client']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
