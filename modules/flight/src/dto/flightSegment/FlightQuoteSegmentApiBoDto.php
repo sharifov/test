@@ -27,6 +27,7 @@ class FlightQuoteSegmentApiBoDto
     public $airEquipType;
     public $marriageGroup;
     public $cabinClass;
+    public $cabinClassBasic;
     public $meal;
     public $fareCode;
     public $key;
@@ -59,6 +60,7 @@ class FlightQuoteSegmentApiBoDto
         $this->marketingAirline = $segmentApiForm->mainAirline;
         $this->marriageGroup = $segmentApiForm->marriageGroup;
         $this->cabinClass = self::mapCabinCalss($segmentApiForm->cabin);
+        $this->cabinClassBasic = $segmentApiForm->cabinIsBasic;
         $this->fareCode = $segmentApiForm->fareCode;
         $this->mileage = $segmentApiForm->mileage;
 

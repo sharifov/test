@@ -123,7 +123,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     $airlineNames = [];
                     foreach ($segments as $segment) {
                         if (!in_array(SearchService::getCabin($segment->qs_cabin), $cabins)) {
-                            $cabins[] = SearchService::getCabin($segment->qs_cabin);
+                            $cabins[] = SearchService::getCabin($segment->qs_cabin, $segment->qs_cabin_basic);
                         }
                         if (isset($segment->qs_recheck_baggage) && $segment->qs_recheck_baggage) {
                             $needRecheck = true;

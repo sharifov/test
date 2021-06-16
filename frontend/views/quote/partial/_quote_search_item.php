@@ -107,7 +107,7 @@ $isQuoteAssignedToFlight = false;
             <strong class="quote__quote-price">$<?= $result['price'] ?></strong>
         </div>
     </div>
-    <div class="quote__wrapper">
+    <div class="quote_search_wrapper">
         <div class="quote__trip">
             <?php $tripsInfo = [];
             $hasAirportChange = false;?>
@@ -127,7 +127,7 @@ $isQuoteAssignedToFlight = false;
                 $needRecheck = false;
                 foreach ($trip['segments'] as $segment) {
                     if (!in_array(SearchService::getCabin($segment['cabin']), $cabins)) {
-                        $cabins[] = SearchService::getCabin($segment['cabin']);
+                        $cabins[] = SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']));
                     }
 
                     if (isset($segment['recheckBaggage']) && $segment['recheckBaggage'] == true) {
@@ -343,7 +343,7 @@ $isQuoteAssignedToFlight = false;
                                         <div class="segment__wrapper">
                                             <div class="segment__options">
                                                 <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $segment['marketingAirline']?>.png" alt="<?= $segment['marketingAirline']?>" class="segment__airline-logo">
-                                                <div class="segment__cabin-xs"><?= SearchService::getCabin($segment['cabin'])?></div>
+                                                <div class="segment__cabin-xs"><?= SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']))?></div>
                                                 <div class="segment__airline"><?= (!isset($airlines[$segment['marketingAirline']])) ?: $airlines[$segment['marketingAirline']];?></div>
                                                 <div class="segment__flight-nr">Flight <?= $segment['marketingAirline']?> <?= $segment['flightNumber']?></div>
                                             </div>
@@ -362,7 +362,7 @@ $isQuoteAssignedToFlight = false;
 
                                             <div class="segment__duration-wrapper">
                                                 <div class="segment__duration-time"><?= SearchService::durationInMinutes($segment['duration'])?></div>
-                                                <div class="segment__cabin"><?= SearchService::getCabin($segment['cabin'])?></div>
+                                                <div class="segment__cabin"><?= SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']))?></div>
                                             </div>
                                         </div>
                                         <div class="segment__note search_fq">

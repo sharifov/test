@@ -44,7 +44,7 @@ use yii\helpers\Html;
                                     <div class="segment__wrapper">
                                         <div class="segment__options">
                                             <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $segment->qs_marketing_airline?>.png" alt="<?= $segment->qs_marketing_airline?>" class="segment__airline-logo">
-                                            <div class="segment__cabin-xs"><?= SearchService::getCabin($segment->qs_cabin)?></div>
+                                            <div class="segment__cabin-xs"><?= SearchService::getCabin($segment->qs_cabin, $segment->qs_cabin_basic)?></div>
                                             <div class="segment__airline">
                                                 <?php $airline = Airline::findIdentity($segment->qs_marketing_airline);
                                                 if ($airline !== null) {
@@ -68,7 +68,7 @@ use yii\helpers\Html;
 
                                         <div class="segment__duration-wrapper">
                                             <div class="segment__duration-time"><?= SearchService::durationInMinutes($segment->qs_duration)?></div>
-                                            <div class="segment__cabin"><?= SearchService::getCabin($segment->qs_cabin)?></div>
+                                            <div class="segment__cabin"><?= SearchService::getCabin($segment->qs_cabin, $segment->qs_cabin_basic)?></div>
                                             <?php if ($segment->qs_ticket_id) :?>
                                                 <div class="warning" title="Ticket <?=$segment->qs_ticket_id?>"><span class="fa fa-ticket"></span> Tick <?=$segment->qs_ticket_id?></div>
                                             <?php endif;?>

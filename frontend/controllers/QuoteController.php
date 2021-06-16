@@ -309,6 +309,7 @@ class QuoteController extends FController
                                                 $segment->qs_operating_airline = $segmentEntry['operatingAirline'];
                                                 $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
                                                 $segment->qs_cabin = $segmentEntry['cabin'];
+                                                $segment->qs_cabin_basic = !empty($segmentEntry['cabinIsBasic']) ? 1 : 0;
 
                                                 if ($ticketSegments && isset($ticketSegments[$tripNr][$segmentNr])) {
                                                     $segment->qs_ticket_id = $ticketSegments[$tripNr][$segmentNr];

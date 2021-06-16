@@ -86,11 +86,12 @@ class SearchService
 
     /**
      * @param string|null $cabin
+     * @param bool $isBasic
      * @return string|null
      */
-    public static function getCabin(?string $cabin): ?string
+    public static function getCabin(?string $cabin, bool $isBasic = false): ?string
     {
-        return self::CABIN_LIST[$cabin] ?? $cabin;
+        return ($isBasic ? 'Basic ' : '') . (self::CABIN_LIST[$cabin] ?? $cabin);
     }
 
     /**

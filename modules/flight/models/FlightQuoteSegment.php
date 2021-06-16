@@ -34,6 +34,7 @@ use yii\helpers\VarDumper;
  * @property string|null $fqs_air_equip_type
  * @property string|null $fqs_marriage_group
  * @property string|null $fqs_cabin_class
+ * @property bool $fqs_cabin_class_basic [tinyint(1)]
  * @property string|null $fqs_meal
  * @property string|null $fqs_fare_code
  * @property string|null $fqs_key
@@ -76,7 +77,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     {
         return [
             [['fqs_flight_quote_id', 'fqs_departure_dt', 'fqs_arrival_dt', 'fqs_departure_airport_iata', 'fqs_arrival_airport_iata'], 'required'],
-            [['fqs_flight_quote_id', 'fqs_flight_quote_trip_id', 'fqs_stop', 'fqs_flight_number', 'fqs_duration', 'fqs_ticket_id', 'fqs_recheck_baggage', 'fqs_mileage'], 'integer'],
+            [['fqs_flight_quote_id', 'fqs_flight_quote_trip_id', 'fqs_stop', 'fqs_flight_number', 'fqs_duration', 'fqs_ticket_id', 'fqs_recheck_baggage', 'fqs_mileage', 'fqs_cabin_class_basic'], 'integer'],
             [['fqs_departure_dt', 'fqs_arrival_dt', 'fqs_uid'], 'safe'],
             [['fqs_booking_class'], 'string', 'max' => 1],
             [
@@ -244,6 +245,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
         $segment->fqs_air_equip_type = $dto->airEquipType;
         $segment->fqs_marriage_group = $dto->marriageGroup;
         $segment->fqs_cabin_class = $dto->cabinClass;
+        $segment->fqs_cabin_class_basic = (int)$dto->cabinClassBasic;
         $segment->fqs_meal = $dto->meal;
         $segment->fqs_fare_code = $dto->fareCode;
         $segment->fqs_key = $dto->key;
@@ -308,6 +310,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
         $segment->fqs_air_equip_type = $dto->airEquipType;
         $segment->fqs_marriage_group = $dto->marriageGroup;
         $segment->fqs_cabin_class = $dto->cabinClass;
+        $segment->fqs_cabin_class_basic = (int)$dto->cabinClassBasic;
         $segment->fqs_meal = $dto->meal;
         $segment->fqs_fare_code = $dto->fareCode;
         $segment->fqs_key = $dto->key;
