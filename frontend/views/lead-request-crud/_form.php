@@ -20,6 +20,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'lr_job_id')->textInput() ?>
 
+        <?= $form->field($model, 'lr_lead_id')->textInput() ?>
+
         <?php
         try {
             $model->lr_json_data = JsonHelper::encode($model->lr_json_data);

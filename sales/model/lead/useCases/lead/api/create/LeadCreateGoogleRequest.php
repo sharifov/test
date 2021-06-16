@@ -11,6 +11,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\setting\SettingHelper;
 use sales\model\leadRequest\entity\LeadRequest;
+use sales\model\leadRequest\repository\LeadRequestRepository;
 use sales\model\leadRequest\service\LeadRequestDictionary;
 use sales\model\leadRequest\service\LeadRequestService;
 use sales\repositories\lead\LeadRepository;
@@ -30,6 +31,7 @@ use yii\helpers\ArrayHelper;
  * @property TransactionManager $transactionManager
  * @property LeadHashGenerator $hashGenerator
  * @property LeadRepository $leadRepository
+ * @property LeadRequestRepository $leadRequestRepository
  */
 class LeadCreateGoogleRequest
 {
@@ -37,6 +39,7 @@ class LeadCreateGoogleRequest
     private TransactionManager $transactionManager;
     private LeadHashGenerator $hashGenerator;
     private LeadRepository $leadRepository;
+    private LeadRequestRepository $leadRequestRepository;
 
     /**
      * LeadCreateGoogleRequest constructor.
@@ -44,17 +47,20 @@ class LeadCreateGoogleRequest
      * @param TransactionManager $transactionManager
      * @param LeadHashGenerator $hashGenerator
      * @param LeadRepository $leadRepository
+     * @param LeadRequestRepository $leadRequestRepository
      */
     public function __construct(
         ClientManageService $clientManageService,
         TransactionManager $transactionManager,
         LeadHashGenerator $hashGenerator,
-        LeadRepository $leadRepository
+        LeadRepository $leadRepository,
+        LeadRequestRepository $leadRequestRepository
     ) {
         $this->clientManageService = $clientManageService;
         $this->transactionManager = $transactionManager;
         $this->hashGenerator = $hashGenerator;
         $this->leadRepository = $leadRepository;
+        $this->leadRequestRepository = $leadRequestRepository;
     }
 
     public function handle(LeadRequest $leadRequest): Lead
@@ -119,6 +125,9 @@ class LeadCreateGoogleRequest
             }
 
             $this->leadRepository->save($lead);
+
+            $leadRequest->setLeadId($lead->id);
+            $this->leadRequestRepository->save($leadRequest);
 
             return $lead;
         });

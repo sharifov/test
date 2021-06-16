@@ -3,10 +3,12 @@
 namespace sales\model\leadRequest\entity;
 
 use common\components\validators\CheckJsonValidator;
+use common\models\Lead;
 use common\models\Project;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -20,6 +22,9 @@ use yii\helpers\ArrayHelper;
  * @property string|null $lr_created_dt
  * @property int $lr_project_id
  * @property int $lr_source_id
+ * @property int|null $lr_lead_id
+ *
+ * @property Lead|null $lead
  */
 class LeadRequest extends \yii\db\ActiveRecord
 {
@@ -48,6 +53,8 @@ class LeadRequest extends \yii\db\ActiveRecord
             ['lr_json_data', CheckJsonValidator::class, 'skipOnEmpty' => true],
 
             ['lr_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            [['lr_lead_id'], 'integer'],
         ];
     }
 
@@ -75,8 +82,14 @@ class LeadRequest extends \yii\db\ActiveRecord
             'lr_json_data' => 'Json Data',
             'lr_created_dt' => 'Created Dt',
             'lr_project_id' => 'Project',
-            'lr_source_id' => 'Source'
+            'lr_source_id' => 'Source',
+            'lr_lead_id' => 'Lead'
         ];
+    }
+
+    public function getLead(): ActiveQuery
+    {
+        return $this->hasOne(Lead::class, ['id' => 'lr_lead_id']);
     }
 
     public static function find(): LeadRequestScopes
@@ -110,9 +123,15 @@ class LeadRequest extends \yii\db\ActiveRecord
         return $model;
     }
 
-    public function setJobId(?int $lr_job_id): LeadRequest
+    public function setJobId(?int $jobId): LeadRequest
     {
-        $this->lr_job_id = $lr_job_id;
+        $this->lr_job_id = $jobId;
+        return $this;
+    }
+
+    public function setLeadId(?int $leadId): LeadRequest
+    {
+        $this->lr_lead_id = $leadId;
         return $this;
     }
 }

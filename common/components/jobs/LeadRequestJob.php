@@ -3,29 +3,30 @@
 namespace common\components\jobs;
 
 use sales\model\lead\useCases\lead\api\create\LeadCreateGoogleRequest;
+use sales\model\leadRequest\entity\LeadRequest;
 use yii\queue\RetryableJobInterface;
 
 /**
  * Class LeadRequestJob
  *
- * @property $leadRequest
+ * @property int|null $leadRequestId
  */
 class LeadRequestJob extends BaseJob implements RetryableJobInterface
 {
-    public $leadRequest;
-
-
+    public $leadRequestId;
 
     public function execute($queue)
     {
         $this->executionTimeRegister();
         try {
-            $leadCreateGoogleRequest = \Yii::$container->get(LeadCreateGoogleRequest::class);
-            $leadCreateGoogleRequest->handle($this->leadRequest);
+            if ($this->leadRequestId && $leadRequest = LeadRequest::findOne($this->leadRequestId)) {
+                $leadCreateGoogleRequest = \Yii::$container->get(LeadCreateGoogleRequest::class);
+                $leadCreateGoogleRequest->handle($leadRequest);
+            }
         } catch (\Throwable $throwable) {
             \Yii::error([
                 'message' => $throwable->getMessage(),
-                'leadRequest' => $this->leadRequest,
+                'leadRequestId' => $this->leadRequestId,
             ], 'LeadRequestJob:Throwable');
             throw new \Exception($throwable->getMessage());
         }

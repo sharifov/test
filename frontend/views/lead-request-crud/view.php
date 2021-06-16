@@ -1,6 +1,7 @@
 <?php
 
 use frontend\helpers\JsonHelper;
+use sales\model\leadRequest\entity\LeadRequest;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -35,6 +36,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'lr_id',
                 'lr_type',
                 'lr_job_id',
+                [
+                    'attribute' => 'lr_lead_id',
+                    'value' => static function (LeadRequest $model) {
+                        return Yii::$app->formatter->asLead($model->lead, 'fa-cubes');
+                    },
+                    'format' => 'raw',
+                ],
                 'lr_created_dt:byUserDateTime',
             ],
         ]) ?>

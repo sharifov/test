@@ -157,9 +157,9 @@ class LeadRequestController extends Controller
             $this->leadRequestRepository->save($leadRequest);
 
             $leadRequestJob = new LeadRequestJob();
-            $leadRequestJob->leadRequest = $leadRequest;
+            $leadRequestJob->leadRequestId = $leadRequest->lr_id;
 
-            if ($jobId = Yii::$app->queue_client_chat_job->priority(10)->push($leadRequestJob)) {
+            if ($jobId = Yii::$app->queue_client_chat_job->priority(50)->push($leadRequestJob)) {
                 $leadRequest->setJobId($jobId);
                 $this->leadRequestRepository->save($leadRequest);
             } else {
