@@ -303,8 +303,10 @@ class FlightManageApiService
                         $this->flightPaxRepository->save($flightPax);
                         $flightPaxProcessed[$passengerApiForm->getHashIdentity()] = $flightPax;
                     }
-                    $flightQuoteTicket = FlightQuoteTicket::create($flightPax->fp_id, $flightQuoteBookingId, $passengerApiForm->tktNumber);
-                    $this->flightQuoteTicketRepository->save($flightQuoteTicket);
+                    if ($passengerApiForm->tktNumber) {
+                        $flightQuoteTicket = FlightQuoteTicket::create($flightPax->fp_id, $flightQuoteBookingId, $passengerApiForm->tktNumber);
+                        $this->flightQuoteTicketRepository->save($flightQuoteTicket);
+                    }
                 }
             }
 
