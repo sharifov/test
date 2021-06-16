@@ -2380,7 +2380,7 @@ class LeadController extends FController
                 Yii::$app->session->setFlash('success', 'Success');
 
                 if ((int) $lead->employee_id !== $user->getId()) {
-                    $leadUserConversion = LeadUserConversion::create($lead->id, $user->getId());
+                    $leadUserConversion = LeadUserConversion::create($clone->id, $user->getId());
                     (new LeadUserConversionRepository())->save($leadUserConversion);
                 }
 
