@@ -38,6 +38,11 @@ class LeadUserConversionController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'delete',
+                ],
+            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
