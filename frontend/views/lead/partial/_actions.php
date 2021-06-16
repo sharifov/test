@@ -98,13 +98,13 @@ $user = Yii::$app->user->identity;
     $viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
     $buttonsSubAction = [];
 
-    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isPending() || $leadModel->isProcessing() || $leadModel->isAlternative()) && $leadModel->getAppliedAlternativeQuotes() === null);
+    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isBookFailed() || $leadModel->isPending() || $leadModel->isProcessing() || $leadModel->isAlternative()) && $leadModel->getAppliedAlternativeQuotes() === null);
     $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
     if ($processingConditions) {
-    //    if ($user->isAdmin() || $user->isSupervision()) {
-    //        $buttonsSubAction[] = $buttonAnswer;
-    //    }
+        //    if ($user->isAdmin() || $user->isSupervision()) {
+        //        $buttonsSubAction[] = $buttonAnswer;
+        //    }
         //$buttonsSubAction[] = $buttonHoldOn;
         $buttonsSubAction[] = $buttonFollowUp;
         if (Auth::can('/lead-change-state/snooze')) {
@@ -182,7 +182,7 @@ $user = Yii::$app->user->identity;
         <?php if ($takeConditions) {
             if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold())) {
                 echo $buttonTakeOver;
-            } elseif ($leadModel->isPending() || $leadModel->isFollowUp() || $leadModel->isAlternative()) {
+            } elseif ($leadModel->isPending() || $leadModel->isFollowUp() || $leadModel->isAlternative() || $leadModel->isBookFailed()) {
                 echo $buttonTake;
             }
         }?>
