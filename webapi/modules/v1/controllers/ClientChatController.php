@@ -68,10 +68,8 @@ class ClientChatController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string}                       chat_visitor_id         Chat visitor Id
-     * @apiParam {string{max 100}}              subscription_uid        Subscription Unique id <code>Required</code>
-     * @apiParam {string}                       chat_room_id            Chat room id
-     * @apiParam {string}                       expired_date            Subscription expiration date <code>format yyyy-mm-dd</code>
+     * @apiParam {string{max 100}}            subscription_uid        Subscription Unique id <code>Required</code>
+     * @apiParam {date}                       [expired_date]          Subscription expiration date <code>format yyyy-mm-dd</code>
      *
      *
      * @apiParamExample {json} Request-Example Flizzard Subscription:

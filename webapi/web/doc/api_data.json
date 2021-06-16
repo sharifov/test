@@ -1199,13 +1199,6 @@
           {
             "group": "Parameter",
             "type": "string",
-            "optional": false,
-            "field": "chat_visitor_id",
-            "description": "<p>Chat visitor Id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
             "size": "max 100",
             "optional": false,
             "field": "subscription_uid",
@@ -1213,15 +1206,8 @@
           },
           {
             "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "chat_room_id",
-            "description": "<p>Chat room id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
+            "type": "date",
+            "optional": true,
             "field": "expired_date",
             "description": "<p>Subscription expiration date <code>format yyyy-mm-dd</code></p>"
           }
