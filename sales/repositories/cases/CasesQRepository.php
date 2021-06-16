@@ -312,14 +312,30 @@ class CasesQRepository
     public function getFirstPriorityCount(Employee $user): int
     {
         //return $this->getFirstPriorityQuery($user)->count();
-        return 0;
+        return 1;
     }
 
     public function getFirstPriorityQuery(Employee $user): ActiveQuery
     {
+        $case_past_departure_date = 2; //days
+        $case_priority_days = 20; // days
+
         $query = CasesQSearch::find()->andWhere(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]]);
         $query->joinWith(['client', 'caseSale as cs']);
         $query->andWhere(['not', ['cs.css_cs_id' => null]]);
+        //$query->andWhere(['last_out_date' => '2021-08-13 20:35:00']);
+        //$query->andWhere(['datediff("last_out_date", CURDATE())' => 59]);
+        //$query->andWhere('datediff(CURDATE(), last_out_date) <= ' . $case_past_departure_date);
+
+        //$query->andWhere('ADDDATE(CURDATE(), 60) > SUBDATE(last_out_date, '. $case_priority_days .')');
+        //$query->andWhere('ADDDATE(CURDATE(), 62) < ADDDATE(last_out_date, ' . $case_past_departure_date . ')');
+
+        $query->andWhere('CURDATE() > SUBDATE(last_out_date, ' . $case_priority_days . ')');
+        $query->andWhere('CURDATE() < ADDDATE(last_out_date, ' . $case_past_departure_date . ')');
+
+
+
+        //var_dump($query->createCommand()->getRawSql()); die();
 
         if (!$user->isAdmin()) {
             $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
