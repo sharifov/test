@@ -38,7 +38,7 @@ class LogCleaner extends BaseCleaner implements CleanerInterface
 
     public static function replaceSelectToDelete(string $sql): string
     {
-        $sql = str_replace('`', '', $sql);
+        $sql = str_replace(['`', "\\\\"], ['', "\\"], $sql);
         $sql = strstr($sql, ' FROM');
         return 'DELETE' . $sql;
     }
