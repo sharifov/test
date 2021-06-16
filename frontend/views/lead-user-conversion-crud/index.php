@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\components\grid\UserColumn;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use yii\grid\SerialColumn;
 use yii\grid\ActionColumn;
@@ -38,7 +39,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
-            'luc_user_id:userName',
+            [
+                'attribute' => 'luc_user_id',
+                'class' => UserColumn::class,
+                'relation' => 'lucUser',
+            ],
             'luc_description',
             [
                 'class' => DateTimeColumn::class,
