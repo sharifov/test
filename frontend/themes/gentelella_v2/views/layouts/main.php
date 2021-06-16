@@ -11,6 +11,7 @@ use frontend\widgets\frontendWidgetList\louassist\LouAssistWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
+use sales\helpers\app\ReleaseVersionHelper;
 use yii\helpers\Html;
 use sales\helpers\setting\SettingHelper;
 
@@ -298,7 +299,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
         <footer>
             <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?>,
                 <span title="<?=Yii::$app->params['release']['git_branch'] ?? ''?> : <?=Yii::$app->params['release']['git_hash'] ?? ''?>">
-                    v. <?=Yii::$app->params['release']['version'] ?? ''?>
+                    v. <?php echo ReleaseVersionHelper::getReleaseVersion(true) ?? '' ?>
                 </span>
                 <span title="Hostname">
                     , host: <?=Yii::$app->params['appHostname'] ?? ''?>

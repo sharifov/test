@@ -26,6 +26,7 @@ class Metrics extends Component
     public const NAMESPACE_CONSOLE  = 'console';
     public const NAMESPACE_FRONTEND = 'frontend';
     public const NAMESPACE_WEBAPI   = 'webapi';
+    public const NAMESPACE_GLOBAL  = 'global';
 
     private array $counterList = [];
     private array $histogramList = [];
@@ -214,16 +215,46 @@ class Metrics extends Component
         }
     }
 
+    public function gaugeMetric(
+        string $name,
+        string $namespace,
+        float $value,
+        array $labels = [],
+        string $prefix = ''
+    ): void {
+        if ($this->isMetricsEnabled) {
+            $labels = self::prepareLabels($labels, true);
+            try {
+                $gauge = $this->registry->getOrRegisterGauge(
+                    self::stringToMetricStandard($namespace),
+                    self::keyFormatter($name, 'gauge', $prefix),
+                    self::helpFormatter($name, $prefix),
+                    array_keys($labels)
+                );
+                $gauge->set($value, array_values($labels));
+            } catch (\Throwable $throwable) {
+                \Yii::error(
+                    ArrayHelper::merge(AppHelper::throwableLog($throwable), func_get_args()),
+                    'Metrics:gaugeMetric:Throwable'
+                );
+            }
+        }
+    }
+
     public static function stringToMetricStandard(string $string, string $separator = '_'): string
     {
         return Inflector::slug(Inflector::camel2id($string, $separator), $separator);
     }
 
-    public static function prepareLabels(array $labels): array
+    public static function prepareLabels(array $labels, bool $keyOnly = false): array
     {
         $result = [];
         foreach ($labels as $key => $value) {
-            $result[self::stringToMetricStandard($key)] = self::stringToMetricStandard($value);
+            if ($keyOnly) {
+                $result[self::stringToMetricStandard($key)] = $value;
+            } else {
+                $result[self::stringToMetricStandard($key)] = self::stringToMetricStandard($value);
+            }
         }
         return $result;
     }
