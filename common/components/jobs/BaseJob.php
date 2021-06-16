@@ -40,6 +40,7 @@ class BaseJob extends BaseObject
         try {
             $metrics = \Yii::$container->get(Metrics::class);
             $seconds = round(microtime(true) - $this->timeStart, 1);
+            $seconds -= $this->delayJob;
             $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
             $metrics->histogramMetric(
                 'job_execute',
@@ -50,7 +51,7 @@ class BaseJob extends BaseObject
                 $buckets
             );
 
-            if ($seconds > ($limitExecution + $this->delayJob)) {
+            if ($seconds > $limitExecution) {
                 \Yii::warning(
                     'Warning: (' . self::runInClass() . ') exceeded execution time limit. Execution time (' . $seconds . ') sec',
                     'BaseJob:executionTimeRegister:TimeLimitExceeded'
