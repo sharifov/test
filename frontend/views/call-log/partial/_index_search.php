@@ -66,6 +66,16 @@ use common\models\Department;
                             'locale' => [
                                 'format' => 'Y-m-d H:i',
                                 'separator' => ' - '
+                            ],
+                            'ranges' => [
+                                  "Today" => ["moment().startOf('day')", "moment().endOf('day')"],
+                                  "Yesterday" => ["moment().startOf('day').subtract(1,'days')", "moment().endOf('day').subtract(1,'days')"],
+                                  "Last 7 Days" => ["moment().startOf('day').subtract(6,'days')", "moment().endOf('day')"],
+                                  "Last 30 Days" => ["moment().startOf('day').subtract(29,'days')", "moment().endOf('day')"],
+                                  "This Month" => ["moment().startOf('month')", "moment().endOf('month')"],
+                                  "Past Month" => ["moment().subtract(1, 'month').startOf('month')", "moment().subtract(1, 'month').endOf('month')"],
+                                  "Last 3 Month" => ["moment().subtract(3, 'month').startOf('day')", "moment().endOf('day')"],
+                                  "All time" => ["moment('2000-01-01')", "moment().endOf('day')"],
                             ]
                         ]
                     ])->label('Created DateTime Range');

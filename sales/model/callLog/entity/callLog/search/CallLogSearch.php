@@ -45,6 +45,7 @@ class CallLogSearch extends CallLog
     public $clq_access_count;
 
     public $createTimeRange;
+    public $createTimeZone;
     public $createTimeStart;
     public $createTimeEnd;
 
@@ -69,7 +70,7 @@ class CallLogSearch extends CallLog
     public $maxTalkTime;
     public $reportCreateTimeRange;
 
-    public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
+    public const CREATE_TIME_START_DEFAULT_RANGE = '-3 month';
 
     public function rules(): array
     {
@@ -116,10 +117,12 @@ class CallLogSearch extends CallLog
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
-        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
-        $this->createTimeRange = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59:59';
-    }
+        $userTimezoneName = Auth::user()->userParams->up_timezone;
+        $userTimezone = strlen($userTimezoneName) ? new \DateTimeZone($userTimezoneName) : new \DateTimeZone('UTC');
+        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone($userTimezone);
+        $this->createTimeRange = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59';
+        $this->createTimeZone = $currentDate->format('P e');
+}
 
     /*public function behaviors()
     {
