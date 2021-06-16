@@ -162,7 +162,7 @@ return array_merge($assetsProd, [
         ]
     ],
     JqueryAsset::class => [
-        'js' => ['https://code.jquery.com/jquery-3.5.1.min.js']
+        'js' => ['https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js']
     ],
     LanguageItemPluginAsset::class => [
         'class' => LajaxLanguageItemPluginAsset::class,
