@@ -11,6 +11,7 @@ use sales\forms\leadflow\ReturnReasonForm;
 use sales\forms\leadflow\SnoozeReasonForm;
 use sales\forms\leadflow\TrashReasonForm;
 use sales\guards\lead\FollowUpGuard;
+use sales\helpers\app\AppHelper;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\services\lead\LeadAssignService;
@@ -100,6 +101,9 @@ class LeadChangeStateController extends FController
 
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
+                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            } catch (\RuntimeException $e) {
+                Yii::warning(AppHelper::throwableLog($e), 'LeadChangeStateController:actionTakeOver:RuntimeException');
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             } catch (\Throwable $e) {
                 Yii::error($e, __CLASS__ . ':' . __FUNCTION__);
