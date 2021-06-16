@@ -327,6 +327,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead Request', 'url' => ['/lead-request-crud/index']],
                         ['label' => 'Lead Data', 'url' => ['/lead-data-crud/index']],
                         ['label' => 'Lead Data Key', 'url' => ['/lead-data-key-crud/index']],
+                        ['label' => 'Lead User Conversion', 'url' => ['/lead-user-conversion-crud/index']],
                     ]
                 ]
             ]

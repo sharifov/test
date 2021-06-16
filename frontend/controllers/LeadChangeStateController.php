@@ -11,6 +11,8 @@ use sales\forms\leadflow\ReturnReasonForm;
 use sales\forms\leadflow\SnoozeReasonForm;
 use sales\forms\leadflow\TrashReasonForm;
 use sales\guards\lead\FollowUpGuard;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
+use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadStateService;
 use Yii;
@@ -92,6 +94,10 @@ class LeadChangeStateController extends FController
                 /** @var Employee $user */
                 $user = Yii::$app->user->identity;
                 $this->assignService->takeOver($lead, $user, Yii::$app->user->id, $form->description);
+
+                $leadUserConversion = LeadUserConversion::create($lead->id, $user->getId());
+                (new LeadUserConversionRepository())->save($leadUserConversion);
+
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());

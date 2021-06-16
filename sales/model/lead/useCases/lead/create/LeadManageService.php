@@ -18,6 +18,8 @@ use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
+use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\visitorLog\useCase\CreateVisitorLog;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadPreferencesRepository;

@@ -502,9 +502,6 @@ $js = <<<JS
             url: quotePriceUrl,
             data: form.serialize(),
             success: function (data) {
-            
-                console.log(data); // TODO:: for debug
-            
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
                 });

@@ -34,6 +34,8 @@ use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use modules\fileStorage\src\widgets\FileStorageUploadWidget;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use sales\auth\Auth;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
@@ -72,6 +74,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 }
 
 $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
+
+$leadAbacDto = new LeadAbacDto($lead, Auth::id());
 ?>
 
 <?= $this->render('partial/_view_header', [
@@ -184,6 +188,14 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                 </div>
             <?php endif; ?>
 
+            <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_READ, View list User Conversation */ ?>
+            <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_READ)) : ?>
+                <?php echo $this->render('user_conversion/lead_user_conversion', [
+                    'lead' => $lead,
+                    'leadAbacDto' => $leadAbacDto,
+                ]) ?>
+            <?php endif; ?>
+
             <?php if (Auth::can('lead-view/check-list/view', ['lead' => $lead])) : ?>
                 <?= $this->render('checklist/lead_checklist', [
                     'lead' => $lead,
@@ -252,8 +264,6 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                     <?php endif; ?>
                 <?php endif; ?>
             <?php endif; ?>
-
-
 
         </div>
 
