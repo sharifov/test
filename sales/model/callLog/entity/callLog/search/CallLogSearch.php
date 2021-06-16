@@ -122,7 +122,7 @@ class CallLogSearch extends CallLog
         $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone($userTimezone);
         $this->createTimeRange = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59';
         $this->createTimeZone = $currentDate->format('P e');
-}
+    }
 
     /*public function behaviors()
     {
