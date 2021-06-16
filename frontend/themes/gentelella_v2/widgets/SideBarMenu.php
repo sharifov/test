@@ -705,7 +705,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
-                ['label' => 'User Sales', 'url' => ['/sales/index'], 'icon' => 'money'],
+                ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'],
             ]
         ];
 

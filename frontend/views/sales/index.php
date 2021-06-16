@@ -16,7 +16,7 @@ use yii\web\View;
 /* @var int $qualifiedLeadsTaken */
 /* @var int $cacheDuration */
 
-$this->title = 'Sales';
+$this->title = 'My Sales';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-stats-index">
