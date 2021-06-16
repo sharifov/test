@@ -677,16 +677,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.183.14",
+            "version": "3.184.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "5664b49a3338acb1dac095778f4136bd1e514d7d"
+                "reference": "34e6b2abfb9d9d2f619c7218fb366371099e26b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5664b49a3338acb1dac095778f4136bd1e514d7d",
-                "reference": "5664b49a3338acb1dac095778f4136bd1e514d7d",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/34e6b2abfb9d9d2f619c7218fb366371099e26b7",
+                "reference": "34e6b2abfb9d9d2f619c7218fb366371099e26b7",
                 "shasum": ""
             },
             "require": {
@@ -761,9 +761,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.183.14"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.184.4"
             },
-            "time": "2021-06-07T18:19:21+00:00"
+            "time": "2021-06-15T18:14:30+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -986,7 +986,7 @@
             "version": "3.5.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:jquery/jquery-dist.git",
+                "url": "https://github.com/jquery/jquery-dist.git",
                 "reference": "4c0e4becb8263bb5b3e6dadc448d8e7305ef8215"
             },
             "dist": {
@@ -1801,16 +1801,16 @@
         },
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.12.24",
+            "version": "8.12.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "bbefdd7ff0bae7bf5a62fc9e8c939fb40dd6d638"
+                "reference": "7d397cbd2e01e78cf79ff347e40a403dbc4c22fa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/bbefdd7ff0bae7bf5a62fc9e8c939fb40dd6d638",
-                "reference": "bbefdd7ff0bae7bf5a62fc9e8c939fb40dd6d638",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/7d397cbd2e01e78cf79ff347e40a403dbc4c22fa",
+                "reference": "7d397cbd2e01e78cf79ff347e40a403dbc4c22fa",
                 "shasum": ""
             },
             "require": {
@@ -1870,7 +1870,7 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-            "time": "2021-05-26T10:08:00+00:00"
+            "time": "2021-06-14T11:44:26+00:00"
         },
         {
             "name": "giggsey/locale",
@@ -1927,16 +1927,16 @@
         },
         {
             "name": "gnello/php-mattermost-driver",
-            "version": "v2.14.3",
+            "version": "v2.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gnello/php-mattermost-driver.git",
-                "reference": "d8d8beb8ba0b8c76a337fcebd15415f5d6ff5031"
+                "reference": "82ddf6e16f11df20493bc264b6e134fc61e4d2c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gnello/php-mattermost-driver/zipball/d8d8beb8ba0b8c76a337fcebd15415f5d6ff5031",
-                "reference": "d8d8beb8ba0b8c76a337fcebd15415f5d6ff5031",
+                "url": "https://api.github.com/repos/gnello/php-mattermost-driver/zipball/82ddf6e16f11df20493bc264b6e134fc61e4d2c5",
+                "reference": "82ddf6e16f11df20493bc264b6e134fc61e4d2c5",
                 "shasum": ""
             },
             "require": {
@@ -1974,9 +1974,9 @@
             "support": {
                 "email": "luca@gnello.com",
                 "issues": "https://github.com/gnello/php-mattermost-driver/issues",
-                "source": "https://github.com/gnello/php-mattermost-driver/tree/v2.14.3"
+                "source": "https://github.com/gnello/php-mattermost-driver/tree/v2.15.0"
             },
-            "time": "2021-05-06T15:27:34+00:00"
+            "time": "2021-06-10T20:47:10+00:00"
         },
         {
             "name": "goetas-webservices/xsd2php-runtime",
@@ -5259,28 +5259,27 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "0.5.4",
+            "version": "0.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "e352d065af1ae9b41c12d1dfd309e90f7b1f55c9"
+                "reference": "ea0b17460ec38e20d7eb64e7ec49b5d44af5d28c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/e352d065af1ae9b41c12d1dfd309e90f7b1f55c9",
-                "reference": "e352d065af1ae9b41c12d1dfd309e90f7b1f55c9",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/ea0b17460ec38e20d7eb64e7ec49b5d44af5d28c",
+                "reference": "ea0b17460ec38e20d7eb64e7ec49b5d44af5d28c",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.1 || ^8.0"
             },
             "require-dev": {
-                "phing/phing": "^2.16.3",
                 "php-parallel-lint/php-parallel-lint": "^1.2",
                 "phpstan/extension-installer": "^1.0",
-                "phpstan/phpstan": "^0.12.60",
+                "phpstan/phpstan": "^0.12.87",
                 "phpstan/phpstan-strict-rules": "^0.12.5",
-                "phpunit/phpunit": "^7.5.20",
+                "phpunit/phpunit": "^9.5",
                 "symfony/process": "^5.2"
             },
             "type": "library",
@@ -5303,9 +5302,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/0.5.4"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/0.5.5"
             },
-            "time": "2021-04-03T14:46:19+00:00"
+            "time": "2021-06-11T13:24:46+00:00"
         },
         {
             "name": "pimple/pimple",
@@ -6451,16 +6450,16 @@
         },
         {
             "name": "stefangabos/world_countries",
-            "version": "2.1.1",
+            "version": "v2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stefangabos/world_countries.git",
-                "reference": "86a44e798b17ec55bb98f28ac0a03588a91c8114"
+                "reference": "428a08bad111edb4840ceb4c1d602bae94ad5b1f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stefangabos/world_countries/zipball/86a44e798b17ec55bb98f28ac0a03588a91c8114",
-                "reference": "86a44e798b17ec55bb98f28ac0a03588a91c8114",
+                "url": "https://api.github.com/repos/stefangabos/world_countries/zipball/428a08bad111edb4840ceb4c1d602bae94ad5b1f",
+                "reference": "428a08bad111edb4840ceb4c1d602bae94ad5b1f",
                 "shasum": ""
             },
             "type": "library",
@@ -6489,9 +6488,9 @@
             ],
             "support": {
                 "issues": "https://github.com/stefangabos/world_countries/issues",
-                "source": "https://github.com/stefangabos/world_countries/tree/2.1.1"
+                "source": "https://github.com/stefangabos/world_countries/tree/v2.2.0"
             },
-            "time": "2020-10-17T11:09:51+00:00"
+            "time": "2021-06-11T10:46:32+00:00"
         },
         {
             "name": "sunhater/kcfinder",
@@ -8204,16 +8203,16 @@
         },
         {
             "name": "webonyx/graphql-php",
-            "version": "v14.8.0",
+            "version": "v14.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webonyx/graphql-php.git",
-                "reference": "7149ebfb0ba4132ca3cc5ef943b8e2ece58a5d5b"
+                "reference": "36b83621deb5eae354347a2e86dc7aec81b32a82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/7149ebfb0ba4132ca3cc5ef943b8e2ece58a5d5b",
-                "reference": "7149ebfb0ba4132ca3cc5ef943b8e2ece58a5d5b",
+                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/36b83621deb5eae354347a2e86dc7aec81b32a82",
+                "reference": "36b83621deb5eae354347a2e86dc7aec81b32a82",
                 "shasum": ""
             },
             "require": {
@@ -8258,7 +8257,7 @@
             ],
             "support": {
                 "issues": "https://github.com/webonyx/graphql-php/issues",
-                "source": "https://github.com/webonyx/graphql-php/tree/v14.8.0"
+                "source": "https://github.com/webonyx/graphql-php/tree/v14.9.0"
             },
             "funding": [
                 {
@@ -8266,7 +8265,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2021-06-01T10:24:56+00:00"
+            "time": "2021-06-15T16:14:17+00:00"
         },
         {
             "name": "webvimark/bootstrap-switch",
@@ -10764,20 +10763,20 @@
         },
         {
             "name": "felixfbecker/advanced-json-rpc",
-            "version": "v3.2.0",
+            "version": "v3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/felixfbecker/php-advanced-json-rpc.git",
-                "reference": "06f0b06043c7438959dbdeed8bb3f699a19be22e"
+                "reference": "b5f37dbff9a8ad360ca341f3240dc1c168b45447"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/felixfbecker/php-advanced-json-rpc/zipball/06f0b06043c7438959dbdeed8bb3f699a19be22e",
-                "reference": "06f0b06043c7438959dbdeed8bb3f699a19be22e",
+                "url": "https://api.github.com/repos/felixfbecker/php-advanced-json-rpc/zipball/b5f37dbff9a8ad360ca341f3240dc1c168b45447",
+                "reference": "b5f37dbff9a8ad360ca341f3240dc1c168b45447",
                 "shasum": ""
             },
             "require": {
-                "netresearch/jsonmapper": "^1.0 || ^2.0",
+                "netresearch/jsonmapper": "^1.0 || ^2.0 || ^3.0 || ^4.0",
                 "php": "^7.1 || ^8.0",
                 "phpdocumentor/reflection-docblock": "^4.3.4 || ^5.0.0"
             },
@@ -10803,9 +10802,9 @@
             "description": "A more advanced JSONRPC implementation",
             "support": {
                 "issues": "https://github.com/felixfbecker/php-advanced-json-rpc/issues",
-                "source": "https://github.com/felixfbecker/php-advanced-json-rpc/tree/v3.2.0"
+                "source": "https://github.com/felixfbecker/php-advanced-json-rpc/tree/v3.2.1"
             },
-            "time": "2021-01-10T17:48:47+00:00"
+            "time": "2021-06-11T22:34:44+00:00"
         },
         {
             "name": "felixfbecker/language-server-protocol",
@@ -11084,16 +11083,16 @@
         },
         {
             "name": "netresearch/jsonmapper",
-            "version": "v2.1.0",
+            "version": "v3.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweiske/jsonmapper.git",
-                "reference": "e0f1e33a71587aca81be5cffbb9746510e1fe04e"
+                "reference": "ba09f0e456d4f00cef84e012da5715625594407c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweiske/jsonmapper/zipball/e0f1e33a71587aca81be5cffbb9746510e1fe04e",
-                "reference": "e0f1e33a71587aca81be5cffbb9746510e1fe04e",
+                "url": "https://api.github.com/repos/cweiske/jsonmapper/zipball/ba09f0e456d4f00cef84e012da5715625594407c",
+                "reference": "ba09f0e456d4f00cef84e012da5715625594407c",
                 "shasum": ""
             },
             "require": {
@@ -11129,9 +11128,9 @@
             "support": {
                 "email": "cweiske@cweiske.de",
                 "issues": "https://github.com/cweiske/jsonmapper/issues",
-                "source": "https://github.com/cweiske/jsonmapper/tree/master"
+                "source": "https://github.com/cweiske/jsonmapper/tree/v3.1.1"
             },
-            "time": "2020-04-16T18:48:43+00:00"
+            "time": "2020-11-02T19:19:54+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -11876,16 +11875,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.88",
+            "version": "0.12.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "464d1a81af49409c41074aa6640ed0c4cbd9bb68"
+                "reference": "54c0f5a6c30511b77128d58b6369f718df250542"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/464d1a81af49409c41074aa6640ed0c4cbd9bb68",
-                "reference": "464d1a81af49409c41074aa6640ed0c4cbd9bb68",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/54c0f5a6c30511b77128d58b6369f718df250542",
+                "reference": "54c0f5a6c30511b77128d58b6369f718df250542",
                 "shasum": ""
             },
             "require": {
@@ -11916,11 +11915,15 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.88"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.89"
             },
             "funding": [
                 {
                     "url": "https://github.com/ondrejmirtes",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/phpstan",
                     "type": "github"
                 },
                 {
@@ -11932,7 +11935,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-17T12:24:49+00:00"
+            "time": "2021-06-09T20:23:49+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
