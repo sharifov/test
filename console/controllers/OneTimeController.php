@@ -1146,108 +1146,45 @@ class OneTimeController extends Controller
         $time_start = microtime(true);
         $fromDate = date("Y-m-01");
         $toDate = date("Y-m-d");
-        $fromMonth = date("m", strtotime($fromDate));
-        $fromYear = date("Y", strtotime($fromDate));
-        $toMonth = date("m", strtotime($toDate));
-        $toYear = date("Y", strtotime($toDate));
 
         try {
             $db = \Yii::$app->db;
             $db->createCommand()->truncateTable(LeadUserConversion::tableName())->execute();
 
-            $query = Lead::find();
-            $query->select(Lead::tableName() . '.id AS luc_lead_id');
-            $query->addSelect(Lead::tableName() . '.employee_id AS luc_user_id');
-            $query->addSelect(Lead::tableName() . '.l_status_dt AS luc_created_dt');
-
-            $query->andWhere(['!=', Lead::tableName() . '.status', Lead::STATUS_TRASH]);
-            $query->andWhere(['l_is_test' => 0]);
-            $query->andWhere(['l_duplicate_lead_id' => null]);
-            $query->andWhere(['>=', 'DATE(' . Lead::tableName() . '.l_status_dt)', $fromDate]);
-            $query->andWhere(['<=', 'DATE(' . Lead::tableName() . '.l_status_dt)', $toDate]);
-
-            $query->innerJoin([
-                'segments' => LeadFlightSegment::find()
-                    ->select(['lead_id'])
-                    ->groupBy(['lead_id'])
-            ], Lead::tableName() . '.id = segments.lead_id');
-
-            $query->innerJoin([
-                'lead_flow' => LeadFlow::find()
-                    ->select(['lead_id'])
-                    ->where(['lf_description' => LeadFlow::DESCRIPTION_MANUAL_CREATE])
-                    ->orWhere(['lf_description' => LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE])
-                    ->orWhere(['AND',
-                        ['status' => Lead::STATUS_PROCESSING],
-                        ['lf_from_status_id' => Lead::STATUS_PENDING],
-                    ])
-                    ->groupBy(['lead_id'])
-            ], Lead::tableName() . '.id = lead_flow.lead_id');
-
-            $query->leftJoin([
-                'my_leads' => Lead::find()
-                    ->select([Lead::tableName() . '.id', Lead::tableName() . '.employee_id'])
-            ], Lead::tableName() . '.clone_id = my_leads.id AND ' . Lead::tableName() . '.employee_id = my_leads.employee_id')
-            ->andWhere(['my_leads.id' => null]);
-
-            $query->leftJoin([
-                'emails' => Email::find()
-                    ->select(['e_lead_id'])
-                    ->where(['e_type_id' => Email::TYPE_INBOX])
-                    ->groupBy(['e_lead_id'])
-            ], Lead::tableName() . '.id = emails.e_lead_id');
-
-            $query->leftJoin([
-                'sms' => Sms::find()
-                    ->select(['s_lead_id'])
-                    ->where(['s_type_id' => Sms::TYPE_INBOX])
-                    ->groupBy(['s_lead_id'])
-            ], Lead::tableName() . '.id = sms.s_lead_id');
-
-            $query->leftJoin([
-                'calls' => CallLog::find()
-                    ->select(['cll_lead_id'])
-                    ->innerJoin(CallLogLead::tableName(), 'cl_id = cll_cl_id')
-                    ->innerJoin(CallLogRecord::tableName(), 'cl_id = clr_cl_id')
-                    ->where([
-                        'AND',
-                            ['cl_type_id' => CallLogType::OUT],
-                            ['cl_status_id' => CallLogStatus::COMPLETE],
-                            ['>=', 'clr_duration', 30]
-                    ])
-                    ->orWhere([
-                        'AND',
-                            ['cl_type_id' => CallLogType::IN],
-                            ['cl_status_id' => CallLogStatus::COMPLETE],
-                            ['>=', 'clr_duration', 30]
-                    ])
-                    ->andWhere(
-                        '(cl_year = :fromYear AND cl_month = :fromMonth) OR (cl_year = :toYear AND cl_month = :toMonth)',
-                        [':fromYear' => $fromYear, ':fromMonth' => $fromMonth, ':toYear' => $toYear, ':toMonth' => $toMonth]
+            $sql = '
+                select 
+                    lead_id as luc_lead_id,
+                    lf_owner_id as luc_user_id,
+                    case
+                        when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take"
+                        when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id is null then "Call Auto Take"
+                        when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is not null and ll.employee_id != lf_owner_id then "Clone"
+                        when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is null and ll.employee_id != lf_owner_id then "Manual"
+                        when lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take Over"
+                    else null end as luc_description,
+                    min(lead_flow.created) as luc_created_dt
+                from lead_flow
+                left join leads l on l.id = lead_flow.lead_id
+                left join leads ll on ll.id = l.clone_id 
+                where 
+                    l.created >= "2021-06-01" and lf_owner_id is not null and
+                    (
+                        (lf_from_status_id = 1 and lead_flow.status = 2 and (lead_flow.employee_id = lf_owner_id or lead_flow.employee_id is null))
+                        OR
+                        (lf_from_status_id is null and lead_flow.status = 2 and ll.employee_id != lf_owner_id)
+                        OR
+                        (lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id)
                     )
-                    ->groupBy(['cll_lead_id'])
-            ], Lead::tableName() . '.id = calls.cll_lead_id');
+                group by luc_lead_id, luc_user_id, luc_description';
 
-            $query->leftJoin([
-                'chat' => ClientChatLead::find()
-                    ->select(['ccl_lead_id'])
-                    ->groupBy(['ccl_lead_id'])
-            ], Lead::tableName() . '.id = chat.ccl_lead_id');
-
-            $query->andWhere([
-                'OR',
-                    ['IS NOT', 'emails.e_lead_id', null],
-                    ['IS NOT', 'sms.s_lead_id', null],
-                    ['IS NOT', 'calls.cll_lead_id', null],
-                    ['IS NOT', 'chat.ccl_lead_id', null],
-            ]);
-
-            $query->groupBy(['luc_lead_id', 'luc_user_id', 'luc_created_dt']);
-
-            $result = $query->asArray()->all();
+            $result = Yii::$app->db->createCommand($sql)->queryAll();
 
             $processed = $db->createCommand()
-                ->batchInsert(LeadUserConversion::tableName(), ['luc_lead_id', 'luc_user_id', 'luc_created_dt'], $result)->execute();
+                ->batchInsert(
+                    LeadUserConversion::tableName(),
+                    ['luc_lead_id', 'luc_user_id', 'luc_description', 'luc_created_dt'],
+                    $result
+                )->execute();
         } catch (\Throwable $throwable) {
             Yii::error(
                 AppHelper::throwableFormatter($throwable),
