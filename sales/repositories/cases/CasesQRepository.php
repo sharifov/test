@@ -345,6 +345,7 @@ class CasesQRepository
         ->where(['not', ['nextFlight' => null]])
         ->andWhere('nextFlight <= ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
         ->orderBy(['nextFlight' => SORT_ASC]);
+        $query->joinWith(['client']);
 
         if (!$user->isAdmin()) {
             $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
@@ -388,6 +389,7 @@ class CasesQRepository
         ])
             ->where(['not', ['nextFlight' => null]])
             ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
+        $query->joinWith(['client']);
 
         if (!$user->isAdmin()) {
             $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
@@ -420,6 +422,7 @@ class CasesQRepository
             ->where('last_out_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
             ->andWhere('last_in_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
             ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
+        $query->joinWith(['client']);
 
         if (!$user->isAdmin()) {
             $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
