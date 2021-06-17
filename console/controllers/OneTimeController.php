@@ -14,14 +14,22 @@ use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\Lead;
+use common\models\LeadFlightSegment;
+use common\models\LeadFlow;
 use common\models\Sms;
 use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\app\AppHelper;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogLead\CallLogLead;
+use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\emailList\entity\EmailList;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\client\ClientsQuery;
 use sales\services\cases\CasesSaleService;
@@ -1127,5 +1135,131 @@ class OneTimeController extends Controller
             Console::updateProgress($processed, $count);
         }
         Console::endProgress(false);
+    }
+
+    public function actionLeadUserConversion(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $processed = 0;
+        $time_start = microtime(true);
+        $fromDate = date("Y-m-01");
+        $toDate = date("Y-m-d");
+        $fromMonth = date("m", strtotime($fromDate));
+        $fromYear = date("Y", strtotime($fromDate));
+        $toMonth = date("m", strtotime($toDate));
+        $toYear = date("Y", strtotime($toDate));
+
+        try {
+            $db = \Yii::$app->db;
+            $db->createCommand()->truncateTable(LeadUserConversion::tableName())->execute();
+
+            $query = Lead::find();
+            $query->select(Lead::tableName() . '.id AS luc_lead_id');
+            $query->addSelect(Lead::tableName() . '.employee_id AS luc_user_id');
+            $query->addSelect(Lead::tableName() . '.l_status_dt AS luc_created_dt');
+
+            $query->andWhere(['!=', Lead::tableName() . '.status', Lead::STATUS_TRASH]);
+            $query->andWhere(['l_is_test' => 0]);
+            $query->andWhere(['l_duplicate_lead_id' => null]);
+            $query->andWhere(['>=', 'DATE(' . Lead::tableName() . '.l_status_dt)', $fromDate]);
+            $query->andWhere(['<=', 'DATE(' . Lead::tableName() . '.l_status_dt)', $toDate]);
+
+            $query->innerJoin([
+                'segments' => LeadFlightSegment::find()
+                    ->select(['lead_id'])
+                    ->groupBy(['lead_id'])
+            ], Lead::tableName() . '.id = segments.lead_id');
+
+            $query->innerJoin([
+                'lead_flow' => LeadFlow::find()
+                    ->select(['lead_id'])
+                    ->where(['lf_description' => LeadFlow::DESCRIPTION_MANUAL_CREATE])
+                    ->orWhere(['lf_description' => LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE])
+                    ->orWhere(['AND',
+                        ['status' => Lead::STATUS_PROCESSING],
+                        ['lf_from_status_id' => Lead::STATUS_PENDING],
+                    ])
+                    ->groupBy(['lead_id'])
+            ], Lead::tableName() . '.id = lead_flow.lead_id');
+
+            $query->leftJoin([
+                'my_leads' => Lead::find()
+                    ->select([Lead::tableName() . '.id', Lead::tableName() . '.employee_id'])
+            ], Lead::tableName() . '.clone_id = my_leads.id AND ' . Lead::tableName() . '.employee_id = my_leads.employee_id')
+            ->andWhere(['my_leads.id' => null]);
+
+            $query->leftJoin([
+                'emails' => Email::find()
+                    ->select(['e_lead_id'])
+                    ->where(['e_type_id' => Email::TYPE_INBOX])
+                    ->groupBy(['e_lead_id'])
+            ], Lead::tableName() . '.id = emails.e_lead_id');
+
+            $query->leftJoin([
+                'sms' => Sms::find()
+                    ->select(['s_lead_id'])
+                    ->where(['s_type_id' => Sms::TYPE_INBOX])
+                    ->groupBy(['s_lead_id'])
+            ], Lead::tableName() . '.id = sms.s_lead_id');
+
+            $query->leftJoin([
+                'calls' => CallLog::find()
+                    ->select(['cll_lead_id'])
+                    ->innerJoin(CallLogLead::tableName(), 'cl_id = cll_cl_id')
+                    ->innerJoin(CallLogRecord::tableName(), 'cl_id = clr_cl_id')
+                    ->where([
+                        'AND',
+                            ['cl_type_id' => CallLogType::OUT],
+                            ['cl_status_id' => CallLogStatus::COMPLETE],
+                            ['>=', 'clr_duration', 30]
+                    ])
+                    ->orWhere([
+                        'AND',
+                            ['cl_type_id' => CallLogType::IN],
+                            ['cl_status_id' => CallLogStatus::COMPLETE],
+                            ['>=', 'clr_duration', 30]
+                    ])
+                    ->andWhere(
+                        '(cl_year = :fromYear AND cl_month = :fromMonth) OR (cl_year = :toYear AND cl_month = :toMonth)',
+                        [':fromYear' => $fromYear, ':fromMonth' => $fromMonth, ':toYear' => $toYear, ':toMonth' => $toMonth]
+                    )
+                    ->groupBy(['cll_lead_id'])
+            ], Lead::tableName() . '.id = calls.cll_lead_id');
+
+            $query->leftJoin([
+                'chat' => ClientChatLead::find()
+                    ->select(['ccl_lead_id'])
+                    ->groupBy(['ccl_lead_id'])
+            ], Lead::tableName() . '.id = chat.ccl_lead_id');
+
+            $query->andWhere([
+                'OR',
+                    ['IS NOT', 'emails.e_lead_id', null],
+                    ['IS NOT', 'sms.s_lead_id', null],
+                    ['IS NOT', 'calls.cll_lead_id', null],
+                    ['IS NOT', 'chat.ccl_lead_id', null],
+            ]);
+
+            $query->groupBy(['luc_lead_id', 'luc_user_id', 'luc_created_dt']);
+
+            $result = $query->asArray()->all();
+
+            $processed = $db->createCommand()
+                ->batchInsert(LeadUserConversion::tableName(), ['luc_lead_id', 'luc_user_id', 'luc_created_dt'], $result)->execute();
+        } catch (\Throwable $throwable) {
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'OneTimeController:actionLeadUserConversion:Throwable'
+            );
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+        }
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 }
