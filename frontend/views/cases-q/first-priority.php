@@ -37,15 +37,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cs_id',
                 'label' => 'ID',
             ],
-            //'caseSale.css_cs_id',
-            [
-                //'attribute' => 'cs_dep_id'
-                'label' => 'test',
-                'value' => static function (CasesQSearch $model) {
-                    return $model->caseSale ? $model->caseSale[0]->css_sale_id : '';
-                },
-                'filter' => Department::getList()
-            ],
             [
                 'class' => CasesStatusColumn::class,
             ],

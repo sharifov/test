@@ -802,45 +802,8 @@ class CasesQSearch extends Cases
     {
         $query = $this->casesQRepository->getFirstPriorityQuery($user);
 
-        $query->addSelect('*');
-        $query->addSelect(new Expression('
-             DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'));
-        $query->leftJoin([
-            'sale_out' => CaseSale::find()
-                ->select([
-                    'css_cs_id',
-                    new Expression('
-                    MIN(css_out_date) AS last_out_date'),
-                ])
-                ->innerJoin(
-                    Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id'
-                )
-                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
-                ->groupBy('css_cs_id')
-        ], 'cases.cs_id = sale_out.css_cs_id');
-
-        $query->leftJoin([
-            'sale_in' => CaseSale::find()
-                ->select([
-                    'css_cs_id',
-                    new Expression('
-                    MIN(css_in_date) AS last_in_date'),
-                ])
-                ->innerJoin(
-                    Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id'
-                )
-                ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
-                ->groupBy('css_cs_id')
-        ], 'cases.cs_id = sale_in.css_cs_id');
-
-        //var_dump($query->createCommand()->getRawSql()); die();
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            //'sort' => ['defaultOrder' => ['cs_status' => SORT_ASC, 'cs_created_dt' => SORT_ASC]],
-            //'sort' => ['defaultOrder' => ['cs_created_dt' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -848,12 +811,12 @@ class CasesQSearch extends Cases
 
         $sorting = $dataProvider->getSort();
         $sorting->attributes = array_merge($sorting->attributes, [
-            /*'nextFlight' => [
+            'nextFlight' => [
                 'asc' => ['nextFlight' => SORT_ASC],
                 'desc' => ['nextFlight' => SORT_DESC],
-                'default' => SORT_ASC,
+                //'default' => SORT_ASC,
                 'label' => 'Next flight date',
-            ],*/
+            ],
 
             'client_locale' => [
                 'asc' => ['cl_locale' => SORT_ASC],

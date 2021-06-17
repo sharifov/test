@@ -15,8 +15,10 @@ use sales\entities\cases\CasesQSearch;
 use sales\entities\cases\CasesStatus;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use sales\helpers\setting\SettingHelper;
 
 class CasesQRepository
 {
@@ -311,29 +313,38 @@ class CasesQRepository
      */
     public function getFirstPriorityCount(Employee $user): int
     {
-        //return $this->getFirstPriorityQuery($user)->count();
-        return 1;
+        return $this->getFirstPriorityQuery($user)->count();
+        //return 1;
     }
 
-    public function getFirstPriorityQuery(Employee $user): ActiveQuery
+    public function getFirstPriorityQuery(Employee $user): Query
     {
-        $case_past_departure_date = 2; //days
-        $case_priority_days = 20; // days
-
-        $query = CasesQSearch::find()->andWhere(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]]);
-        $query->joinWith(['client', 'caseSale as cs']);
-        $query->andWhere(['not', ['cs.css_cs_id' => null]]);
-        //$query->andWhere(['last_out_date' => '2021-08-13 20:35:00']);
-        //$query->andWhere(['datediff("last_out_date", CURDATE())' => 59]);
-        //$query->andWhere('datediff(CURDATE(), last_out_date) <= ' . $case_past_departure_date);
-
-        //$query->andWhere('ADDDATE(CURDATE(), 60) > SUBDATE(last_out_date, '. $case_priority_days .')');
-        //$query->andWhere('ADDDATE(CURDATE(), 62) < ADDDATE(last_out_date, ' . $case_past_departure_date . ')');
-
-        $query->andWhere('CURDATE() > SUBDATE(last_out_date, ' . $case_priority_days . ')');
-        $query->andWhere('CURDATE() < ADDDATE(last_out_date, ' . $case_past_departure_date . ')');
-
-
+        $query = CasesQSearch::find();
+        $query->select('*')->from([
+            'dd' => (new Query())->select(['cs.*', 'DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'])->from([
+                'cs' => (new Query())->select('cases.*')->from('cases')
+                    ->innerJoin('case_sale', 'cs_id = css_cs_id')
+                    ->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+                    ->groupBy('cs_id')
+            ])->leftJoin([
+                'sale_out' => (new Query())->select('css_cs_id, MIN(css_out_date) AS last_out_date')
+                    ->from('case_sale')
+                    ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
+                    ->where('css_out_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+                    ->orWhere('css_out_date > SUBDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+                    ->groupBy('css_cs_id')
+            ], 'cs.cs_id = sale_out.css_cs_id')
+                ->leftJoin([
+                    'sale_in' => (new Query())->select('css_cs_id, MIN(css_in_date) AS last_in_date')
+                        ->from('case_sale')
+                        ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
+                        ->where('css_in_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+                        ->orWhere('css_in_date > SUBDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+                        ->groupBy('css_cs_id')
+                ], 'cs.cs_id = sale_in.css_cs_id')
+        ])
+        ->where(['not', ['nextFlight' => null]])
+        ->orderBy(['nextFlight' => SORT_ASC]);
 
         //var_dump($query->createCommand()->getRawSql()); die();
 
