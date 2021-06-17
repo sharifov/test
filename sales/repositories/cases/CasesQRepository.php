@@ -300,6 +300,8 @@ class CasesQRepository
         $query->joinWith(['client', 'caseSale']);
         $query->andWhere(['css_cs_id' => null]);
 
+        $query->orderBy([new \yii\db\Expression('FIELD (cs_status, ' . CasesStatus::STATUS_PENDING . ', ' . CasesStatus::STATUS_FOLLOW_UP . ', ' . CasesStatus::STATUS_PROCESSING . ')')]);
+
         if (!$user->isAdmin()) {
             $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
             $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments($user))]);
