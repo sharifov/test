@@ -331,20 +331,19 @@ class CasesQRepository
                 'sale_out' => (new Query())->select('css_cs_id, MIN(css_out_date) AS last_out_date')
                     ->from('case_sale')
                     ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
-                    ->where('css_out_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
-                    ->orWhere('css_out_date > SUBDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+                    ->where('css_out_date >= SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
                     ->groupBy('css_cs_id')
             ], 'cs.cs_id = sale_out.css_cs_id')
                 ->leftJoin([
                     'sale_in' => (new Query())->select('css_cs_id, MIN(css_in_date) AS last_in_date')
                         ->from('case_sale')
                         ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
-                        ->where('css_in_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
-                        ->orWhere('css_in_date > SUBDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+                        ->where('css_in_date >= SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
                         ->groupBy('css_cs_id')
                 ], 'cs.cs_id = sale_in.css_cs_id')
         ])
         ->where(['not', ['nextFlight' => null]])
+        ->andWhere('nextFlight <= ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
         ->orderBy(['nextFlight' => SORT_ASC]);
 
         if (!$user->isAdmin()) {
@@ -388,7 +387,7 @@ class CasesQRepository
                 ], 'cs.cs_id = sale_in.css_cs_id')
         ])
             ->where(['not', ['nextFlight' => null]])
-            ->orderBy(['nextFlight' => SORT_ASC]);
+            ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
 
         if (!$user->isAdmin()) {
             $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);

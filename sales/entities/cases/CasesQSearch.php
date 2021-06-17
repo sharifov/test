@@ -856,7 +856,6 @@ class CasesQSearch extends Cases
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['cs_need_action' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
