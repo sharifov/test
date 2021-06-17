@@ -340,4 +340,14 @@ class SettingHelper
     {
         return ArrayHelper::getValue(Yii::$app->params['settings'], 'frontend_widget_list.' . $key, []);
     }
+
+    public static function getCasePastDepartureDate(): int
+    {
+        return (int)(Yii::$app->params['settings']['case_past_departure_date'] ?? 2);
+    }
+
+    public static function getCasePriorityDays(): int
+    {
+        return (int)(Yii::$app->params['settings']['case_priority_days'] ?? 14);
+    }
 }
