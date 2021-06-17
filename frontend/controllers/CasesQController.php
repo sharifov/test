@@ -129,4 +129,16 @@ class CasesQController extends FController
             'isAgent' => Auth::user()->isAgent(),
         ]);
     }
+
+    public function actionPassDeparture()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchPassDeparture(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('pass-departure', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
 }

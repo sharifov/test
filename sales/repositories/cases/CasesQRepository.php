@@ -397,6 +397,49 @@ class CasesQRepository
 
     /**
      * @param Employee $user
+     * @return int
+     */
+    public function getPassDepartureCount(Employee $user): int
+    {
+        return $this->getPassDepartureQuery($user)->count();
+    }
+
+    public function getPassDepartureQuery(Employee $user): Query
+    {
+        $query = CasesQSearch::find();
+        $query->select('*')->from([
+            'dd' => (new Query())->select(['cs.*', 'DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'])->from([
+                'cs' => (new Query())->select('cases.*')->from('cases')
+                    ->innerJoin('case_sale', 'cs_id = css_cs_id')
+                    ->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+                    ->groupBy('cs_id')
+            ])->leftJoin([
+                'sale_out' => (new Query())->select('css_cs_id, MIN(css_out_date) AS last_out_date')
+                    ->from('case_sale')
+                    ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
+                    ->where('css_out_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+                    ->groupBy('css_cs_id')
+            ], 'cs.cs_id = sale_out.css_cs_id')
+                ->leftJoin([
+                    'sale_in' => (new Query())->select('css_cs_id, MIN(css_in_date) AS last_in_date')
+                        ->from('case_sale')
+                        ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
+                        ->where('css_in_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+                        ->groupBy('css_cs_id')
+                ], 'cs.cs_id = sale_in.css_cs_id')
+        ])
+            ->where(['not', ['nextFlight' => null]])
+            ->orderBy(['nextFlight' => SORT_ASC]);
+
+        if (!$user->isAdmin()) {
+            $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+            $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments($user))]);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
      * @return ActiveQuery
      */
     public function getHotQuery(Employee $user): ActiveQuery

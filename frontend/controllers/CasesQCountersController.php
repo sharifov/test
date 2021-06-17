@@ -112,6 +112,11 @@ class CasesQCountersController extends FController
                         $result['second-priority'] = $count;
                     }
                     break;
+                case 'pass-departure':
+                    if ($count = $this->getPassDepartureAction()) {
+                        $result['pass-departure'] = $count;
+                    }
+                    break;
             }
         }
 
@@ -237,5 +242,15 @@ class CasesQCountersController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->casesQRepository->getSecondPriorityCount($user);
+    }
+
+    private function getPassDepartureAction(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/pass-departure')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getPassDepartureCount($user);
     }
 }
