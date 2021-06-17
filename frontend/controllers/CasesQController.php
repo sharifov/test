@@ -117,4 +117,16 @@ class CasesQController extends FController
             'isAgent' => Auth::user()->isAgent(),
         ]);
     }
+
+    public function actionSecondPriority()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchSecondPriority(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('second-priority', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
 }
