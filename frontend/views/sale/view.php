@@ -317,6 +317,91 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 </div>
             <?php endif ?>
 
+            <?php if (!empty($caseSaleModel) && $flexibleTicket = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'flexibleTicket')) : ?>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h2>Flexible Ticket</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Title</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'title')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Currency</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'currency')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Pax Count</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'paxCount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount per pax</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'amountPerPax')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Is Activated</th>
+                                <td><?php echo ArrayHelper::getValue($flexibleTicket, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            <?php endif ?>
+
+            <?php if (!empty($caseSaleModel) && $pdp = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'pdp')) : ?>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h2>Price Drop Protectiont</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Type</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($pdp, 'type')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($pdp, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Pax Count</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($pdp, 'paxCount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount per pax</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($pdp, 'amountPerPax')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Is Activated</th>
+                                <td><?php echo ArrayHelper::getValue($pdp, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <?php if ($pdpOptions = ArrayHelper::getValue($pdp, 'options')) : ?>
+                        <div class="col-md-5">
+                            <h2>Price Drop Protection options</h2>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Limit</th>
+                                    <th>Value</th>
+                                </tr>
+                                <?php foreach ($pdpOptions as $option) : ?>
+                                    <tr>
+                                        <td><?=Html::encode($option['name'])?></td>
+                                        <td><?=Html::encode($option['type'])?></td>
+                                        <td><?=Html::encode($option['limit'])?></td>
+                                        <td><?=Html::encode($option['value'])?></td>
+                                    </tr>
+                                <?php endforeach;?>
+                            </table>
+                        </div>
+                    <?php endif ?>
+                </div>
+            <?php endif ?>
+
             <?php if (!empty($caseSaleModel) && $package = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'package')) : ?>
                 <div class="row">
                     <div class="col-md-3">
