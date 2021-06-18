@@ -125,9 +125,9 @@ $user = Yii::$app->user->identity;
                             'timePicker24Hour' => true,
                             'locale' => [
                                     'format' => 'Y-m-d H:i'
-                            ]
-                        ],
-                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
+                            ],
+                            'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
+                        ]
                     ]);
                     ?>
                 </div>
