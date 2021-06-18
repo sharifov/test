@@ -5,15 +5,17 @@ namespace sales\model\cases\useCases\cases\api\create;
 /**
  * Class Command
  *
- * @property string $contact_email
- * @property string $contact_phone
+ * @property string|null $contact_email
+ * @property string|null $contact_phone
  * @property int $category_id
- * @property string $order_uid
+ * @property string|null $order_uid
  * @property array $order_info
  * @property int $project_id
  * @property string|null $subject
  * @property string|null $description
  * @property string|null $project_key
+ * @property string|null $chat_visitor_id
+ * @property string|null $contact_name
  */
 class Command
 {
@@ -26,17 +28,21 @@ class Command
     public $project_key;
     public $subject;
     public $description;
+    public $chat_visitor_id;
+    public $contact_name;
 
     public function __construct(
-        string $contact_email,
-        string $contact_phone,
+        ?string $contact_email,
+        ?string $contact_phone,
         int $category_id,
-        string $order_uid,
+        ?string $order_uid,
         array $order_info,
         int $project_id,
         ?string $subject,
         ?string $description,
-        ?string $project_key
+        ?string $project_key,
+        ?string $chat_visitor_id,
+        ?string $contact_name
     ) {
         $this->contact_email = $contact_email;
         $this->contact_phone = $contact_phone;
@@ -47,5 +53,7 @@ class Command
         $this->project_key = $project_key;
         $this->subject = $subject;
         $this->description = $description;
+        $this->chat_visitor_id = $chat_visitor_id;
+        $this->contact_name = $contact_name;
     }
 }

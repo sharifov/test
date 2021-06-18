@@ -161,7 +161,7 @@ define({ "api": [
             "size": "160",
             "optional": false,
             "field": "contact_email",
-            "description": "<p>Client Email</p>"
+            "description": "<p>Client Email required if contact phone or chat_visitor_id or order_uid are not set</p>"
           },
           {
             "group": "Parameter",
@@ -169,7 +169,23 @@ define({ "api": [
             "size": "20",
             "optional": false,
             "field": "contact_phone",
-            "description": "<p>Client Phone</p>"
+            "description": "<p>Client Phone required if contact email or chat_visitor_id or order_uid are not set</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": true,
+            "field": "contact_name",
+            "description": "<p>Client Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "lead.client.chat_visitor_id",
+            "description": "<p>Client chat_visitor_id required if contact phone or email or order_uid are not set</p>"
           },
           {
             "group": "Parameter",
@@ -184,7 +200,7 @@ define({ "api": [
             "size": "5..7",
             "optional": false,
             "field": "order_uid",
-            "description": "<p>Order uid (symbols and numbers only)</p>"
+            "description": "<p>Order uid (symbols and numbers only) required if contact phone or email or chat_visitor_id are not set</p>"
           },
           {
             "group": "Parameter",
