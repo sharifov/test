@@ -126,7 +126,8 @@ $user = Yii::$app->user->identity;
                             'locale' => [
                                     'format' => 'Y-m-d H:i'
                             ]
-                        ]
+                        ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                     ]);
                     ?>
                 </div>

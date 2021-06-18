@@ -51,7 +51,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     'locale' => [
                         'format' => 'Y-m-d H:i',
                         'separator' => ' - '
-                    ]
+                    ],
+                    'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                 ]
             ]);
             ?>

@@ -86,7 +86,8 @@ use yii\widgets\ActiveForm;
                                     'locale' => [
                                         'format' => 'd-M-Y H:i',
                                         'separator' => ' - '
-                                    ]
+                                    ],
+                                    'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                                 ]
                             ])->label('Created From / To') ?>
                         </div>
@@ -104,7 +105,8 @@ use yii\widgets\ActiveForm;
                                     'locale' => [
                                         'format' => 'd-M-Y H:i',
                                         'separator' => ' - '
-                                    ]
+                                    ],
+                                    'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                                 ]
                             ])->label('Updated From / To') ?>
                         </div>
@@ -122,7 +124,8 @@ use yii\widgets\ActiveForm;
                                     'locale' => [
                                         'format' => 'd-M-Y H:i',
                                         'separator' => ' - '
-                                    ]
+                                    ],
+                                    'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                                 ]
                             ])->label('Status From / To') ?>
                         </div>

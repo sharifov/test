@@ -123,6 +123,7 @@ $pjaxListId = 'pjax-api-log';
                             'format' => 'Y-m-d H:i',
                             'separator' => ' - '
                         ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                     ],
                 ]),
             ],
