@@ -388,6 +388,8 @@ class CasesQRepository
                 ], 'cs.cs_id = sale_in.css_cs_id')
         ])
             ->where(['not', ['nextFlight' => null]])
+            ->andWhere('nextFlight > ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+
             ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
         $query->joinWith(['client']);
 
