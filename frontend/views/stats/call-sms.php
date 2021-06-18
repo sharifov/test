@@ -71,7 +71,8 @@ if ($user->isAdmin() || $user->isQa()) {
                                 'locale' => [
                                     'format' => 'Y-m-d H:i',
                                     'separator' => ' - '
-                                ]
+                                ],
+                                'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                             ]
                         ]);
                         ?>

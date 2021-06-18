@@ -62,7 +62,8 @@ use yii\widgets\ActiveForm;
                         'locale' => [
                             'format' => 'Y-m-d H:i',
                             'separator' => ' - '
-                        ]
+                        ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                     ]
                 ])->label('Created DateTime Range');
                 ?>

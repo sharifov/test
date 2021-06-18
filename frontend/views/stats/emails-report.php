@@ -92,6 +92,7 @@ $this->title = 'Emails Report';
                                         'format' => 'Y-m-d',
                                         'separator' => ' / '
                                     ],
+                                    'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                                 ],
                                 'pluginEvents' => [
                                     "apply.daterangepicker" => "function(){

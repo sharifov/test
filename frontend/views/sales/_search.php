@@ -46,8 +46,8 @@ use yii\widgets\ActiveForm;
                             'separator' => ' - ',
                         ],
                         'ranges' => [
-                            'Current Month' => ["moment().startOf('month')", "moment().endOf('month')"],
-                            'Previous Month' => ["moment().subtract(1, 'month').startOf('month')", "moment().subtract(1, 'month').endOf('month')"],
+                            'This Month' => ["moment().startOf('month')", "moment().endOf('month')"],
+                            'Past Month' => ["moment().subtract(1, 'month').startOf('month')", "moment().subtract(1, 'month').endOf('month')"],
                         ],
                     ],
                 ])->label('Sold Date');

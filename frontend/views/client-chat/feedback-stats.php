@@ -54,7 +54,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                             'format' => 'Y-m-d H:i:s',
                                             'separator' => ' - '
                                         ],
-                                        'opens' => 'right'
+                                        'opens' => 'right',
+                                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                                     ],
                                     'pluginEvents' => [
                                         "apply.daterangepicker" => new JsExpression('function(){ 
