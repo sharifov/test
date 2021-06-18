@@ -1,4 +1,5 @@
 Minimal Installation setup for local stage development server:
+(full toolkit setup documentation located at https://traveldev.atlassian.net/wiki/spaces/SLS/pages/1584791640/ )
 
 -------------------
 1). Install PHP 7.4 and redis-server :
@@ -27,7 +28,7 @@ git checkout tags/v4.4.16
 phpize && ./configure
 make -j 4 && sudo make install
 ``` 
- 
+
 Add this in “Dynamic Extensions” section if php-cli config file located at  /ect/php/7.4/cli/php.ini
 
 ```
@@ -35,9 +36,7 @@ extension=swoole
 extension=swoole_async
 ```
 
-
 2). Composer INSTALL:
-
 ```
 composer install
 ```
@@ -46,22 +45,13 @@ composer install
 ./init (select ENV)
 ```
 
-MySQL 8.0.13:
--------------------
-```
-DB name: sales
-DB user: sales
-DB pass:
-```
-
-
 Nginx configuration
 -------------------
-1. Copy example config file from ./nginx.conf to your nginx configs directory located at /etc/nginx/sites-available/
+1. Copy example config file ./nginx.conf from project folder to your nginx configs directory usually located at /etc/nginx/sites-available/
 2. (Optional) You can edit our test hosts from sales.zeit.test and api.sales.zeit.test to anything else (if you want)
-3. Generate self-signed SSL certificate and edit in nginx config their file names for 2 hosts:
-sales.zeit.test
-api.sales.zeit.test
+3. Generate self-signed SSL certificate (for example you can use certutil or openssl) and edit in nginx config their file names for 2 hosts (add them to /etc/hosts too):
+   sales.zeit.test
+   api.sales.zeit.test
 
 4. Also edit this parameter in nginx config:
 
@@ -93,80 +83,42 @@ Create Pg Dump:
 pg_dump -h localhost --username=postgres -Fc sales3 > /home/user/db.dump
 ```
 
-sudo nano /etc/mysql/conf.d/mysql.cnf
+edit /etc/mysql/conf.d/mysql.cnf
 ``` 
 [mysqld]
 sql_mode=only_full_group_by
 ```
 sudo service mysql restart
 
-
-
-Prod Kiv Host:
--------------------
-- [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
-- [sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
-- [sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html) - API Documentation
- 
-Prod GTT Host:
--------------------
-- [crm.gttglobal.com](https://crm.gttglobal.com) - Frontend
-- [crm-api.gttglobal.com](https://crm-api.gttglobal.com) - API
-- [crm-api.gttglobal.com/doc/index.html](https://crm-api.gttglobal.com/doc/index.html) - API Documentation
- 
-Stage Host:
--------------------
-- [stage-sales.travel-dev.com](https://stage-sales.travel-dev.com) - Frontend
-- [stage-sales-api.travel-dev.com](https://stage-sales-api.travel-dev.com) - API
-- [stage-sales-api.travel-dev.com/doc/index.html](https://stage-sales-api.travel-dev.com/doc/index.html) - API Documentation
-
-Dev Host:
--------------------
-- [sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
-- [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
-- [api-sales.dev.travelinsides.com/doc/index.html](https://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
-  
- Generate API Documentation (apiDoc):
- ```
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc2" -t ./webapi/web/apidoc/template2 -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc3" -t ./webapi/web/apidoc/template3 -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc4" -t ./webapi/web/apidoc/template4 -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc5" -t ./webapi/web/apidoc/template5 -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc6" -t ./webapi/web/apidoc/template6 -f ".*\\.php$"
- ```
-
 Install Supervisor
- -------------------
+-------------------
  ```
  sudo apt-get install supervisor
  sudo nano /etc/supervisor/supervisord.conf
  ```
- Update global config file (code):
+Update global config file (code):
  ```
  [include]
  files = /var/www/.../common/config/supervisor/*.conf
  ```
- 
- Create supervisor config file (rename to socket-server.conf):
+
+Create supervisor config file (rename to socket-server.conf):
  ```
  /var/www/.../common/config/supervisor/socket-server.conf.txt
  ```
- 
-  Create supervisor config file (rename to queue-email-job.conf):
+
+Create supervisor config file (rename to queue-email-job.conf):
   ```
   /var/www/.../common/config/supervisor/queue-email-job.conf.txt
   ```
 
- 
- 
- Start supervisor service:
+Start supervisor service:
  ```
  
  sudo service supervisor start (OR sudo /etc/init.d/supervisor restart)
  #sudo apt-get install php-xmlrpc -y (optional)
  ``` 
-  
+
 
 Beanstalk:
 -------------------
@@ -185,7 +137,7 @@ Driver for queue
 
 *Install on Ubuntu:*
 ```
-apt-get install beanstalkd
+sudo apt install beanstalkd
 ```
 *Install on Centos:*
 ```
@@ -197,11 +149,60 @@ yum install beanstalkd
 service beanstalkd start
 ```
 
+Cetrifugo Server
+-------------------
+*Install on Ubuntu:*
+
+https://centrifugal.github.io/centrifugo/server/install/
+
+
+In .. config/supervisor
+rename file centrifugo.conf.txt
+sudo service supervisor restart
+```
+
+END of installation. Now frontend and api must respond. 
 ----------
 
 
- Api Example:
- -------------------
+DOCUMENTATION
+
+Prod Kiv Host:
+-------------------
+- [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
+- [sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
+- [sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html) - API Documentation
+
+Prod GTT Host:
+-------------------
+- [crm.gttglobal.com](https://crm.gttglobal.com) - Frontend
+- [crm-api.gttglobal.com](https://crm-api.gttglobal.com) - API
+- [crm-api.gttglobal.com/doc/index.html](https://crm-api.gttglobal.com/doc/index.html) - API Documentation
+
+Stage Host:
+-------------------
+- [stage-sales.travel-dev.com](https://stage-sales.travel-dev.com) - Frontend
+- [stage-sales-api.travel-dev.com](https://stage-sales-api.travel-dev.com) - API
+- [stage-sales-api.travel-dev.com/doc/index.html](https://stage-sales-api.travel-dev.com/doc/index.html) - API Documentation
+
+Dev Host:
+-------------------
+- [sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
+- [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
+- [api-sales.dev.travelinsides.com/doc/index.html](https://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
+
+Generate API Documentation (apiDoc):
+ ```
+ sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
+ sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc2" -t ./webapi/web/apidoc/template2 -f ".*\\.php$"
+ sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc3" -t ./webapi/web/apidoc/template3 -f ".*\\.php$"
+ sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc4" -t ./webapi/web/apidoc/template4 -f ".*\\.php$"
+ sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc5" -t ./webapi/web/apidoc/template5 -f ".*\\.php$"
+ sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc6" -t ./webapi/web/apidoc/template6 -f ".*\\.php$"
+ ```
+
+Api Example:
+-------------------
 
 POST - ```https://sales.api.travelinsides.com/v1/lead/create``` :
 
@@ -343,7 +344,7 @@ CRONs
 0 0 1 * *   php /var/www/sale/yii client-chat/refresh-rocket-chat-user-token
 0 8 * * 1   php /var/www/sale/yii call-report/priceline-weekly
 ```
-  
+
 ```
 sudo chmod 777 /var/spool/cron/crontabs/root
 ```
@@ -376,7 +377,7 @@ php -r "echo geoip_time_zone_by_country_and_region('US', 'CA') . PHP_EOL;"
 
 ```
 
-CRYPTO - PgSQL 
+CRYPTO - PgSQL
 -------------------
 ```
 CREATE EXTENSION pgcrypto;
@@ -385,7 +386,7 @@ SELECT convert_from(decrypt_iv(decode('a5S7B5nas5XaWibbuX45AA==','base64'), 'PAS
 ```
 
 
-CRYPTO - MySQL 
+CRYPTO - MySQL
 -------------------
 ```
 SET block_encryption_mode = 'aes-256-cbc';
@@ -393,67 +394,55 @@ SELECT TO_BASE64(AES_ENCRYPT('Hello!','PASSWORD', 'IV-STRING-16')) AS aes
 SELECT AES_DECRYPT(FROM_BASE64('PRZKw4PIlNtSPRFuNWYmbA=='), 'PASSWORD', 'IV-STRING-16') AS aes
 ```
 
-CRYPTO - PHP 
+CRYPTO - PHP
 -------------------
 ```
 
 ```
-
 
 Command must return the time zone of the USA - California ---> America/Los_Angeles
 
-Cetrifugo Server
--------------------
-*Install on Ubuntu:*
-
-https://centrifugal.github.io/centrifugo/server/install/
-
-
-In .. config/supervisor 
-rename file centrifugo.conf.txt 
-sudo service supervisor restart
-```
 
 DIRECTORY STRUCTURE
 -------------------
 
 ```
 common
-    config/              contains shared configurations
-    mail/                contains view files for e-mails
-    models/              contains model classes used in both backend and frontend
-    tests/               contains tests for common classes
+config/              contains shared configurations
+mail/                contains view files for e-mails
+models/              contains model classes used in both backend and frontend
+tests/               contains tests for common classes
 console
-    config/              contains console configurations
-    controllers/         contains console controllers (commands)
-    migrations/          contains database migrations
-    models/              contains console-specific model classes
-    runtime/             contains files generated during runtime
+config/              contains console configurations
+controllers/         contains console controllers (commands)
+migrations/          contains database migrations
+models/              contains console-specific model classes
+runtime/             contains files generated during runtime
 backend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains backend configurations
-    controllers/         contains Web controller classes
-    models/              contains backend-specific model classes
-    runtime/             contains files generated during runtime
-    tests/               contains tests for backend application
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
+assets/              contains application assets such as JavaScript and CSS
+config/              contains backend configurations
+controllers/         contains Web controller classes
+models/              contains backend-specific model classes
+runtime/             contains files generated during runtime
+tests/               contains tests for backend application
+views/               contains view files for the Web application
+web/                 contains the entry script and Web resources
 frontend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains frontend configurations
-    controllers/         contains Web controller classes
-    models/              contains frontend-specific model classes
-    runtime/             contains files generated during runtime
-    tests/               contains tests for frontend application
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
-    widgets/             contains frontend widgets
+assets/              contains application assets such as JavaScript and CSS
+config/              contains frontend configurations
+controllers/         contains Web controller classes
+models/              contains frontend-specific model classes
+runtime/             contains files generated during runtime
+tests/               contains tests for frontend application
+views/               contains view files for the Web application
+web/                 contains the entry script and Web resources
+widgets/             contains frontend widgets
 webapi
-    config/              contains webapi configurations
-    controllers/         contains Web controller classes
-    models/              contains webapi-specific model classes
-    runtime/             contains files generated during runtime
-    web/                 contains the entry script and Web resources
+config/              contains webapi configurations
+controllers/         contains Web controller classes
+models/              contains webapi-specific model classes
+runtime/             contains files generated during runtime
+web/                 contains the entry script and Web resources
 vendor/                  contains dependent 3rd-party packages
 environments/            contains environment-based overrides
 ```
