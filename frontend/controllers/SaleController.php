@@ -117,6 +117,7 @@ class SaleController extends FController
                 'hash' => $hash,
                 'withFareRules' => $withFareRules,
             ],
+            'disableMasking' => false
         ];
 
         if (Yii::$app->request->isAjax) {
