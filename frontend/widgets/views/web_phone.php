@@ -471,8 +471,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                 // console.log('app_sid: ' + data.app_sid + 'account_sid: ' + data.account_sid);
                 call_acc_sid = data.account_sid;
                 //console.log('Token: ' + data.token);
-                device = new Twilio.Device();
-                device.setup(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false, allowIncomingWhileBusy: false})
+                device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false, allowIncomingWhileBusy: false});
 
                 device.audio.incoming(false);
                 device.audio.outgoing(false);
@@ -628,19 +627,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
                     incomingSoundOff();
                 });
-
-                // device.on('warning', function (warningName, warningData) {
-                //     console.log('Twilio device warning');
-                //     if (warningName === 'low-mos') {
-                //         console.log('We have detected poor call quality conditions. You may experience degraded call quality.')
-                //     }
-                //     console.log(warningData);
-                // });
-                //
-                // device.on('warning-cleared', function (warningName, warningData) {
-                //     console.log('call-quality-metric has returned to normal')
-                //     console.log(warningData);
-                // });
 
                 device.on('offline', function (device) {
                     console.log('Phone device: status Offline');
