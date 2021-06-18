@@ -49,12 +49,19 @@ class Handler
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $command->project_id;
             $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
+            if ($command->contact_name) {
+                $clientForm->firstName = $command->contact_name;
+            }
 
-            $client = $this->clientManageService->getOrCreate(
-                [new PhoneCreateForm(['phone' => $command->contact_phone])],
-                [new EmailCreateForm(['email' => $command->contact_email])],
-                $clientForm
-            );
+            try {
+                $client = $this->clientManageService->getOrCreate(
+                    [new PhoneCreateForm(['phone' => $command->contact_phone])],
+                    [new EmailCreateForm(['email' => $command->contact_email])],
+                    $clientForm
+                );
+            } catch (\DomainException $e) {
+                $client = $this->clientManageService->create($clientForm, null);
+            }
 
             $case = Cases::createByApi(
                 $client->id,
