@@ -39,6 +39,7 @@ use yii\helpers\Html;
                             'format' => 'Y-m-d H:i:s',
                             'separator' => ' - '
                         ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default'],
                         'opens' => 'right'
                     ]
                 ])->label(false);
