@@ -257,6 +257,7 @@ class CasesController extends BaseController
 
         return new SuccessResponse(
             new DataMessage(
+                new Message('case_id', $result->csId),
                 new Message('case_gid', $result->caseGid),
                 new Message('client_uuid', $result->clientUuid),
             )
