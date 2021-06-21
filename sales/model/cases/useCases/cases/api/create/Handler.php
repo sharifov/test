@@ -45,7 +45,6 @@ class Handler
 
         /** @var Result $result */
         $result = $this->transactionManager->wrap(function () use ($command, $category) {
-
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $command->project_id;
             $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
@@ -60,7 +59,9 @@ class Handler
                     $clientForm
                 );
             } catch (\DomainException $e) {
-                $client = $this->clientManageService->create($clientForm, null);
+                if (!$command->chat_visitor_id || !$client = Client::find()->byProject($command->project_id)->byVisitor($command->chat_visitor_id)->one()) {
+                    $client = $this->clientManageService->create($clientForm, null);
+                }
             }
             if ($command->chat_visitor_id) {
                 $this->clientManageService->addVisitorId($client, $command->chat_visitor_id);
