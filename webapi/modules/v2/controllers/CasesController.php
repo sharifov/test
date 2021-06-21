@@ -215,7 +215,7 @@ class CasesController extends BaseController
         }
 
         if (
-            $case = Cases::find()
+            $form->order_uid && $case = Cases::find()
             ->andWhere(['cs_category_id' => $form->category_id, 'cs_order_uid' => $form->order_uid])
             ->withNotFinishStatus()->limit(1)->one()
         ) {
