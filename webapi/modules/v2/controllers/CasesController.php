@@ -65,7 +65,7 @@ class CasesController extends BaseController
      * @apiParam {string{160}}          contact_email                    Client Email required if contact phone or chat_visitor_id or order_uid are not set
      * @apiParam {string{20}}           contact_phone                    Client Phone required if contact email or chat_visitor_id or order_uid are not set
      * @apiParam {string{20}}           [contact_name]                   Client Name
-     * @apiParam {string{50}}           lead.client.chat_visitor_id      Client chat_visitor_id required if contact phone or email or order_uid are not set
+     * @apiParam {string{50}}           chat_visitor_id                  Client chat_visitor_id required if contact phone or email or order_uid are not set
      * @apiParam {int}                  category_id                      Case category id
      * @apiParam {string{5..7}}         order_uid                        Order uid (symbols and numbers only) required if contact phone or email or chat_visitor_id are not set
      * @apiParam {string{100}}          [project_key]                    Project Key (if not exist project assign API User)

@@ -62,6 +62,9 @@ class Handler
             } catch (\DomainException $e) {
                 $client = $this->clientManageService->create($clientForm, null);
             }
+            if ($command->chat_visitor_id) {
+                $this->clientManageService->addVisitorId($client, $command->chat_visitor_id);
+            }
 
             $case = Cases::createByApi(
                 $client->id,
