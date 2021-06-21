@@ -125,6 +125,35 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
             </table>
 
 
+            <?php if (!empty($caseSaleModel) && $autoCheckIn = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'autoCheckIn')) : ?>
+                <h2>Auto check in</h2>
+                <table class="table table-bordered table-hover table-striped">
+                    <tr>
+                        <th>Title</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'title')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Amount</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'amount')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Currency</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'currency')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Pax Count</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'paxCount')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Amount per pax</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'amountPerPax')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Is Activated</th>
+                        <td><?php echo ArrayHelper::getValue($autoCheckIn, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
+                    </tr>
+                </table>
+            <?php endif ?>
         </div>
 
         <div class="col-md-9">
