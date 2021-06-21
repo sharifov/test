@@ -100,7 +100,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id']],
 
             ['dpp_priority', 'default', 'value' => 0],
-            ['dpp_priority', 'integer', 'max' => 6500, 'min' => 0],
+            ['dpp_priority', 'integer', 'max' => 6500, 'min' => -6500],
             ['dpp_priority', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
