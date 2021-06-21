@@ -95,6 +95,7 @@ class CasesController extends BaseController
      *       "status": 200,
      *       "message": "OK",
      *       "data": {
+     *           "case_id": 2354356,
      *           "case_gid": "708ddf3e44ec477f8807d8b5f748bb6c",
      *           "client_uuid": "5d0cd25a-7f22-4b18-9547-e19a3e7d0c9a"
      *       },
