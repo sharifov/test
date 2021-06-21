@@ -28,6 +28,7 @@ use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\leadData\entity\LeadData;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\quoteLabel\entity\QuoteLabel;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
@@ -78,6 +79,7 @@ use sales\auth\Auth;
  * @property string|null $lead_data_key
  * @property string|null $lead_data_value
  * @property array|null $quote_labels
+ * @property bool|null $is_conversion
  *
  * @property $count_files
  * @property int|null $includedFiles
@@ -167,6 +169,7 @@ class LeadSearch extends Lead
     public $lead_data_key;
     public $lead_data_value;
     public $quote_labels;
+    public $is_conversion;
 
     private $leadBadgesRepository;
 
@@ -245,6 +248,8 @@ class LeadSearch extends Lead
             [['lead_data_key', 'lead_data_value'], 'trim'],
 
             [['quote_labels'], 'safe'],
+
+            [['is_conversion'], 'in', 'range' => [0, 1]],
         ];
     }
 
@@ -263,6 +268,7 @@ class LeadSearch extends Lead
             'lead_data_key' => 'Data Key',
             'lead_data_value' => 'Data Value',
             'quote_labels' => 'Quote labels',
+            'is_conversion' => 'Is Conversion',
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }
@@ -844,6 +850,21 @@ class LeadSearch extends Lead
             $query->innerJoin([
                 'quote_label' => $quoteSubQuery
             ], 'leads.id = quote_label.lead_id');
+        }
+
+        if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
+            $leadIds = LeadUserConversion::find()
+                ->select('luc_lead_id')
+                ->groupBy(['luc_lead_id'])
+                ->indexBy('luc_lead_id')
+                ->column();
+            $command = $this->is_conversion ? 'IN' : 'NOT IN';
+
+            $query->andWhere([
+                $command,
+                'leads.id',
+                $leadIds
+            ]);
         }
 
         return $dataProvider;
@@ -3018,16 +3039,20 @@ class LeadSearch extends Lead
             $leadTable . '.l_type' => $this->l_type,
         ]);
 
-//        $query
-//        ->andWhere(['IN','leads.status', [self::STATUS_TRASH]])
-//        ->andWhere(['IN', $leadTable . '.project_id', $projectIds]);
+        if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
+            $leadIds = LeadUserConversion::find()
+                ->select('luc_lead_id')
+                ->groupBy(['luc_lead_id'])
+                ->indexBy('luc_lead_id')
+                ->column();
+            $command = $this->is_conversion ? 'IN' : 'NOT IN';
 
-
-//        if($this->supervision_id > 0) {
-//            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-//            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-//            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
-//        }
+            $query->andWhere([
+                $command,
+                $leadTable . '.id',
+                $leadIds
+            ]);
+        }
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
 

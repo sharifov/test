@@ -248,6 +248,10 @@ use frontend\extensions\DatePicker;
                             ?>
                         </div>
 
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'is_conversion')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
+                        </div>
+
                         <div class="row" style="padding-left: 10px;">
                             <div class="col-md-6">
                                 <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataKey::getListCache(), ['prompt' => '-']) ?>
@@ -269,8 +273,6 @@ use frontend\extensions\DatePicker;
                                     ?>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
                 <div class=" profile-bottom text-center">
