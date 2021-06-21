@@ -237,18 +237,20 @@ class CasesController extends BaseController
             );
         }
 
-        try {
-            $job = new CreateSaleFromBOJob();
-            $job->case_id = $result->csId;
-            $job->order_uid = $form->order_uid;
-            $job->email = $form->contact_email;
-            $job->phone = $form->contact_phone;
-            Yii::$app->queue_job->priority(100)->push($job);
-        } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
-            );
+        if ($form->order_uid || $form->contact_email || $form->contact_phone) {
+            try {
+                $job = new CreateSaleFromBOJob();
+                $job->case_id = $result->csId;
+                $job->order_uid = $form->order_uid;
+                $job->email = $form->contact_email;
+                $job->phone = $form->contact_phone;
+                Yii::$app->queue_job->priority(100)->push($job);
+            } catch (\Throwable $throwable) {
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
+                );
+            }
         }
 
         return new SuccessResponse(
