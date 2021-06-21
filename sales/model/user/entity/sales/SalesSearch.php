@@ -31,6 +31,8 @@ use yii\db\Query;
  * @property float|null $final_profit
  * @property string|null $l_status_dt
  * @property string|null $created
+ * @property $luc_created_dt
+ * @property $luc_description
  * @property string|null $dateRange
  * @property string|null $defaultDateRange
  * @property string|null $dateFrom
@@ -55,6 +57,8 @@ class SalesSearch extends Model
     public $final_profit;
     public $l_status_dt;
     public $created;
+    public $luc_created_dt;
+    public $luc_description;
 
     private $currentUser;
     private $minDate;
@@ -92,12 +96,18 @@ class SalesSearch extends Model
 
             ['dateFrom', 'default', 'value' => $this->defaultMinDate],
             ['dateTo', 'default', 'value' => $this->maxDate],
+
+            [['luc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['luc_description'], 'string', 'max' => 100],
         ];
     }
 
     public function attributeLabels(): array
     {
-        return [];
+        return [
+            'luc_created_dt' => 'Qualified date',
+            'luc_description' => 'Description',
+        ];
     }
 
     public function searchByUser(array $params, int $cacheDuration = -1)
@@ -166,13 +176,70 @@ class SalesSearch extends Model
         return $dataProvider;
     }
 
+    public function searchQualifiedLeads(array $params, int $cacheDuration = -1)
+    {
+        $query = (new Query());
+        $query->from(Lead::tableName());
+        $query->select([
+            Lead::tableName() . '.*',
+            LeadUserConversion::tableName() . '.luc_description',
+            LeadUserConversion::tableName() . '.luc_created_dt',
+        ]);
+        $query->innerJoin(LeadUserConversion::tableName(), Lead::tableName() . '.id = luc_lead_id');
+        $query->where(['luc_user_id' => $this->currentUser->getId()]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['luc_created_dt' => SORT_DESC],
+                'attributes' => [
+                    'luc_created_dt' => [
+                        'asc' => ['luc_created_dt' => SORT_ASC],
+                        'desc' => ['luc_created_dt' => SORT_DESC],
+                        'label' => 'Created',
+                    ],
+                    'luc_description'  => [
+                        'asc' => ['luc_description' => SORT_ASC],
+                        'desc' => ['luc_description' => SORT_DESC],
+                        'label' => 'Description',
+                    ],
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        if ($this->dateFrom && $this->dateTo) {
+            $query->andWhere(['>=', 'DATE(luc_created_dt)', $this->dateFrom]);
+            $query->andWhere(['<=', 'DATE(luc_created_dt)', $this->dateTo]);
+        }
+
+        $query->andFilterWhere([
+            Lead::tableName() . '.id' => $this->id,
+            'DATE(luc_created_dt)' => $this->luc_created_dt,
+        ]);
+
+        $query->andFilterWhere(['like', 'luc_description', $this->luc_description]);
+
+        $query->cache($cacheDuration);
+
+        return $dataProvider;
+    }
+
     public function qualifiedLeadsTakenQuery(array $params, int $cacheDuration = -1): LeadQuery
     {
         $query = Lead::find();
         $query->select(Lead::tableName() . '.*');
         $query->innerJoin(LeadUserConversion::tableName(), Lead::tableName() . '.id = luc_lead_id');
         $query->where(['luc_user_id' => $this->currentUser->getId()]);
-        $query->andWhere(['l_is_test' => 0]);
 
         if ($this->dateFrom && $this->dateTo) {
             $query->andWhere(['>=', 'DATE(luc_created_dt)', $this->dateFrom]);
