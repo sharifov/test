@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -18,7 +19,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'luc_user_id')->textInput() ?>
 
-        <?= $form->field($model, 'luc_description')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'luc_description')->dropDownList(LeadUserConversionDictionary::DESCRIPTION_LIST) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

@@ -34,6 +34,7 @@ use sales\model\callLog\services\CallLogTransferService;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
+use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -1042,7 +1043,11 @@ class Call extends \yii\db\ActiveRecord
                                 );
                                 $leadRepository->save($lead);
 
-                                $leadUserConversion = LeadUserConversion::create($lead->id, $this->c_created_user_id);
+                                $leadUserConversion = LeadUserConversion::create(
+                                    $lead->id,
+                                    $this->c_created_user_id,
+                                    LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE
+                                );
                                 (new LeadUserConversionRepository())->save($leadUserConversion);
 
                                 $qCallService->remove($lead->id);
