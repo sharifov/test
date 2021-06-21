@@ -221,6 +221,7 @@ class CasesController extends BaseController
         ) {
             return new SuccessResponse(
                 new DataMessage(
+                    new Message('case_id', $case->cs_id),
                     new Message('case_gid', $case->cs_gid),
                     new Message('client_uuid', $case->client ? $case->client->uuid : ''),
                 )
