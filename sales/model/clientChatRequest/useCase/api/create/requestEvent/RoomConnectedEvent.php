@@ -11,8 +11,9 @@ use sales\model\clientChat\componentEvent\component\ComponentDTO;
 use sales\model\clientChat\componentEvent\service\ComponentEventsTypeService;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatCase\service\ClientChatCaseManageService;
 use sales\model\clientChatLead\entity\ClientChatLead;
-use sales\model\clientChatLead\entity\ClientChatLeadRepository;
+use sales\model\clientChatLead\service\ClientChatLeadMangeService;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatVisitorData\service\ChatVisitorDataService;
@@ -34,8 +35,9 @@ use yii\redis\Connection;
  * @property ChatVisitorDataService $chatVisitorDataService
  * @property ClientChatMessageService $clientChatMessageService
  * @property TransactionManager $transactionManager
- * @property ClientChatLeadRepository $clientChatLeadRepository
  * @property ComponentEventsTypeService $componentEventsTypeService
+ * @property ClientChatLeadMangeService $clientChatLeadMangeService
+ * @property ClientChatCaseManageService $clientChatCaseManageService
  * @property Connection $redis
  * @property int $delay
  * @property int $countProcesses
@@ -74,7 +76,9 @@ class RoomConnectedEvent implements ChatRequestEvent
      */
     private TransactionManager $transactionManager;
 
-    private ClientChatLeadRepository $clientChatLeadRepository;
+    private ClientChatLeadMangeService $clientChatLeadMangeService;
+
+    private ClientChatCaseManageService $clientChatCaseManageService;
 
     private ComponentEventsTypeService $componentEventsTypeService;
 
@@ -93,8 +97,9 @@ class RoomConnectedEvent implements ChatRequestEvent
         ChatVisitorDataService $chatVisitorDataService,
         ClientChatMessageService $clientChatMessageService,
         TransactionManager $transactionManager,
-        ClientChatLeadRepository $clientChatLeadRepository,
-        ComponentEventsTypeService $componentEventsTypeService
+        ComponentEventsTypeService $componentEventsTypeService,
+        ClientChatLeadMangeService $clientChatLeadMangeService,
+        ClientChatCaseManageService $clientChatCaseManageService
     ) {
         $this->clientChatRepository = $clientChatRepository;
         $this->clientManageService = $clientManageService;
@@ -102,8 +107,9 @@ class RoomConnectedEvent implements ChatRequestEvent
         $this->chatVisitorDataService = $chatVisitorDataService;
         $this->clientChatMessageService = $clientChatMessageService;
         $this->transactionManager = $transactionManager;
-        $this->clientChatLeadRepository = $clientChatLeadRepository;
         $this->componentEventsTypeService = $componentEventsTypeService;
+        $this->clientChatLeadMangeService = $clientChatLeadMangeService;
+        $this->clientChatCaseManageService = $clientChatCaseManageService;
         $this->redis = \Yii::$app->redis;
     }
 
@@ -174,19 +180,10 @@ class RoomConnectedEvent implements ChatRequestEvent
                 $this->chatVisitorDataService->manageChatVisitorData($clientChat->cch_id, $clientChat->cch_client_id, $visitorRcId, $clientChatRequest->getDecodedData());
 
                 if (($leadIds = $clientChatRequest->getLeadIds()) && is_array($leadIds)) {
-                    foreach ($leadIds as $leadId) {
-                        if (Lead::find()->where(['id' => $leadId])->exists()) {
-                            $clientChatLead = ClientChatLead::create($clientChat->cch_id, $leadId, new \DateTimeImmutable('now'));
-                            if ($clientChatLead->validate()) {
-                                $this->clientChatLeadRepository->save($clientChatLead);
-                            } else {
-                                \Yii::warning(
-                                    ErrorsToStringHelper::extractFromModel($clientChatLead),
-                                    'RoomConnectedEvent:process:clientChatLead:validate'
-                                );
-                            }
-                        }
-                    }
+                    $this->clientChatLeadMangeService->assignChatByLeadIds($leadIds, $clientChat->cch_id);
+                }
+                if (($caseIds = $clientChatRequest->getCaseIds()) && is_array($caseIds)) {
+                    $this->clientChatCaseManageService->assignChatByCaseIds($caseIds, $clientChat->cch_id);
                 }
             });
 
