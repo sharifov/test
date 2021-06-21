@@ -337,7 +337,6 @@ class EmailController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }*/
 
-
         //echo 123;        exit;
 
         /** @abac new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to view email*/
