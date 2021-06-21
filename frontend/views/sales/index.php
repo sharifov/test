@@ -13,17 +13,29 @@ use yii\web\View;
 /* @var yii\data\ActiveDataProvider $dataProvider */
 /* @var int $totalCount */
 /* @var float $sumGrossProfit */
-/* @var int $qualifiedLeadsTaken */
+/* @var int $qualifiedLeadsTakenCount */
 /* @var int $cacheDuration */
+/* @var yii\data\ActiveDataProvider $searchQualifiedLeads */
 
 $this->title = 'My Sales';
 $this->params['breadcrumbs'][] = $this->title;
+
+$tabs[] = [
+    'id' => 'sold-leads',
+    'name' => '<i class="fa fa-line-chart"></i> Sold Leads <sup>(' . $totalCount . ')</sup>',
+    'content' => $this->render('partial/_sold_leads', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel]),
+];
+
+$tabs[] = [
+    'id' => 'qualified-leads',
+    'name' => '<i class="fa fa-tasks"></i> Qualified Leads <sup>(' . $qualifiedLeadsTakenCount . ')</sup>',
+    'content' => $this->render('partial/_qualified_leads', ['dataProvider' => $searchQualifiedLeads, 'searchModel' => $searchModel]),
+];
+
 ?>
 <div class="user-stats-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
-    <?php Pjax::begin(['id' => 'pjax-sales', 'timeout' => 90000, 'enablePushState' => true]); ?>
 
     <?php if ($cacheDuration > 0) : ?>
         <div class="alert alert-secondary alert-dismissible" role="alert">
@@ -63,15 +75,15 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-md-2 tile_stats_count dev-tile-adjust sales-stats-box">
                 <span class="count_top"><i class="fa fa-tasks"></i> Qualified Leads</span>
-                <div class="count"><?php echo $qualifiedLeadsTaken ?></div>
+                <div class="count"><?php echo $qualifiedLeadsTakenCount ?></div>
             </div>
             <div class="col-md-2 tile_stats_count dev-tile-adjust sales-stats-box">
                 <span class="count_top"><i class="fa fa-pie-chart"></i> Conversion</span>
-                <div class="count"><?php echo $totalCount ?>/<?php echo $qualifiedLeadsTaken ?></div>
-                <?php if ($qualifiedLeadsTaken > 0) : ?>
+                <div class="count"><?php echo $totalCount ?>/<?php echo $qualifiedLeadsTakenCount ?></div>
+                <?php if ($qualifiedLeadsTakenCount > 0) : ?>
                     <span class="count_bottom">
                         <i class="green">
-                            <?php echo round(($totalCount * 100) / $qualifiedLeadsTaken, 2) ?>%
+                            <?php echo round(($totalCount * 100) / $qualifiedLeadsTakenCount, 2) ?>%
                         </i>
                     </span>
                 <?php endif ?>
@@ -79,49 +91,32 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
-        'columns' => [
-            [
-                'attribute' => 'id',
-                'format' => 'raw',
-                'label' => 'Lead',
-                'value' => static function ($data) {
-                    return Html::tag('i', '', ['class' => 'fa fa-arrow-right'])
-                        . ' '
-                        . Html::a(
-                            'lead: ' . $data['id'],
-                            ['/lead/view', 'gid' => $data['gid']],
-                            ['target' => '_blank', 'data-pjax' => 0]
-                        );
-                }
-            ],
-            [
-                'attribute' => 'final_profit',
-                'format' => 'raw',
-                'label' => 'Gross Profit',
-                'value' => static function ($data) {
-                    return Html::tag('i', '', ['class' => 'fa fa-money']) . ' ' . $data['gross_profit'];
-                },
-                'contentOptions' => [
-                    'style' => 'width:420px'
-                ],
-            ],
-            [
-                'attribute' => 'l_status_dt',
-                'class' => DateColumn::class,
-                'label' => 'Sold Date',
-            ],
-            [
-                'attribute' => 'created',
-                'class' => DateColumn::class,
-            ],
-        ],
-    ]) ?>
+    <div class="row">
+        <div class="col-md-12">
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <?php foreach ($tabs as $key => $tab) : ?>
+                        <?php if ($key === 0) : ?>
+                            <a class="nav-item nav-link active" id="nav-<?= $tab['id']?>-tab" data-toggle="tab" href="#nav-<?= $tab['id']?>" role="tab" aria-controls="nav-<?= $tab['id']?>" aria-selected="true"><?= $tab['name']?></a>
+                        <?php else : ?>
+                            <a class="nav-item nav-link" id="nav-<?= $tab['id']?>-tab" data-toggle="tab" href="#nav-<?= $tab['id']?>" role="tab" aria-controls="nav-<?= $tab['id']?>" aria-selected="false"><?= $tab['name']?></a>
+                        <?php endif;?>
+                    <?php endforeach; ?>
+                </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                <br>
+                <?php foreach ($tabs as $key => $tab) : ?>
+                    <?php if ($key === 0) : ?>
+                        <div class="tab-pane fade show active" id="nav-<?= $tab['id']?>" role="tabpanel" aria-labelledby="nav-<?= $tab['id']?>-tab"><?= $tab['content']?></div>
+                    <?php else : ?>
+                        <div class="tab-pane fade" id="nav-<?= $tab['id']?>" role="tabpanel" aria-labelledby="nav-<?= $tab['id']?>-tab"><?= $tab['content']?></div>
+                    <?php endif;?>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
 
-    <?php Pjax::end(); ?>
 </div>
 
 <?php
