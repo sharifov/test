@@ -139,7 +139,7 @@ class ApiLogController extends FController
 
     public function actionDeleteAll()
     {
-        ApiLog::deleteAll();
+        ApiLog::getDb()->createCommand()->truncateTable(ApiLog::tableName())->execute();
         return $this->redirect(['index']);
     }
 

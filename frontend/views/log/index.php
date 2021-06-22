@@ -23,7 +23,7 @@ $pjaxListId = 'pjax-log';
         <div class="row">
             <div class="col-md-12" style="margin-bottom: 12px;">
                 <?php echo Html::a(
-                    '<i class="fas fa-remove"></i> Clear all Logs',
+                    '<i class="fas fa-remove"></i> Truncate Log table',
                     ['log/clear'],
                     [
                         'class' => 'btn btn-danger',
