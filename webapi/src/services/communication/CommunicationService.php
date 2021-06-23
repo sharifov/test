@@ -20,11 +20,15 @@ use common\models\Sources;
 use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\lead\LeadRepository;
 use sales\services\call\CallDeclinedException;
 use sales\services\call\CallService;
+use sales\services\phone\blackList\PhoneBlackListManageService;
 use Twilio\TwiML\VoiceResponse;
 use webapi\src\repositories\communication\CommunicationRepository;
 use Yii;
@@ -82,6 +86,18 @@ class CommunicationService
         if (!$incoming_phone_number) {
             $response['error'] = 'Not found Call Called (Agent phone number)';
             $response['error_code'] = 11;
+        }
+
+        try {
+            if (
+                SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list') &&
+                CallTerminateLogService::isPhoneBlackListCandidate($client_phone_number)
+            ) {
+                $addMinutes = (int) (SettingHelper::getCallTerminateBlackListByKey('black_list_expired_minutes') ?? 180);
+                PhoneBlackListManageService::createOrRenewExpiration($client_phone_number, $addMinutes, new \DateTime(), 'Reason - CallTerminateLog');
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'CommunicationService:CallTerminateLogService:Throwable');
         }
 
         try {
