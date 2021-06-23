@@ -89,27 +89,6 @@ class CommunicationService
         }
 
         try {
-            if (
-                SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list') &&
-                CallTerminateLogService::isPhoneBlackListCandidate($client_phone_number)
-            ) {
-                $addMinutes = (int) (SettingHelper::getCallTerminateBlackListByKey('black_list_expired_minutes') ?? 180);
-                PhoneBlackListManageService::createOrRenewExpiration($client_phone_number, $addMinutes, new \DateTime(), 'Reason - CallTerminateLog');
-            }
-            \Yii::info(
-                        [
-                            'phone' => $client_phone_number,
-                            'point' => 'CommunicationService',
-                            'status' => CallTerminateLogService::isPhoneBlackListCandidate($client_phone_number)
-                        ],
-                        'info\Debug:CommunicationService:CallTerminateLogService'
-                    );
-                    /* TODO: FOR DEBUG:: must by remove */
-        } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'CommunicationService:CallTerminateLogService:Throwable');
-        }
-
-        try {
             $this->callService->guardDeclined($client_phone_number, ArrayHelper::toArray($requestDataDTO), Call::CALL_TYPE_IN);
         } catch (CallDeclinedException $e) {
             $vr = new VoiceResponse();

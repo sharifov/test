@@ -104,27 +104,6 @@ class CallQueueJob extends BaseJob implements JobInterface
                     throw new Exception('CallQueueJob: Not found CallId: ' . $this->call_id, 5);
                 }
 
-                try {
-                    if (
-                        SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list') &&
-                        CallTerminateLogService::isPhoneBlackListCandidate($call->c_from)
-                    ) {
-                        $addMinutes = (int) (SettingHelper::getCallTerminateBlackListByKey('black_list_expired_minutes') ?? 180);
-                        PhoneBlackListManageService::createOrRenewExpiration($call->c_from, $addMinutes, new \DateTime(), 'Reason - CallTerminateLog');
-                    }
-                    \Yii::info(
-                        [
-                            'phone' => $call->c_from,
-                            'point' => 'CallQueueJob',
-                            'status' => CallTerminateLogService::isPhoneBlackListCandidate($call->c_from)
-                        ],
-                        'info\Debug:CallQueueJob:CallTerminateLogService'
-                    );
-                    /* TODO: FOR DEBUG:: must by remove */
-                } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableLog($throwable), 'CallQueueJob:CallTerminateLogService:Throwable');
-                }
-
                 $originalAgentId = $call->c_created_user_id;
 
                 if ($call->isStatusIvr()) {
