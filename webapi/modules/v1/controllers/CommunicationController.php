@@ -352,6 +352,15 @@ class CommunicationController extends ApiBaseController
                     $addMinutes = (int) (SettingHelper::getCallTerminateBlackListByKey('black_list_expired_minutes') ?? 180);
                     PhoneBlackListManageService::createOrRenewExpiration($client_phone_number, $addMinutes, new \DateTime(), 'Reason - CallTerminateLog');
                 }
+                \Yii::info(
+                        [
+                            'phone' => $client_phone_number,
+                            'point' => 'CommunicationController',
+                            'status' => CallTerminateLogService::isPhoneBlackListCandidate($client_phone_number)
+                        ],
+                        'info\Debug:CommunicationController:CallTerminateLogService'
+                    );
+                    /* TODO: FOR DEBUG:: must by remove */
             } catch (\Throwable $throwable) {
                 Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:CallTerminateLogService:Throwable');
             }
