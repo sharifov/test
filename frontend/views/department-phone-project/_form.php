@@ -9,14 +9,20 @@ use yii\widgets\ActiveForm;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
+<style>
+    .jsoneditor-mode-code {
+        height: 800px;
+    }
+</style>
+
 <div class="department-phone-project-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
     <div class="col-md-4">
-        <?= $form->field($model, 'dpp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 
-        <?= $form->field($model, 'dpp_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
+
+
 
         <?php //= $form->field($model, 'dpp_phone_number')->textInput(['maxlength' => true]) ?>
 
@@ -25,12 +31,22 @@ use yii\widgets\ActiveForm;
                 $model->dpp_phone_list_id => $model->phoneList->pl_phone_number
             ] : [],
         ]) ?>
+        <div class="row">
+        <div class="col-md-6">
+            <?= $form->field($model, 'dpp_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'dpp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
+        </div>
+        </div>
 
+        <div class="row">
         <div class="col-md-6">
             <?= $form->field($model, 'dpp_redial')->dropDownList([0 => 'No', 1 => 'Yes']) ?>
         </div>
         <div class="col-md-6">
             <?= $form->field($model, 'dpp_language_id')->dropDownList(\common\models\Language::getLanguages(true, 'language'), ['prompt' => '---']) ?>
+        </div>
         </div>
 
         <?php //= $form->field($model, 'dpp_source_id')->dropDownList(Sour) ?>
