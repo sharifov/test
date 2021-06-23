@@ -3,6 +3,7 @@
 namespace common\components;
 
 use common\models\Setting;
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\base\BootstrapInterface;
 
@@ -26,10 +27,10 @@ class SettingsBootstrap implements BootstrapInterface
      */
     public function bootstrap($app)
     {
-        $tableSchema = Yii::$app->db->schema->getTableSchema('setting');
+        try {
+            Yii::$app->db->schema->getTableSchema('setting');
 
 
-        if ($tableSchema) {
             $cache = Yii::$app->cache;
 
             //$cache->delete('site_settings');
@@ -64,6 +65,8 @@ class SettingsBootstrap implements BootstrapInterface
                 // $settingsArr['cache'] = true;
                 Yii::$app->params['settings'] = $settingsArr;
             }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'SettingsBootstrap');
         }
     }
 }
