@@ -3,7 +3,6 @@
 namespace webapi\models;
 
 use yii\helpers\VarDumper;
-use common\components\CommunicationService;
 
 class ApiCheckHealth
 {

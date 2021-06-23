@@ -22,11 +22,13 @@ class CheckHealthController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-        $behaviors['authenticator'] = [
-            'class' => HttpBasicAuthCheckHealth::class,
+        if ((\Yii::$app->params['apiCheckHealth']['user'] != '') && (\Yii::$app->params['apiCheckHealth']['password'] != '')) {
+            $behaviors['authenticator'] = [
+                'class' => HttpBasicAuthCheckHealth::class,
 //            'auth' => [$this, 'auth']
-        ];
-        return $behaviors;
+            ];
+        }
+            return $behaviors;
     }
 
 //    public function auth($username, $password)
