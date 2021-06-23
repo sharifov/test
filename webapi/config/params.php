@@ -5,8 +5,8 @@ return [
     'serviceName' => 'sales-api',
     'host' => 'communication.api.travelinsides.com',
     'apiCheckHealth' => [
-        'user' => 'apiuser',
-        'password' => 'zeitstyle2018'
+        'user' => '',
+        'password' => ''
     ]
 
 ];
