@@ -7,6 +7,8 @@ use common\models\Employee;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\email\form\EmailSendForm;
 use http\Url;
+use modules\email\src\abac\dto\EmailAbacDto;
+use modules\email\src\abac\EmailAbacObject;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
@@ -331,7 +333,13 @@ class EmailController extends FController
     {
         $model = $this->findModel($id);
 
-        if (!Auth::can('email/view', ['email' => $model])) {
+        /*if (!Auth::can('email/view', ['email' => $model])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }*/
+
+        /** @abac new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to view emails on case or lead*/
+
+        if (!Yii::$app->abac->can(new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
