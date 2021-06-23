@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use webapi\behaviors\HttpBasicAuthCheckHealth;
 use webapi\models\ApiCheckHealth;
 use yii\rest\Controller;
+use yii\helpers\VarDumper;
 
 class CheckHealthController extends Controller
 {
@@ -22,19 +23,11 @@ class CheckHealthController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-        if ((\Yii::$app->params['apiCheckHealth']['user'] != '') && (\Yii::$app->params['apiCheckHealth']['password'] != '')) {
-            $behaviors['authenticator'] = [
-                'class' => HttpBasicAuthCheckHealth::class,
-//            'auth' => [$this, 'auth']
-            ];
-        }
-            return $behaviors;
+        $behaviors['authenticator'] = [
+            'class' => HttpBasicAuthCheckHealth::class,
+        ];
+        return $behaviors;
     }
-
-//    public function auth($username, $password)
-//    {
-//        return null;
-//    }
 
     public function actionQuick()
     {

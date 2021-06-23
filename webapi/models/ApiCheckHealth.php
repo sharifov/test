@@ -2,9 +2,10 @@
 
 namespace webapi\models;
 
+use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
-class ApiCheckHealth
+class ApiCheckHealth extends ActiveRecord
 {
     /**
      * @throws \yii\httpclient\Exception
@@ -13,12 +14,9 @@ class ApiCheckHealth
     {
         $response = [];
         try {
-            $row = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('employees')
-                ->limit(1)
-                ->one();
-            if ($row > 0) {
+            $test_row = \Yii::$app->db->createCommand('SELECT id FROM employees LIMIT 1')->queryOne();
+
+            if ($test_row['id'] > 0) {
                 $response['mysql'] = true;
             } else {
                 $response['mysql'] = false;
@@ -30,7 +28,7 @@ class ApiCheckHealth
         try {
             $row = \Yii::$app->db_postgres->createCommand('SELECT id from log LIMIT 1')->queryAll();
             $response['postgresql'] = boolval($row > 0);
-        } catch (Throwable $e) {
+        } catch (\yii\db\Exception $e) {
             $response['postgresql'] = false;
         }
 
@@ -43,7 +41,20 @@ class ApiCheckHealth
             } else {
                 $response['redis'] = false;
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            $response['redis'] = false;
+        }
+
+        try {
+            $cache = \Yii::$app->cacheFile;
+            $key = 'health_check';
+            $cache->set($key, 'test_passed');
+            if ($cache->get($key) == 'test_passed') {
+                $response['cacheFile'] = true;
+            } else {
+                $response['cacheFile'] = false;
+            }
+        } catch (\Throwable $e) {
             $response['redis'] = false;
         }
 

@@ -9,6 +9,7 @@
 namespace webapi\behaviors;
 
 use yii\filters\auth\AuthMethod;
+use yii\helpers\VarDumper;
 
 /**
  * HttpBasicAuth is an action filter that supports the HTTP Basic authentication method.
@@ -75,7 +76,11 @@ class HttpBasicAuthCheckHealth extends AuthMethod
      */
     public function authenticate($user, $request, $response)
     {
-        if (($_SERVER['PHP_AUTH_USER'] == \Yii::$app->params['apiCheckHealth']['user']) && ($_SERVER['PHP_AUTH_PW'] == \Yii::$app->params['apiCheckHealth']['password'])) {
+        if (empty(\Yii::$app->params['apiCheckHealth']) || empty(\Yii::$app->params['apiCheckHealth']['user'])) {
+            return true;
+        }
+        list($username, $password) = $request->getAuthCredentials();
+        if ((\Yii::$app->params['apiCheckHealth']['user'] == $username) && (\Yii::$app->params['apiCheckHealth']['password'] == $password)) {
             return true;
         } else {
             return null;
