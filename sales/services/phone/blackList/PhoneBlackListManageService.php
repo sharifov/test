@@ -49,7 +49,7 @@ class PhoneBlackListManageService
         }
     }
 
-    public static function createOrRenewExpiration(string $phone, int $addMinutes, \DateTime $date): PhoneBlacklist
+    public static function createOrRenewExpiration(string $phone, int $addMinutes, \DateTime $date, ?string $description = null): PhoneBlacklist
     {
         $date->add(new \DateInterval("PT{$addMinutes}M"));
         $expirationDate = $date->format('Y-m-d H:i:s');
@@ -57,8 +57,9 @@ class PhoneBlackListManageService
         if ($phoneBlackList = PhoneBlacklist::findOne(['pbl_phone' => $phone])) {
             $phoneBlackList->pbl_expiration_date = $expirationDate;
             $phoneBlackList->pbl_enabled = true;
+            $phoneBlackList->pbl_description = $description;
         } else {
-            $phoneBlackList = PhoneBlacklist::create($phone, $expirationDate);
+            $phoneBlackList = PhoneBlacklist::create($phone, $expirationDate, $description);
         }
 
         if (!$phoneBlackList->save()) {

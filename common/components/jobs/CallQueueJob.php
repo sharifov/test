@@ -244,7 +244,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                         CallTerminateLogService::isPhoneBlackListCandidate($call->c_from)
                     ) {
                         $addMinutes = (int) (SettingHelper::getCallTerminateBlackListByKey('black_list_expired_minutes') ?? 180);
-                        PhoneBlackListManageService::createOrRenewExpiration($call->c_from, $addMinutes, new \DateTime());
+                        PhoneBlackListManageService::createOrRenewExpiration($call->c_from, $addMinutes, new \DateTime(), 'Reason - CallTerminateLog');
                     }
                 } catch (\Throwable $throwable) {
                     Yii::error(AppHelper::throwableLog($throwable), 'CallQueueJob:CallTerminateLogService:Throwable');
