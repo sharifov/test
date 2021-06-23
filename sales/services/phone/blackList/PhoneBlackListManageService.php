@@ -48,4 +48,29 @@ class PhoneBlackListManageService
             throw new \RuntimeException($phoneBlackList->getErrorSummary(true)[0]);
         }
     }
+
+    public static function createOrRenewExpiration(string $phone, int $addMinutes, \DateTime $date): PhoneBlacklist
+    {
+        $date->add(new \DateInterval("PT{$addMinutes}M"));
+        $expirationDate = $date->format('Y-m-d H:i:s');
+
+        if ($phoneBlackList = PhoneBlacklist::findOne(['pbl_phone' => $phone])) {
+            $phoneBlackList->pbl_expiration_date = $expirationDate;
+            $phoneBlackList->pbl_enabled = true;
+        } else {
+            $phoneBlackList = PhoneBlacklist::create($phone, $expirationDate);
+        }
+
+        if (!$phoneBlackList->save()) {
+            throw new \RuntimeException($phoneBlackList->getErrorSummary(true)[0]);
+        }
+
+        $phoneBlackListLog = new PhoneBlacklistLog();
+        $phoneBlackListLog->pbll_phone = $phone;
+        if (!$phoneBlackListLog->save()) {
+            throw new \RuntimeException($phoneBlackListLog->getErrorSummary(true)[0]);
+        }
+
+        return $phoneBlackList;
+    }
 }

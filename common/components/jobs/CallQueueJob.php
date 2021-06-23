@@ -19,6 +19,9 @@ use common\models\UserGroupAssign;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\callTerminateLog\entity\CallTerminateLog;
+use sales\model\callTerminateLog\repository\CallTerminateLogRepository;
+use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesCreateService;
@@ -26,6 +29,7 @@ use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadManageService;
+use sales\services\phone\blackList\PhoneBlackListManageService;
 use yii\base\BaseObject;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
@@ -234,12 +238,21 @@ class CallQueueJob extends BaseJob implements JobInterface
                     }
                 }
 
+                try {
+                    if (
+                        SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list') &&
+                        CallTerminateLogService::isPhoneBlackListCandidate($call->c_from)
+                    ) {
+                        $addMinutes = (int) (SettingHelper::getCallTerminateBlackListByKey('black_list_expired_minutes') ?? 180);
+                        PhoneBlackListManageService::createOrRenewExpiration($call->c_from, $addMinutes, new \DateTime());
+                    }
+                } catch (\Throwable $throwable) {
+                    Yii::error(AppHelper::throwableLog($throwable), 'CallQueueJob:CallTerminateLogService:Throwable');
+                }
 
                 if ($call->update() === false) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update');
                 }
-
-
 
                 if ($call->isStatusQueue() || $call->isStatusIvr()) {
                     if ($call->checkCancelCall()) {

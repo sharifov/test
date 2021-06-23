@@ -10,7 +10,10 @@ use common\models\Sources;
 use common\models\UserProfile;
 use console\helpers\OutputHelper;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\callTerminateLog\entity\CallTerminateLog;
+use sales\model\callTerminateLog\repository\CallTerminateLogRepository;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;
@@ -168,6 +171,7 @@ class CallController extends Controller
             /** @var Call $call */
             foreach ($items as $call) {
                 $old_status = $call->getStatusName();
+                $oldStatusId = $call->c_status_id;
                 if ($call->isStatusDelay()) {
                     $call->setStatusCompleted();
                 } else {
@@ -180,6 +184,11 @@ class CallController extends Controller
                         'new_status' => $call->getStatusName(),
                     ];
                     try {
+                        if (SettingHelper::getCallTerminateBlackListByKey('enable_write_log')) {
+                            $callTerminateLog = CallTerminateLog::create($call->c_from, $oldStatusId, $call->c_project_id);
+                            (new CallTerminateLogRepository())->save($callTerminateLog);
+                        }
+
                         $result = Yii::$app->communication->hangUp($call->c_call_sid);
                         if ($result['error']) {
                             Yii::error(VarDumper::dumpAsString([

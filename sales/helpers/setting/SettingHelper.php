@@ -350,4 +350,14 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['case_priority_days'] ?? 14);
     }
+
+    public static function getCallTerminateBlackList(): ?array
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'call_terminate_black_list');
+    }
+
+    public static function getCallTerminateBlackListByKey(string $key)
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'call_terminate_black_list.' . $key);
+    }
 }

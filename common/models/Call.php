@@ -764,6 +764,11 @@ class Call extends \yii\db\ActiveRecord
         return self::STATUS_LIST[$this->c_status_id] ?? '-';
     }
 
+    public static function getStatusNameById(?int $statusId): string
+    {
+        return self::STATUS_LIST[$statusId] ?? '-';
+    }
+
     /**
      * @return string
      */
