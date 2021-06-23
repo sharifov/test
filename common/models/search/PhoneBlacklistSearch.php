@@ -36,6 +36,10 @@ class PhoneBlacklistSearch extends PhoneBlacklist
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['pbl_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -58,7 +62,7 @@ class PhoneBlacklistSearch extends PhoneBlacklist
             'pbl_id' => $this->pbl_id,
             'pbl_enabled' => $this->pbl_enabled,
             'pbl_updated_user_id' => $this->pbl_updated_user_id,
-            'pbl_expiration_date' => $this->pbl_expiration_date,
+            'DATE(pbl_expiration_date)' => $this->pbl_expiration_date,
         ]);
 
         $query->andFilterWhere(['like', 'pbl_phone', $this->pbl_phone])

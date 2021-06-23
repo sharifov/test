@@ -74,18 +74,24 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],*/
-//            [
-//                'class' => DateTimeColumn::class,
-//                'attribute' => 'pbl_created_dt',
-//            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'pbl_created_dt',
+            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pbl_updated_dt',
             ],
-            [
+            /*[
                 'class' => UserColumn::class,
                 'attribute' => 'pbl_updated_user_id',
                 'relation' => 'updatedUser',
+            ],*/
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'pbl_updated_user_id',
+                'relation' => 'updatedUser',
+                'placeholder' => 'Select User',
             ],
             ['class' => ActionColumn::class],
         ],
