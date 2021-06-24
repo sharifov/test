@@ -57,6 +57,7 @@ use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\phone\blackList\PhoneBlackListManageService;
+use sales\services\phone\callFilterGuard\TwilioCallFilterGuard;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
@@ -365,6 +366,16 @@ class CommunicationController extends ApiBaseController
 //            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
+                if ($departmentPhone->getCallFilterGuardEnable()) {
+                    $twilioCallFilterGuard = new TwilioCallFilterGuard($incoming_phone_number);
+                    $trustPercent = $twilioCallFilterGuard->checkPhone();
+
+                    if ($trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()) {
+                        $addMinutes = (int) $departmentPhone->getCallFilterGuardTrustBlockListExpiredMinutes();
+                        PhoneBlackListManageService::createOrRenewExpiration($incoming_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+                    }
+                }
+
                 $project = $departmentPhone->dppProject;
                 $source = $departmentPhone->dppSource;
                 if ($project && !$source) {

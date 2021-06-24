@@ -1300,4 +1300,25 @@ class CommunicationService extends Component implements CommunicationServiceInte
         }
         return $out;
     }
+
+    public function lookup(string $phone): array
+    {
+        $out = ['error' => false, 'result' => null];
+        $data = [
+            'phone' => $phone,
+        ];
+        $response = $this->sendRequest('twilio/lookup', $data);
+
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $out['result'] = $response->data['data'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][result][result]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::lookup');
+        }
+        return $out;
+    }
 }
