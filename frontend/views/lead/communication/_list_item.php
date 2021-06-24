@@ -2,6 +2,8 @@
 
 use common\models\Employee;
 use frontend\helpers\EmailHelper;
+use modules\email\src\abac\dto\EmailAbacDto;
+use modules\email\src\abac\EmailAbacObject;
 use sales\auth\Auth;
 use sales\helpers\call\CallHelper;
 use sales\model\clientChat\entity\ClientChat;
@@ -128,7 +130,10 @@ $fromType = 'client';
                 <div class="" style="word-wrap: break-word">
                 <?php echo \yii\helpers\StringHelper::truncate(Email::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
-            <?php if (Auth::can('email/view', ['email' => $mail])) : ?>
+            <?php /*if (Auth::can('email/view', ['email' => $mail])) : */?>
+
+            <?php /** @abac new EmailAbacDto($mail), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to button email details lead*/ ?>
+            <?php if (Yii::$app->abac->can(new EmailAbacDto($mail), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) : ?>
                     <div class="chat__message-footer">
                         <?= EmailHelper::renderDetailButton($mail) ?>
                     </div>

@@ -11,6 +11,8 @@ use common\models\Sms;
 use common\models\Call;
 use sales\helpers\email\MaskEmailHelper;
 use sales\helpers\phone\MaskPhoneHelper;
+use modules\email\src\abac\dto\EmailAbacDto;
+use modules\email\src\abac\EmailAbacObject;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -107,11 +109,14 @@ use sales\helpers\phone\MaskPhoneHelper;
                 <div class="">
                 <?php echo \yii\helpers\StringHelper::truncate(Email::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
-            <?php if (Auth::can('email/view', ['email' => $mail])) : ?>
+            <?php /*if (Auth::can('email/view', ['email' => $mail])) : */?>
+
+                <?php /** @abac new EmailAbacDto($mail), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to button email details on case*/ ?>
+                <?php if (Yii::$app->abac->can(new EmailAbacDto($mail), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) : ?>
                     <div class="chat__message-footer">
                         <?= EmailHelper::renderDetailButton($mail) ?>
                     </div>
-            <?php endif;?>
+                <?php endif;?>
             </div>
         </div>
     <?php endif;?>
