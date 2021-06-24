@@ -26,6 +26,8 @@ ClientChatAsset::register($this);
 $readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
 $agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
 $server = Yii::$app->rchat->host;
+$apiServer = Yii::$app->rchat->apiServer;
+$chatApiScriptUrl = Yii::$app->rchat->chatApiScriptUrl;
 ?>
 
 <?php if (empty($userRcAuthToken)) : ?>
@@ -45,13 +47,15 @@ $server = Yii::$app->rchat->host;
     <div class="row">
         <div class="col-md-9">
             <div id="_rc-iframe-wrapper">
-                <?= $iframe ?: ''?>
-                <?php /* $this->render('partial/_client_chat_dialog', [
+                <?php // $iframeData ?: ''?>
+                <?= $this->render('partial/_client_chat_dialog', [
                     'agentToken' => $agentToken,
                     'server' => $server,
                     'rid' => $clientChat->cch_rid ?? null,
-                    'readonly' => $readonly
-                ]) */ ?>
+                'readonly' => $readonly,
+                'apiServer' => $apiServer,
+                'chatApiScriptUrl' => $chatApiScriptUrl
+            ]) ?>
             </div>
             <?php if (!$isClosed && $actionPermissions->canSendCannedResponse()) : ?>
                 <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>
@@ -88,12 +92,13 @@ $server = Yii::$app->rchat->host;
         </div>
     </div>
 
-    <?php echo $this->render('partial/bridge_js/_client_chat_common', [
+    <?php echo $this->render('partial/bridge_js/_client_chat_common_v2', [
             'clientChat' => $clientChat,
             'filter' => $filter,
             'agentToken' => $agentToken,
             'server' => $server,
-            'loadChannelsUrl' => \yii\helpers\Url::to('/client-chat/dashboard-v2')
+        'loadChannelsUrl' => \yii\helpers\Url::to('/client-chat/dashboard-v2'),
+        'apiServer' => $apiServer
         ]);
     ?>
 <?php endif; ?>
