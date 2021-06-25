@@ -391,7 +391,8 @@ class Notifications extends ActiveRecord
             }
         } catch (\Throwable $throwable) {
             $errorData = AppHelper::throwableLog($throwable);
-//            $errorData['command'] = $command;
+            $errorData['command'] = $command;
+            $errorData['channels'] = $channels;
             $errorData['params'] = $params;
 //            $errorData['data'] = $data;
 //            $errorData['jsonData'] = $jsonData;
