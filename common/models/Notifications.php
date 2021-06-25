@@ -373,6 +373,14 @@ class Notifications extends ActiveRecord
         $jsonData = $data;
 
         try {
+            $errorData = [];
+            $errorData['command'] = $command;
+            $errorData['params'] = $params;
+            $errorData['data'] = $data;
+            $errorData['channels'] = $channels;
+            $errorData['jsonData'] = $jsonData;
+            Yii::info($errorData, 'info\Notifications:publish');
+
             if ($channels) {
                 foreach ($channels as $channel) {
                     $redis->publish($channel, Json::encode($jsonData));
@@ -380,12 +388,12 @@ class Notifications extends ActiveRecord
                 return true;
             }
         } catch (\Throwable $throwable) {
-            $errorData = AppHelper::throwableLog($throwable, false);
+            $errorData = AppHelper::throwableLog($throwable);
             $errorData['command'] = $command;
             $errorData['params'] = $params;
             $errorData['data'] = $data;
             $errorData['jsonData'] = $jsonData;
-            Yii::error($errorData, 'Notifications:publish:redis');
+            \Yii::error($errorData, 'Notifications:publish:redis');
         }
         return false;
     }
