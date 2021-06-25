@@ -370,9 +370,25 @@ class CommunicationController extends ApiBaseController
                     $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
                     $trustPercent = $twilioCallFilterGuard->checkPhone();
 
+                    \Yii::info(
+                        [
+                            'client_phone_number' => $client_phone_number,
+                            'trustPercent' => $trustPercent,
+                            'GuardTrustPercent' => $departmentPhone->getCallFilterGuardTrustPercent(),
+                            'checkResult' => ($trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()),
+                        ],
+                        'info\Debug:' . self::class . ':' . __FUNCTION__
+                    );
+                    /* TODO: FOR DEBUG:: must by remove */
+
                     if ($trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()) {
                         $addMinutes = (int) $departmentPhone->getCallFilterGuardTrustBlockListExpiredMinutes();
-                        PhoneBlackListManageService::createOrRenewExpiration($client_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+                        $x = PhoneBlackListManageService::createOrRenewExpiration($client_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+                        \Yii::info(
+                            $x->toArray(),
+                            'info\Debug:' . self::class . ':' . __FUNCTION__
+                        );
+                        /* TODO: FOR DEBUG:: must by remove */
                     }
                 }
 
