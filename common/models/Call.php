@@ -1284,11 +1284,12 @@ class Call extends \yii\db\ActiveRecord
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
 
                 $infoData = [];
-                $infoData['attributes'] = $this->getAttributes();
                 $infoData['user_id'] = $this->c_created_user_id;
-                $infoData['message'] = $message;
+                $infoData['attributes'] = $this->getAttributes();
 
-                Yii::info($infoData, 'info\Call:callUpdate');
+                //$infoData['message'] = $message;
+
+                Yii::info($infoData, 'info\Call:callUpdate\user-' . $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
         }
