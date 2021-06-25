@@ -62,11 +62,14 @@ class PhoneBlackListManageService
             $phoneBlackList = PhoneBlacklist::create($phone, $expirationDate, $description);
         }
 
+        $phoneBlackList->detachBehavior('attribute');
+
         if (!$phoneBlackList->save()) {
             throw new \RuntimeException($phoneBlackList->getErrorSummary(true)[0]);
         }
 
         $phoneBlackListLog = new PhoneBlacklistLog();
+        $phoneBlackListLog->detachBehavior('attribute');
         $phoneBlackListLog->pbll_phone = $phone;
         if (!$phoneBlackListLog->save()) {
             throw new \RuntimeException($phoneBlackListLog->getErrorSummary(true)[0]);

@@ -366,14 +366,18 @@ class CommunicationController extends ApiBaseController
 //            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
-                if ($departmentPhone->getCallFilterGuardEnable()) {
-                    $twilioCallFilterGuard = new TwilioCallFilterGuard($incoming_phone_number);
-                    $trustPercent = $twilioCallFilterGuard->checkPhone();
+                try {
+                    if ($departmentPhone->getCallFilterGuardEnable()) {
+                        $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
+                        $trustPercent = $twilioCallFilterGuard->checkPhone();
 
-                    if ($trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()) {
-                        $addMinutes = (int) $departmentPhone->getCallFilterGuardTrustBlockListExpiredMinutes();
-                        PhoneBlackListManageService::createOrRenewExpiration($incoming_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+                        if ($trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()) {
+                            $addMinutes = (int) $departmentPhone->getCallFilterGuardTrustBlockListExpiredMinutes();
+                            PhoneBlackListManageService::createOrRenewExpiration($client_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+                        }
                     }
+                } catch (\Throwable $throwable) {
+                    Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:CallFilterGuard:Throwable');
                 }
 
                 $project = $departmentPhone->dppProject;
