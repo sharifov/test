@@ -396,6 +396,9 @@ class Notifications extends ActiveRecord
 //            $errorData['data'] = $data;
 //            $errorData['jsonData'] = $jsonData;
             \Yii::error(AppHelper::throwableLog($throwable), 'Notifications:publish:redis');
+            if (!empty($params['user_id']) && $params['user_id'] == 843) {
+                Yii::info($errorData, 'info\Notifications:publish:843');
+            }
         }
         return false;
     }
