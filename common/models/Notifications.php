@@ -372,15 +372,15 @@ class Notifications extends ActiveRecord
         //$jsonData['multiple'] = $multiple;
         $jsonData = $data;
 
-        if (!empty($params['user_id']) && $params['user_id'] == 843) {
-            $errorData = [];
-            $errorData['command'] = $command;
-            $errorData['params'] = $params;
-            $errorData['data'] = $data;
-            $errorData['channels'] = $channels;
-            //$errorData['jsonData'] = $jsonData;
-            Yii::info($errorData, 'info\Notifications:publish');
-        }
+//        if (!empty($params['user_id']) && $params['user_id'] == 843) {
+//            $errorData = [];
+//            $errorData['command'] = $command;
+//            $errorData['params'] = $params;
+//            $errorData['data'] = $data;
+//            $errorData['channels'] = $channels;
+//            //$errorData['jsonData'] = $jsonData;
+//            Yii::info($errorData, 'info\Notifications:publish');
+//        }
 
         try {
             if ($channels) {
