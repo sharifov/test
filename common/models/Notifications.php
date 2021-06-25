@@ -350,7 +350,6 @@ class Notifications extends ActiveRecord
      */
     public static function publish(string $command, array $params = [], array $data = []): bool
     {
-        $redis = \Yii::$app->redis;
         $channels = [];
 
         if ($command) {
@@ -383,6 +382,7 @@ class Notifications extends ActiveRecord
 //        }
 
         try {
+            $redis = \Yii::$app->redis;
             if ($channels) {
                 foreach ($channels as $channel) {
                     $redis->publish($channel, Json::encode($jsonData));
