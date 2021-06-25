@@ -1289,7 +1289,9 @@ class Call extends \yii\db\ActiveRecord
 
                 //$infoData['message'] = $message;
 
-                Yii::info($infoData, 'info\Call:callUpdate\user-' . $this->c_created_user_id);
+                if ($this->c_created_user_id == 843) {
+                    Yii::info($infoData, 'info\Call:callUpdate\user-' . $this->c_created_user_id);
+                }
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
         }
