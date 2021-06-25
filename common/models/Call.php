@@ -1282,6 +1282,13 @@ class Call extends \yii\db\ActiveRecord
                 || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
             ) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
+
+                $infoData = [];
+                $infoData['attributes'] = $this->getAttributes();
+                $infoData['user_id'] = $this->c_created_user_id;
+                $infoData['message'] = $message;
+
+                Yii::info($infoData, 'info\Call:callUpdate');
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
         }
