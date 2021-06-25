@@ -384,7 +384,7 @@ class Notifications extends ActiveRecord
                 return true;
             }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable), 'Notifications:publish:redis');
+            Yii::error(AppHelper::throwableLog($throwable, true), 'Notifications:publish:redis');
         }
         return false;
     }
