@@ -356,21 +356,17 @@ class Notifications extends ActiveRecord
         if ($command) {
             $data['cmd'] = $command;
         }
-        $jsonData = [];
 
-        if (isset($params['user_id'])) {
-            $jsonData['user_id'] = (int) $params['user_id'];
-            $channels[] = 'user-' . $jsonData['user_id'];
+        if (!empty($params['user_id'])) {
+            $channels[] = 'user-' . (int) $params['user_id'];
         }
 
-        if (isset($params['lead_id'])) {
-            $jsonData['lead_id'] = $params['lead_id'];
-            $channels[] = 'lead-' . $jsonData['lead_id'];
+        if (!empty($params['lead_id'])) {
+            $channels[] = 'lead-' . (int) $params['lead_id'];
         }
 
-        if (isset($params['case_id'])) {
-            $jsonData['case_id'] = $params['case_id'];
-            $channels[] = 'case-' . $jsonData['case_id'];
+        if (!empty($params['case_id'])) {
+            $channels[] = 'case-' . (int) $params['case_id'];
         }
 
         //$jsonData['multiple'] = $multiple;
