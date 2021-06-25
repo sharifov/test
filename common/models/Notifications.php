@@ -384,7 +384,7 @@ class Notifications extends ActiveRecord
         try {
             $redis = \Yii::$app->redis;
             if ($channels) {
-                $jsonDataEncode = Json::encode($jsonData); // , JSON_UNESCAPED_UNICODE
+                $jsonDataEncode = Json::encode($jsonData, JSON_INVALID_UTF8_SUBSTITUTE); // , JSON_UNESCAPED_UNICODE
                 foreach ($channels as $channel) {
                     $redis->publish($channel, $jsonDataEncode);
                 }
