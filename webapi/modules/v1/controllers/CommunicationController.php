@@ -313,8 +313,10 @@ class CommunicationController extends ApiBaseController
      */
     private function voiceIncoming(array $post, string $type): array
     {
-
-        \Yii::info(['voiceIncoming' => true],
+        \Yii::info(
+            [
+                'voiceIncoming' => true
+            ],
             'info\Debug:' . self::class . ':' . __FUNCTION__
         );
         /* TODO: FOR DEBUG:: must by remove */
@@ -372,8 +374,10 @@ class CommunicationController extends ApiBaseController
 //            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
-
-                \Yii::info(['enable' => $departmentPhone->getCallFilterGuardEnable()],
+                \Yii::info(
+                    [
+                        'enable' => $departmentPhone->getCallFilterGuardEnable()
+                    ],
                     'info\Debug:' . self::class . ':' . __FUNCTION__
                 );
                 /* TODO: FOR DEBUG:: must by remove */
@@ -382,12 +386,12 @@ class CommunicationController extends ApiBaseController
                     $twilioCallFilterGuard = new TwilioCallFilterGuard($incoming_phone_number);
                     $trustPercent = $twilioCallFilterGuard->checkPhone();
 
-                    \Yii::info([
-                        'trustPercent' => $trustPercent,
-                        'GuardTrustPercent' => $departmentPhone->getCallFilterGuardTrustPercent(),
-                        'checkResult' => $trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()
-
-                    ],
+                    \Yii::info(
+                        [
+                            'trustPercent' => $trustPercent,
+                            'GuardTrustPercent' => $departmentPhone->getCallFilterGuardTrustPercent(),
+                            'checkResult' => $trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()
+                        ],
                         'info\Debug:' . self::class . ':' . __FUNCTION__
                     );
                     /* TODO: FOR DEBUG:: must by remove */
@@ -396,7 +400,8 @@ class CommunicationController extends ApiBaseController
                         $addMinutes = (int) $departmentPhone->getCallFilterGuardTrustBlockListExpiredMinutes();
                         $x = PhoneBlackListManageService::createOrRenewExpiration($incoming_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
 
-                        \Yii::info($x->toArray(),
+                        \Yii::info(
+                            $x->toArray(),
                             'info\Debug:' . self::class . ':' . __FUNCTION__
                         );
                         /* TODO: FOR DEBUG:: must by remove */
