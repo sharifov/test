@@ -12,9 +12,21 @@ interface ComponentDTOInterface
 
     public function setComponentEventConfig(string $config): self;
 
+    public function setVisitorId(string $id): self;
+
     public function getClientChatEntity(): ?ClientChat;
 
     public function getChannelId(): ?int;
 
     public function getComponentEventConfig();
+
+    public function getVisitorId(): ?string;
+
+    public function setIsChatNew(bool $value): self;
+
+    public function getIsChatNew(): bool;
+
+    public function setRunnableComponentConfig(string $config): self;
+
+    public function getRunnableComponentConfig(): array;
 }

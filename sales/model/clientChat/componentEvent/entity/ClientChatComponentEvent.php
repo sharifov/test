@@ -3,7 +3,8 @@
 namespace sales\model\clientChat\componentEvent\entity;
 
 use common\models\Employee;
-use sales\model\clientChat\componentEvent\component\CheckFlizzardSubscription;
+use frontend\helpers\JsonHelper;
+use sales\model\clientChat\componentEvent\component\FlizzardSubscription;
 use sales\model\clientChat\componentEvent\component\ComponentEventInterface;
 use sales\model\clientChat\componentRule\entity\ClientChatComponentRule;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -47,7 +48,7 @@ class ClientChatComponentEvent extends \yii\db\ActiveRecord
     ];
 
     private const COMPONENT_CLASS_LIST = [
-        self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => CheckFlizzardSubscription::class
+        self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => FlizzardSubscription::class,
     ];
 
     public const COMPONENT_EVENT_TYPE_BEFORE_CHAT_CREATION = 1;

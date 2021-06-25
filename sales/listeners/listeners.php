@@ -12,6 +12,7 @@ use sales\model\clientChat\event\ClientChatCloseEvent;
 use sales\model\clientChat\event\ClientChatHoldEvent;
 use sales\model\clientChat\event\ClientChatIdleEvent;
 use sales\model\clientChat\event\ClientChatInProgressEvent;
+use sales\model\clientChat\event\ClientChatNewEvent;
 use sales\model\clientChat\event\ClientChatPendingEvent;
 use sales\model\clientChat\event\ClientChatTransferEvent;
 use sales\model\clientChat\event\ClientChatUpdateStatusEvent;
@@ -21,6 +22,7 @@ use sales\model\clientChat\event\listener\ClientChatEndConversationListener;
 use sales\model\clientChat\event\listener\ClientChatHoldStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatIdleStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatInProgressStatusLogListener;
+use sales\model\clientChat\event\listener\ClientChatNewStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatPendingStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatRefreshListListener;
 use sales\model\clientChat\event\listener\ClientChatRemoveLastMessageListener;
@@ -41,6 +43,9 @@ return [
     ResetChatUserAccessWidgetEvent::class => [ResetChatUserAccessWidgetListener::class],
     ClientChatPendingEvent::class => [
         ClientChatPendingStatusLogListener::class
+    ],
+    ClientChatNewEvent::class => [
+        ClientChatNewStatusLogListener::class
     ],
     ClientChatCloseEvent::class => [
         ClientChatCloseStatusLogListener::class,
