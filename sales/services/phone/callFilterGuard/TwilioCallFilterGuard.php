@@ -33,13 +33,28 @@ class TwilioCallFilterGuard
         \Yii::info(
             [
                 'phone' => $this->phone,
-                'mobile_country_code' => $mobile_country_code,
-                'mobile_network_code' => $mobile_network_code,
                 'response' => $this->response,
             ],
             'info\Debug:' . self::class . ':' . __FUNCTION__
         );
         /* TODO: FOR DEBUG:: must by remove */
+
+        if ($type === 'voip') {
+            $this->trustPercent = 0;
+        } else {
+            $this->trustPercent = 100;
+        }
+
+        return $this->trustPercent;
+    }
+
+    public function checkPhoneOld(): int
+    {
+        $this->response = \Yii::$app->communication->lookup($this->phone);
+
+        $type = ArrayHelper::getValue($this->response, 'result.result.carrier.type');
+        $mobile_country_code = ArrayHelper::getValue($this->response, 'result.result.carrier.mobile_country_code');
+        $mobile_network_code = ArrayHelper::getValue($this->response, 'result.result.carrier.mobile_network_code');
 
         if ($type === 'voip' && $mobile_country_code === null && $mobile_network_code === null) {
             $this->trustPercent = 0;
