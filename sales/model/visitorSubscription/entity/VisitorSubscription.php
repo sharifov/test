@@ -18,9 +18,9 @@ use yii\db\ActiveRecord;
  */
 class VisitorSubscription extends \yii\db\ActiveRecord
 {
-    private const SUBSCRIPTION_FLIZZARD = 1;
+    public const SUBSCRIPTION_FLIZZARD = 1;
 
-    private const SUBSCRIPTION_LIST_NAME = [
+    public const SUBSCRIPTION_LIST_NAME = [
         self::SUBSCRIPTION_FLIZZARD => 'Flizzard'
     ];
 

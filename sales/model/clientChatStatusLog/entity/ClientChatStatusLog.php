@@ -53,6 +53,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
     public const ACTION_MULTIPLE_TAKE = 21;
     public const ACTION_MULTIPLE_ACCEPT = 22;
     public const ACTION_MULTIPLE_UPDATE_STATUS = 23;
+    public const ACTION_PENDING_BY_DISTRIBUTION_LOGIC = 24;
 
     private const ACTION_LIST = [
         self::ACTION_OPEN => 'Open By Client',
@@ -78,6 +79,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_MULTIPLE_TAKE => 'Multiple Update Take',
         self::ACTION_MULTIPLE_ACCEPT => 'Multiple Update Accept',
         self::ACTION_MULTIPLE_UPDATE_STATUS => 'Multiple Update Status',
+        self::ACTION_PENDING_BY_DISTRIBUTION_LOGIC => 'Distribution logic',
     ];
 
     private const ACTION_LABEL_LIST = [
@@ -103,6 +105,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_MULTIPLE_UPDATE_CLOSE => 'badge badge-red',
         self::ACTION_MULTIPLE_TAKE => 'badge badge-info',
         self::ACTION_MULTIPLE_UPDATE_STATUS => 'badge badge-yellow',
+        self::ACTION_PENDING_BY_DISTRIBUTION_LOGIC => 'badge badge-yellow',
     ];
 
     public function rules(): array
