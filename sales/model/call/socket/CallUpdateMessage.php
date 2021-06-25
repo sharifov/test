@@ -149,17 +149,17 @@ class CallUpdateMessage
         $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $phone])->andWhere('pbl_expiration_date > now()')->exists();
         //var_dump($isPhoneInBlackList); die();
 
-        if ($userId === 843 && $call->isStatusInProgress() && $call->isOut()) {
+        if ($userId === 843) {
             return [
                 'id' => $callId,
                 'callSid' => $callSid,
                 'conferenceSid' => $call->c_conference_sid,
-                'status' => $call->getStatusName(),
+                'status' => mb_convert_encoding($call->getStatusName(), 'UTF-8', 'UTF-8'),
                 'duration' => $call->c_call_duration,
                 'snr' => $call->c_sequence_number,
                 'leadId' => $call->c_lead_id,
                 'typeId' => $call->c_call_type_id,
-                'type' => CallHelper::getTypeDescription($call),
+                'type' => mb_convert_encoding(CallHelper::getTypeDescription($call), 'UTF-8', 'UTF-8'),
                 'source_type_id' => $call->c_source_type_id,
                 'fromInternal' => $fromInternal,
                 'isInternal' => $call->isInternal(),
@@ -170,9 +170,26 @@ class CallUpdateMessage
                 'isMute' => $isMute,
                 'isBarge' => $isBarge,
                 'isJoin' => $call->isJoin(),
-                'project' => $call->c_project_id ? $call->cProject->name : '',
+                'project' => $call->c_project_id ? mb_convert_encoding($call->cProject->name, 'UTF-8', 'UTF-8') : '',
                 'source' => $source,
                 'isEnded' => $call->isEnded(),
+                'contact' => [
+                    'id' => $call->c_client_id,
+                    'name' => $name,
+                    'phone' => $phone,
+                    'company' => '',
+                    'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
+                    'canContactDetails' => $auth->checkAccess($userId, '/client/ajax-get-info'),
+                    'canCallInfo' => $auth->checkAccess($userId, '/call/ajax-call-info'),
+                    'callSid' => $callSid,
+                    'isPhoneInBlackList' => $isPhoneInBlackList
+                ],
+                'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
+                'queue' => mb_convert_encoding(Call::getQueueName($call), 'UTF-8', 'UTF-8'),
+                'conference' => $conference !== null ? $conference->getData() : null,
+                'isConferenceCreator' => $isConferenceCreator,
+                'recordingDisabled' => $call->c_recording_disabled,
+                'blacklistBtnEnabled' => PhoneBlackListGuard::canAdd($userId)
             ];
         }
 

@@ -37,10 +37,10 @@ use yii\helpers\Json;
  */
 class Notifications extends ActiveRecord
 {
-    const TYPE_SUCCESS = 1;
-    const TYPE_INFO = 2;
-    const TYPE_WARNING = 3;
-    const TYPE_DANGER = 4;
+    public const TYPE_SUCCESS = 1;
+    public const TYPE_INFO = 2;
+    public const TYPE_WARNING = 3;
+    public const TYPE_DANGER = 4;
 
     private $_eventList = [];
 
@@ -384,7 +384,7 @@ class Notifications extends ActiveRecord
         try {
             $redis = \Yii::$app->redis;
             if ($channels) {
-                $jsonDataEncode = Json::encode($jsonData);
+                $jsonDataEncode = Json::encode($jsonData); // , JSON_UNESCAPED_UNICODE
                 foreach ($channels as $channel) {
                     $redis->publish($channel, $jsonDataEncode);
                 }
