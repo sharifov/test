@@ -313,6 +313,12 @@ class CommunicationController extends ApiBaseController
      */
     private function voiceIncoming(array $post, string $type): array
     {
+
+        \Yii::info(['voiceIncoming' => true],
+            'info\Debug:' . self::class . ':' . __FUNCTION__
+        );
+        /* TODO: FOR DEBUG:: must by remove */
+
         $response = [];
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
@@ -366,13 +372,34 @@ class CommunicationController extends ApiBaseController
 //            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
+
+                \Yii::info(['enable' => $departmentPhone->getCallFilterGuardEnable()],
+                    'info\Debug:' . self::class . ':' . __FUNCTION__
+                );
+                /* TODO: FOR DEBUG:: must by remove */
+
                 if ($departmentPhone->getCallFilterGuardEnable()) {
                     $twilioCallFilterGuard = new TwilioCallFilterGuard($incoming_phone_number);
                     $trustPercent = $twilioCallFilterGuard->checkPhone();
 
+                    \Yii::info([
+                        'trustPercent' => $trustPercent,
+                        'GuardTrustPercent' => $departmentPhone->getCallFilterGuardTrustPercent(),
+                        'checkResult' => $trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()
+
+                    ],
+                        'info\Debug:' . self::class . ':' . __FUNCTION__
+                    );
+                    /* TODO: FOR DEBUG:: must by remove */
+
                     if ($trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()) {
                         $addMinutes = (int) $departmentPhone->getCallFilterGuardTrustBlockListExpiredMinutes();
-                        PhoneBlackListManageService::createOrRenewExpiration($incoming_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+                        $x = PhoneBlackListManageService::createOrRenewExpiration($incoming_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+
+                        \Yii::info($x->toArray(),
+                            'info\Debug:' . self::class . ':' . __FUNCTION__
+                        );
+                        /* TODO: FOR DEBUG:: must by remove */
                     }
                 }
 
