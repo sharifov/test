@@ -148,6 +148,34 @@ class CallUpdateMessage
         //$isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $phone, 'pbl_enabled' => true])->exists();
         $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $phone])->andWhere('pbl_expiration_date > now()')->exists();
         //var_dump($isPhoneInBlackList); die();
+
+        if ($userId === 843 && $call->isStatusInProgress() && $call->isOut()) {
+            return [
+                'id' => $callId,
+                'callSid' => $callSid,
+                'conferenceSid' => $call->c_conference_sid,
+                'status' => $call->getStatusName(),
+                'duration' => $call->c_call_duration,
+                'snr' => $call->c_sequence_number,
+                'leadId' => $call->c_lead_id,
+                'typeId' => $call->c_call_type_id,
+                'type' => CallHelper::getTypeDescription($call),
+                'source_type_id' => $call->c_source_type_id,
+                'fromInternal' => $fromInternal,
+                'isInternal' => $call->isInternal(),
+                'isHold' => $isHold,
+                'holdDuration' => $holdDuration,
+                'isListen' => $isListen,
+                'isCoach' => $isCoach,
+                'isMute' => $isMute,
+                'isBarge' => $isBarge,
+                'isJoin' => $call->isJoin(),
+                'project' => $call->c_project_id ? $call->cProject->name : '',
+                'source' => $source,
+                'isEnded' => $call->isEnded(),
+            ];
+        }
+
         return [
             'id' => $callId,
             'callSid' => $callSid,

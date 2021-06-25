@@ -384,8 +384,9 @@ class Notifications extends ActiveRecord
         try {
             $redis = \Yii::$app->redis;
             if ($channels) {
+                $jsonDataEncode = Json::encode($jsonData);
                 foreach ($channels as $channel) {
-                    $redis->publish($channel, Json::encode($jsonData));
+                    $redis->publish($channel, $jsonDataEncode);
                 }
                 return true;
             }
@@ -396,8 +397,8 @@ class Notifications extends ActiveRecord
             $errorData['params'] = $params;
             $errorData['data'] = $data;
 //            $errorData['jsonData'] = $jsonData;
-            \Yii::error(AppHelper::throwableLog($throwable), 'Notifications:publish:redis');
-            \Yii::warning($errorData, 'Notifications:publish2:redis');
+            \Yii::error(AppHelper::throwableLog($throwable), 'Notifications:publish:Throwable');
+            \Yii::error($errorData, 'Notifications:publish:Throwable2');
 //            if (!empty($params['user_id']) && $params['user_id'] == 843) {
 //                Yii::info($errorData, 'info\Notifications:publish:843');
 //            }
