@@ -1283,19 +1283,19 @@ class Call extends \yii\db\ActiveRecord
             ) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
 
-                $infoData = [];
-                $infoData['user_id'] = $this->c_created_user_id;
-                $infoData['attributes'] = $this->getAttributes();
-
-                //$infoData['message'] = $message;
-
-                if ($this->c_created_user_id == 843) {
-                    Yii::info($infoData, 'info\Call:callUpdate\user-' . $this->c_created_user_id);
-                    $infoData['message'] = $message;
-                    Yii::info($infoData, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
-                    //Yii::info(VarDumper::dumpAsString($message, 10), 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
-                    //Yii::info($message, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
-                }
+//                $infoData = [];
+//                $infoData['user_id'] = $this->c_created_user_id;
+//                $infoData['attributes'] = $this->getAttributes();
+//
+//                //$infoData['message'] = $message;
+//
+//                if ($this->c_created_user_id == 843) {
+//                    Yii::info($infoData, 'info\Call:callUpdate\user-' . $this->c_created_user_id);
+//                    $infoData['message'] = $message;
+//                    Yii::info($infoData, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
+//                    //Yii::info(VarDumper::dumpAsString($message, 10), 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
+//                    //Yii::info($message, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
+//                }
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
         }
