@@ -30,15 +30,6 @@ class TwilioCallFilterGuard
         $mobile_country_code = ArrayHelper::getValue($this->response, 'result.result.carrier.mobile_country_code');
         $mobile_network_code = ArrayHelper::getValue($this->response, 'result.result.carrier.mobile_network_code');
 
-        \Yii::info(
-            [
-                'phone' => $this->phone,
-                'response' => $this->response,
-            ],
-            'info\Debug:' . self::class . ':' . __FUNCTION__
-        );
-        /* TODO: FOR DEBUG:: must by remove */
-
         if ($type === 'voip') {
             $this->trustPercent = 0;
         } else {
