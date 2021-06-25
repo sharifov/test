@@ -394,7 +394,7 @@ class Notifications extends ActiveRecord
             $errorData['command'] = $command;
             $errorData['channels'] = $channels;
             $errorData['params'] = $params;
-//            $errorData['data'] = $data;
+            $errorData['data'] = $data;
 //            $errorData['jsonData'] = $jsonData;
             \Yii::error(AppHelper::throwableLog($throwable), 'Notifications:publish:redis');
             \Yii::warning($errorData, 'Notifications:publish2:redis');
