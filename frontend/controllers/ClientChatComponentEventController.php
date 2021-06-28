@@ -110,7 +110,7 @@ class ClientChatComponentEventController extends \frontend\controllers\FControll
             'ComponentEventCreateForm',
             ['componentRules' => 'ClientChatComponentRule']
         );
-        $form = new ComponentEventCreateForm(count($data['post']['ClientChatComponentRule']));
+        $form = new ComponentEventCreateForm(count($data['post']['ClientChatComponentRule']), $model);
 
         if (Yii::$app->request->isPost && $form->load($data['post']) && !$form->pjaxReload && $form->validate()) {
             try {

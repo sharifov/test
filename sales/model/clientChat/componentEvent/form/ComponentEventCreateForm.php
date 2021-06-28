@@ -22,9 +22,13 @@ class ComponentEventCreateForm extends CompositeForm
 
     public $component_event_changed;
 
-    public function __construct($countComponentRule = 1, $config = [])
+    public function __construct($countComponentRule = 1, ?ClientChatComponentEvent $model = null, $config = [])
     {
-        $this->componentEvent = new ClientChatComponentEvent();
+        if (!$model) {
+            $this->componentEvent = new ClientChatComponentEvent();
+        } else {
+            $this->componentEvent = $model;
+        }
 
         $this->componentRules = array_map(static function () {
             $model = new ComponentRuleCreateForm();
