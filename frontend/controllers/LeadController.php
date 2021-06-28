@@ -69,6 +69,9 @@ use sales\model\lead\useCases\lead\import\LeadImportParseService;
 use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
 use sales\model\lead\useCases\lead\link\LeadLinkChatForm;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
+use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
+use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use sales\model\phone\AvailablePhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -1393,9 +1396,21 @@ class LeadController extends FController
         }
 
         try {
+            $oldStatus = $lead->status;
+
             /** @var Employee $user */
             $user = Yii::$app->user->identity;
             $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
+
+            if ($oldStatus === Lead::STATUS_PENDING) {
+                $leadUserConversion = LeadUserConversion::create(
+                    $lead->id,
+                    $user->getId(),
+                    LeadUserConversionDictionary::DESCRIPTION_TAKE
+                );
+                (new LeadUserConversionRepository())->save($leadUserConversion);
+            }
+
             Yii::$app->getSession()->setFlash('success', 'Lead taken!');
         } catch (\DomainException $e) {
             // Yii::info($e, 'info\Lead:Take');
@@ -2101,6 +2116,13 @@ class LeadController extends FController
                     $clientManageService->checkIpChanged($lead->client, $form->requestIp);
                 }
 
+                $leadUserConversion = LeadUserConversion::create(
+                    $lead->id,
+                    Yii::$app->user->id,
+                    LeadUserConversionDictionary::DESCRIPTION_MANUAL
+                );
+                (new LeadUserConversionRepository())->save($leadUserConversion);
+
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {
@@ -2131,6 +2153,14 @@ class LeadController extends FController
                     $form->client->projectId = $form->projectId;
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                     $lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+
+                    $leadUserConversion = LeadUserConversion::create(
+                        $lead->id,
+                        Yii::$app->user->id,
+                        LeadUserConversionDictionary::DESCRIPTION_MANUAL
+                    );
+                    (new LeadUserConversionRepository())->save($leadUserConversion);
+
                     Yii::$app->session->setFlash('success', 'Lead save');
                     return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
                 } catch (\Throwable $e) {
@@ -2178,6 +2208,14 @@ class LeadController extends FController
             try {
                 $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
                 $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+
+                $leadUserConversion = LeadUserConversion::create(
+                    $lead->id,
+                    $userId,
+                    LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL
+                );
+                (new LeadUserConversionRepository())->save($leadUserConversion);
+
                 return "<script> $('#modal-md').modal('hide');refreshChatInfo('" . $chat->cch_id . "')</script>";
             } catch (\Throwable $e) {
                 Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionCreateByChat');
@@ -2357,6 +2395,16 @@ class LeadController extends FController
             try {
                 $clone = $this->leadCloneService->cloneLead($lead, Yii::$app->user->id, Yii::$app->user->id, $form->description);
                 Yii::$app->session->setFlash('success', 'Success');
+
+                if ((int) $lead->employee_id !== $user->getId()) {
+                    $leadUserConversion = LeadUserConversion::create(
+                        $clone->id,
+                        $user->getId(),
+                        LeadUserConversionDictionary::DESCRIPTION_CLONE
+                    );
+                    (new LeadUserConversionRepository())->save($leadUserConversion);
+                }
+
                 return $this->redirect(['lead/view', 'gid' => $clone->gid]);
             } catch (\DomainException $e) {
                 Yii::$app->errorHandler->logException($e);
@@ -2448,7 +2496,8 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalProfit = $lead->getFinalProfit() ?: $lead->getBookedQuote()->getEstimationProfit();
+            //$totalProfit = $lead->getFinalProfit() ?: $lead->getBookedQuote()->getEstimationProfit();
+            $totalProfit = $lead->getFinalProfit() ?: 0;
             $splitForm = new ProfitSplitForm($lead);
 
             $mainAgentProfit = $totalProfit;

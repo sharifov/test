@@ -97,6 +97,26 @@ class CasesQCountersController extends FController
                         $result['need-action'] = $count;
                     }
                     break;
+                case 'unidentified':
+                    if ($count = $this->getUnidentifiedAction()) {
+                        $result['unidentified'] = $count;
+                    }
+                    break;
+                case 'first-priority':
+                    if ($count = $this->getFirstPriorityAction()) {
+                        $result['first-priority'] = $count;
+                    }
+                    break;
+                case 'second-priority':
+                    if ($count = $this->getSecondPriorityAction()) {
+                        $result['second-priority'] = $count;
+                    }
+                    break;
+                case 'pass-departure':
+                    if ($count = $this->getPassDepartureAction()) {
+                        $result['pass-departure'] = $count;
+                    }
+                    break;
             }
         }
 
@@ -192,5 +212,45 @@ class CasesQCountersController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->casesQRepository->getNeedActionCount($user);
+    }
+
+    private function getUnidentifiedAction(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/unidentified')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getUnidentifiedCount($user);
+    }
+
+    private function getFirstPriorityAction(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/first-priority')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getFirstPriorityCount($user);
+    }
+
+    private function getSecondPriorityAction(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/second-priority')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getSecondPriorityCount($user);
+    }
+
+    private function getPassDepartureAction(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/pass-departure')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getPassDepartureCount($user);
     }
 }

@@ -12,6 +12,7 @@ use common\models\Project;
 use modules\flight\models\behaviors\FlightQuoteFqUid;
 use modules\flight\src\entities\flightQuote\events\FlightQuoteCloneCreatedEvent;
 use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
+use modules\flight\src\entities\flightQuoteLabel\FlightQuoteLabel;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
@@ -19,6 +20,7 @@ use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
+use sales\model\quoteLabel\entity\QuoteLabel;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\flight\src\entities\flightQuote\Scopes;
@@ -64,6 +66,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  * @property FlightQuoteFlight[] $flightQuoteFlights
+ * @property FlightQuoteLabel[] $quoteLabel
  */
 class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 {
@@ -306,6 +309,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function getFlightQuoteFlights(): ActiveQuery
     {
         return $this->hasMany(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id']);
+    }
+
+    public function getQuoteLabel(): ActiveQuery
+    {
+        return $this->hasMany(FlightQuoteLabel::class, ['fql_quote_id' => 'fq_id']);
     }
 
     public static function find(): Scopes

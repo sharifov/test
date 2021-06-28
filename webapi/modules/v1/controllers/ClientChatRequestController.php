@@ -158,7 +158,15 @@ class ClientChatRequestController extends ApiBaseController
                     "lastVisitorMessage": null,
                     "id": "fef46d63-8a30-4eec-89eb-62f1bfc0ffcd",
                     "uuid": "54d87707-bb54-46e3-9eca-8f776c7bcacf",
-                    "project": "ovago"
+                    "project": "ovago",
+                    "leadIds": [
+                        234556,
+                        357346
+                    ],
+                    "caseIds": [
+                        345464634,
+                        345634634
+                    ]
                 },
                 "sources": [],
                 "page": {

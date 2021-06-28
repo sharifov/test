@@ -104,7 +104,8 @@
 		"kartik-v/yii2-widget-fileinput": "@dev",
 		"kartik-v/yii2-mpdf": "^1.0",
 		"pixel418/markdownify": "^2.3",
-		"casbin/casbin": "^3.1"
+		"casbin/casbin": "^3.1",
+		"snowplow/snowplow-tracker": "0.4.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -128,7 +129,8 @@
 		"brainmaestro/composer-git-hooks": "^2.8",
 		"codeception/module-webdriver": "^1.2",
 		"codeception/module-rest": "^1.2",
-		"codeception/module-phpbrowser": "^1.0"
+		"codeception/module-phpbrowser": "^1.0",
+		"fakerphp/faker": "^1.14"
 	},
 	"autoload-dev": {
 		"psr-2": {

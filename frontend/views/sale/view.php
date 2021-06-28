@@ -6,6 +6,7 @@ use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\helpers\email\MaskEmailHelper;
+use sales\model\airline\service\AirlineService;
 use sales\model\saleTicket\entity\SaleTicket;
 use sales\model\saleTicket\useCase\sendEmail\SaleTicketHelper;
 use yii\grid\GridView;
@@ -23,7 +24,9 @@ use sales\helpers\phone\MaskPhoneHelper;
 /* @var $caseSaleModel common\models\CaseSale */
 /* @var $caseModel sales\entities\cases\Cases */
 /* @var $additionalData array */
-/* @var $dataProviderCc yii\data\ActiveDataProvider */
+/** @var $dataProviderCc yii\data\ActiveDataProvider
+ * @var $disableMasking bool
+ */
 
 if (Yii::$app->request->isPjax) {
     $this->params['breadcrumbs'][] = ['label' => 'Sales', 'url' => ['search']];
@@ -122,6 +125,35 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
             </table>
 
 
+            <?php if (!empty($caseSaleModel) && $autoCheckIn = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'autoCheckIn')) : ?>
+                <h2>Auto check in</h2>
+                <table class="table table-bordered table-hover table-striped">
+                    <tr>
+                        <th>Title</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'title')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Amount</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'amount')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Currency</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'currency')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Pax Count</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'paxCount')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Amount per pax</th>
+                        <td><?php echo Html::encode(ArrayHelper::getValue($autoCheckIn, 'amountPerPax')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Is Activated</th>
+                        <td><?php echo ArrayHelper::getValue($autoCheckIn, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
+                    </tr>
+                </table>
+            <?php endif ?>
         </div>
 
         <div class="col-md-9">
@@ -314,6 +346,91 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 </div>
             <?php endif ?>
 
+            <?php if (!empty($caseSaleModel) && $flexibleTicket = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'flexibleTicket')) : ?>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h2>Flexible Ticket</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Title</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'title')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Currency</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'currency')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Pax Count</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'paxCount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount per pax</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($flexibleTicket, 'amountPerPax')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Is Activated</th>
+                                <td><?php echo ArrayHelper::getValue($flexibleTicket, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            <?php endif ?>
+
+            <?php if (!empty($caseSaleModel) && $pdp = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'pdp')) : ?>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h2>Price Drop Protectiont</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Type</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($pdp, 'type')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($pdp, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Pax Count</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($pdp, 'paxCount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount per pax</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($pdp, 'amountPerPax')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Is Activated</th>
+                                <td><?php echo ArrayHelper::getValue($pdp, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <?php if ($pdpOptions = ArrayHelper::getValue($pdp, 'options')) : ?>
+                        <div class="col-md-5">
+                            <h2>Price Drop Protection options</h2>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Limit</th>
+                                    <th>Value</th>
+                                </tr>
+                                <?php foreach ($pdpOptions as $option) : ?>
+                                    <tr>
+                                        <td><?=Html::encode($option['name'])?></td>
+                                        <td><?=Html::encode($option['type'])?></td>
+                                        <td><?=Html::encode($option['limit'])?></td>
+                                        <td><?=Html::encode($option['value'])?></td>
+                                    </tr>
+                                <?php endforeach;?>
+                            </table>
+                        </div>
+                    <?php endif ?>
+                </div>
+            <?php endif ?>
+
             <?php if (!empty($caseSaleModel) && $package = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'package')) : ?>
                 <div class="row">
                     <div class="col-md-3">
@@ -454,8 +571,8 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <tr>
                                     <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
                                     <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
-                                    <td><?=Html::encode(MaskPhoneHelper::masking($data['customerInfo']['phoneNumber']) ?? '')?></td>
-                                    <td><?=Html::encode(MaskEmailHelper::masking($data['email'] ?? '')) ?></td>
+                                    <td><?=Html::encode(MaskPhoneHelper::masking($data['customerInfo']['phoneNumber']  ?? '', $disableMasking))?></td>
+                                    <td><?=Html::encode(MaskEmailHelper::masking($data['email'] ?? '', $disableMasking)) ?></td>
                                 </tr>
                             </table>
                         <?php endif;?>
@@ -570,6 +687,10 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                         <th>Frequent Flyer Airline</th>
                         <th>Frequent Flyer</th>
                         <th>KTN</th>
+                        <th>Country of Issuance</th>
+                        <th>Document Number</th>
+                        <th>Expiration Date</th>
+                        <th>Redress Number</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -791,6 +912,111 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     }
                                 }
 ////                                Html::encode($passenger['kt_numbers'] ?? null)
+                                ?>
+                            </td>
+                            <td>
+                                <?php if (!$canManageSaleInfo) {
+                                    echo Editable::widget([
+                                        'name' => 'cssSaleData[passengers][' . $key . '][pas_country]',
+                                        'header' => 'Country',
+                                        'asPopover' => false,
+                                        'inputType' => Editable::INPUT_DROPDOWN_LIST,
+                                        'data' => \sales\helpers\CountryHelper::getCountriesCode(),
+                                        'value' => Html::encode(!empty($passenger['pas_country']) ? $passenger['pas_country'] : null),
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'pluginEvents' => [
+                                            'editableSuccess' => 'function (event, val, form, data) {
+                                                document.activateButtonSync(data);
+                                            }',
+                                        ],
+//                                        'placement' => PopoverX::ALIGN_LEFT,
+                                        'pjaxContainerId' => 'pjax-sale-list'
+                                    ]);
+                                } else {
+                                    echo !empty($passenger['pas_country']) ? Html::encode($passenger['pas_country']) : '(not set)';
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <?php if (!$canManageSaleInfo) {
+                                    echo Editable::widget([
+                                        'name' => 'cssSaleData[passengers][' . $key . '][pas_number]',
+                                        'header' => 'Document Number',
+                                        'asPopover' => false,
+                                        'inputType' => Editable::INPUT_TEXT,
+                                        'value' => Html::encode(!empty($passenger['pas_number']) ? $passenger['pas_number'] : null),
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'pluginEvents' => [
+                                            'editableSuccess' => 'function (event, val, form, data) {
+                                                document.activateButtonSync(data);
+                                            }',
+                                        ],
+//                                        'placement' => PopoverX::ALIGN_LEFT,
+                                        'pjaxContainerId' => 'pjax-sale-list'
+                                    ]);
+                                } else {
+                                    echo !empty($passenger['pas_number']) ? Html::encode($passenger['pas_number']) : '(not set)';
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                $pasExpirationDate = !empty($passenger['pas_expiration_date']) ? date('d M Y', strtotime($passenger['pas_expiration_date'])) : null;
+                                if (!$canManageSaleInfo) :
+                                    $editable = Editable::begin([
+                                        'name' => 'cssSaleData[passengers][' . $key . '][pas_expiration_date]',
+                                        'header' => 'Expiration Date',
+                                        'asPopover' => false,
+                                        'inputType' => Editable::INPUT_DATE,
+                                        'displayValue' => $pasExpirationDate,
+                                        'value' => $pasExpirationDate,
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'options' => [
+                                            'convertFormat' => true,
+                                            'pluginOptions' => [
+                                                'format' => 'php:d M Y',
+                                                'autoclose' => true,
+                                                //                                            'type' =>
+                                            ],
+                                            'class' => 'cssSaleData_passengers_birth_date'
+                                        ],
+                                        'pluginEvents' => [
+                                            'editableSuccess' => 'function (event, val, form, data) {
+                                                document.activateButtonSync(data);
+                                            }',
+                                        ],
+                                        'pjaxContainerId' => 'pjax-sale-list'
+                                    ]);
+                                    ?>
+                                    <?php  Editable::end();
+                                else : ?>
+                                    <?= !empty($pasExpirationDate) ? $pasExpirationDate : '(not set)' ?>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if (!$canManageSaleInfo) {
+                                    echo Editable::widget([
+                                        'name' => 'cssSaleData[passengers][' . $key . '][redress_number]',
+                                        'header' => 'Redress Number',
+                                        'asPopover' => false,
+                                        'inputType' => Editable::INPUT_TEXT,
+                                        'value' => Html::encode(!empty($passenger['redress_number']) && is_array($passenger['redress_number']) ? reset($passenger['redress_number']) : null),
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'pluginEvents' => [
+                                            'editableSuccess' => 'function (event, val, form, data) {
+                                                document.activateButtonSync(data);
+                                            }',
+                                        ],
+//                                        'placement' => PopoverX::ALIGN_LEFT,
+                                        'pjaxContainerId' => 'pjax-sale-list'
+                                    ]);
+                                } else {
+                                    if (isset($passenger['redress_number']) && is_array($passenger['redress_number'])) {
+                                        echo reset($passenger['redress_number']) ?: '(not set)';
+                                    } else {
+                                        echo !empty($passenger['redress_number']) ? Html::encode($passenger['redress_number']) : '(not set)';
+                                    }
+                                }
                                 ?>
                             </td>
                         </tr>

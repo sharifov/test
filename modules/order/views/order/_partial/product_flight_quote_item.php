@@ -93,7 +93,7 @@ $totalAmountQuote = 0.0;
                                     $airlineNames = [];
                                     foreach ($segments as $segment) {
                                         if (!in_array(SearchService::getCabin($segment->fqs_cabin_class), $cabins, false)) {
-                                            $cabins[] = SearchService::getCabin($segment->fqs_cabin_class);
+                                            $cabins[] = SearchService::getCabin($segment->fqs_cabin_class, $segment->fqs_cabin_class_basic);
                                         }
                                         if (isset($segment->fqs_recheck_baggage) && $segment->fqs_recheck_baggage) {
                                             $needRecheck = true;
@@ -405,7 +405,7 @@ $totalAmountQuote = 0.0;
                                 $airlineNames = [];
                                 foreach ($segments as $segment) {
                                     if (!in_array(SearchService::getCabin($segment->fqs_cabin_class), $cabins, false)) {
-                                        $cabins[] = SearchService::getCabin($segment->fqs_cabin_class);
+                                        $cabins[] = SearchService::getCabin($segment->fqs_cabin_class, $segment->fqs_cabin_class_basic);
                                     }
                                     if (isset($segment->fqs_recheck_baggage) && $segment->fqs_recheck_baggage) {
                                         $needRecheck = true;

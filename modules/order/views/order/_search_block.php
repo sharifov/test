@@ -72,7 +72,7 @@ use yii\widgets\ActiveForm;
                                 'pluginOptions' => ['allowClear' => true],
                             ]); ?>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <?= $form->field($model, 'createdRangeTime', [
                                 'options' => ['class' => 'form-group']
                             ])->widget(\kartik\daterange\DateRangePicker::class, [
@@ -86,11 +86,12 @@ use yii\widgets\ActiveForm;
                                     'locale' => [
                                         'format' => 'd-M-Y H:i',
                                         'separator' => ' - '
-                                    ]
+                                    ],
+                                    'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                                 ]
                             ])->label('Created From / To') ?>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <?= $form->field($model, 'updatedRangeTime', [
                                 'options' => ['class' => 'form-group']
                             ])->widget(\kartik\daterange\DateRangePicker::class, [
@@ -104,11 +105,12 @@ use yii\widgets\ActiveForm;
                                     'locale' => [
                                         'format' => 'd-M-Y H:i',
                                         'separator' => ' - '
-                                    ]
+                                    ],
+                                    'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                                 ]
                             ])->label('Updated From / To') ?>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <?= $form->field($model, 'statusRangeTime', [
                                 'options' => ['class' => 'form-group']
                             ])->widget(\kartik\daterange\DateRangePicker::class, [
@@ -122,7 +124,8 @@ use yii\widgets\ActiveForm;
                                     'locale' => [
                                         'format' => 'd-M-Y H:i',
                                         'separator' => ' - '
-                                    ]
+                                    ],
+                                    'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                                 ]
                             ])->label('Status From / To') ?>
                         </div>

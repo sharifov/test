@@ -45,16 +45,27 @@ class Handler
 
         /** @var Result $result */
         $result = $this->transactionManager->wrap(function () use ($command, $category) {
-
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $command->project_id;
             $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
+            if ($command->contact_name) {
+                $clientForm->firstName = $command->contact_name;
+            }
 
-            $client = $this->clientManageService->getOrCreate(
-                [new PhoneCreateForm(['phone' => $command->contact_phone])],
-                [new EmailCreateForm(['email' => $command->contact_email])],
-                $clientForm
-            );
+            try {
+                $client = $this->clientManageService->getOrCreate(
+                    [new PhoneCreateForm(['phone' => $command->contact_phone])],
+                    [new EmailCreateForm(['email' => $command->contact_email])],
+                    $clientForm
+                );
+            } catch (\DomainException $e) {
+                if (!$command->chat_visitor_id || !$client = Client::find()->byProject($command->project_id)->byVisitor($command->chat_visitor_id)->one()) {
+                    $client = $this->clientManageService->create($clientForm, null);
+                }
+            }
+            if ($command->chat_visitor_id) {
+                $this->clientManageService->addVisitorId($client, $command->chat_visitor_id);
+            }
 
             $case = Cases::createByApi(
                 $client->id,

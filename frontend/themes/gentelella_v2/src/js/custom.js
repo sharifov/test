@@ -175,6 +175,13 @@ $(document).ready(function() {
 
         $BOX_PANEL.remove();
     });
+
+    setTimeout(function () {
+        if ($('body').hasClass('nav-sm')) {
+            $('.side-menu > li.active').removeClass('active');
+            $('.side-menu ul.child_menu').hide();
+        }
+    }, 50);
 });
 // /Panel toolbox
 

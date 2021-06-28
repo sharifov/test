@@ -28,6 +28,7 @@ use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\exceptions\CallFinishedException;
 use sales\model\call\exceptions\UniqueCallNotFoundException;
@@ -36,6 +37,7 @@ use sales\model\call\services\QueueLongTimeNotificationJobCreator;
 use sales\model\call\services\RepeatMessageCallJobCreator;
 use sales\model\callLog\services\CallLogConferenceTransferService;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
@@ -54,6 +56,8 @@ use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
+use sales\services\phone\blackList\PhoneBlackListManageService;
+use sales\services\phone\callFilterGuard\TwilioCallFilterGuard;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
@@ -362,6 +366,20 @@ class CommunicationController extends ApiBaseController
 //            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
+                try {
+                    if ($departmentPhone->getCallFilterGuardEnable()) {
+                        $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
+                        $trustPercent = $twilioCallFilterGuard->checkPhone();
+
+                        if ($trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()) {
+                            $addMinutes = (int) $departmentPhone->getCallFilterGuardTrustBlockListExpiredMinutes();
+                            PhoneBlackListManageService::createOrRenewExpiration($client_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+                        }
+                    }
+                } catch (\Throwable $throwable) {
+                    Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:CallFilterGuard:Throwable');
+                }
+
                 $project = $departmentPhone->dppProject;
                 $source = $departmentPhone->dppSource;
                 if ($project && !$source) {
@@ -1479,11 +1497,13 @@ class CommunicationController extends ApiBaseController
         if (!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
         } else {
+            $delayJob = 7;
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
             $job->callFromInternalPhone = $callFromInternalPhone;
-            $jobId = Yii::$app->queue_job->delay(7)->priority(90)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(90)->push($job);
         }
 
         $project = $callModel->cProject;
@@ -1557,11 +1577,13 @@ class CommunicationController extends ApiBaseController
         if (!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
         } else {
+            $delayJob = 7;
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
             $job->callFromInternalPhone = $callFromInternalPhone;
-            $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(100)->push($job);
         }
 
 
@@ -1676,11 +1698,13 @@ class CommunicationController extends ApiBaseController
                 Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update');
             }
 
+            $delayJob = 7;
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->source_id = $department->dpp_source_id;
             $job->delay = 0;
-            $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(100)->push($job);
 
             try {
                 if (!$jobId) {
@@ -1874,11 +1898,13 @@ class CommunicationController extends ApiBaseController
                         Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update2');
                     }
 
+                    $delayJob = 7;
                     $job = new CallQueueJob();
                     $job->call_id = $callModel->c_id;
                     $job->source_id = $department->dpp_source_id;
                     $job->delay = 0;
-                    $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
+                    $job->delayJob = $delayJob;
+                    $jobId = Yii::$app->queue_job->delay($delayJob)->priority(80)->push($job);
 
                     try {
                         if (!$jobId) {

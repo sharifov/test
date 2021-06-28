@@ -15,7 +15,9 @@ use yii\widgets\Pjax;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $caseModel \sales\entities\cases\Cases */
 /* @var $saleSearchModel common\models\search\SaleSearch */
-/* @var $saleDataProvider yii\data\ArrayDataProvider */
+/** @var $saleDataProvider yii\data\ArrayDataProvider
+ * @var $disableMasking bool
+ */
 
 $user = Yii::$app->user->identity;
 
@@ -150,6 +152,7 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                                 'dataProviderCc' => $dataProviderCc,
                                 'caseModel' => $caseModel,
                                 'additionalData' => [],
+                                'disableMasking' => $disableMasking
                         ]);
                     }
 

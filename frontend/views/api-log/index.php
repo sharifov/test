@@ -26,7 +26,7 @@ $pjaxListId = 'pjax-api-log';
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
-        <?= Html::a('<i class="fa fa-remove"></i> Delete All', ['delete-all'], [
+        <?= Html::a('<i class="fa fa-remove"></i> Truncate ApiLog table', ['delete-all'], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete all items?',
@@ -123,6 +123,7 @@ $pjaxListId = 'pjax-api-log';
                             'format' => 'Y-m-d H:i',
                             'separator' => ' - '
                         ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                     ],
                 ]),
             ],

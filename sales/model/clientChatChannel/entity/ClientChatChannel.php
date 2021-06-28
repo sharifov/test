@@ -369,6 +369,6 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         if (isset($this->settings['system']['autoCloseRoom'])) {
             return (bool) $this->settings['system']['autoCloseRoom'];
         }
-        return true;
+        return false;
     }
 }

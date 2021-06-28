@@ -32,6 +32,9 @@ use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\model\conference\service\ConferenceDataService;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
+use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
+use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -761,6 +764,11 @@ class Call extends \yii\db\ActiveRecord
         return self::STATUS_LIST[$this->c_status_id] ?? '-';
     }
 
+    public static function getStatusNameById(?int $statusId): string
+    {
+        return self::STATUS_LIST[$statusId] ?? '-';
+    }
+
     /**
      * @return string
      */
@@ -1040,6 +1048,13 @@ class Call extends \yii\db\ActiveRecord
                                 );
                                 $leadRepository->save($lead);
 
+                                $leadUserConversion = LeadUserConversion::create(
+                                    $lead->id,
+                                    $this->c_created_user_id,
+                                    LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE
+                                );
+                                (new LeadUserConversionRepository())->save($leadUserConversion);
+
                                 $qCallService->remove($lead->id);
 
                                 if (
@@ -1267,6 +1282,20 @@ class Call extends \yii\db\ActiveRecord
                 || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
             ) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
+
+//                $infoData = [];
+//                $infoData['user_id'] = $this->c_created_user_id;
+//                $infoData['attributes'] = $this->getAttributes();
+//
+//                //$infoData['message'] = $message;
+//
+//                if ($this->c_created_user_id == 843) {
+//                    Yii::info($infoData, 'info\Call:callUpdate\user-' . $this->c_created_user_id);
+//                    $infoData['message'] = $message;
+//                    Yii::info($infoData, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
+//                    //Yii::info(VarDumper::dumpAsString($message, 10), 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
+//                    //Yii::info($message, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
+//                }
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
         }
@@ -1346,9 +1375,11 @@ class Call extends \yii\db\ActiveRecord
         if ($isChangedTwStatus && $this->isCompletedTw()) {
             $createJob = (bool)(Yii::$app->params['settings']['call_price_job'] ?? false);
             if ($createJob) {
+                $delayJob = 60;
                 $job = new CallPriceJob();
                 $job->callSids = [$this->c_call_sid];
-                Yii::$app->queue_job->delay(60)->priority(10)->push($job);
+                $job->delayJob = $delayJob;
+                Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
             }
         }
 
@@ -1480,6 +1511,7 @@ class Call extends \yii\db\ActiveRecord
                             $checkJob = new CheckClientCallJoinToConferenceJob();
                             $checkJob->callId = $call->c_id;
                             $checkJob->dateTime = date('Y-m-d H:i:s');
+                            $checkJob->delayJob = $delay;
                             Yii::$app->queue_job->delay($delay)->push($checkJob);
                         }
                     }

@@ -1161,6 +1161,7 @@ class PhoneController extends FController
                     $timeOut = CallHelper::warmTransferTimeout($parent->c_dep_id);
                     if ($timeOut) {
                         $checkJob = new CheckWarmTransferTimeExpiredJob($parent->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
+                        $checkJob->delayJob = $timeOut;
                         Yii::$app->queue_job->delay($timeOut)->push($checkJob);
                     }
                 }
@@ -1187,6 +1188,7 @@ class PhoneController extends FController
                     $timeOut = CallHelper::warmTransferTimeout($childCall->c_dep_id);
                     if ($timeOut) {
                         $checkJob = new CheckWarmTransferTimeExpiredJob($childCall->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
+                        $checkJob->delayJob = $timeOut;
                         Yii::$app->queue_job->delay($timeOut)->push($checkJob);
                     }
                 }

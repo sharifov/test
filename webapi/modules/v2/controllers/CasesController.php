@@ -62,10 +62,12 @@ class CasesController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{160}}          contact_email                    Client Email
-     * @apiParam {string{20}}           contact_phone                    Client Phone
+     * @apiParam {string{160}}          contact_email                    Client Email required if contact phone or chat_visitor_id or order_uid are not set
+     * @apiParam {string{20}}           contact_phone                    Client Phone required if contact email or chat_visitor_id or order_uid are not set
+     * @apiParam {string{20}}           [contact_name]                   Client Name
+     * @apiParam {string{50}}           chat_visitor_id                  Client chat_visitor_id required if contact phone or email or order_uid are not set
      * @apiParam {int}                  category_id                      Case category id
-     * @apiParam {string{5..7}}         order_uid                        Order uid (symbols and numbers only)
+     * @apiParam {string{5..7}}         order_uid                        Order uid (symbols and numbers only) required if contact phone or email or chat_visitor_id are not set
      * @apiParam {string{100}}          [project_key]                    Project Key (if not exist project assign API User)
      * @apiParam {string{255}}          [subject]                        Subject
      * @apiParam {string{65000}}        [description]                    Description
@@ -93,6 +95,7 @@ class CasesController extends BaseController
      *       "status": 200,
      *       "message": "OK",
      *       "data": {
+     *           "case_id": 2354356,
      *           "case_gid": "708ddf3e44ec477f8807d8b5f748bb6c",
      *           "client_uuid": "5d0cd25a-7f22-4b18-9547-e19a3e7d0c9a"
      *       },
@@ -213,12 +216,13 @@ class CasesController extends BaseController
         }
 
         if (
-            $case = Cases::find()
+            $form->order_uid && $case = Cases::find()
             ->andWhere(['cs_category_id' => $form->category_id, 'cs_order_uid' => $form->order_uid])
             ->withNotFinishStatus()->limit(1)->one()
         ) {
             return new SuccessResponse(
                 new DataMessage(
+                    new Message('case_id', $case->cs_id),
                     new Message('case_gid', $case->cs_gid),
                     new Message('client_uuid', $case->client ? $case->client->uuid : ''),
                 )
@@ -235,22 +239,25 @@ class CasesController extends BaseController
             );
         }
 
-        try {
-            $job = new CreateSaleFromBOJob();
-            $job->case_id = $result->csId;
-            $job->order_uid = $form->order_uid;
-            $job->email = $form->contact_email;
-            $job->phone = $form->contact_phone;
-            Yii::$app->queue_job->priority(100)->push($job);
-        } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
-            );
+        if ($form->order_uid || $form->contact_email || $form->contact_phone) {
+            try {
+                $job = new CreateSaleFromBOJob();
+                $job->case_id = $result->csId;
+                $job->order_uid = $form->order_uid;
+                $job->email = $form->contact_email;
+                $job->phone = $form->contact_phone;
+                Yii::$app->queue_job->priority(100)->push($job);
+            } catch (\Throwable $throwable) {
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
+                );
+            }
         }
 
         return new SuccessResponse(
             new DataMessage(
+                new Message('case_id', $result->csId),
                 new Message('case_gid', $result->caseGid),
                 new Message('client_uuid', $result->clientUuid),
             )

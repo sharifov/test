@@ -46,6 +46,12 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['NOT IN', 'cch_id', $ids]);
     }
 
+    public function excludePendingUserAccessByUserId(int $id): self
+    {
+        $subQuery = ClientChatUserAccess::find()->select(['ccua_cch_id'])->byUserId($id);
+        return $this->andWhere(['NOT IN', 'cch_id', $subQuery]);
+    }
+
     public function byIds(array $ids): self
     {
         return $this->andWhere(['IN', 'cch_id', $ids]);
@@ -197,6 +203,16 @@ class Scopes extends \yii\db\ActiveQuery
             ->andWhere(['NOT IN', 'cch_status_id', ClientChat::CLOSED_STATUS_GROUP]);
     }
 
+    public function pending(): self
+    {
+        return $this->andWhere(['cch_status_id' => ClientChat::STATUS_PENDING]);
+    }
+
+    public function pendingOrIdle(): self
+    {
+        return $this->andWhere(['cch_status_id' => [ClientChat::STATUS_PENDING, ClientChat::STATUS_IDLE]]);
+    }
+
     public function withUnreadMessage(bool $edgerLoading = false): self
     {
         return $this->innerJoinWith(['unreadMessage' => static function (ActiveQuery $query) {
@@ -284,6 +300,13 @@ class Scopes extends \yii\db\ActiveQuery
     public function orOwner(Employee $user): self
     {
         return $this->orWhere(['cch_owner_user_id' => $user->getId()]);
+    }
+
+    public function joinWithUserChannels(int $userId): self
+    {
+        return $this->innerJoin(ClientChatUserChannel::tableName(), 'cch_channel_id = ccuc_channel_id and ccuc_user_id = :userId', [
+            'userId' => $userId
+        ]);
     }
 
     /**

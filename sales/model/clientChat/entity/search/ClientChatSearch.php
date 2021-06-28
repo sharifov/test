@@ -7,6 +7,7 @@ use common\models\ClientEmail;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
+use common\models\UserGroupAssign;
 use sales\access\EmployeeGroupAccess;
 use sales\helpers\query\QueryHelper;
 use sales\model\clientChat\dashboard\FilterForm;
@@ -339,7 +340,7 @@ class ClientChatSearch extends ClientChat
         return $clientChats;
     }
 
-    public function getListOfChats(Employee $user, array $channelsIds, FilterForm $filter): ArrayDataProvider
+    public function getListOfChats(Employee $user, array $channelsIds, FilterForm $filter, int $page, bool $increaseLimit): ArrayDataProvider
     {
         if (GroupFilter::isNothing($filter->group)) {
             return new ArrayDataProvider([
@@ -348,7 +349,18 @@ class ClientChatSearch extends ClientChat
         }
 
         $query = $this->listOfChatsQuery($filter, $user, $channelsIds);
+        $totalCount = $query->count();
 
+
+        $limit = $this->pageSize;
+        $offset = $this->pageSize * $page;
+        if ($increaseLimit) {
+            $limit *= ($page);
+            $offset = 0;
+        }
+//        $limit = $increaseLiVmit ? $this->pageSize * (($page === 0) ? $page+1 : $page)  : $this->pageSize;
+
+        $query->limit($limit)->offset($offset);
         $data = $query->asArray()->all();
 //        $data = ArrayHelper::index($data, 'cch_id');
 //        $chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
@@ -367,6 +379,7 @@ class ClientChatSearch extends ClientChat
         $dataProvider = new ArrayDataProvider([
             'allModels' => $data,
             'pagination' => ['pageSize' => $this->pageSize],
+            'totalCount' => $totalCount
             //            'sort' => [
             //                'defaultOrder' => [
             //                    'count_unread_messages' => SORT_DESC,
@@ -468,7 +481,7 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->channelId) {
-            $query->byChannel($filter->channelId);
+            $query->byChannelIds($filter->channelId);
         } else {
             if (!GroupFilter::isMy($filter->group)) {
                 $query->byChannelIds($channelsIds);
@@ -480,7 +493,8 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->project) {
-            $query->byProject($filter->project);
+//            $query->byProject($filter->project);
+            $query->andWhere(['cch_project_id' => $filter->project]);
         }
 
         if ($filter->userId) {
@@ -498,7 +512,7 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->status) {
-            $query->byStatus($filter->status);
+            $query->byStatuses($filter->status);
         }
 
         if ($filter->clientName) {
@@ -506,6 +520,10 @@ class ClientChatSearch extends ClientChat
                 ['like', 'client.first_name', $filter->clientName],
                 ['like', 'client.last_name', $filter->clientName]
             ]);
+        }
+
+        if ($filter->chatId) {
+            $query->andWhere(['cch_id' => $filter->chatId]);
         }
 
         if ($filter->clientEmail) {
@@ -528,6 +546,11 @@ class ClientChatSearch extends ClientChat
         $query->leftJoin(['last_message' => ClientChatLastMessage::tableName()], 'cch_id = last_message.cclm_cch_id');
 
         $query->limit(1000);
+
+        if ($filter->userGroups) {
+            $query->innerJoin(['ownerUserGroupAssign' => UserGroupAssign::tableName()], new Expression('ownerUserGroupAssign.ugs_user_id = owner.id'));
+            $query->andWhere(['ownerUserGroupAssign.ugs_group_id' => $filter->userGroups]);
+        }
 
         return $query;
     }
@@ -563,18 +586,19 @@ class ClientChatSearch extends ClientChat
         $query = ClientChat::find()->freeToTake($user->id);
 
         if ($filter->channelId) {
-            $query->byChannel($filter->channelId);
+            $query->byChannelIds($filter->channelId);
         } else {
             $query->byChannelIds($channelsIds);
         }
         if ($filter->project) {
-            $query->byProject($filter->project);
+//            $query->byProject($filter->project);
+            $query->andWhere(['cch_project_id' => $filter->project]);
         }
         if ($filter->userId) {
             $query->andWhere(['cch_owner_user_id' => $filter->userId]);
         }
         if ($filter->status) {
-            $query->byStatus($filter->status);
+            $query->byStatuses($filter->status);
         }
         if ($filter->clientName) {
             $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');

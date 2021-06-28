@@ -14,6 +14,7 @@ use sales\events\quote\QuoteSendEvent;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\airportLang\service\AirportLangService;
+use sales\model\quoteLabel\entity\QuoteLabel;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use sales\traits\MetricObjectCounterTrait;
@@ -66,6 +67,7 @@ use yii\helpers\VarDumper;
  * @property QuoteTrip[] $quoteTrips
  * @property Airline[] $mainAirline
  * @property Project $providerProject
+ * @property QuoteLabel[] $quoteLabel
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -402,7 +404,7 @@ class Quote extends \yii\db\ActiveRecord
         $quote->lead_id = $lead->id;
         $quote->cabin = $lead->cabin;
         $quote->trip_type = $lead->trip_type;
-        $quote->check_payment = true;
+        $quote->check_payment = ArrayHelper::getValue($quoteData, 'prices.isCk', true);
         $quote->fare_type = $quoteData['fareType'] ?? null;
         $quote->gds = $quoteData['gds'] ?? null;
         $quote->pcc = $quoteData['pcc'] ?? null;
@@ -1608,6 +1610,11 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasOne(Project::class, ['id' => 'provider_project_id']);
     }
 
+    public function getQuoteLabel(): ActiveQuery
+    {
+        return $this->hasMany(QuoteLabel::class, ['ql_quote_id' => 'id']);
+    }
+
     public function getQuoteTripsData()
     {
         $trips = [];
@@ -2179,7 +2186,12 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getServiceFeePercent()
     {
-        return ($this->check_payment) ? ($this->service_fee_percent ? $this->service_fee_percent : $this->serviceFee * 100) : 0;
+        return $this->service_fee_percent ?: 0;
+    }
+
+    public function getServiceFee()
+    {
+        return $this->service_fee_percent ? $this->serviceFee : 0;
     }
 
     public function getEstimationProfitText()
@@ -2765,5 +2777,11 @@ class Quote extends \yii\db\ActiveRecord
             ->one();
 
         return $quote;
+    }
+
+    public function changeServiceFeePercent(?float $serviceFeePercent): Quote
+    {
+        $this->service_fee_percent = $serviceFeePercent;
+        return $this;
     }
 }

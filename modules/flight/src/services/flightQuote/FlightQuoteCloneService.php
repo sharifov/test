@@ -9,6 +9,7 @@ use modules\flight\models\FlightQuoteSegmentPaxBaggage;
 use modules\flight\models\FlightQuoteSegmentPaxBaggageCharge;
 use modules\flight\models\FlightQuoteSegmentStop;
 use modules\flight\models\FlightQuoteTrip;
+use modules\flight\src\entities\flightQuoteLabel\service\FlightQuoteLabelService;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
@@ -100,6 +101,10 @@ class FlightQuoteCloneService
                 $stop = FlightQuoteSegmentStop::clone($originalStop, $segment->fqs_id);
                 $this->flightQuoteSegmentStopRepository->save($stop);
             }
+        }
+
+        if ($originalQuote->quoteLabel) {
+            FlightQuoteLabelService::cloneByQuote($originalQuote, $quote->fq_id);
         }
     }
 }

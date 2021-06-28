@@ -38,7 +38,7 @@ if ($listParams['isFullList']) {
     <div id="cc-dialogs-wrapper" class="_cc-list-wrapper" data-page="<?= $listParams['page'] ?>">
         <?php if ($dataProvider) : ?>
             <?= $this->render('_client-chat-item', [
-                'clientChats' => $dataProvider->getModels(),
+                'clientChats' => $dataProvider->allModels,
                 'clientChatId' => $clientChatId,
                 'formatter' => $formatter,
                 'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,

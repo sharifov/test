@@ -4,6 +4,7 @@ namespace sales\model\lead\useCases\lead\api\create;
 
 use common\models\Language;
 use common\models\Lead;
+use common\models\Project;
 use common\models\Sources;
 use sales\helpers\lead\LeadHelper;
 use common\components\validators\IsArrayValidator;
@@ -14,6 +15,7 @@ use yii\base\Model;
  *
  * @property string $source_code
  * @property int $source_id
+ * @property string|null $project_key
  * @property int $project_id
  * @property int $status
  * @property string $uid
@@ -43,6 +45,7 @@ class LeadCreateForm extends Model
 {
     public $source_code;
     public $source_id;
+    public $project_key;
     public $project_id;
     public $status;
     public $uid;
@@ -71,16 +74,9 @@ class LeadCreateForm extends Model
     public function rules(): array
     {
         return [
-            ['source_code', 'required'],
+            ['project_key', 'string', 'max' => 50],
             ['source_code', 'string', 'max' => 20],
-            ['source_code', function () {
-                if ($source = Sources::find()->select(['id', 'project_id'])->where(['cid' => $this->source_code])->asArray()->limit(1)->one()) {
-                    $this->source_id = $source['id'];
-                    $this->project_id = $source['project_id'];
-                } else {
-                    $this->addError('source_code', 'Source not found');
-                }
-            }],
+            ['source_code', 'projectSourcesProcessing', 'skipOnEmpty' => false],
 
             ['cabin', 'default', 'value' => Lead::CABIN_ECONOMY],
             ['cabin', 'string', 'max' => 1],
@@ -145,6 +141,61 @@ class LeadCreateForm extends Model
 
             [['lead_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
+    }
+
+    public function projectSourcesProcessing($attribute): void
+    {
+        if (!$this->detectSource()) {
+            $this->addError($attribute, 'Source not found');
+        }
+    }
+
+    private function detectSource(): bool
+    {
+        if ((!empty($this->source_code) && !empty($this->project_key)) && $source = self::getSource($this->source_code, $this->project_key)) {
+            $this->source_id = $source['id'];
+            $this->project_id = $source['project_id'];
+            return true;
+        }
+        if (!empty($this->project_key) && $source = self::getDefaultSource($this->project_key)) {
+            $this->source_id = $source['id'];
+            $this->project_id = $source['project_id'];
+            return true;
+        }
+        if (!empty($this->source_code) && $source = Sources::find()->select(['id', 'project_id'])->where(['cid' => $this->source_code])->asArray()->one()) {
+            $this->source_id = $source['id'];
+            $this->project_id = $source['project_id'];
+            return true;
+        }
+        return false;
+    }
+
+    private static function getDefaultSource(?string $projectKey): ?array
+    {
+        return Sources::find()
+            ->select(Sources::tableName() . '.*')
+            ->innerJoin(
+                Project::tableName(),
+                Project::tableName() . '.id = project_id AND project_key = :projectKey',
+                [':projectKey' => $projectKey]
+            )
+            ->where(['default' => 1])
+            ->asArray()
+            ->one();
+    }
+
+    private static function getSource(?string $sourceCode, ?string $projectKey): ?array
+    {
+        return Sources::find()
+            ->select(Sources::tableName() . '.*')
+            ->innerJoin(
+                Project::tableName(),
+                Project::tableName() . '.id = project_id AND project_key = :projectKey',
+                [':projectKey' => $projectKey]
+            )
+            ->where(['cid' => $sourceCode])
+            ->asArray()
+            ->one();
     }
 
     public function formName(): string

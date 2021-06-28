@@ -28,6 +28,7 @@ class FlightQuoteSegmentDTO
     public $airEquipType;
     public $marriageGroup;
     public $cabinClass;
+    public $cabinClassBasic;
     public $meal;
     public $fareCode;
     public $key;
@@ -61,6 +62,7 @@ class FlightQuoteSegmentDTO
         $this->airEquipType = $segment['airEquipType'] ?? '';
         $this->marriageGroup = $segment['marriageGroup'] ?? '';
         $this->cabinClass = $segment['cabin'] ?? '';
+        $this->cabinClassBasic = $segment['cabinIsBasic'] ?? false;
         $this->meal = $segment['meal'] ?? '';
         $this->fareCode = $segment['fareCode'] ?? '';
         $this->ticketId = $ticketId;

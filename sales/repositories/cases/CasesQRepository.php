@@ -15,8 +15,10 @@ use sales\entities\cases\CasesQSearch;
 use sales\entities\cases\CasesStatus;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use sales\helpers\setting\SettingHelper;
 
 class CasesQRepository
 {
@@ -280,6 +282,154 @@ class CasesQRepository
 
         $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
 
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getUnidentifiedCount(Employee $user): int
+    {
+        return $this->getUnidentifiedQuery($user)->count();
+    }
+
+    public function getUnidentifiedQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]]);
+        $query->joinWith(['client', 'caseSale']);
+        $query->andWhere(['css_cs_id' => null]);
+
+        $query->orderBy([new \yii\db\Expression('FIELD (cs_status, ' . CasesStatus::STATUS_PENDING . ', ' . CasesStatus::STATUS_FOLLOW_UP . ', ' . CasesStatus::STATUS_PROCESSING . ')')]);
+
+        if (!$user->isAdmin()) {
+            $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+            $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments($user))]);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getFirstPriorityCount(Employee $user): int
+    {
+        return $this->getFirstPriorityQuery($user)->count();
+    }
+
+    public function getFirstPriorityQuery(Employee $user): Query
+    {
+        $query = CasesQSearch::find();
+        $query->select('*')->from([
+            'dd' => (new Query())->select(['cs.*', 'DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'])->from([
+                'cs' => (new Query())->select('cases.*')->from('cases')
+                    ->innerJoin('case_sale', 'cs_id = css_cs_id')
+                    ->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+                    ->groupBy('cs_id')
+            ])->leftJoin([
+                'sale_out' => (new Query())->select('css_cs_id, MIN(css_out_date) AS last_out_date')
+                    ->from('case_sale')
+                    ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
+                    ->where('css_out_date >= SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+                    ->groupBy('css_cs_id')
+            ], 'cs.cs_id = sale_out.css_cs_id')
+                ->leftJoin([
+                    'sale_in' => (new Query())->select('css_cs_id, MIN(css_in_date) AS last_in_date')
+                        ->from('case_sale')
+                        ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
+                        ->where('css_in_date >= SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+                        ->groupBy('css_cs_id')
+                ], 'cs.cs_id = sale_in.css_cs_id')
+        ])
+        ->where(['not', ['nextFlight' => null]])
+        ->andWhere('nextFlight <= ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+        ->orderBy(['nextFlight' => SORT_ASC]);
+        $query->joinWith(['client']);
+
+        if (!$user->isAdmin()) {
+            $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+            $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments($user))]);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getSecondPriorityCount(Employee $user): int
+    {
+        return $this->getSecondPriorityQuery($user)->count();
+    }
+
+    public function getSecondPriorityQuery(Employee $user): Query
+    {
+        $query = CasesQSearch::find();
+        $query->select('*')->from([
+            'dd' => (new Query())->select(['cs.*', 'DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'])->from([
+                'cs' => (new Query())->select('cases.*')->from('cases')
+                    ->innerJoin('case_sale', 'cs_id = css_cs_id')
+                    ->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+                    ->groupBy('cs_id')
+            ])->leftJoin([
+                'sale_out' => (new Query())->select('css_cs_id, MIN(css_out_date) AS last_out_date')
+                    ->from('case_sale')
+                    ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
+                    ->where('css_out_date > ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+                    ->groupBy('css_cs_id')
+            ], 'cs.cs_id = sale_out.css_cs_id')
+                ->leftJoin([
+                    'sale_in' => (new Query())->select('css_cs_id, MIN(css_in_date) AS last_in_date')
+                        ->from('case_sale')
+                        ->innerJoin('cases', 'case_sale.css_cs_id = cases.cs_id')
+                        ->where('css_in_date > ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+                        ->groupBy('css_cs_id')
+                ], 'cs.cs_id = sale_in.css_cs_id')
+        ])
+            ->where(['not', ['nextFlight' => null]])
+            ->andWhere('nextFlight > ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+
+            ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
+        $query->joinWith(['client']);
+
+        if (!$user->isAdmin()) {
+            $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+            $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments($user))]);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getPassDepartureCount(Employee $user): int
+    {
+        return $this->getPassDepartureQuery($user)->count();
+    }
+
+    public function getPassDepartureQuery(Employee $user): Query
+    {
+        $query = CasesQSearch::find();
+        $query->select('*')->from([
+            'dd' => (new Query())->select(['cs.*', 'GREATEST(last_in_date, last_out_date) AS nextFlight'])->from([
+                'cs' => (new Query())->select(['cases.*', 'MAX(css_out_date) AS last_out_date', 'MAX(css_in_date) AS last_in_date'])
+                    ->from('cases')
+                    ->innerJoin('case_sale', 'cs_id = css_cs_id')
+                    ->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+                    ->groupBy('cs_id')
+            ])
+        ])
+            ->where('last_out_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+            ->andWhere('last_in_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+            ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
+        $query->joinWith(['client']);
+
+        if (!$user->isAdmin()) {
+            $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+            $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments($user))]);
+        }
         return $query;
     }
 

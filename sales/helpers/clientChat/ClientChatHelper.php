@@ -74,7 +74,7 @@ class ClientChatHelper
         return true;
     }
 
-    public static function displayBtnAcceptTransfer(Employee $user, $accessId, $chatId, $accessUrl, $accessAction): string
+    public static function displayBtnAcceptTransfer(Employee $user, $accessId, $chatId, $accessUrl, $accessAction, string $checkAccessUrl): string
     {
         if (!$user->can('client-chat/accept-transfer')) {
             return '';
@@ -84,11 +84,12 @@ class ClientChatHelper
             'data-ccua-id' => $accessId,
             'data-cch-id' => $chatId,
             'data-ajax-url' => $accessUrl,
-            'data-access-action' => $accessAction
+            'data-access-action' => $accessAction,
+            'data-check-access-url' => $checkAccessUrl
         ]);
     }
 
-    public static function displayBtnSkipTransfer(Employee $user, $accessId, $chatId, $accessUrl, $accessAction): string
+    public static function displayBtnSkipTransfer(Employee $user, $accessId, $chatId, $accessUrl, $accessAction, string $checkAccessUrl): string
     {
         if (!$user->can('client-chat/skip-transfer')) {
             return '';
@@ -98,11 +99,12 @@ class ClientChatHelper
             'data-ccua-id' => $accessId,
             'data-cch-id' => $chatId,
             'data-ajax-url' => $accessUrl,
-            'data-access-action' => $accessAction
+            'data-access-action' => $accessAction,
+            'data-check-access-url' => $checkAccessUrl
         ]);
     }
 
-    public static function displayBtnAcceptPending(Employee $user, $accessId, $chatId, $accessUrl, $accessAction): string
+    public static function displayBtnAcceptPending(Employee $user, $accessId, $chatId, $accessUrl, $accessAction, string $checkAccessUrl): string
     {
         if (!$user->can('client-chat/accept-pending')) {
             return '';
@@ -112,11 +114,12 @@ class ClientChatHelper
             'data-ccua-id' => $accessId,
             'data-cch-id' => $chatId,
             'data-ajax-url' => $accessUrl,
-            'data-access-action' => $accessAction
+            'data-access-action' => $accessAction,
+            'data-check-access-url' => $checkAccessUrl
         ]);
     }
 
-    public static function displayBtnSkipPending(Employee $user, $accessId, $chatId, $accessUrl, $accessAction): string
+    public static function displayBtnSkipPending(Employee $user, $accessId, $chatId, $accessUrl, $accessAction, string $checkAccessUrl): string
     {
         if (!$user->can('client-chat/skip-pending')) {
             return '';
@@ -126,11 +129,12 @@ class ClientChatHelper
             'data-ccua-id' => $accessId,
             'data-cch-id' => $chatId,
             'data-ajax-url' => $accessUrl,
-            'data-access-action' => $accessAction
+            'data-access-action' => $accessAction,
+            'data-check-access-url' => $checkAccessUrl
         ]);
     }
 
-    public static function displayBtnTakeIdle(Employee $user, array $access, $accessUrl, $accessAction): string
+    public static function displayBtnTakeIdle(Employee $user, array $access, $accessUrl, $accessAction, string $checkAccessUrl): string
     {
         $chat = new ClientChat();
         $chat->cch_status_id = (int)($access['cch_status_id'] ?? 0);
@@ -144,7 +148,8 @@ class ClientChatHelper
             'data-ccua-id' => $access['ccua_id'] ?? null,
             'data-cch-id' => $access['ccua_cch_id'] ?? null,
             'data-ajax-url' => $accessUrl,
-            'data-access-action' => $accessAction
+            'data-access-action' => $accessAction,
+            'data-check-access-url' => $checkAccessUrl
         ]);
     }
 

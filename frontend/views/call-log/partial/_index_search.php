@@ -66,7 +66,8 @@ use common\models\Department;
                             'locale' => [
                                 'format' => 'Y-m-d H:i',
                                 'separator' => ' - '
-                            ]
+                            ],
+                            'ranges' => \Yii::$app->params['dateRangePicker']['configs']['added3monthAllTime']
                         ]
                     ])->label('Created DateTime Range');
 ?>

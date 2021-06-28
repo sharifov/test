@@ -18,6 +18,7 @@ class RepeatMessageCallJobCreator
         }
 
         $repeatJob = new CallQueueRepeatMessageJob($call->c_id, $depPhoneProjectId, microtime());
+        $repeatJob->delayJob = (int) $repeatParams['repeat_time'];
         $repeatJobId = Yii::$app->queue_job->delay((int)$repeatParams['repeat_time'])->priority(100)->push($repeatJob);
         if ($repeatJobId) {
             $call->setDataRepeat($repeatJobId, $repeatJob->departmentPhoneProjectId, $repeatJob->createdTime);

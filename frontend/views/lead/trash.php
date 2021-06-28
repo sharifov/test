@@ -32,10 +32,9 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 
-    <div class="row">
-        <?php $form = ActiveForm::begin([
+    <?php $form = ActiveForm::begin([
             'action' => ['trash'],
             'method' => 'get',
             'options' => [
@@ -43,38 +42,46 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]); ?>
 
-        <div class="col-md-3">
-            <?php
-            echo  \kartik\daterange\DateRangePicker::widget([
-                'model' => $searchModel,
-                'attribute' => 'date_range',
-                'useWithAddon' => true,
-                'presetDropdown' => true,
-                'hideInput' => true,
-                'convertFormat' => true,
-                'startAttribute' => 'datetime_start',
-                'endAttribute' => 'datetime_end',
-                'pluginOptions' => [
-                    'timePicker' => true,
-                    'timePickerIncrement' => 1,
-                    'timePicker24Hour' => true,
-                    'locale' => [
-                        'format' => 'Y-m-d H:i',
-                        'separator' => ' - '
+        <div class="row">
+            <div class="col-md-3">
+                <?php
+                echo  \kartik\daterange\DateRangePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'date_range',
+                    'useWithAddon' => true,
+                    'presetDropdown' => true,
+                    'hideInput' => true,
+                    'convertFormat' => true,
+                    'startAttribute' => 'datetime_start',
+                    'endAttribute' => 'datetime_end',
+                    'pluginOptions' => [
+                        'timePicker' => true,
+                        'timePickerIncrement' => 1,
+                        'timePicker24Hour' => true,
+                        'locale' => [
+                            'format' => 'Y-m-d H:i',
+                            'separator' => ' - '
+                        ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                     ]
-                ]
-            ]);
-            ?>
+                ]);
+                ?>
+            </div>
         </div>
 
-        <div class="form-group">
-            <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-success']) ?>
+        <div class="row">
+            <div class="col-md-2">
+                <?= $form->field($searchModel, 'is_conversion')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
+            </div>
+
+            <div class="col-md-1" style="padding-top: 25px; margin-left: 15px;">
+                <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-success']) ?>
+            </div>
         </div>
-        <?php ActiveForm::end(); ?>
-    </div>
+
+    <?php ActiveForm::end(); ?>
 
     <?php
-
     $gridColumns = [
         [
             'attribute' => 'id',
@@ -166,7 +173,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) {
-
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                     if ($clientName === 'Client Name') {
@@ -357,7 +363,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{action}',
             'buttons' => [
                 'action' => function ($url, \common\models\Lead $model, $key) {
-
                     $buttons = '';
 
                     $buttons .= Html::a('<i class="fa fa-search"></i> view', [

@@ -119,7 +119,7 @@ $totalAmountQuote = 0.0;
                                 $airlineNames = [];
                                 foreach ($segments as $segment) {
                                     if (!in_array(SearchService::getCabin($segment->fqs_cabin_class), $cabins, false)) {
-                                        $cabins[] = SearchService::getCabin($segment->fqs_cabin_class);
+                                        $cabins[] = SearchService::getCabin($segment->fqs_cabin_class, $segment->fqs_cabin_class_basic);
                                     }
                                     if (isset($segment->fqs_recheck_baggage) && $segment->fqs_recheck_baggage) {
                                         $needRecheck = true;
@@ -385,6 +385,24 @@ $totalAmountQuote = 0.0;
                         <?php Pjax::end(); ?>
 
                         <td class="text-right">
+
+                            <?php if ($flightQuote->quoteLabel) : ?>
+                                <?php $quoteLabels = '' ?>
+                                <?php foreach ($flightQuote->quoteLabel as $quoteLabel) : ?>
+                                    <?php $quoteLabels .= $quoteLabel->getDescription() . '<br />' ?>
+                                <?php endforeach ?>
+                                <span class="popover-class"
+                                    data-toggle="popover"
+                                    data-html="true"
+                                    data-placement="top"
+                                    data-container="body"
+                                    data-trigger="hover"
+                                    title="Quote Label"
+                                    data-content='<?= Html::encode($quoteLabels) ?>'>
+                                        <i class="fa fa-tags fa-border text-info"></i>
+                                </span>
+                            <?php endif ?>
+
                             <?php $baggageInfo = FlightQuoteHelper::getBaggageInfo($flightQuote); ?>
                             <?php $hasAirportChange = FlightQuoteHelper::hasAirportChange($flightQuote); ?>
                             <?php $ticketSegments = FlightQuoteHelper::getTicketSegments($flightQuote); ?>
@@ -454,7 +472,7 @@ $totalAmountQuote = 0.0;
                                 $airlineNames = [];
                                 foreach ($segments as $segment) {
                                     if (!in_array(SearchService::getCabin($segment->fqs_cabin_class), $cabins, false)) {
-                                        $cabins[] = SearchService::getCabin($segment->fqs_cabin_class);
+                                        $cabins[] = SearchService::getCabin($segment->fqs_cabin_class, $segment->fqs_cabin_class_basic);
                                     }
                                     if (isset($segment->fqs_recheck_baggage) && $segment->fqs_recheck_baggage) {
                                         $needRecheck = true;

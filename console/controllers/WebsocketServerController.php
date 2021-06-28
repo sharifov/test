@@ -5,6 +5,7 @@ namespace console\controllers;
 use common\models\UserConnection;
 use common\models\UserOnline;
 use sales\model\user\entity\monitor\UserMonitor;
+use sales\services\clientChatService\ClientChatService;
 use Swoole\Redis;
 use Swoole\Table;
 use Swoole\WebSocket\Server;
@@ -210,6 +211,8 @@ class WebsocketServerController extends Controller
                         if ($uo->save()) {
                             UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ONLINE);
                             UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ACTIVE);
+
+                            ClientChatService::createJobAssigningUaToPendingChats((int)$uo->uo_user_id);
                         } else {
                             echo 'Error: UserOnline:save' . PHP_EOL;
                             \Yii::error($uo->errors, 'ws:open:UserOnline:save');

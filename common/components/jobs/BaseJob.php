@@ -10,22 +10,24 @@ use yii\base\BaseObject;
 
 /**
  * Class BaseJob
+ *
+ * @property float $timeStart
+ * @property int $delayJob
  */
 class BaseJob extends BaseObject
 {
     public float $timeStart;
-    public Metrics $metrics;
+    public int $delayJob = 0;
 
     private array $defaultBuckets = [1, 3, 5, 7, 10, 15, 30, 60, 300];
 
     /**
-     * @param Metrics $metrics
+     * @param float|null $timeStart
      * @param array $config
      */
-    public function __construct(?Metrics $metrics = null, $config = [])
+    public function __construct(?float $timeStart = null, $config = [])
     {
-        $this->timeStart = microtime(true);
-        $this->metrics = $metrics ?? \Yii::$container->get(Metrics::class);
+        $this->timeStart = $timeStart ?? microtime(true);
         parent::__construct($config);
     }
 
@@ -38,6 +40,7 @@ class BaseJob extends BaseObject
         try {
             $metrics = \Yii::$container->get(Metrics::class);
             $seconds = round(microtime(true) - $this->timeStart, 1);
+            $seconds -= $this->delayJob;
             $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
             $metrics->histogramMetric(
                 'job_execute',

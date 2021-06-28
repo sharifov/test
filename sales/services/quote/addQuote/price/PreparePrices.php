@@ -29,7 +29,7 @@ class PreparePrices
                     $price->fare = $value['fare'];
                     $price->taxes = $value['taxes'];
                     $price->net = $price->fare + $price->taxes;
-                    $price->selling = ($price->net + $price->mark_up)  * (1 + (new Quote())->serviceFee);
+                    $price->selling = ($price->net + $price->mark_up);
                     $price->toFloat();
                     $price->roundAttributesValue();
                     $price->oldParams = serialize($price->attributes);

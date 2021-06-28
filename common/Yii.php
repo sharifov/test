@@ -53,6 +53,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \kivork\PrometheusClient\components\PrometheusClient $prometheus Prometheus client component
  * @property \sorokinmedia\centrifugo\Client $centrifugo Centrifugo client component
  * @property \modules\abac\components\AbacComponent $abac ABAC component
+ * @property \common\components\SnowplowService $snowplow Snowplow component
  *
  *
  *

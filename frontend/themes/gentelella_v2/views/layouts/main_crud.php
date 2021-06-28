@@ -4,9 +4,12 @@
 /* @var $content string */
 
 use common\models\Employee;
+use frontend\widgets\frontendWidgetList\FrontendLauncherWidgetList;
+use frontend\widgets\frontendWidgetList\louassist\LouAssistWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
+use sales\helpers\app\ReleaseVersionHelper;
 use yii\helpers\Html;
 
 $bundle = \frontend\assets\AppCrudAsset::register($this);
@@ -110,6 +113,9 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
                         <?php echo frontend\widgets\OnlineConnection::widget() ?>
                         <?php echo frontend\widgets\UserMonitor::widget() ?>
 
+                        <?php echo (new FrontendLauncherWidgetList())->getContent() ?>
+
+
                         <?php
                         if (Yii::$app->params['settings']['notification_web_socket']) {
                             echo NotificationSocketWidget::widget(['userId' => Auth::id()]);
@@ -180,7 +186,7 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
         <footer>
             <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?>,
                 <span title="<?=Yii::$app->params['release']['git_branch'] ?? ''?> : <?=Yii::$app->params['release']['git_hash'] ?? ''?>">
-                    v. <?=Yii::$app->params['release']['version'] ?? ''?>
+                    v. <?php echo ReleaseVersionHelper::getReleaseVersion(true) ?? '' ?>
                 </span>
                 <span title="Hostname">
                     , host: <?=Yii::$app->params['appHostname'] ?? ''?>

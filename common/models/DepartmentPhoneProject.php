@@ -3,12 +3,14 @@
 namespace common\models;
 
 use common\models\query\DepartmentPhoneProjectQuery;
+use frontend\helpers\JsonHelper;
 use sales\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "department_phone_project".
@@ -100,7 +102,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id']],
 
             ['dpp_priority', 'default', 'value' => 0],
-            ['dpp_priority', 'integer', 'max' => 6500, 'min' => 0],
+            ['dpp_priority', 'integer', 'max' => 6500, 'min' => -6500],
             ['dpp_priority', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
@@ -255,5 +257,28 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     public function isEnabled(): bool
     {
         return (bool)$this->dpp_enable;
+    }
+
+    public function getCallFilterGuard(): array
+    {
+        if (empty($this->dpp_params)) {
+            return [];
+        }
+        return ArrayHelper::getValue(JsonHelper::decode($this->dpp_params), 'callFilterGuard', []);
+    }
+
+    public function getCallFilterGuardEnable()
+    {
+        return ArrayHelper::getValue($this->getCallFilterGuard(), 'enable', false);
+    }
+
+    public function getCallFilterGuardTrustPercent()
+    {
+        return ArrayHelper::getValue($this->getCallFilterGuard(), 'trustPercent', false);
+    }
+
+    public function getCallFilterGuardTrustBlockListExpiredMinutes()
+    {
+        return ArrayHelper::getValue($this->getCallFilterGuard(), 'blockList.expiredMinutes', 60);
     }
 }

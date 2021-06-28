@@ -8,6 +8,7 @@ use common\models\search\lead\LeadSearchByClient;
 use common\models\search\LeadSearch;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
+use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
 use sales\entities\cases\CasesSearchByClient;
 use Yii;
@@ -152,6 +153,7 @@ class ClientController extends FController
             $clientId = Yii::$app->request->get('client_id');
         }
         $client = $this->findModel((int)$clientId);
+        $case = Cases::findOne(Yii::$app->request->post('case_id'));
 
         $providers = [];
 
@@ -166,7 +168,10 @@ class ClientController extends FController
 //        }
 
         return $this->renderAjax('ajax_info', ArrayHelper::merge(
-            ['model' => $client],
+            [
+                'model' => $client,
+                'case' => $case
+            ],
             $providers
         ));
     }

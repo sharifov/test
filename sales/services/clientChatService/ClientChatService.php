@@ -2,6 +2,7 @@
 
 namespace sales\services\clientChatService;
 
+use common\components\jobs\clientChat\ChatAssignUserAccessPendingChatsJob;
 use common\components\jobs\clientChat\ClientChatUserAccessJob;
 use common\components\purifier\Purifier;
 use common\models\Client;
@@ -17,6 +18,7 @@ use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatQuery;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\close\ClientChatCloseForm;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
@@ -140,6 +142,9 @@ class ClientChatService
     private ClientChatUnreadRepository $clientChatUnreadRepository;
     private ClientChatLastMessageRepository $clientChatLastMessageRepository;
 
+    private const REDIS_DISTRIBUTION_LOGIC_KEY = '-chat-distribution-logic';
+    private const REDIS_DISTRIBUTION_LOGIC_EXPIRE_S = 1800;
+
     public function __construct(
         ClientChatChannelRepository $clientChatChannelRepository,
         ClientChatRepository $clientChatRepository,
@@ -205,34 +210,62 @@ class ClientChatService
         $limit = $channel->getSystemUserLimit();
         $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $limit, $channel->getSystemPastMinutes());
 
+        $key = $this->getRedisDistributionLogicKey($clientChat->cch_id);
         if ($users) {
             foreach ($users as $user) {
-                $this->sendRequestToUser($clientChat, $user);
+                $this->sendRequestToUser($clientChat, $user->id);
             }
 
             if ($limit) {
-                $this->createUserAccessJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
+                $this->createUserAccessDistributionLogicJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
             }
+        } elseif (\Yii::$app->redis->exists($key)) {
+            \Yii::$app->redis->del($key);
         }
     }
 
-    public function createUserAccessJob(int $chatId, int $delay = 0): void
+    public function createUserAccessDistributionLogicJob(int $chatId, int $delay = 0): void
     {
+        $key = $this->getRedisDistributionLogicKey($chatId);
+        \Yii::$app->redis->set($key, true);
+        \Yii::$app->redis->expire($key, self::REDIS_DISTRIBUTION_LOGIC_EXPIRE_S);
+
         $job = new ClientChatUserAccessJob();
         $job->chatId = $chatId;
+        $job->delayJob = $delay;
         if (!$jobId = \Yii::$app->queue_client_chat_job->priority(10)->delay($delay)->push($job)) {
             throw new \RuntimeException('ClientChatUserAccessJob not added to queue. ChatId: ' .
                 $chatId);
         }
     }
 
+    public static function createJobAssigningUaToPendingChats(int $userId): void
+    {
+        $job = new ChatAssignUserAccessPendingChatsJob($userId);
+        if (!$job->isRunning()) {
+            \Yii::$app->queue_client_chat_job->priority(10)->push($job);
+        }
+    }
+
+    public function assignUserAccessToPendingChats(int $userId): void
+    {
+        $chats = ClientChatQuery::findAvailablePendingChatsByUser($userId)->all();
+        if ($chats) {
+            foreach ($chats as $chat) {
+                if (!\Yii::$app->redis->exists($this->getRedisDistributionLogicKey($chat->cch_id))) {
+                    $this->sendRequestToUser($chat, $userId);
+                }
+            }
+        }
+    }
+
     /**
      * @param ClientChat $clientChat
-     * @param Employee $agent
+     * @param int $agentId
      */
-    public function sendRequestToUser(ClientChat $clientChat, Employee $agent): void
+    public function sendRequestToUser(ClientChat $clientChat, int $agentId): void
     {
-        $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agent->id);
+        $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agentId);
         $clientChatUserAccess->pending();
         $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
     }
@@ -387,7 +420,7 @@ class ClientChatService
                     /** @var Employee $agent */
                     foreach ($agents as $agent) {
                         try {
-                            $this->sendRequestToUser($clientChat, $agent);
+                            $this->sendRequestToUser($clientChat, $agent->id);
                         } catch (\RuntimeException $e) {
                             \Yii::error('Send request to user ' . $agent->id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
                             throw $e;
@@ -809,5 +842,10 @@ class ClientChatService
         $this->sendRequestToUsers($newClientChat);
 
         return $newClientChat;
+    }
+
+    private function getRedisDistributionLogicKey(int $chatId): string
+    {
+        return $chatId . self::REDIS_DISTRIBUTION_LOGIC_KEY;
     }
 }

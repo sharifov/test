@@ -28,6 +28,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\services\metrics\MetricsService;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
@@ -308,6 +309,7 @@ class QuoteController extends FController
                                                 $segment->qs_operating_airline = $segmentEntry['operatingAirline'];
                                                 $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
                                                 $segment->qs_cabin = $segmentEntry['cabin'];
+                                                $segment->qs_cabin_basic = !empty($segmentEntry['cabinIsBasic']) ? 1 : 0;
 
                                                 if ($ticketSegments && isset($ticketSegments[$tripNr][$segmentNr])) {
                                                     $segment->qs_ticket_id = $ticketSegments[$tripNr][$segmentNr];
@@ -478,6 +480,12 @@ class QuoteController extends FController
                                 $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
                                 if ($chat) {
                                     ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
+                                }
+
+                                try {
+                                    QuoteLabelService::processingQuoteLabel($entry, $quote->id);
+                                } catch (\Throwable $throwable) {
+                                    \Yii::warning($throwable->getMessage(), 'QuoteController:actionCreateQuoteFromSearch:QuoteLabel');
                                 }
                             }
 
@@ -653,6 +661,8 @@ class QuoteController extends FController
             return $result;
         }
 
+        $refresh = (bool) Yii::$app->request->get('refresh', false);
+
         $attr = Yii::$app->request->post($model->formName());
         foreach ($attr as $key => $item) {
             $price = QuotePrice::findOne([
@@ -662,7 +672,7 @@ class QuoteController extends FController
                 $price = new QuotePrice();
             }
             $price->attributes = $item;
-            $price->calculatePrice();
+            $price->calculatePrice($quote, $refresh);
 
             $result[Html::getInputId($price, '[' . $key . ']mark_up')] = $price->mark_up;
             $result[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
@@ -789,6 +799,9 @@ class QuoteController extends FController
             }
 
             $quote = Quote::createQuote($postQuote, $lead->id, $lead->originalQuoteExist());
+            if ($checkPayment = ArrayHelper::getValue($quote, 'check_payment', true)) {
+                $quote->changeServiceFeePercent($quote->serviceFeePercent);
+            }
             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'manual']);
 
             if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
@@ -822,7 +835,7 @@ class QuoteController extends FController
                     $price->net = $quotePrice['net'];
                     $price->mark_up = $quotePrice['mark_up'];
                     $price->selling = $quotePrice['selling'];
-                    $price->service_fee = ($quote->check_payment) ? round($price->selling * (new Quote())->serviceFee, 2) : 0;
+                    $price->service_fee = ($quote->service_fee_percent) ? round($price->selling * $quote->getServiceFee(), 2) : 0;
 
                     if (!$price->validate()) {
                         $response['errorsPrices'][$key] = $price->getErrors();
@@ -873,6 +886,12 @@ class QuoteController extends FController
                             $baggageObj->save(false);
                         }
                     }
+                }
+            }
+
+            if ($quoteLabels = ArrayHelper::getValue($post, 'quote_label')) {
+                foreach ($quoteLabels as $label) {
+                    QuoteLabelService::createQuoteLabel($quote->id, $label);
                 }
             }
 

@@ -471,11 +471,12 @@ class TwilioController extends ApiBaseNoAuthController
                             $responseTwml->play($url_music, ['loop' => 0]);
                         }
 
-
+                        $delayJob = 7;
                         $job = new CallQueueJob();
                         $job->call_id = $call->c_id;
                         $job->delay = 0;
-                        $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
+                        $job->delayJob = $delayJob;
+                        $jobId = Yii::$app->queue_job->delay($delayJob)->priority(80)->push($job);
 
                         try {
                             if (!$jobId) {

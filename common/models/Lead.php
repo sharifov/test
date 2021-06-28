@@ -61,6 +61,7 @@ use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\leadData\entity\LeadData;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -178,6 +179,7 @@ use yii\helpers\VarDumper;
  * @property TipsSplit[] $tipsSplits
  * @property UserConnection[] $userConnections
  * @property LeadData[] $leadData
+ * @property LeadUserConversion[] $leadUserConversion
  *
  * @property LeadFlow $lastLeadFlow
  *
@@ -2135,6 +2137,11 @@ class Lead extends ActiveRecord implements Objectable
     public function getLeadData(): ActiveQuery
     {
         return $this->hasMany(LeadData::class, ['ld_lead_id' => 'id']);
+    }
+
+    public function getLeadUserConversion(): ActiveQuery
+    {
+        return $this->hasMany(LeadUserConversion::class, ['luc_lead_id' => 'id']);
     }
 
     /**

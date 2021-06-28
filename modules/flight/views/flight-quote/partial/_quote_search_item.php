@@ -4,7 +4,9 @@ use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
 use modules\flight\src\dto\ngs\QuoteNgsDataDto;
 use modules\flight\src\helpers\FlightQuoteHelper;
+use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use yii\bootstrap\Html;
+use yii\helpers\ArrayHelper;
 
 /**
  * @var $resultKey int
@@ -80,12 +82,24 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
             </div>
           <?php endif;?>
 
+          <?php if ($prodTypes = ArrayHelper::getValue($result, 'meta.prod_types')) :?>
+            <div class="quote__seats">
+                <?php if (is_array($prodTypes)) : ?>
+                    <?php foreach ($prodTypes as $label) : ?>
+                        <span class="fa fa-tags text-success"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
+                    <?php endforeach ?>
+                <?php else : ?>
+                    <span class="fa fa-tags text-success"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
+                <?php endif ?>
+            </div>
+          <?php endif;?>
+
       </div>
       <div class="quote__heading-right text-success">
         <strong class="quote__quote-price">$<?= $result['price'] ?></strong>
       </div>
     </div>
-    <div class="quote__wrapper">
+    <div class="quote_search_wrapper">
       <div class="quote__trip">
           <?php $tripsInfo = [];
             $hasAirportChange = false;?>
@@ -105,7 +119,7 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
                 $needRecheck = false;
                 foreach ($trip['segments'] as $segment) {
                     if (!in_array(SearchService::getCabin($segment['cabin']), $cabins)) {
-                        $cabins[] = SearchService::getCabin($segment['cabin']);
+                        $cabins[] = SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']));
                     }
 
                     if (isset($segment['recheckBaggage']) && $segment['recheckBaggage'] == true) {
@@ -313,7 +327,7 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
                           <div class="segment__wrapper">
                             <div class="segment__options">
                               <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $segment['marketingAirline']?>.png" alt="<?= $segment['marketingAirline']?>" class="segment__airline-logo">
-                              <div class="segment__cabin-xs"><?= SearchService::getCabin($segment['cabin'])?></div>
+                              <div class="segment__cabin-xs"><?= SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']))?></div>
                               <div class="segment__airline"><?= (!isset($airlines[$segment['marketingAirline']])) ?: $airlines[$segment['marketingAirline']];?></div>
                               <div class="segment__flight-nr">Flight <?= $segment['marketingAirline']?> <?= $segment['flightNumber']?></div>
                             </div>
@@ -332,7 +346,7 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
 
                             <div class="segment__duration-wrapper">
                               <div class="segment__duration-time"><?= SearchService::durationInMinutes($segment['duration'])?></div>
-                              <div class="segment__cabin"><?= SearchService::getCabin($segment['cabin'])?></div>
+                              <div class="segment__cabin"><?= SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']))?></div>
                             </div>
                           </div>
                           <div class="segment__note search_fq">

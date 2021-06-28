@@ -32,7 +32,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'pbll_created_dt',
             ],
-            'pbll_created_user_id:username',
+            //'pbll_created_user_id:username',
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'pbll_created_user_id',
+                'relation' => 'pbllCreatedUser',
+                'placeholder' => 'Select User',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

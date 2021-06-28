@@ -47,7 +47,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
                                     <div class="segment__wrapper">
                                         <div class="segment__options">
                                             <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $segment->fqs_marketing_airline?>.png" alt="<?= $segment->fqs_marketing_airline?>" class="segment__airline-logo">
-                                            <div class="segment__cabin-xs"><?= SearchService::getCabin($segment->fqs_cabin_class)?></div>
+                                            <div class="segment__cabin-xs"><?= SearchService::getCabin($segment->fqs_cabin_class, $segment->fqs_cabin_class_basic)?></div>
                                             <div class="segment__airline">
                                                 <?php $airline = Airline::findIdentity($segment->fqs_marketing_airline);
                                                 if ($airline !== null) {
@@ -71,7 +71,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 
                                         <div class="segment__duration-wrapper">
                                             <div class="segment__duration-time"><?= SearchService::durationInMinutes($segment->fqs_duration)?></div>
-                                            <div class="segment__cabin"><?= SearchService::getCabin($segment->fqs_cabin_class)?></div>
+                                            <div class="segment__cabin"><?= SearchService::getCabin($segment->fqs_cabin_class, $segment->fqs_cabin_class_basic)?></div>
                                             <?php if ($segment->fqs_ticket_id) :?>
                                                 <div class="warning" title="Ticket <?=$segment->fqs_ticket_id?>"><span class="fa fa-ticket"></span> Tick <?=$segment->fqs_ticket_id?></div>
                                             <?php endif;?>

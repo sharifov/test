@@ -3,7 +3,8 @@
 use common\models\Quote;
 use kartik\select2\Select2;
 use sales\access\ListsAccess;
-use sales\model\leadData\services\LeadDataDictionary;
+use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
+use sales\model\leadDataKey\entity\LeadDataKey;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\Lead;
@@ -247,16 +248,31 @@ use frontend\extensions\DatePicker;
                             ?>
                         </div>
 
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'is_conversion')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
+                        </div>
+
                         <div class="row" style="padding-left: 10px;">
                             <div class="col-md-6">
-                                <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataDictionary::KEY_LIST, ['prompt' => '-']) ?>
+                                <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataKey::getListCache(), ['prompt' => '-']) ?>
                             </div>
                             <div class="col-md-6">
                                 <?php echo $form->field($model, 'lead_data_value') ?>
                             </div>
                         </div>
 
-
+                        <div class="row" style="padding-left: 10px;">
+                            <div class="col-md-12">
+                                <?php
+                                    echo $form->field($model, 'quote_labels')->widget(Select2::class, [
+                                        'data' => FlightQuoteLabelListService::getListKeyDescription(),
+                                        'size' => Select2::SMALL,
+                                        'options' => ['placeholder' => 'Select quote labels', 'multiple' => true],
+                                        'pluginOptions' => ['allowClear' => true],
+                                    ]);
+                                    ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class=" profile-bottom text-center">

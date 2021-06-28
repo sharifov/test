@@ -45,4 +45,17 @@ class ClientChatQuery
     {
         return ClientChat::find()->byParent($cchId)->exists();
     }
+
+    /**
+     * @param int $userId
+     * @return Scopes
+     */
+    public static function findAvailablePendingChatsByUser(int $userId): Scopes
+    {
+        return ClientChat::find()
+            ->byOwner(null)
+            ->pendingOrIdle()
+            ->joinWithUserChannels($userId)
+            ->excludePendingUserAccessByUserId($userId);
+    }
 }

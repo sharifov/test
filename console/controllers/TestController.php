@@ -28,6 +28,8 @@ use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
+use sales\model\cases\useCases\cases\api\create\Command;
+use sales\model\cases\useCases\cases\api\create\Handler;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
@@ -422,5 +424,12 @@ class TestController extends Controller
     public function actionTestJob()
     {
         \Yii::$app->queue_job->push(new BookingFlightJob(2));
+    }
+
+    public function actionTestTranzaction()
+    {
+        $command = new Command(null, null, 1, '', [], 1, '', '', '', '');
+        $handler = \Yii::createObject(Handler::class);
+        $handler->handle($command);
     }
 }

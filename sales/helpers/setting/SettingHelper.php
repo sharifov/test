@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -328,5 +329,35 @@ class SettingHelper
     public static function getMetricJobTimeExecution(): int
     {
         return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'metric_job_time_execution', 60);
+    }
+
+    public static function getFrontendWidgetList(): array
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'frontend_widget_list');
+    }
+
+    public static function getFrontendWidgetByKey(string $key): array
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'frontend_widget_list.' . $key, []);
+    }
+
+    public static function getCasePastDepartureDate(): int
+    {
+        return (int)(Yii::$app->params['settings']['case_past_departure_date'] ?? 2);
+    }
+
+    public static function getCasePriorityDays(): int
+    {
+        return (int)(Yii::$app->params['settings']['case_priority_days'] ?? 14);
+    }
+
+    public static function getCallTerminateBlackList(): ?array
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'call_terminate_black_list');
+    }
+
+    public static function getCallTerminateBlackListByKey(string $key)
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'call_terminate_black_list.' . $key);
     }
 }

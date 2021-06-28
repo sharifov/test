@@ -124,13 +124,16 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                         },
                         'format' => 'raw',
                     ],
-
                     [
                         'attribute' => 'updated',
                         'value' => function (\common\models\Quote $model) {
                             return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'service_fee_percent',
+                        'visible' => $showGdsOfferId,
                     ],
                 ],
             ]) ?>

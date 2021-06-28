@@ -5,7 +5,7 @@ namespace sales\model\leadData\entity;
 use common\models\Lead;
 use sales\entities\serializer\Serializable;
 use sales\model\leadData\serializer\LeadDataSerializer;
-use sales\model\leadData\services\LeadDataDictionary;
+use sales\model\leadDataKey\entity\LeadDataKey;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -21,6 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $ld_created_dt
  *
  * @property Lead $ldLead
+ * @property LeadDataKey $leadDataKey
  */
 class LeadData extends ActiveRecord implements Serializable
 {
@@ -37,7 +38,7 @@ class LeadData extends ActiveRecord implements Serializable
             [['ld_lead_id', 'ld_field_key'], 'unique', 'targetAttribute' => ['ld_lead_id', 'ld_field_key']],
 
             ['ld_field_key', 'string', 'max' => 50],
-            ['ld_field_key', 'in', 'range' => array_keys(LeadDataDictionary::KEY_LIST)],
+            ['ld_field_key', 'in', 'range' => array_keys(LeadDataKey::getListCache())],
 
             ['ld_field_value', 'string', 'max' => 500],
 
@@ -66,6 +67,11 @@ class LeadData extends ActiveRecord implements Serializable
     public function getLdLead(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Lead::class, ['id' => 'ld_lead_id']);
+    }
+
+    public function getLeadDataKey(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(LeadDataKey::class, ['ldk_key' => 'ld_field_key']);
     }
 
     public function attributeLabels(): array

@@ -164,25 +164,31 @@ class QuotePrice extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param Quote|null $quote
+     * @param bool $refresh
      * @return $this
      */
-    public function calculatePrice(): QuotePrice
+    public function calculatePrice(?Quote $quote = null, bool $refresh = false): QuotePrice
     {
         $this->oldAttributes = unserialize($this->oldParams, ['allowed_classes' => false]);
         $this->oldParams = '';
         $this->toFloat();
 
-        $serviceFee = (new Quote())->serviceFee;
+        if ($quote && !(bool) $quote->check_payment) {
+            $serviceFee = 0;
+        } else {
+            $serviceFee = (new Quote())->serviceFee;
+        }
 
-        if ($this->oldAttributes['selling'] !== $this->selling) {
+        if ($this->oldAttributes['selling'] !== $this->selling || $refresh) {
             $this->mark_up = $this->selling / (1 + $serviceFee) - $this->net; // Selling Price/(1+SERVICE_FEE) - Net Price
-        } elseif ($this->oldAttributes['fare'] !== $this->fare) {
+        } elseif ($this->oldAttributes['fare'] !== $this->fare || $refresh) {
             $this->net = $this->fare + $this->taxes;
             $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee); // Selling Price = (Fare + Taxes + Mark-up)*(1+SERVICE_FEE)
-        } elseif ($this->oldAttributes['taxes'] !== $this->taxes) {
+        } elseif ($this->oldAttributes['taxes'] !== $this->taxes || $refresh) {
             $this->net = $this->fare + $this->taxes;
             $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee);
-        } elseif ($this->oldAttributes['mark_up'] !== $this->mark_up) {
+        } elseif ($this->oldAttributes['mark_up'] !== $this->mark_up || $refresh) {
             $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee);
         } else {
             $this->oldParams = serialize($this->attributes);
@@ -363,7 +369,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         $this->passenger_type = $paxType;
         $this->selling = $this->net = $this->fare = $this->taxes = $this->mark_up = $this->extra_mark_up = 0;
 
-        $this->service_fee = round($this->selling * (new Quote())->serviceFee, 2);
+        $this->service_fee = $this->quote ? round($this->selling * $this->quote->getServiceFee(), 2) : 0;
         $this->selling += $this->service_fee;
 
         $this->toFloat();

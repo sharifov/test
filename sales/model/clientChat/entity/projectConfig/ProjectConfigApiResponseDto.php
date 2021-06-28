@@ -93,7 +93,7 @@ class ProjectConfigApiResponseDto
         $this->project = $projectConfig->ccpcProject ? $projectConfig->ccpcProject->name : '';
         $this->projectKey = ($projectConfig->ccpcProject && $projectConfig->ccpcProject->project_key) ? $projectConfig->ccpcProject->project_key : '';
         $this->theme = Json::decode($projectConfig->ccpc_theme_json) ?? [];
-        $this->settings = Json::decode($projectConfig->ccpc_settings_json) ?? [];
+        $this->settings = $params['settings'] ?? [];
         $this->channels = ClientChatChannel::getSettingsList($projectConfig->ccpc_project_id, $languageId);
 
         $this->autoMessage = $params['autoMessage'] ?? [];

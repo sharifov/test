@@ -19,6 +19,8 @@ return [
         'no-reply' => 'no-reply@techork.com',
     ],
 
+    'cc_username_prefix' => '',
+
     'lead' => [
         'call2DelayTime' => 2 * 60 * 60,     // 2 hours
     ],

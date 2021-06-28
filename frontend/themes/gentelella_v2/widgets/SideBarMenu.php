@@ -115,6 +115,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuCases[] = ['label' => 'Case Need Action <span id="cases-q-need-action" data-type="need-action" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/need-action'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Unidentified <span id="cases-q-unidentified" data-type="unidentified" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/unidentified'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case First Priority <span id="cases-q-first-priority" data-type="first-priority" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/first-priority'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Second Priority <span id="cases-q-second-priority" data-type="second-priority" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/second-priority'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Pass Departure <span id="cases-q-pass-departure" data-type="pass-departure" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pass-departure'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
         $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-follow-up" data-type="follow-up" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/follow-up'], 'icon' => 'recycle'];
         $menuCases[] = ['label' => 'Case Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
@@ -257,6 +261,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Chat Forms', 'url' => ['/client-chat-form-crud/index']],
                         ['label' => 'User Chat Data CRUD', 'url' => ['/user-client-chat-data-crud/index']],
                         ['label' => 'User Chat Data Manage', 'url' => ['/user-client-chat-data/index']],
+                        ['label' => 'Client Chat Component Event', 'url' => ['/client-chat-component-event/index']],
+                        ['label' => 'Client Chat Component Event CRUD', 'url' => ['/client-chat-component-event-crud/index']],
+                        ['label' => 'Client Chat Component Rule CRUD', 'url' => ['/client-chat-component-rule-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
@@ -295,8 +302,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
                 ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                 ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
-                ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'list'],
-                ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
+
+                [
+                    'label' => 'Quotes',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
+                        ['label' => 'Flight Quote Label List', 'url' => ['/flight-quote-label-list-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Label', 'url' => ['/quote-label-crud/index'], 'icon' => 'list'],
+                    ],
+                ],
 
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 [
@@ -312,6 +329,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Export Leads', 'url' => ['/leads/export']],
                         ['label' => 'Lead Request', 'url' => ['/lead-request-crud/index']],
                         ['label' => 'Lead Data', 'url' => ['/lead-data-crud/index']],
+                        ['label' => 'Lead Data Key', 'url' => ['/lead-data-key-crud/index']],
+                        ['label' => 'Lead User Conversion', 'url' => ['/lead-user-conversion-crud/index']],
                     ]
                 ]
             ]
@@ -334,6 +353,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Client Accounts', 'url' => ['/client-account-crud/index'], 'icon' => 'user'],
                 ['label' => 'Client Account Social', 'url' => ['/client-account-social-crud/index'], 'icon' => 'odnoklassniki'],
                 ['label' => 'Client Visitor', 'url' => ['/client-visitor-crud/index'], 'icon' => 'comments'],
+                ['label' => 'Visitor Subscription', 'url' => ['/visitor-subscription-crud/index'], 'icon' => 'bell'],
             ]
         ];
 
@@ -688,6 +708,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
+                ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'],
             ]
         ];
 
@@ -747,6 +768,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
                 ['label' => 'Virtual cron', 'url' => ['/virtual-cron/cron-scheduler/index'], 'icon' => 'cogs'],
                 ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
+                ['label' => 'Call Terminate Log', 'url' => ['/call-terminate-log-crud/index'], 'icon' => 'list'],
             ]
         ];
 

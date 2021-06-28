@@ -45,4 +45,12 @@ class CountryHelper
 
         return $result;
     }
+
+    public static function getCountriesCode(string $lang = 'en'): array
+    {
+        $countries = self::getCountries($lang);
+        return ArrayHelper::map($countries, static function ($item) {
+            return mb_strtoupper($item['alpha2']);
+        }, 'name');
+    }
 }

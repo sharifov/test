@@ -30,6 +30,7 @@ use sales\model\clientChat\entity\ClientChatQuery;
  * @property bool|null $canLinkCase
  * @property bool|null $canLinkLead
  * @property bool|null $canUpdateChatStatus
+ * @property bool|null $canViewChat
  */
 class ClientChatActionPermission
 {
@@ -64,6 +65,8 @@ class ClientChatActionPermission
     private ?bool $canLinkLead = null;
 
     private ?bool $canUpdateChatStatus = null;
+
+    private ?bool $canViewChat = null;
 
     public function canClose(ClientChat $chat): bool
     {
@@ -375,5 +378,15 @@ class ClientChatActionPermission
 
         $this->canUpdateChatStatus = Auth::can('client-chat/accept-pending');
         return $this->canUpdateChatStatus;
+    }
+
+    public function canViewChat(): bool
+    {
+        if ($this->canViewChat !== null) {
+            return $this->canViewChat;
+        }
+
+        $this->canViewChat = Auth::can('/client-chat/dashboard-v2');
+        return $this->canViewChat;
     }
 }

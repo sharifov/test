@@ -2,7 +2,9 @@
 
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
+use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use yii\bootstrap\Html;
+use yii\helpers\ArrayHelper;
 
 /**
  * @var $resultKey int
@@ -131,12 +133,14 @@ if (isset($result['prices']['isCk'])) {
                 </span>
                 <span class="quote__vc-name"><?= (!isset($airlines[$result['validatingCarrier']])) ?: $airlines[$result['validatingCarrier']];?><strong> [<?= $result['validatingCarrier']?>]</strong></span>
             </span>
+            <?php /* ?>
             <div class="quote__gds">
                 GDS: <strong><?= SearchService::getGDSName($result['gds'])?></strong>
             </div>
             <div class="quote__pcc">
                 PCC: <strong><?= $result['pcc']?></strong>
             </div>
+            <?php */ ?>
             <div class="quote__seats">
                 Seats left: <strong class="text-danger"><i class="fa fa-fire"></i> <?= $result['maxSeats']?></strong>
             </div>
@@ -155,6 +159,18 @@ if (isset($result['prices']['isCk'])) {
             <?php if ($technicalStopCnt) :?>
                 <div class="quote__seats" title="Technical Stops">
                     <span class="fa fa-warning danger"></span>Tech Stops (<?= $technicalStopCnt?>)
+                </div>
+            <?php endif;?>
+
+            <?php if ($prodTypes = ArrayHelper::getValue($result, 'meta.prod_types')) :?>
+                <div class="quote__seats">
+                    <?php if (is_array($prodTypes)) : ?>
+                        <?php foreach ($prodTypes as $label) : ?>
+                            <span class="fa fa-tags text-success" title="<?php echo Html::encode($label) ?>"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
+                        <?php endforeach ?>
+                    <?php elseif (is_string($prodTypes)) : ?>
+                        <span class="fa fa-tags text-success" title="<?php echo Html::encode($prodTypes) ?>"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
+                    <?php endif ?>
                 </div>
             <?php endif;?>
 
@@ -183,7 +199,7 @@ if (isset($result['prices']['isCk'])) {
                 $needRecheck = false;
                 foreach ($trip['segments'] as $segment) {
                     if (!in_array(SearchService::getCabin($segment['cabin']), $cabins)) {
-                        $cabins[] = SearchService::getCabin($segment['cabin']);
+                        $cabins[] = SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']));
                     }
 
                     if (isset($segment['recheckBaggage']) && $segment['recheckBaggage'] == true) {
@@ -389,7 +405,7 @@ if (isset($result['prices']['isCk'])) {
                                         <div class="segment__wrapper">
                                             <div class="segment__options">
                                                 <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $segment['marketingAirline']?>.png" alt="<?= $segment['marketingAirline']?>" class="segment__airline-logo">
-                                                <div class="segment__cabin-xs"><?= SearchService::getCabin($segment['cabin'])?></div>
+                                                <div class="segment__cabin-xs"><?= SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']))?></div>
                                                 <div class="segment__airline"><?= (!isset($airlines[$segment['marketingAirline']])) ?: $airlines[$segment['marketingAirline']];?></div>
                                                 <div class="segment__flight-nr">Flight <?= $segment['marketingAirline']?> <?= $segment['flightNumber']?></div>
                                             </div>
@@ -408,7 +424,7 @@ if (isset($result['prices']['isCk'])) {
 
                                             <div class="segment__duration-wrapper">
                                                 <div class="segment__duration-time"><?= SearchService::durationInMinutes($segment['duration'])?></div>
-                                                <div class="segment__cabin"><?= SearchService::getCabin($segment['cabin'])?></div>
+                                                <div class="segment__cabin"><?= SearchService::getCabin($segment['cabin'], !empty($segment['cabinIsBasic']))?></div>
                                             </div>
                                         </div>
                                         <div class="segment__note">

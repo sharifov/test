@@ -54,6 +54,7 @@ class SegmentApiForm extends Model
     public $operatingAirline;
     public $operatingAirlineCode;
     public $cabin;
+    public $cabinIsBasic;
     public $departureCity;
     public $arrivalCity;
     public $departureCountry;
@@ -96,6 +97,7 @@ class SegmentApiForm extends Model
             [['operatingAirline'], 'string'],
             [['operatingAirlineCode'], 'string', 'max' => 2],
             [['cabin'], 'string'],
+            [['cabinIsBasic'], 'boolean'],
             [['departureCity'], 'string'],
             [['arrivalCity'], 'string'],
             [['departureCountry'], 'string', 'max' => 2],

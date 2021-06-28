@@ -431,14 +431,16 @@ $(document).on('click', '._cc-list-item', function () {
     iframeWrapperEl.find('._rc-iframe').hide();
     $('._cc-list-item').removeClass('_cc_active');
     $(ref).addClass('_cc_active');
-    
+    $('#refresh-token-processing').removeClass('active');
+    $('#manual-refresh-token').removeClass('active');
+
     // let chatEl = $('#_rc-' + cch_id);
     // if (chatEl.length) {
     //     chatEl.show();
     // }
     
     window.initChatDialog({
-        token: '$agentToken',
+        token: window.chatAgentToken,
         server: '$server',
         rid: rid,
         readonly: Boolean(readonly),
@@ -1439,14 +1441,18 @@ $(document).on('click', '.multiple-checkbox', function(e) {
    
     $.each( checked, function( key, value ) {
         if (typeof data[value] === 'undefined') {
-          data[value] = value;
+            data[value] = value;
+            let uncheckedIndex = unchecked[unchecked.findIndex((elem) => elem === value)];
+            if (uncheckedIndex !== 'undefined') {
+                delete(unchecked[uncheckedIndex]);
+            }
         }
     });
     
-   $.each( unchecked, function( key, value ) {
-      if (typeof data[value] !== 'undefined') {
+    $.each( unchecked, function( key, value ) {
+        if (typeof data[value] !== 'undefined') {
             delete(data[value]);
-      }
+        }
     });
    
    sessionStorage.selectedChats = JSON.stringify(data);

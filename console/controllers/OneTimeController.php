@@ -14,14 +14,22 @@ use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\Lead;
+use common\models\LeadFlightSegment;
+use common\models\LeadFlow;
 use common\models\Sms;
 use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\app\AppHelper;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogLead\CallLogLead;
+use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\emailList\entity\EmailList;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\client\ClientsQuery;
 use sales\services\cases\CasesSaleService;
@@ -1127,5 +1135,68 @@ class OneTimeController extends Controller
             Console::updateProgress($processed, $count);
         }
         Console::endProgress(false);
+    }
+
+    public function actionLeadUserConversion(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $processed = 0;
+        $time_start = microtime(true);
+        $fromDate = date("Y-m-01");
+        $toDate = date("Y-m-d");
+
+        try {
+            $db = \Yii::$app->db;
+            $db->createCommand()->truncateTable(LeadUserConversion::tableName())->execute();
+
+            $sql = '
+                select 
+                    lead_id as luc_lead_id,
+                    lf_owner_id as luc_user_id,
+                    case
+                        when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take"
+                        when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id is null then "Call Auto Take"
+                        when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is not null and ll.employee_id != lf_owner_id then "Clone"
+                        when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is null and ll.employee_id != lf_owner_id then "Manual"
+                        when lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take Over"
+                    else null end as luc_description,
+                    min(lead_flow.created) as luc_created_dt
+                from lead_flow
+                left join leads l on l.id = lead_flow.lead_id
+                left join leads ll on ll.id = l.clone_id 
+                where 
+                    l.created >= "2021-06-01" and lf_owner_id is not null and
+                    (
+                        (lf_from_status_id = 1 and lead_flow.status = 2 and (lead_flow.employee_id = lf_owner_id or lead_flow.employee_id is null))
+                        OR
+                        (lf_from_status_id is null and lead_flow.status = 2 and ll.employee_id != lf_owner_id)
+                        OR
+                        (lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id)
+                    )
+                group by luc_lead_id, luc_user_id, luc_description';
+
+            $result = Yii::$app->db->createCommand($sql)->queryAll();
+
+            $processed = $db->createCommand()
+                ->batchInsert(
+                    LeadUserConversion::tableName(),
+                    ['luc_lead_id', 'luc_user_id', 'luc_description', 'luc_created_dt'],
+                    $result
+                )->execute();
+        } catch (\Throwable $throwable) {
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'OneTimeController:actionLeadUserConversion:Throwable'
+            );
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+        }
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 }

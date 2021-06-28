@@ -25,6 +25,7 @@ use yii\db\ActiveRecord;
  * @property string $qs_marriage_group
  * @property int $qs_mileage
  * @property string $qs_cabin
+ * @property bool $qs_cabin_basic [tinyint(1)]
  * @property string $qs_meal
  * @property string $qs_fare_code
  * @property int $qs_trip_id
@@ -89,7 +90,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
     {
         return [
             [['qs_departure_time', 'qs_arrival_time', 'qs_created_dt', 'qs_updated_dt'], 'safe'],
-            [['qs_stop', 'qs_duration', 'qs_mileage', 'qs_trip_id', 'qs_updated_user_id', 'qs_ticket_id'], 'integer'],
+            [['qs_stop', 'qs_duration', 'qs_mileage', 'qs_trip_id', 'qs_updated_user_id', 'qs_ticket_id', 'qs_cabin_basic'], 'integer'],
             [['qs_flight_number', 'qs_departure_airport_terminal', 'qs_arrival_airport_terminal'], 'string', 'max' => 5],
             [['qs_booking_class', 'qs_cabin'], 'string', 'max' => 1],
             [['qs_departure_airport_code', 'qs_arrival_airport_code', 'qs_meal'], 'string', 'max' => 3],
@@ -245,7 +246,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
     public static function getCabin($cabin = null)
     {
         $mapping = [
-            self::CABIN_ECONOMY => 'Economy',
+            self::CABIN_ECONOMY => 'Economy Basic',
             self::CABIN_PREMIUM_ECONOMY => 'Premium Economy',
             self::CABIN_BUSINESS => 'Business',
             self::CABIN_PREMIUM_BUSINESS => 'Premium Business',
@@ -323,6 +324,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
         $segment->qs_operating_airline = $segmentEntry['operatingAirline'] ?? null;
         $segment->qs_marketing_airline = $segmentEntry['marketingAirline'] ?? null;
         $segment->qs_cabin = $segmentEntry['cabin'] ?? null;
+        $segment->qs_cabin_basic = !empty($segmentEntry['cabinIsBasic']) ? 1 : 0;
         $segment->qs_ticket_id = $ticketId;
         $segment->qs_mileage = $segmentEntry['mileage'] ?? null;
         $segment->qs_marriage_group = $segmentEntry['marriageGroup'] ?? null;

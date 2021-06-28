@@ -41,6 +41,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'lr_job_id',
             [
+                'attribute' => 'lr_lead_id',
+                'value' => static function (LeadRequest $model) {
+                    return Yii::$app->formatter->asLead($model->lead, 'fa-cubes');
+                },
+                'format' => 'raw',
+            ],
+            [
                 'attribute' => 'lr_json_data',
                 'format' => 'raw',
                 'value' => static function (LeadRequest $model) {

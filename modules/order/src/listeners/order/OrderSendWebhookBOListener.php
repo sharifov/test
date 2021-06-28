@@ -9,6 +9,9 @@ class OrderSendWebhookBOListener
 {
     public function handle(OrderUpdateEvent $event): void
     {
-        \Yii::$app->queue_job->delay(10)->push(new OrderWebhookJob($event->orderId));
+        $delayJob = 10;
+        $job = new OrderWebhookJob($event->orderId);
+        $job->delayJob = $delayJob;
+        \Yii::$app->queue_job->delay($delayJob)->push($job);
     }
 }

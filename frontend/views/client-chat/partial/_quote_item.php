@@ -55,7 +55,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 }
                 ?> &nbsp;[<strong><?= $model->main_airline_code?></strong>]
             </span>
-
+            <?php /* ?>
             <div class="quote__gds" title="GDS / <?php if ($showGdsOfferId && !empty($model->gds_offer_id)) :
                 echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($model->gds_offer_id) . ' /';
                                                  endif; ?> PCC">
@@ -65,6 +65,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 <?php endif; ?>
                 / <i><?= $model->pcc?></i>
             </div>
+            <?php */ ?>
             <span title="<?= $model->created_by_seller ? 'Agent' : 'Expert'?>: <?= \yii\helpers\Html::encode($model->employee_name)?>">
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
                 <strong><?= $model->employee_name?></strong>
@@ -93,6 +94,12 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     </a>
                 <?php endif;?>
 
+            <?php if ($model->quoteLabel) : ?>
+                <?php foreach ($model->quoteLabel as $quoteLabel) : ?>
+                    <span class="fa fa-tags text-success"></span> &nbsp;<?php echo $quoteLabel->getDescription() ?>
+                <?php endforeach ?>
+            <?php endif ?>
+
         </div>
     </div>
     <div class="quote__wrapper">
@@ -116,7 +123,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     $airlineNames = [];
                     foreach ($segments as $segment) {
                         if (!in_array(SearchService::getCabin($segment->qs_cabin), $cabins)) {
-                            $cabins[] = SearchService::getCabin($segment->qs_cabin);
+                            $cabins[] = SearchService::getCabin($segment->qs_cabin, $segment->qs_cabin_basic);
                         }
                         if (isset($segment->qs_recheck_baggage) && $segment->qs_recheck_baggage) {
                             $needRecheck = true;

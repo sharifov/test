@@ -19,6 +19,9 @@ use common\models\UserGroupAssign;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\callTerminateLog\entity\CallTerminateLog;
+use sales\model\callTerminateLog\repository\CallTerminateLogRepository;
+use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesCreateService;
@@ -26,6 +29,7 @@ use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadManageService;
+use sales\services\phone\blackList\PhoneBlackListManageService;
 use yii\base\BaseObject;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
@@ -234,12 +238,9 @@ class CallQueueJob extends BaseJob implements JobInterface
                     }
                 }
 
-
                 if ($call->update() === false) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update');
                 }
-
-
 
                 if ($call->isStatusQueue() || $call->isStatusIvr()) {
                     if ($call->checkCancelCall()) {
@@ -289,6 +290,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                                     if ($timeStartCallUserAccess) {
                                         $job = new CallUserAccessJob();
                                         $job->call_id = $call->c_id;
+                                        $job->delayJob = $timeStartCallUserAccess;
                                         $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
                                     }
                                 }
@@ -318,6 +320,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                         if ($timeStartCallUserAccess) {
                             $job = new CallUserAccessJob();
                             $job->call_id = $call->c_id;
+                            $job->delayJob = $timeStartCallUserAccess;
                             $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
                         }
                     }

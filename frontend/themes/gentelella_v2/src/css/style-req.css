@@ -3920,6 +3920,14 @@ input[disabled] + .radio-tab__text {
   -ms-flex-flow: row wrap;
   flex-flow: row wrap;
 }
+.quote_search_wrapper {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-flow: row;
+    -ms-flex-flow: row;
+    flex-flow: row;
+}
 
 .quote__trip {
   -webkit-flex: 1 1 auto;

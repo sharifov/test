@@ -12,9 +12,13 @@ use common\models\QuoteSegmentBaggageCharge;
 use common\models\QuoteSegmentStop;
 use common\models\QuoteTrip;
 use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\quoteLabel\entity\QuoteLabel;
+use sales\model\quoteLabel\repository\QuoteLabelRepository;
+use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\repositories\quote\QuotePriceRepository;
 use sales\repositories\quote\QuoteRepository;
 use sales\repositories\quote\QuoteSegmentBaggageChargeRepository;
@@ -23,6 +27,7 @@ use sales\repositories\quote\QuoteSegmentRepository;
 use sales\repositories\quote\QuoteSegmentStopRepository;
 use sales\repositories\quote\QuoteTripRepository;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class AddQuoteService
@@ -115,6 +120,12 @@ class AddQuoteService
             $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
             if ($chat) {
                 ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
+            }
+
+            try {
+                QuoteLabelService::processingQuoteLabel($quoteData, $quote->id);
+            } catch (\Throwable $throwable) {
+                \Yii::warning($throwable->getMessage(), 'AddQuoteService:createQuoteFromSearch:QuoteLabel');
             }
         });
     }

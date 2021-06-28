@@ -33,8 +33,10 @@ $(document).on('click', '._cc-access-action', function (e) {
     let $btn = $(this);
 
     let url = $btn.attr('data-ajax-url');
+    let checkAccessUrl = $btn.attr('data-check-access-url');
     let ccuaId = $btn.attr('data-ccua-id');
     let accessAction = $btn.attr('data-access-action');
+    let wrapperId = $btn.closest('._cc-box-item-wrapper').attr('id');
 
     let actionBtns = $btn.closest('._cc-action').find('._cc-access-action');
 
@@ -57,6 +59,17 @@ $(document).on('click', '._cc-access-action', function (e) {
                     $(elem).removeClass('disabled').removeAttr('disabled');
                 });
                 $btn.html(btnHtml);
+            } else {
+                setTimeout(function () {
+                    if ($('#'+wrapperId).length) {
+                        checkChatAccessAction(ccuaId, accessAction, checkAccessUrl, function () {
+                            actionBtns.each(function (i, elem) {
+                                $(elem).removeClass('disabled').removeAttr('disabled');
+                            });
+                            $btn.html(btnHtml);
+                        });
+                    }
+                }, 1500);
             }
         },
         error: function (xhr) {
@@ -66,8 +79,25 @@ $(document).on('click', '._cc-access-action', function (e) {
             });
             $btn.html(btnHtml);
         },
-    })
-})
+    });
+});
+
+function checkChatAccessAction(ccuaId, accessAction, url, callable)
+{
+    $.post(url, {ccuaId: ccuaId, accessAction: accessAction}, function (response) {
+        if (response.error) {
+            createNotify('Error', response.message, 'error');
+            callable();
+        } else {
+            if (typeof refreshClientChatWidget === "function" && response.widgetData) {
+                refreshClientChatWidget(response.widgetData);
+            }
+        }
+    }, 'json')
+    .fail(function (xhr) {
+        createNotify('Error', xhr.responseText, 'error');
+    });
+}
 
 function refreshClientChatWidget(obj) {
     if ((typeof obj !== "object") && !('data' in obj)) {
@@ -138,6 +168,25 @@ function refreshClientChatWidget(obj) {
             console.error('refreshClientChatWidget:: unknown command');
             break;
     }
+}
+
+function refreshDialogToken(obj)
+{
+    if ((typeof obj !== "object") && !('data' in obj)) {
+        console.error('refreshDialogToken:: provided param is not object or property data is undefined');
+        return false;
+    }
+
+    let data = obj.data;
+
+    $('#refresh-token-processing').removeClass('active');
+    $('#manual-refresh-token').removeClass('active');
+
+    window.chatAgentToken = data.token;
+
+    window.initChatDialog({
+        token: data.token
+    });
 }
 
 function openWidget() {

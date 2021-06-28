@@ -58,6 +58,7 @@ class LeadController extends BaseController
      *
      * @apiParam {object}               lead                                        Lead data array
      * @apiParam {string{20}}           lead.source_code                            Source Code
+     * @apiParam {string{50}}           [lead.project_key]                          Project key
      * @apiParam {int{0..9}}            lead.adults                                 Adult count
      * @apiParam {int{0..9}}            [lead.children]                             Children count (by default 0)
      * @apiParam {int{0..9}}            [lead.infants]                              Infants count (by default 0)
@@ -96,6 +97,7 @@ class LeadController extends BaseController
      *           "uid": "WD6q53PO3b",
      *           "status": 14,
      *           "source_code": "JIVOCH",
+     *           "project_key": "ovago",
      *           "cabin": "E",
      *           "adults": 2,
      *           "children": 2,

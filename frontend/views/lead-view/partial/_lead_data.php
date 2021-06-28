@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Lead;
-use sales\model\leadData\services\LeadDataDictionary;
+use sales\model\leadDataKey\entity\LeadDataKey;
 use yii\web\View;
 
 /**
@@ -15,7 +15,7 @@ use yii\web\View;
         <table class="table table-bordered table-condensed">
             <tr>
                 <td style="width: 32px; background-color: #eef3f9;">
-                    <?php echo LeadDataDictionary::getKeyName($leadData->ld_field_key) ?>
+                    <?php echo LeadDataKey::getKeyName($leadData->ld_field_key) ?>
                 </td>
                 <td style="">
                     <?php echo $leadData->ld_field_value ?>

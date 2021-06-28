@@ -144,7 +144,7 @@ class AbacComponent extends Component
             }
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'AbacComponent::can');
-            VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
+            //VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
             return null;
         }
 

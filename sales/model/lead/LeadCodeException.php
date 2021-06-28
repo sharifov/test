@@ -17,4 +17,8 @@ class LeadCodeException
 
     public const API_LEAD_NOT_FOUND_DATA_ON_REQUEST = Module::LEAD . 300;
     public const API_LEAD_VALIDATE = Module::LEAD . 301;
+
+    public const LEAD_USER_CONVERSATION_NOT_PARAM = Module::LEAD . 401;
+    public const LEAD_USER_CONVERSATION_NOT_FOUND = Module::LEAD . 402;
+    public const LEAD_ACCESS_DENIED = Module::LEAD . 403;
 }

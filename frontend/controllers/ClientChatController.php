@@ -19,12 +19,12 @@ use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
-use http\Exception\RuntimeException;
 use Markdownify\Converter;
 use Markdownify\ConverterExtra;
 use modules\offer\src\entities\offer\OfferQuery;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use sales\auth\Auth;
+use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
 use sales\entities\chat\ChatFeedbackGraphSearch;
@@ -40,6 +40,7 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\helpers\clientChat\ClientChatIframeHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch;
 use sales\helpers\ErrorsToStringHelper;
@@ -47,6 +48,7 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatQuery;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
@@ -73,6 +75,7 @@ use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\model\userClientChatData\entity\UserClientChatData;
@@ -85,6 +88,7 @@ use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
 use sales\repositories\quote\QuoteRepository;
 use sales\services\client\ClientManageService;
+use sales\services\clientChat\ClientChatRequesterService;
 use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
@@ -132,12 +136,14 @@ use yii\widgets\ActiveForm;
  * @property ClientChatActionPermission $actionPermissions
  * @property ClientChatCouchNoteRepository  $clientChatCouchNoteRepository
  * @property QuoteRepository $quoteRepository
+ * @property UserClientChatDataService $userClientChatDataService
  * @property array|null $channels
  */
 class ClientChatController extends FController
 {
     private const CLIENT_CHAT_PAGE_SIZE = 10;
     private const RESERVE_CHAT_TO_PROCESS_KEY = 'reserve_chat_to_process_key_';
+    private const RESERVE_PROCESS_REFRESH_TOKEN_KEY = '_process_refresh_token_key';
     /**
      * @var ClientChatRepository
      */
@@ -193,6 +199,7 @@ class ClientChatController extends FController
     private QuoteRepository $quoteRepository;
 
     private ClientChatActionPermission $actionPermissions;
+    private UserClientChatDataService $userClientChatDataService;
     private ?array $channels;
 
     public function __construct(
@@ -216,6 +223,7 @@ class ClientChatController extends FController
         ClientChatActionPermission $actionPermissions,
         ClientChatCouchNoteRepository $clientChatCouchNoteRepository,
         QuoteRepository $quoteRepository,
+        UserClientChatDataService $userClientChatDataService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -238,6 +246,7 @@ class ClientChatController extends FController
         $this->clientChatCouchNoteRepository = $clientChatCouchNoteRepository;
         $this->quoteRepository = $quoteRepository;
         $this->channels = ClientChatChannel::getListByUserId(Auth::id());
+        $this->userClientChatDataService = $userClientChatDataService;
     }
 
     /**
@@ -276,7 +285,8 @@ class ClientChatController extends FController
                     'ajax-multiple-close',
                     'validate-multiple-assign',
                     'validate-multiple-close',
-                    'ajax-update-chat-status'
+                    'ajax-update-chat-status',
+                    'ajax-refresh-user-chat-token'
                 ],
             ],
         ];
@@ -390,9 +400,11 @@ class ClientChatController extends FController
 
         $filter->loadDefaultValuesByPermissions();
 
-        $page = (int)\Yii::$app->request->get('page');
-        if ($page < 1) {
-            $page = 1;
+        $page = $queryPage = (int)\Yii::$app->request->get('page');
+        $increaseLimit = false;
+        if (!Yii::$app->request->isAjax && $page > 0) {
+            $queryPage++;
+            $increaseLimit = true;
         }
 
         if ($filter->resetAdditionalFilter) {
@@ -402,19 +414,17 @@ class ClientChatController extends FController
         $countFreeToTake = 0;
         $dataProvider = null;
 
-        if ($this->channels) {
-            if (Yii::$app->request->get('act') === 'select-all') {
-                $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($this->channels), $filter);
-                return $this->asJson($chatIds);
-            }
+        if (Yii::$app->request->get('act') === 'select-all') {
+            $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($this->channels), $filter);
+            return $this->asJson($chatIds);
+        }
 
-            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter);
+        $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter, $queryPage, $increaseLimit);
 
-            if ($filter->group === GroupFilter::FREE_TO_TAKE) {
-                $countFreeToTake = $dataProvider->getTotalCount();
-            } else {
-                $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($this->channels), $filter);
-            }
+        if ($filter->group === GroupFilter::FREE_TO_TAKE) {
+            $countFreeToTake = $dataProvider->getTotalCount();
+        } else {
+            $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($this->channels), $filter);
         }
 
         $clientChat = null;
@@ -448,25 +458,25 @@ class ClientChatController extends FController
         $loadingChannels = \Yii::$app->request->get('loadingChannels');
         if ($dataProvider) {
             if ($loadingChannels) {
-                $dataProvider->pagination->setPage($page - 1);
+//                $dataProvider->pagination->setPage($page - 1);
 //            if (\Yii::$app->request->post('loadingChannels')) {
 //                $dataProvider->pagination->page = $filter->page;
 //            } else {
 //                $dataProvider->pagination->page = $filter->page = 0;
 //            }
-                $alreadyLoadedCount = $dataProvider->getPagination()->getPageSize() * ($page - 1) + $dataProvider->getCount();
+                $alreadyLoadedCount = $dataProvider->getPagination()->getPageSize() * ($page + 1);
                 $response = [
                     'html' => '',
-                    'page' => $page,
+                    'page' => $page + 1,
                     'isFullList' => $alreadyLoadedCount >= $dataProvider->getTotalCount(),
                     'moreCount' => $dataProvider->getTotalCount() - $alreadyLoadedCount,
                 ];
 
-                if ($dataProvider->getCount()) {
+                if ($dataProvider->allModels) {
                     $formatter = new Formatter();
                     $formatter->timeZone = Auth::user()->timezone;
                     $response['html'] = $this->renderPartial('partial/_client-chat-item', [
-                        'clientChats' => $dataProvider->getModels(),
+                        'clientChats' => $dataProvider->allModels,
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
                         'formatter' => $formatter,
                         'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
@@ -486,11 +496,12 @@ class ClientChatController extends FController
             }
         }
 
-        $isFullList = $dataProvider ? ($dataProvider->getCount() === $dataProvider->getTotalCount()) : false;
+        $countAllModels = count($dataProvider->allModels);
+        $isFullList = $dataProvider ? ($countAllModels === (int)$dataProvider->getTotalCount()) : false;
         if ($isFullList || !$dataProvider) {
             $moreCount = 0;
         } else {
-            $moreCount = $dataProvider->getTotalCount() - $dataProvider->getCount();
+            $moreCount = $dataProvider->getTotalCount() - $countAllModels;
         }
 
         return $this->render('dashboard-v2', [
@@ -598,7 +609,7 @@ class ClientChatController extends FController
 
             $connectionId = (int)Yii::$app->request->post('socketConnectionId');
 
-            if (UserConnection::find()->andWhere(['uc_id' => $connectionId])->exists() && $clientChat->isOwner(Auth::id())) {
+            if (UserConnection::find()->andWhere(['uc_id' => $connectionId])->exists()) {
                 if (!$this->clientChatService->addActiveConnection($connectionId, $cchId)) {
                     $result['message'][] = 'Active connection save error.';
                 }
@@ -787,6 +798,42 @@ class ClientChatController extends FController
             $result['notifyMessage'] = 'Internal Server Error';
             $result['notifyTitle'] = 'Error';
             $result['notifyType'] = 'error';
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionCheckAccessAction(): Response
+    {
+        if (!$this->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $chatUserAccessId = (int)Yii::$app->request->post('ccuaId');
+        $accessAction = (int)Yii::$app->request->post('accessAction');
+
+        $result = [
+            'error' => false,
+            'message' => '',
+            'widgetData' => [
+                'data' => null
+            ]
+        ];
+
+        try {
+            $userAccess = $this->clientChatUserAccessRepository->findByPrimaryKey($chatUserAccessId);
+
+            $eventDispatcher = Yii::createObject(EventDispatcher::class);
+            if ($userAccess->ccua_status_id === $accessAction) {
+                $eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($userAccess->ccuaCch, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $userAccess->ccua_user_id);
+                $result['widgetData']['data'] = $this->clientChatUserAccessRepository->getUserAccessWidgetCommandData($userAccess->ccua_cch_id, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey());
+            } else {
+                $result['error'] = true;
+                $result['message'] = 'The action was performed incorrectly, please try again';
+            }
+        } catch (NotFoundException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
         }
 
         return $this->asJson($result);
@@ -1310,6 +1357,17 @@ class ClientChatController extends FController
         } else {
             throw new \RuntimeException('Chat is already being processed. Please try again in ' . $seconds . ' seconds.');
         }
+    }
+
+    private function guardCanRefreshToken(int $userId, int $seconds = 20): void
+    {
+        $redis = Yii::$app->redis;
+        $key = $userId . self::RESERVE_PROCESS_REFRESH_TOKEN_KEY;
+        if ($redis->exists($key)) {
+            throw new \RuntimeException('Refresh token is being processed...');
+        }
+        $redis->set($key, true);
+        $redis->expire($key, $seconds);
     }
 
     public function actionPjaxUpdateChatWidget()
@@ -1877,6 +1935,10 @@ class ClientChatController extends FController
         $userClientChatData->save();
         $this->clientChatUserAccessRepository->resetChatUserAccessWidget(Auth::id());
 
+        if ($userClientChatData->isStatusReady()) {
+            $this->clientChatService->assignUserAccessToPendingChats(Auth::id());
+        }
+
         return $this->asJson([
             'error' => false,
             'message' => ''
@@ -2174,8 +2236,8 @@ class ClientChatController extends FController
             foreach ($form->chatIds as $chatId) {
                 $chat = ClientChat::findOne(['cch_id' => $chatId]);
                 if ($chat) {
-                    $chat->cch_status_id = $form->statusId;
-                    $chat->save();
+                    $chat->updateStatus(Auth::id(), $form->statusId, ClientChatStatusLog::ACTION_MULTIPLE_UPDATE_STATUS);
+                    $this->clientChatRepository->save($chat);
                 }
             }
 
@@ -2618,5 +2680,46 @@ class ClientChatController extends FController
             'formMultipleClose' => $form,
             'alertMessage' => $alertMessage
         ]);
+    }
+
+    public function actionAjaxRefreshUserChatToken()
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        if (!$this->actionPermissions->canViewChat()) {
+            throw new ForbiddenHttpException('Permission denied');
+        }
+
+        $userClientChatData = Auth::user()->userClientChatData;
+
+        if (!$userClientChatData) {
+            throw new NotFoundException('Agent has no rc profile');
+        }
+
+        try {
+            $this->guardCanRefreshToken(Auth::id());
+
+            $result = [
+                'error' => false,
+                'message' => ''
+            ];
+
+            $this->userClientChatDataService->refreshRocketChatUserToken($userClientChatData);
+
+            Notifications::publish(
+                'refreshDialogToken',
+                ['user_id' => Auth::id()],
+                ['data' => [
+                    'token' => $userClientChatData->uccd_auth_token
+                ]]
+            );
+        } catch (\RuntimeException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($result);
     }
 }

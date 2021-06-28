@@ -103,6 +103,7 @@ class CallUserAccessJob extends BaseJob implements JobInterface
                         $job = new CallUserAccessJob();
                         $job->call_id = $call->c_id;
                         $job->delay = 0;
+                        $job->delayJob = $timeStartCallUserAccess;
                         $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
                     }
                 }

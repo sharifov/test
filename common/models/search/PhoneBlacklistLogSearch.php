@@ -26,6 +26,10 @@ class PhoneBlacklistLogSearch extends PhoneBlacklistLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['pbll_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -37,7 +41,7 @@ class PhoneBlacklistLogSearch extends PhoneBlacklistLog
 
         $query->andFilterWhere([
             'pbll_id' => $this->pbll_id,
-            'pbll_created_dt' => $this->pbll_created_dt,
+            'DATE(pbll_created_dt)' => $this->pbll_created_dt,
             'pbll_created_user_id' => $this->pbll_created_user_id,
         ]);
 

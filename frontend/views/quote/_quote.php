@@ -8,6 +8,8 @@
  */
 
 use common\models\Lead;
+use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListDictionary;
+use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
 use sales\services\parsingDump\lib\ParsingDump;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -286,7 +288,7 @@ $paxCntTypes = [
                                 'tag' => false,
                             ],
                         ])->checkbox([
-                            'class' => 'alt-quote-price',
+                            'class' => 'alt-quote-price js-check-payment',
                             'template' => '{input}'
                         ])->label(false); ?>
                         <label for="<?= Html::getInputId($quote, 'check_payment') ?>"></label>
@@ -300,6 +302,26 @@ $paxCntTypes = [
                                 ],
                                 'template' => '{input}'
                             ])->dropDownList(Quote::getFareType()) ?>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="td-input"><label for="fare-type">Quote label</label></th>
+                    <td class="td-input" width="120">
+                        <div class="select-wrap-label">
+                            <?= Select2::widget([
+                                'data' => FlightQuoteLabelListService::getListKeyDescription(FlightQuoteLabelListDictionary::MANUAL_CREATE_LABELS),
+                                'name' => 'quote_label',
+                                'size' => Select2::SIZE_SMALL,
+                                'pluginOptions' => [
+                                    'width' => '100%',
+                                ],
+                                'options' => [
+                                    'placeholder' => '',
+                                    'id' => 'quote_label',
+                                    'multiple' => true,
+                                ],
+                            ]); ?>
                         </div>
                     </td>
                 </tr>
@@ -468,13 +490,18 @@ $js = <<<JS
             $(this).val(0);
         }
         
+        let quotePriceUrl = '{$quotePriceUrl}';
+        
+        if ($(this).hasClass('js-check-payment')) {
+            quotePriceUrl = quotePriceUrl + '&refresh=1'
+        }
+        
         var form = $('#$formID');
         $.ajax({
             type: 'post',
-            url: '$quotePriceUrl',
+            url: quotePriceUrl,
             data: form.serialize(),
             success: function (data) {
-            
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
                 });

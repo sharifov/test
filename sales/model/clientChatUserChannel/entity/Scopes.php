@@ -33,7 +33,9 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->join(
             'INNER JOIN',
             UserClientChatData::tableName(),
-            new Expression('ccuc_user_id = uccd_employee_id AND (uccd_rc_user_id <> \' \' OR uccd_rc_user_id IS NOT NULL)')
+            new Expression('ccuc_user_id = uccd_employee_id AND (uccd_rc_user_id <> \' \' OR uccd_rc_user_id IS NOT NULL) and uccd_chat_status_id = :chatStatusId', [
+                'chatStatusId' => UserClientChatData::CHAT_STATUS_READY
+            ])
         );
     }
 

@@ -12,6 +12,7 @@ use common\models\Lead;
 use common\models\local\LeadLogMessage;
 use common\models\Log;
 use common\models\Notifications;
+use common\models\Project;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
@@ -31,6 +32,7 @@ use sales\model\leadData\services\LeadDataService;
 use sales\model\project\entity\projectRelation\ProjectRelation;
 use sales\model\project\entity\projectRelation\ProjectRelationQuery;
 use sales\model\project\entity\projectRelation\ProjectRelationRepository;
+use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
@@ -905,6 +907,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [Quote.employee_name]       employee_name
      * @apiParam {bool}             [Quote.created_by_seller]   created_by_seller
      * @apiParam {int}              [Quote.type_id]             type_id
+     * @apiParam {object}           [Quote.prod_types[]]        Quote labels
      * @apiParam {object}           QuotePrice[]                QuotePrice data array
      * @apiParam {string}           [QuotePrice.uid]            uid
      * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
@@ -939,7 +942,8 @@ class QuoteController extends ApiBaseController
      *          "fare_type": "TOUR",
      *          "employee_name": "Barry",
      *          "created_by_seller": false,
-     *          "type_id" : 0
+     *          "type_id" : 0,
+     *          "prod_types" : ["SEP", "TOUR"]
      *      },
      *      "QuotePrice": [
      *          {
@@ -1036,6 +1040,10 @@ class QuoteController extends ApiBaseController
             $quote->employee_id = null;
             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'web_api']);
 
+            if ($checkPayment = ArrayHelper::getValue($quote, 'check_payment', true)) {
+                $quote->changeServiceFeePercent($quote->serviceFeePercent);
+            }
+
             $type = $quoteAttributes['type_id'] ?? null;
             $this->setTypeQuoteInsert($type, $quote, $lead);
 
@@ -1123,6 +1131,12 @@ class QuoteController extends ApiBaseController
                         }
                     }
                 }
+            }
+
+            try {
+                QuoteLabelService::processingQuoteLabel($quoteAttributes, $quote->id, 'prod_types');
+            } catch (\Throwable $throwable) {
+                $warnings[] = $throwable->getMessage();
             }
 
             if (!$quote->hasErrors()) {
@@ -1252,6 +1266,7 @@ class QuoteController extends ApiBaseController
     public function actionCreateData()
     {
         $form = new QuoteCreateDataForm();
+        $warnings = [];
 
         if (!Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -1282,6 +1297,8 @@ class QuoteController extends ApiBaseController
 
         try {
             $lead = $this->leadRepository->find($form->lead_id);
+
+            $this->apiProject = $this->apiProject ?: Project::findOne($lead->project_id);
 
             if (!$this->apiProject) {
                 throw new \RuntimeException(
@@ -1315,12 +1332,28 @@ class QuoteController extends ApiBaseController
             $apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         }
-        $response = new SuccessResponse(
+
+        try {
+            if ($quote = Quote::findOne(['uid' => $quoteUid])) {
+                QuoteLabelService::processingQuoteLabel($preparedQuoteData['results'][0], $quote->id);
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::warning($throwable->getMessage(), 'QuoteController:actionCreateData:QuoteLabel');
+            $warnings[] = $throwable->getMessage();
+        }
+
+        $responseObj = new SuccessResponse(
             new DataMessage(
                 new Message('quote_uid', $quoteUid)
             )
         );
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+
+        $response = ArrayHelper::toArray($responseObj);
+        if ($warnings) {
+            ArrayHelper::setValue($response, 'warnings', implode(',', $warnings));
+        }
+
+        $apiLog->endApiLog($response);
         return $response;
     }
 
@@ -1402,6 +1435,7 @@ class QuoteController extends ApiBaseController
     public function actionCreateKey()
     {
         $form = new QuoteCreateKeyForm();
+        $warnings = [];
 
         if (!Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -1432,6 +1466,8 @@ class QuoteController extends ApiBaseController
 
         try {
             $lead = $this->leadRepository->find($form->lead_id);
+
+            $this->apiProject = $this->apiProject ?: Project::findOne($lead->project_id);
 
             if (!$this->apiProject) {
                 throw new \RuntimeException(
@@ -1469,12 +1505,28 @@ class QuoteController extends ApiBaseController
             $apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         }
-        $response = new SuccessResponse(
+
+        try {
+            if ($quote = Quote::findOne(['uid' => $quoteUid])) {
+                QuoteLabelService::processingQuoteLabel($preparedQuoteData['results'][0], $quote->id);
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::warning($throwable->getMessage(), 'QuoteController:actionCreateKey:QuoteLabel');
+            $warnings[] = $throwable->getMessage();
+        }
+
+        $responseObj = new SuccessResponse(
             new DataMessage(
                 new Message('quote_uid', $quoteUid)
             )
         );
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+
+        $response = ArrayHelper::toArray($responseObj);
+        if ($warnings) {
+            ArrayHelper::setValue($response, 'warnings', implode(',', $warnings));
+        }
+
+        $apiLog->endApiLog($response);
         return $response;
     }
 

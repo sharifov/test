@@ -182,7 +182,7 @@ class LogController extends FController
         if (!Auth::can('global/clean/table')) {
             throw new ForbiddenHttpException('You don\'t have access to this page');
         }
-        Log::getDb()->createCommand()->truncateTable('log')->execute();
+        Log::getDb()->createCommand()->truncateTable(Log::tableName())->execute();
         $this->redirect(['log/index']);
     }
 

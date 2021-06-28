@@ -103,7 +103,8 @@ $('#clone-quote-by-id-form').on('beforeSubmit', function (e) {
            if (data.message) {
                text = data.message;
            }
-            $.pjax.reload({container: '#quotes_list', async: true});
+            $.pjax.reload({container: '#quotes_list', async: true, push: false, replace: false, timeout: 10000});
+            
             new PNotify({
                 title: "Clone Quote by UID",
                 type: "success",

@@ -708,9 +708,11 @@ class Sms extends \yii\db\ActiveRecord
         if (($isChangedStatus || ($insert && $this->isIn())) && $this->s_tw_message_sid && $this->isEnded()) {
             $createJob = (bool)(Yii::$app->params['settings']['sms_price_job'] ?? false);
             if ($createJob) {
+                $delayJob = 60;
                 $job = new SmsPriceJob();
                 $job->smsSids = [$this->s_tw_message_sid];
-                Yii::$app->queue_job->delay(60)->priority(10)->push($job);
+                $job->delayJob = $delayJob;
+                Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
             }
         }
     }
