@@ -1296,7 +1296,26 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::getContent');
+        }
+        return $out;
+    }
+
+    public function checkPhoneNumber(string $phone): array
+    {
+        $out = ['error' => null, 'result' => null];
+        $data = ['phone' => $phone];
+
+        $response = $this->sendRequest('phone/index', $data, 'get');
+
+        if ($response->isOk) {
+            if ($numbers = ArrayHelper::getValue($response->data, 'data.response.numbers')) {
+                $out['result'] = $numbers;
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response][numbers]';
+            }
+        } else {
+            $out['error'] = $response->content;
         }
         return $out;
     }

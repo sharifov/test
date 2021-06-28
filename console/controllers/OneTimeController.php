@@ -2,6 +2,8 @@
 
 namespace console\controllers;
 
+use borales\extensions\phoneInput\PhoneInputValidator;
+use common\components\CheckPhoneByNeutrinoJob;
 use common\components\jobs\CreateSaleFromBOJob;
 use common\models\Call;
 use common\models\CaseSale;
@@ -28,6 +30,10 @@ use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\contactPhoneList\entity\ContactPhoneList;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use sales\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
 use sales\model\emailList\entity\EmailList;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\phoneList\entity\PhoneList;
@@ -35,6 +41,8 @@ use sales\repositories\client\ClientsQuery;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
+use sales\services\phone\checkPhone\CheckPhoneNeutrinoService;
+use sales\services\phone\checkPhone\CheckPhoneService;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\console\Controller;
@@ -1196,6 +1204,181 @@ class OneTimeController extends Controller
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionPhoneList(): void
+    {
+        $offset = BaseConsole::input('Offset: ');
+        $limit = BaseConsole::input('Limit: ');
+
+        $offset = (int) $offset;
+        $limit = (int) $limit;
+
+        if ($offset < 1) {
+            echo 'Start must be > 0' . PHP_EOL;
+            return;
+        }
+        if ($limit < 1) {
+            echo 'Limit must be > 0' . PHP_EOL;
+            return;
+        }
+        $offset--;
+
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $time_start = microtime(true);
+
+        $query = (new Query())
+            ->select(['phone'])
+            ->from(ClientPhone::tableName())
+            ->where('cp_cpl_uid IS NULL')
+            ->offset($offset)
+            ->limit($limit)
+            ->groupBy(['phone']);
+
+        $count = $query->count();
+        $validator = new PhoneInputValidator();
+        $processed = 0;
+        $errors = [];
+        $notValidPhones = [];
+        $batchSize = $limit > 25 ? $limit : 25;
+
+        Console::startProgress(0, $count);
+
+        foreach ($query->each($batchSize) as $clientPhone) {
+            try {
+                if (!$validator->validate($clientPhone['phone'])) {
+                    $notValidPhones[] = $clientPhone['phone'];
+                    \Yii::info(
+                        'Phone(' . $clientPhone['phone'] . ') not valid',
+                        'info\OneTimeController:actionPhoneList:notValid'
+                    );
+                    continue;
+                }
+
+                $job = new CheckPhoneByNeutrinoJob();
+                $job->phone = $clientPhone['phone'];
+                $job->title = 'trust';
+                Yii::$app->queue_phone_check->priority(10)->push($job);
+
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'OneTimeController:actionPhoneList:Throwable');
+                $errors[] = [
+                    'phone' => $clientPhone['phone'],
+                    'message' => $throwable->getMessage()
+                ];
+            }
+        }
+
+        Console::endProgress(false);
+
+        if ($notValidPhones) {
+            echo Console::renderColoredString('%r --- NotValidPhones count(' . count($notValidPhones) . '). Please see logs. %n'), PHP_EOL;
+        }
+        if ($errors) {
+            echo Console::renderColoredString('%r --- Errors count(' . count($errors) . '). Please see logs. %n'), PHP_EOL;
+        }
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionFillTrustPhone(): void
+    {
+        $offset = BaseConsole::input('Offset: ');
+        $limit = BaseConsole::input('Limit: ');
+
+        $offset = (int) $offset;
+        $limit = (int) $limit;
+
+        if ($offset < 1) {
+            echo 'Start must be > 0' . PHP_EOL;
+            return;
+        }
+        if ($limit < 1) {
+            echo 'Limit must be > 0' . PHP_EOL;
+            return;
+        }
+        $offset--;
+
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $time_start = microtime(true);
+
+        $query = (new Query())
+            ->select([ClientPhone::tableName() . '.phone'])
+            ->from(ClientPhone::tableName())
+            ->where('cp_cpl_uid IS NULL')
+            ->innerJoin(Client::tableName(), ClientPhone::tableName() . '.client_id = ' . Client::tableName() . '.id')
+            ->innerJoin([
+                'sold_lead_clients' => Lead::find()
+                    ->select(['client_id'])
+                    ->where(['IN', 'status', [Lead::STATUS_SOLD, Lead::STATUS_BOOKED]])
+                    ->groupBy(['client_id'])
+            ], Client::tableName() . '.id = sold_lead_clients.client_id')
+            ->offset($offset)
+            ->limit($limit)
+            ->groupBy([ClientPhone::tableName() . '.phone']);
+
+        $count = $query->count();
+        $validator = new PhoneInputValidator();
+        $processed = 0;
+        $errors = [];
+        $notValidPhones = [];
+        $batchSize = $limit > 25 ? $limit : 25;
+
+        Console::startProgress(0, $count);
+
+        foreach ($query->each($batchSize) as $clientPhone) {
+            try {
+                if (!$validator->validate($clientPhone['phone'])) {
+                    $notValidPhones[] = $clientPhone['phone'];
+                    \Yii::info(
+                        'Phone(' . $clientPhone['phone'] . ') not valid',
+                        'info\OneTimeController:actionFillTrustPhone:notValid'
+                    );
+                    continue;
+                }
+
+                $job = new CheckPhoneByNeutrinoJob();
+                $job->phone = $clientPhone['phone'];
+                $job->title = 'trust';
+                Yii::$app->queue_phone_check->priority(10)->push($job);
+
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'OneTimeController:actionFillTrustPhone:Throwable');
+                $errors[] = [
+                    'phone' => $clientPhone['phone'],
+                    'message' => $throwable->getMessage()
+                ];
+            }
+        }
+
+        Console::endProgress(false);
+
+        if ($notValidPhones) {
+            echo Console::renderColoredString('%r --- NotValidPhones count(' . count($notValidPhones) . '). Please see logs. %n'), PHP_EOL;
+        }
+        if ($errors) {
+            echo Console::renderColoredString('%r --- Errors count(' . count($errors) . '). Please see logs. %n'), PHP_EOL;
+        }
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }

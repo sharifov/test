@@ -2,13 +2,19 @@
 
 namespace frontend\controllers;
 
+use borales\extensions\phoneInput\PhoneInputValidator;
+use common\components\CheckPhoneByNeutrinoJob;
+use common\components\CheckPhoneNumberJob;
 use common\models\Quote;
+use sales\forms\file\CsvUploadForm;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\lib\worldSpan\Baggage;
 use sales\services\parsingDump\lib\worldSpan\Pricing;
 use sales\services\parsingDump\lib\worldSpan\Reservation;
 use sales\services\parsingDump\lib\worldSpan\WorldSpan;
 use sales\services\parsingDump\ReservationService;
+use sales\services\phone\checkPhone\CheckPhoneNeutrinoService;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -16,9 +22,11 @@ use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\VarDumper;
+use yii\queue\Queue;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
 
 /**
  * ToolsController implements the CRUD actions for ApiLog model.
@@ -244,6 +252,90 @@ class ToolsController extends FController
         return $this->render('db-info', [
             'tables' => $tables,
             'schema' => $schema,
+        ]);
+    }
+
+    public function actionCheckPhone(): string
+    {
+        $phone = trim(Yii::$app->request->get('phone', ''));
+        $errors = [];
+        $dbResult = [];
+        $apiResult = [];
+
+        if ($phone) {
+            try {
+                $validator = new PhoneInputValidator();
+                if (!$validator->validate($phone)) {
+                    throw new \RuntimeException('Phone(' . $phone . ') not valid');
+                }
+                if (!$dbResult = ContactPhoneListService::getWidthServiceInfo($phone)) {
+                    $checkPhoneNeutrinoService = new CheckPhoneNeutrinoService($phone);
+                    $apiResult = $checkPhoneNeutrinoService->checkRequest();
+                }
+            } catch (\Throwable $throwable) {
+                $errors[] = $throwable->getMessage();
+            }
+        }
+
+        return $this->render('check-phone', [
+            'phone' => $phone,
+            'errors' => $errors,
+            'dbResult' => $dbResult,
+            'apiResult' => $apiResult,
+        ]);
+    }
+
+    public function actionImportPhone(): string
+    {
+        $form = new CsvUploadForm();
+        $errors = [];
+        $validator = new PhoneInputValidator();
+        $processed = 0;
+
+        if (Yii::$app->request->isPost) {
+            $form->file = UploadedFile::getInstance($form, 'file');
+            if ($form->validate()) {
+                try {
+                    $content = file_get_contents($form->file->tempName);
+                    $rows = explode("\n", $content);
+
+                    foreach ($rows as $key => $row) {
+                        if ($key === 0) {
+                            continue;
+                        }
+                        $rowExploded = explode(',', $row);
+                        if (count($rowExploded) !== 4) {
+                            $errors[] = 'Number of array elements must be "4". Decimeter: ",". Row: (' . $row . ')';
+                            continue;
+                        }
+                        if (strtolower(trim($rowExploded[3])) !== 'banned') {
+                            continue;
+                        }
+                        $phone = $rowExploded[1];
+                        if (!$validator->validate($phone)) {
+                            $errors[] = 'Phone(' . $phone . ') not valid';
+                            continue;
+                        }
+
+                        $job = new CheckPhoneByNeutrinoJob();
+                        $job->phone = $phone;
+                        $job->title = 'banned';
+                        Yii::$app->queue_phone_check->priority(10)->push($job);
+                        $processed++;
+                    }
+                } catch (\Throwable $e) {
+                    $errors[] = $e->getMessage();
+                }
+            } else {
+                $errors[] = VarDumper::dumpAsString($form->getErrors());
+            }
+            $form->file = null;
+        }
+
+        return $this->render('import-phone', [
+            'model' => $form,
+            'errors' => $errors,
+            'processed' => $processed,
         ]);
     }
 

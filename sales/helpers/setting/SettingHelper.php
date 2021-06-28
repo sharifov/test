@@ -351,6 +351,11 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['case_priority_days'] ?? 14);
     }
 
+    public static function isEnableCheckPhoneByNeutrino(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_check_phone_by_neutrino'] ?? false);
+    }
+
     public static function getCallTerminateBlackList(): ?array
     {
         return ArrayHelper::getValue(Yii::$app->params['settings'], 'call_terminate_black_list');

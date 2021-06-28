@@ -1,0 +1,48 @@
+<?php
+
+use common\components\grid\DateTimeColumn;
+use yii\grid\ActionColumn;
+use yii\bootstrap4\Html;
+use yii\grid\GridView;
+use yii\widgets\Pjax;
+
+/* @var $this yii\web\View */
+/* @var $searchModel sales\model\contactPhoneList\entity\ContactPhoneListSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = 'Contact Phone Lists';
+$this->params['breadcrumbs'][] = $this->title;
+?>
+<div class="contact-phone-list-index">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+
+    <p>
+        <?= Html::a('Create Contact Phone List', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
+
+    <?php Pjax::begin(['id' => 'pjax-contact-phone-list']); ?>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
+        'columns' => [
+
+            'cpl_id',
+            'cpl_phone_number',
+            'cpl_uid',
+            'cpl_title',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cpl_created_dt',
+                'format' => 'byUserDateTime'
+            ],
+
+            ['class' => ActionColumn::class],
+        ],
+    ]); ?>
+
+    <?php Pjax::end(); ?>
+
+</div>
