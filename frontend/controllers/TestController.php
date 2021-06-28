@@ -190,6 +190,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
+use sales\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
 use sales\services\lead\LeadCloneService;
@@ -202,6 +203,8 @@ use sales\services\lead\qcall\DayTimeHours;
 use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use sales\services\pdf\GeneratorPdfService;
+use sales\services\phone\blackList\PhoneBlackListManageService;
+use sales\services\phone\callFilterGuard\CallFilterGuardService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use sales\services\TransactionManager;
@@ -2156,6 +2159,46 @@ class TestController extends FController
 
     public function actionZ()
     {
+        /*$departmentPhone = DepartmentPhoneProject::findOne(11);
+        $incoming_phone_number = '+12072478670';
+
+        if ($departmentPhone) {
+            try {
+                $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+
+                $callFilterGuardService = new CallFilterGuardService(
+                    $incoming_phone_number,
+                    $departmentPhoneProjectParamsService
+                );
+
+                \Yii::info([
+                    'isEnable' => $callFilterGuardService->isEnable(),
+                    'isTrusted' => $callFilterGuardService->isTrusted(),
+                    'trustPercent' => $callFilterGuardService->getTrustPercent()
+                           ],
+                    'info\Debug:' . self::class . ':' . __FUNCTION__
+                );
+
+                if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
+                    $addMinutes = $departmentPhoneProjectParamsService->getCallFilterGuardBlockListExpiredMinutes();
+                    PhoneBlackListManageService::createOrRenewExpiration(
+                        $incoming_phone_number,
+                        $addMinutes,
+                        new \DateTime(),
+                        'Reason - CallFilterGuardTrust'
+                    );
+                }
+            } catch (\Throwable $throwable) {
+                Yii::error(
+                    AppHelper::throwableLog($throwable),
+                    'CommunicationController:voiceIncoming:CallFilterGuardService'
+                );
+            }
+        }*/
+
+        //\yii\helpers\VarDumper::dump($departmentPhone, 20, true); exit();
+        /* FOR DEBUG:: must by remove */
+
         return $this->render('z');
     }
 

@@ -56,8 +56,10 @@ use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
+use sales\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use sales\services\phone\blackList\PhoneBlackListManageService;
 use sales\services\phone\callFilterGuard\TwilioCallFilterGuard;
+use sales\services\phone\callFilterGuard\CallFilterGuardService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
@@ -367,17 +369,39 @@ class CommunicationController extends ApiBaseController
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
                 try {
-                    if ($departmentPhone->getCallFilterGuardEnable()) {
-                        $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
-                        $trustPercent = $twilioCallFilterGuard->checkPhone();
+                    $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+                    $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService);
 
-                        if ($trustPercent < $departmentPhone->getCallFilterGuardTrustPercent()) {
-                            $addMinutes = (int) $departmentPhone->getCallFilterGuardTrustBlockListExpiredMinutes();
-                            PhoneBlackListManageService::createOrRenewExpiration($client_phone_number, $addMinutes, new \DateTime(), 'Reason - CallFilterGuardTrust');
+                    if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
+                        if ($departmentPhoneProjectParamsService->getCallFilterGuardCallTerminate()) {
+                            \Yii::warning(
+                                'Phone number(' . $client_phone_number . ') is terminated. Reason - CallFilterGuardTrust',
+                                'CommunicationController:voiceIncoming:callTerminate'
+                            );
+                            throw new CallDeclinedException('Phone number(' . $client_phone_number . ') is terminated. Reason - CallFilterGuardTrust');
+                        }
+                        if ($departmentPhoneProjectParamsService->getCallFilterGuardBlockListEnabled()) {
+                            $addMinutes = $departmentPhoneProjectParamsService->getCallFilterGuardBlockListExpiredMinutes();
+                            PhoneBlackListManageService::createOrRenewExpiration(
+                                $client_phone_number,
+                                $addMinutes,
+                                new \DateTime(),
+                                'Reason - CallFilterGuardTrust'
+                            );
+                            $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
                         }
                     }
+                } catch (CallDeclinedException $e) {
+                    $vr = new VoiceResponse();
+                    $vr->reject(['reason' => 'busy']);
+                    return $this->getResponseChownData(
+                        $vr,
+                        404,
+                        404,
+                        'Phone number(' . $client_phone_number . ') is terminated. Reason - CallFilterGuardTrust'
+                    );
                 } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:CallFilterGuard:Throwable');
+                    Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:voiceIncoming:CallFilterGuardService');
                 }
 
                 $project = $departmentPhone->dppProject;

@@ -1350,7 +1350,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             if (isset($response->data['data'])) {
                 $out['result'] = $response->data['data'];
             } else {
-                $out['error'] = 'Not found in response array data key [data][result][result]';
+                $out['error'] = 'Not found in response array data key [data]';
             }
         } else {
             $out['error'] = $response->content;
