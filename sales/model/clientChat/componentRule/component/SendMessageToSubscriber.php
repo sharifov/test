@@ -24,8 +24,7 @@ class SendMessageToSubscriber implements RunnableComponentInterface
                     'msg' => trim($converter->parseString($config['message'] ?? 'You do not have a subscription to chat with an agent'))
                 ],
             ];
-            $headers = Yii::$app->chatBot->getSystemAuthDataHeader();
-
+            $headers = Yii::$app->rchat->getSystemAuthDataHeader();
             $response = Yii::$app->chatBot->sendMessage($data, $headers);
 
             if ($response['error']) {
