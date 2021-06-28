@@ -59,7 +59,8 @@ class ClientChatComponentEventManageService
     public function updateWithRules(ClientChatComponentEvent $model, ComponentEventCreateForm $form): void
     {
         $this->transactionManager->wrap(function () use ($model, $form) {
-            $model->updateAttributes($form->componentEvent->toArray());
+            $model->setAttributes($form->componentEvent->toArray());
+            $this->clientChatComponentEventRepository->save($model);
 
             ClientChatComponentRuleQuery::deleteByComponentEventId($model->ccce_id);
 
