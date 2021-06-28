@@ -15,7 +15,7 @@ class CheckPhoneService
 {
     public static function uidGenerator(string $phone): string
     {
-        return md5($phone);
+        return hash('md4', $phone);
     }
 
     public static function cleanPhone(string $phone): string
