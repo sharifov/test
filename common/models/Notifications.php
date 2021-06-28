@@ -37,10 +37,10 @@ use yii\helpers\Json;
  */
 class Notifications extends ActiveRecord
 {
-    const TYPE_SUCCESS = 1;
-    const TYPE_INFO = 2;
-    const TYPE_WARNING = 3;
-    const TYPE_DANGER = 4;
+    public const TYPE_SUCCESS = 1;
+    public const TYPE_INFO = 2;
+    public const TYPE_WARNING = 3;
+    public const TYPE_DANGER = 4;
 
     private $_eventList = [];
 
@@ -350,41 +350,58 @@ class Notifications extends ActiveRecord
      */
     public static function publish(string $command, array $params = [], array $data = []): bool
     {
-        $redis = \Yii::$app->redis;
         $channels = [];
 
         if ($command) {
             $data['cmd'] = $command;
         }
-        $jsonData = [];
 
-        if (isset($params['user_id'])) {
-            $jsonData['user_id'] = (int) $params['user_id'];
-            $channels[] = 'user-' . $jsonData['user_id'];
+        if (!empty($params['user_id'])) {
+            $channels[] = 'user-' . (int) $params['user_id'];
         }
 
-        if (isset($params['lead_id'])) {
-            $jsonData['lead_id'] = $params['lead_id'];
-            $channels[] = 'lead-' . $jsonData['lead_id'];
+        if (!empty($params['lead_id'])) {
+            $channels[] = 'lead-' . (int) $params['lead_id'];
         }
 
-        if (isset($params['case_id'])) {
-            $jsonData['case_id'] = $params['case_id'];
-            $channels[] = 'case-' . $jsonData['case_id'];
+        if (!empty($params['case_id'])) {
+            $channels[] = 'case-' . (int) $params['case_id'];
         }
 
         //$jsonData['multiple'] = $multiple;
         $jsonData = $data;
 
+//        if (!empty($params['user_id']) && $params['user_id'] == 843) {
+//            $errorData = [];
+//            $errorData['command'] = $command;
+//            $errorData['params'] = $params;
+//            $errorData['data'] = $data;
+//            $errorData['channels'] = $channels;
+//            //$errorData['jsonData'] = $jsonData;
+//            Yii::info($errorData, 'info\Notifications:publish');
+//        }
+
         try {
+            $redis = \Yii::$app->redis;
             if ($channels) {
+                $jsonDataEncode = Json::encode($jsonData, JSON_INVALID_UTF8_SUBSTITUTE); // , JSON_UNESCAPED_UNICODE
                 foreach ($channels as $channel) {
-                    $redis->publish($channel, Json::encode($jsonData));
+                    $redis->publish($channel, $jsonDataEncode);
                 }
                 return true;
             }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable), 'Notifications:publish:redis');
+            $errorData = AppHelper::throwableLog($throwable);
+            $errorData['command'] = $command;
+            $errorData['channels'] = $channels;
+            $errorData['params'] = $params;
+            $errorData['data'] = $data;
+//            $errorData['jsonData'] = $jsonData;
+            \Yii::error(AppHelper::throwableLog($throwable), 'Notifications:publish:Throwable');
+            \Yii::error($errorData, 'Notifications:publish:Throwable2');
+//            if (!empty($params['user_id']) && $params['user_id'] == 843) {
+//                Yii::info($errorData, 'info\Notifications:publish:843');
+//            }
         }
         return false;
     }
