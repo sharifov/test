@@ -4,6 +4,7 @@ namespace sales\services\clientChatMessage;
 
 use common\models\Notifications;
 use sales\helpers\setting\SettingHelper;
+use sales\model\clientChat\ClientChatPlatform;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLastMessage\ClientChatLastMessageRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
@@ -252,7 +253,7 @@ class ClientChatMessageService
                 'totalUnreadMessages' => $this->getCountOfTotalUnreadMessagesByUser($clientChat->cch_owner_user_id) ?: '',
                 'cchUnreadMessages' => $countUnreadByChatMessages,
                 'soundNotification' => $this->soundNotification($clientChat->cch_owner_user_id),
-                'shortMessage' => StringHelper::truncate($message->getMessage(), 40, '...'),
+                'shortMessage' => ClientChatPlatform::getIconWithTitle($message->ccm_platform_id) . ' ' . StringHelper::truncate($message->getMessage(), 40, '...'),
                 'messageOwner' => $message->isMessageFromClient() ? 'client' : 'agent',
                 'moment' =>  round((time() - strtotime($message->ccm_sent_dt))),
             ]

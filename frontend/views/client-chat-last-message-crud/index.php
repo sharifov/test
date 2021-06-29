@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\clientChat\ClientChatPlatform;
 use yii\grid\ActionColumn;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use yii\helpers\Html;
@@ -43,6 +44,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'truncate'
                 ],
+            ],
+            [
+                'attribute' => 'cclm_platform_id',
+                'value' => static function (ClientChatLastMessage $model) {
+                    return ClientChatPlatform::getNameWithIcon($model->cclm_platform_id);
+                },
+                'filter' => ClientChatPlatform::getListName(),
+                'format' => 'raw'
             ],
             [
                 'class' => DateTimeColumn::class,

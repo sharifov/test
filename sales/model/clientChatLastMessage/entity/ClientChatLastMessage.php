@@ -2,11 +2,13 @@
 
 namespace sales\model\clientChatLastMessage\entity;
 
+use sales\model\clientChat\ClientChatPlatform;
 use sales\model\clientChat\entity\ClientChat;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "client_chat_last_message".
@@ -18,6 +20,7 @@ use yii\db\ActiveRecord;
  * @property string|null $cclm_dt
  *
  * @property ClientChat $clientChat
+ * @property int $cclm_platform_id [tinyint]
  */
 class ClientChatLastMessage extends ActiveRecord
 {
@@ -46,6 +49,10 @@ class ClientChatLastMessage extends ActiveRecord
             [['cclm_cch_id'], 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['cclm_cch_id' => 'cch_id']],
 
             [['cclm_type_id'], 'in', 'range' => array_keys(self::TYPE_LIST)],
+
+            ['cclm_platform_id', 'integer'],
+            ['cclm_platform_id', 'default', 'value' => ClientChatPlatform::getDefaultPlatform()],
+            ['cclm_platform_id', 'validatePlatform']
         ];
     }
 
@@ -92,13 +99,23 @@ class ClientChatLastMessage extends ActiveRecord
         return self::TYPE_LIST[$typeId] ?? '-';
     }
 
-    public static function create(int $cchId, int $typeId, string $message, ?string $dt): self
+    public static function create(int $cchId, int $typeId, string $message, ?string $dt, int $platform): self
     {
         $model = new static();
         $model->cclm_cch_id = $cchId;
         $model->cclm_type_id = $typeId;
         $model->cclm_message = $message;
         $model->cclm_dt = $dt;
+        $model->cclm_platform_id = $platform;
         return $model;
+    }
+
+    public function validatePlatform(): bool
+    {
+        if (!array_key_exists($this->cclm_platform_id, ClientChatPlatform::getListName())) {
+            Yii::warning('Unknown chat platform on message validation: ' . VarDumper::dumpAsString($this), 'ClientChatLastMessage::validatePlatform');
+            $this->cclm_platform_id = ClientChatPlatform::getDefaultPlatform();
+        }
+        return true;
     }
 }

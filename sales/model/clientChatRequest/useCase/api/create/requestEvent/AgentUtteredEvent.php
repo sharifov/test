@@ -66,7 +66,7 @@ class AgentUtteredEvent implements ChatRequestEvent
     public function process(ClientChatRequest $request): void
     {
         $this->transactionManager->wrap(function () use ($request) {
-            $message = ClientChatMessage::createByApi($this->form, $request->ccr_event);
+            $message = ClientChatMessage::createByApi($this->form, $request->ccr_event, $request->getPlatformId());
             $this->clientChatMessageRepository->save($message, 0);
 
             $clientChat = $this->clientChatRepository->getLastByRid($this->form->data['rid'] ?? '');

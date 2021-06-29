@@ -1,5 +1,7 @@
 <?php
 
+use sales\model\clientChat\ClientChatPlatform;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
 use yii\widgets\DetailView;
@@ -38,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccm_sent_dt',
             [
                 'attribute' => 'files',
-                'value' => function (\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
+                'value' => function (ClientChatMessage $model) {
                     $view = "";
                     if (array_key_exists('attachments', $model->ccm_body)) {
                         foreach ($model->ccm_body['attachments'] as $attachment) {
@@ -58,20 +60,27 @@ $this->params['breadcrumbs'][] = $this->title;
 //            'ccm_body',
             [
                 'attribute' => 'ccm_body',
-                'value' => function (\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
+                'value' => function (ClientChatMessage $model) {
                     return json_encode($model->ccm_body);
                 },
                 'format' => 'raw',
             ],
             [
                 'attribute' => 'ccm_has_attachment',
-                'value' => function (\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
+                'value' => function (ClientChatMessage $model) {
                     if ($model->ccm_has_attachment > 0) {
                         return "Yes";
                     }
                     return "No";
                 },
                 'format' => 'raw',
+            ],
+            [
+                'attribute' => 'ccm_platform_id',
+                'value' => static function (ClientChatMessage $model) {
+                    return ClientChatPlatform::getNameWithIcon($model->ccm_platform_id);
+                },
+                'format' => 'raw'
             ],
             'byType:ntext:Type'
         ],

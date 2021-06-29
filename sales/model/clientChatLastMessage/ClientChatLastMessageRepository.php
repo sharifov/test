@@ -30,6 +30,7 @@ class ClientChatLastMessageRepository
             $clientChatLastMessage->cclm_message = $clientChatMessage->getMessage();
             $clientChatLastMessage->cclm_cch_id = $clientChatMessage->ccm_cch_id;
             $clientChatLastMessage->cclm_type_id = self::getTypeByMessage($clientChatMessage);
+            $clientChatLastMessage->cclm_platform_id = $clientChatMessage->ccm_platform_id;
 
             try {
                 $this->save($clientChatLastMessage);
@@ -55,7 +56,8 @@ class ClientChatLastMessageRepository
             $chatId,
             $clientChatLastMessage->cclm_type_id,
             $clientChatLastMessage->cclm_message,
-            $clientChatLastMessage->cclm_dt
+            $clientChatLastMessage->cclm_dt,
+            $clientChatLastMessage->cclm_platform_id
         );
     }
 
