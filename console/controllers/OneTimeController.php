@@ -1318,7 +1318,7 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        Yii::$app->db->createCommand()->truncateTable(ContactPhoneData::tableName())->execute();
+        //Yii::$app->db->createCommand()->truncateTable(ContactPhoneData::tableName())->execute();
 
         $time_start = microtime(true);
 
