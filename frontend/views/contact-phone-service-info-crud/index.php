@@ -15,7 +15,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfoSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Contact Phone Service Infos';
+$this->title = 'Contact Phone Service Info';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="contact-phone-service-info-index">
