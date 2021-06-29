@@ -1318,7 +1318,7 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        //Yii::$app->db->createCommand()->truncateTable(ContactPhoneData::tableName())->execute();
+        Yii::$app->db->createCommand()->truncateTable(ContactPhoneData::tableName())->execute();
 
         $time_start = microtime(true);
 
@@ -1340,7 +1340,8 @@ class OneTimeController extends Controller
                     ->groupBy(['cpl_phone_number'])
             ], ClientPhone::tableName() . '.phone = exist_phone_data.cpl_phone_number')
             ->leftJoin(PhoneBlacklist::tableName(), ClientPhone::tableName() . '.phone = pbl_phone')
-            ->where('exist_phone_data.cpl_phone_number IS NULL')
+            ->where(['!=', ClientPhone::tableName() . '.type', ClientPhone::PHONE_VALID])
+            ->andWhere('exist_phone_data.cpl_phone_number IS NULL')
             ->andWhere('pbl_phone IS NULL')
             ->offset($offset)
             ->limit($limit)
