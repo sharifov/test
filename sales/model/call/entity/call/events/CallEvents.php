@@ -46,6 +46,12 @@ class CallEvents extends Component
 
             if ($call->c_parent_id && $call->isIn() && $call->isStatusCompleted()) {
                 $userStatus->us_gl_call_count = (int)$userStatus->us_gl_call_count + 1;
+                \Yii::info([
+                    'callSid' => $call->c_call_sid,
+                    'callId' => $call->c_id,
+                    'status' => $call->getStatusName(),
+                    'callCountGeneralLine' => $userStatus->us_gl_call_count
+                ], 'info\CallEvents::updateUserStatus');
             }
 
             $userStatus->us_is_on_call = Call::find()
