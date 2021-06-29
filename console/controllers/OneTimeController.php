@@ -33,6 +33,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\contactPhoneData\entity\ContactPhoneData;
 use sales\model\contactPhoneData\repository\ContactPhoneDataRepository;
+use sales\model\contactPhoneData\service\ContactPhoneDataService;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
@@ -1360,12 +1361,11 @@ class OneTimeController extends Controller
                 }
 
                 $contactPhoneList = ContactPhoneListService::getOrCreate($clientPhone['phone'], 'Is trusted');
-                $contactPhoneData = ContactPhoneData::create(
+                ContactPhoneDataService::getOrCreate(
                     $contactPhoneList->cpl_id,
                     ContactPhoneDataDictionary::KEY_IS_TRUSTED,
                     '1'
                 );
-                (new ContactPhoneDataRepository())->save($contactPhoneData);
 
                 $processed++;
                 Console::updateProgress($processed, $count);

@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -30,7 +31,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
 
             'cpd_cpl_id',
-            'cpd_key',
+            [
+                'attribute' => 'cpd_key',
+                'filter' => ContactPhoneDataDictionary::KEY_LIST
+            ],
             'cpd_value',
             [
                 'class' => DateTimeColumn::class,
