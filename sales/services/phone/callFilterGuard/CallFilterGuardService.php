@@ -94,11 +94,6 @@ class CallFilterGuardService
     public function isTrusted(): bool
     {
         if ($this->checkByContactPhoneData()) {
-            \Yii::info(
-                'checkByContactPhoneData - isTrust',
-                'info\Debug:' . self::class . ':' . __FUNCTION__
-            );
-            /* TODO: FOR DEBUG:: must by remove */
             return true;
         }
         return ($this->getTrustPercent() >= $this->departmentPhoneProjectParamsService->getCallFilterGuardPercent());
