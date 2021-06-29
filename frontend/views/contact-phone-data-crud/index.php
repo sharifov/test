@@ -41,6 +41,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'phone',
                 'label' => 'Phone',
                 'value' => static function (ContactPhoneData $model) {
+                    if (!$model->cpdCpl) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
                     return $model->cpdCpl->cpl_phone_number;
                 }
             ],

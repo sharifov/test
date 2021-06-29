@@ -70,6 +70,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'phone',
                 'label' => 'Phone',
                 'value' => static function (ContactPhoneServiceInfo $model) {
+                    if (!$model->cpsiCpl) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
                     return $model->cpsiCpl->cpl_phone_number;
                 }
             ],
