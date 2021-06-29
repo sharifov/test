@@ -36,9 +36,9 @@ class DepartmentPhoneProjectParamsService
         return (bool) ArrayHelper::getValue($this->getCallFilterGuard(), 'enable', false);
     }
 
-    public function getCallFilterGuardPercent(): bool
+    public function getCallFilterGuardPercent(): int
     {
-        return (bool) ArrayHelper::getValue($this->getCallFilterGuard(), 'trustPercent', false);
+        return (int) ArrayHelper::getValue($this->getCallFilterGuard(), 'trustPercent', 100);
     }
 
     public function getCallFilterGuardBlockListExpiredMinutes(): int
