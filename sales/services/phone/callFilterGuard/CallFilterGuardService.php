@@ -5,11 +5,15 @@ namespace sales\services\phone\callFilterGuard;
 use common\models\Call;
 use DateTime;
 use sales\helpers\app\AppHelper;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use sales\model\contactPhoneList\entity\ContactPhoneList;
 use sales\services\call\CallDeclinedException;
 use sales\services\call\CallService;
 use sales\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use sales\services\phone\blackList\PhoneBlackListManageService;
 use sales\services\phone\callFilterGuard\CheckServiceInterface;
+use sales\services\phone\checkPhone\CheckPhoneService;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 
@@ -88,6 +92,9 @@ class CallFilterGuardService
 
     public function isTrusted(): bool
     {
+        if ($this->checkByContactPhoneData()) {
+            return true;
+        }
         return ($this->getTrustPercent() >= $this->departmentPhoneProjectParamsService->getCallFilterGuardPercent());
     }
 
@@ -136,6 +143,16 @@ class CallFilterGuardService
             );
             $this->callService->guardDeclined($this->getPhone(), $postCall, Call::CALL_TYPE_IN);
         }
+    }
+
+    public function checkByContactPhoneData(): bool
+    {
+        return ContactPhoneList::find()
+            ->innerJoin(ContactPhoneData::tableName(), 'cpl_id = cpd_cpl_id')
+            ->where(['cpl_uid' => CheckPhoneService::uidGenerator($this->phone)])
+            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_IS_TRUSTED])
+            ->andWhere(['cpd_value' => '1'])
+            ->exists();
     }
 
     public static function getResponseChownData(VoiceResponse $vr, int $status = 200, int $code = 0, string $message = ''): array

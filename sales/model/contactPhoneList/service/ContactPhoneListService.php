@@ -13,12 +13,16 @@ class ContactPhoneListService
 {
     public static function getOrCreate(string $phone, ?string $title = null): ContactPhoneList
     {
-        $uid = CheckPhoneService::uidGenerator($phone);
-        if (!$contactPhoneList = ContactPhoneList::findOne(['cpl_uid' => $uid])) {
+        if (!$contactPhoneList = self::getByPhone($phone)) {
             $contactPhoneList = ContactPhoneList::create($phone, $title);
             (new ContactPhoneListRepository())->save($contactPhoneList);
         }
         return $contactPhoneList;
+    }
+
+    public static function getByPhone(string $phone): ?ContactPhoneList
+    {
+        return ContactPhoneList::findOne(['cpl_uid' => CheckPhoneService::uidGenerator($phone)]);
     }
 
     public static function getWidthServiceInfo(string $phone): array

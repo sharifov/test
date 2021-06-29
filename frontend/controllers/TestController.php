@@ -2162,7 +2162,7 @@ class TestController extends FController
     public function actionZ()
     {
         $departmentPhone = DepartmentPhoneProject::findOne(11);
-        $client_phone_number = '+14145942152'; // '+19374280853'
+        $client_phone_number = '+19374280853'; // '+19374280853'  +14145942152
 
         try {
             $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);

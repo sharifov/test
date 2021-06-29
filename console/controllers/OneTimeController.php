@@ -20,6 +20,7 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\Sms;
 use common\models\UserProjectParams;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\app\AppHelper;
@@ -30,6 +31,8 @@ use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneData\repository\ContactPhoneDataRepository;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
@@ -1318,7 +1321,6 @@ class OneTimeController extends Controller
         $query = (new Query())
             ->select([ClientPhone::tableName() . '.phone'])
             ->from(ClientPhone::tableName())
-            ->where('cp_cpl_uid IS NULL')
             ->innerJoin(Client::tableName(), ClientPhone::tableName() . '.client_id = ' . Client::tableName() . '.id')
             ->innerJoin([
                 'sold_lead_clients' => Lead::find()
@@ -1326,6 +1328,13 @@ class OneTimeController extends Controller
                     ->where(['IN', 'status', [Lead::STATUS_SOLD, Lead::STATUS_BOOKED]])
                     ->groupBy(['client_id'])
             ], Client::tableName() . '.id = sold_lead_clients.client_id')
+            ->leftJoin([
+                'exist_phone_data' => ContactPhoneList::find()
+                    ->select(['cpl_phone_number'])
+                    ->innerJoin(ContactPhoneData::tableName(), 'cpl_id = cpd_cpl_id')
+                    ->where(['cpd_key' => ContactPhoneDataDictionary::KEY_IS_TRUSTED])
+                    ->groupBy(['cpl_phone_number'])
+            ], ClientPhone::tableName() . '.phone = exist_phone_data.cpl_phone_number')
             ->offset($offset)
             ->limit($limit)
             ->groupBy([ClientPhone::tableName() . '.phone']);
@@ -1350,15 +1359,20 @@ class OneTimeController extends Controller
                     continue;
                 }
 
-                $job = new CheckPhoneByNeutrinoJob();
-                $job->phone = $clientPhone['phone'];
-                $job->title = 'trust';
-                Yii::$app->queue_phone_check->priority(10)->push($job);
+                $contactPhoneList = ContactPhoneListService::getOrCreate($clientPhone['phone'], 'Is trusted');
+                $contactPhoneData = ContactPhoneData::create(
+                    $contactPhoneList->cpl_id,
+                    ContactPhoneDataDictionary::KEY_IS_TRUSTED,
+                    '1'
+                );
+                (new ContactPhoneDataRepository())->save($contactPhoneData);
 
                 $processed++;
                 Console::updateProgress($processed, $count);
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'OneTimeController:actionFillTrustPhone:Throwable');
+                $throwableData = AppHelper::throwableLog($throwable);
+                $throwableData['phone'] = $clientPhone['phone'];
+                Yii::error($throwableData, 'OneTimeController:actionFillTrustPhone:Throwable');
                 $errors[] = [
                     'phone' => $clientPhone['phone'],
                     'message' => $throwable->getMessage()

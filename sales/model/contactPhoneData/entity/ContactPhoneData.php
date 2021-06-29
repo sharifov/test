@@ -2,6 +2,7 @@
 
 namespace sales\model\contactPhoneData\entity;
 
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -32,6 +33,7 @@ class ContactPhoneData extends \yii\db\ActiveRecord
 
             ['cpd_key', 'required'],
             ['cpd_key', 'string', 'max' => 30],
+            [['cpd_key'], 'in', 'range' => ContactPhoneDataDictionary::KEY_LIST],
 
             ['cpd_value', 'required'],
             ['cpd_value', 'string', 'max' => 100],
@@ -79,5 +81,20 @@ class ContactPhoneData extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'contact_phone_data';
+    }
+
+    /**
+     * @param int $cplId
+     * @param $key
+     * @param $value
+     * @return ContactPhoneData
+     */
+    public static function create(int $cplId, $key, $value): ContactPhoneData
+    {
+        $model = new self();
+        $model->cpd_cpl_id = $cplId;
+        $model->cpd_key = $key;
+        $model->cpd_value = $value;
+        return $model;
     }
 }
