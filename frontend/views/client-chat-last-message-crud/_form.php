@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\clientChat\ClientChatPlatform;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -21,7 +22,11 @@ use sales\widgets\DateTimePicker;
 
         <?= $form->field($model, 'cclm_message')->textarea(['rows' => 6]) ?>
 
-        <div class="form-group">
+        <?= $form->field($model, 'cclm_platform_id')->dropDownList(ClientChatPlatform::getListName(), [
+            'prompt' => '---'
+        ]) ?>
+
+      <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
 

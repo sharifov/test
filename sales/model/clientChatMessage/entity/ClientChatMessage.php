@@ -4,11 +4,13 @@ namespace sales\model\clientChatMessage\entity;
 
 use DateTime;
 use sales\entities\EventTrait;
+use sales\model\clientChat\ClientChatPlatform;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "client_chat_message".
@@ -24,6 +26,7 @@ use yii\helpers\ArrayHelper;
  * @property string $message
  * @property string $username
  * @property int|null $ccm_event
+ * @property int $ccm_platform_id
  */
 class ClientChatMessage extends \yii\db\ActiveRecord
 {
@@ -96,6 +99,9 @@ class ClientChatMessage extends \yii\db\ActiveRecord
             [['ccm_sent_dt', 'ccm_body'], 'safe'],
             [['ccm_rid'], 'string', 'max' => 150],
             ['ccm_event', 'in', 'range' => array_keys(self::EVENT_LIST)],
+            ['ccm_platform_id', 'integer'],
+            ['ccm_platform_id', 'default', 'value' => ClientChatPlatform::getDefaultPlatform()],
+            ['ccm_platform_id', 'validatePlatform']
         ];
     }
 
@@ -140,7 +146,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         return [$partitionStartDate, $partitionEndDate];
     }
 
-    public static function createByApi(ClientChatRequestApiForm $form, int $event): ClientChatMessage
+    public static function createByApi(ClientChatRequestApiForm $form, int $event, int $platformId): ClientChatMessage
     {
         $message = new self();
         $message->ccm_rid = $form->data['rid'] ?? '';
@@ -149,6 +155,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         $message->ccm_sent_dt = $date->format('Y-m-d H:i:s');
         $message->ccm_body = $form->data;
         $message->ccm_event = $event;
+        $message->ccm_platform_id = $platformId;
 
         if (array_key_exists('file', $form->data)) {
             $message->ccm_has_attachment = 1;
@@ -248,5 +255,14 @@ class ClientChatMessage extends \yii\db\ActiveRecord
     public static function removeAllMessages(int $cchId)
     {
         self::deleteAll(['ccm_cch_id' => $cchId]);
+    }
+
+    public function validatePlatform(): bool
+    {
+        if (!array_key_exists($this->ccm_platform_id, ClientChatPlatform::getListName())) {
+            Yii::warning('Unknown chat platform on message validation: ' . VarDumper::dumpAsString($this), 'ClientChatMessage::validatePlatform');
+            $this->ccm_platform_id = ClientChatPlatform::getDefaultPlatform();
+        }
+        return true;
     }
 }

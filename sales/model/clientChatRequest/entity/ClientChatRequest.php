@@ -4,6 +4,7 @@ namespace sales\model\clientChatRequest\entity;
 
 use DateTime;
 use sales\forms\clientChat\RealTimeStartChatForm;
+use sales\model\clientChat\ClientChatPlatform;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\AgentUtteredEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\ChatRequestEventCreator;
@@ -275,6 +276,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
     public function getSourceCid(): string
     {
         return $this->decodedData['sources']['cid'] ?? '';
+    }
+
+    public function getPlatformId(): int
+    {
+        return ClientChatPlatform::getPlatformIdByName($this->decodedData['visitor']['platform'] ?? '');
     }
 
     /**

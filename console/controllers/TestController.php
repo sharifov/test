@@ -33,6 +33,7 @@ use sales\model\cases\useCases\cases\api\create\Handler;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
+use sales\model\clientChat\ClientChatPlatform;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
@@ -145,7 +146,7 @@ class TestController extends Controller
 
         $clientChatRepository = \Yii::createObject(ClientChatRepository::class);
         $clientChat = $clientChatRepository->findByRid($form->data['rid'] ?? '');
-        $message = ClientChatMessage::createByApi($form, $clientChat, new ClientChatRequest());
+        $message = ClientChatMessage::createByApi($form, (new ClientChatRequest())->ccm_event ?? 0, ClientChatPlatform::getDefaultPlatform());
 
         $tr = \Yii::$app->get('db_postgres')->beginTransaction();
         try {

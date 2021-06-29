@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\clientChat\ClientChatPlatform;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -19,7 +20,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ccm_user_id')->textInput() ?>
 
-    <?php //= $form->field($model, 'ccm_body')->textInput() ?>
+    <?= $form->field($model, 'ccm_platform_id')->dropDownList(ClientChatPlatform::getListName(), [
+        'prompt' => '---'
+    ]) ?>
+
+    <?php //= $form->field($model, 'ccm_body')->textInput()?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

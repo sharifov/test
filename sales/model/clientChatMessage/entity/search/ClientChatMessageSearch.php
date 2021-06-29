@@ -17,7 +17,7 @@ class ClientChatMessageSearch extends ClientChatMessage
     public function rules()
     {
         return [
-            [['ccm_id', 'ccm_client_id', 'ccm_user_id', 'ccm_cch_id'], 'integer'],
+            [['ccm_id', 'ccm_client_id', 'ccm_user_id', 'ccm_cch_id', 'ccm_platform_id'], 'integer'],
             [['ccm_rid', 'ccm_body'], 'safe'],
             [['ccm_sent_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -68,6 +68,7 @@ class ClientChatMessageSearch extends ClientChatMessage
             'ccm_user_id' => $this->ccm_user_id,
             'DATE(ccm_sent_dt)' => $this->ccm_sent_dt,
             'ccm_cch_id' => $this->ccm_cch_id,
+            'ccm_platform_id' => $this->ccm_platform_id,
         ]);
 
         $query->andFilterWhere(['ilike', 'ccm_rid', $this->ccm_rid])
