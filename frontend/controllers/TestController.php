@@ -138,6 +138,8 @@ use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\model\project\entity\projectLocale\ProjectLocaleScopes;
 use sales\repositories\client\ClientsQuery;
 use sales\repositories\NotFoundException;
+use sales\services\call\CallDeclinedException;
+use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
@@ -2159,45 +2161,24 @@ class TestController extends FController
 
     public function actionZ()
     {
-        /*$departmentPhone = DepartmentPhoneProject::findOne(11);
-        $incoming_phone_number = '+12072478670';
+        $departmentPhone = DepartmentPhoneProject::findOne(11);
+        $client_phone_number = '+14145942152';
 
-        if ($departmentPhone) {
-            try {
-                $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-
-                $callFilterGuardService = new CallFilterGuardService(
-                    $incoming_phone_number,
-                    $departmentPhoneProjectParamsService
-                );
-
-                \Yii::info([
-                    'isEnable' => $callFilterGuardService->isEnable(),
-                    'isTrusted' => $callFilterGuardService->isTrusted(),
-                    'trustPercent' => $callFilterGuardService->getTrustPercent()
-                           ],
-                    'info\Debug:' . self::class . ':' . __FUNCTION__
-                );
-
-                if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
-                    $addMinutes = $departmentPhoneProjectParamsService->getCallFilterGuardBlockListExpiredMinutes();
-                    PhoneBlackListManageService::createOrRenewExpiration(
-                        $incoming_phone_number,
-                        $addMinutes,
-                        new \DateTime(),
-                        'Reason - CallFilterGuardTrust'
-                    );
-                }
-            } catch (\Throwable $throwable) {
-                Yii::error(
-                    AppHelper::throwableLog($throwable),
-                    'CommunicationController:voiceIncoming:CallFilterGuardService'
-                );
+        try {
+            $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+            $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, Yii::createObject(CallService::class));
+            if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
+                $callFilterGuardService->runRepression([]);
             }
-        }*/
-
-        //\yii\helpers\VarDumper::dump($departmentPhone, 20, true); exit();
-        /* FOR DEBUG:: must by remove */
+        } catch (CallDeclinedException $e) {
+            \Yii::warning($e->getMessage(), 'CommunicationController:voiceIncoming:callTerminate');
+            $vr = new VoiceResponse();
+            $vr->reject(['reason' => 'busy']);
+            $message = 'Phone number(' . $client_phone_number . ') is terminated. Reason - CallFilterGuardTrust';
+            CallFilterGuardService::getResponseChownData($vr, 404, 404, $e->getMessage());
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:voiceIncoming:CallFilterGuardService');
+        }
 
         return $this->render('z');
     }

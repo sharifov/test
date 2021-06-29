@@ -9,6 +9,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use sales\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
+use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\services\phone\checkPhone\CheckPhoneNeutrinoService;
 use sales\services\phone\checkPhone\CheckPhoneService;
 
@@ -40,20 +41,11 @@ class CheckPhoneByNeutrinoJob implements \yii\queue\JobInterface
                     $phone = CheckPhoneService::cleanPhone($phoneNumber);
                     $contactPhoneList = ContactPhoneListService::getOrCreate($phone, $this->title);
 
-                    $contactPhoneServiceInfoRepository = new ContactPhoneServiceInfoRepository();
-                    $contactPhoneServiceInfo = $contactPhoneServiceInfoRepository::findByPk(
+                    $contactPhoneServiceInfo = ContactPhoneInfoService::getOrCreate(
                         $contactPhoneList->cpl_id,
-                        ContactPhoneServiceInfo::SERVICE_NEUTRINO
+                        ContactPhoneServiceInfo::SERVICE_NEUTRINO,
+                        $phoneData
                     );
-
-                    if (!$contactPhoneServiceInfo) {
-                        $contactPhoneServiceInfo = ContactPhoneServiceInfo::create(
-                            $contactPhoneList->cpl_id,
-                            ContactPhoneServiceInfo::SERVICE_NEUTRINO,
-                            $phoneData
-                        );
-                        $contactPhoneServiceInfoRepository->save($contactPhoneServiceInfo);
-                    }
                 }
 
                 ClientPhone::updateAll(

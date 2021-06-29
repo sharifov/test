@@ -370,36 +370,15 @@ class CommunicationController extends ApiBaseController
             if ($departmentPhone) {
                 try {
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-                    $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService);
-
+                    $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
                     if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
-                        if ($departmentPhoneProjectParamsService->getCallFilterGuardCallTerminate()) {
-                            \Yii::warning(
-                                'Phone number(' . $client_phone_number . ') is terminated. Reason - CallFilterGuardTrust',
-                                'CommunicationController:voiceIncoming:callTerminate'
-                            );
-                            throw new CallDeclinedException('Phone number(' . $client_phone_number . ') is terminated. Reason - CallFilterGuardTrust');
-                        }
-                        if ($departmentPhoneProjectParamsService->getCallFilterGuardBlockListEnabled()) {
-                            $addMinutes = $departmentPhoneProjectParamsService->getCallFilterGuardBlockListExpiredMinutes();
-                            PhoneBlackListManageService::createOrRenewExpiration(
-                                $client_phone_number,
-                                $addMinutes,
-                                new \DateTime(),
-                                'Reason - CallFilterGuardTrust'
-                            );
-                            $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
-                        }
+                        $callFilterGuardService->runRepression($postCall);
                     }
                 } catch (CallDeclinedException $e) {
+                    \Yii::warning($e->getMessage(), 'CommunicationController:voiceIncoming:callTerminate');
                     $vr = new VoiceResponse();
                     $vr->reject(['reason' => 'busy']);
-                    return $this->getResponseChownData(
-                        $vr,
-                        404,
-                        404,
-                        'Phone number(' . $client_phone_number . ') is terminated. Reason - CallFilterGuardTrust'
-                    );
+                    return CallFilterGuardService::getResponseChownData($vr, 404, 404, $e->getMessage());
                 } catch (\Throwable $throwable) {
                     Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:voiceIncoming:CallFilterGuardService');
                 }

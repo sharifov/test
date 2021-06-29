@@ -7,6 +7,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use sales\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
+use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\services\phone\checkPhone\CheckPhoneNeutrinoService;
 use sales\services\phone\checkPhone\CheckPhoneService;
 use common\models\ClientPhone;
@@ -57,9 +58,7 @@ class CheckPhoneNumberJob extends BaseJob implements \yii\queue\JobInterface
                     }
 
                     $contactPhoneList = ContactPhoneListService::getOrCreate($phone);
-
-                    $contactPhoneServiceInfoRepository = new ContactPhoneServiceInfoRepository();
-                    $contactPhoneServiceInfo = $contactPhoneServiceInfoRepository::findByPk(
+                    $contactPhoneServiceInfo = ContactPhoneInfoService::findByPk(
                         $contactPhoneList->cpl_id,
                         ContactPhoneServiceInfo::SERVICE_NEUTRINO
                     );
@@ -70,7 +69,7 @@ class CheckPhoneNumberJob extends BaseJob implements \yii\queue\JobInterface
                             ContactPhoneServiceInfo::SERVICE_NEUTRINO,
                             $phoneData
                         );
-                        $contactPhoneServiceInfoRepository->save($contactPhoneServiceInfo);
+                        (new ContactPhoneServiceInfoRepository())->save($contactPhoneServiceInfo);
                     }
                 }
             }

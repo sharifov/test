@@ -1338,7 +1338,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function lookup(string $phone): array
+    public function twilioLookup(string $phone): array
     {
         $out = ['error' => false, 'result' => null];
         $data = [

@@ -2,34 +2,48 @@
 
 namespace sales\services\phone\callFilterGuard;
 
+use common\models\Call;
 use DateTime;
 use sales\helpers\app\AppHelper;
+use sales\services\call\CallDeclinedException;
+use sales\services\call\CallService;
 use sales\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
+use sales\services\phone\blackList\PhoneBlackListManageService;
 use sales\services\phone\callFilterGuard\CheckServiceInterface;
+use Twilio\TwiML\VoiceResponse;
 use Yii;
 
 /**
  * Class CallFilterGuardService
  *
  * @property string $phone
- * @property DepartmentPhoneProjectParamsService $departmentPhoneProjectParamsService
  * @property int $trustPercent
+ *
+ * @property DepartmentPhoneProjectParamsService $departmentPhoneProjectParamsService
+ * @property CallService $callService
  */
 class CallFilterGuardService
 {
     private const CLASS_POSTFIX = 'CallFilterGuard';
 
     private string $phone;
-    private DepartmentPhoneProjectParamsService $departmentPhoneProjectParamsService;
     private int $trustPercent = 0;
+
+    private DepartmentPhoneProjectParamsService $departmentPhoneProjectParamsService;
+    private CallService $callService;
 
     /**
      * @param string $phone
      * @param DepartmentPhoneProjectParamsService $departmentPhoneProjectParamsService
+     * @param CallService $callService
      */
-    public function __construct(string $phone, DepartmentPhoneProjectParamsService $departmentPhoneProjectParamsService)
-    {
+    public function __construct(
+        string $phone,
+        DepartmentPhoneProjectParamsService $departmentPhoneProjectParamsService,
+        CallService $callService
+    ) {
         $this->phone = $phone;
+        $this->callService = $callService;
         $this->departmentPhoneProjectParamsService = $departmentPhoneProjectParamsService;
 
         if ($this->isEnable()) {
@@ -105,5 +119,34 @@ class CallFilterGuardService
     public function getTrustPercent(): int
     {
         return $this->trustPercent;
+    }
+
+    public function runRepression(array $postCall): void
+    {
+        if ($this->departmentPhoneProjectParamsService->getCallFilterGuardCallTerminate()) {
+            throw new CallDeclinedException('Phone number(' . $this->getPhone() . ') is terminated. Reason - CallFilterGuardTrust');
+        }
+        if ($this->departmentPhoneProjectParamsService->getCallFilterGuardBlockListEnabled()) {
+            $addMinutes = $this->departmentPhoneProjectParamsService->getCallFilterGuardBlockListExpiredMinutes();
+            PhoneBlackListManageService::createOrRenewExpiration(
+                $this->getPhone(),
+                $addMinutes,
+                new \DateTime(),
+                'Reason - CallFilterGuardTrust'
+            );
+            $this->callService->guardDeclined($this->getPhone(), $postCall, Call::CALL_TYPE_IN);
+        }
+    }
+
+    public static function getResponseChownData(VoiceResponse $vr, int $status = 200, int $code = 0, string $message = ''): array
+    {
+        $response['twml'] = (string) $vr;
+        return [
+            'status' => $status,
+            'name' => ($status === 200 ? 'Success' : 'Error'),
+            'code' => $code,
+            'message' => $message,
+            'data' => ['response' => $response]
+        ];
     }
 }

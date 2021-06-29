@@ -3,7 +3,9 @@
 namespace sales\model\contactPhoneServiceInfo\repository;
 
 use sales\helpers\ErrorsToStringHelper;
+use sales\model\contactPhoneList\entity\ContactPhoneList;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use sales\services\phone\checkPhone\CheckPhoneService;
 
 /**
  * Class ContactPhoneServiceInfoRepository
@@ -16,10 +18,5 @@ class ContactPhoneServiceInfoRepository
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($model));
         }
         return $model;
-    }
-
-    public static function findByPk(int $cplId, int $serviceId): ?ContactPhoneServiceInfo
-    {
-        return ContactPhoneServiceInfo::findOne(['cpsi_cpl_id' => $cplId, 'cpsi_service_id' => $serviceId]);
     }
 }
