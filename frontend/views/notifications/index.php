@@ -94,7 +94,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Notifications::getTypeList()
             ],
             'n_title',
-            'n_message:ntextWithPurify',
+
+            //'n_message:ntextWithPurify',
+            'n_message:textWithLinks',
+
             'n_new:boolean',
             'n_deleted:boolean',
             'n_popup:boolean',

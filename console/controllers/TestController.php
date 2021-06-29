@@ -2,13 +2,16 @@
 
 namespace console\controllers;
 
+use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Call;
 use common\models\Notifications;
+use common\models\Sms;
 use common\models\UserOnline;
 use Faker\Factory;
+use frontend\widgets\notification\NotificationMessage;
 use modules\flight\components\api\FlightQuoteBookService;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
@@ -56,15 +59,69 @@ use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackF
 use sales\model\project\entity\params\Params;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
+use sales\services\sms\incoming\SmsIncomingForm;
+use sales\services\sms\incoming\SmsIncomingService;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\console\ExitCode;
+use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+    /**
+     * Test Data Privacy Send Sms notification
+     */
+    public function actionSmsNotify()
+    {
+        $smsIncomingForm  = new SmsIncomingForm();
+        $smsIncomingForm->si_phone_from = '+19173649747';
+        $smsIncomingForm->si_phone_to = '+16693337271';
+        $smsIncomingForm->si_sms_text = 'Test Sms message to lead vincent dev';
+
+        $response = (\Yii::createObject(SmsIncomingService::class))->create($smsIncomingForm)->attributes;
+
+        print_r($response);
+
+        echo 'Local sms notification simulation Done';
+    }
+
+    public function actionCallNotify()
+    {
+        $call =  Call::find()->where(['c_id' => 3368237])->one();
+
+        if ($sendWarmTransferMissedNotification = true) {
+            $message = 'Missed Call (Id: ' . Purifier::createCallShortLink($call) /*Call::SOURCE_LIST[Call::SOURCE_TRANSFER_CALL]*/ . ')  from ' /*. $call->c_from*/ ;
+            if ($call->c_lead_id && $call->cLead) {
+                $message .= $call->cLead->client ? $call->cLead->client->getFullName() : '';
+                $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                $message .= $call->cLead->project ? '<br> ' . $call->cLead->project->name : '';
+            }
+            if ($call->c_case_id && $call->cCase) {
+                $message .= $call->cCase->client ? $call->cLead->client->getFullName() : '';
+                $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                $message .= $call->cCase->project ? '<br> ' . $call->cCase->project->name : '';
+            }
+
+            if (
+                $ntf = Notifications::create(
+                    658,
+                    'Missed Call (' . Call::SOURCE_LIST[Call::SOURCE_TRANSFER_CALL] . ')',
+                    $message,
+                    Notifications::TYPE_WARNING,
+                    true
+                )
+            ) {
+                $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::publish('getNewNotification', ['user_id' => 658], $dataNotification);
+            }
+        }
+
+        print_r($call);
+    }
+
     public function actionDisconnectCalls()
     {
         $userId = 295;

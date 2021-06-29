@@ -2,6 +2,8 @@
 
 namespace common\components\purifier\filter;
 
+use yii\bootstrap4\Html;
+
 /**
  * Class FilterShortCodeToId
  *
@@ -27,6 +29,8 @@ class FilterShortCodeToId implements Filter
         $this->processCase();
         $this->processQaTask();
         $this->processChat();
+        $this->processSms();
+        $this->processCall();
         return $this->content;
     }
 
@@ -54,6 +58,20 @@ class FilterShortCodeToId implements Filter
     public function processChat(): void
     {
         $this->content = preg_replace_callback('|{chat-([\d]+)}|iU', static function ($matches) {
+            return $matches[1];
+        }, $this->content);
+    }
+
+    private function processSms(): void
+    {
+        $this->content = preg_replace_callback('|{sms-([\d]+)}|iU', function ($matches) {
+            return $matches[1];
+        }, $this->content);
+    }
+
+    private function processCall(): void
+    {
+        $this->content = preg_replace_callback('|{call-([\d]+)}|iU', function ($matches) {
             return $matches[1];
         }, $this->content);
     }
