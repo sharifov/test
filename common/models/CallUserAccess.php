@@ -222,10 +222,10 @@ class CallUserAccess extends \yii\db\ActiveRecord
                 } else {
                     $message = 'New incoming Call' . ' (' . $this->cua_call_id . ')';
                     if (isset($call->cLead)) {
-                        $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                        $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
                     }
                     if (isset($call->cCase)) {
-                        $message .= ', Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                        $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
                     }
                     if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', $message, Notifications::TYPE_SUCCESS, true)) {
                         //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);

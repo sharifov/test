@@ -938,12 +938,16 @@ class Call extends \yii\db\ActiveRecord
                             );
                         } else {
                             if ($sendWarmTransferMissedNotification) {
-                                $message = 'Missed Call (' . self::SOURCE_LIST[self::SOURCE_TRANSFER_CALL] . ')  from ' . $this->c_from;
+                                $message = 'Missed Call (Id: ' . Purifier::createCallShortLink($this) . ')  from ';
                                 if ($this->c_lead_id && $this->cLead) {
-                                    $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
+                                    $message .= $this->cLead->client ? $this->cLead->client->getFullName() : '';
+                                    $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
+                                    $message .= $this->cLead->project ? '<br> ' . $this->cLead->project->name : '';
                                 }
                                 if ($this->c_case_id && $this->cCase) {
-                                    $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
+                                    $message .= $this->cCase->client ? $this->cLead->client->getFullName() : '';
+                                    $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
+                                    $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
                                 }
 
                                 if (
@@ -1446,18 +1450,26 @@ class Call extends \yii\db\ActiveRecord
 
                     $user = Employee::findOne($user_id);
 
-                    $message = 'Missed Call (' . $call->getSourceName() . ')  from ' . $call->c_from . ' to ' . $call->c_to . '. Taken by Agent: ' . ($user ? Html::encode($user->username) : '-');
+                    $message = 'Missed Queued Call (Id: ' . Purifier::createCallShortLink($call) . ')  from ';
                     if ($call->c_lead_id && $call->cLead) {
-                        $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                        $message .= $call->cLead->client ? $call->cLead->client->getFullName() : '';
+                        $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                        $message .= $call->cLead->project ? '<br> ' . $call->cLead->project->name : '';
+                        $message .= $call->cLead->lDep ? ' / ' . $call->cLead->lDep->dep_name : '';
                     }
                     if ($call->c_case_id && $call->cCase) {
-                        $message .= ', Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                        $message .= $call->cCase->client ? $call->cLead->client->getFullName() : '';
+                        $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                        $message .= $call->cCase->project ? '<br> ' . $call->cCase->project->name : '';
+                        $message .= $call->cCase->department ? ' / ' . $call->cCase->department->dep_name : '';
                     }
+
+                    $message .= '<br> Taken by Agent: ' . ($user ? Html::encode($user->username) : '-');
 
                     if (
                         $ntf = Notifications::create(
                             $call->c_created_user_id,
-                            'Missed Call (' . $call->getSourceName() . ')',
+                            'Missed Queued Call (' . $call->getSourceName() . ')',
                             $message,
                             Notifications::TYPE_WARNING,
                             true

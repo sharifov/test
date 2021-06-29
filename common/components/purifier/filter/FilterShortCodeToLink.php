@@ -39,6 +39,7 @@ class FilterShortCodeToLink implements Filter
         $this->processChat();
         $this->processNotification();
         $this->processSms();
+        $this->processCall();
         return $this->content;
     }
 
@@ -96,6 +97,13 @@ class FilterShortCodeToLink implements Filter
     {
         $this->content = preg_replace_callback('|{sms-([\d]+)}|iU', function ($matches) {
             return Html::a($matches[1], $this->host . '/sms/view2?id=' . $matches[1]);
+        }, $this->content);
+    }
+
+    private function processCall(): void
+    {
+        $this->content = preg_replace_callback('|{call-([\d]+)}|iU', function ($matches) {
+            return Html::a($matches[1], $this->host . '/call/view?id=' . $matches[1]);
         }, $this->content);
     }
 }

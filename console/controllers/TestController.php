@@ -87,6 +87,40 @@ class TestController extends Controller
         echo 'Local sms notification simulation Done';
     }
 
+    public function actionCallNotify()
+    {
+        $call =  Call::find()->where(['c_id' => 3368237])->one();
+
+        if ($sendWarmTransferMissedNotification = true) {
+            $message = 'Missed Call (Id: ' . Purifier::createCallShortLink($call) /*Call::SOURCE_LIST[Call::SOURCE_TRANSFER_CALL]*/ . ')  from ' /*. $call->c_from*/ ;
+            if ($call->c_lead_id && $call->cLead) {
+                $message .= $call->cLead->client ? $call->cLead->client->getFullName() : '';
+                $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                $message .= $call->cLead->project ? '<br> ' . $call->cLead->project->name : '';
+            }
+            if ($call->c_case_id && $call->cCase) {
+                $message .= $call->cCase->client ? $call->cLead->client->getFullName() : '';
+                $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                $message .= $call->cCase->project ? '<br> ' . $call->cCase->project->name : '';
+            }
+
+            if (
+                $ntf = Notifications::create(
+                    658,
+                    'Missed Call (' . Call::SOURCE_LIST[Call::SOURCE_TRANSFER_CALL] . ')',
+                    $message,
+                    Notifications::TYPE_WARNING,
+                    true
+                )
+            ) {
+                $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::publish('getNewNotification', ['user_id' => 658], $dataNotification);
+            }
+        }
+
+        print_r($call);
+    }
+
     public function actionDisconnectCalls()
     {
         $userId = 295;

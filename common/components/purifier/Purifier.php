@@ -3,6 +3,7 @@
 namespace common\components\purifier;
 
 use common\components\purifier\filter\Filter;
+use common\models\Call;
 use common\models\Lead;
 use common\models\Sms;
 use modules\qaTask\src\entities\qaTask\QaTask;
@@ -55,5 +56,10 @@ class Purifier
     public static function createSmsShortLink(Sms $sms): string
     {
         return '{sms-' . $sms->s_id . '}';
+    }
+
+    public static function createCallShortLink(Call $call): string
+    {
+        return '{call-' . $call->c_id . '}';
     }
 }
