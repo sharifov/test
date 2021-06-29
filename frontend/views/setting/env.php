@@ -162,13 +162,33 @@ $this->params['breadcrumbs'][] = $this->title;
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
                 <td>getAirportUrl</td>
-                <td><?=Yii::$app->params['backOffice']['serverUrlV2'] . '/airport/search' ?? ''?></td>
+                <td><?= '/airport/search' ?? ''?></td>
             </tr>
 
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
                 <td>searchApiUrl</td>
                 <td>Not used</td>
+            </tr>
+            <tr>
+                <td><?php echo $paramsNum++ ?></td>
+                <td>$_ENV</td>
+                <td><?php \yii\helpers\VarDumper::dump($_ENV, 10, true) ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $paramsNum++ ?></td>
+                <td>DB_NAME</td>
+                <td><?php echo getenv('DB_NAME') ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $paramsNum++ ?></td>
+                <td>DB_NAME2</td>
+                <td><?php echo getenv('DB_NAME2') ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $paramsNum++ ?></td>
+                <td>DB_NAME2</td>
+                <td><?php echo $_ENV['DB_NAME2'] ?? '-' ?></td>
             </tr>
 
             <tr>

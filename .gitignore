@@ -3,6 +3,9 @@
 /yii_test
 /yii_test.bat
 
+# environments
+/.env
+
 #node modules
 
 /node_modules
