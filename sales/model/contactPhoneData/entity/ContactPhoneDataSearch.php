@@ -2,11 +2,18 @@
 
 namespace sales\model\contactPhoneData\entity;
 
+use sales\model\contactPhoneList\entity\ContactPhoneList;
 use yii\data\ActiveDataProvider;
 use sales\model\contactPhoneData\entity\ContactPhoneData;
 
+/**
+ * Class ContactPhoneDataSearch
+ * @property string|null $phone
+ */
 class ContactPhoneDataSearch extends ContactPhoneData
 {
+    public $phone;
+
     public function rules(): array
     {
         return [
@@ -14,6 +21,7 @@ class ContactPhoneDataSearch extends ContactPhoneData
             [['cpd_created_dt', 'cpd_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
             ['cpd_key', 'string'],
             ['cpd_value', 'string'],
+            ['phone', 'string'],
         ];
     }
 
@@ -42,6 +50,11 @@ class ContactPhoneDataSearch extends ContactPhoneData
 
         $query->andFilterWhere(['like', 'cpd_key', $this->cpd_key])
             ->andFilterWhere(['like', 'cpd_value', $this->cpd_value]);
+
+        if ($this->phone) {
+            $query->innerJoin(ContactPhoneList::tableName(), 'cpd_cpl_id = cpl_id')
+                ->andWhere(['cpl_phone_number' => $this->phone]);
+        }
 
         return $dataProvider;
     }

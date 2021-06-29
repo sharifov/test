@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use frontend\helpers\JsonHelper;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
@@ -64,6 +65,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                     return '<small>' . $resultStr . '</small>';
                 },
+            ],
+            [
+                'attribute' => 'phone',
+                'label' => 'Phone',
+                'value' => static function (ContactPhoneServiceInfo $model) {
+                    return $model->cpsiCpl->cpl_phone_number;
+                }
             ],
             [
                 'class' => DateTimeColumn::class,

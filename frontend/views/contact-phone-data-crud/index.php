@@ -2,6 +2,8 @@
 
 use common\components\grid\DateTimeColumn;
 use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -36,6 +38,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ContactPhoneDataDictionary::KEY_LIST
             ],
             'cpd_value',
+            [
+                'attribute' => 'phone',
+                'label' => 'Phone',
+                'value' => static function (ContactPhoneData $model) {
+                    return $model->cpdCpl->cpl_phone_number;
+                }
+            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'cpd_created_dt',

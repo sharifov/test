@@ -2,11 +2,18 @@
 
 namespace sales\model\contactPhoneServiceInfo\entity;
 
+use sales\model\contactPhoneList\entity\ContactPhoneList;
 use yii\data\ActiveDataProvider;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 
+/**
+ * Class ContactPhoneServiceInfoSearch
+ * @property string|null $phone
+ */
 class ContactPhoneServiceInfoSearch extends ContactPhoneServiceInfo
 {
+    public $phone;
+
     public function rules(): array
     {
         return [
@@ -17,6 +24,8 @@ class ContactPhoneServiceInfoSearch extends ContactPhoneServiceInfo
             ['cpsi_service_id', 'integer'],
 
             [['cpsi_created_dt', 'cpsi_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+
+            ['phone', 'string'],
         ];
     }
 
@@ -45,6 +54,11 @@ class ContactPhoneServiceInfoSearch extends ContactPhoneServiceInfo
         ]);
 
         $query->andFilterWhere(['like', 'cpsi_data_json', $this->cpsi_data_json]);
+
+        if ($this->phone) {
+            $query->innerJoin(ContactPhoneList::tableName(), 'cpsi_cpl_id = cpl_id')
+                ->andWhere(['cpl_phone_number' => $this->phone]);
+        }
 
         return $dataProvider;
     }
