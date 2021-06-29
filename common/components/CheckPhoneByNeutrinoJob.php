@@ -41,7 +41,7 @@ class CheckPhoneByNeutrinoJob implements \yii\queue\JobInterface
                     $phone = CheckPhoneService::cleanPhone($phoneNumber);
                     $contactPhoneList = ContactPhoneListService::getOrCreate($phone, $this->title);
 
-                    $contactPhoneServiceInfo = ContactPhoneInfoService::getOrCreate(
+                    ContactPhoneInfoService::getOrCreate(
                         $contactPhoneList->cpl_id,
                         ContactPhoneServiceInfo::SERVICE_NEUTRINO,
                         $phoneData

@@ -2162,7 +2162,7 @@ class TestController extends FController
     public function actionZ()
     {
         $departmentPhone = DepartmentPhoneProject::findOne(11);
-        $client_phone_number = '+14145942152';
+        $client_phone_number = '+14145942152'; // '+19374280853'
 
         try {
             $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
@@ -2174,7 +2174,6 @@ class TestController extends FController
             \Yii::warning($e->getMessage(), 'CommunicationController:voiceIncoming:callTerminate');
             $vr = new VoiceResponse();
             $vr->reject(['reason' => 'busy']);
-            $message = 'Phone number(' . $client_phone_number . ') is terminated. Reason - CallFilterGuardTrust';
             CallFilterGuardService::getResponseChownData($vr, 404, 404, $e->getMessage());
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:voiceIncoming:CallFilterGuardService');

@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use frontend\helpers\JsonHelper;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
@@ -42,11 +43,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ContactPhoneServiceInfo::SERVICE_LIST
             ],
             [
-                'attribute' => 'lr_json_data',
+                'attribute' => 'cpsi_data_json',
                 'format' => 'raw',
                 'value' => static function (ContactPhoneServiceInfo $model) {
                     $resultStr = '-';
-                    if ($decodedData = \frontend\helpers\JsonHelper::decode($model->cpsi_data_json)) {
+                    if ($decodedData = JsonHelper::decode($model->cpsi_data_json)) {
                         $truncatedStr = StringHelper::truncate(
                             Html::encode(VarDumper::dumpAsString($decodedData)),
                             300,

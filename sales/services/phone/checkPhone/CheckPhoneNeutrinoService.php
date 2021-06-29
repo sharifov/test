@@ -39,7 +39,11 @@ class CheckPhoneNeutrinoService
         if (!$this->isEnableCheckPhoneByApi) {
             return null;
         }
+        return $this->getRequest();
+    }
 
+    public function getRequest(): ?array
+    {
         $response = $this->communicationService->checkPhoneNumber($this->phone);
         if ($error = ArrayHelper::getValue($response, 'error')) {
             throw new \RuntimeException($error);

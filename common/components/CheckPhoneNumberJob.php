@@ -58,19 +58,11 @@ class CheckPhoneNumberJob extends BaseJob implements \yii\queue\JobInterface
                     }
 
                     $contactPhoneList = ContactPhoneListService::getOrCreate($phone);
-                    $contactPhoneServiceInfo = ContactPhoneInfoService::findByPk(
+                    ContactPhoneInfoService::getOrCreate(
                         $contactPhoneList->cpl_id,
-                        ContactPhoneServiceInfo::SERVICE_NEUTRINO
+                        ContactPhoneServiceInfo::SERVICE_NEUTRINO,
+                        $phoneData
                     );
-
-                    if (!$contactPhoneServiceInfo) {
-                        $contactPhoneServiceInfo = ContactPhoneServiceInfo::create(
-                            $contactPhoneList->cpl_id,
-                            ContactPhoneServiceInfo::SERVICE_NEUTRINO,
-                            $phoneData
-                        );
-                        (new ContactPhoneServiceInfoRepository())->save($contactPhoneServiceInfo);
-                    }
                 }
             }
 
