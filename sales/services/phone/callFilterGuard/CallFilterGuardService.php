@@ -4,6 +4,7 @@ namespace sales\services\phone\callFilterGuard;
 
 use common\models\Call;
 use DateTime;
+use PHPStan\BetterReflection\Reflector\Exception\IdentifierNotFound;
 use sales\helpers\app\AppHelper;
 use sales\model\contactPhoneData\entity\ContactPhoneData;
 use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
@@ -93,6 +94,10 @@ class CallFilterGuardService
     public function isTrusted(): bool
     {
         if ($this->checkByContactPhoneData()) {
+            \Yii::info('checkByContactPhoneData - isTrust',
+                'info\Debug:' . self::class . ':' . __FUNCTION__
+            );
+            /* TODO: FOR DEBUG:: must by remove */
             return true;
         }
         return ($this->getTrustPercent() >= $this->departmentPhoneProjectParamsService->getCallFilterGuardPercent());

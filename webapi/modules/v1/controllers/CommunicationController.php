@@ -371,6 +371,19 @@ class CommunicationController extends ApiBaseController
                 try {
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
+
+                    \Yii::info([
+                            'getTrustPercent' => $callFilterGuardService->getTrustPercent(),
+                            'isTrusted' => $callFilterGuardService->isTrusted(),
+                            'filterGuardPercent' => $departmentPhoneProjectParamsService->getCallFilterGuardPercent(),
+                            'isEnable' => $callFilterGuardService->isEnable(),
+                            'getPhone' => $callFilterGuardService->getPhone(),
+                            'getCallFilterGuard' => $departmentPhoneProjectParamsService->getCallFilterGuard()
+                        ],
+                        'info\Debug:' . self::class . ':' . __FUNCTION__
+                    );
+                    /* TODO: FOR DEBUG:: must by remove */
+
                     if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
                         $callFilterGuardService->runRepression($postCall);
                     }
