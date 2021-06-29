@@ -18,6 +18,7 @@ use common\models\Email;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
+use common\models\PhoneBlacklist;
 use common\models\Sms;
 use common\models\UserProjectParams;
 use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
@@ -1317,6 +1318,8 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
+        Yii::$app->db->createCommand()->truncateTable(ContactPhoneData::tableName())->execute();
+
         $time_start = microtime(true);
 
         $query = (new Query())
@@ -1336,6 +1339,9 @@ class OneTimeController extends Controller
                     ->where(['cpd_key' => ContactPhoneDataDictionary::KEY_IS_TRUSTED])
                     ->groupBy(['cpl_phone_number'])
             ], ClientPhone::tableName() . '.phone = exist_phone_data.cpl_phone_number')
+            ->leftJoin(PhoneBlacklist::tableName(), ClientPhone::tableName() . '.phone = pbl_phone')
+            ->where('exist_phone_data.cpl_phone_number IS NULL')
+            ->andWhere('pbl_phone IS NULL')
             ->offset($offset)
             ->limit($limit)
             ->groupBy([ClientPhone::tableName() . '.phone']);
