@@ -75,21 +75,24 @@ class CallService
             return;
         }
 
-        $call = Call::createDeclined(
-            $data['CallSid'] ?? null,
-            $typeId,
-            $clientPhoneNumber,
-            $internalPhoneNumber,
-            date('Y-m-d H:i:s'),
-            $data['c_com_call_id'] ?? null,
-            Call::getClientTime($data),
-            Call::getDisplayRegion($data['FromCountry'] ?? ''),
-            $data['FromState'] ?? null,
-            $data['FromCity'] ?? null,
-            null
-        );
-
-        $call->setDataCreatedParams($data);
+        if ($call = Call::findOne(['c_call_sid' => $data['CallSid'] ?? ''])) {
+            $call->declined();
+        } else {
+            $call = Call::createDeclined(
+                $data['CallSid'] ?? null,
+                $typeId,
+                $clientPhoneNumber,
+                $internalPhoneNumber,
+                date('Y-m-d H:i:s'),
+                $data['c_com_call_id'] ?? null,
+                Call::getClientTime($data),
+                Call::getDisplayRegion($data['FromCountry'] ?? ''),
+                $data['FromState'] ?? null,
+                $data['FromCity'] ?? null,
+                null
+            );
+            $call->setDataCreatedParams($data);
+        }
 
         if (!$call->save()) {
             \Yii::error(VarDumper::dumpAsString($call->errors), 'CallService:guardDeclined:Call:save');
@@ -97,7 +100,6 @@ class CallService
         }
 
         if (
-//            ($upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $internalPhoneNumber])->limit(1)->one())
             ($upp = UserProjectParams::find()->byPhone($internalPhoneNumber, false)->limit(1)->one())
             && ($user = $upp->uppUser)
         ) {
