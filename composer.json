@@ -210,7 +210,7 @@
 		"post-update-cmd": [
 			"cghooks update"
 		],
-        "apidoc-gen": "apidoc -i \"./webapi/modules\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\""
+        "apidoc-gen": "apidoc -i \"./webapi/\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\""
 	},
 	"extra": {
 		"hooks": {
