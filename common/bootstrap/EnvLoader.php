@@ -16,9 +16,21 @@ use Dotenv\Repository\RepositoryBuilder;
 /**
  * Class EnvLoader
  *
+ * @property string|null $path
+ * @property string|null $file
  */
 class EnvLoader
 {
+
+    /**
+     * @var string Environment variable file directory
+     */
+    public string $path = '/';
+    /**
+     * @var string Use if custom environment variable file
+     */
+    public string $file = '.env';
+
     /**
      * @param string|null $path
      * @param string|null $file
@@ -32,16 +44,6 @@ class EnvLoader
             $this->file = $file;
         }
     }
-
-    /**
-     * @var string Environment variable file directory
-     */
-    public string $path = '/';
-    /**
-     * @var string Use if custom environment variable file
-     */
-    public string $file = '.env';
-
 
     public function load()
     {
@@ -58,12 +60,10 @@ class EnvLoader
 //                ->immutable()
 //                ->make();
 
-
             $dotenv = Dotenv::create($repository, $this->path, $this->file);
             $dotenv->load();
 
-            //$dotenv->required('ASSERTVAR2')->notEmpty();
-            $dotenv->required(['YII_DEBUG', 'YII_ENV']);
+            //$dotenv->required(['YII_DEBUG', 'YII_ENV']);
         } catch (\Exception $e) {
             echo('Could not load Dotenv file. ERROR: ' . $e->getMessage());
             exit;
