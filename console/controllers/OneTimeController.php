@@ -53,6 +53,7 @@ use Yii;
 use yii\console\Controller;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\BaseConsole;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
@@ -1301,9 +1302,11 @@ class OneTimeController extends Controller
     {
         $offset = BaseConsole::input('Offset: ');
         $limit = BaseConsole::input('Limit: ');
+        $truncate = BaseConsole::input('Truncate table? (0/1): ');
 
         $offset = (int) $offset;
         $limit = (int) $limit;
+        $truncate = (int) $truncate;
 
         if ($offset < 1) {
             echo 'Start must be > 0' . PHP_EOL;
@@ -1313,12 +1316,18 @@ class OneTimeController extends Controller
             echo 'Limit must be > 0' . PHP_EOL;
             return;
         }
+        if (!ArrayHelper::isIn($truncate, [0, 1], true)) {
+            echo 'Truncate must be 0 or 1' . PHP_EOL;
+            return;
+        }
         $offset--;
 
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        //Yii::$app->db->createCommand()->truncateTable(ContactPhoneData::tableName())->execute();
+        if ($truncate) {
+            Yii::$app->db->createCommand()->truncateTable(ContactPhoneData::tableName())->execute();
+        }
 
         $time_start = microtime(true);
 
