@@ -79,6 +79,16 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
         $value = $this->asNtext($value);
+
+        return Purifier::purify($value);
+    }
+
+    public function asTextWithLinks($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
         return Purifier::purify($value);
     }
 

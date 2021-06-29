@@ -33,9 +33,11 @@ class IncomingSmsCreatedByCaseTypeNotificationListener
                 if (
                     $ntf = Notifications::create(
                         $userId,
-                        'New SMS ' . $event->clientPhone,
-                        'SMS from ' . $event->clientPhone . ' (' . $clientName . ') to ' . $event->userPhone . ' <br> ' . nl2br(Html::encode($event->text))
-                        . ($event->sms->sCase ? '<br>Case (Id: ' . Purifier::createCaseShortLink($event->sms->sCase) . ')' : ''),
+                        'New SMS from ' . $clientName,
+                        nl2br(Html::encode($event->text))
+                        . ($event->sms->sCase ? ' <br> Case (Id: ' . Purifier::createCaseShortLink($event->sms->sCase) . ')' : '')
+                        . ($event->sms ? ' <br> SMS (Id: ' . Purifier::createSmsShortLink($event->sms) . ')' : '')
+                        . ($event->sms->sCase ? ' <br> ' . $event->sms->sCase->project->name  : ''),
                         Notifications::TYPE_INFO,
                         true
                     )

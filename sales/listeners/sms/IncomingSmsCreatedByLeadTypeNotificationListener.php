@@ -32,9 +32,11 @@ class IncomingSmsCreatedByLeadTypeNotificationListener
                 if (
                     $ntf = Notifications::create(
                         $userId,
-                        'New SMS ' . $event->clientPhone,
-                        'SMS from ' . $event->clientPhone . ' (' . $clientName . ') to ' . $event->userPhone . ' <br> ' . nl2br(Html::encode($event->text))
-                        . ($event->sms->sLead ? '<br>Lead (Id: ' . Purifier::createLeadShortLink($event->sms->sLead) . ')' : ''),
+                        'New SMS from ' . $clientName,
+                        nl2br(Html::encode($event->text))
+                        . ($event->sms->sLead ? ' <br> Lead (Id: ' . Purifier::createLeadShortLink($event->sms->sLead) . ')' : '')
+                        . ($event->sms ? ' <br> SMS (Id: ' . Purifier::createSmsShortLink($event->sms) . ')' : '')
+                        . ($event->sms->sLead ? ' <br> ' . $event->sms->sLead->project->name  : ''),
                         Notifications::TYPE_INFO,
                         true
                     )
