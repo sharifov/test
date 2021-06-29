@@ -71,10 +71,7 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
-    /**
-     * Test Data Privacy Send Sms notification
-     */
-    public function actionSmsNotify()
+    /*public function actionSmsNotify()
     {
         $smsIncomingForm  = new SmsIncomingForm();
         $smsIncomingForm->si_phone_from = '+19173649747';
@@ -86,14 +83,14 @@ class TestController extends Controller
         print_r($response);
 
         echo 'Local sms notification simulation Done';
-    }
+    }*/
 
-    public function actionCallNotify()
+    /*public function actionCallNotify()
     {
         $call =  Call::find()->where(['c_id' => 3368237])->one();
 
         if ($sendWarmTransferMissedNotification = true) {
-            $message = 'Missed Call (Id: ' . Purifier::createCallShortLink($call) /*Call::SOURCE_LIST[Call::SOURCE_TRANSFER_CALL]*/ . ')  from ' /*. $call->c_from*/ ;
+            $message = 'Missed Call (Id: ' . Purifier::createCallShortLink($call) . ')  from ';
             if ($call->c_lead_id && $call->cLead) {
                 $message .= $call->cLead->client ? $call->cLead->client->getFullName() : '';
                 $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
@@ -120,7 +117,7 @@ class TestController extends Controller
         }
 
         print_r($call);
-    }
+    }*/
 
     public function actionDisconnectCalls()
     {

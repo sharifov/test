@@ -1177,13 +1177,17 @@ class Call extends \yii\db\ActiveRecord
 
                 $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
                 $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
-                $message = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')  from ' . $from . ' to ' . $to;
+                $message = 'Missed Queued' . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')  from ';
                 if ($this->c_lead_id && $this->cLead) {
-                    $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
+                    $message .= $this->cLead->client ? $this->cLead->client->getFullName() : '';
+                    $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
+                    $message .= $this->cLead->project ? '<br> ' . $this->cLead->project->name : '';
                 }
 
                 if ($this->c_case_id && $this->cCase) {
-                    $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
+                    $message .= $this->cCase->client ? $this->cLead->client->getFullName() : '';
+                    $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
+                    $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
                 }
 
                 foreach ($userListNotifications as $userId) {
