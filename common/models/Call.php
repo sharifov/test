@@ -1172,12 +1172,12 @@ class Call extends \yii\db\ActiveRecord
             }
 
             if ($userListNotifications) {
-                $from = PhoneFormatter::getPhoneOrNickname($this->c_from);
-                $to = PhoneFormatter::getPhoneOrNickname($this->c_to);
+                //$from = PhoneFormatter::getPhoneOrNickname($this->c_from);
+                //$to = PhoneFormatter::getPhoneOrNickname($this->c_to);
 
                 $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
                 $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
-                $message = 'Missed Queued' . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')  from ';
+                $message = 'Missed Queued ' . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')  from ';
                 if ($this->c_lead_id && $this->cLead) {
                     $message .= $this->cLead->client ? $this->cLead->client->getFullName() : '';
                     $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
