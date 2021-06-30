@@ -945,7 +945,7 @@ class Call extends \yii\db\ActiveRecord
                                     $message .= $this->cLead->project ? '<br> ' . $this->cLead->project->name : '';
                                 }
                                 if ($this->c_case_id && $this->cCase) {
-                                    $message .= $this->cCase->client ? $this->cLead->client->getFullName() : '';
+                                    $message .= $this->cCase->client ? $this->cCase->client->getFullName() : '';
                                     $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
                                     $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
                                 }
@@ -1189,7 +1189,7 @@ class Call extends \yii\db\ActiveRecord
                 }
 
                 if ($this->c_case_id && $this->cCase) {
-                    $message .= $this->cCase->client ? $this->cLead->client->getFullName() : '';
+                    $message .= $this->cCase->client ? $this->cCase->client->getFullName() : '';
                     $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
                     $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
                 }
@@ -1466,7 +1466,7 @@ class Call extends \yii\db\ActiveRecord
                         $message .= $call->cLead->lDep ? ' / ' . $call->cLead->lDep->dep_name : '';
                     }
                     if ($call->c_case_id && $call->cCase) {
-                        $message .= $call->cCase->client ? $call->cLead->client->getFullName() : '';
+                        $message .= $call->cCase->client ? $call->cCase->client->getFullName() : '';
                         $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
                         $message .= $call->cCase->project ? '<br> ' . $call->cCase->project->name : '';
                         $message .= $call->cCase->department ? ' / ' . $call->cCase->department->dep_name : '';
