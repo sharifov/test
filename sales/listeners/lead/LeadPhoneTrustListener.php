@@ -22,7 +22,9 @@ class LeadPhoneTrustListener
             $lead = $event->getLead();
             $phones = $lead->client->getClientPhonesByType(
                 [
+                    null,
                     ClientPhone::PHONE_VALID,
+                    ClientPhone::PHONE_NOT_SET,
                     ClientPhone::PHONE_FAVORITE,
                 ]
             );
