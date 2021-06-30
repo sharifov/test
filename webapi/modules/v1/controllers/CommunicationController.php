@@ -1041,6 +1041,7 @@ class CommunicationController extends ApiBaseController
             Yii::error([
                 'message' => $e->getMessage(),
                 'post' => $post,
+                'throwableLog' => AppHelper::throwableLog($e, true),
             ], 'CallCallBackProcessingError');
             $response['status'] = 'Success';
             return $response;
@@ -1049,6 +1050,7 @@ class CommunicationController extends ApiBaseController
             Yii::error([
                 'message' => $e->getMessage(),
                 'post' => $post,
+                'throwableLog' => AppHelper::throwableLog($e, true),
             ], 'CallCallBackProcessingError');
             $response['status'] = 'Success';
             return $response;
@@ -1056,6 +1058,7 @@ class CommunicationController extends ApiBaseController
             Yii::error([
                 'message' => $e->getMessage(),
                 'post' => $post,
+                'throwableLog' => AppHelper::throwableLog($e, true),
             ], 'CallCallBackProcessingError');
             $response['status'] = 'Success';
             return $response;
