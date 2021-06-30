@@ -135,6 +135,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Yii::$app->formatter->asBoolean($model->css_need_sync_bo);
                 },
                 'format' => 'raw',
+                'enableSorting' => false,
             ],
 
             ['class' => 'yii\grid\ActionColumn'],
