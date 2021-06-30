@@ -1177,7 +1177,7 @@ class Call extends \yii\db\ActiveRecord
 
                 $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
                 $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
-                $message = 'Missed Queued ' . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')  from ';
+                $message = 'Missed ' . $this->c_source_type_id != self::SOURCE_DIRECT_CALL ? 'Queued ' : '' . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')  from ';
                 if ($this->c_lead_id && $this->cLead) {
                     $message .= $this->cLead->client ? $this->cLead->client->getFullName() : '';
                     $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
