@@ -64,13 +64,6 @@ window.refreshRcAgentToken = function () {
     });
 }
 
-$(document).on('click', '#manual-refresh-token-btn', function () {
-    let html = $(this).html();
-    $(this).find('.fa').addClass('fa-spin');
-    $(this).prop('disabled', true).addClass('disabled');
-    window.refreshRcAgentToken();
-});
-
 window.initChatDialog = function (params) {
   let chatDialogContainer = document.getElementById('chat-dialog');
   chatDialogContainer.classList.add('active');
@@ -88,6 +81,16 @@ window.initChatDialog = function (params) {
 }
 JS;
 $this->registerJs($js, \yii\web\View::POS_HEAD);
+
+$js = <<<JS
+$(document).on('click', '#manual-refresh-token-btn', function () {
+    let html = $(this).html();
+    $(this).find('.fa').addClass('fa-spin');
+    $(this).prop('disabled', true).addClass('disabled');
+    window.refreshRcAgentToken();
+});
+JS;
+$this->registerJs($js, \yii\web\View::POS_END);
 if ($rid) {
     $js = <<<JS
 var t = setInterval(function() {

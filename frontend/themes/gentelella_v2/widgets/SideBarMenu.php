@@ -332,10 +332,19 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead Data Key', 'url' => ['/lead-data-key-crud/index']],
                         ['label' => 'Lead User Conversion', 'url' => ['/lead-user-conversion-crud/index']],
                     ]
+                ],
+                [
+                    'label' => 'Contact Phone numbers',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Phone List', 'url' => ['/contact-phone-list-crud/index']],
+                        ['label' => 'Phone Data', 'url' => ['/contact-phone-data-crud/index']],
+                        ['label' => 'Phone service info', 'url' => ['/contact-phone-service-info-crud/index']],
+                    ]
                 ]
             ]
         ];
-
 
         $menuItems[] = [
             'label' => 'Clients',
@@ -673,7 +682,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ]
         ];
 
-
         $menuItems[] = [
             'label' => 'Stats & Reports',
             'url' => 'javascript:',
@@ -759,6 +767,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Check Exclude IP'), 'url' => ['/tools/check-exclude-ip']],
                         ['label' => Yii::t('menu', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
                         ['label' => Yii::t('menu', 'DB Info'), 'url' => ['/tools/db-info']],
+                        ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
+                        ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
                     ]
                 ],
 

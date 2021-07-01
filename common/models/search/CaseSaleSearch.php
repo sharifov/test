@@ -7,6 +7,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CaseSale;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -23,6 +24,8 @@ class CaseSaleSearch extends CaseSale
             [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_created_user_id', 'css_updated_user_id'], 'integer'],
             [['css_sale_book_id', 'css_sale_pnr', 'css_sale_data'], 'safe'],
             [['css_sale_created_dt', 'css_created_dt', 'css_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+
+            [['css_need_sync_bo'], 'boolean'],
         ];
     }
 
@@ -89,6 +92,10 @@ class CaseSaleSearch extends CaseSale
 
         $query->andFilterWhere(['like', 'css_sale_book_id', $this->css_sale_book_id])
             ->andFilterWhere(['like', 'css_sale_pnr', $this->css_sale_pnr]);
+
+        if (ArrayHelper::isIn($this->css_need_sync_bo, ['1', '0'], false)) {
+            $query->andWhere(['css_need_sync_bo' => $this->css_need_sync_bo]);
+        }
 
         return $dataProvider;
     }

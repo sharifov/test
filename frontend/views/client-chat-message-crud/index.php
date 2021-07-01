@@ -1,5 +1,7 @@
 <?php
 
+use sales\model\clientChat\ClientChatPlatform;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -21,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -45,10 +47,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'byUserDateTime',
             ],
             'ccm_has_attachment',
+            [
+                'attribute' => 'ccm_platform_id',
+                'value' => static function (ClientChatMessage $model) {
+                    return ClientChatPlatform::getNameWithIcon($model->ccm_platform_id);
+                },
+                'filter' => ClientChatPlatform::getListName(),
+                'format' => 'raw'
+            ],
             //'ccm_body',
             [
                 'attribute' => 'message',
-                'value' => function (\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
+                'value' => function (ClientChatMessage $model) {
                     if (is_null($model->ccm_body) || is_null($model->ccm_body['msg'])) {
                         return "";
                     }

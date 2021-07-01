@@ -2,7 +2,9 @@
 
 namespace sales\model\clientChat\componentEvent\component;
 
+use frontend\helpers\JsonHelper;
 use sales\model\clientChat\entity\ClientChat;
+use yii\helpers\Json;
 
 /**
  * Class ComponentDTO
@@ -11,6 +13,9 @@ use sales\model\clientChat\entity\ClientChat;
  * @property-read ClientChat $chat
  * @property-read int $channelId
  * @property-read string $componentConfig
+ * @property-read string|null $visitorId
+ * @property-read bool $isChatNew
+ * @property-read array $runnableComponentConfig
  */
 class ComponentDTO implements ComponentDTOInterface
 {
@@ -19,6 +24,12 @@ class ComponentDTO implements ComponentDTOInterface
     private int $channelId;
 
     private string $componentConfig;
+
+    private string $visitorId;
+
+    private bool $isChatNew;
+
+    private array $runnableComponentConfig;
 
     public function setClientChatEntity(ClientChat $chat): ComponentDTOInterface
     {
@@ -38,12 +49,12 @@ class ComponentDTO implements ComponentDTOInterface
         return $this;
     }
 
-    public function getClientChatEntity(): ClientChat
+    public function getClientChatEntity(): ?ClientChat
     {
         return $this->chat;
     }
 
-    public function getChannelId(): int
+    public function getChannelId(): ?int
     {
         return $this->channelId;
     }
@@ -51,5 +62,38 @@ class ComponentDTO implements ComponentDTOInterface
     public function getComponentEventConfig(): string
     {
         return $this->componentConfig;
+    }
+
+    public function setVisitorId(string $id): ComponentDTOInterface
+    {
+        $this->visitorId = $id;
+        return $this;
+    }
+
+    public function getVisitorId(): ?string
+    {
+        return $this->visitorId;
+    }
+
+    public function setIsChatNew(bool $value): ComponentDTOInterface
+    {
+        $this->isChatNew = $value;
+        return $this;
+    }
+
+    public function getIsChatNew(): bool
+    {
+        return $this->isChatNew;
+    }
+
+    public function setRunnableComponentConfig(string $config): ComponentDTOInterface
+    {
+        $this->runnableComponentConfig = JsonHelper::decode($config);
+        return $this;
+    }
+
+    public function getRunnableComponentConfig(): array
+    {
+        return $this->runnableComponentConfig;
     }
 }

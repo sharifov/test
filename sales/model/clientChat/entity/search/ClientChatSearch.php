@@ -419,6 +419,7 @@ class ClientChatSearch extends ClientChat
             'last_message.cclm_message as last_message',
             'last_message.cclm_type_id as last_message_type_id',
             'last_message.cclm_dt as last_message_date',
+            'last_message.cclm_platform_id as last_message_platform'
         ]);
 
         if (ClientChat::isTabAll($filter->showFilter)) {

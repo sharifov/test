@@ -1267,6 +1267,14 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recordingUrl . $recordingSid);
     }
 
+    /**
+     * @param string $key
+     * @param array $contentData
+     * @param string $languageId
+     * @param string|null $locale
+     * @return array
+     * @throws Exception
+     */
     public function getContent(string $key, array $contentData = [], string $languageId = 'en-US', ?string $locale = null): array
     {
         $out = ['error' => false, 'content' => ''];
@@ -1296,12 +1304,41 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::getContent');
         }
         return $out;
     }
 
-    public function lookup(string $phone): array
+    /**
+     * @param string $phone
+     * @return null[]
+     * @throws Exception
+     */
+    public function checkPhoneNumber(string $phone): array
+    {
+        $out = ['error' => null, 'result' => null];
+        $data = ['phone' => $phone];
+
+        $response = $this->sendRequest('phone/index', $data, 'get');
+
+        if ($response->isOk) {
+            if ($numbers = ArrayHelper::getValue($response->data, 'data.response.numbers')) {
+                $out['result'] = $numbers;
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response][numbers]';
+            }
+        } else {
+            $out['error'] = $response->content;
+        }
+        return $out;
+    }
+
+    /**
+     * @param string $phone
+     * @return array
+     * @throws Exception
+     */
+    public function twilioLookup(string $phone): array
     {
         $out = ['error' => false, 'result' => null];
         $data = [
@@ -1313,7 +1350,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             if (isset($response->data['data'])) {
                 $out['result'] = $response->data['data'];
             } else {
-                $out['error'] = 'Not found in response array data key [data][result][result]';
+                $out['error'] = 'Not found in response array data key [data]';
             }
         } else {
             $out['error'] = $response->content;

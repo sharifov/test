@@ -46,6 +46,7 @@ use sales\listeners\lead\LeadFollowUpNotificationsListener;
 use sales\listeners\lead\LeadNewEventLogListener;
 use sales\listeners\lead\LeadOwnerChangedNotificationsListener;
 use sales\listeners\lead\LeadPendingEventLogListener;
+use sales\listeners\lead\LeadPhoneTrustListener;
 use sales\listeners\lead\LeadPreferencesUpdateCurrencyEventListener;
 use sales\listeners\lead\LeadProcessingEventLogListener;
 use sales\listeners\lead\LeadQcallAddListener;
@@ -115,11 +116,13 @@ return [
     LeadSoldEvent::class => [
         LeadSoldEventLogListener::class,
         LeadSoldNotificationsListener::class,
+        LeadPhoneTrustListener::class,
     ],
     LeadTrashEvent::class => [LeadTrashEventLogListener::class],
     LeadBookedEvent::class => [
         LeadBookedEventLogListener::class,
         LeadBookedNotificationsListener::class,
+        LeadPhoneTrustListener::class,
     ],
     LeadSnoozeEvent::class => [
         LeadSnoozeEventLogListener::class,

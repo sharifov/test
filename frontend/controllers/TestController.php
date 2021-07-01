@@ -138,6 +138,8 @@ use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\model\project\entity\projectLocale\ProjectLocaleScopes;
 use sales\repositories\client\ClientsQuery;
 use sales\repositories\NotFoundException;
+use sales\services\call\CallDeclinedException;
+use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
@@ -190,6 +192,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
+use sales\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
 use sales\services\lead\LeadCloneService;
@@ -202,6 +205,8 @@ use sales\services\lead\qcall\DayTimeHours;
 use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use sales\services\pdf\GeneratorPdfService;
+use sales\services\phone\blackList\PhoneBlackListManageService;
+use sales\services\phone\callFilterGuard\CallFilterGuardService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use sales\services\TransactionManager;
@@ -2156,6 +2161,24 @@ class TestController extends FController
 
     public function actionZ()
     {
+        $departmentPhone = DepartmentPhoneProject::findOne(11);
+        $client_phone_number = '+19374280853'; // '+19374280853'  +14145942152
+
+        try {
+            $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+            $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, Yii::createObject(CallService::class));
+            if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
+                $callFilterGuardService->runRepression([]);
+            }
+        } catch (CallDeclinedException $e) {
+            \Yii::warning($e->getMessage(), 'CommunicationController:voiceIncoming:callTerminate');
+            $vr = new VoiceResponse();
+            $vr->reject(['reason' => 'busy']);
+            CallFilterGuardService::getResponseChownData($vr, 404, 404, $e->getMessage());
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:voiceIncoming:CallFilterGuardService');
+        }
+
         return $this->render('z');
     }
 

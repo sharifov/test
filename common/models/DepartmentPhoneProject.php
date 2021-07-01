@@ -258,27 +258,4 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     {
         return (bool)$this->dpp_enable;
     }
-
-    public function getCallFilterGuard(): array
-    {
-        if (empty($this->dpp_params)) {
-            return [];
-        }
-        return ArrayHelper::getValue(JsonHelper::decode($this->dpp_params), 'callFilterGuard', []);
-    }
-
-    public function getCallFilterGuardEnable()
-    {
-        return ArrayHelper::getValue($this->getCallFilterGuard(), 'enable', false);
-    }
-
-    public function getCallFilterGuardTrustPercent()
-    {
-        return ArrayHelper::getValue($this->getCallFilterGuard(), 'trustPercent', false);
-    }
-
-    public function getCallFilterGuardTrustBlockListExpiredMinutes()
-    {
-        return ArrayHelper::getValue($this->getCallFilterGuard(), 'blockList.expiredMinutes', 60);
-    }
 }

@@ -4,6 +4,9 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\query\ClientPhoneQuery;
+use sales\behaviors\CheckPhoneJobBehavior;
+use sales\behaviors\PhoneCleanerBehavior;
+use sales\behaviors\UidPhoneGeneratorBehavior;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\AttributeBehavior;
@@ -13,7 +16,6 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\VarDumper;
 use yii\queue\Queue;
-use common\components\CheckPhoneNumberJob;
 
 /**
  * This is the model class for table "client_phone".
@@ -28,6 +30,8 @@ use common\components\CheckPhoneNumberJob;
  * @property string $comments
  * @property string $type
  * @property string $cp_title
+ * @property string|null $cp_cpl_uid
+ *
  *
  * @property Client $client
  */
@@ -73,7 +77,7 @@ class ClientPhone extends \yii\db\ActiveRecord
     ];
 
     // old phone value. need for afterSave() method
-    private $old_phone = '';
+    public $old_phone = '';
 
     public $enablelAferSave = true; //todo remove
 
@@ -134,6 +138,8 @@ class ClientPhone extends \yii\db\ActiveRecord
 
             ['type', 'in', 'range' => array_keys(self::PHONE_TYPE)],
             [['cp_title'], 'string', 'max' => 150],
+
+            [['cp_cpl_uid'], 'string', 'max' => 36],
         ];
     }
 
@@ -163,7 +169,8 @@ class ClientPhone extends \yii\db\ActiveRecord
             'created' => 'Created',
             'updated' => 'Updated',
             'type' => 'Phone Type',
-            'cp_title' => 'Title'
+            'cp_title' => 'Title',
+            'cp_cpl_uid' => 'Cpl uid',
         ];
     }
 
@@ -178,6 +185,16 @@ class ClientPhone extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
+            'phoneCleaner' => [
+                'class' => PhoneCleanerBehavior::class,
+                'targetColumn' => 'phone',
+            ],
+            'uidGenerator' => [
+                'class' => UidPhoneGeneratorBehavior::class,
+                'donorColumn' => 'phone',
+                'targetColumn' => 'cp_cpl_uid',
+            ],
+            'CheckPhoneJobBehavior' => CheckPhoneJobBehavior::class,
         ];
     }
 
@@ -192,8 +209,6 @@ class ClientPhone extends \yii\db\ActiveRecord
 
     public function beforeValidate()
     {
-        $this->phone = str_replace('-', '', $this->phone);
-        $this->phone = str_replace(' ', '', $this->phone);
         if (!$this->isNewRecord) {
             $this->old_phone = $this->oldAttributes['phone'];
         }
@@ -212,36 +227,6 @@ class ClientPhone extends \yii\db\ActiveRecord
             $phoneNumber = ($phoneNumber[0] === '+' ? '+' : '') . str_replace('+', '', $phoneNumber);
         }
         return $phoneNumber;
-    }
-
-    public function afterSave($insert, $changedAttributes)
-    {
-        if ($this->enablelAferSave) {
-            if ($this->id > 0 && $this->client_id > 0) {
-                $isRenewPhoneNumber = ($this->old_phone != '' && $this->old_phone !== $this->phone);
-                /*\Yii::info(VarDumper::dumpAsString([
-                    'client_id' => $this->client_id,
-                    'id' => $this->id,
-                    'validate_dt' => $this->validate_dt,
-                    'is_sms' => $this->is_sms,
-                    'old_phone' => $this->old_phone,
-                    'phone' => $this->phone,
-                    'isRenewPhoneNumber' => $isRenewPhoneNumber,
-                ]), 'info\model:ClientPhone:afterSave');*/
-
-                // check if phone rewrite
-                if (null === $this->validate_dt || $isRenewPhoneNumber) {
-                    /** @var Queue $queue */
-                    $queue = \Yii::$app->queue_phone_check;
-                    $job = new CheckPhoneNumberJob();
-                    $job->client_id = $this->client_id;
-                    $job->client_phone_id = $this->id;
-                    $queue->push($job);
-                }
-            }
-        }
-
-        parent::afterSave($insert, $changedAttributes);
     }
 
     /**

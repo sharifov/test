@@ -18,6 +18,7 @@ use sales\model\clientChat\event\ClientChatCloseEvent;
 use sales\model\clientChat\event\ClientChatHoldEvent;
 use sales\model\clientChat\event\ClientChatIdleEvent;
 use sales\model\clientChat\event\ClientChatInProgressEvent;
+use sales\model\clientChat\event\ClientChatNewEvent;
 use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
 use sales\model\clientChat\event\ClientChatPendingEvent;
 use sales\model\clientChat\event\ClientChatTransferEvent;
@@ -378,6 +379,22 @@ class ClientChat extends \yii\db\ActiveRecord
             $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_PENDING;
+    }
+
+    public function new(?int $userId, int $action, ?string $description = null): void
+    {
+        $this->recordEvent(new ClientChatNewEvent(
+            $this,
+            $this->cch_status_id,
+            $this->cch_owner_user_id,
+            $userId,
+            $description,
+            $this->cch_channel_id,
+            $action,
+            null,
+            $this->cch_rid
+        ));
+        $this->cch_status_id = self::STATUS_NEW;
     }
 
     public function close(int $userId, int $action, ?int $reasonId = null, ?string $description = null): void

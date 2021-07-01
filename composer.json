@@ -105,7 +105,8 @@
 		"kartik-v/yii2-mpdf": "^1.0",
 		"pixel418/markdownify": "^2.3",
 		"casbin/casbin": "^3.1",
-		"snowplow/snowplow-tracker": "0.4.0"
+		"snowplow/snowplow-tracker": "0.4.0",
+		"vlucas/phpdotenv": "^5.3"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -209,7 +210,7 @@
 		"post-update-cmd": [
 			"cghooks update"
 		],
-        "apidoc-gen": "apidoc -i \"./webapi/modules\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\""
+        "apidoc-gen": "apidoc -i \"./webapi/modules/\" -i \"./webapi/controllers/\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\""
 	},
 	"extra": {
 		"hooks": {

@@ -1,5 +1,6 @@
 <?php
 
+use common\models\CaseSale;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -126,6 +127,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],*/
+            [
+                'label' => 'Need sync bo',
+                'attribute' => 'css_need_sync_bo',
+                'filter' => [0 => 'No', 1 => 'Yes'],
+                'value' => static function (CaseSale $model) {
+                    return Yii::$app->formatter->asBoolean($model->css_need_sync_bo);
+                },
+                'format' => 'raw',
+                'enableSorting' => false,
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

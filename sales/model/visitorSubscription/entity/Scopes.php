@@ -22,4 +22,19 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byUid(string $id): self
+    {
+        return $this->andWhere(['vs_subscription_uid' => $id]);
+    }
+
+    public function enabled(): self
+    {
+        return $this->andWhere(['vs_enabled' => 1]);
+    }
+
+    public function byType(int $type): self
+    {
+        return $this->andWhere(['vs_type_id' => $type]);
+    }
 }

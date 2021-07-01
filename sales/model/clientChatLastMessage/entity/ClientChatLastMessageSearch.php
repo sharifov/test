@@ -15,7 +15,7 @@ class ClientChatLastMessageSearch extends ClientChatLastMessage
     public function rules(): array
     {
         return [
-            [['cclm_id', 'cclm_cch_id', 'cclm_type_id'], 'integer'],
+            [['cclm_id', 'cclm_cch_id', 'cclm_type_id', 'cclm_platform_id'], 'integer'],
             [['cclm_message'], 'safe'],
             [['cclm_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -48,6 +48,7 @@ class ClientChatLastMessageSearch extends ClientChatLastMessage
             'cclm_id' => $this->cclm_id,
             'cclm_cch_id' => $this->cclm_cch_id,
             'cclm_type_id' => $this->cclm_type_id,
+            'cclm_platform_id' => $this->cclm_platform_id
         ]);
 
         $query->andFilterWhere(['like', 'cclm_message', $this->cclm_message]);

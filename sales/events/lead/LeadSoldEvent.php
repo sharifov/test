@@ -15,7 +15,7 @@ use common\models\Lead;
  * @property string|null $reason
  * @property string $created
  */
-class LeadSoldEvent
+class LeadSoldEvent implements LeadableEventInterface
 {
 
     public $lead;
@@ -49,5 +49,10 @@ class LeadSoldEvent
         $this->creatorId = $creatorId;
         $this->reason = $reason;
         $this->created = date('Y-m-d H:i:s');
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->lead;
     }
 }

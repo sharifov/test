@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\visitorSubscription\entity\VisitorSubscription;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -16,15 +17,20 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'vs_subscription_uid')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'vs_type_id')->textInput() ?>
+        <?= $form->field($model, 'vs_type_id')->dropDownList(VisitorSubscription::getSubscriptionListName(), [
+            'prompt' => '---'
+        ]) ?>
 
-        <?= $form->field($model, 'vs_enabled')->textInput() ?>
+        <?= $form->field($model, 'vs_enabled')->checkbox() ?>
 
-        <?= $form->field($model, 'vs_expired_date')->textInput() ?>
-
-        <?= $form->field($model, 'vs_created_dt')->textInput() ?>
-
-        <?= $form->field($model, 'vs_updated_dt')->textInput() ?>
+        <?= $form->field($model, 'vs_expired_date')->widget(\kartik\date\DatePicker::class, [
+            'pluginOptions' => [
+                'format' => 'yyyy-mm-dd',
+                'autoclose' => true,
+                'todayHighlight' => true
+            ],
+            'value' => date('Y-m-d')
+        ]) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

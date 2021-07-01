@@ -54,10 +54,18 @@ class ClientChatComponentEventController extends \frontend\controllers\FControll
         );
         $form = new ComponentEventCreateForm(count($data['post']['ClientChatComponentRule']));
 
-        if (Yii::$app->request->isPost && $form->load($data['post']) && $form->validate()) {
+        $form->load($data['post']);
+        if (Yii::$app->request->isPost && !$form->pjaxReload && $form->validate()) {
             $componentEventId = $this->manageService->createWithRules($form);
             return $this->redirect(['view', 'id' => $componentEventId]);
         }
+
+        if ($form->pjaxReload) {
+            $form->componentEventSetDefaultConfig();
+            $form->componentRulesSetDefaultConfig();
+        }
+
+        $form->pjaxReload = 0;
 
         return $this->render('create', [
             'model' => $form,
@@ -102,9 +110,9 @@ class ClientChatComponentEventController extends \frontend\controllers\FControll
             'ComponentEventCreateForm',
             ['componentRules' => 'ClientChatComponentRule']
         );
-        $form = new ComponentEventCreateForm(count($data['post']['ClientChatComponentRule']));
+        $form = new ComponentEventCreateForm(count($data['post']['ClientChatComponentRule']), $model);
 
-        if (Yii::$app->request->isPost && $form->load($data['post'])) {
+        if (Yii::$app->request->isPost && $form->load($data['post']) && !$form->pjaxReload && $form->validate()) {
             try {
                 $this->manageService->updateWithRules($model, $form);
                 return $this->redirect(['view', 'id' => $model->ccce_id]);
@@ -112,6 +120,13 @@ class ClientChatComponentEventController extends \frontend\controllers\FControll
                 $form->addError('general', $e->getMessage());
             }
         }
+
+        if ($form->pjaxReload) {
+            $form->componentEventSetDefaultConfig();
+            $form->componentRulesSetDefaultConfig();
+        }
+
+        $form->pjaxReload = 0;
 
         return $this->render('update', [
             'model' => $form

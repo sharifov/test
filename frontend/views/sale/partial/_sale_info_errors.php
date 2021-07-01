@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 
 /**
  * @var $errors array
@@ -8,6 +9,10 @@ use yii\helpers\Html;
 ?>
 
 <?php foreach ($errors as $error) :?>
+    <?php if (array_key_exists('messages', $error)) : ?>
+        <?php \Yii::info(VarDumper::dumpAsString($error, 20), 'info\_sale_info_errors:notFoundMessagesKey'); ?>
+        <?php continue; ?>
+    <?php endif ?>
     <ul>
         <li><?= $error['messages'] ?>:</li>
         <ol>
