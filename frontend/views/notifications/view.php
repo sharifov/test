@@ -75,7 +75,8 @@ $this->params['breadcrumbs'][] = $this->title;
             <h4>Message text:</h4>
             <pre>
                 <?php
-                    echo $model->n_message;
+                    //echo $model->n_message;
+                    echo Yii::$app->formatter->asTextWithLinks($model->n_message);
                 ?>
             </pre>
         </div>
