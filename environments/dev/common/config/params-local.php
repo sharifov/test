@@ -109,4 +109,5 @@ return [
             ],
         ]
     ],
+    'ipinfodb_key' => env('common.config.params.ipinfodb_key')
 ];
