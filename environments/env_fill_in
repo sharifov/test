@@ -9,8 +9,8 @@ require_once('env_tools_lib.php');
 $root = str_replace('\\', '/', __DIR__);
 $appPath = $root . '/../';
 $errors = [];
-$envFile = '.env';
-$envExampleFile = '.env.example';
+$envFile = '../.env';
+$envExampleFile = '../.env.example';
 $envPatchToFile = $root . '/' . $envFile;
 $envExamplePatchToFile = $root . '/' . $envExampleFile;
 echo "Environment Gen Tool v1.0\n";
@@ -86,4 +86,10 @@ fclose($fileEnvExample);
 
 $content = implode("\r\n", $newEnvConfigs);
 
-file_put_contents($envFile, $content);
+if (file_put_contents($root . '/' . $envFile, $content)) {
+    echo formatMessage("Data was successfully saved to file \"$root/$envFile\" !", ['fg-green']) . " \n";
+} else {
+    printError("Error Operation save Environment file\n");
+}
+
+echo "... Script completed ...\n";

@@ -30,7 +30,7 @@ return [
         'webhook_url'   => env('common.config.params.telegram.webhook_url'),
     ],
 
-    'use_browser_call_access' => env('common.config.params.use_browser_call_access'),
+    'use_browser_call_access' => env('common.config.params.use_browser_call_access', 'bool'),
 
     'liveChatRealTimeVisitors' => env('common.config.params.liveChatRealTimeVisitors'),
 
@@ -44,7 +44,7 @@ return [
     ],
 
     'centrifugo' => [
-        'enabled' => env('common.config.params.centrifugo.enabled'),
+        'enabled' => env('common.config.params.centrifugo.enabled', 'bool'),
         'wsConnectionUrl' => env('common.config.params.centrifugo.wsConnectionUrl'),
     ],
 
@@ -72,7 +72,7 @@ return [
         'version' => '2006-03-01',
     ],
     'fileStorage' => [
-        'useRemoteStorage' => env('common.config.params.fileStorage.useRemoteStorage'),
+        'useRemoteStorage' => env('common.config.params.fileStorage.useRemoteStorage', 'bool'),
         'remoteStorage' => [
             'cdn' => [
                 'host' => env('common.config.params.fileStorage.remoteStorage.cdn.host'),
