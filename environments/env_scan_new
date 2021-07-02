@@ -1,0 +1,34 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Environment Scan Tool
+ * @author alex.connor 2020-09-01
+ *
+ * In order to run in non-interactive mode:
+ *
+ */
+
+require_once('env_tools_lib.php');
+
+$root = str_replace('\\', '/', __DIR__);
+$tplEnvFile = '.env.example';
+$env['skipFiles'] = ['.env', $tplEnvFile, 'env_scan', 'env_scan_new', 'env_fill_in', 'env_diff', 'env_tools_lib.php'];
+
+echo "Environment Scan Tool v1.0\n\n";
+echo '... Start scan keys: ' . date('H:i:s'). " ...\n";
+$files = getFileList("$root/");
+if (isset($env['skipFiles'])) {
+    $skipFiles = $env['skipFiles'];
+    array_walk($skipFiles, function(&$value) use($env, $root) { $value = "$root/$value"; });
+    $files = array_diff($files, array_intersect_key($env['skipFiles'], array_filter($skipFiles, 'file_exists')));
+}
+
+$envList = getNewEnvironmentList($root, $files);
+
+if (saveNewEnvironmentList($envList, $root, $tplEnvFile) ) {
+    echo formatMessage("Data was successfully saved to file \"$root/$tplEnvFile\" !", ['fg-green']) . " \n";
+} else {
+    printError("Error Operation save Environment file\n");
+}
+
+echo "... Scan completed ...\n";
