@@ -11,7 +11,7 @@
 require_once('env_tools_lib.php');
 
 $root = str_replace('\\', '/', __DIR__);
-$tplEnvFile = '.env.example';
+$tplEnvFile = '../.env.example';
 $env['skipFiles'] = ['.env', $tplEnvFile, 'env_scan', 'env_scan_new', 'env_fill_in', 'env_diff', 'env_tools_lib.php'];
 
 echo "Environment Scan Tool v1.0\n\n";
