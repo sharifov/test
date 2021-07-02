@@ -1,0 +1,89 @@
+#!/usr/bin/env php
+<?php
+
+use yii\helpers\ArrayHelper;
+
+require_once(__DIR__ . '/../vendor/autoload.php');
+require_once('env_tools_lib.php');
+
+$root = str_replace('\\', '/', __DIR__);
+$appPath = $root . '/../';
+$errors = [];
+$envFile = '.env';
+$envExampleFile = '.env.example';
+$envPatchToFile = $root . '/' . $envFile;
+$envExamplePatchToFile = $root . '/' . $envExampleFile;
+echo "Environment Gen Tool v1.0\n";
+echo '... Start : ' . date('H:i:s'). " ...\n";
+
+checkRequiredFiles([$envExampleFile], $root);
+
+$fileEnvExample = fopen($envExamplePatchToFile, 'rb+') or die('Unable top open file: ' . $envExamplePatchToFile);
+
+$requiredConfigs = [];
+$newEnvConfigs = [];
+
+function searchValue($arraySearchIndex, $needleArray)
+{
+    foreach ($arraySearchIndex as $key => $value) {
+        $value = trim($value);
+
+        if (isset($needleArray[$value]) && is_array($needleArray[$value])) {
+            unset($arraySearchIndex[$key]);
+            return searchValue($arraySearchIndex, $needleArray[$value]);
+        }
+
+        if (isset($needleArray[$value])) {
+            return $needleArray[$value];
+        }
+
+        return $needleArray[$value] ?? "null";
+    }
+}
+
+while (!feof($fileEnvExample)) {
+    $line = fgets($fileEnvExample);
+    $option = explode('=', $line);
+    $key = $option[0];
+    $pathArray = explode('.', $key);
+    $mainConfig = [];
+    $mainConfigLocal = [];
+    $pathString = '';
+    foreach ($pathArray as $keyArray => $value) {
+        $pathString .= trim(($value));
+        if (is_dir($appPath . $pathString)) {
+            $pathString .= '/';
+            unset($pathArray[$keyArray]);
+            continue;
+        }
+
+        if (is_file($appPath . $pathString . '.php')) {
+            if (empty($requiredConfigs[$pathString])) {
+                $mainConfig = require($appPath . $pathString . '.php');
+            }
+            if (file_exists($appPath . $pathString . '-local.php')) {
+                if (empty($requiredConfigs[$pathString])) {
+                    $mainConfigLocal = require($appPath . $pathString . '-local.php');
+                }
+            }
+
+            if ($mainConfig || $mainConfigLocal) {
+                $requiredConfigs[$pathString] = ArrayHelper::merge($mainConfig, $mainConfigLocal);
+            }
+            unset($pathArray[$keyArray]);
+            break;
+        }
+    }
+
+    if (!empty($pathArray) && is_array($pathArray) && $requiredConfigs) {
+        $newEnvConfigs[$key] = $key . "=" . '"'. searchValue($pathArray, $requiredConfigs[$pathString]) . '"';
+    } else {
+        $newEnvConfigs[$key] = $key . "=" . '"'. trim(str_replace('"', '', $option[1])) . '"';
+    }
+}
+fclose($fileEnvExample);
+
+
+$content = implode("\r\n", $newEnvConfigs);
+
+file_put_contents($envFile, $content);

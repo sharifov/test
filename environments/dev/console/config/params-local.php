@@ -4,8 +4,8 @@ return [
     'serviceName' => 'sales-console',
 
     'webSocketServer' => [
-        'host' => '{{ console.config.params.webSocketServer.host:str }}',
-        'port' => '{{ console.config.params.webSocketServer.port:int }}',
+        'host' => env('console.config.params.webSocketServer.host'),
+        'port' => env('console.config.params.webSocketServer.port'),
         'mode' => SWOOLE_PROCESS,
         'sockType' => SWOOLE_SOCK_TCP,
         'settings' => [

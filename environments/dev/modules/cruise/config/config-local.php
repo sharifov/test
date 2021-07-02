@@ -4,9 +4,9 @@ return [
     'components' => [
         'apiService' => [
             'class' => \modules\cruise\components\ApiCruiseService::class,
-            'url' => '{{ modules.cruise.config.components.apiService.url:str }}',
-            'username' => '{{ modules.cruise.config.components.apiService.username:str }}',
-            'password' => '{{ modules.cruise.config.components.apiService.password:str }}',
+            'url' => env('modules.cruise.config.config.components.apiService.url'),
+            'username' => env('modules.cruise.config.config.components.apiService.username'),
+            'password' => env('modules.cruise.config.config.components.apiService.password'),
         ],
     ],
 ];

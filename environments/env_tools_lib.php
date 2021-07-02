@@ -64,6 +64,38 @@ function getEnvironmentList($root, $paths)
 }
 
 /**
+ * @param $root
+ * @param $paths
+ * @return array
+ */
+function getNewEnvironmentList($root, $paths)
+{
+    $envList = [];
+    foreach ($paths as $n => $file) {
+        $fileName = $root . '/' . $file;
+        $content = file_get_contents($fileName);
+
+        $matches = [];
+        preg_match_all('~env\((.*)\)~U', $content, $matches);
+        $count = 0;
+        if (!empty($matches[1])) {
+            foreach ($matches[1] as $key) {
+                $keyArray = explode(',', $key);
+                $key = trim(str_replace("'", '', $keyArray[0]));
+                $keyVal = trim(str_replace("'", '', $keyArray[1] ?? ''));
+
+                $envList[$key] = $keyVal;
+            }
+            $count = count($matches[1]);
+        }
+        if ($count) {
+            echo formatMessage($n . '. "' . $file . '" => ' . $count . " keys \n", ['fg-blue']);
+        }
+    }
+    return $envList;
+}
+
+/**
  * @param $envList
  * @param $root
  * @param $file
@@ -76,6 +108,26 @@ function saveEnvironmentList($envList, $root, $file)
     if ($envList) {
         foreach ($envList as $key => $value) {
             $lines[] = $key . '=' . $value;
+        }
+    }
+    $file = $root . '/' . $file;
+    $content = implode("\r\n", $lines);
+    return file_put_contents($file, $content);
+}
+
+/**
+ * @param $envList
+ * @param $root
+ * @param $file
+ * @return false|int
+ */
+function saveNewEnvironmentList($envList, $root, $file)
+{
+    $lines = [];
+    ksort($envList);
+    if ($envList) {
+        foreach ($envList as $key => $value) {
+            $lines[] = $key . '=""';
         }
     }
     $file = $root . '/' . $file;

@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'host' => '{{ webapi.config.params.host:str }}',
+    'host' => env('webapi.config.params.host'),
 ];
