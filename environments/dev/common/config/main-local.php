@@ -112,6 +112,9 @@ return [
             'username' => env('common.config.main.components.rchat.username'),
             'password' => env('common.config.main.components.rchat.password'),
             'host' => env('common.config.main.components.rchat.host'),
+            'url' => env('common.config.main.components.rchat.url'),
+            'apiServer' => env('common.config.main.components.rchat.apiServer'),
+            'chatApiScriptUrl' => env('common.config.main.components.rchat.chatApiScriptUrl')
         ],
         'chatBot' => [
             'class' => \common\components\ChatBot::class,

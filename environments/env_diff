@@ -5,8 +5,8 @@ require_once('env_tools_lib.php');
 
 $root = str_replace('\\', '/', __DIR__);
 $errors = [];
-$envFile = '.env';
-$envExampleFile = '.env.example';
+$envFile = '../.env';
+$envExampleFile = '../.env.example';
 $envPatchToFile = $root . '/' . $envFile;
 $envExamplePatchToFile = $root . '/' . $envExampleFile;
 
