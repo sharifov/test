@@ -93,7 +93,8 @@ return [
             'password' => '',
             'recordingUrl' => '',
             'xAccelRedirectUrl' => '',
-            'voipApiUsername' => 'sales'
+            'voipApiUsername' => 'sales',
+            'host' => ''
         ],
         'hybrid' => [
             'class' => \common\components\HybridService::class,
