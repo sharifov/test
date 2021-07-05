@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'s_name',
             's_type',
             's_value',
+            's_description',
             [
                 'attribute' => 's_updated_user_id',
                 'value' => static function (\common\models\Setting $model) {
