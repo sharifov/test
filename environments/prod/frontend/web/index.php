@@ -2,11 +2,12 @@
 
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../common/bootstrap/EnvLoader.php';
-(new \common\bootstrap\EnvLoader(__DIR__ . '/../../'))->load();
+$dotenv = (new \common\bootstrap\EnvLoader(__DIR__ . '/../../'))->load();
+$dotenv->validate();
 
 require __DIR__ . '/../../common/helpers/EnvHelper.php';
-defined('YII_DEBUG') or define('YII_DEBUG', env('YII_DEBUG', false));
-defined('YII_ENV') or define('YII_ENV', env('YII_ENV', 'prod'));
+defined('YII_DEBUG') or define('YII_DEBUG', env('YII_DEBUG', 'bool'));
+defined('YII_ENV') or define('YII_ENV', env('YII_ENV', 'str'));
 
 require __DIR__ . '/../../vendor/yiisoft/yii2/Yii.php';
 require __DIR__ . '/../../common/config/bootstrap.php';
