@@ -1535,7 +1535,7 @@ class CommunicationController extends ApiBaseController
 //              'answerOnBridge' => true,
 //              'recordingStatusCallbackMethod' => 'POST',
 //              'record' => 'record-from-answer-dual',
-//              'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
+//              'recordingStatusCallback' =>  Yii::$app->communication->host . '/v1/twilio-jwt/recording-callback',
 //          ]);
 //          $dial->client(UserCallIdentity::getId($user->id));
             $response['agent_username'][] = UserCallIdentity::getId($user->id);

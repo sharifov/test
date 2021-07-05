@@ -80,6 +80,7 @@ return [
         ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,
+            'host' => env('common.config.main.components.communication.host'),
             'url' => env('common.config.main.components.communication.url'),
             'username' => env('common.config.main.components.communication.username'),
             'password' => env('common.config.main.components.communication.password'),
