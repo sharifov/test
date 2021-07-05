@@ -1170,6 +1170,7 @@ class Call extends \yii\db\ActiveRecord
                     $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
                 }
             }
+            Yii::info('CallId: ' . $this->c_id . ', ' . VarDumper::dumpAsString($userListNotifications), 'info\debug:missedCallNotification');
 
             if ($userListNotifications) {
                 //$from = PhoneFormatter::getPhoneOrNickname($this->c_from);
