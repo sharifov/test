@@ -6,7 +6,8 @@
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/../../common/bootstrap/EnvLoader.php';
-(new \common\bootstrap\EnvLoader(__DIR__ . '/../../'))->load();
+$dotenv = (new \common\bootstrap\EnvLoader(__DIR__ . '/'))->load();
+$dotenv->validate();
 
 require __DIR__ . '/../../common/helpers/EnvHelper.php';
 defined('YII_DEBUG') or define('YII_DEBUG', env('YII_DEBUG', 'bool', true));
