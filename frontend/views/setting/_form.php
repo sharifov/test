@@ -65,6 +65,8 @@ use yii\widgets\ActiveForm;
 
         <?php //= $form->field($model, 's_value')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 's_description')->textarea() ?>
+
         <?php //= $form->field($model, 's_updated_dt')->textInput() ?>
 
         <?php //= $form->field($model, 's_updated_user_id')->textInput() ?>
