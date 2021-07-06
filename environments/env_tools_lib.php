@@ -66,9 +66,10 @@ function getEnvironmentList($root, $paths)
 /**
  * @param $root
  * @param $paths
+ * @param string $pattern
  * @return array
  */
-function getNewEnvironmentList($root, $paths)
+function getNewEnvironmentList($root, $paths, $pattern = '~env\((.*)\)~U')
 {
     $envList = [];
     foreach ($paths as $n => $file) {
@@ -76,7 +77,7 @@ function getNewEnvironmentList($root, $paths)
         $content = file_get_contents($fileName);
 
         $matches = [];
-        preg_match_all('~env\((.*)\)~U', $content, $matches);
+        preg_match_all($pattern, $content, $matches);
         $count = 0;
         if (!empty($matches[1])) {
             foreach ($matches[1] as $key) {

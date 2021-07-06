@@ -23,8 +23,7 @@ if (isset($env['skipFiles'])) {
     $files = array_diff($files, array_intersect_key($env['skipFiles'], array_filter($skipFiles, 'file_exists')));
 }
 
-$envList = getNewEnvironmentList($root, $files);
-
+$envList = array_merge(getNewEnvironmentList($root, $files), getNewEnvironmentList($root, $files, '~\{\{(.*)\}\}~U'));
 if (saveNewEnvironmentList($envList, $root, $tplEnvFile) ) {
     echo formatMessage("Data was successfully saved to file \"$root/$tplEnvFile\" !", ['fg-green']) . " \n";
 } else {
