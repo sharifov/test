@@ -15,7 +15,7 @@ class LeadAbacDto extends \stdClass
 {
     public bool $is_owner;
     public bool $has_owner;
-    public bool $is_common_group;
+    public bool $is_common_group = false;
     public ?int $status_id = null;
 
     /**
@@ -27,7 +27,9 @@ class LeadAbacDto extends \stdClass
         if ($lead) {
             $this->is_owner = $lead->isOwner($userId);
             $this->has_owner = $lead->hasOwner();
-            $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);
+            if ($lead->hasOwner()) {
+                $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);
+            }
             $this->status_id = $lead->status;
         }
     }
