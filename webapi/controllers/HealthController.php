@@ -6,29 +6,23 @@ use webapi\behaviors\HttpBasicAuthHealthCheck;
 use yii\rest\Controller;
 use yii\helpers\VarDumper;
 use Yii;
+use yii\web\NotFoundHttpException;
 
 /**
  * Class HealthCheckController
  * @package webapi\controllers
  *
- * @property bool $debug
- * @property Project $apiProject
- * @property ApiUser $apiUser
  *
  */
 
-class HealthCheckController extends Controller
+class HealthController extends Controller
 {
 
     public function init()
     {
-
+//VarDumper::dump($_SERVER); die;
         parent::init();
-
         Yii::$app->user->enableSession = false;
-        if (Yii::$app->request->get('debug')) {
-            $this->debug = true;
-        }
     }
 
     public function behaviors()
@@ -137,5 +131,14 @@ class HealthCheckController extends Controller
         }
 
         return $response;
+    }
+
+    public function actionDummy()
+    {
+        //return new NotFoundHttpException('Invalid route: Create new NginX config location for /health-check to run health-check php script instead index.php', 100);
+        return [
+            'message' => 'Error: Invalid route. Create new NginX config location for /health-check to run health-check php script instead index.php',
+            'code' => 401,
+        ];
     }
 }

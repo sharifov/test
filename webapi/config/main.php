@@ -175,6 +175,7 @@ return [
                     //'pluralize' => true,
                     //'tokens' => ['{id}' => '<id:\\d+>']
                 ],
+                'health-check' => 'health/dummy',
                 '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
