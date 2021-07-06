@@ -26,6 +26,8 @@ if (isset($config['components']['cache']['redis'])) {
     unset($config['components']['cache']['redis']);
 }
 
+$config['components']['urlManager']['rules'] = ['health-check' => 'health/index'];
+
 if (isset($config['bootstrap'])) {
     unset($config['bootstrap']);
 }

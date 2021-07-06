@@ -6,29 +6,22 @@ use webapi\behaviors\HttpBasicAuthHealthCheck;
 use yii\rest\Controller;
 use yii\helpers\VarDumper;
 use Yii;
+use yii\web\NotFoundHttpException;
 
 /**
- * Class HealthCheckController
+ * Class HealthController
  * @package webapi\controllers
  *
- * @property bool $debug
- * @property Project $apiProject
- * @property ApiUser $apiUser
  *
  */
 
-class HealthCheckController extends Controller
+class HealthController extends Controller
 {
 
     public function init()
     {
-
         parent::init();
-
         Yii::$app->user->enableSession = false;
-        if (Yii::$app->request->get('debug')) {
-            $this->debug = true;
-        }
     }
 
     public function behaviors()
@@ -109,7 +102,6 @@ class HealthCheckController extends Controller
         try {
             $connection = Yii::$app->db_postgres;
             $connection->attributes[\PDO::ATTR_TIMEOUT] = 1;      // setting postgresql PDO connection timeout to 1 sec
-//            $connection = new Yii\db\Connection($config);
             $connection->open();
             if ($connection->pdo == null) {
                 $response['postgresql'] = false;
@@ -137,5 +129,14 @@ class HealthCheckController extends Controller
         }
 
         return $response;
+    }
+
+    public function actionDummy()
+    {
+        //return new NotFoundHttpException('Invalid route: Create new NginX config location for /health-check to run health-check php script instead index.php', 100);
+        return [
+            'message' => 'Error: Invalid route. Create new NginX config location for /health-check to run health-check php script instead index.php',
+            'code' => 401,
+        ];
     }
 }
