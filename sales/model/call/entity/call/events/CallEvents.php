@@ -4,6 +4,7 @@ namespace sales\model\call\entity\call\events;
 
 use common\models\Call;
 use common\models\ConferenceParticipant;
+use sales\helpers\setting\SettingHelper;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Component;
 use yii\helpers\VarDumper;
@@ -44,14 +45,8 @@ class CallEvents extends Component
                 $userStatus->us_gl_call_count = 0;
             }
 
-            if ($call->c_parent_id && $call->isIn() && $call->isStatusCompleted()) {
+            if ($call->c_parent_id && $call->isIn() && $call->isStatusCompleted() && $call->c_source_type_id === Call::SOURCE_GENERAL_LINE && $call->c_call_duration > SettingHelper::getCallDurationSecondsGlCount()) {
                 $userStatus->us_gl_call_count = (int)$userStatus->us_gl_call_count + 1;
-                \Yii::info([
-                    'callSid' => $call->c_call_sid,
-                    'callId' => $call->c_id,
-                    'status' => $call->getStatusName(),
-                    'callCountGeneralLine' => $userStatus->us_gl_call_count
-                ], 'info\CallEvents::updateUserStatus');
             }
 
             $userStatus->us_is_on_call = Call::find()
