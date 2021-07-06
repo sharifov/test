@@ -9,7 +9,7 @@ use Yii;
 use yii\web\NotFoundHttpException;
 
 /**
- * Class HealthCheckController
+ * Class HealthController
  * @package webapi\controllers
  *
  *
@@ -20,7 +20,6 @@ class HealthController extends Controller
 
     public function init()
     {
-//VarDumper::dump($_SERVER); die;
         parent::init();
         Yii::$app->user->enableSession = false;
     }
@@ -103,7 +102,6 @@ class HealthController extends Controller
         try {
             $connection = Yii::$app->db_postgres;
             $connection->attributes[\PDO::ATTR_TIMEOUT] = 1;      // setting postgresql PDO connection timeout to 1 sec
-//            $connection = new Yii\db\Connection($config);
             $connection->open();
             if ($connection->pdo == null) {
                 $response['postgresql'] = false;
