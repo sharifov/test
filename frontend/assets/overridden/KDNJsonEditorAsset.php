@@ -7,14 +7,15 @@ use yii\web\AssetBundle;
 
 class KDNJsonEditorAsset extends AssetBundle
 {
-    public $sourcePath = '@npm/jsoneditor/dist';
+    public $sourcePath = null;
+    public $basePath = null;
 
     public $css = [
-        'jsoneditor.css',
+        'https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.4.1/jsoneditor.min.css',
     ];
 
     public $js = [
-        'jsoneditor.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.4.1/jsoneditor.min.js',
     ];
 
 }
