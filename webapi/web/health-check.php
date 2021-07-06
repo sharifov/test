@@ -19,6 +19,8 @@ $config = yii\helpers\ArrayHelper::merge(
     require __DIR__ . '/../config/main-local.php'
 );
 
+$config['components']['urlManager']['rules'] = ['health-check' => 'health/index'];
+
 if (isset($config['components']['cache']['class'])) {
     $config['components']['cache']['class'] = 'yii\caching\DummyCache';
 }
@@ -26,7 +28,6 @@ if (isset($config['components']['cache']['redis'])) {
     unset($config['components']['cache']['redis']);
 }
 
-$config['components']['urlManager']['rules'] = ['health-check' => 'health/index'];
 
 if (isset($config['bootstrap'])) {
     unset($config['bootstrap']);
