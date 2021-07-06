@@ -80,6 +80,10 @@ class EnvLoader
             $this->dotenv->required('YII_DEBUG')->notEmpty();
             $this->dotenv->required('YII_ENV')->notEmpty();
 
+            $this->dotenv->required('app.path')->notEmpty();
+            $this->dotenv->required('app.console.logfile.path')->notEmpty();
+            $this->dotenv->required('common.config.supervisor.queue.user')->notEmpty();
+
             $this->dotenv->required('common.config.main.components.db.dsn.dbname')->notEmpty();
             $this->dotenv->required('common.config.main.components.db.dsn.host')->notEmpty();
 
@@ -87,6 +91,9 @@ class EnvLoader
 
             $this->dotenv->required('common.config.main.components.db_postgres.dsn.host')->notEmpty();
             $this->dotenv->required('common.config.main.components.db_postgres.username')->notEmpty();
+
+            $this->dotenv->required('common.config.supervisor.socket_server.password')->notEmpty();
+            $this->dotenv->required('common.config.supervisor.socket_server.username')->notEmpty();
         } catch (ValidationException $e) {
             echo('Dotenv validation failed. ERROR: ' . $e->getMessage());
             exit;
