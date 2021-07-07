@@ -14,10 +14,12 @@ use yii\web\View;
 use yii\helpers\Url;
 use yii\bootstrap4\Modal;
 use sales\auth\Auth;
+use modules\lead\src\abac\LeadAbacObject;
 
 /**
  * @var Employee $user
  * @var $unsubscribedEmails array
+ * @var $leadAbacDto \stdClass
  */
 $user = Yii::$app->user->identity;
 
@@ -31,7 +33,10 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
             <h2><i class="fa fa-user-circle-o"></i> Client Info</h2>
             <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
             <ul class="nav navbar-right panel_toolbox">
-                <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess) : ?>
+                <?php /*if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess) : */?>
+
+                <?php /** @abac $leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Grant access to Main Menu in Client Info block on lead */ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
                     <li>
                         <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#', [
                             'id' => 'btn-client-info-details',
