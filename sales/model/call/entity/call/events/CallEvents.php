@@ -66,6 +66,9 @@ class CallEvents extends Component
             }
 
 //            $userStatus->us_is_on_call = $onCall;
+            if (!$userStatus->us_is_on_call && $userStatus->us_call_phone_status) {
+                $userStatus->updatePhoneReadyTime();
+            }
 
             if (!$userStatus->save()) {
                 \Yii::error(
