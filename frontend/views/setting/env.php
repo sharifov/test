@@ -172,11 +172,6 @@ $this->params['breadcrumbs'][] = $this->title;
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
-                <td>$_ENV</td>
-                <td><?php \yii\helpers\VarDumper::dump($_ENV, 10, true) ?></td>
-            </tr>
-            <tr>
-                <td><?php echo $paramsNum++ ?></td>
                 <td>DB_NAME</td>
                 <td><?php echo getenv('DB_NAME') ?></td>
             </tr>
