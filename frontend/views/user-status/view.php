@@ -1,5 +1,7 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
+use sales\model\user\entity\userStatus\UserStatus;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -35,6 +37,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'us_call_phone_status:boolean',
             'us_is_on_call:boolean',
             'us_has_call_access:boolean',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'us_phone_ready_time',
+                'value' => static function (UserStatus $model) {
+                    return $model->us_phone_ready_time ? date('Y-m-d H:i:s', $model->us_phone_ready_time) : null;
+                },
+                'format' => 'byUserDateTimeWithSeconds',
+            ],
             'us_updated_dt:byUserDateTime',
         ],
     ]) ?>

@@ -39,6 +39,10 @@ class UserCallStatusEvents extends Component
 
         $userStatus->us_call_phone_status = $callPhoneStatus;
 
+        if ($userStatus->us_call_phone_status) {
+            $userStatus->updatePhoneReadyTime();
+        }
+
         if (!$userStatus->save()) {
             \Yii::error(VarDumper::dumpAsString($userStatus->errors), 'UserCallStatusEvent:updateUserStatus:UserStatus:save');
         }
