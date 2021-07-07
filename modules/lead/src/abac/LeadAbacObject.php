@@ -26,11 +26,13 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
+    public const UI_MENU_CLIENT_INFO  = self::NS . 'ui/menu/client-info';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ACT_USER_CONVERSION    => self::ACT_USER_CONVERSION,
-        self::UI_BLOCK_CLIENT_INFO    => self::UI_BLOCK_CLIENT_INFO
+        self::UI_BLOCK_CLIENT_INFO    => self::UI_BLOCK_CLIENT_INFO,
+        self::UI_MENU_CLIENT_INFO    => self::UI_MENU_CLIENT_INFO
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -43,7 +45,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE],
-        self::UI_BLOCK_CLIENT_INFO => [self::ACTION_ACCESS]
+        self::UI_BLOCK_CLIENT_INFO => [self::ACTION_ACCESS],
+        self::UI_MENU_CLIENT_INFO => [self::ACTION_ACCESS]
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -99,12 +102,17 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
-         self::ACT_USER_CONVERSION    => [self::ATTR_LEAD_IS_OWNER],
-         self::UI_BLOCK_CLIENT_INFO   => [
-             self::ATTR_LEAD_IS_OWNER,
-             self::ATTR_LEAD_HAS_OWNER,
-             self::ATTR_IS_COMMON_GROUP
-         ],
+        self::ACT_USER_CONVERSION    => [self::ATTR_LEAD_IS_OWNER],
+        self::UI_BLOCK_CLIENT_INFO   => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
+        ],
+        self::UI_MENU_CLIENT_INFO    => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
+        ],
     ];
 
     /**
@@ -133,6 +141,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::UI_BLOCK_CLIENT_INFO][] = $attrStatus;
+        $attributeList[self::UI_MENU_CLIENT_INFO][] = $attrStatus;
 
         return $attributeList;
     }

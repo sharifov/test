@@ -136,6 +136,7 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id());
                     'is_manager' => $is_manager,
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
+                    'leadAbacDto' => $leadAbacDto,
                 ]) ?>
             <?php endif; ?>
 

@@ -27,9 +27,11 @@ class LeadAbacDto extends \stdClass
         if ($lead) {
             $this->is_owner = $lead->isOwner($userId);
             $this->has_owner = $lead->hasOwner();
-            if ($lead->hasOwner()) {
+
+            if ($this->has_owner) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);
             }
+
             $this->status_id = $lead->status;
         }
     }
