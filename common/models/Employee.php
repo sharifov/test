@@ -2468,7 +2468,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         //$query->groupBy(['uo.uo_user_id']);
-        $query->orderBy(['us.us_gl_call_count' => SORT_ASC]);
+        $sort = self::getUsersForCallQueueSort($call);
+
+        $sortAttributes = [
+            'general_line_call_count' => 'us.us_gl_call_count',
+            'phone_ready_time' => 'us.us_phone_ready_time'
+        ];
+
+        if (!empty($sort)) {
+            foreach ($sort as $key => $item) {
+                if (isset($sortAttributes[$key])) {
+                    $query->addOrderBy([$sortAttributes[$key] => $item]);
+                }
+            }
+        } else {
+            $query->addOrderBy(['us.us_phone_ready_time' => SORT_ASC]);
+        }
 
         if ($limit > 0) {
             $query->limit($limit);
@@ -2786,5 +2801,24 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $list;
+    }
+
+    private static function getUsersForCallQueueSort(Call $call): array
+    {
+        if ($call->c_dep_id && $params = $call->cDep->getParams()) {
+            if ($params->queueDistribution->callDistributionSort && $params->queueDistribution->callDistributionSort->generalLineCallCount) {
+                $sort['general_line_call_count'] = $params->queueDistribution->callDistributionSort->generalLineCallCount;
+            }
+
+            if ($params->queueDistribution->callDistributionSort && $params->queueDistribution->callDistributionSort->phoneReadyTime) {
+                $sort['phone_ready_time'] = $params->queueDistribution->callDistributionSort->phoneReadyTime;
+            }
+
+            if (!empty($sort)) {
+                return $sort;
+            }
+        }
+        $sort = SettingHelper::getCallDistributionSort();
+        return $sort;
     }
 }

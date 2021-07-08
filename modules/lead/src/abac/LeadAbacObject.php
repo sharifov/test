@@ -12,7 +12,7 @@ use modules\abac\src\entities\AbacInterface;
 class LeadAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'lead/';
+    private const NS = 'lead/lead/';
 
     /** ALL PERMISSIONS */
     public const ALL = self::NS . '*';
