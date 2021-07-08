@@ -1273,7 +1273,7 @@ class TestController extends FController
     {
         $call = new Call();
         $call->c_project_id = 6;
-        $call->c_dep_id = null;
+        $call->c_dep_id = 1;
 
         Employee::getUsersForCallQueue($call, 6);
     }
