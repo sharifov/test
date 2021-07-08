@@ -5,12 +5,13 @@ use common\models\Lead;
 use yii\helpers\Url;
 use yii\web\View;
 use sales\helpers\email\MaskEmailHelper;
+use modules\lead\src\abac\LeadAbacObject;
 
 /**
  * @var $this View
  * @var $lead Lead
  * @var $clientEmails ClientEmail[]
- * @var $manageClientInfoAccess bool
+ * @var $leadAbacDto \stdClass
  * @var $unsubscribedEmails array
  */
 $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
@@ -33,7 +34,8 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                         'clientId' => $email->client_id
                     ]) ?>"><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
                 <?php endif; ?>
-                <?php if ($manageClientInfoAccess) : ?>
+                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_ACCESS, Access to btn client edit email on lead*/ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_ACCESS)) : ?>
                     <a class="showModalButton" title="Edit Email" data-content-url="<?= Url::to([
                         'lead-view/ajax-edit-client-email-modal-content',
                         'gid' => $lead->gid,
