@@ -253,6 +253,9 @@ class LeadViewController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
+
         try {
             $form = new PhoneCreateForm();
             $form->client_id = $lead->client_id;
@@ -266,7 +269,7 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
                     'clientPhones' => $lead->client->clientPhones,
                     'lead' => $lead,
-                    //'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'disableMasking' => $disableMasking,
                     'leadAbacDto' => $leadAbacDto
                 ]);
             } else {
@@ -371,6 +374,9 @@ class LeadViewController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
+
         try {
             $form = new PhoneCreateForm();
             $form->scenario = 'update';
@@ -391,7 +397,7 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
                     'clientPhones' => $lead->client->clientPhones,
                     'lead' => $lead,
-                    //'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'disableMasking' => $disableMasking,
                     'leadAbacDto' => $leadAbacDto
                 ]);
             } else {
@@ -479,6 +485,9 @@ class LeadViewController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
+
         try {
             $form = new EmailCreateForm();
             $form->client_id = $lead->client_id;
@@ -492,8 +501,8 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
                     'clientEmails' => $lead->client->clientEmails,
                     'lead' => $lead,
-                    'leadAbacDto' => $leadAbacDto
-                    //'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'leadAbacDto' => $leadAbacDto,
+                    'disableMasking' => $disableMasking
                 ]);
             } else {
                 $response['error'] = true;
@@ -597,6 +606,9 @@ class LeadViewController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
+
         try {
             $form = new EmailCreateForm();
             $form->scenario = 'update';
@@ -617,8 +629,8 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
                     'clientEmails' => $lead->client->clientEmails,
                     'lead' => $lead,
-                    'leadAbacDto' => $leadAbacDto
-                    //'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'leadAbacDto' => $leadAbacDto,
+                    'disableMasking' => $disableMasking
                 ]);
             } else {
                 $response['error'] = true;
