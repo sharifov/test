@@ -38,13 +38,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ClientChatChannel::getList(),
             ],
             [
-                'attribute' => 'fromChannelProjectId',
-                'value' => static function (ClientChatChannelTransfer $model) {
-                    return $model->from->cccProject->name ?? null;
-                },
-                'filter' => \common\models\Project::getList()
-            ],
-            [
                 'attribute' => 'cctr_to_ccc_id',
                 'value' => static function (ClientChatChannelTransfer $model) {
                     return $model->from ? $model->to->ccc_name : null;
@@ -52,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ClientChatChannel::getList(),
             ],
             [
-                'attribute' => 'toChannelProjectId',
+                'attribute' => 'channelProjectId',
                 'value' => static function (ClientChatChannelTransfer $model) {
                     return $model->to->cccProject->name ?? null;
                 },

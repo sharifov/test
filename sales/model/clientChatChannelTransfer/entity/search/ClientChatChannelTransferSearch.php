@@ -13,14 +13,12 @@ use yii\helpers\ArrayHelper;
  * Class ClientChatChannelTransferSearch
  * @package sales\model\clientChatChannelTransfer\entity\search
  *
- * @property int|null $fromChannelProjectId
- * @property int|null $toChannelProjectId
+ * @property int|null $channelProjectId
  */
 class ClientChatChannelTransferSearch extends ClientChatChannelTransfer
 {
-    public $fromChannelProjectId;
 
-    public $toChannelProjectId;
+    public $channelProjectId;
 
     public function rules(): array
     {
@@ -29,7 +27,7 @@ class ClientChatChannelTransferSearch extends ClientChatChannelTransfer
 
             ['cctr_created_user_id', 'integer'],
 
-            [['fromChannelProjectId', 'toChannelProjectId'], 'integer'],
+            [['channelProjectId'], 'integer'],
 
             ['cctr_from_ccc_id', 'integer'],
 
@@ -56,15 +54,12 @@ class ClientChatChannelTransferSearch extends ClientChatChannelTransfer
             \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cctr_created_dt', $this->cctr_created_dt, $user->timezone);
         }
 
-        if ($this->fromChannelProjectId) {
-            $query->innerJoin(ClientChatChannel::tableName(), 'cctr_from_ccc_id = ccc_id and ccc_project_id = :fromProjectId', [
-                'fromProjectId' => $this->fromChannelProjectId
+        if ($this->channelProjectId) {
+            $query->innerJoin(ClientChatChannel::tableName() . ' as fromChannel', 'cctr_from_ccc_id = fromChannel.ccc_id and fromChannel.ccc_project_id = :fromProjectId', [
+                'fromProjectId' => $this->channelProjectId
             ]);
-        }
-
-        if ($this->toChannelProjectId) {
-            $query->innerJoin(ClientChatChannel::tableName(), 'cctr_to_ccc_id = ccc_id and ccc_project_id = :toProjectId', [
-                'toProjectId' => $this->toChannelProjectId
+            $query->innerJoin(ClientChatChannel::tableName() . ' as toChannel', 'cctr_to_ccc_id = toChannel.ccc_id and toChannel.ccc_project_id = :toProjectId', [
+                'toProjectId' => $this->channelProjectId
             ]);
         }
 
@@ -80,8 +75,7 @@ class ClientChatChannelTransferSearch extends ClientChatChannelTransfer
     public function attributeLabels(): array
     {
         return ArrayHelper::merge(parent::attributeLabels(), [
-           'fromChannelProjectId' => 'From Channel Project',
-           'toChannelProjectId' => 'To Channel Project',
+           'channelProjectId' => 'Channel Project',
         ]);
     }
 }
