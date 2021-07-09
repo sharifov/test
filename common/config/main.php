@@ -20,6 +20,20 @@ return [
             'password' => '',
             'charset' => 'utf8mb4',
         ],
+        'db_slave' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => '',
+            'username' => '',
+            'password' => '',
+            'charset' => 'utf8mb4',
+
+            'slaveConfig' => [
+                'username' => '',
+                'password' => ''
+            ],
+
+            'slaves' => []
+        ],
         'db_postgres' => [
             'class' => 'yii\db\Connection',
             'dsn' => '',

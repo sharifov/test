@@ -114,6 +114,11 @@ class CaseSale extends \yii\db\ActiveRecord
         return 'case_sale';
     }
 
+    public static function getDb()
+    {
+        return Yii::$app->get('db_slave');
+    }
+
     /**
      * {@inheritdoc}
      */
