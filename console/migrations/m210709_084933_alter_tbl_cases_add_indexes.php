@@ -22,6 +22,7 @@ class m210709_084933_alter_tbl_cases_add_indexes extends Migration
         $this->createIndex('IND_cases_order_uid', '{{%cases}}', 'cs_order_uid');
         $this->createIndex('IND_cases_cs_created_dt', '{{%cases}}', 'cs_created_dt');
         $this->createIndex('IND_cases_cs_updated_dt', '{{%cases}}', 'cs_updated_dt');
+        $this->createIndex('IND_cases_cs_need_action', '{{%cases}}', 'cs_need_action');
     }
 
     /**
@@ -39,5 +40,6 @@ class m210709_084933_alter_tbl_cases_add_indexes extends Migration
         $this->dropIndex('IND_cases_order_uid', '{{%cases}}');
         $this->dropIndex('IND_cases_cs_created_dt', '{{%cases}}');
         $this->dropIndex('IND_cases_cs_updated_dt', '{{%cases}}');
+        $this->dropIndex('IND_cases_cs_need_action', '{{%cases}}');
     }
 }
