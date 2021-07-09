@@ -18,6 +18,7 @@ use yii\helpers\Url;
  * @property int $s_id
  * @property string $s_key
  * @property string $s_name
+ * @property string $s_description
  * @property string $s_type
  * @property string $s_value
  * @property string $s_updated_dt
@@ -67,6 +68,7 @@ class Setting extends \yii\db\ActiveRecord
             [['s_updated_user_id', 's_category_id'], 'integer'],
             [['s_key', 's_name', 's_value'], 'string', 'max' => 700],
             [['s_type'], 'string', 'max' => 10],
+            [['s_description'], 'string', 'max' => 1000],
             [['s_key'], 'unique'],
             [['s_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['s_updated_user_id' => 'id']],
             [['s_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => SettingCategory::class, 'targetAttribute' => ['s_category_id' => 'sc_id']],
@@ -105,6 +107,7 @@ class Setting extends \yii\db\ActiveRecord
             's_id' => 'ID',
             's_key' => 'Key',
             's_name' => 'Name',
+            's_description' => 'Description',
             's_type' => 'Type',
             's_value' => 'Value',
             's_updated_dt' => 'Updated Dt',

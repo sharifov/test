@@ -22,6 +22,7 @@ use sales\helpers\setting\SettingHelper;
 
 class CasesQRepository
 {
+    private const CACHE_DURATION = 300;
 
     /**
      * @param Employee $user
@@ -29,7 +30,7 @@ class CasesQRepository
      */
     public function getPendingCount(Employee $user): int
     {
-        return $this->getPendingQuery($user)->count();
+        return $this->getPendingQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     /**
@@ -53,7 +54,7 @@ class CasesQRepository
      */
     public function getInboxCount(Employee $user): int
     {
-        return $this->getInboxQuery($user)->count();
+        return $this->getInboxQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     /**
@@ -85,7 +86,7 @@ class CasesQRepository
      */
     public function getNeedActionCount(Employee $user): int
     {
-        return $this->getNeedActionQuery($user)->count();
+        return $this->getNeedActionQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     public function getNeedActionQuery(Employee $user): ActiveQuery
@@ -122,7 +123,7 @@ class CasesQRepository
      */
     public function getFollowUpCount(Employee $user): int
     {
-        return $this->getFollowUpQuery($user)->count();
+        return $this->getFollowUpQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     /**
@@ -150,7 +151,7 @@ class CasesQRepository
      */
     public function getProcessingCount(Employee $user): int
     {
-        return $this->getProcessingQuery($user)->count();
+        return $this->getProcessingQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     /**
@@ -197,7 +198,7 @@ class CasesQRepository
      */
     public function getSolvedCount(Employee $user): int
     {
-        return $this->getSolvedQuery($user)->count();
+        return $this->getSolvedQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     /**
@@ -244,7 +245,7 @@ class CasesQRepository
      */
     public function getTrashCount(Employee $user): int
     {
-        return $this->getTrashQuery($user)->count();
+        return $this->getTrashQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     /**
@@ -291,7 +292,7 @@ class CasesQRepository
      */
     public function getUnidentifiedCount(Employee $user): int
     {
-        return $this->getUnidentifiedQuery($user)->count();
+        return $this->getUnidentifiedQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     public function getUnidentifiedQuery(Employee $user): ActiveQuery
@@ -315,7 +316,7 @@ class CasesQRepository
      */
     public function getFirstPriorityCount(Employee $user): int
     {
-        return $this->getFirstPriorityQuery($user)->count();
+        return $this->getFirstPriorityQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     public function getFirstPriorityQuery(Employee $user): Query
@@ -360,7 +361,7 @@ class CasesQRepository
      */
     public function getSecondPriorityCount(Employee $user): int
     {
-        return $this->getSecondPriorityQuery($user)->count();
+        return $this->getSecondPriorityQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     public function getSecondPriorityQuery(Employee $user): Query
@@ -406,7 +407,7 @@ class CasesQRepository
      */
     public function getPassDepartureCount(Employee $user): int
     {
-        return $this->getPassDepartureQuery($user)->count();
+        return $this->getPassDepartureQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     public function getPassDepartureQuery(Employee $user): Query

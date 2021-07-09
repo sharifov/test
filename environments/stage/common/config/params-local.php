@@ -2,85 +2,85 @@
 
 return [
     'appEnv' => 'stage',
-    'appInstance' => '{{ common.config.params.appInstance:str }}',
+    'appInstance' => env('common.config.params.appInstance'),
 
-    'url_address'      => '{{ common.config.params.url_address:str }}',
-    'url_api_address'  => '{{ common.config.params.url_api_address:str }}',
+    'url_address'      => env('common.config.params.url_address'),
+    'url_api_address'  => env('common.config.params.url_api_address'),
 
     'backOffice' => [
         'ver' => '1.0.0',
-        'apiKey' => '{{ common.config.params.backOffice.apiKey:str }}',
-        'serverUrl' => '{{ common.config.params.backOffice.serverUrl:str }}',
-        'serverUrlV2' => '{{ common.config.params.backOffice.serverUrlV2:str }}',
-        'serverUrlV3' => '{{ common.config.params.backOffice.serverUrlV3:str }}',
+        'apiKey' => env('common.config.params.backOffice.apiKey'),
+        'serverUrl' => env('common.config.params.backOffice.serverUrl'),
+        'serverUrlV2' => env('common.config.params.backOffice.serverUrlV2'),
+        'serverUrlV3' => env('common.config.params.backOffice.serverUrlV3'),
         'webHookEndpoint' => 'webhook/ping',
-        'username' => '{{ common.config.params.backOffice.username:str }}',
-        'password' => '{{ common.config.params.backOffice.password:str }}'
+        'username' => env('common.config.params.backOffice.username'),
+        'password' => env('common.config.params.backOffice.password')
     ],
 
     'crypt' => [
         'method'    => 'aes-256-cbc',
-        'password'  => '{{ common.config.params.crypt.password:str }}',
-        'iv'        => '{{ common.config.params.crypt.iv:str }}',
+        'password'  => env('common.config.params.crypt.password'),
+        'iv'        => env('common.config.params.crypt.iv'),
     ],
 
-    'cc_username_prefix' => '{{ common.config.params.cc_username_prefix:str }}',
+    'cc_username_prefix' => env('common.config.params.cc_username_prefix'),
 
     'telegram' => [
-        'webhook_url'   => '{{ common.config.params.telegram.webhook_url:str }}',
+        'webhook_url'   => env('common.config.params.telegram.webhook_url'),
     ],
 
-    'use_browser_call_access' => '{{ common.config.params.use_browser_call_access:bool }}',
+    'use_browser_call_access' => env('common.config.params.use_browser_call_access', 'bool'),
 
-    'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}',
+    'liveChatRealTimeVisitors' => env('common.config.params.liveChatRealTimeVisitors'),
 
     'price_line_ftp_credential' => [
-        'url' => '{{ common.config.params.price_line_ftp_credential.url:str }}',
-        'port' => '{{ common.config.params.price_line_ftp_credential.port:int }}',
-        'protocol' => '{{ common.config.params.price_line_ftp_credential.protocol:str }}',
+        'url' => env('common.config.params.price_line_ftp_credential.url'),
+        'port' => env('common.config.params.price_line_ftp_credential.port'),
+        'protocol' => env('common.config.params.price_line_ftp_credential.protocol'),
         'path' => 'reports',
-        'user' => '{{ common.config.params.price_line_ftp_credential.user:str }}',
-        'pass' => '{{ common.config.params.price_line_ftp_credential.pass:str }}',
+        'user' => env('common.config.params.price_line_ftp_credential.user'),
+        'pass' => env('common.config.params.price_line_ftp_credential.pass'),
     ],
 
     'centrifugo' => [
-        'enabled' => '{{ common.config.params.centrifugo.enabled:bool }}',
-        'wsConnectionUrl' => '{{ common.config.params.centrifugo.wsConnectionUrl:str }}',
+        'enabled' => env('common.config.params.centrifugo.enabled', 'bool'),
+        'wsConnectionUrl' => env('common.config.params.centrifugo.wsConnectionUrl'),
     ],
 
     'search' => [
-        'host' => '{{ common.config.params.search.host:str }}',
-        'sid' => '{{ common.config.params.search.sid:str }}',
-        'username' => '{{ common.config.params.search.username:str }}',
-        'password' => '{{ common.config.params.search.password:str }}'
+        'host' => env('common.config.params.search.host'),
+        'sid' => env('common.config.params.search.sid'),
+        'username' => env('common.config.params.search.username'),
+        'password' => env('common.config.params.search.password')
     ],
 
     'clientChat' => [
         'projectConfig' => [
             'params' => [
-                'endpoint' => '{{ common.config.params.clientChat.projectConfig.params.endpoint:str }}',
+                'endpoint' => env('common.config.params.clientChat.projectConfig.params.endpoint'),
             ]
         ]
     ],
 
     's3' => [
         'credentials' => [
-            'key' => '{{ common.config.params.s3.credentials.key:str }}',
-            'secret' => '{{ common.config.params.s3.credentials.secret:str }}',
+            'key' => env('common.config.params.s3.credentials.key'),
+            'secret' => env('common.config.params.s3.credentials.secret'),
         ],
         'region' => 'us-east-1',
         'version' => '2006-03-01',
     ],
     'fileStorage' => [
-        'useRemoteStorage' => '{{ common.config.params.fileStorage.useRemoteStorage:bool }}',
+        'useRemoteStorage' => env('common.config.params.fileStorage.useRemoteStorage', 'bool'),
         'remoteStorage' => [
             'cdn' => [
-                'host' => '{{ common.config.params.fileStorage.remoteStorage.cdn.host:str }}',
-                'prefix' => '{{ common.config.params.fileStorage.remoteStorage.cdn.prefix:str }}',
+                'host' => env('common.config.params.fileStorage.remoteStorage.cdn.host'),
+                'prefix' => env('common.config.params.fileStorage.remoteStorage.cdn.prefix'),
             ],
             's3' => [
-                'bucket' => '{{ common.config.params.fileStorage.remoteStorage.s3.bucket:str }}',
-                'prefix' => '{{ common.config.params.fileStorage.remoteStorage.s3.prefix:str }}',
+                'bucket' => env('common.config.params.fileStorage.remoteStorage.s3.bucket'),
+                'prefix' => env('common.config.params.fileStorage.remoteStorage.s3.prefix'),
                 'uploadConfig' => [
                     'visibility' => 'private',// Required: [private or public] for FlySystem -> ACL native S3
                     // League\Flysystem\AwsS3V3\AwsS3V3Adapter\AVAILABLE_OPTIONS
@@ -89,8 +89,8 @@ return [
             ],
         ],
         'localStorage' => [
-            'path' => '{{ common.config.params.fileStorage.localStorage.path:str }}',
-            'url' => '{{ common.config.params.fileStorage.localStorage.url:str }}',
+            'path' => env('common.config.params.fileStorage.localStorage.path'),
+            'url' => env('common.config.params.fileStorage.localStorage.url'),
             'converterConfig' => [
                 'fileDir' => [
                     'file' => [
@@ -109,4 +109,5 @@ return [
             ],
         ]
     ],
+    'ipinfodb_key' => env('common.config.params.ipinfodb_key')
 ];

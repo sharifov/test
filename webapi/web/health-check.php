@@ -2,7 +2,8 @@
 
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../common/bootstrap/EnvLoader.php';
-(new \common\bootstrap\EnvLoader(__DIR__ . '/../../'))->load();
+$dotenv = (new \common\bootstrap\EnvLoader(__DIR__ . '/../../'))->load();
+$dotenv->validate();
 
 require __DIR__ . '/../../common/helpers/EnvHelper.php';
 defined('YII_DEBUG') or define('YII_DEBUG', env('YII_DEBUG'));
@@ -18,12 +19,15 @@ $config = yii\helpers\ArrayHelper::merge(
     require __DIR__ . '/../config/main-local.php'
 );
 
+$config['components']['urlManager']['rules'] = ['health-check' => 'health/index'];
+
 if (isset($config['components']['cache']['class'])) {
     $config['components']['cache']['class'] = 'yii\caching\DummyCache';
 }
 if (isset($config['components']['cache']['redis'])) {
     unset($config['components']['cache']['redis']);
 }
+
 
 if (isset($config['bootstrap'])) {
     unset($config['bootstrap']);

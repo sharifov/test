@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Yii Composer'){
             steps{
-                sh "docker run --rm --tty --volume ${env.WORKSPACE}:/app composer:1.9.3 install --ignore-platform-reqs --no-interaction"
+                sh "composer install --ignore-platform-reqs --no-interaction"
                 echo "${env.WORKSPACE}"
             }
         }

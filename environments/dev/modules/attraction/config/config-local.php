@@ -1,12 +1,14 @@
 <?php
 
+use modules\attraction\components\ApiAttractionService;
+
 return [
     'components' => [
         'apiService' => [
-            'class' => \modules\attraction\components\ApiAttractionService::class,
-            'url' => '{{ modules.attraction.config.components.apiService.url:str }}',
-            'apiKey' => '{{ modules.attraction.config.components.apiService.apiKey:str }}',
-            'secret' => '{{ modules.attraction.config.components.apiService.secret:str }}',
+            'class' => ApiAttractionService::class,
+            'url' => env('modules.attraction.config.config.components.apiService.url'),
+            'apiKey' => env('modules.attraction.config.config.components.apiService.apiKey'),
+            'secret' => env('modules.attraction.config.config.components.apiService.secret'),
         ],
     ],
 ];

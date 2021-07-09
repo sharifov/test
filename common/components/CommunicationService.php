@@ -52,6 +52,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $securityConferenceRecordingUrl = '/conference/record/';
     public $xAccelRedirectUrl = '';
     public $voipApiUsername = '';
+    public $host = '';
 
 
     public function init(): void

@@ -8,6 +8,7 @@
 namespace common\bootstrap;
 
 use Dotenv\Dotenv;
+use Dotenv\Exception\ValidationException;
 use Dotenv\Repository\Adapter\EnvConstAdapter;
 use Dotenv\Repository\Adapter\PutenvAdapter;
 use Dotenv\Repository\Adapter\ServerConstAdapter;
@@ -31,6 +32,8 @@ class EnvLoader
      */
     public string $file = '.env';
 
+    private Dotenv $dotenv;
+
     /**
      * @param string|null $path
      * @param string|null $file
@@ -45,7 +48,7 @@ class EnvLoader
         }
     }
 
-    public function load()
+    public function load(): self
     {
         try {
             $repository = RepositoryBuilder::createWithNoAdapters()
@@ -60,13 +63,42 @@ class EnvLoader
 //                ->immutable()
 //                ->make();
 
-            $dotenv = Dotenv::create($repository, $this->path, $this->file);
-            $dotenv->load();
+            $this->dotenv = Dotenv::create($repository, $this->path, $this->file);
+            $this->dotenv->load();
 
             //$dotenv->required(['YII_DEBUG', 'YII_ENV']);
         } catch (\Exception $e) {
             echo('Could not load Dotenv file. ERROR: ' . $e->getMessage());
             exit;
         }
+        return $this;
+    }
+
+    public function validate(): self
+    {
+        try {
+            $this->dotenv->required('YII_DEBUG')->notEmpty();
+            $this->dotenv->required('YII_ENV')->notEmpty();
+
+            $this->dotenv->required('app.path')->notEmpty();
+            $this->dotenv->required('app.console.logfile.path')->notEmpty();
+            $this->dotenv->required('common.config.supervisor.queue.user')->notEmpty();
+
+            $this->dotenv->required('common.config.main.components.db.dsn.dbname')->notEmpty();
+            $this->dotenv->required('common.config.main.components.db.dsn.host')->notEmpty();
+
+            $this->dotenv->required('common.config.main.components.cache.redis.hostname')->notEmpty();
+
+            $this->dotenv->required('common.config.main.components.db_postgres.dsn.host')->notEmpty();
+            $this->dotenv->required('common.config.main.components.db_postgres.username')->notEmpty();
+
+            $this->dotenv->required('common.config.supervisor.socket_server.password')->notEmpty();
+            $this->dotenv->required('common.config.supervisor.socket_server.username')->notEmpty();
+        } catch (ValidationException $e) {
+            echo('Dotenv validation failed. ERROR: ' . $e->getMessage());
+            exit;
+        }
+
+        return $this;
     }
 }

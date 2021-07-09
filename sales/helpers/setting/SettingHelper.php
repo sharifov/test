@@ -365,4 +365,9 @@ class SettingHelper
     {
         return ArrayHelper::getValue(Yii::$app->params['settings'], 'call_terminate_black_list.' . $key);
     }
+
+    public static function getCallDurationSecondsGlCount(): int
+    {
+        return (int)(Yii::$app->params['settings']['call_duration_seconds_gl_count'] ?? 20);
+    }
 }
