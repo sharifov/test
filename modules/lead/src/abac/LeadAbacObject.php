@@ -39,6 +39,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
     public const UI_MENU_CLIENT_INFO  = self::NS . 'ui/menu/client-info';
 
+    /** LOGIC PERMISSION */
+    public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
+
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ACT_USER_CONVERSION   => self::ACT_USER_CONVERSION,
@@ -54,7 +57,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CLIENT_UNSUBSCRIBE    => self::ACT_CLIENT_UNSUBSCRIBE,
         self::UI_BLOCK_CLIENT_INFO  => self::UI_BLOCK_CLIENT_INFO,
         self::UI_MENU_CLIENT_INFO   => self::UI_MENU_CLIENT_INFO,
-        self::ACT_SEARCH_LEADS_BY_IP   => self::ACT_SEARCH_LEADS_BY_IP
+        self::ACT_SEARCH_LEADS_BY_IP   => self::ACT_SEARCH_LEADS_BY_IP,
+        self::LOGIC_CLIENT_DATA   => self::LOGIC_CLIENT_DATA,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -63,6 +67,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_READ    = 'read';
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
+    public const ACTION_UNMASK  = 'unmask';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -79,7 +84,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_MENU_CLIENT_INFO => [self::ACTION_ACCESS],
         self::ACT_CLIENT_SUBSCRIBE => [self::ACTION_ACCESS],
         self::ACT_CLIENT_UNSUBSCRIBE => [self::ACTION_ACCESS],
-        self::ACT_SEARCH_LEADS_BY_IP => [self::ACTION_ACCESS]
+        self::ACT_SEARCH_LEADS_BY_IP => [self::ACTION_ACCESS],
+        self::LOGIC_CLIENT_DATA  => [self::ACTION_UNMASK],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -201,6 +207,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_LEAD_HAS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+        self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
     ];
 
     /**

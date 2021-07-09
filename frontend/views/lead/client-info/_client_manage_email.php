@@ -13,6 +13,7 @@ use modules\lead\src\abac\LeadAbacObject;
  * @var $clientEmails ClientEmail[]
  * @var $leadAbacDto \stdClass
  * @var $unsubscribedEmails array
+ * @var $disableMasking bool
  */
 $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
 ?>
@@ -24,7 +25,7 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                 <?= ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '' ?>
                 <?= in_array($email->email, $unsubscribedEmails) ? '<i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '' ?>
             </td>
-            <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"> <?= \yii\helpers\Html::encode(MaskEmailHelper::masking($email->email))?></td>
+            <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"> <?= \yii\helpers\Html::encode(MaskEmailHelper::masking($email->email, $disableMasking))?></td>
 
             <td class="text-right" style="width: 70px">
                 <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_SAME_EMAIL_INFO, LeadAbacObject::ACTION_ACCESS, Access to btn The same user by email on lead*/ ?>

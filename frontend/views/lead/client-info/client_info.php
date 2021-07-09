@@ -21,6 +21,7 @@ use modules\lead\src\abac\LeadAbacObject;
  * @var $unsubscribedEmails array
  * @var $leadAbacDto \stdClass
  * @var $unsubscribe bool
+ * @var $disableMasking bool
  */
 $user = Yii::$app->user->identity;
 
@@ -157,7 +158,8 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                                     echo $this->render('_client_manage_phone', [
                                         'clientPhones' => $phones,
                                         'lead' => $lead,
-                                        'leadAbacDto' => $leadAbacDto
+                                        'leadAbacDto' => $leadAbacDto,
+                                        'disableMasking' => $disableMasking
                                     ]);
                                 }
                                 ?>
@@ -171,7 +173,8 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                                         'clientEmails' => $emails,
                                         'lead' => $lead,
                                         //'manageClientInfoAccess' => $manageClientInfoAccess
-                                        'leadAbacDto' => $leadAbacDto
+                                        'leadAbacDto' => $leadAbacDto,
+                                        'disableMasking' => $disableMasking
                                     ]);
                                 }
                                 ?>
@@ -234,7 +237,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 ])
 ?>
 <?php
-$clientInfoUrl = \yii\helpers\Url::to(['/lead/ajax-get-info']);
+$clientInfoUrl = \yii\helpers\Url::to(['/lead-view/ajax-get-info']);
 
 $js = <<<JS
     $(document).on('click', '#btn-client-info-details', function(e) {
