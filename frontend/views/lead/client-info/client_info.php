@@ -25,7 +25,7 @@ use modules\lead\src\abac\LeadAbacObject;
 $user = Yii::$app->user->identity;
 
 $formId = sprintf('%s-form', $leadForm->getClient()->formName());
-$manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user);
+//$manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user);
 
 ?>
 
@@ -185,10 +185,12 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                             'userId' => $user->id
                         ]) ?>
 
-                        <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
-                            <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
+                        <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS, Access to btn search leads by ip on lead*/ ?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS)) : ?>
+                            <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
+                                <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
+                            <?php endif; ?>
                         <?php endif; ?>
-
                     </div>
                 </div>
             </div>

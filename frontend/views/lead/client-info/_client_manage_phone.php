@@ -24,7 +24,7 @@ use modules\lead\src\abac\LeadAbacObject;
             <td> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode(MaskPhoneHelper::masking($phone->phone)) ?></span></td>
 
             <td class="text-right" style="width: 70px">
-                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to btn The same user by phone on lead*/ ?>
+                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_SAME_PHONE_INFO, LeadAbacObject::ACTION_ACCESS, Access to btn The same user by phone on lead*/ ?>
                 <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_SAME_PHONE_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
                     <?php if ($count = $phone->countUsersSamePhone()) : ?>
                         <a class="showModalButton" data-modal_id="client-large" title="The Same users by phone" data-content-url="<?= Url::to([

@@ -29,9 +29,11 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_USER_SAME_PHONE_INFO  = self::NS . 'act/user-same-phone-info';
     public const ACT_CLIENT_ADD_EMAIL  = self::NS . 'act/client-add-email';
     public const ACT_CLIENT_EDIT_EMAIL  = self::NS . 'act/client-edit-email';
+    public const ACT_USER_SAME_EMAIL_INFO  = self::NS . 'act/user-same-email-info';
     public const ACT_CLIENT_UPDATE  = self::NS . 'act/client-update';
     public const ACT_CLIENT_SUBSCRIBE  = self::NS . 'act/client-subscribe';
     public const ACT_CLIENT_UNSUBSCRIBE  = self::NS . 'act/client-unsubscribe';
+    public const ACT_SEARCH_LEADS_BY_IP  = self::NS . 'act/search-leads-by-ip';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -46,11 +48,13 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_USER_SAME_PHONE_INFO    => self::ACT_USER_SAME_PHONE_INFO,
         self::ACT_CLIENT_ADD_EMAIL    => self::ACT_CLIENT_ADD_EMAIL,
         self::ACT_CLIENT_EDIT_EMAIL    => self::ACT_CLIENT_EDIT_EMAIL,
+        self::ACT_USER_SAME_EMAIL_INFO    => self::ACT_USER_SAME_EMAIL_INFO,
         self::ACT_CLIENT_UPDATE    => self::ACT_CLIENT_UPDATE,
         self::ACT_CLIENT_SUBSCRIBE    => self::ACT_CLIENT_SUBSCRIBE,
         self::ACT_CLIENT_UNSUBSCRIBE    => self::ACT_CLIENT_UNSUBSCRIBE,
         self::UI_BLOCK_CLIENT_INFO  => self::UI_BLOCK_CLIENT_INFO,
-        self::UI_MENU_CLIENT_INFO   => self::UI_MENU_CLIENT_INFO
+        self::UI_MENU_CLIENT_INFO   => self::UI_MENU_CLIENT_INFO,
+        self::ACT_SEARCH_LEADS_BY_IP   => self::ACT_SEARCH_LEADS_BY_IP
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -64,16 +68,18 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJECT_ACTION_LIST = [
         self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE],
         self::ACT_CLIENT_DETAILS => [self::ACTION_ACCESS],
-        self::ACT_CLIENT_ADD_PHONE => [self::ACTION_ACCESS],
+        self::ACT_CLIENT_ADD_PHONE => [self::ACTION_ACCESS, self::ACTION_CREATE],
         self::ACT_CLIENT_EDIT_PHONE => [self::ACTION_ACCESS, self::ACTION_UPDATE],
         self::ACT_USER_SAME_PHONE_INFO => [self::ACTION_ACCESS],
-        self::ACT_CLIENT_ADD_EMAIL => [self::ACTION_ACCESS],
+        self::ACT_CLIENT_ADD_EMAIL => [self::ACTION_ACCESS, self::ACTION_CREATE],
         self::ACT_CLIENT_EDIT_EMAIL => [self::ACTION_ACCESS, self::ACTION_UPDATE],
+        self::ACT_USER_SAME_EMAIL_INFO => [self::ACTION_ACCESS],
         self::ACT_CLIENT_UPDATE => [self::ACTION_ACCESS],
         self::UI_BLOCK_CLIENT_INFO => [self::ACTION_ACCESS],
         self::UI_MENU_CLIENT_INFO => [self::ACTION_ACCESS],
         self::ACT_CLIENT_SUBSCRIBE => [self::ACTION_ACCESS],
-        self::ACT_CLIENT_UNSUBSCRIBE => [self::ACTION_ACCESS]
+        self::ACT_CLIENT_UNSUBSCRIBE => [self::ACTION_ACCESS],
+        self::ACT_SEARCH_LEADS_BY_IP => [self::ACTION_ACCESS]
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -185,6 +191,16 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_LEAD_HAS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+        self::ACT_USER_SAME_EMAIL_INFO    => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
+        ],
+        self::ACT_SEARCH_LEADS_BY_IP    => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
+        ],
     ];
 
     /**
@@ -223,6 +239,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_CLIENT_EDIT_PHONE][] = $attrStatus;
         $attributeList[self::ACT_USER_SAME_PHONE_INFO][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_EDIT_EMAIL][] = $attrStatus;
+        $attributeList[self::ACT_USER_SAME_EMAIL_INFO][] = $attrStatus;
+        $attributeList[self::ACT_SEARCH_LEADS_BY_IP][] = $attrStatus;
 
         return $attributeList;
     }

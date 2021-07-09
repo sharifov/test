@@ -27,12 +27,15 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
             <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"> <?= \yii\helpers\Html::encode(MaskEmailHelper::masking($email->email))?></td>
 
             <td class="text-right" style="width: 70px">
-                <?php if ($count = $email->countUsersSameEmail()) : ?>
-                    <a class="showModalButton" data-modal_id="client-large" title="The Same users by email" data-content-url="<?= Url::to([
-                        'lead-view/ajax-get-users-same-email-info',
-                        'email' => $email->email,
-                        'clientId' => $email->client_id
-                    ]) ?>"><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
+                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_SAME_EMAIL_INFO, LeadAbacObject::ACTION_ACCESS, Access to btn The same user by email on lead*/ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_SAME_EMAIL_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
+                    <?php if ($count = $email->countUsersSameEmail()) : ?>
+                        <a class="showModalButton" data-modal_id="client-large" title="The Same users by email" data-content-url="<?= Url::to([
+                            'lead-view/ajax-get-users-same-email-info',
+                            'email' => $email->email,
+                            'clientId' => $email->client_id
+                        ]) ?>"><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_ACCESS, Access to btn client edit email on lead*/ ?>
                 <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_ACCESS)) : ?>

@@ -94,6 +94,12 @@ class LeadViewController extends FController
     public function actionSearchLeadsByIp(): string
     {
         $lead = $this->findLeadByGid((string)Yii::$app->request->get('gid'));
+
+        /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS, Restrict access to action search leads by ip*/
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         if (!$lead->request_ip) {
             throw new NotFoundHttpException('Not found Lead with request ip');
         }
@@ -231,13 +237,16 @@ class LeadViewController extends FController
      */
     public function actionAjaxAddClientPhone()
     {
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
         $gid = (string)Yii::$app->request->get('gid');
         $lead = $this->findLeadByGid($gid);
-
-        if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        /*if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
             throw new HttpException(403, 'Access Denied');
+        }*/
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_CREATE, Restrict access to action client add phone on lead*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         try {
@@ -254,7 +263,7 @@ class LeadViewController extends FController
                     'clientPhones' => $lead->client->clientPhones,
                     'lead' => $lead,
                     //'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
-                    'leadAbacDto' => new LeadAbacDto($lead, Auth::id())
+                    'leadAbacDto' => $leadAbacDto
                 ]);
             } else {
                 $response['error'] = true;
@@ -279,7 +288,7 @@ class LeadViewController extends FController
             $gid = (string)Yii::$app->request->get('gid');
             $lead = $this->findLeadByGid($gid);
 
-            /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS, Access to action client edit phone on lead*/
+            /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_ACCESS, Access to action client edit phone on lead*/
             if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_ACCESS)) {
                 throw new ForbiddenHttpException('Access denied.');
             }
@@ -353,7 +362,7 @@ class LeadViewController extends FController
             throw new HttpException(403, 'Access Denied');
         }*/
 
-        /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS, Restrict access to action edit phone on lead*/
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_ACCESS, Restrict access to action edit phone on lead*/
         if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_UPDATE)) {
             throw new ForbiddenHttpException('Access denied.');
         }
@@ -386,8 +395,8 @@ class LeadViewController extends FController
                 $response['message'] = $this->getParsedErrors($form->getErrors());
             }
 
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return $response;
+
+            return $this->asJson($response);
         } catch (\Throwable $e) {
             Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientPhone:Throwable');
         }
@@ -454,13 +463,16 @@ class LeadViewController extends FController
      */
     public function actionAjaxAddClientEmail()
     {
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
         $gid = (string)Yii::$app->request->get('gid');
         $lead = $this->findLeadByGid($gid);
-
-        if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        /*if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
             throw new HttpException(403, 'Access Denied');
+        }*/
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_CREATE, Restrict access to action client add email on lead*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         try {
@@ -476,7 +488,8 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
                     'clientEmails' => $lead->client->clientEmails,
                     'lead' => $lead,
-                    'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'leadAbacDto' => $leadAbacDto
+                    //'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
                 ]);
             } else {
                 $response['error'] = true;
@@ -575,7 +588,7 @@ class LeadViewController extends FController
             throw new HttpException(403, 'Access Denied');
         }*/
 
-        /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_UPDATE, Restrict access to action edit phone on lead*/
+        /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_UPDATE, Restrict access to action edit phone on lead*/
         if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_UPDATE)) {
             throw new ForbiddenHttpException('Access denied.');
         }
