@@ -12,6 +12,7 @@ use modules\lead\src\abac\LeadAbacObject;
  * @var $lead Lead
  * @var $clientPhones ClientPhone[]
  * @var $leadAbacDto \stdClass
+ * @var $disableMasking bool
  */
 ?>
 
@@ -21,7 +22,7 @@ use modules\lead\src\abac\LeadAbacObject;
             <td title="<?= $phone::getPhoneType($phone->type) ?>" class="text-center" style="width:35px; background-color: #eef3f9">
                 <?= $phone::getPhoneTypeIcon($phone->type) ?>
             </td>
-            <td> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode(MaskPhoneHelper::masking($phone->phone)) ?></span></td>
+            <td> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode(MaskPhoneHelper::masking($phone->phone, $disableMasking)) ?></span></td>
 
             <td class="text-right" style="width: 70px">
                 <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_SAME_PHONE_INFO, LeadAbacObject::ACTION_ACCESS, Access to btn The same user by phone on lead*/ ?>

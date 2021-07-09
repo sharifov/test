@@ -22,14 +22,11 @@ use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
-use common\models\search\lead\LeadSearchByClient;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
-use modules\lead\src\abac\dto\LeadAbacDto;
-use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -48,7 +45,6 @@ use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
-use sales\entities\cases\CasesSearchByClient;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
@@ -2680,94 +2676,6 @@ class LeadController extends FController
     {
         $keyCache = Yii::$app->request->get('key_cache');
         return Yii::$app->cacheFile->get($keyCache);
-    }
-
-    /**
-     * @return string
-     * @throws NotFoundHttpException
-     * @throws \ReflectionException
-     */
-    public function actionAjaxGetInfo(): string
-    {
-        $model = $this->findLeadById(Yii::$app->request->post('lead_id'));
-        /** @abac new LeadAbacDto($model), LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS, Restrict access to action client details on lead*/
-        if (!Yii::$app->abac->can(new LeadAbacDto($model, Auth::id()), LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access denied.');
-        }
-
-        if (!$clientId = Yii::$app->request->post('client_id')) {
-            $clientId = Yii::$app->request->get('client_id');
-        }
-        $client = Client::findOne((int)$clientId);
-        //$case = Cases::findOne(Yii::$app->request->post('case_id'));
-
-        $providers = [];
-
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
-        $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id, $user);
-        $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id, Yii::$app->user->id);
-
-        return $this->renderAjax('client-info/ajax_info', ArrayHelper::merge(
-            [
-                'model' => $client,
-                'case' => null
-            ],
-            $providers
-        ));
-    }
-
-    /**
-     * @param int $clientId
-     * @param int $userId
-     * @return ActiveDataProvider
-     * @throws \ReflectionException
-     */
-    private function getCasesDataProvider(int $clientId, int $userId): ActiveDataProvider
-    {
-        $params[CasesSearchByClient::getShortName()]['clientId'] = $clientId;
-
-        $dataProvider = (new CasesSearchByClient())->search($params, $userId);
-
-        $dataProvider->query->orderBy(['cs_last_action_dt' => SORT_DESC]);
-
-        $dataProvider->sort = false;
-
-        $pagination = $dataProvider->pagination;
-        $pagination->pageSize = 10;
-        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
-        $pagination->pageParam = 'case-page';
-        $pagination->pageSizeParam = 'case-per-page';
-        $dataProvider->pagination = $pagination;
-
-        return $dataProvider;
-    }
-
-    /**
-     * @param int $clientId
-     * @param Employee $user
-     * @return ActiveDataProvider
-     * @throws \ReflectionException
-     */
-    private function getLeadsDataProvider(int $clientId, Employee $user): ActiveDataProvider
-    {
-        $params[LeadSearchByClient::getShortName()]['clientId'] = $clientId;
-
-        $dataProvider = (new LeadSearchByClient())->search($params, $user);
-
-        $dataProvider->query->orderBy(['l_last_action_dt' => SORT_DESC]);
-
-        $dataProvider->sort = false;
-
-        $pagination = $dataProvider->getPagination();
-        $pagination->pageSize = 10;
-        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
-        $pagination->pageParam = 'lead-page';
-        $pagination->pageSizeParam = 'lead-per-page';
-        $dataProvider->setPagination($pagination);
-
-        return $dataProvider;
     }
 
     /**

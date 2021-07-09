@@ -23,13 +23,6 @@ if ($model->project) {
     $unsubscribedEmails = array_column($model->project->emailUnsubscribes, 'eu_email');
 }
 
-if ($case) {
-    /** @abac new CasesAbacDto($case), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK, Disable mask client data on Case details popup */
-    $disableMasking = Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK);
-} else {
-    $disableMasking = false;
-}
-
 ?>
 <div class="row">
     <div class="col-md-6">

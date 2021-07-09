@@ -6,14 +6,14 @@ use yii\widgets\Pjax;
 /* @var $model common\models\Client */
 /* @var $leadsDataProvider yii\data\ActiveDataProvider */
 /* @var $casesDataProvider yii\data\ActiveDataProvider
- * @var $case \sales\entities\cases\Cases
+ * @var $disableMasking bool
  */
 
 ?>
 
 <div>
 
-    <?= $this->render('_client_info', ['model' => $model, 'case' => $case]) ?>
+    <?= $this->render('_client_info', ['model' => $model, 'disableMasking' => $disableMasking]) ?>
 
     <?php if ($model->isClient()) : ?>
             <?php Pjax::begin(['id' => 'client_leads_info', 'timeout' => 2000, 'enablePushState' => false]); ?>

@@ -8,6 +8,7 @@ use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\LeadPreferences;
 use common\models\search\ClientSearch;
+use common\models\search\lead\LeadSearchByClient;
 use frontend\models\LeadForm;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
@@ -15,6 +16,7 @@ use sales\access\ClientInfoAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\LeadPreferencesAccess;
 use sales\auth\Auth;
+use sales\entities\cases\CasesSearchByClient;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\services\client\ClientCreateForm;
@@ -30,6 +32,8 @@ use Yii;
 use common\models\Lead;
 use common\models\search\lead\LeadSearchByIp;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\HttpException;
@@ -843,6 +847,95 @@ class LeadViewController extends FController
     }
 
     /**
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \ReflectionException
+     */
+    public function actionAjaxGetInfo(): string
+    {
+        $user = Auth::user();
+        $model = $this->findLeadById(Yii::$app->request->post('lead_id'));
+        $leadAbacDto = new LeadAbacDto($model, $user->id);
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS, Restrict access to action client details on lead*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
+
+        if (!$clientId = Yii::$app->request->post('client_id')) {
+            $clientId = Yii::$app->request->get('client_id');
+        }
+        $client = Client::findOne((int)$clientId);
+
+        $providers = [];
+        $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id, $user);
+        $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id, $user->id);
+
+        return $this->renderAjax('ajax_info', ArrayHelper::merge(
+            [
+                'model' => $client,
+                'disableMasking' => $disableMasking
+            ],
+            $providers
+        ));
+    }
+
+    /**
+     * @param int $clientId
+     * @param int $userId
+     * @return ActiveDataProvider
+     * @throws \ReflectionException
+     */
+    private function getCasesDataProvider(int $clientId, int $userId): ActiveDataProvider
+    {
+        $params[CasesSearchByClient::getShortName()]['clientId'] = $clientId;
+
+        $dataProvider = (new CasesSearchByClient())->search($params, $userId);
+
+        $dataProvider->query->orderBy(['cs_last_action_dt' => SORT_DESC]);
+
+        $dataProvider->sort = false;
+
+        $pagination = $dataProvider->pagination;
+        $pagination->pageSize = 10;
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->pageParam = 'case-page';
+        $pagination->pageSizeParam = 'case-per-page';
+        $dataProvider->pagination = $pagination;
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param int $clientId
+     * @param Employee $user
+     * @return ActiveDataProvider
+     * @throws \ReflectionException
+     */
+    private function getLeadsDataProvider(int $clientId, Employee $user): ActiveDataProvider
+    {
+        $params[LeadSearchByClient::getShortName()]['clientId'] = $clientId;
+
+        $dataProvider = (new LeadSearchByClient())->search($params, $user);
+
+        $dataProvider->query->orderBy(['l_last_action_dt' => SORT_DESC]);
+
+        $dataProvider->sort = false;
+
+        $pagination = $dataProvider->getPagination();
+        $pagination->pageSize = 10;
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->pageParam = 'lead-page';
+        $pagination->pageSizeParam = 'lead-per-page';
+        $dataProvider->setPagination($pagination);
+
+        return $dataProvider;
+    }
+
+    /**
      * @param string $gid
      * @return Lead the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -853,6 +946,19 @@ class LeadViewController extends FController
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @param $id
+     * @return Lead the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findLeadById($id): Lead
+    {
+        if ($model = Lead::findOne($id)) {
+            return $model;
+        }
+        throw new NotFoundHttpException('Not found lead ID:' . $id);
     }
 
     /**
