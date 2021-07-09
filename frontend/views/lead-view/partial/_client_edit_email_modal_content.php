@@ -90,11 +90,19 @@ $('#client-edit-email-form').on('beforeSubmit', function (e) {
             }
        },
        error: function (error) {
-            new PNotify({
-                title: 'Error',
-                text: 'Internal Server Error. Try again letter.',
-                type: 'error'                
-            });
+            if(error.status == 403) {
+                new PNotify({
+                    title: error.statusText,
+                    text: error.responseText,
+                    type: 'warning'                
+                });
+            } else {                
+                new PNotify({
+                    title: 'Error',
+                    text: 'Internal Server Error. Try again letter.',
+                    type: 'error'                
+                });
+            }
        }
     })
     return false;
