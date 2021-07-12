@@ -15,8 +15,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
+use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\dto\LeadAbacDto;
 
-$user = Yii::$app->user->identity;
+$leadAbacDto = new LeadAbacDto($lead, Auth::id())
 ?>
 
 <div class="edit-name-modal-content-ghj">
@@ -39,22 +41,22 @@ $user = Yii::$app->user->identity;
 
     <?= $form->field($editName, 'middleName')->textInput() ?>
 
-    <?php if (Auth::can('global/client/locale/edit')) : ?>
+    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT, LeadAbacObject::ACTION_ACCESS, Field Locale in form Client Update*/ ?>
+    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT, LeadAbacObject::ACTION_UPDATE)) : ?>
         <?= $form->field($editName, 'locale')->dropDownList(Language::getLocaleList(false), ['prompt' => '-']) ?>
     <?php endif ?>
-    <?php if (Auth::can('global/client/marketing_country/edit')) : ?>
+
+    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_MARKETING_COUNTRY, LeadAbacObject::ACTION_ACCESS, Field Marketing Country */ ?>
+    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_MARKETING_COUNTRY, LeadAbacObject::ACTION_UPDATE)) : ?>
         <?php echo $form->field($editName, 'marketingCountry')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
     <?php endif ?>
 
-    <?=
-    $form->field($editName, 'id')->hiddenInput()->label(false)->error(false);
-    ?>
+    <?= $form->field($editName, 'id')->hiddenInput()->label(false)->error(false); ?>
 
     <div class="text-center">
         <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Update client', [
             'class' => 'btn btn-warning'
-        ])
-?>
+        ]) ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>
