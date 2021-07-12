@@ -65,7 +65,6 @@ class CouponUse extends \yii\db\ActiveRecord
             'cu_created_dt' => 'Created',
         ];
     }
-    
 
     public static function find(): CouponUseScopes
     {
