@@ -24,11 +24,11 @@ use yii\widgets\ActiveForm;
                     <div class="row">
                         <div class="col-md-6">
                             <?= $form->field($model, 'au_api_username')
-                                ->textInput(['maxlength' => true, 'autocomplete' => false]) ?>
+                                ->textInput(['maxlength' => true, 'autocomplete' => 'new-user']) ?>
                         </div>
                         <div class="col-md-6">
                             <?= $form->field($model, 'au_api_password')
-                                ->passwordInput(['maxlength' => true, 'autocomplete' => false]) ?>
+                                ->passwordInput(['maxlength' => true, 'autocomplete' => 'new-password']) ?>
                         </div>
                     </div>
 
