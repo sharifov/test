@@ -418,13 +418,13 @@ class Client extends ActiveRecord
     /**
      * @return array
      */
-    public function getPhoneNumbersSms(): array
+    public function getPhoneNumbersSms($maskState = false): array
     {
         $phoneList = [];
         $phones = $this->clientPhones;
         if ($phones) {
             foreach ($phones as $phone) {
-                $phoneList[$phone->phone] = MaskPhoneHelper::masking($phone->phone) . ($phone->is_sms ? ' (sms)' : '');
+                $phoneList[$phone->phone] = MaskPhoneHelper::masking($phone->phone, $maskState) . ($phone->is_sms ? ' (sms)' : '');
             }
         }
         return $phoneList;
