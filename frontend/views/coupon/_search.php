@@ -40,8 +40,6 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?php // echo $form->field($model, 'c_status_id') ?>
 
-    <?php // echo $form->field($model, 'c_used_dt') ?>
-
     <?php // echo $form->field($model, 'c_disabled') ?>
 
     <?php // echo $form->field($model, 'c_type_id') ?>

@@ -27,7 +27,6 @@ use yii\db\ActiveRecord;
  * @property int|null $c_reusable_count
  * @property int|null $c_public
  * @property int|null $c_status_id
- * @property string|null $c_used_dt
  * @property int|null $c_disabled
  * @property int|null $c_type_id
  * @property string|null $c_created_dt
@@ -79,8 +78,6 @@ class Coupon extends \yii\db\ActiveRecord
             ['c_type_id', 'required'],
             ['c_type_id', 'integer'],
             ['c_type_id', 'in', 'range' => array_keys(CouponType::getList())],
-
-            ['c_used_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -157,7 +154,6 @@ class Coupon extends \yii\db\ActiveRecord
             'c_reusable_count' => 'Reusable Count',
             'c_public' => 'Public',
             'c_status_id' => 'Status',
-            'c_used_dt' => 'Used Dt',
             'c_disabled' => 'Disabled',
             'c_type_id' => 'Type',
             'c_created_dt' => 'Created Dt',
