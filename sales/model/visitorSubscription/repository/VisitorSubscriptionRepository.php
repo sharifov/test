@@ -2,17 +2,31 @@
 
 namespace sales\model\visitorSubscription\repository;
 
+use sales\dispatchers\EventDispatcher;
 use sales\model\visitorSubscription\entity\VisitorSubscription;
 use sales\repositories\NotFoundException;
 
+/**
+ * Class VisitorSubscriptionRepository
+ * @package sales\model\visitorSubscription\repository
+ *
+ * @property-read EventDispatcher $eventDispatcher
+ */
 class VisitorSubscriptionRepository
 {
-    public function save(VisitorSubscription $subscription): int
+    private EventDispatcher $eventDispatcher;
+
+    public function __construct(EventDispatcher $eventDispatcher)
     {
-        if ($subscription->save()) {
-            return $subscription->vs_id;
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+    public function save(VisitorSubscription $subscription): void
+    {
+        if (!$subscription->save()) {
+            throw new \RuntimeException('Visitor subscription saving error: ' . $subscription->getErrorSummary(true)[0]);
         }
-        throw new \RuntimeException('Visitor subscription saving error: ' . $subscription->getErrorSummary(true)[0]);
+        $this->eventDispatcher->dispatchAll($subscription->releaseEvents());
     }
 
     public function findByUid(string $uid): VisitorSubscription
