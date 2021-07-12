@@ -81,11 +81,11 @@ class CouponSend extends \yii\db\ActiveRecord
     {
         return [
             'cus_id' => 'Id',
-            'cus_coupon_id' => 'Coupon ID',
-            'cus_user_id' => 'User ID',
+            'cus_coupon_id' => 'Coupon',
+            'cus_user_id' => 'User',
             'cus_type_id' => 'Type',
             'cus_send_to' => 'Send To',
-            'cus_created_dt' => 'Created Dt',
+            'cus_created_dt' => 'Created',
         ];
     }
 
