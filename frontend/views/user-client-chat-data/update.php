@@ -129,9 +129,9 @@ $this->params['breadcrumbs'][] = 'Manage';
                                         ->textInput(['maxlength' => true, 'title' => 'Display name of the user', 'id' => 'rcName']) ?>
 
                                     <?php echo $form->field($model, 'uccd_username')
-                                        ->textInput(['maxlength' => true, 'title' => 'Username for the user', 'id' => 'rcUserName']) ?>
+                                        ->textInput(['maxlength' => true, 'title' => 'Username for the user', 'id' => 'rcUserName','autocomplete' => 'new-user']) ?>
 
-                                    <?php echo $form->field($model, 'uccd_password')->passwordInput(['autocomplete' => 'off']) ?>
+                                    <?php echo $form->field($model, 'uccd_password')->passwordInput(['autocomplete' => 'new-password']) ?>
                                 </div>
                                 <div class="col-md-6">
                                     <?= $form->field($model, 'uccd_rc_user_id')->textInput(['maxlength' => true, 'disabled' => true]) ?>
