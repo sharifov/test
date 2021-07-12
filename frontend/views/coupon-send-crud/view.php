@@ -36,9 +36,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cus_coupon_id:coupon',
                 'cus_user_id:userName',
                 [
-                    'attribute' => 'cus_type',
+                    'attribute' => 'cus_type_id',
                     'value' => static function (CouponSend $model) {
-                        return CouponSend::getTypeName($model->cus_type);
+                        return CouponSend::getTypeName($model->cus_type_id);
                     },
                     'format' => 'raw',
                 ],

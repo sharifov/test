@@ -81,4 +81,12 @@ class CouponClient extends \yii\db\ActiveRecord
     {
         return 'coupon_client';
     }
+
+    public static function create(int $couponId, int $clientId): CouponClient
+    {
+        $model = new self();
+        $model->cuc_coupon_id = $couponId;
+        $model->cuc_client_id = $clientId;
+        return $model;
+    }
 }

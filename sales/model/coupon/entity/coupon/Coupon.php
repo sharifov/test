@@ -6,6 +6,7 @@ use common\models\Employee;
 use sales\entities\cases\Cases;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\entity\couponClient\CouponClient;
+use sales\model\coupon\entity\couponSend\CouponSend;
 use sales\model\coupon\entity\couponUse\CouponUse;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -40,6 +41,7 @@ use yii\db\ActiveRecord;
  * @property CouponCase[] $couponCases
  * @property CouponUse[] $couponUse
  * @property CouponClient[] $couponClient
+ * @property CouponSend[] $couponSend
  */
 class Coupon extends \yii\db\ActiveRecord
 {
@@ -129,6 +131,11 @@ class Coupon extends \yii\db\ActiveRecord
     public function getCouponClient(): \yii\db\ActiveQuery
     {
         return $this->hasMany(CouponClient::class, ['cuc_coupon_id' => 'c_id']);
+    }
+
+    public function getCouponSend(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(CouponSend::class, ['cus_coupon_id' => 'c_id']);
     }
 
     public function isSend(): bool

@@ -24,7 +24,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'cus_user_id') ?>
 
-    <?= $form->field($model, 'cus_type') ?>
+    <?= $form->field($model, 'cus_type_id') ?>
 
     <?= $form->field($model, 'cus_send_to') ?>
 

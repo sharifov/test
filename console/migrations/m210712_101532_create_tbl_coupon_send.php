@@ -36,7 +36,7 @@ class m210712_101532_create_tbl_coupon_send extends Migration
             'cus_id' => $this->primaryKey(),
             'cus_coupon_id' => $this->integer()->notNull(),
             'cus_user_id' => $this->integer(),
-            'cus_type' => $this->tinyInteger()->notNull()->defaultValue(1), // email
+            'cus_type_id' => $this->tinyInteger()->notNull()->defaultValue(1), // email
             'cus_send_to' => $this->string(50)->notNull(),
             'cus_created_dt' => $this->dateTime(),
         ], $tableOptions);

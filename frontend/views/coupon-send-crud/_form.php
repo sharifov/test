@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cus_user_id')->textInput() ?>
 
-        <?= $form->field($model, 'cus_type')->dropDownList(CouponSend::TYPE_LIST) ?>
+        <?= $form->field($model, 'cus_type_id')->dropDownList(CouponSend::TYPE_LIST) ?>
 
         <?= $form->field($model, 'cus_send_to')->textInput(['maxlength' => true]) ?>
 

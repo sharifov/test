@@ -15,7 +15,7 @@ use yii\helpers\ArrayHelper;
  * @property int $cus_id
  * @property int $cus_coupon_id
  * @property int|null $cus_user_id
- * @property int $cus_type
+ * @property int $cus_type_id
  * @property string $cus_send_to
  * @property string|null $cus_created_dt
  *
@@ -42,9 +42,9 @@ class CouponSend extends \yii\db\ActiveRecord
             ['cus_send_to', 'required'],
             ['cus_send_to', 'string', 'max' => 50],
 
-            ['cus_type', 'required'],
-            ['cus_type', 'integer'],
-            ['cus_type', 'in', 'range' => array_keys(self::TYPE_LIST)],
+            ['cus_type_id', 'required'],
+            ['cus_type_id', 'integer'],
+            ['cus_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
 
             ['cus_user_id', 'required'],
             ['cus_user_id', 'integer'],
@@ -83,7 +83,7 @@ class CouponSend extends \yii\db\ActiveRecord
             'cus_id' => 'Id',
             'cus_coupon_id' => 'Coupon ID',
             'cus_user_id' => 'User ID',
-            'cus_type' => 'Type',
+            'cus_type_id' => 'Type',
             'cus_send_to' => 'Send To',
             'cus_created_dt' => 'Created Dt',
         ];
@@ -102,5 +102,19 @@ class CouponSend extends \yii\db\ActiveRecord
     public static function getTypeName(?int $typeId): string
     {
         return self::TYPE_LIST[$typeId] ?? '';
+    }
+
+    public static function create(
+        int $couponId,
+        int $userId,
+        string $sendTo,
+        int $typeId = self::TYPE_EMAIL
+    ): CouponSend {
+        $model = new self();
+        $model->cus_coupon_id = $couponId;
+        $model->cus_user_id = $userId;
+        $model->cus_type_id = $typeId;
+        $model->cus_send_to = $sendTo;
+        return $model;
     }
 }

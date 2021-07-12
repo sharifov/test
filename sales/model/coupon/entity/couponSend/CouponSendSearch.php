@@ -18,7 +18,7 @@ class CouponSendSearch extends CouponSend
 
             ['cus_send_to', 'safe'],
 
-            ['cus_type', 'integer'],
+            ['cus_type_id', 'integer'],
 
             ['cus_user_id', 'integer'],
         ];
@@ -45,7 +45,7 @@ class CouponSendSearch extends CouponSend
             'cus_id' => $this->cus_id,
             'cus_coupon_id' => $this->cus_coupon_id,
             'cus_user_id' => $this->cus_user_id,
-            'cus_type' => $this->cus_type,
+            'cus_type_id' => $this->cus_type_id,
             'DATE(cus_created_dt)' => $this->cus_created_dt,
         ]);
 

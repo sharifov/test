@@ -37,8 +37,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'c_status_id')->dropDownList(CouponStatus::getList(), ['prompt' => 'Select status']) ?>
 
-        <?= $form->field($model, 'c_used_dt')->widget(DateTimePicker::class) ?>
-
         <?= $form->field($model, 'c_disabled')->checkbox() ?>
 
         <?= $form->field($model, 'c_type_id')->dropDownList(CouponType::getList()) ?>
