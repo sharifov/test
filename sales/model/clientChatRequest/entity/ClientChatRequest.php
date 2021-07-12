@@ -8,6 +8,7 @@ use sales\model\clientChat\ClientChatPlatform;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\AgentUtteredEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\ChatRequestEventCreator;
+use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestConnectedEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestDisconnectedEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestUtteredEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\RoomConnectedEventCreator;
@@ -65,6 +66,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         self::EVENT_TRACK => TrackEventCreator::class,
         self::EVENT_GUEST_UTTERED => GuestUtteredEventCreator::class,
         self::EVENT_AGENT_UTTERED => AgentUtteredEventCreator::class,
+        self::EVENT_GUEST_CONNECTED => GuestConnectedEventCreator::class
     ];
 
     private array $decodedJsonData = [];
