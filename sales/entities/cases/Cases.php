@@ -70,6 +70,11 @@ class Cases extends ActiveRecord implements Objectable
 {
     use EventTrait;
 
+    public static function getDb()
+    {
+        return Yii::$app->get('db_slave');
+    }
+
     /**
      * @return static
      */

@@ -13,10 +13,11 @@ if (! function_exists('env')) {
      * Gets the value of an environment variable. Supports boolean, empty and null.
      *
      * @param string $key
-     * @param  mixed   $default
+     * @param string|null $type
+     * @param mixed $default
      * @return mixed
      */
-    function env(string $key, $default = null)
+    function env(string $key, ?string $type = null, $default = null)
     {
         $value = getenv($key);
 
@@ -44,6 +45,26 @@ if (! function_exists('env')) {
 
         if (str_starts_with($value, '"') && str_ends_with($value, '"')) {
             return substr($value, 1, -1);
+        }
+
+        if ($type) {
+            switch ($type) {
+                case 'integer':
+                case 'int':
+                    return (int)$value;
+                case 'string':
+                case 'str':
+                    return (string)$value;
+                case 'null':
+                    return null;
+                case 'boolean':
+                case 'bool':
+                    return (bool)$value;
+                case 'float':
+                    return (float)$value;
+                case 'array':
+                    return (array)$value;
+            }
         }
 
         return $value;

@@ -76,6 +76,9 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
 
 $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+
+/** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+$disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
 ?>
 
 <?= $this->render('partial/_view_header', [
@@ -127,58 +130,19 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id());
 
         </div>
         <div class="col-md-6">
-            <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
-                <div class="alert alert-warning" role="alert">
-                    <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available in VIEW MODE, please take lead!</p>
-                </div>
 
-            <?php /*elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):*/?>
-
-                <div class="alert alert-warning" role="alert">
-                    <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available for this status (<?/*=strtoupper($lead->getStatusName())*/?>)!</p>
-                </div>
-
-            <?php /*else: */?>
-                <?php /*yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) */?>
-                <?/*= $this->render('client-info/client_info', [
-                    'lead' => $lead,
-                    'leadForm' => $leadForm,
-                    'is_manager' => $is_manager,
-                    'unsubscribe' => $unsubscribe
-                ]) */?>
-                <?php /*\yii\widgets\Pjax::end(); */?>
-            --><?php /*endif;*/?>
-
-            <?php if (Auth::can('lead-view/client-info/view', ['lead' => $lead])) : ?>
+            <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Give access to Client Info block on lead */ ?>
+            <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
                 <?= $this->render('client-info/client_info', [
                     'lead' => $lead,
                     'leadForm' => $leadForm,
                     'is_manager' => $is_manager,
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
+                    'leadAbacDto' => $leadAbacDto,
+                    'disableMasking' => $disableMasking
                 ]) ?>
             <?php endif; ?>
-
-            <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
-                <div class="alert alert-warning" role="alert">
-                    <h4 class="alert-heading">Warning!</h4>
-                    <p>Lead Preferences is not available in VIEW MODE, please take lead!</p>
-                </div>
-            <?php /*elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):*/?>
-
-                <div class="alert alert-warning" role="alert">
-                    <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available for this status (<?/*=strtoupper($lead->getStatusName())*/?>)!</p>
-                </div>
-            <?php /*else: */?>
-                <div id="lead-preferences">
-                    <?/*= $this->render('partial/_lead_preferences', [
-                        'lead' => $lead
-                    ]) */?>
-                </div>
-            --><?php /*endif; */?>
 
             <?php if (Auth::can('lead-view/lead-preferences/view', ['lead' => $lead])) : ?>
                 <div id="lead-preferences">
@@ -236,6 +200,7 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id());
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
                     'smsEnabled' => $smsEnabled,
+                    'disableMasking' => $disableMasking
                 ]); ?>
                 <?php /*else: */ ?><!--
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>-->

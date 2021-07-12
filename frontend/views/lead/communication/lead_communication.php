@@ -13,6 +13,7 @@
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
  * @var $unsubscribedEmails array
+ * @var $disableMasking bool
  */
 
 use common\models\Call;
@@ -86,8 +87,12 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
                         ],
                         'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
                         'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
-                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView) {
-                            return $this->render($listItemView, ['model' => $model, 'dataProvider' => $dataProvider]);
+                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView, $disableMasking) {
+                            return $this->render($listItemView, [
+                                    'model' => $model,
+                                    'dataProvider' => $dataProvider,
+                                    'disableMasking' => $disableMasking
+                                ]);
                         },
 
                         'itemOptions' => [

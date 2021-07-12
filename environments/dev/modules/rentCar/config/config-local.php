@@ -4,9 +4,9 @@ return [
     'components' => [
         'apiService' => [
             'class' => \modules\rentCar\components\ApiRentCarService::class,
-            'url' => '{{ modules.rentCar.config.components.apiService.url:str }}',
-            'refid' => '{{ modules.rentCar.config.components.apiService.refid:str }}',
-            'api_key' => '{{ modules.rentCar.config.components.apiService.api_key:str }}',
+            'url' => env('modules.rentCar.config.config.components.apiService.url'),
+            'refid' => env('modules.rentCar.config.config.components.apiService.refid'),
+            'api_key' => env('modules.rentCar.config.config.components.apiService.api_key'),
         ],
     ],
 ];

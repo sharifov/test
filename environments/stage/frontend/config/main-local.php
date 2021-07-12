@@ -3,7 +3,7 @@
 return [
     'components' => [
         'request' => [
-            'cookieValidationKey' => '{{ frontend.config.main.components.request.cookieValidationKey:str }}',
+            'cookieValidationKey' => env('frontend.config.main.components.request.cookieValidationKey'),
         ],
     ],
 ];

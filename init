@@ -210,7 +210,7 @@ function setCookieValidationKey($root, $paths)
 
 function setInitConfig($root, $paths)
 {
-    $envFile = $root . '/environments/.env';
+    $envFile = $root . '/.env';
     if (file_exists($envFile)) {
         $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         $envData = [];
@@ -261,7 +261,7 @@ function setInitConfig($root, $paths)
                             $replaceList[] = $val;
                             break;
                         default:
-                            $val = (string)str_replace("'", "\'", $value);
+                            $val = (string)str_replace(["'", '"'], "", $value);
 //                                $patternList[$nl] = '~(\{\{[ ]*' . $keyVal . '[ ]*\}\})~';
                             $patternList[] = '\'{{ ' . $keyVal . ' }}\'';
                             $replaceList[] = '\'' . $val . '\'';

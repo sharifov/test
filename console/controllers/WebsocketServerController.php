@@ -5,6 +5,7 @@ namespace console\controllers;
 use common\models\UserConnection;
 use common\models\UserOnline;
 use sales\model\user\entity\monitor\UserMonitor;
+use sales\model\user\entity\userStatus\UserStatus;
 use sales\services\clientChatService\ClientChatService;
 use Swoole\Redis;
 use Swoole\Table;
@@ -21,7 +22,6 @@ use yii\web\IdentityInterface;
  */
 class WebsocketServerController extends Controller
 {
-
     public function init()
     {
         \Yii::$app->log->flushInterval = 1;
@@ -213,6 +213,10 @@ class WebsocketServerController extends Controller
                             UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ACTIVE);
 
                             ClientChatService::createJobAssigningUaToPendingChats((int)$uo->uo_user_id);
+                            if (($userStatus = UserStatus::findOne(['us_user_id' => $userId])) && $userStatus->us_call_phone_status) {
+                                $userStatus->updatePhoneReadyTime();
+                                $userStatus->save();
+                            }
                         } else {
                             echo 'Error: UserOnline:save' . PHP_EOL;
                             \Yii::error($uo->errors, 'ws:open:UserOnline:save');

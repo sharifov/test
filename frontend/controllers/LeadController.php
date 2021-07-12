@@ -2667,6 +2667,8 @@ class LeadController extends FController
         return $this->render('import', ['model' => $form, 'log' => $logResult]);
     }
 
+
+
     /**
      * @return mixed|null
      */

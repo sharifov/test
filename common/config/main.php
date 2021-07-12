@@ -20,6 +20,20 @@ return [
             'password' => '',
             'charset' => 'utf8mb4',
         ],
+        'db_slave' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => '',
+            'username' => '',
+            'password' => '',
+            'charset' => 'utf8mb4',
+
+            'slaveConfig' => [
+                'username' => '',
+                'password' => ''
+            ],
+
+            'slaves' => []
+        ],
         'db_postgres' => [
             'class' => 'yii\db\Connection',
             'dsn' => '',
@@ -93,7 +107,8 @@ return [
             'password' => '',
             'recordingUrl' => '',
             'xAccelRedirectUrl' => '',
-            'voipApiUsername' => 'sales'
+            'voipApiUsername' => 'sales',
+            'host' => ''
         ],
         'hybrid' => [
             'class' => \common\components\HybridService::class,
@@ -223,12 +238,6 @@ return [
         ]
     ],
     'bootstrap' => [
-//        [
-//            'class' => \common\bootstrap\EnvLoader::class,
-//            'path' => '@vendor/../', // Directory of the .env file
-//            'file' => '.env', // Optional parameter if custom environment variable file
-//            'overload' => false, // overload already existing environment variables. Defaults to false
-//        ],
         'queue_sms_job',
         'queue_email_job',
         'queue_phone_check',

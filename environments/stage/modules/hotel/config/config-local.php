@@ -4,9 +4,9 @@ return [
     'components' => [
         'apiService' => [
             'class' => \modules\hotel\components\ApiHotelService::class,
-            'url' => '{{ modules.hotel.config.components.apiService.url:str }}',
-            'username' => '{{ modules.hotel.config.components.apiService.username:str }}',
-            'password' => '{{ modules.hotel.config.components.apiService.password:str }}',
+            'url' => env('modules.hotel.config.config.components.apiService.url'),
+            'username' => env('modules.hotel.config.config.components.apiService.username'),
+            'password' => env('modules.hotel.config.config.components.apiService.password'),
         ],
     ],
 ];

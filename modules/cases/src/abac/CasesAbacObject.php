@@ -8,7 +8,7 @@ use modules\abac\src\entities\AbacInterface;
 class CasesAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'cases/';
+    private const NS = 'case/case/';
 
     /** ALL PERMISSIONS */
     public const ALL = self::NS . '*';
@@ -34,12 +34,6 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'id' => self::NS . 'is_owner',
         'field' => 'is_owner',
         'label' => 'Is Owner',
-
-        /*'type' => self::ATTR_TYPE_INTEGER,
-        'input' => self::ATTR_INPUT_SELECT,
-        'values' => [1 => 'Unmask', 2 => 'Mask'],
-        'operators' =>  [self::OP_EQUAL2]*/
-
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
@@ -49,7 +43,9 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
-    public const OBJECT_ATTRIBUTE_LIST = [];
+    public const OBJECT_ATTRIBUTE_LIST = [
+        self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER],
+    ];
 
     /**
      * @return string[]
@@ -72,10 +68,6 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
-
-        $attributeList = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::LOGIC_CLIENT_DATA][] = self::ATTR_CASE_IS_OWNER;
-
-        return $attributeList;
+        return self::OBJECT_ATTRIBUTE_LIST;
     }
 }

@@ -81,6 +81,15 @@ use yii\widgets\MaskedInputAsset;
 Yii::setAlias('@webroot', __DIR__ . '/../../frontend/web');
 Yii::setAlias('@web', '/');
 
+$params = array_merge(
+    require __DIR__ . '/../../common/config/params.php',
+    require __DIR__ . '/../../common/config/params-local.php',
+    require __DIR__ . '/params.php',
+    require __DIR__ . '/params-local.php'
+);
+
+$appVersion = $params['release']['version'] ?? '';
+
 return [
     'jsCompressor' => 'gulp compress-js --gulpfile gulpfile.js --src {from} --dist {to}',
 
@@ -137,7 +146,7 @@ return [
         Timeline2Asset::class,
         TimelineAsset::class,
 
-        KDNJsonEditorAsset::class,
+//        KDNJsonEditorAsset::class,
         KartikExportMenuAsset::class,
         ExportColumnAsset::class,
         DropdownAsset::class,
@@ -210,16 +219,16 @@ return [
             ]
         ],
 
-        'GlyphiconAsset' => [
-            'class' => GlyphiconAsset::class,
-            'basePath' => '@webroot/fontawesome/build',
-            'baseUrl' => '@web/fontawesome/build',
-            'js' => 'glyphicon.min.js',
-            'css' => 'glyphicon.min.css',
-            'depends' => [
-                GlyphiconAsset::class,
-            ]
-        ],
+//        'GlyphiconAsset' => [
+//            'class' => GlyphiconAsset::class,
+//            'basePath' => '@webroot/fontawesome/build',
+//            'baseUrl' => '@web/fontawesome/build',
+//            'js' => 'glyphicon.min.js',
+//            'css' => 'glyphicon.min.css',
+//            'depends' => [
+//                GlyphiconAsset::class,
+//            ]
+//        ],
 
         'PageLoaderAsset' => [
             'class' => PageLoaderAsset::class,
@@ -489,14 +498,14 @@ return [
             'depends' => [ \dosamigos\datepicker\DatePickerAsset::class ],
         ],
 
-        'KDNJsonEditorAsset' => [
-            'class' => KDNJsonEditorAsset::class,
-            'basePath' => '@webroot/all_shared/build',
-            'baseUrl' => '@web/all_shared/build',
-            'js' => 'jsoneditor.min.js',
-            'css' => 'jsoneditor.min.css',
-            'depends' => [ KDNJsonEditorAsset::class, ],
-        ],
+//        'KDNJsonEditorAsset' => [
+//            'class' => KDNJsonEditorAsset::class,
+//            'basePath' => '@webroot/all_shared/build',
+//            'baseUrl' => '@web/all_shared/build',
+//            'js' => 'jsoneditor.min.js',
+//            'css' => 'jsoneditor.min.css',
+//            'depends' => [ KDNJsonEditorAsset::class, ],
+//        ],
         'KartikExportMenuAsset' => [
             'class' => KartikExportMenuAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -961,6 +970,13 @@ return [
                 'bsDependencyEnabled' => false,
                 'depends' => [JqueryAsset::class]
             ],
+            GlyphiconAsset::class => [
+                'css' => [],
+                'js' => [],
+                'basePath' => null,
+                'sourcePath' => null,
+                'depends' => []
+            ],
             FontAwesomeAsset::class => [
                 'depends' => [
                     JqueryAsset::class,
@@ -993,6 +1009,15 @@ return [
                 'basePath' => null,
                 'sourcePath' => null
             ],
+            \yii\jui\JuiAsset::class => [
+                'css' => ['https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.min.css'],
+                'js' => ['https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js'],
+                'basePath' => null,
+                'sourcePath' => null,
+                'depends' => [
+                    JqueryAsset::class
+                ]
+            ]
         ],
         'hashCallback' => static function ($path) {
             return hash('md4', $path);

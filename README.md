@@ -191,7 +191,24 @@ Dev Host:
 - [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
 - [api-sales.dev.travelinsides.com/doc/index.html](https://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
 
+Health check API:
+https://sales.api.travelinsides.com/health-check - Prod
+https://stage-sales-api.travel-dev.com/health-check - Stage
+https://api-sales.dev.travelinsides.com/health-check - Dev
+
+Success-Response (JSON format):
+HTTP/1.1 200 OK
+{
+    "mysql": true,
+    "postgresql": true,
+    "redis": true
+}
+If one or more components self-check fails then corresponding field return value "false" and HTTP status is 503 Service Unavailable.
+If app config param "apiHealthCheck" username is not empty base auth then API call requires Basic Auth with username/password from this config param.
+
+
 Generate API Documentation (apiDoc):
+
  ```
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc2" -t ./webapi/web/apidoc/template2 -f ".*\\.php$"
