@@ -7,6 +7,12 @@ use sales\model\visitorSubscription\entity\VisitorSubscription;
 use sales\model\visitorSubscription\repository\VisitorSubscriptionRepository;
 use sales\repositories\NotFoundException;
 
+/**
+ * Class VisitorSubscriptionApiManageService
+ * @package sales\model\visitorSubscription\service
+ *
+ * @property VisitorSubscriptionRepository $repository
+ */
 class VisitorSubscriptionApiManageService
 {
     /**

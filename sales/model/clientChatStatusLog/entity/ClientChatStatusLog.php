@@ -54,6 +54,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
     public const ACTION_MULTIPLE_ACCEPT = 22;
     public const ACTION_MULTIPLE_UPDATE_STATUS = 23;
     public const ACTION_PENDING_BY_DISTRIBUTION_LOGIC = 24;
+    public const ACTION_VISITOR_ENABLED_SUBSCRIPTION = 25;
 
     private const ACTION_LIST = [
         self::ACTION_OPEN => 'Open By Client',
@@ -80,6 +81,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_MULTIPLE_ACCEPT => 'Multiple Update Accept',
         self::ACTION_MULTIPLE_UPDATE_STATUS => 'Multiple Update Status',
         self::ACTION_PENDING_BY_DISTRIBUTION_LOGIC => 'Distribution logic',
+        self::ACTION_VISITOR_ENABLED_SUBSCRIPTION => 'Visitor enabled subscription',
     ];
 
     private const ACTION_LABEL_LIST = [
