@@ -501,8 +501,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
 
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
-                ['label' => 'Coupons', 'url' => ['/coupon/index'], 'icon' => 'list'],
 
+                [
+                    'label' => 'Coupons',
+                    'url' => 'javascript:',
+                    'icon' => 'ticket',
+                    'items' => [
+                        ['label' => 'Coupons', 'url' => ['/coupon/index'], 'icon' => 'list'],
+                        ['label' => 'Coupon Use', 'url' => ['/coupon-use-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Coupon Client', 'url' => ['/coupon-client-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Coupon Send', 'url' => ['/coupon-send-crud/index'], 'icon' => 'list'],
+                    ],
+                ],
                 [
                     'label' => 'Cases & Sale',
                     'url' => 'javascript:',

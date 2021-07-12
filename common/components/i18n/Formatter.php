@@ -714,6 +714,14 @@ class Formatter extends \yii\i18n\Formatter
         return CouponType::asFormat($value);
     }
 
+    public function asCoupon($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('i', '', ['class' => 'fa fa-ticket']) . ' ' . Html::a($value, ['/coupon/view', 'id' => $value], ['data-pjax' => 0, 'target' => '_blank']);
+    }
+
     public function asConferenceParticipantType($value): string
     {
         if ($value === null) {

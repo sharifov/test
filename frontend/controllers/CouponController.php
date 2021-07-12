@@ -10,6 +10,10 @@ use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\model\coupon\entity\coupon\CouponStatus;
 use sales\model\coupon\entity\couponCase\CouponCase;
+use sales\model\coupon\entity\couponClient\CouponClient;
+use sales\model\coupon\entity\couponClient\repository\CouponClientRepository;
+use sales\model\coupon\entity\couponSend\CouponSend;
+use sales\model\coupon\entity\couponSend\repository\CouponSendRepository;
 use sales\model\coupon\useCase\request\RequestCouponService;
 use sales\model\coupon\useCase\request\RequestForm;
 use sales\model\coupon\useCase\send\SendCouponsForm;
@@ -281,6 +285,14 @@ class CouponController extends FController
                             if ($coupon) {
                                 $coupon->c_status_id = CouponStatus::SEND;
                                 $coupon->save();
+
+                                if ($clientId = ArrayHelper::getValue($case, 'client.id')) {
+                                    $couponClient = CouponClient::create($coupon->c_id, $clientId);
+                                    (new CouponClientRepository())->save($couponClient);
+
+                                    $couponSend = CouponSend::create($coupon->c_id, Auth::id(), $mail->e_email_to);
+                                    (new CouponSendRepository())->save($couponSend);
+                                }
                             }
                         }
 

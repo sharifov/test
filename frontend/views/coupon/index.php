@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => CouponTypeColumn::class],
             ['class' => DateTimeColumn::class, 'attribute' => 'c_exp_date'],
             ['class' => DateTimeColumn::class, 'attribute' => 'c_start_date'],
-            ['class' => DateTimeColumn::class, 'attribute' => 'c_used_dt'],
+
             ['class' => DateTimeColumn::class, 'attribute' => 'c_created_dt'],
             ['class' => DateTimeColumn::class, 'attribute' => 'c_updated_dt'],
             ['class' => UserSelect2Column::class, 'attribute' => 'c_created_user_id', 'relation' => 'createdUser'],

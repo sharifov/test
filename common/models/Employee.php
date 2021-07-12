@@ -14,6 +14,7 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\model\coupon\entity\couponSend\CouponSend;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\AccessCache;
 use sales\model\user\entity\ShiftTime;
@@ -83,6 +84,8 @@ use yii\web\NotFoundHttpException;
  * @property UserClientChatData $userClientChatData
  * @property UserOnline $userOnline
  * @property UserStatus $userStatus
+ * @property CouponSend[] $couponSend
+ *
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
  * @property int $callExpertCountByShiftTime
@@ -470,6 +473,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasOne(UserStatus::class, ['us_user_id' => 'id']);
     }
 
+    public function getCouponSend(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(CouponSend::class, ['cus_user_id' => 'id']);
+    }
 
     /**
      * @return ActiveQuery
