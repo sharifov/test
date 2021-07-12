@@ -510,7 +510,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Coupons', 'url' => ['/coupon/index'], 'icon' => 'list'],
                         ['label' => 'Coupon Use', 'url' => ['/coupon-use-crud/index'], 'icon' => 'list'],
                         ['label' => 'Coupon Client', 'url' => ['/coupon-client-crud/index'], 'icon' => 'list'],
-                    ]
+                        ['label' => 'Coupon Send', 'url' => ['/coupon-send-crud/index'], 'icon' => 'list'],
+                    ],
                 ],
                 [
                     'label' => 'Cases & Sale',
