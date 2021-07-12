@@ -302,10 +302,10 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
                             $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
 
                             foreach ($clientEmails as $key => $element) {
-                                $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element);
+                                $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element, $disableMasking);
                             }
 
-                            $clientPhones = $leadForm->getClient()->getPhoneNumbersSms(); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
+                            $clientPhones = $leadForm->getClient()->getPhoneNumbersSms($disableMasking); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
 
                             if (Yii::$app->session->hasFlash('send-success')) {
                                 echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
