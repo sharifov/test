@@ -8,6 +8,8 @@ use common\components\CheckPhoneNumberJob;
 use common\models\Quote;
 use sales\forms\file\CsvUploadForm;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\lib\worldSpan\Baggage;
 use sales\services\parsingDump\lib\worldSpan\Pricing;
@@ -257,7 +259,10 @@ class ToolsController extends FController
 
     public function actionCheckPhone(): string
     {
-        $phone = trim(Yii::$app->request->get('phone', ''));
+        $phone = trim(Yii::$app->request->post('phone', ''));
+        $checkTwilio = (bool) Yii::$app->request->post('check_twilio', false);
+        $checkNeutrino = (bool) Yii::$app->request->post('check_neutrino', false);
+
         $errors = [];
         $dbResult = [];
         $apiResult = [];
@@ -268,9 +273,33 @@ class ToolsController extends FController
                 if (!$validator->validate($phone)) {
                     throw new \RuntimeException('Phone(' . $phone . ') not valid');
                 }
-                if (!$dbResult = ContactPhoneListService::getWidthServiceInfo($phone)) {
-                    $checkPhoneNeutrinoService = new CheckPhoneNeutrinoService($phone);
-                    $apiResult = $checkPhoneNeutrinoService->checkRequest();
+
+                if ($checkTwilio) {
+                    if ($twilioDbResult = ContactPhoneInfoService::findByPhoneAndService($phone, ContactPhoneServiceInfo::SERVICE_TWILIO)) {
+                        $dbResult['twilio'] = $twilioDbResult->toArray();
+                    } else {
+                        $apiResult['twilio'] = \Yii::$app->communication->twilioLookup($phone);
+                        $contactPhoneList = ContactPhoneListService::getOrCreate($phone);
+                        ContactPhoneInfoService::getOrCreate(
+                            $contactPhoneList->cpl_id,
+                            ContactPhoneServiceInfo::SERVICE_TWILIO,
+                            $apiResult['twilio']
+                        );
+                    }
+                }
+
+                if ($checkNeutrino) {
+                    if ($neutrinoDbResult = ContactPhoneInfoService::findByPhoneAndService($phone, ContactPhoneServiceInfo::SERVICE_NEUTRINO)) {
+                        $dbResult['neutrino'] = $neutrinoDbResult->toArray();
+                    } else {
+                        $apiResult['neutrino'] = (new CheckPhoneNeutrinoService($phone))->checkRequest();
+                        $contactPhoneList = ContactPhoneListService::getOrCreate($phone);
+                        ContactPhoneInfoService::getOrCreate(
+                            $contactPhoneList->cpl_id,
+                            ContactPhoneServiceInfo::SERVICE_NEUTRINO,
+                            $apiResult['neutrino']
+                        );
+                    }
                 }
             } catch (\Throwable $throwable) {
                 $errors[] = $throwable->getMessage();
@@ -282,6 +311,8 @@ class ToolsController extends FController
             'errors' => $errors,
             'dbResult' => $dbResult,
             'apiResult' => $apiResult,
+            'checkTwilio' => $checkTwilio,
+            'checkNeutrino' => $checkNeutrino,
         ]);
     }
 
