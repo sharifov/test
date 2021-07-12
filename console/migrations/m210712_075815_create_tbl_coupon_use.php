@@ -59,6 +59,7 @@ class m210712_075815_create_tbl_coupon_use extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('FK-coupon_use-cu_coupon_id', '{{%coupon_use}}');
         $this->dropTable('{{%coupon_use}}');
 
         (new RbacMigrationService())->down($this->routes, $this->roles);
