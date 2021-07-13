@@ -13,6 +13,7 @@ use yii\base\Model;
  * @property $expirationDate
  * @property $reusableCount
  * @property $public
+ * @property $reusable
  */
 class CouponCreateForm extends Model
 {
@@ -22,7 +23,8 @@ class CouponCreateForm extends Model
     public $startDate;
     public $expirationDate;
     public $reusableCount;
-    public $public = false;
+    public $public;
+    public $reusable;
 
     public function rules(): array
     {
@@ -32,13 +34,13 @@ class CouponCreateForm extends Model
 
             ['amount', 'required', 'when' => static function ($model) {
                 return empty($model->percent);
-            }],
+            }, 'message' => 'Amount cannot be blank if percent is empty'],
             ['amount', 'integer'],
             ['amount', 'filter', 'filter' => 'intval'],
 
             ['percent', 'required', 'when' => static function ($model) {
                 return empty($model->amount);
-            }],
+            }, 'message' => 'Percent cannot be blank if amount is empty'],
             ['percent', 'integer'],
             ['percent', 'filter', 'filter' => 'intval'],
 
@@ -54,13 +56,12 @@ class CouponCreateForm extends Model
 
             [['expirationDate'], 'checkDate'],
 
-            ['reusableCount', 'integer', 'min' => 1],
-            ['reusableCount', 'default', 'value' => 1],
-            ['reusableCount', 'filter', 'filter' => 'intval'],
+            ['reusableCount', 'integer'],
+            ['reusableCount', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['public', 'boolean'],
-            ['public', 'default', 'value' => false],
-            ['public', 'filter', 'filter' => 'boolval'],
+            [['reusable', 'public'], 'boolean'],
+            [['reusable', 'public'], 'default', 'value' => false],
+            [['reusable', 'public'], 'filter', 'filter' => 'boolval'],
         ];
     }
 

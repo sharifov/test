@@ -22,14 +22,14 @@ class CouponApiCreateService
     {
         $coupon = new Coupon();
         $coupon->c_status_id = CouponStatus::NEW;
-        $coupon->c_type_id = self::detectTypeCoupon($couponCreateForm->reusableCount);
+        $coupon->c_type_id = self::detectTypeCoupon($couponCreateForm->reusable);
         $coupon->c_code = $code ?? self::uniqCodeGenerator();
         $coupon->c_start_date = $couponCreateForm->startDate;
         $coupon->c_exp_date = $couponCreateForm->expirationDate;
         $coupon->c_amount = $couponCreateForm->amount;
         $coupon->c_currency_code = $couponCreateForm->currencyCode;
         $coupon->c_public = $couponCreateForm->public;
-        $coupon->c_reusable = ($couponCreateForm->reusableCount > 1);
+        $coupon->c_reusable = $couponCreateForm->reusable;
         $coupon->c_reusable_count = $couponCreateForm->reusableCount;
         return $coupon;
     }
@@ -54,12 +54,9 @@ class CouponApiCreateService
         return null;
     }
 
-    private static function detectTypeCoupon(int $reusableCount): int
+    private static function detectTypeCoupon(bool $reusable): int
     {
-        if ($reusableCount > 1) {
-            return CouponType::COUPON;
-        }
-        return CouponType::VOUCHER;
+        return ($reusable) ? CouponType::COUPON : CouponType::VOUCHER;
     }
 
     private static function requestCodeFromAirSearch(?string $amountCurrencyCode): ?string

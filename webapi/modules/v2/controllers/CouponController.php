@@ -45,7 +45,6 @@ class CouponController extends BaseController
         $config = []
     ) {
         $this->transactionManager = $transactionManager;
-
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -66,7 +65,8 @@ class CouponController extends BaseController
      * @apiParam {int}                          amount                      Amount
      * @apiParam {string{3}}                    currencyCode                Currency Code (USD)
      * @apiParam {int}                          [percent]                   Percent (required if amount is empty)
-     * @apiParam {int}                          [reusableCount]             Reusable Count (default 1)
+     * @apiParam {bool}                         [reusable]                  Reusable (default false)
+     * @apiParam {int}                          [reusableCount]             Reusable Count
      * @apiParam {string{format yyyy-mm-dd}}    [startDate]                 Start Date
      * @apiParam {string{format yyyy-mm-dd}}    [expirationDate]            Expiration Date
      * @apiParam {bool}                         [public]                    Public (default false)
@@ -76,7 +76,7 @@ class CouponController extends BaseController
             "amount": 25,
             "currencyCode": "USD",
             "percent": "",
-            "reusableCount": 1,
+            "reusableCount": 3,
             "startDate": "2021-12-20",
             "expirationDate": "2021-12-25"
      *  }
@@ -88,7 +88,7 @@ class CouponController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     *            "code": "DUEYEWH64BDGD3Y"
+     *            "code": "D2EYEWH64BDGD3Y"
      *        },
      *        "technical": {
      *           ...
@@ -165,16 +165,14 @@ class CouponController extends BaseController
 
         try {
             $code = CouponApiCreateService::getCodeFromAirSearch($couponCreateForm);
-
             $couponCode = $this->transactionManager->wrap(static function () use ($couponCreateForm, $code) {
                 $coupon = CouponApiCreateService::createFromApiForm($couponCreateForm, $code);
                 $coupon = (new CouponRepository())->save($coupon);
-
                 return $coupon->c_code;
             });
         } catch (\Throwable $throwable) {
             \Yii::error(
-                ['throwable' => AppHelper::throwableLog($throwable, true), 'post' => $post],
+                ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
                 'CouponController:actionCreate:Throwable'
             );
             return new ErrorResponse(
