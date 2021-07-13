@@ -114,13 +114,10 @@ JS;
           <li>
             <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
           </li>
-
-
         </ul>
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block">
-
         <?= ListView::widget([
             'dataProvider' => $dataProvider,
             'itemView' => '_quote_item',
@@ -137,9 +134,9 @@ JS;
                 'tag' => false,
             ],
         ]);?>
-
-        <?= $this->render('_quote_clone_by_id', ['lead' => $leadForm->getLead()])?>
     </div>
+
+    <?= $this->render('_quote_clone_by_id', ['lead' => $leadForm->getLead()])?>
 </div>
 <?php Pjax::end() ?>
 

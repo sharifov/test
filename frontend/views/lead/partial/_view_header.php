@@ -109,7 +109,7 @@ if ($lead->l_expiration_dt && !LeadHelper::expiredLead($lead)) :
         $('#clock-expiration')
             .timer('remove')
             .timer({
-                format: '%Hh %Mm %Ss', 
+                format: '%Dd %Hh %Mm %Ss', 
                 duration: leftTime, 
                 countdown: true,
                 callback: function() {

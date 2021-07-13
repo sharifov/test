@@ -14,8 +14,11 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
+use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use sales\auth\Auth;
 
-$user = Yii::$app->user->identity;
+$leadAbacDto = new LeadAbacDto($lead, Auth::id())
 ?>
 
 <div class="edit-phone-modal-content-ghj">
@@ -31,7 +34,9 @@ $user = Yii::$app->user->identity;
 
     <?= $form->errorSummary($editEmail) ?>
 
-    <?php if ($user->isAdmin() || $user->isSuperAdmin()) : ?>
+    <?php /*if ($user->isAdmin() || $user->isSuperAdmin()) : */?>
+    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_EMAIL_FROM_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS, Access Field Email in form Edit Email*/ ?>
+    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_EMAIL_FORM_ADD_EMAIL, LeadAbacObject::ACTION_UPDATE)) : ?>
         <?=
         $form->field($editEmail, 'email', [
             'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',

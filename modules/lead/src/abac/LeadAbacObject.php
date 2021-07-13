@@ -38,6 +38,10 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
     public const UI_MENU_CLIENT_INFO  = self::NS . 'ui/menu/client-info';
+    public const UI_FIELD_PHONE_FORM_ADD_PHONE = self::NS . 'ui/field/phone';
+    public const UI_FIELD_EMAIL_FORM_ADD_EMAIL = self::NS . 'ui/field/email';
+    public const UI_FIELD_LOCALE_FORM_UPDATE_CLIENT = self::NS . 'ui/field/locale';
+    public const UI_FIELD_MARKETING_COUNTRY = self::NS . 'ui/field/marketing_country';
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
@@ -59,6 +63,10 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_MENU_CLIENT_INFO   => self::UI_MENU_CLIENT_INFO,
         self::ACT_SEARCH_LEADS_BY_IP   => self::ACT_SEARCH_LEADS_BY_IP,
         self::LOGIC_CLIENT_DATA   => self::LOGIC_CLIENT_DATA,
+        self::UI_FIELD_PHONE_FORM_ADD_PHONE   => self::UI_FIELD_PHONE_FORM_ADD_PHONE,
+        self::UI_FIELD_EMAIL_FORM_ADD_EMAIL   => self::UI_FIELD_EMAIL_FORM_ADD_EMAIL,
+        self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT   => self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT,
+        self::UI_FIELD_MARKETING_COUNTRY   => self::UI_FIELD_MARKETING_COUNTRY
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -86,6 +94,10 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CLIENT_UNSUBSCRIBE => [self::ACTION_ACCESS],
         self::ACT_SEARCH_LEADS_BY_IP => [self::ACTION_ACCESS],
         self::LOGIC_CLIENT_DATA  => [self::ACTION_UNMASK],
+        self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ACTION_CREATE, self::ACTION_UPDATE],
+        self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ACTION_CREATE, self::ACTION_UPDATE],
+        self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT  => [self::ACTION_UPDATE],
+        self::UI_FIELD_MARKETING_COUNTRY  => [self::ACTION_UPDATE],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -208,6 +220,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_COMMON_GROUP
         ],
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
+        self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ATTR_LEAD_IS_OWNER],
+        self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ATTR_LEAD_IS_OWNER],
     ];
 
     /**
