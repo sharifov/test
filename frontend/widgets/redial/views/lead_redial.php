@@ -10,6 +10,7 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\web\JqueryAsset;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /** @var View $this */
 /** @var Lead $lead */
@@ -60,7 +61,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
                     <?php
                     $phones = [];
                     foreach ($phonesTo as $phone) {
-                        $phones[$phone->phone . ':' . $phone->description] = $phone->phone . ($phone->description ? ' (' . $phone->description . ')' : '');
+                        $phones[$phone->phone . ':' . $phone->description] = MaskPhoneHelper::masking($phone->phone) . ($phone->description ? ' (' . $phone->description . ')' : '');
                     }
                     ?>
 
@@ -126,6 +127,7 @@ $("#redial-lead-actions-block-call").on('click', function (e) {
     }
     let phoneToStr = $('#redial-lead-phone-to').val();
     let phoneTo = phoneToStr.split(":")[0];
+    
     if (!phoneTo) {
         new PNotify({title: "Lead Redial: Call", type: "error", text: 'Not selected phone', hide: true});
         return ;
