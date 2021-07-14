@@ -6,9 +6,11 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\repository\CouponRepository;
+use sales\model\coupon\entity\coupon\service\CouponService;
 use sales\model\coupon\useCase\apiCreate\CouponApiCreateService;
 use sales\model\coupon\useCase\apiCreate\CouponCreateForm;
 use sales\model\coupon\useCase\apiInfo\CouponInfoForm;
+use sales\model\coupon\useCase\apiValidate\CouponValidateForm;
 use sales\model\coupon\useCase\request\CouponForm;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
@@ -419,28 +421,28 @@ class CouponController extends BaseController
     public function actionValidate()
     {
         $post = Yii::$app->request->post();
-        $couponInfoForm = new CouponInfoForm();
+        $couponValidateForm = new CouponValidateForm();
 
-        if (!$couponInfoForm->load($post)) {
+        if (!$couponValidateForm->load($post)) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
                 new ErrorsMessage('Not found data on POST request'),
             );
         }
-        if (!$couponInfoForm->validate()) {
+        if (!$couponValidateForm->validate()) {
             return new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($couponInfoForm->getErrors()),
+                new ErrorsMessage($couponValidateForm->getErrors()),
             );
         }
 
         try {
-            /* TODO::  */
+            $isValid = CouponService::checkIsValid($couponValidateForm->code);
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
-                'CouponController:actionInfo:Throwable'
+                'CouponController:actionValidate:Throwable'
             );
             return new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -450,7 +452,7 @@ class CouponController extends BaseController
 
         return new SuccessResponse(
             new DataMessage([
-                'isValid' => false, /* TODO::  */
+                'isValid' => $isValid,
             ])
         );
     }

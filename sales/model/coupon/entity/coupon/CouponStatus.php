@@ -11,6 +11,11 @@ class CouponStatus
     public const USED = 3;
     public const CANCEL = 4;
 
+    public const VALID_STATUS_LIST = [
+        self::NEW,
+        self::SEND,
+    ];
+
     private const LIST = [
         self::NEW => 'New',
         self::SEND => 'Send',
