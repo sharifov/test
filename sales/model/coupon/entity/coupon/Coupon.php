@@ -4,6 +4,8 @@ namespace sales\model\coupon\entity\coupon;
 
 use common\models\Employee;
 use sales\entities\cases\Cases;
+use sales\entities\serializer\Serializable;
+use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\entity\couponClient\CouponClient;
 use sales\model\coupon\entity\couponSend\CouponSend;
@@ -42,7 +44,7 @@ use yii\db\ActiveRecord;
  * @property CouponClient[] $couponClient
  * @property CouponSend[] $couponSend
  */
-class Coupon extends \yii\db\ActiveRecord
+class Coupon extends ActiveRecord implements Serializable
 {
     public function rules(): array
     {
@@ -172,5 +174,10 @@ class Coupon extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return '{{%coupon}}';
+    }
+
+    public function serialize(): array
+    {
+        return (new CouponSerializer($this))->getData();
     }
 }
