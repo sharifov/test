@@ -331,4 +331,127 @@ class CouponController extends BaseController
             ])
         );
     }
+
+    /**
+     * @api {post} /v2/coupon/validate Coupon validate
+     * @apiVersion 0.1.0
+     * @apiName Coupon validate
+     * @apiGroup Coupon
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{15}}                    code                Coupon Code
+     *
+     * @apiParamExample {json} Request-Example:
+     *   {
+            "code": "D2EYEWH64BDGD3Y"
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
+     *           "isValid": true
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Coupon not found",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *.
+     * @apiErrorExample {json} Error-Response (500):
+     * HTTP/1.1 500 Internal Server Error
+     * {
+     *        "status": "Failed",
+     *        "source": {
+     *            "type": 1,
+     *            "status": 500
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": "Failed",
+     *        "message": "Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received",
+     *        "errors": [
+     *              "Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received"
+     *        ],
+     *        "code": 0,
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionValidate()
+    {
+        $post = Yii::$app->request->post();
+        $couponInfoForm = new CouponInfoForm();
+
+        if (!$couponInfoForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+        if (!$couponInfoForm->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($couponInfoForm->getErrors()),
+            );
+        }
+
+        try {
+            /* TODO::  */
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
+                'CouponController:actionInfo:Throwable'
+            );
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($throwable->getMessage()),
+            );
+        }
+
+        return new SuccessResponse(
+            new DataMessage([
+                'isValid' => false, /* TODO::  */
+            ])
+        );
+    }
 }
