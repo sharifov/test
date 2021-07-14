@@ -22,7 +22,7 @@ class ReleaseVersionHelper
 
     public static function registerToMetric(string $releaseVersion): void
     {
-        $keyTag = 'release-version-' . $releaseVersion;
+        $keyTag = 'release-version-' . $releaseVersion . '-' . php_uname('n');
         Yii::$app->cache->getOrSet($keyTag, function () use ($releaseVersion) {
             /** @var Metrics $metrics */
             $metrics = \Yii::$container->get(Metrics::class);
@@ -33,6 +33,6 @@ class ReleaseVersionHelper
                 ['version' => $releaseVersion]
             );
             return $releaseVersion;
-        }, 60 * 60 * 24, new TagDependency(['tags' => $keyTag]));
+        }, 60 * 60 * 24, new TagDependency(['tags' => 'release-version']));
     }
 }
