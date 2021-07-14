@@ -191,9 +191,9 @@ class CouponController extends BaseController
     }
 
     /**
-     * @api {post} /v2/coupon/info Create info
+     * @api {post} /v2/coupon/info Coupon info
      * @apiVersion 0.1.0
-     * @apiName Create info
+     * @apiName Coupon info
      * @apiGroup Coupon
      * @apiPermission Authorized User
      *
