@@ -33,6 +33,6 @@ class ReleaseVersionHelper
                 ['version' => $releaseVersion]
             );
             return $releaseVersion;
-        }, 60 * 60 * 24, new TagDependency(['tags' => $keyTag]));
+        }, 60 * 60 * 24, new TagDependency(['tags' => 'release-version']));
     }
 }
