@@ -1584,7 +1584,7 @@ class ClientChatController extends FController
                 $headers = Yii::$app->rchat->getSystemAuthDataHeader();
             }
 
-            Yii::$app->chatBot->sendMessage($message, $headers);
+            Yii::$app->chatBot->sendOffer($message, $headers);
             $this->removeQuoteCaptures(Auth::id(), $clientChat->cch_id, $lead->id);
 
             $quoteList = ArrayHelper::getColumn($captures, 'quoteId');
@@ -1955,29 +1955,27 @@ class ClientChatController extends FController
                 'actions' => [
                     [
                         'type' => 'web_url',
-                        'msg_in_chat_window' => true,
+//                        'msg_in_chat_window' => true,
                         'text' => 'Offer',
                         'msg' => $capture['checkoutUrl'],
                     ],
                 ],
-                'fields' => [
-                    [
-                        'short' => true,
-                        'title' => 'Offer',
-                        'value' => '[' . $capture['checkoutUrl'] . '](' . $capture['checkoutUrl'] . ')',
-                    ],
-                ],
+//                'fields' => [
+//                    [
+//                        'short' => true,
+//                        'title' => 'Offer',
+//                        'value' => '[' . $capture['checkoutUrl'] . '](' . $capture['checkoutUrl'] . ')',
+//                    ],
+//                ],
             ];
         }
 
         $data = [
-            'message' => [
-                'rid' => $chat->cch_rid,
-                'attachments' => $attachments,
-                'file' => [
-                    'customTemplate' => 'carousel',
-                ],
-            ],
+            'rid' => $chat->cch_rid,
+            'attachments' => $attachments,
+//            'file' => [
+//                'customTemplate' => 'carousel',
+//            ],
         ];
 
         return $data;
