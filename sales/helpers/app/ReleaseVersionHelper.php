@@ -22,7 +22,7 @@ class ReleaseVersionHelper
 
     public static function registerToMetric(string $releaseVersion): void
     {
-        $keyTag = 'release-version-' . $releaseVersion;
+        $keyTag = 'release-version-' . $releaseVersion . '-' . php_uname('n');
         Yii::$app->cache->getOrSet($keyTag, function () use ($releaseVersion) {
             /** @var Metrics $metrics */
             $metrics = \Yii::$container->get(Metrics::class);
