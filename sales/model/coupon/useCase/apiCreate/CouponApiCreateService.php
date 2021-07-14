@@ -31,6 +31,7 @@ class CouponApiCreateService
         $coupon->c_public = $couponCreateForm->public;
         $coupon->c_reusable = $couponCreateForm->reusable;
         $coupon->c_reusable_count = $couponCreateForm->reusableCount;
+        $coupon->c_percent = $couponCreateForm->percent;
         return $coupon;
     }
 
