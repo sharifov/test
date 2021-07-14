@@ -169,8 +169,11 @@ class UserClientChatDataController extends FController
                 $updateFields = [
                     'uccd_name' => 'name',
                     'uccd_username' => 'username',
-                    'uccd_password' => 'password',
                 ];
+                if (!empty($model->uccd_password)) {
+                    $updateFields['uccd_password'] = 'password';
+                }
+
                 foreach ($updateFields as $column => $rcField) {
                     if ($model->isAttributeChanged($column) && $model->validate([$column])) {
                         $updateRC[$rcField] = $model->{$column};
@@ -205,6 +208,8 @@ class UserClientChatDataController extends FController
                 );
                 $error = $throwable->getMessage();
             }
+        } else {
+            $model->uccd_password = '';
         }
 
         return $this->render('update', [

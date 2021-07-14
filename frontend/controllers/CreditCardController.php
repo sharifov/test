@@ -63,6 +63,12 @@ class CreditCardController extends FController
         $this->clientRepository = $clientRepository;
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * @return array
      */
@@ -115,9 +121,9 @@ class CreditCardController extends FController
     public function actionCreate()
     {
         $model = new CreditCardForm();
+        $modelCc = new CreditCard();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $modelCc = new CreditCard();
             $modelCc->attributes = $model->attributes;
             $modelCc->updateSecureCardNumber();
             $modelCc->updateSecureCvv();
@@ -129,6 +135,7 @@ class CreditCardController extends FController
 
         return $this->render('create', [
             'model' => $model,
+            'modelCc' => $modelCc,
         ]);
     }
 
@@ -142,8 +149,8 @@ class CreditCardController extends FController
     public function actionUpdate($id)
     {
         $modelCc = $this->findModel($id);
-        $model = new CreditCardForm();
 
+        $model = new CreditCardForm();
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
                 $modelCc->attributes = $model->attributes;
@@ -152,7 +159,12 @@ class CreditCardController extends FController
                 $modelCc->cc_expiration_year = $model->cc_expiration_year;
 
                 $modelCc->updateSecureCardNumber();
-                $modelCc->updateSecureCvv();
+                if (!empty($modelCc->cc_cvv)) {
+                    $modelCc->updateSecureCvv();
+                } else {
+                    unset($modelCc->cc_cvv);
+                }
+
                 if ($modelCc->save()) {
                     return $this->redirect(['view', 'id' => $modelCc->cc_id]);
                 } else {
@@ -161,8 +173,8 @@ class CreditCardController extends FController
             }
         } else {
             $model->attributes = $modelCc->attributes;
-            $model->cc_number = $modelCc->initNumber;
-            $model->cc_cvv = $modelCc->initCvv;
+            $model->cc_number = str_replace('*', '0', $modelCc->cc_display_number); // $modelCc->initNumber;
+            $model->cc_cvv = ''; // $modelCc->initCvv;
             $model->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year . '-' . $modelCc->cc_expiration_month . '-01'));
         }
 
@@ -170,6 +182,7 @@ class CreditCardController extends FController
 
         return $this->render('update', [
             'model' => $model,
+            'modelCc' => $modelCc,
         ]);
     }
 

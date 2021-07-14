@@ -51,7 +51,7 @@ class UserClientChatData extends \yii\db\ActiveRecord
         return [
             [[
                 'uccd_employee_id',
-                'uccd_username', 'uccd_name', 'uccd_password',
+                'uccd_username', 'uccd_name',
             ], 'required'],
 
             ['uccd_employee_id', 'integer'],
@@ -67,10 +67,11 @@ class UserClientChatData extends \yii\db\ActiveRecord
 
             [['uccd_created_dt', 'uccd_updated_dt'], 'date', 'format' => 'php:Y-m-d H:i:s'],
 
-            [['uccd_auth_token', 'uccd_rc_user_id', 'uccd_password', 'uccd_username', 'uccd_name'], 'trim'],
+            [['uccd_auth_token', 'uccd_rc_user_id', 'uccd_username', 'uccd_name'], 'trim'],
 
             [['uccd_auth_token'], 'string', 'max' => 50],
             [['uccd_rc_user_id'], 'string', 'max' => 20],
+            [['uccd_password'], 'string', 'skipOnEmpty' => true],
             [['uccd_password'], 'string', 'min' => 8, 'max' => 50],
 
             [['uccd_token_expired'], 'date', 'format' => 'php:Y-m-d H:i:s'],

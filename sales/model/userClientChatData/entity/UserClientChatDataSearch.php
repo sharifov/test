@@ -22,6 +22,7 @@ class UserClientChatDataSearch extends UserClientChatData
             [['uccd_rc_user_id'], 'string', 'max' => 20],
             [['uccd_name'], 'string', 'max' => 255],
             [['uccd_username'], 'string', 'max' => 50],
+            [['uccd_password'], 'string', 'skipOnEmpty' => true]
         ];
     }
 
