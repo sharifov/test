@@ -4,9 +4,11 @@ namespace modules\flight\controllers;
 
 use common\models\Notifications;
 use frontend\helpers\JsonHelper;
+use modules\flight\components\api\ApiFlightQuoteSearchService;
 use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
+use modules\flight\src\dto\flightQuoteSearchDTO\FlightQuoteSearchDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
@@ -15,7 +17,6 @@ use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
 use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
-use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
@@ -47,13 +48,13 @@ use yii\web\Response;
  * FlightQuoteController implements the CRUD actions for FlightQuote model.
  *
  * @property FlightRepository $flightRepository
- * @property FlightQuoteSearchService $quoteSearchService
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteRepository $productQuoteRepository
  * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
  * @property LeadRepository $leadRepository
  * @property ProductCreateService $productCreateService
  * @property FlightManageService $flightManageService
+ * @property ApiFlightQuoteSearchService $apiFlightQuoteSearchService
  */
 class FlightQuoteController extends FController
 {
@@ -61,10 +62,6 @@ class FlightQuoteController extends FController
      * @var FlightRepository
      */
     private $flightRepository;
-    /**
-     * @var FlightQuoteSearchService
-     */
-    private $quoteSearchService;
     /**
      * @var FlightQuoteManageService
      */
@@ -89,43 +86,47 @@ class FlightQuoteController extends FController
      * @var FlightManageService
      */
     private $flightManageService;
+    /**
+     * @var ApiFlightQuoteSearchService
+     */
+    private ApiFlightQuoteSearchService $apiFlightQuoteSearchService;
 
     /**
      * FlightQuoteController constructor.
      * @param $id
      * @param $module
      * @param FlightRepository $flightRepository
-     * @param FlightQuoteSearchService $quoteSearchService
      * @param FlightQuoteManageService $flightQuoteManageService
      * @param ProductQuoteRepository $productQuoteRepository
      * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
      * @param LeadRepository $leadRepository
      * @param ProductCreateService $productCreateService
      * @param FlightManageService $flightManageService
+     * @param ApiFlightQuoteSearchService $apiFlightQuoteSearchService
      * @param array $config
      */
     public function __construct(
         $id,
         $module,
         FlightRepository $flightRepository,
-        FlightQuoteSearchService $quoteSearchService,
         FlightQuoteManageService $flightQuoteManageService,
         ProductQuoteRepository $productQuoteRepository,
         FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository,
         LeadRepository $leadRepository,
         ProductCreateService $productCreateService,
         FlightManageService $flightManageService,
+        ApiFlightQuoteSearchService $apiFlightQuoteSearchService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->flightRepository = $flightRepository;
-        $this->quoteSearchService = $quoteSearchService;
         $this->flightQuoteManageService = $flightQuoteManageService;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->flightQuotePaxPriceRepository = $flightQuotePaxPriceRepository;
         $this->leadRepository = $leadRepository;
         $this->productCreateService = $productCreateService;
         $this->flightManageService = $flightManageService;
+        $this->apiFlightQuoteSearchService = $apiFlightQuoteSearchService;
     }
 
     /**
@@ -249,10 +250,11 @@ class FlightQuoteController extends FController
                 throw new \DomainException('Flight Segment data is not found; Create a new flight request;');
             }
 
+            $dto = new FlightQuoteSearchDTO($flight, $gds);
             $quotes = \Yii::$app->cacheFile->get($flight->fl_request_hash_key);
 
             if ($quotes === false) {
-                $quotes = $this->quoteSearchService->search($flight, $gds);
+                $quotes = $this->apiFlightQuoteSearchService->search($dto->getAsArray())['data'];
                 if (!empty($quotes['results'])) {
                     \Yii::$app->cacheFile->set($flight->fl_request_hash_key, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
                 }
@@ -261,6 +263,7 @@ class FlightQuoteController extends FController
             $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
 
             $viewData = FlightQuoteSearchHelper::getAirlineLocationInfo($quotes);
+            $viewData['flightQuoteSearchDTO'] = $dto;
 
             if (Yii::$app->request->isPost) {
                 $params = ['page' => 1];
@@ -302,6 +305,7 @@ class FlightQuoteController extends FController
         $viewData['searchForm'] = $form;
         $viewData['errorMessage'] = $errorMessage ?? '';
         $viewData['pjaxId'] = $pjaxId;
+        $viewData['isAdmin'] = Auth::user()->isAdmin();
 
         return $this->renderAjax('partial/_quote_search', $viewData);
     }
