@@ -10,6 +10,7 @@ namespace common\components\jobs;
 
 use common\components\SearchService;
 use common\models\Lead;
+use sales\dto\searchService\SearchServiceQuoteDTO;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
@@ -37,7 +38,8 @@ class QuickSearchInitPriceJob extends BaseJob implements JobInterface
             if ($this->lead_id) {
                 $lead = Lead::findOne($this->lead_id);
                 if ($lead) {
-                    $result = SearchService::getOnlineQuotes($lead);
+                    $dto = new SearchServiceQuoteDTO($lead);
+                    $result = SearchService::getOnlineQuotes($dto);
                     if ($result && isset($result['data']['results'][0]['prices']['totalPrice'])) {
                         $minPrice = (double) $result['data']['results'][0]['prices']['totalPrice'];
                         $lead->l_init_price = $minPrice;
