@@ -86,10 +86,15 @@ class UserClientChatDataCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+            if (empty($model->uccd_password)) {
+                unset($model->uccd_password);
+            }
+            $model->save();
             return $this->redirect(['view', 'id' => $model->uccd_id]);
+        } else {
+            $model->uccd_password = '';
         }
-
         return $this->render('update', [
             'model' => $model,
         ]);

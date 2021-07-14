@@ -1,10 +1,13 @@
 <?php
 
+use common\models\CreditCard;
+use frontend\models\form\CreditCardForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\CreditCard */
+/* @var $model CreditCardForm */
+/* @var $modelCc CreditCard */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $isAjax bool */
 
@@ -39,7 +42,7 @@ $pjaxId = 'pjax-create-credit-card'
 
         <div class="row">
             <div class="col-md-12">
-                <?= $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]) ?>
+                <?= $modelCc->isNewRecord ? $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]) : $form->field($model, 'cc_number')->hiddenInput(['id' => 'cc_number'])->label(false) ?>
             </div>
         </div>
 
@@ -69,11 +72,11 @@ $pjaxId = 'pjax-create-credit-card'
 
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($model, 'cc_type_id')->dropDownList(\common\models\CreditCard::getTypeList(), ['prompt' => '---']) ?>
+                <?= $form->field($model, 'cc_type_id')->dropDownList(CreditCard::getTypeList(), ['prompt' => '---']) ?>
             </div>
             <?php if (!$isAjax) : ?>
             <div class="col-md-6">
-                <?= $form->field($model, 'cc_status_id')->dropDownList(\common\models\CreditCard::getStatusList(), ['prompt' => '---']) ?>
+                <?= $form->field($model, 'cc_status_id')->dropDownList(CreditCard::getStatusList(), ['prompt' => '---']) ?>
             </div>
             <?php endif; ?>
         </div>

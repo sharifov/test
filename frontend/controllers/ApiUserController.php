@@ -101,10 +101,10 @@ class ApiUserController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-            if ($model->au_api_password) {
-                $model->setPassword($model->au_api_password);
-            } else {
+            if (empty($model->au_api_password)) {
                 unset($model->au_api_password);
+            } else {
+                $model->setPassword($model->au_api_password);
             }
 
                 $model->au_updated_dt = date('Y-m-d H:i:s');
@@ -114,7 +114,7 @@ class ApiUserController extends FController
                 return $this->redirect(['view', 'id' => $model->au_id]);
             }
         } else {
-            $model->au_api_password = null;
+            $model->au_api_password = '';
         }
 
         return $this->render('update', [
