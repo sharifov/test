@@ -100,7 +100,7 @@ class ApiUserController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (empty($model->au_api_password)) {
                 unset($model->au_api_password);
             } else {
