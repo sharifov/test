@@ -218,25 +218,25 @@ class CouponController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "coupon": {
-                        "c_id": 9,
-                        "c_code": "HPCCZH68PNQB5FY",
-                        "c_amount": "25.00",
-                        "c_currency_code": "USD",
-                        "c_percent": null,
-                        "c_exp_date": "2022-07-12 00:00:00",
-                        "c_start_date": null,
-                        "c_reusable": 0,
-                        "c_reusable_count": null,
-                        "c_public": 0,
-                        "c_status_id": 2,
-                        "c_disabled": null,
-                        "c_type_id": 1,
-                        "c_created_dt": "2021-07-12 07:16:25",
-                        "statusName": "Send",
-                        "typeName": "Voucher"
-                    }
-              },
+     *           "coupon": {
+     *              "c_id": 9,
+     *              "c_code": "HPCCZH68PNQB5FY",
+     *              "c_amount": "25.00",
+     *              "c_currency_code": "USD",
+     *              "c_percent": null,
+     *              "c_exp_date": "2022-07-12 00:00:00",
+     *              "c_start_date": null,
+     *              "c_reusable": 0,
+     *              "c_reusable_count": null,
+     *              "c_public": 0,
+     *              "c_status_id": 2,
+     *              "c_disabled": null,
+     *              "c_type_id": 1,
+     *              "c_created_dt": "2021-07-12 07:16:25",
+     *              "statusName": "Send",
+     *              "typeName": "Voucher"
+     *          }
+     *        },
      *        "technical": {
      *           ...
      *        },
