@@ -6,6 +6,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\local\FlightSegment;
 use common\models\Quote;
+use sales\dto\searchService\SearchServiceQuoteDTO;
 use Yii;
 use common\models\Airline;
 use common\models\Airports;
@@ -126,66 +127,19 @@ class SearchService
     }
 
     /**
-     * @param Lead $lead
-     * @param int $limit
-     * @param null $gdsCode
-     * @param bool $group
+     * @param SearchServiceQuoteDTO $dto
      * @return mixed
      * @throws \yii\httpclient\Exception
-     * @throws \JsonException
      */
-    public static function getOnlineQuotes(Lead $lead, int $limit = 600, $gdsCode = null, bool $group = true)
+    public static function getOnlineQuotes(SearchServiceQuoteDTO $dto)
     {
-        $result = [];
-        $fl = [];
-
-        $params = [
-            'cabin' => self::getCabinRealCode($lead->cabin),
-            'cid' => \Yii::$app->params['search']['sid'],
-            'adt' => $lead->adults,
-            'chd' => $lead->children,
-            'inf' => $lead->infants,
-            'group' => $group,
-        ];
-
-        if ($limit) {
-            $params['limit'] = $limit;
-        }
-
-        if ($gdsCode) {
-            $params['gds'] = $gdsCode;
-        }
-
-        foreach ($lead->leadFlightSegments as $flightSegment) {
-            $segment = [
-                'o' => $flightSegment->origin,
-                'd' => $flightSegment->destination,
-                'dt' => $flightSegment->departure
-            ];
-
-            if ($flightSegment->flexibility > 0) {
-                $segment['flex'] = $flightSegment->flexibility;
-
-                if ($flightSegment->flexibility_type && $flexType = self::getSearchFlexType($flightSegment->flexibility_type)) {
-                    $segment['ft'] = $flexType;
-                }
-            }
-
-            $fl[] = $segment;
-        }
-
-        $params['fl'] = $fl;
-
-        if ($lead->client->isExcluded()) {
-            $params['ppn'] = $lead->client->cl_ppn;
-        }
-
+        $params = $dto->getAsArray();
         $response = \Yii::$app->airsearch->searchQuotes($params);
 
         if (!$result['data'] = $response['data']) {
             $result['error'] = $response['error'];
             \Yii::error(
-                ['lead_id' => $lead->id,
+                ['lead_id' => $dto->getLeadId(),
                 'params' => $params,
                 'message' => $response['error']],
                 'SearchService::getOnlineQuotes'

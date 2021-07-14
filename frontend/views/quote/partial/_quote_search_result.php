@@ -5,7 +5,9 @@ use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use yii\bootstrap4\Alert;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\View;
 use yii\widgets\Pjax;
 
@@ -20,6 +22,8 @@ use yii\widgets\Pjax;
  * @var $dataProvider ArrayDataProvider
  * @var $searchForm FlightQuoteSearchForm
  * @var $keyCache string
+ * @var $searchServiceQuoteDto \sales\dto\searchService\SearchServiceQuoteDTO
+ * @var $isAdmin bool
  */
 //\yii\helpers\VarDumper::dump($airlines);die;
 if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
@@ -74,7 +78,18 @@ JS;
 ]) ?>
 
     <div class="search-results__wrapper">
-        <?php $n = 0; ?>
+        <?php $n = 0;
+        $layout = '{pager}'; ?>
+
+        <?php if ($isAdmin) : ?>
+            <?php $layout = '<div class="d-flex justify-content-between align-items-center">{pager} <span data-toggle="collapse" href="#collapseSearchParams" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Search Query Params</span></div>'; ?>
+          <div id="collapseSearchParams" class="collapse">
+            <div class="card-body card">
+              <h4>Search Query Params</h4>
+              <pre><?= Html::encode(VarDumper::dumpAsString($searchServiceQuoteDto->getAsArray())) ?></pre>
+            </div>
+          </div>
+        <?php endif; ?>
         <?= \yii\widgets\ListView::widget([
             'dataProvider' => $dataProvider,
             'emptyText' => '<div class="text-center">Not found quotes</div><br>',
@@ -92,10 +107,10 @@ JS;
                     ]
                 );
             },
-            'layout' => '{summary}{pager}{items}{pager}',
+            'layout' => '{summary}' . $layout . '{items}{pager}',
             'itemOptions' => [
                 'tag' => false,
-            ]
+            ],
         ]) ?>
     </div>
     <?php
@@ -139,5 +154,15 @@ JS;
             </div>
         <?php endif; ?>
         <p>No search results</p>
+
+        <?php if ($isAdmin && isset($searchServiceQuoteDto)) : ?>
+            <div class="d-flex justify-content-between align-items-center"><span data-toggle="collapse" href="#collapseSearchParams" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Search Query Params</span></div>
+            <div id="collapseSearchParams" class="collapse">
+              <div class="card-body card">
+                <h4>Search Query Params</h4>
+                <pre><?= Html::encode(VarDumper::dumpAsString($searchServiceQuoteDto->getAsArray())) ?></pre>
+              </div>
+            </div>
+        <?php endif; ?>
     </div>
 <?php endif;?>

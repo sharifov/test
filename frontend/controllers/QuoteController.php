@@ -14,6 +14,7 @@ use frontend\helpers\QuoteHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use PhpParser\Node\Expr\Empty_;
 use sales\auth\Auth;
+use sales\dto\searchService\SearchServiceQuoteDTO;
 use sales\exception\AdditionalDataException;
 use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use sales\helpers\app\AppHelper;
@@ -86,7 +87,8 @@ class QuoteController extends FController
                         $timeStart = microtime(true);
                         $metricsService = \Yii::$container->get(MetricsService::class);
 
-                        $result = SearchService::getOnlineQuotes($lead);
+                        $dto = new SearchServiceQuoteDTO($lead);
+                        $result = SearchService::getOnlineQuotes($dto);
 
                         $metricsService->addQuoteSearchHistogram($timeStart, 'quick_search');
                         $metricsService->addQuoteSearchCounter('quick_search');
@@ -134,11 +136,12 @@ class QuoteController extends FController
 
                 $quotes = \Yii::$app->cacheFile->get($keyCache);
 
+                $dto = new SearchServiceQuoteDTO($lead);
                 if ($quotes === false) {
                     $timeStart = microtime(true);
                     $metricsService = \Yii::$container->get(MetricsService::class);
 
-                    $quotes = SearchService::getOnlineQuotes($lead);
+                    $quotes = SearchService::getOnlineQuotes($dto);
 
                     $metricsService->addQuoteSearchHistogram($timeStart, 'quote_search');
                     $metricsService->addQuoteSearchCounter('quote_search');
@@ -183,6 +186,7 @@ class QuoteController extends FController
                 $viewData['dataProvider'] = $dataProvider ?? new ArrayDataProvider();
                 $viewData['searchForm'] = $form;
                 $viewData['keyCache'] = $keyCache;
+                $viewData['searchServiceQuoteDto'] = $dto;
 //                    $viewData['pjaxId'] = $pjaxId;
             } else {
                 throw new \Exception('Not found lead', -1);
@@ -194,6 +198,7 @@ class QuoteController extends FController
             }
             $viewData['quotes'] = [];
         }
+        $viewData['isAdmin'] = Auth::user()->isAdmin();
         return $this->renderAjax('partial/_quote_search_result', $viewData);
     }
 
@@ -540,7 +545,8 @@ class QuoteController extends FController
                 $timeStart = microtime(true);
                 $metricsService = \Yii::$container->get(MetricsService::class);
 
-                $quotes = SearchService::getOnlineQuotes($lead);
+                $dto = new SearchServiceQuoteDTO($lead);
+                $quotes = SearchService::getOnlineQuotes($dto);
 
                 $metricsService->addQuoteSearchHistogram($timeStart, 'auto_select_quotes');
                 $metricsService->addQuoteSearchCounter('auto_select_quotes');
