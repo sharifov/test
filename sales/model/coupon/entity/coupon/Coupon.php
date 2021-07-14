@@ -96,6 +96,7 @@ class Coupon extends \yii\db\ActiveRecord
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'c_created_user_id',
                 'updatedByAttribute' => 'c_updated_user_id',
+                'defaultValue' => null, /* TODO:: api handler */ /* */
             ],
         ];
     }
