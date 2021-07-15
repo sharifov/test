@@ -48,9 +48,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
     /** QUERY PERMISSIONS */
     public const QUERY_SOLD_ALL = self::NS . 'query/sold/*';
-    public const QUERY_SOLD_ON_COMMON_PROJECTS = self::NS . 'query/sold/on_common_projects';
-    public const QUERY_SOLD_ON_COMMON_DEPARTMENTS = self::NS . 'query/sold/on_common_departments';
-    public const QUERY_SOLD_ON_COMMON_GROUPS = self::NS . 'query/sold/on_common_groups';
+    public const QUERY_SOLD_IN_COMMON_PROJECTS = self::NS . 'query/sold/in_common_projects';
+    public const QUERY_SOLD_IN_COMMON_DEPARTMENTS = self::NS . 'query/sold/in_common_departments';
+    public const QUERY_SOLD_IN_COMMON_GROUPS = self::NS . 'query/sold/in_common_groups';
     public const QUERY_SOLD_IS_OWNER = self::NS . 'query/sold/is_owner';
     public const QUERY_SOLD_IS_EMPTY_OWNER = self::NS . 'query/sold/is_empty_owner';
 
@@ -76,9 +76,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT   => self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT,
         self::UI_FIELD_MARKETING_COUNTRY   => self::UI_FIELD_MARKETING_COUNTRY,
         self::QUERY_SOLD_ALL   => self::QUERY_SOLD_ALL,
-        self::QUERY_SOLD_ON_COMMON_PROJECTS   => self::QUERY_SOLD_ON_COMMON_PROJECTS,
-        self::QUERY_SOLD_ON_COMMON_DEPARTMENTS   => self::QUERY_SOLD_ON_COMMON_DEPARTMENTS,
-        self::QUERY_SOLD_ON_COMMON_GROUPS   => self::QUERY_SOLD_ON_COMMON_GROUPS,
+        self::QUERY_SOLD_IN_COMMON_PROJECTS   => self::QUERY_SOLD_IN_COMMON_PROJECTS,
+        self::QUERY_SOLD_IN_COMMON_DEPARTMENTS   => self::QUERY_SOLD_IN_COMMON_DEPARTMENTS,
+        self::QUERY_SOLD_IN_COMMON_GROUPS   => self::QUERY_SOLD_IN_COMMON_GROUPS,
         self::QUERY_SOLD_IS_OWNER   => self::QUERY_SOLD_IS_OWNER,
         self::QUERY_SOLD_IS_EMPTY_OWNER   => self::QUERY_SOLD_IS_EMPTY_OWNER,
     ];
@@ -115,9 +115,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT  => [self::ACTION_UPDATE],
         self::UI_FIELD_MARKETING_COUNTRY  => [self::ACTION_UPDATE],
         self::QUERY_SOLD_ALL  => [self::ACTION_ACCESS],
-        self::QUERY_SOLD_ON_COMMON_PROJECTS  => [self::ACTION_ACCESS],
-        self::QUERY_SOLD_ON_COMMON_DEPARTMENTS  => [self::ACTION_ACCESS],
-        self::QUERY_SOLD_ON_COMMON_GROUPS  => [self::ACTION_ACCESS],
+        self::QUERY_SOLD_IN_COMMON_PROJECTS  => [self::ACTION_ACCESS],
+        self::QUERY_SOLD_IN_COMMON_DEPARTMENTS  => [self::ACTION_ACCESS],
+        self::QUERY_SOLD_IN_COMMON_GROUPS  => [self::ACTION_ACCESS],
         self::QUERY_SOLD_IS_OWNER  => [self::ACTION_ACCESS],
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ACTION_QUERY_AND, self::ACTION_QUERY_OR],
     ];

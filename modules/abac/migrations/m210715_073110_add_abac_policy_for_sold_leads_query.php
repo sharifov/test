@@ -33,7 +33,7 @@ class m210715_073110_add_abac_policy_for_sold_leads_query extends Migration
             'ap_rule_type' => 'p',
             'ap_subject' => '("data_analyst" in r.sub.env.user.roles) || ("exchange_senior" in r.sub.env.user.roles) || ("qa" in r.sub.env.user.roles) || ("qa_super" in r.sub.env.user.roles) || ("sales_senior" in r.sub.env.user.roles) || ("supervision" in r.sub.env.user.roles) || ("support_senior" in r.sub.env.user.roles) || ("agent" in r.sub.env.user.roles)',
             'ap_subject_json' => '{"condition":"OR","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"data_analyst"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"exchange_senior"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"qa"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"qa_super"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"sales_senior"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"supervision"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"support_senior"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"agent"}],"valid":true}',
-            'ap_object' => 'lead/lead/query/sold/on_common_projects',
+            'ap_object' => 'lead/lead/query/sold/in_common_projects',
             'ap_action' => '(access)',
             'ap_action_json' => "[\"access\"]",
             'ap_effect' => 1,
@@ -47,7 +47,7 @@ class m210715_073110_add_abac_policy_for_sold_leads_query extends Migration
             'ap_rule_type' => 'p',
             'ap_subject' => '("admin" in r.sub.env.user.roles)',
             'ap_subject_json' => '{"condition":"AND","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"}],"valid":true}',
-            'ap_object' => 'lead/lead/query/sold/on_common_departments',
+            'ap_object' => 'lead/lead/query/sold/in_common_departments',
             'ap_action' => '(access)',
             'ap_action_json' => "[\"access\"]",
             'ap_effect' => 1,
@@ -61,7 +61,7 @@ class m210715_073110_add_abac_policy_for_sold_leads_query extends Migration
             'ap_rule_type' => 'p',
             'ap_subject' => '("admin" in r.sub.env.user.roles)',
             'ap_subject_json' => '{"condition":"AND","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"}],"valid":true}',
-            'ap_object' => 'lead/lead/query/sold/on_common_groups',
+            'ap_object' => 'lead/lead/query/sold/in_common_groups',
             'ap_action' => '(access)',
             'ap_action_json' => "[\"access\"]",
             'ap_effect' => 1,
@@ -123,9 +123,9 @@ class m210715_073110_add_abac_policy_for_sold_leads_query extends Migration
     {
         $this->delete('{{%abac_policy}}', ['IN', 'ap_object', [
             'lead/lead/query/sold/*',
-            'lead/lead/query/sold/on_common_projects',
-            'lead/lead/query/sold/on_common_departments',
-            'lead/lead/query/sold/on_common_groups',
+            'lead/lead/query/sold/in_common_projects',
+            'lead/lead/query/sold/in_common_departments',
+            'lead/lead/query/sold/in_common_groups',
             'lead/lead/query/sold/is_owner',
             'lead/lead/query/sold/is_empty_owner'
         ]]);
