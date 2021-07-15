@@ -157,7 +157,6 @@ class CommunicationService extends Component implements CommunicationServiceInte
         if (isset($email_data['email_to_name']) && $email_data['email_to_name']) {
             $data['mail']['email_to_name'] = $email_data['email_to_name'];
         }
-
         $response = $this->sendRequest('email/preview', $data);
 
         if ($response->isOk) {
