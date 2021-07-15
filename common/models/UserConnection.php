@@ -58,7 +58,7 @@ class UserConnection extends \yii\db\ActiveRecord
             [['uc_connection_uid'], 'unique'],
             [['uc_user_agent', 'uc_sub_list'], 'string', 'max' => 255],
             [['uc_controller_id', 'uc_action_id'], 'string', 'max' => 50],
-            [['uc_page_url'], 'string', 'max' => 500],
+            [['uc_page_url'], 'string', 'max' => 1400],
             [['uc_ip'], 'string', 'max' => 40],
             [['uc_app_instance'], 'string', 'max' => 20],
             [['uc_created_dt', 'uc_window_state_dt', 'uc_idle_state_dt'], 'safe'],

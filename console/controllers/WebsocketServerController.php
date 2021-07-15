@@ -188,7 +188,7 @@ class WebsocketServerController extends Controller
                 $userConnection->uc_lead_id = empty($request->get['lead_id']) ? null : (int) $request->get['lead_id'];
                 $userConnection->uc_controller_id = empty($request->get['controller_id']) ? null : substr($request->get['controller_id'], 0, 50);
                 $userConnection->uc_action_id = empty($request->get['action_id']) ? null : substr($request->get['action_id'], 0, 50);
-                $userConnection->uc_page_url = empty($request->get['page_url']) ? null : substr($request->get['page_url'], 0, 500);
+                $userConnection->uc_page_url = empty($request->get['page_url']) ? null : substr($request->get['page_url'], 0, 1400);
                 $userConnection->uc_user_agent = $ua;
                 $userConnection->uc_ip = $ip;
                 $userConnection->uc_user_id = $userId;
