@@ -25,20 +25,18 @@ class ClientChatLeadMangeService
         $this->repository = $repository;
     }
 
-    public function assignChatByLeadIds(array $leadIds, int $chatId): void
+    public function assignChatByLeadIds(array $leadIds, int $chatId): array
     {
+        $errors = [];
+
         foreach ($leadIds as $leadId) {
-            if (Lead::find()->where(['id' => $leadId])->exists()) {
-                $clientChatLead = ClientChatLead::create($chatId, $leadId, new \DateTimeImmutable('now'));
-                if ($clientChatLead->validate()) {
-                    $this->repository->save($clientChatLead);
-                } else {
-                    \Yii::warning(
-                        ErrorsToStringHelper::extractFromModel($clientChatLead),
-                        'ClientChatLeadMangeService:assignChatByLeadIds:validate'
-                    );
-                }
+            $clientChatLead = ClientChatLead::create($chatId, $leadId, new \DateTimeImmutable('now'));
+            if ($clientChatLead->validate()) {
+                $this->repository->save($clientChatLead);
+            } else {
+                $errors[] = ErrorsToStringHelper::extractFromModel($clientChatLead);
             }
         }
+        return $errors;
     }
 }

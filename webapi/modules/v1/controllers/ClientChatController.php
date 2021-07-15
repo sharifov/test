@@ -4,8 +4,11 @@ namespace webapi\modules\v1\controllers;
 
 use common\models\ApiLog;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChat\useCase\linkLeadsForm\LinkLeadsForm;
 use sales\model\clientChatForm\form\ClientChatSubscribeForm;
 use sales\model\clientChatForm\form\ClientChatUnsubscribeForm;
+use sales\model\clientChatLead\service\ClientChatLeadMangeService;
 use sales\model\visitorSubscription\repository\VisitorSubscriptionRepository;
 use sales\model\visitorSubscription\service\VisitorSubscriptionApiManageService;
 use sales\repositories\NotFoundException;
@@ -28,6 +31,8 @@ use yii\web\UnprocessableEntityHttpException;
  *
  * @property-read VisitorSubscriptionApiManageService $service
  * @property-read VisitorSubscriptionRepository $subscriptionRepository
+ * @property-read ClientChatRepository $clientChatRepository
+ * @property-read ClientChatLeadMangeService $clientChatLeadMangeService
  */
 class ClientChatController extends ApiBaseController
 {
@@ -39,17 +44,29 @@ class ClientChatController extends ApiBaseController
      * @var VisitorSubscriptionRepository
      */
     private VisitorSubscriptionRepository $subscriptionRepository;
+    /**
+     * @var ClientChatRepository
+     */
+    private ClientChatRepository $clientChatRepository;
+    /**
+     * @var ClientChatLeadMangeService
+     */
+    private ClientChatLeadMangeService $clientChatLeadMangeService;
 
     public function __construct(
         $id,
         $module,
         VisitorSubscriptionApiManageService $service,
         VisitorSubscriptionRepository $subscriptionRepository,
+        ClientChatRepository $clientChatRepository,
+        ClientChatLeadMangeService $clientChatLeadMangeService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->service = $service;
         $this->subscriptionRepository = $subscriptionRepository;
+        $this->clientChatRepository = $clientChatRepository;
+        $this->clientChatLeadMangeService = $clientChatLeadMangeService;
     }
 
     /**
@@ -251,6 +268,125 @@ class ClientChatController extends ApiBaseController
             new MessageMessage('Some errors occurred while creating client chat request'),
             new ErrorsMessage($form->getErrorSummary(true)),
             new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+        ));
+    }
+
+    /**
+     * @return Response
+     *
+     * @api {post} /v1/client-chat/link-leads Client Chat Link Leads
+     * @apiVersion 0.1.0
+     * @apiName ClientChat Link Leads
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{max 150}}      rid     Chat Room Id <code>Required</code>
+     * @apiParam {array}      leadIds     Chat Room Id <code>Required</code>
+     *
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+            "rid": "e0ea61ca-ce03-497a-b740-asf4as6fcv",
+     *      "leadIds": [
+     *          235344,
+     *          345567,
+     *          345466
+     *      ]
+     * }
+     *
+     * @apiSuccessExample Success-Response:
+     *  HTTP/1.1 200 OK
+     *  {
+     *     "status": 200
+     *     "message": "Ok"
+     *  }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+            "status": 400,
+            "message": "Some errors occurred while creating client chat request",
+            "errors": [
+                "Lead id not exist: 345567"
+            ],
+            "code": "13101"
+        }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+            "status": 400,
+            "message": "Some errors occurred while creating client chat request",
+            "errors": [
+                "Lead(235344) already linked to chat;
+            ],
+            "code": "13107"
+        }
+     *
+     */
+    public function actionLinkLeads()
+    {
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+        $form = new LinkLeadsForm();
+
+        if (!\Yii::$app->request->isPost) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Not found POST request'),
+                new CodeMessage(ApiCodeException::REQUEST_IS_NOT_POST)
+            );
+        }
+
+        if (!\Yii::$app->request->post()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('POST data request is empty'),
+                new CodeMessage(ApiCodeException::POST_DATA_IS_EMPTY)
+            );
+        }
+
+        if (!$form->load(\Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not loaded data from get request'),
+                new CodeMessage(ApiCodeException::GET_DATA_NOT_LOADED)
+            );
+        }
+
+        if ($form->validate()) {
+            try {
+                $clientChat = $this->clientChatRepository->findByRid($form->rid);
+                $result = $this->clientChatLeadMangeService->assignChatByLeadIds($form->leadIds, $clientChat->cch_id);
+                if ($result) {
+                    throw new \RuntimeException(implode('; ', $result));
+                }
+
+                return $this->endApiLog($apiLog, new SuccessResponse(
+                    new StatusCodeMessage(200),
+                    new MessageMessage('Ok'),
+                ));
+            } catch (\RuntimeException | NotFoundException $e) {
+                $form->addError('general', $e->getMessage());
+            } catch (\Throwable $e) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'API::v1::ClientChatController::actionLinkLeads::Throwable');
+            }
+        }
+
+        return $this->endApiLog($apiLog, new ErrorResponse(
+            new StatusCodeMessage(400),
+            new MessageMessage('Some errors occurred while creating client chat request'),
+            new ErrorsMessage($form->getErrorSummary(true)),
+            new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
         ));
     }
 

@@ -24,15 +24,15 @@ class ClientChatLead extends ActiveRecord
         return [
             ['ccl_chat_id', 'integer'],
             ['ccl_chat_id', 'required'],
-            ['ccl_chat_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['ccl_chat_id' => 'cch_id']],
 
             ['ccl_lead_id', 'integer'],
             ['ccl_lead_id', 'required'],
-            ['ccl_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['ccl_lead_id' => 'id']],
-
-            [['ccl_chat_id', 'ccl_lead_id'], 'unique', 'targetAttribute' => ['ccl_chat_id', 'ccl_lead_id']],
 
             ['ccl_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            [['ccl_lead_id'], 'unique', 'targetAttribute' => ['ccl_chat_id', 'ccl_lead_id'], 'message' => 'Lead(' . $this->ccl_lead_id . ') already linked to chat'],
+            ['ccl_chat_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['ccl_chat_id' => 'cch_id']],
+            ['ccl_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['ccl_lead_id' => 'id']],
         ];
     }
 

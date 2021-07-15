@@ -1,6 +1,81 @@
 define({ "api": [
   {
     "type": "get, post",
+    "url": "/health-check",
+    "title": "Health check action",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>components statuses (&quot;true&quot; or &quot;false&quot;)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "Service",
+            "description": "<p>Unavailable 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
     "version": "0.1.0",
@@ -7266,5 +7341,86 @@ define({ "api": [
     },
     "filename": "webapi/modules/v2/controllers/UserGroupController.php",
     "groupTitle": "UserGroup"
+  },
+  {
+    "type": "post",
+    "url": "/v1/client-chat/link-leads",
+    "title": "Client Chat Link Leads",
+    "version": "0.1.0",
+    "name": "ClientChat_Link_Leads",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 150",
+            "optional": false,
+            "field": "rid",
+            "description": "<p>Chat Room Id <code>Required</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array",
+            "optional": false,
+            "field": "leadIds",
+            "description": "<p>Chat Room Id <code>Required</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n            \"rid\": \"e0ea61ca-ce03-497a-b740-asf4as6fcv\",\n     \"leadIds\": [\n         235344,\n         345567,\n         345466\n     ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n            \"status\": 400,\n            \"message\": \"Some errors occurred while creating client chat request\",\n            \"errors\": [\n                \"Lead id not exist: 345567\"\n            ],\n            \"code\": \"13101\"\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatController.php",
+    "group": "_var_www_sales_test_www_webapi_modules_v1_controllers_ClientChatController_php",
+    "groupTitle": "_var_www_sales_test_www_webapi_modules_v1_controllers_ClientChatController_php"
   }
 ] });
