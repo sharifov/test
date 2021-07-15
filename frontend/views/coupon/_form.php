@@ -41,6 +41,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'c_type_id')->dropDownList(CouponType::getList()) ?>
 
+        <?= $form->field($model, 'c_used_count')->textInput() ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

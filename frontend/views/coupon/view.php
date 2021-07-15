@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_start_date:byUserDateTime',
                 'c_reusable:booleanByLabel',
                 'c_reusable_count',
+                'c_used_count',
                 'c_public:booleanByLabel',
                 'c_status_id:couponStatus',
                 'c_disabled:booleanByLabel',

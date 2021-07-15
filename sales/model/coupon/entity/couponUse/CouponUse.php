@@ -75,4 +75,13 @@ class CouponUse extends \yii\db\ActiveRecord
     {
         return 'coupon_use';
     }
+
+    public static function create(int $couponId, ?string $ip, ?string $userAgent): CouponUse
+    {
+        $model = new self();
+        $model->cu_coupon_id = $couponId;
+        $model->cu_ip = $ip;
+        $model->cu_user_agent = $userAgent;
+        return $model;
+    }
 }

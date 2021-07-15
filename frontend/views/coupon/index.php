@@ -1,5 +1,6 @@
 <?php
 
+use yii\grid\ActionColumn;
 use common\components\grid\BooleanColumn;
 use common\components\grid\coupon\CouponStatusColumn;
 use common\components\grid\coupon\CouponTypeColumn;
@@ -25,11 +26,12 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'c_id',
             'c_code',
@@ -38,18 +40,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_percent',
             ['class' => BooleanColumn::class, 'attribute' => 'c_reusable'],
             'c_reusable_count',
+            'c_used_count',
             ['class' => BooleanColumn::class, 'attribute' => 'c_public'],
             ['class' => CouponStatusColumn::class],
             ['class' => BooleanColumn::class, 'attribute' => 'c_disabled'],
             ['class' => CouponTypeColumn::class],
             ['class' => DateTimeColumn::class, 'attribute' => 'c_exp_date'],
             ['class' => DateTimeColumn::class, 'attribute' => 'c_start_date'],
-
             ['class' => DateTimeColumn::class, 'attribute' => 'c_created_dt'],
             ['class' => DateTimeColumn::class, 'attribute' => 'c_updated_dt'],
             ['class' => UserSelect2Column::class, 'attribute' => 'c_created_user_id', 'relation' => 'createdUser'],
             ['class' => UserSelect2Column::class, 'attribute' => 'c_updated_user_id', 'relation' => 'updatedUser'],
-            ['class' => 'yii\grid\ActionColumn'],
+
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
 

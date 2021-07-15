@@ -32,6 +32,7 @@ class CouponSerializer extends Serializer
             'c_percent',
             'c_reusable',
             'c_reusable_count',
+            'c_used_count',
             'c_public',
             'c_status_id',
             'c_disabled',

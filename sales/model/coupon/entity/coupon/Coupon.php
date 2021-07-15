@@ -35,6 +35,7 @@ use yii\db\ActiveRecord;
  * @property string|null $c_updated_dt
  * @property int|null $c_created_user_id
  * @property int|null $c_updated_user_id
+ * @property int $c_used_count
  *
  * @property Employee $createdUser
  * @property Employee $updatedUser
@@ -80,6 +81,9 @@ class Coupon extends ActiveRecord implements Serializable
             ['c_type_id', 'required'],
             ['c_type_id', 'integer'],
             ['c_type_id', 'in', 'range' => array_keys(CouponType::getList())],
+
+            ['c_used_count', 'integer'],
+            ['c_used_count', 'default', 'value' => 0],
         ];
     }
 
@@ -163,6 +167,7 @@ class Coupon extends ActiveRecord implements Serializable
             'c_updated_dt' => 'Updated Dt',
             'c_created_user_id' => 'Created User',
             'c_updated_user_id' => 'Updated User',
+            'c_used_count' => 'Used count',
         ];
     }
 
@@ -179,5 +184,11 @@ class Coupon extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new CouponSerializer($this))->getData();
+    }
+
+    public function usedCountIncrement(): Coupon
+    {
+        $this->c_used_count ++;
+        return $this;
     }
 }
