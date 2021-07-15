@@ -607,10 +607,17 @@ class CouponController extends BaseController
             }
 
             $couponUsed = $this->transactionManager->wrap(static function () use ($coupon, $couponUseForm) {
-                $couponUse = CouponUse::create($coupon->c_id, $couponUseForm->ip, $couponUseForm->userAgent);
+                $couponUse = CouponUse::create($coupon->c_id, $couponUseForm->clientIp, $couponUseForm->clientUserAgent);
                 (new CouponUseRepository($couponUse))->save();
 
-                $coupon->usedCountIncrement()->statusUsed();
+                $coupon->usedCountIncrement();
+
+                if (CouponService::checkChangeStatusToProgress($coupon)) {
+                    $coupon->statusInProgress();
+                }
+                if (CouponService::checkChangeStatusToUse($coupon)) {
+                    $coupon->statusUsed();
+                }
                 return (new CouponRepository($coupon))->save();
             });
 
@@ -628,7 +635,7 @@ class CouponController extends BaseController
 
         return new SuccessResponse(
             new DataMessage([
-                'status' => $couponInfo['statusName'],
+                'result' => true,
                 'couponInfo' => $couponInfo,
             ])
         );

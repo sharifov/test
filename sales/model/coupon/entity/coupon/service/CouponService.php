@@ -39,4 +39,29 @@ class CouponService
             ])
             ->exists();
     }
+
+    public static function checkChangeStatusToUse(Coupon $coupon): bool
+    {
+        if ($coupon->c_status_id === CouponStatus::USED) {
+            return false;
+        }
+        if (!$coupon->c_reusable) {
+            return true;
+        }
+        if ($coupon->c_reusable_count <= $coupon->c_used_count) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function checkChangeStatusToProgress(Coupon $coupon): bool
+    {
+        if ($coupon->c_status_id === CouponStatus::IN_PROGRESS) {
+            return false;
+        }
+        if ($coupon->c_reusable && ($coupon->c_reusable_count > $coupon->c_used_count)) {
+            return true;
+        }
+        return false;
+    }
 }
