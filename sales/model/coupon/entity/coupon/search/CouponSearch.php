@@ -27,7 +27,7 @@ class CouponSearch extends Coupon
 
             ['c_reusable', 'boolean'],
 
-            ['c_reusable_count', 'integer'],
+            [['c_reusable_count', 'c_used_count'], 'integer'],
 
             ['c_status_id', 'integer'],
             ['c_type_id', 'integer'],
@@ -53,7 +53,7 @@ class CouponSearch extends Coupon
         $this->load($params);
 
         if (!$this->validate()) {
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -87,10 +87,8 @@ class CouponSearch extends Coupon
             'c_updated_user_id' => $this->c_updated_user_id,
             'c_currency_code' => $this->c_currency_code,
             'c_code' => $this->c_code,
+            'c_used_count' => $this->c_used_count,
         ]);
-
-//        $query->andFilterWhere(['like', 'c_code', $this->c_code])
-//            ->andFilterWhere(['like', 'c_currency_code', $this->c_currency_code]);
 
         return $dataProvider;
     }
