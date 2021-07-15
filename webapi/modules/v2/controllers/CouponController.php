@@ -6,7 +6,9 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\repository\CouponRepository;
+use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\coupon\service\CouponService;
+use sales\model\coupon\entity\couponUse\CouponUse;
 use sales\model\coupon\useCase\apiCreate\CouponApiCreateService;
 use sales\model\coupon\useCase\apiCreate\CouponCreateForm;
 use sales\model\coupon\useCase\apiInfo\CouponInfoForm;
@@ -438,7 +440,29 @@ class CouponController extends BaseController
         }
 
         try {
+            $couponInfo = [];
             $isValid = CouponService::checkIsValid($couponValidateForm->code);
+            if ($coupon = Coupon::findOne(['c_code' => $couponValidateForm->code])) {
+                $couponInfo = (new CouponSerializer($coupon))->getDataValidate();
+            }
+
+            $dataMessage = [
+                'isValid' => $isValid,
+                'couponInfo' => $couponInfo,
+            ];
+
+            /*if ((!$isValid && $coupon->c_reusable) && (count($coupon->couponUse) > $coupon->c_reusable_count)) {
+                $dataMessage['warning'][] = 'CouponUse (' . count($coupon->couponUse) .
+                    ') more than ReusableCount (' . $coupon->c_reusable_count . ')';
+                \Yii::warning(
+                    [
+                        'code' => $couponValidateForm->code,
+                        'c_reusable_count' => $coupon->c_reusable_count,
+                        'couponUse' => count($coupon->couponUse),
+                    ],
+                    'CouponController:actionValidate:reusableCountNEQCouponUse'
+                );
+            }*/ /* TODO:: c_used_count */
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
@@ -451,9 +475,7 @@ class CouponController extends BaseController
         }
 
         return new SuccessResponse(
-            new DataMessage([
-                'isValid' => $isValid,
-            ])
+            new DataMessage($dataMessage)
         );
     }
 }
