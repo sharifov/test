@@ -147,6 +147,16 @@ class Coupon extends ActiveRecord implements Serializable
         return $this->c_status_id === CouponStatus::SEND;
     }
 
+    public function isUsed(): bool
+    {
+        return $this->c_status_id === CouponStatus::USED;
+    }
+
+    public function isInProgress(): bool
+    {
+        return $this->c_status_id === CouponStatus::IN_PROGRESS;
+    }
+
     public function attributeLabels(): array
     {
         return [
@@ -189,6 +199,18 @@ class Coupon extends ActiveRecord implements Serializable
     public function usedCountIncrement(): Coupon
     {
         $this->c_used_count ++;
+        return $this;
+    }
+
+    public function statusUsed(): Coupon
+    {
+        $this->c_status_id = CouponStatus::USED;
+        return $this;
+    }
+
+    public function statusInProgress(): Coupon
+    {
+        $this->c_status_id = CouponStatus::IN_PROGRESS;
         return $this;
     }
 }

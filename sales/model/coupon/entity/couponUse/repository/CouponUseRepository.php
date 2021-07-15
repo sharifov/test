@@ -2,19 +2,19 @@
 
 namespace sales\model\coupon\entity\couponUse\repository;
 
-use sales\helpers\ErrorsToStringHelper;
 use sales\model\coupon\entity\couponUse\CouponUse;
+use sales\repositories\AbstractBaseRepository;
 
 /**
  * Class CouponUseRepository
  */
-class CouponUseRepository
+class CouponUseRepository extends AbstractBaseRepository
 {
-    public function save(CouponUse $model): CouponUse
+    /**
+     * @param CouponUse $model
+     */
+    public function __construct(CouponUse $model)
     {
-        if (!$model->save()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($model));
-        }
-        return $model;
+        parent::__construct($model);
     }
 }
