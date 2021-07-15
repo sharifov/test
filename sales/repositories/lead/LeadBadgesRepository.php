@@ -331,19 +331,19 @@ class LeadBadgesRepository
         $displayFlag = false;
 
         /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_PROJECTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common projects*/
-        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_IN_COMMON_PROJECTS, LeadAbacObject::ACTION_ACCESS)) {
+        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_PROJECTS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInProjectSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
 
         /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common departments*/
-        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_IN_COMMON_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS)) {
+        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInDepartmentsSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
 
         /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_GROUPS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common groups*/
-        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_IN_COMMON_GROUPS, LeadAbacObject::ACTION_ACCESS)) {
+        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_GROUPS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInGroupsSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
