@@ -1957,7 +1957,8 @@ class LeadController extends FController
 
         $dataProvider = $searchModel->searchSold($params, $user);
 
-        $tmpl = $user->isQa() ? 'sold_qa' : 'sold';
+        //$tmpl = $user->isQa() ? 'sold_qa' : 'sold';
+        $tmpl = 'sold';
 
         return $this->render($tmpl, [
             'searchModel' => $searchModel,

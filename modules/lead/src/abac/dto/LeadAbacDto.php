@@ -8,6 +8,7 @@ use sales\access\EmployeeGroupAccess;
 /**
  * @property bool $is_owner
  * @property bool $has_owner
+ * @property bool $has_owner_query
  * @property bool $is_common_group
  * @property int|null $status_id
  */
@@ -15,6 +16,7 @@ class LeadAbacDto extends \stdClass
 {
     public bool $is_owner;
     public bool $has_owner;
+    public bool $has_owner_query;
     public bool $is_common_group = false;
     public ?int $status_id = null;
 
@@ -27,6 +29,7 @@ class LeadAbacDto extends \stdClass
         if ($lead) {
             $this->is_owner = $lead->isOwner($userId);
             $this->has_owner = $lead->hasOwner();
+            $this->has_owner_query = $this->has_owner;
 
             if ($this->has_owner) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);

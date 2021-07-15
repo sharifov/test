@@ -46,6 +46,14 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
 
+    /** QUERY PERMISSIONS */
+    public const QUERY_SOLD_ALL = self::NS . 'query/sold/*';
+    public const QUERY_SOLD_ON_COMMON_PROJECTS = self::NS . 'query/sold/on_common_projects';
+    public const QUERY_SOLD_ON_COMMON_DEPARTMENTS = self::NS . 'query/sold/on_common_departments';
+    public const QUERY_SOLD_ON_COMMON_GROUPS = self::NS . 'query/sold/on_common_groups';
+    public const QUERY_SOLD_IS_OWNER = self::NS . 'query/sold/is_owner';
+    public const QUERY_SOLD_IS_EMPTY_OWNER = self::NS . 'query/sold/is_empty_owner';
+
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ACT_USER_CONVERSION   => self::ACT_USER_CONVERSION,
@@ -66,7 +74,13 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_FIELD_PHONE_FORM_ADD_PHONE   => self::UI_FIELD_PHONE_FORM_ADD_PHONE,
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL   => self::UI_FIELD_EMAIL_FORM_ADD_EMAIL,
         self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT   => self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT,
-        self::UI_FIELD_MARKETING_COUNTRY   => self::UI_FIELD_MARKETING_COUNTRY
+        self::UI_FIELD_MARKETING_COUNTRY   => self::UI_FIELD_MARKETING_COUNTRY,
+        self::QUERY_SOLD_ALL   => self::QUERY_SOLD_ALL,
+        self::QUERY_SOLD_ON_COMMON_PROJECTS   => self::QUERY_SOLD_ON_COMMON_PROJECTS,
+        self::QUERY_SOLD_ON_COMMON_DEPARTMENTS   => self::QUERY_SOLD_ON_COMMON_DEPARTMENTS,
+        self::QUERY_SOLD_ON_COMMON_GROUPS   => self::QUERY_SOLD_ON_COMMON_GROUPS,
+        self::QUERY_SOLD_IS_OWNER   => self::QUERY_SOLD_IS_OWNER,
+        self::QUERY_SOLD_IS_EMPTY_OWNER   => self::QUERY_SOLD_IS_EMPTY_OWNER,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -76,6 +90,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
     public const ACTION_UNMASK  = 'unmask';
+    public const ACTION_QUERY_AND  = 'and';
+    public const ACTION_QUERY_OR  = 'or';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -98,6 +114,12 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ACTION_CREATE, self::ACTION_UPDATE],
         self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT  => [self::ACTION_UPDATE],
         self::UI_FIELD_MARKETING_COUNTRY  => [self::ACTION_UPDATE],
+        self::QUERY_SOLD_ALL  => [self::ACTION_ACCESS],
+        self::QUERY_SOLD_ON_COMMON_PROJECTS  => [self::ACTION_ACCESS],
+        self::QUERY_SOLD_ON_COMMON_DEPARTMENTS  => [self::ACTION_ACCESS],
+        self::QUERY_SOLD_ON_COMMON_GROUPS  => [self::ACTION_ACCESS],
+        self::QUERY_SOLD_IS_OWNER  => [self::ACTION_ACCESS],
+        self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ACTION_QUERY_AND, self::ACTION_QUERY_OR],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -122,6 +144,19 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_LEAD_HAS_OWNER_QUERY = [
+        'optgroup' => 'Query',
+        'id' => self::NS . 'has_owner_query',
+        'field' => 'has_owner_query',
+        'label' => 'Condition',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['false' => 'Allow', 'true' => 'Dany'],
         'multiple' => false,
         'operators' =>  [self::OP_EQUAL2]
     ];
@@ -222,6 +257,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ATTR_LEAD_IS_OWNER],
+        self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ATTR_LEAD_HAS_OWNER_QUERY],
     ];
 
     /**

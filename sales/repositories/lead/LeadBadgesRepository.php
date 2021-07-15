@@ -9,9 +9,12 @@ use common\models\Quote;
 use common\models\TipsSplit;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use yii\db\ActiveQuery;
+use modules\lead\src\abac\LeadAbacObject;
 
 class LeadBadgesRepository
 {
@@ -313,13 +316,58 @@ class LeadBadgesRepository
     {
         $query = Lead::find()->where([Lead::tableName() . '.status' => Lead::STATUS_SOLD]);
 
-        if ($user->isAdmin()) {
+        /*if ($user->isAdmin()) {
             return $query;
-        }
+        }*/
+
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS, Access to all sold leads*/
+        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS)) {
+            return $query;
+        } /*else {
+            $query->where('0=1');
+        }*/
 
         $conditions = [];
+        $displayFlag = false;
 
-        if ($user->isAgent() || $user->isExAgent()) {
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_PROJECTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common projects*/
+        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_ON_COMMON_PROJECTS, LeadAbacObject::ACTION_ACCESS)) {
+            $query->andWhere($this->createInProjectSubQuery($user->id, $conditions));
+            $displayFlag = true;
+        }
+
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common departments*/
+        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_ON_COMMON_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS)) {
+            $query->andWhere($this->createInDepartmentsSubQuery($user->id, $conditions));
+            $displayFlag = true;
+        }
+
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_GROUPS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common groups*/
+        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_ON_COMMON_GROUPS, LeadAbacObject::ACTION_ACCESS)) {
+            $query->andWhere($this->createInGroupsSubQuery($user->id, $conditions));
+            $displayFlag = true;
+        }
+
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where user id owner*/
+        if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS)) {
+            $query->andWhere([Lead::tableName() . '.employee_id' => $user->id]);
+            $displayFlag = true;
+        }
+        $lead = new Lead();
+        $lead->employee_id = null;
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner*/
+        if (\Yii::$app->abac->can(new LeadAbacDto($lead, 0), LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_QUERY_AND)) {
+            $query->andWhere([Lead::tableName() . '.employee_id' => null]);
+            $displayFlag = true;
+        }
+
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner*/
+        if (\Yii::$app->abac->can(new LeadAbacDto($lead, 0), LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_QUERY_OR)) {
+            $query->orWhere([Lead::tableName() . '.employee_id' => null])->andWhere([Lead::tableName() . '.status' => Lead::STATUS_SOLD]);
+            $displayFlag = true;
+        }
+
+        /*if ($user->isAgent() || $user->isExAgent()) {
             $conditions = $this->inSplit($user->id);
         }
 
@@ -333,7 +381,11 @@ class LeadBadgesRepository
             ];
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions));
+        $query->andWhere($this->createSubQuery($user->id, $conditions));*/
+
+        if (!$displayFlag) {
+            $query->where('0=1');
+        }
 
         return $query;
     }
@@ -419,6 +471,23 @@ class LeadBadgesRepository
     }
 
     /**
+     * @param $userId
+     * @return array
+     */
+    private function inDepartment($userId): array
+    {
+        return [Lead::tableName() . '.employee_id' => EmployeeDepartmentAccess::usersIdsInCommonDepartmentsSubQuery($userId)];
+    }
+    /**
+     * @param $userId
+     * @return array
+     */
+    private function inGroups($userId): array
+    {
+        return [Lead::tableName() . '.employee_id' => $this->usersIdsInCommonGroups($userId)];
+    }
+
+    /**
      * @return array
      */
     private function freeLead(): array
@@ -437,6 +506,15 @@ class LeadBadgesRepository
 
     /**
      * @param $userId
+     * @return ActiveQuery
+     */
+    private function usersIdsInCommonDepartments($userId): ActiveQuery
+    {
+        return EmployeeDepartmentAccess::usersIdsInCommonDepartmentsSubQuery($userId);
+    }
+
+    /**
+     * @param $userId
      * @param $conditions
      * @return array
      */
@@ -450,6 +528,48 @@ class LeadBadgesRepository
                 $this->inProject($userId),
                 $conditions
             ]
+        ];
+    }
+
+    /**
+     * @param $userId
+     * @param $conditions
+     * @return array
+     */
+    private function createInProjectSubQuery($userId, $conditions): array
+    {
+        return [
+                'and',
+                $this->inProject($userId),
+                $conditions
+        ];
+    }
+
+    /**
+     * @param $userId
+     * @param $conditions
+     * @return array
+     */
+    private function createInDepartmentsSubQuery($userId, $conditions): array
+    {
+        return [
+                'and',
+                $this->inDepartment($userId),
+                $conditions
+        ];
+    }
+
+    /**
+     * @param $userId
+     * @param $conditions
+     * @return array
+     */
+    private function createInGroupsSubQuery($userId, $conditions): array
+    {
+        return [
+                'and',
+                $this->inGroups($userId),
+                $conditions
         ];
     }
 }
