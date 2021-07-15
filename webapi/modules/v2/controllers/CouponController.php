@@ -447,11 +447,16 @@ class CouponController extends BaseController
             );
         }
 
+        $exceptFields = [
+            'c_code', 'c_amount', 'c_currency_code', 'c_percent', 'c_public',
+            'c_status_id', 'c_type_id', 'c_created_dt', 'typeName',
+        ];
+
         try {
             $couponInfo = [];
             $isValid = CouponService::checkIsValid($couponValidateForm->code);
             if ($coupon = Coupon::findOne(['c_code' => $couponValidateForm->code])) {
-                $couponInfo = (new CouponSerializer($coupon))->getDataValidate();
+                $couponInfo = (new CouponSerializer($coupon))->getDataExcept($exceptFields);
             }
         } catch (\Throwable $throwable) {
             \Yii::error(
@@ -487,6 +492,8 @@ class CouponController extends BaseController
      *  }
      *
      * @apiParam {string{15}}                    code                Coupon Code
+     * @apiParam {string{40}}                    [clientIp]          Client Ip
+     * @apiParam {string{500}}                   [clientUserAgent]   Client UserAgent
      *
      * @apiParamExample {json} Request-Example:
      *   {
@@ -502,16 +509,15 @@ class CouponController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     *          "example": "TODO::     ",
-     *          "isValid": true,
-     *           "couponInfo": {
+     *          "status": "Used",
+     *          "couponInfo": {
      *               "c_reusable": 1,
      *               "c_reusable_count": 5,
      *               "c_disabled": 0,
      *               "c_used_count": 0,
      *               "startDate": "2021-07-14",
      *               "expDate": "2021-12-25",
-     *               "statusName": "New"
+     *               "statusName": "Used"
      *           }
      *        },
      *        "technical": {
@@ -622,6 +628,7 @@ class CouponController extends BaseController
 
         return new SuccessResponse(
             new DataMessage([
+                'status' => $couponInfo['statusName'],
                 'couponInfo' => $couponInfo,
             ])
         );
