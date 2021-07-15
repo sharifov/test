@@ -42,7 +42,7 @@ class CouponService
 
     public static function checkChangeStatusToUse(Coupon $coupon): bool
     {
-        if ($coupon->c_status_id === CouponStatus::USED) {
+        if ($coupon->isUsed()) {
             return false;
         }
         if (!$coupon->c_reusable) {
@@ -56,7 +56,7 @@ class CouponService
 
     public static function checkChangeStatusToProgress(Coupon $coupon): bool
     {
-        if ($coupon->c_status_id === CouponStatus::IN_PROGRESS) {
+        if ($coupon->isInProgress()) {
             return false;
         }
         if ($coupon->c_reusable && ($coupon->c_reusable_count > $coupon->c_used_count)) {
