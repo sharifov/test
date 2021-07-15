@@ -509,7 +509,7 @@ class CouponController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     *          "status": "Used",
+     *          "result": true,
      *          "couponInfo": {
      *               "c_reusable": 1,
      *               "c_reusable_count": 5,

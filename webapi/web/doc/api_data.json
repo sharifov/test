@@ -1910,7 +1910,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n         \"status\": \"Used\",\n         \"couponInfo\": {\n              \"c_reusable\": 1,\n              \"c_reusable_count\": 5,\n              \"c_disabled\": 0,\n              \"c_used_count\": 0,\n              \"startDate\": \"2021-07-14\",\n              \"expDate\": \"2021-12-25\",\n              \"statusName\": \"Used\"\n          }\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n         \"result\": true,\n         \"couponInfo\": {\n              \"c_reusable\": 1,\n              \"c_reusable_count\": 5,\n              \"c_disabled\": 0,\n              \"c_used_count\": 0,\n              \"startDate\": \"2021-07-14\",\n              \"expDate\": \"2021-12-25\",\n              \"statusName\": \"Used\"\n          }\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
