@@ -1839,6 +1839,106 @@
   },
   {
     "type": "post",
+    "url": "/v2/coupon/use",
+    "title": "Coupon use",
+    "version": "0.1.0",
+    "name": "Coupon_use",
+    "group": "Coupon",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "15",
+            "optional": false,
+            "field": "code",
+            "description": "<p>Coupon Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "clientIp",
+            "description": "<p>Client Ip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "500",
+            "optional": true,
+            "field": "clientUserAgent",
+            "description": "<p>Client UserAgent</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"code\": \"D2EYEWH64BDGD3Y\",\n    \"clientIp\": \"127.0.0.1\",\n    \"clientUserAgent\": \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n         \"status\": \"Used\",\n         \"couponInfo\": {\n              \"c_reusable\": 1,\n              \"c_reusable_count\": 5,\n              \"c_disabled\": 0,\n              \"c_used_count\": 0,\n              \"startDate\": \"2021-07-14\",\n              \"expDate\": \"2021-12-25\",\n              \"statusName\": \"Used\"\n          }\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Coupon not found\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}\n.",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (500):",
+          "content": "HTTP/1.1 500 Internal Server Error\n{\n       \"status\": \"Failed\",\n       \"source\": {\n           \"type\": 1,\n           \"status\": 500\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": \"Failed\",\n       \"message\": \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\",\n       \"errors\": [\n             \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\"\n       ],\n       \"code\": 0,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CouponController.php",
+    "groupTitle": "Coupon"
+  },
+  {
+    "type": "post",
     "url": "/v2/coupon/validate",
     "title": "Coupon validate",
     "version": "0.1.0",
