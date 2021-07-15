@@ -24,15 +24,15 @@ class ClientChatCase extends ActiveRecord
         return [
             ['cccs_chat_id', 'integer'],
             ['cccs_chat_id', 'required'],
-            ['cccs_chat_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['cccs_chat_id' => 'cch_id']],
 
             ['cccs_case_id', 'integer'],
             ['cccs_case_id', 'required'],
-            ['cccs_case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['cccs_case_id' => 'cs_id']],
-
-            [['cccs_chat_id', 'cccs_case_id'], 'unique', 'targetAttribute' => ['cccs_chat_id', 'cccs_case_id']],
 
             ['cccs_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            [['cccs_case_id'], 'unique', 'targetAttribute' => ['cccs_chat_id', 'cccs_case_id'], 'message' => 'Case(' . $this->cccs_case_id . ') already linked to chat'],
+            ['cccs_chat_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['cccs_chat_id' => 'cch_id']],
+            ['cccs_case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['cccs_case_id' => 'cs_id']],
         ];
     }
 

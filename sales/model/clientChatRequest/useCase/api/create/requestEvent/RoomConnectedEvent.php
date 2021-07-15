@@ -196,10 +196,6 @@ class RoomConnectedEvent implements ChatRequestEvent
 
                 $this->componentEventsTypeService->afterChatCreation($dto);
             }
-
-            if (($caseIds = $clientChatRequest->getCaseIds()) && is_array($caseIds)) {
-                $this->clientChatCaseManageService->assignChatByCaseIds($caseIds, $clientChat->cch_id);
-            }
             $this->setEventKey($clientChatRequest->ccr_rid)->decreaseProcessCounter();
         } catch (\Throwable $e) {
             $this->setEventKey($clientChatRequest->ccr_rid)->decreaseProcessCounter();

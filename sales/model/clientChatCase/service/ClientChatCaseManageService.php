@@ -26,20 +26,18 @@ class ClientChatCaseManageService
         $this->repository = $repository;
     }
 
-    public function assignChatByCaseIds(array $ids, int $chatId): void
+    public function assignChatByCaseIds(array $ids, int $chatId): array
     {
+        $errors = [];
+
         foreach ($ids as $caseId) {
-            if (Cases::find()->where(['cs_id' => $caseId])->exists()) {
-                $clientChatCase = ClientChatCase::create($chatId, $caseId, new \DateTimeImmutable('now'));
-                if ($clientChatCase->validate()) {
-                    $this->repository->save($clientChatCase);
-                } else {
-                    \Yii::warning(
-                        ErrorsToStringHelper::extractFromModel($clientChatCase),
-                        'ClientChatCaseManageService:assignChatByCaseIds:validate'
-                    );
-                }
+            $clientChatCase = ClientChatCase::create($chatId, $caseId, new \DateTimeImmutable('now'));
+            if ($clientChatCase->validate()) {
+                $this->repository->save($clientChatCase);
+            } else {
+                $errors[] = ErrorsToStringHelper::extractFromModel($clientChatCase);
             }
         }
+        return $errors;
     }
 }
