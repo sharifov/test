@@ -35,7 +35,7 @@ class CouponService
                 'OR',
                     ['c_reusable' => null],
                     ['c_reusable' => false],
-                    new Expression('(c_reusable = TRUE AND c_reusable_count > 0)'),
+                    new Expression('(c_reusable = TRUE AND c_reusable_count > c_used_count)'),
             ])
             ->exists();
     }

@@ -364,7 +364,16 @@ class CouponController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     *           "isValid": true
+     *           "isValid": true,
+     *           "couponInfo": {
+     *               "c_reusable": 1,
+     *               "c_reusable_count": 5,
+     *               "c_disabled": 0,
+     *               "c_used_count": 0,
+     *               "startDate": "2021-07-14",
+     *               "expDate": "2021-12-25",
+     *               "statusName": "New"
+     *           }
      *        },
      *        "technical": {
      *           ...
@@ -445,24 +454,6 @@ class CouponController extends BaseController
             if ($coupon = Coupon::findOne(['c_code' => $couponValidateForm->code])) {
                 $couponInfo = (new CouponSerializer($coupon))->getDataValidate();
             }
-
-            $dataMessage = [
-                'isValid' => $isValid,
-                'couponInfo' => $couponInfo,
-            ];
-
-            /*if ((!$isValid && $coupon->c_reusable) && (count($coupon->couponUse) > $coupon->c_reusable_count)) {
-                $dataMessage['warning'][] = 'CouponUse (' . count($coupon->couponUse) .
-                    ') more than ReusableCount (' . $coupon->c_reusable_count . ')';
-                \Yii::warning(
-                    [
-                        'code' => $couponValidateForm->code,
-                        'c_reusable_count' => $coupon->c_reusable_count,
-                        'couponUse' => count($coupon->couponUse),
-                    ],
-                    'CouponController:actionValidate:reusableCountNEQCouponUse'
-                );
-            }*/ /* TODO:: c_used_count */
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
@@ -475,7 +466,10 @@ class CouponController extends BaseController
         }
 
         return new SuccessResponse(
-            new DataMessage($dataMessage)
+            new DataMessage([
+                'isValid' => $isValid,
+                'couponInfo' => $couponInfo,
+            ])
         );
     }
 }
