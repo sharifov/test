@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\UserConnection;
 use common\models\UserOnline;
+use sales\helpers\app\AppHelper;
 use sales\model\user\entity\monitor\UserMonitor;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\services\clientChatService\ClientChatService;
@@ -212,10 +213,12 @@ class WebsocketServerController extends Controller
                             UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ONLINE);
                             UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ACTIVE);
 
-                            ClientChatService::createJobAssigningUaToPendingChats((int)$uo->uo_user_id);
-                            if (($userStatus = UserStatus::findOne(['us_user_id' => $userId])) && $userStatus->us_call_phone_status) {
-                                $userStatus->updatePhoneReadyTime();
-                                $userStatus->save();
+                            try {
+                                ClientChatService::createJobAssigningUaToPendingChats((int)$uo->uo_user_id);
+                                $result = \Yii::$app->db->createCommand()->update(UserStatus::tableName(), ['us_phone_ready_time' => time()], ['us_user_id' => $userId, 'us_call_phone_status' => 1])->execute();
+                                \Yii::info($result, 'ws:open:UserStatus:update');
+                            } catch (\Throwable $e) {
+                                \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:UserStatus:update');
                             }
                         } else {
                             echo 'Error: UserOnline:save' . PHP_EOL;
