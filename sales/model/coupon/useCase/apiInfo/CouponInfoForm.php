@@ -17,7 +17,7 @@ class CouponInfoForm extends Model
     {
         return [
             ['code', 'required'],
-            ['code', 'string', 'max' => 16],
+            ['code', 'string', 'min' => 14, 'max' => 16],
             ['code', 'trim'],
             ['code', 'exist', 'skipOnError' => true, 'targetClass' => Coupon::class, 'targetAttribute' => ['code' => 'c_code'], 'message' => 'Coupon not found'],
         ];

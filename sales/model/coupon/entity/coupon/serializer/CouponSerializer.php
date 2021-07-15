@@ -70,4 +70,22 @@ class CouponSerializer extends Serializer
 
         return $data;
     }
+
+    public function getDataExcept(array $exceptFields = []): array
+    {
+        $data = $this->toArray();
+
+        $data['startDate'] = $this->model->c_start_date ? date('Y-m-d', strtotime($this->model->c_start_date)) : null;
+        $data['expDate'] = $this->model->c_exp_date ? date('Y-m-d', strtotime($this->model->c_exp_date)) : null;
+        $data['statusName'] = CouponStatus::getName($this->model->c_status_id);
+        $data['typeName'] = CouponType::getName($this->model->c_type_id);
+
+        foreach ($exceptFields as $keyField) {
+            if (ArrayHelper::keyExists($keyField, $data)) {
+                ArrayHelper::remove($data, $keyField);
+            }
+        }
+
+        return $data;
+    }
 }

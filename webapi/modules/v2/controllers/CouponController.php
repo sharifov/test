@@ -3,17 +3,17 @@
 namespace webapi\modules\v2\controllers;
 
 use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\repository\CouponRepository;
 use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\coupon\service\CouponService;
 use sales\model\coupon\entity\couponUse\CouponUse;
+use sales\model\coupon\entity\couponUse\repository\CouponUseRepository;
 use sales\model\coupon\useCase\apiCreate\CouponApiCreateService;
 use sales\model\coupon\useCase\apiCreate\CouponCreateForm;
 use sales\model\coupon\useCase\apiInfo\CouponInfoForm;
+use sales\model\coupon\useCase\apiUse\CouponUseForm;
 use sales\model\coupon\useCase\apiValidate\CouponValidateForm;
-use sales\model\coupon\useCase\request\CouponForm;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
@@ -23,7 +23,6 @@ use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
-use webapi\src\services\payment\PaymentManageApiService;
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -173,7 +172,7 @@ class CouponController extends BaseController
             $code = CouponApiCreateService::getCodeFromAirSearch($couponCreateForm);
             $couponCode = $this->transactionManager->wrap(static function () use ($couponCreateForm, $code) {
                 $coupon = CouponApiCreateService::createFromApiForm($couponCreateForm, $code);
-                $coupon = (new CouponRepository())->save($coupon);
+                $coupon = (new CouponRepository($coupon))->save();
                 return $coupon->c_code;
             });
         } catch (\Throwable $throwable) {
@@ -468,6 +467,161 @@ class CouponController extends BaseController
         return new SuccessResponse(
             new DataMessage([
                 'isValid' => $isValid,
+                'couponInfo' => $couponInfo,
+            ])
+        );
+    }
+
+    /**
+     * @api {post} /v2/coupon/use Coupon use
+     * @apiVersion 0.1.0
+     * @apiName Coupon use
+     * @apiGroup Coupon
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{15}}                    code                Coupon Code
+     *
+     * @apiParamExample {json} Request-Example:
+     *   {
+     *      "code": "D2EYEWH64BDGD3Y",
+     *      "clientIp": "127.0.0.1",
+     *      "clientUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
+     *          "example": "TODO::     ",
+     *          "isValid": true,
+     *           "couponInfo": {
+     *               "c_reusable": 1,
+     *               "c_reusable_count": 5,
+     *               "c_disabled": 0,
+     *               "c_used_count": 0,
+     *               "startDate": "2021-07-14",
+     *               "expDate": "2021-12-25",
+     *               "statusName": "New"
+     *           }
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Coupon not found",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *.
+     * @apiErrorExample {json} Error-Response (500):
+     * HTTP/1.1 500 Internal Server Error
+     * {
+     *        "status": "Failed",
+     *        "source": {
+     *            "type": 1,
+     *            "status": 500
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": "Failed",
+     *        "message": "Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received",
+     *        "errors": [
+     *              "Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received"
+     *        ],
+     *        "code": 0,
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionUse()
+    {
+        $post = Yii::$app->request->post();
+        $couponUseForm = new CouponUseForm();
+
+        if (!$couponUseForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+        if (!$couponUseForm->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($couponUseForm->getErrors()),
+            );
+        }
+
+        $exceptFields = [
+            'c_code', 'c_amount', 'c_currency_code', 'c_percent', 'c_public',
+            'c_status_id', 'c_type_id', 'c_created_dt', 'typeName',
+        ];
+
+        try {
+            if (!$isValid = CouponService::checkIsValid($couponUseForm->code)) {
+                throw new \DomainException('Coupon is not valid');
+            }
+            if (!$coupon = Coupon::findOne(['c_code' => $couponUseForm->code])) {
+                throw new \DomainException('Coupon not found by code (' . $couponUseForm->code . ')');
+            }
+
+            $couponUsed = $this->transactionManager->wrap(static function () use ($coupon, $couponUseForm) {
+                $couponUse = CouponUse::create($coupon->c_id, $couponUseForm->ip, $couponUseForm->userAgent);
+                (new CouponUseRepository($couponUse))->save();
+
+                $coupon->usedCountIncrement()->statusUsed();
+                return (new CouponRepository($coupon))->save();
+            });
+
+            $couponInfo = (new CouponSerializer($couponUsed))->getDataExcept($exceptFields);
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
+                'CouponController:actionUse:Throwable'
+            );
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($throwable->getMessage()),
+            );
+        }
+
+        return new SuccessResponse(
+            new DataMessage([
                 'couponInfo' => $couponInfo,
             ])
         );

@@ -191,4 +191,10 @@ class Coupon extends ActiveRecord implements Serializable
         $this->c_used_count ++;
         return $this;
     }
+
+    public function statusUsed(): Coupon
+    {
+        $this->c_status_id = CouponStatus::USED;
+        return $this;
+    }
 }
