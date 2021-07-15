@@ -42,7 +42,7 @@ class UserStatus extends ActiveRecord
     public function rules()
     {
         return [
-            [['us_gl_call_count'], 'integer'],
+            [['us_gl_call_count', 'us_phone_ready_time'], 'integer'],
             [['us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'boolean'],
             [['us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'filter', 'filter' => 'boolval'],
             [['us_updated_dt'], 'safe'],

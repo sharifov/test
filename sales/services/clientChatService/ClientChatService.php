@@ -245,6 +245,7 @@ class ClientChatService
         if (!$job->isRunning()) {
             \Yii::$app->queue_client_chat_job->priority(10)->push($job);
         }
+        unset($job);
     }
 
     public function assignUserAccessToPendingChats(int $userId): void
