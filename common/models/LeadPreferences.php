@@ -61,9 +61,9 @@ class LeadPreferences extends \yii\db\ActiveRecord
         $this->clients_budget = $clientBudget;
         $this->number_stops = $numberStops;
 
-        if ($this->pref_currency != $currency) {
+        /*if ($this->pref_currency != $currency) {
             $this->recordEvent((new LeadPreferencesUpdateCurrencyEvent($this)));
-        }
+        }*/
         $this->pref_currency = $currency;
     }
 
