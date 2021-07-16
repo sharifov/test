@@ -93,7 +93,8 @@ class CouponController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     *            "code": "D2EYEWH64BDGD3Y"
+     *            "code": "D2EYEWH64BDGD3Y",
+     *            "synchronized": true
      *        },
      *        "technical": {
      *           ...
@@ -169,8 +170,12 @@ class CouponController extends BaseController
         }
 
         try {
-            $code = CouponApiCreateService::getCodeFromAirSearch($couponCreateForm);
-            $couponCode = $this->transactionManager->wrap(static function () use ($couponCreateForm, $code) {
+            $dataMessage['synchronized'] = false;
+            if ($code = CouponApiCreateService::getCodeFromAirSearch($couponCreateForm)) {
+                $dataMessage['synchronized'] = true;
+            }
+
+            $dataMessage['code'] = $this->transactionManager->wrap(static function () use ($couponCreateForm, $code) {
                 $coupon = CouponApiCreateService::createFromApiForm($couponCreateForm, $code);
                 $coupon = (new CouponRepository($coupon))->save();
                 return $coupon->c_code;
@@ -187,9 +192,7 @@ class CouponController extends BaseController
         }
 
         return new SuccessResponse(
-            new DataMessage([
-                'code' => $couponCode,
-            ])
+            new DataMessage($dataMessage)
         );
     }
 
