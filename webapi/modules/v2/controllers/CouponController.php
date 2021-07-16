@@ -3,6 +3,7 @@
 namespace webapi\modules\v2\controllers;
 
 use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\repository\CouponRepository;
 use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
@@ -14,6 +15,7 @@ use sales\model\coupon\useCase\apiCreate\CouponCreateForm;
 use sales\model\coupon\useCase\apiInfo\CouponInfoForm;
 use sales\model\coupon\useCase\apiUse\CouponUseForm;
 use sales\model\coupon\useCase\apiValidate\CouponValidateForm;
+use sales\model\coupon\useCase\request\CouponForm;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
@@ -170,16 +172,39 @@ class CouponController extends BaseController
         }
 
         try {
-            $dataMessage['synchronized'] = false;
-            if ($code = CouponApiCreateService::getCodeFromAirSearch($couponCreateForm)) {
-                $dataMessage['synchronized'] = true;
+            $couponAirSearch = CouponApiCreateService::requestCouponFromAirSearch($couponCreateForm->getAmountCurrencyCode());
+            $couponForm = new CouponForm();
+            if (!$couponForm->load($couponAirSearch)) {
+                throw new \DomainException('CouponForm not loaded');
+            }
+            if (!$couponForm->validate()) {
+                throw new \DomainException(ErrorsToStringHelper::extractFromModel($couponForm));
             }
 
-            $dataMessage['code'] = $this->transactionManager->wrap(static function () use ($couponCreateForm, $code) {
-                $coupon = CouponApiCreateService::createFromApiForm($couponCreateForm, $code);
+            $couponCreated = $this->transactionManager->wrap(static function () use ($couponCreateForm, $couponForm) {
+                $coupon = CouponApiCreateService::createFromAirSearch($couponCreateForm, $couponForm);
                 $coupon = (new CouponRepository($coupon))->save();
-                return $coupon->c_code;
+                return $coupon;
             });
+
+            $dataMessage['coupon'] = $couponCreated->serialize();
+            $dataMessage['serviceResponse'] = $couponAirSearch;
+            if (!empty($couponCreateForm->public) && ((bool) $couponCreateForm->public !== (bool) $couponForm->public)) {
+                $dataMessage['warning'][] =
+                    'Input param "public" (' . (int) $couponCreateForm->public . ') rewritten by result service (' . (int) $couponForm->public . ')';
+            }
+            if (!empty($couponCreateForm->reusable) && ((bool) $couponCreateForm->reusable !== (bool) $couponForm->reusable)) {
+                $dataMessage['warning'][] =
+                    'Input param "reusable" (' . (int) $couponCreateForm->reusable . ') rewritten by result service (' . (int) $couponForm->reusable . ')';
+            }
+            if (!empty($couponCreateForm->expirationDate)) {
+                $inputExpirationDate = date('Y-m-d', strtotime($couponCreateForm->expirationDate));
+                $serviceExpirationDate = date('Y-m-d', strtotime($couponForm->exp_date));
+                if ($inputExpirationDate !== $serviceExpirationDate) {
+                    $dataMessage['warning'][] =
+                        'Input param "expirationDate" (' . $inputExpirationDate . ') rewritten by result service (' . $serviceExpirationDate . ')';
+                }
+            }
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
