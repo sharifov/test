@@ -1,5 +1,6 @@
 <?php
 
+use dosamigos\datetimepicker\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -12,7 +13,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <div class="col-md-6">
+    <div class="col-md-3">
     <?= $form->field($model, 'us_user_id')->input('number', ['min' => 0]) ?>
 
     <?= $form->field($model, 'us_gl_call_count')->input('number', ['min' => 0]) ?>
@@ -23,7 +24,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'us_has_call_access')->checkbox() ?>
 
-    <?= $form->field($model, 'us_phone_ready_time')->input('number') ?>
+    <?= $form->field($model, 'us_phone_ready_dt')->widget(DateTimePicker::class) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
