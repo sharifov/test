@@ -89,7 +89,6 @@ class WebsocketServerController extends Controller
 
         $server->on('start', static function (Server $server) {
             echo ' Swoole WebSocket Server is started at ' . $server->host . ':' . $server->port . PHP_EOL;
-            \Yii::info(' Swoole WebSocket Server is started at ' . $server->host . ':' . $server->port, 'info\ws:actionStart:event:start');
 
             if (!empty(\Yii::$app->params['appInstance'])) {
                 $ucList = UserConnection::find()->where(['uc_app_instance' => \Yii::$app->params['appInstance']])->all();
@@ -103,8 +102,8 @@ class WebsocketServerController extends Controller
         });
 
         $server->on('workerStart', static function ($server, $workerId) use ($frontendConfig, $thisClass, $redisConfig) {
-            echo ' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
-            \Yii::info(' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s'), 'info\ws:actionStart:event:workerStart');
+            echo ' Websocket Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
+            \Yii::info('Websocket Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s'), 'info\ws:actionStart:event:workerStart');
 
 
             $server->tick(20000, static function () use ($server) {
