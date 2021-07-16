@@ -2076,14 +2076,14 @@ define({ "api": [
             "type": "int",
             "optional": true,
             "field": "percent",
-            "description": "<p>Percent (required if amount is empty)</p>"
+            "description": "<p>Percent</p>"
           },
           {
             "group": "Parameter",
             "type": "bool",
             "optional": true,
             "field": "reusable",
-            "description": "<p>Reusable (default false)</p>"
+            "description": "<p>Reusable</p>"
           },
           {
             "group": "Parameter",
@@ -2113,7 +2113,7 @@ define({ "api": [
             "type": "bool",
             "optional": true,
             "field": "public",
-            "description": "<p>Public (default false)</p>"
+            "description": "<p>Public</p>"
           }
         ]
       },
