@@ -42,6 +42,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const UI_FIELD_EMAIL_FORM_ADD_EMAIL = self::NS . 'ui/field/email';
     public const UI_FIELD_LOCALE_FORM_UPDATE_CLIENT = self::NS . 'ui/field/locale';
     public const UI_FIELD_MARKETING_COUNTRY = self::NS . 'ui/field/marketing_country';
+    public const UI_DISPLAY_QUOTE_SEARCH_PARAMS = self::NS . 'ui/quote/search/params';
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
@@ -81,6 +82,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_GROUPS   => self::QUERY_SOLD_GROUPS,
         self::QUERY_SOLD_IS_OWNER   => self::QUERY_SOLD_IS_OWNER,
         self::QUERY_SOLD_IS_EMPTY_OWNER   => self::QUERY_SOLD_IS_EMPTY_OWNER,
+        self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => self::UI_DISPLAY_QUOTE_SEARCH_PARAMS
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -120,6 +122,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_GROUPS  => [self::ACTION_ACCESS],
         self::QUERY_SOLD_IS_OWNER  => [self::ACTION_ACCESS],
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ACTION_QUERY_AND, self::ACTION_QUERY_OR],
+        self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => [self::ACTION_ACCESS]
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [

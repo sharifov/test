@@ -305,7 +305,6 @@ class FlightQuoteController extends FController
         $viewData['searchForm'] = $form;
         $viewData['errorMessage'] = $errorMessage ?? '';
         $viewData['pjaxId'] = $pjaxId;
-        $viewData['isAdmin'] = Auth::user()->isAdmin();
 
         return $this->renderAjax('partial/_quote_search', $viewData);
     }
