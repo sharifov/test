@@ -32,17 +32,12 @@ class CouponCreateForm extends Model
             ['currencyCode', 'required'],
             ['currencyCode', 'in', 'range' => array_keys(\common\models\Currency::getList())],
 
-            ['amount', 'required', 'when' => static function ($model) {
-                return empty($model->percent);
-            }, 'message' => 'Amount cannot be blank if percent is empty'],
+            ['amount', 'required'],
             ['amount', 'integer'],
-            ['amount', 'filter', 'filter' => 'intval'],
+            ['amount', 'filter', 'skipOnEmpty' => true, 'skipOnError' => true, 'filter' => 'intval'],
 
-            ['percent', 'required', 'when' => static function ($model) {
-                return empty($model->amount);
-            }, 'message' => 'Percent cannot be blank if amount is empty'],
             ['percent', 'integer'],
-            ['percent', 'filter', 'filter' => 'intval'],
+            ['percent', 'filter', 'skipOnEmpty' => true, 'skipOnError' => true, 'filter' => 'intval'],
 
             [['startDate', 'expirationDate'], 'date', 'format' => 'php:Y-m-d'],
 

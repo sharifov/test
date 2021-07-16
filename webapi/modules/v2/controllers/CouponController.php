@@ -66,12 +66,12 @@ class CouponController extends BaseController
      *
      * @apiParam {int}                          amount                      Amount
      * @apiParam {string{3}}                    currencyCode                Currency Code (USD)
-     * @apiParam {int}                          [percent]                   Percent (required if amount is empty)
-     * @apiParam {bool}                         [reusable]                  Reusable (default false)
+     * @apiParam {int}                          [percent]                   Percent
+     * @apiParam {bool}                         [reusable]                  Reusable
      * @apiParam {int}                          [reusableCount]             Reusable Count
      * @apiParam {string{format yyyy-mm-dd}}    [startDate]                 Start Date
      * @apiParam {string{format yyyy-mm-dd}}    [expirationDate]            Expiration Date
-     * @apiParam {bool}                         [public]                    Public (default false)
+     * @apiParam {bool}                         [public]                    Public
      *
      * @apiParamExample {json} Request-Example:
      *   {
@@ -90,7 +90,36 @@ class CouponController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     *            "code": "D2EYEWH64BDGD3Y"
+     *            "coupon": {
+                    "c_status_id": 1,
+                    "c_type_id": 1,
+                    "c_code": "KLCVZWDZGCCNFJE",
+                    "c_amount": 25,
+                    "c_currency_code": "USD",
+                    "c_public": false,
+                    "c_reusable": false,
+                    "c_reusable_count": 3,
+                    "c_percent": 0,
+                    "c_created_dt": "2021-07-16 08:37:02",
+                    "startDate": "2021-06-20",
+                    "expDate": "2022-07-16",
+                    "statusName": "Send",
+                    "typeName": "Voucher"
+                },
+                "serviceResponse": {
+                    "dec_coupon": "",
+                    "enc_coupon": "KLCVZWDZGCCNFJE",
+                    "exp_date": "2022-07-16",
+                    "amount": 25,
+                    "currency": "USD",
+                    "public": false,
+                    "reusable": false,
+                    "valid": true
+                },
+                "warning": [
+                    "Input param \"reusable\" (1) rewritten by result service (0)",
+                    "Input param \"expirationDate\" (2021-12-25) rewritten by result service (2022-07-16)"
+                ]
      *        },
      *        "technical": {
      *           ...
@@ -166,12 +195,39 @@ class CouponController extends BaseController
         }
 
         try {
-            $code = CouponApiCreateService::getCodeFromAirSearch($couponCreateForm);
-            $couponCode = $this->transactionManager->wrap(static function () use ($couponCreateForm, $code) {
-                $coupon = CouponApiCreateService::createFromApiForm($couponCreateForm, $code);
+            $couponAirSearch = CouponApiCreateService::requestCouponFromAirSearch($couponCreateForm->getAmountCurrencyCode());
+            $couponForm = new CouponForm();
+            if (!$couponForm->load($couponAirSearch)) {
+                throw new \DomainException('CouponForm not loaded');
+            }
+            if (!$couponForm->validate()) {
+                throw new \DomainException(ErrorsToStringHelper::extractFromModel($couponForm));
+            }
+
+            $couponCreated = $this->transactionManager->wrap(static function () use ($couponCreateForm, $couponForm) {
+                $coupon = CouponApiCreateService::createFromAirSearch($couponCreateForm, $couponForm);
                 $coupon = (new CouponRepository())->save($coupon);
-                return $coupon->c_code;
+                return $coupon;
             });
+
+            $dataMessage['coupon'] = $couponCreated->serialize();
+            $dataMessage['serviceResponse'] = $couponAirSearch;
+            if (!empty($couponCreateForm->public) && ((bool) $couponCreateForm->public !== (bool) $couponForm->public)) {
+                $dataMessage['warning'][] =
+                    'Input param "public" (' . (int) $couponCreateForm->public . ') rewritten by result service (' . (int) $couponForm->public . ')';
+            }
+            if (!empty($couponCreateForm->reusable) && ((bool) $couponCreateForm->reusable !== (bool) $couponForm->reusable)) {
+                $dataMessage['warning'][] =
+                    'Input param "reusable" (' . (int) $couponCreateForm->reusable . ') rewritten by result service (' . (int) $couponForm->reusable . ')';
+            }
+            if (!empty($couponCreateForm->expirationDate)) {
+                $inputExpirationDate = date('Y-m-d', strtotime($couponCreateForm->expirationDate));
+                $serviceExpirationDate = date('Y-m-d', strtotime($couponForm->exp_date));
+                if ($inputExpirationDate !== $serviceExpirationDate) {
+                    $dataMessage['warning'][] =
+                        'Input param "expirationDate" (' . $inputExpirationDate . ') rewritten by result service (' . $serviceExpirationDate . ')';
+                }
+            }
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
@@ -184,9 +240,7 @@ class CouponController extends BaseController
         }
 
         return new SuccessResponse(
-            new DataMessage([
-                'code' => $couponCode,
-            ])
+            new DataMessage($dataMessage)
         );
     }
 

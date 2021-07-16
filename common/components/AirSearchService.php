@@ -2,6 +2,7 @@
 
 namespace common\components;
 
+use frontend\helpers\JsonHelper;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
 use yii\httpclient\Client;
@@ -130,6 +131,34 @@ class AirSearchService extends Component
             'AirSearchService::generateCoupons'
         );
         return null;
+    }
+
+    public function apiGenerateCoupons(int $count = 0, string $code = ''): array
+    {
+        $result = ['data' => [], 'error' => null];
+        $params = [
+            'nr' => $count,
+            'code' => $code
+        ];
+
+        $response = $this->sendRequest('v1/discounts/coupons', $params, 'get');
+
+        if ($response->isOk) {
+            $result['data'] = $response->data;
+        } else {
+            try {
+                $contentDecoded = JsonHelper::decode($response->content);
+                if ($error = ArrayHelper::getValue($contentDecoded, 'Message')) {
+                    $result['error'] = 'Service Error Message: ' . $error;
+                } else {
+                    $result['error'] = $response->content;
+                }
+            } catch (\Throwable $throwable) {
+                $result['error'] = $response->content;
+                \Yii::error($throwable->getMessage(), 'AirSearchService:parseError');
+            }
+        }
+        return $result;
     }
 
 

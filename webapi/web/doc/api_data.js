@@ -1,81 +1,6 @@
 define({ "api": [
   {
     "type": "get, post",
-    "url": "/health-check",
-    "title": "Health check action",
-    "version": "0.1.0",
-    "name": "HealthCheck_Sales",
-    "group": "App",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Array",
-            "optional": false,
-            "field": "data",
-            "description": "<p>components statuses (&quot;true&quot; or &quot;false&quot;)</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "Service",
-            "description": "<p>Unavailable 503</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/controllers/HealthController.php",
-    "groupTitle": "App"
-  },
-  {
-    "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
     "version": "0.1.0",
@@ -2139,14 +2064,14 @@ define({ "api": [
             "type": "int",
             "optional": true,
             "field": "percent",
-            "description": "<p>Percent (required if amount is empty)</p>"
+            "description": "<p>Percent</p>"
           },
           {
             "group": "Parameter",
             "type": "bool",
             "optional": true,
             "field": "reusable",
-            "description": "<p>Reusable (default false)</p>"
+            "description": "<p>Reusable</p>"
           },
           {
             "group": "Parameter",
@@ -2176,7 +2101,7 @@ define({ "api": [
             "type": "bool",
             "optional": true,
             "field": "public",
-            "description": "<p>Public (default false)</p>"
+            "description": "<p>Public</p>"
           }
         ]
       },
@@ -2192,7 +2117,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n           \"code\": \"D2EYEWH64BDGD3Y\"\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n           \"coupon\": {\n                    \"c_status_id\": 1,\n                    \"c_type_id\": 1,\n                    \"c_code\": \"KLCVZWDZGCCNFJE\",\n                    \"c_amount\": 25,\n                    \"c_currency_code\": \"USD\",\n                    \"c_public\": false,\n                    \"c_reusable\": false,\n                    \"c_reusable_count\": 3,\n                    \"c_percent\": 0,\n                    \"c_created_dt\": \"2021-07-16 08:37:02\",\n                    \"startDate\": \"2021-06-20\",\n                    \"expDate\": \"2022-07-16\",\n                    \"statusName\": \"Send\",\n                    \"typeName\": \"Voucher\"\n                },\n                \"serviceResponse\": {\n                    \"dec_coupon\": \"\",\n                    \"enc_coupon\": \"KLCVZWDZGCCNFJE\",\n                    \"exp_date\": \"2022-07-16\",\n                    \"amount\": 25,\n                    \"currency\": \"USD\",\n                    \"public\": false,\n                    \"reusable\": false,\n                    \"valid\": true\n                },\n                \"warning\": [\n                    \"Input param \\\"reusable\\\" (1) rewritten by result service (0)\",\n                    \"Input param \\\"expirationDate\\\" (2021-12-25) rewritten by result service (2022-07-16)\"\n                ]\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
