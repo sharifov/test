@@ -71,12 +71,12 @@ class CouponController extends BaseController
      *
      * @apiParam {int}                          amount                      Amount
      * @apiParam {string{3}}                    currencyCode                Currency Code (USD)
-     * @apiParam {int}                          [percent]                   Percent (required if amount is empty)
-     * @apiParam {bool}                         [reusable]                  Reusable (default false)
+     * @apiParam {int}                          [percent]                   Percent
+     * @apiParam {bool}                         [reusable]                  Reusable
      * @apiParam {int}                          [reusableCount]             Reusable Count
      * @apiParam {string{format yyyy-mm-dd}}    [startDate]                 Start Date
      * @apiParam {string{format yyyy-mm-dd}}    [expirationDate]            Expiration Date
-     * @apiParam {bool}                         [public]                    Public (default false)
+     * @apiParam {bool}                         [public]                    Public
      *
      * @apiParamExample {json} Request-Example:
      *   {
