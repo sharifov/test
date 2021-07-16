@@ -108,7 +108,7 @@ class CouponController extends BaseController
                     "c_created_dt": "2021-07-16 08:37:02",
                     "startDate": "2021-06-20",
                     "expDate": "2022-07-16",
-                    "statusName": "New",
+                    "statusName": "Send",
                     "typeName": "Voucher"
                 },
                 "serviceResponse": {
