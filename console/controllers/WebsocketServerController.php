@@ -215,8 +215,7 @@ class WebsocketServerController extends Controller
 
                             try {
                                 ClientChatService::createJobAssigningUaToPendingChats((int)$uo->uo_user_id);
-                                $result = \Yii::$app->db->createCommand()->update(UserStatus::tableName(), ['us_phone_ready_time' => time()], ['us_user_id' => $userId, 'us_call_phone_status' => 1])->execute();
-                                \Yii::info($result, 'ws:open:UserStatus:update');
+                                \Yii::$app->db->createCommand()->update(UserStatus::tableName(), ['us_phone_ready_time' => time()], ['us_user_id' => $userId, 'us_call_phone_status' => 1])->execute();
                             } catch (\Throwable $e) {
                                 \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:UserStatus:update');
                             }
