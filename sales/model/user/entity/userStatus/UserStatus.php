@@ -23,10 +23,13 @@ use yii\db\ActiveRecord;
  *
  * @property Employee $usUser
  * @property int $us_phone_ready_time [int]
+ * @property string|null $us_phone_ready_dt
  */
 class UserStatus extends ActiveRecord
 {
     public const CHANNEL_NAME = 'userStatusChannel';
+
+    public string $us_phone_ready_dt = '';
 
     /**
      * @return string
@@ -45,7 +48,7 @@ class UserStatus extends ActiveRecord
             [['us_gl_call_count', 'us_phone_ready_time'], 'integer'],
             [['us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'boolean'],
             [['us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'filter', 'filter' => 'boolval'],
-            [['us_updated_dt'], 'safe'],
+            [['us_updated_dt', 'us_phone_ready_dt'], 'safe'],
             [['us_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['us_user_id' => 'id']],
         ];
     }
