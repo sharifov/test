@@ -95,8 +95,36 @@ class CouponController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     *            "code": "D2EYEWH64BDGD3Y",
-     *            "synchronized": true
+     *            "coupon": {
+                    "c_status_id": 1,
+                    "c_type_id": 1,
+                    "c_code": "KLCVZWDZGCCNFJE",
+                    "c_amount": 25,
+                    "c_currency_code": "USD",
+                    "c_public": false,
+                    "c_reusable": false,
+                    "c_reusable_count": 3,
+                    "c_percent": 0,
+                    "c_created_dt": "2021-07-16 08:37:02",
+                    "startDate": "2021-06-20",
+                    "expDate": "2022-07-16",
+                    "statusName": "New",
+                    "typeName": "Voucher"
+                },
+                "serviceResponse": {
+                    "dec_coupon": "",
+                    "enc_coupon": "KLCVZWDZGCCNFJE",
+                    "exp_date": "2022-07-16",
+                    "amount": 25,
+                    "currency": "USD",
+                    "public": false,
+                    "reusable": false,
+                    "valid": true
+                },
+                "warning": [
+                    "Input param \"reusable\" (1) rewritten by result service (0)",
+                    "Input param \"expirationDate\" (2021-12-25) rewritten by result service (2022-07-16)"
+                ]
      *        },
      *        "technical": {
      *           ...
