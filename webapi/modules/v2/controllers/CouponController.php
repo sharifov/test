@@ -868,7 +868,6 @@ class CouponController extends BaseController
                 (new CouponUserActionRepository($couponUserAction))->save();
                 return $coupon;
             });
-
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
