@@ -267,6 +267,11 @@ class Project extends \yii\db\ActiveRecord
         return $this->p_params_json['airSearch']['cid'] ?? null;
     }
 
+    public function getEmailConfigOnApiCaseCreate(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.sendEmailOnApiCaseCreate', []);
+    }
+
     public static function getListByUserWithProjectKeys(int $user_id = 0): array
     {
         return self::find()->select([
