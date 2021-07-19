@@ -219,16 +219,16 @@ return [
             ]
         ],
 
-//        'GlyphiconAsset' => [
-//            'class' => GlyphiconAsset::class,
-//            'basePath' => '@webroot/fontawesome/build',
-//            'baseUrl' => '@web/fontawesome/build',
-//            'js' => 'glyphicon.min.js',
-//            'css' => 'glyphicon.min.css',
-//            'depends' => [
-//                GlyphiconAsset::class,
-//            ]
-//        ],
+        'GlyphiconAsset' => [
+            'class' => GlyphiconAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'glyphicon.min.js',
+            'css' => 'glyphicon.min.css',
+            'depends' => [
+                GlyphiconAsset::class,
+            ]
+        ],
 
         'PageLoaderAsset' => [
             'class' => PageLoaderAsset::class,
@@ -970,13 +970,13 @@ return [
                 'bsDependencyEnabled' => false,
                 'depends' => [JqueryAsset::class]
             ],
-            GlyphiconAsset::class => [
-                'css' => [],
-                'js' => [],
-                'basePath' => null,
-                'sourcePath' => null,
-                'depends' => []
-            ],
+//            GlyphiconAsset::class => [
+//                'css' => [],
+//                'js' => [],
+//                'basePath' => null,
+//                'sourcePath' => null,
+//                'depends' => []
+//            ],
             FontAwesomeAsset::class => [
                 'depends' => [
                     JqueryAsset::class,
