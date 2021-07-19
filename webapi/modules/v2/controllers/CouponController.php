@@ -12,6 +12,8 @@ use sales\model\coupon\entity\couponUse\CouponUse;
 use sales\model\coupon\entity\couponUse\repository\CouponUseRepository;
 use sales\model\coupon\useCase\apiCreate\CouponApiCreateService;
 use sales\model\coupon\useCase\apiCreate\CouponCreateForm;
+use sales\model\coupon\useCase\apiEdit\CouponApiEditService;
+use sales\model\coupon\useCase\apiEdit\CouponEditForm;
 use sales\model\coupon\useCase\apiInfo\CouponInfoForm;
 use sales\model\coupon\useCase\apiUse\CouponUseForm;
 use sales\model\coupon\useCase\apiValidate\CouponValidateForm;
@@ -693,6 +695,159 @@ class CouponController extends BaseController
             new DataMessage([
                 'result' => true,
                 'couponInfo' => $couponInfo,
+            ])
+        );
+    }
+
+    /**
+     * @api {post} /v2/coupon/edit Coupon edit
+     * @apiVersion 0.1.0
+     * @apiName Coupon edit
+     * @apiGroup Coupon
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{15}}                    code                Coupon Code
+     * @apiParam {string{format yyyy-mm-dd}}    [c_start_date]       Start Date
+     * @apiParam {string{format yyyy-mm-dd}}    [c_exp_date]         Expiration Date
+     * @apiParam {bool}                         [c_disabled]         Disabled
+     * @apiParam {bool}                         [c_public]           Public
+     * @apiValidate Note: at least one parameter is required (c_start_date,c_exp_date,c_disabled)
+     *
+     * @apiParamExample {json} Request-Example:
+     *   {
+     *      "code": "D2EYEWH64BDGD3Y",
+     *      "c_disabled": false,
+     *      "c_public": false,
+     *      "c_start_date": "2021-07-15",
+     *      "c_exp_date": "2021-07-20"
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
+     *           "coupon": {
+     *              "c_code": "HPCCZH68PNQB5FY",
+     *              "c_amount": "25.00",
+     *              "c_currency_code": "USD",
+     *              "c_percent": null,
+     *              "c_reusable": 1,
+     *              "c_reusable_count": 1,
+     *              "c_public": 0,
+     *              "c_status_id": 2,
+     *              "c_disabled": null,
+     *              "c_type_id": 1,
+     *              "c_created_dt": "2021-07-12 07:16:25",
+     *              "c_used_count": 0,
+     *              "startDate": null,
+     *              "expDate": "2022-08-12",
+     *              "statusName": "Send",
+     *              "typeName": "Voucher"
+     *          }
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Coupon not found",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (500):
+     * HTTP/1.1 500 Internal Server Error
+     * {
+     *        "status": "Failed",
+     *        "source": {
+     *            "type": 1,
+     *            "status": 500
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": "Failed",
+     *        "message": "Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received",
+     *        "errors": [
+     *              "Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received"
+     *        ],
+     *        "code": 0,
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionEdit()
+    {
+        $post = Yii::$app->request->post();
+        $couponEditForm = new CouponEditForm();
+
+        if (!$couponEditForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+        if (!$couponEditForm->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($couponEditForm->getErrors()),
+            );
+        }
+
+        try {
+            if (!$coupon = Coupon::findOne(['c_code' => $couponEditForm->code])) {
+                throw new \DomainException('Coupon not found');
+            }
+            $coupon = CouponApiEditService::editFromApiForm($coupon, $couponEditForm);
+            $coupon = (new CouponRepository($coupon))->save();
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
+                'CouponController:actionEdit:Throwable'
+            );
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($throwable->getMessage()),
+            );
+        }
+
+        return new SuccessResponse(
+            new DataMessage([
+                'coupon' => $coupon->serialize(),
             ])
         );
     }

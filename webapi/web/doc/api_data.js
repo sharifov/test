@@ -1755,6 +1755,120 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v2/coupon/edit",
+    "title": "Coupon edit",
+    "version": "0.1.0",
+    "name": "Coupon_edit",
+    "group": "Coupon",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "15",
+            "optional": false,
+            "field": "code",
+            "description": "<p>Coupon Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "c_start_date",
+            "description": "<p>Start Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "c_exp_date",
+            "description": "<p>Expiration Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "c_disabled",
+            "description": "<p>Disabled</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "c_public",
+            "description": "<p>Public</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"code\": \"D2EYEWH64BDGD3Y\",\n    \"c_disabled\": false,\n    \"c_public\": false,\n    \"c_start_date\": \"2021-07-15\",\n    \"c_exp_date\": \"2021-07-20\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n          \"coupon\": {\n             \"c_code\": \"HPCCZH68PNQB5FY\",\n             \"c_amount\": \"25.00\",\n             \"c_currency_code\": \"USD\",\n             \"c_percent\": null,\n             \"c_reusable\": 1,\n             \"c_reusable_count\": 1,\n             \"c_public\": 0,\n             \"c_status_id\": 2,\n             \"c_disabled\": null,\n             \"c_type_id\": 1,\n             \"c_created_dt\": \"2021-07-12 07:16:25\",\n             \"c_used_count\": 0,\n             \"startDate\": null,\n             \"expDate\": \"2022-08-12\",\n             \"statusName\": \"Send\",\n             \"typeName\": \"Voucher\"\n         }\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Coupon not found\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (500):",
+          "content": "HTTP/1.1 500 Internal Server Error\n{\n       \"status\": \"Failed\",\n       \"source\": {\n           \"type\": 1,\n           \"status\": 500\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": \"Failed\",\n       \"message\": \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\",\n       \"errors\": [\n             \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\"\n       ],\n       \"code\": 0,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CouponController.php",
+    "groupTitle": "Coupon"
+  },
+  {
+    "type": "post",
     "url": "/v2/coupon/info",
     "title": "Coupon info",
     "version": "0.1.0",
