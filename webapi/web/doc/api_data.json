@@ -2228,13 +2228,59 @@
             "optional": true,
             "field": "public",
             "description": "<p>Public</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "product",
+            "description": "<p>Product additional info</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "product.flight",
+            "description": "<p>Product type key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "product.flight.departure_airport_iata",
+            "description": "<p>Departure airport iata</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "product.flight.arrival_airport_iata",
+            "description": "<p>Arrival airport iata</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "product.flight.marketing_airline",
+            "description": "<p>Marketing airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "product.flight.cabin_class",
+            "description": "<p>Cabin class</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n           \"amount\": 25,\n           \"currencyCode\": \"USD\",\n           \"percent\": \"\",\n           \"reusableCount\": 3,\n           \"startDate\": \"2021-12-20\",\n           \"expirationDate\": \"2021-12-25\"\n}",
+          "content": " {\n           \"amount\": 25,\n           \"currencyCode\": \"USD\",\n           \"percent\": \"\",\n           \"reusableCount\": 3,\n           \"startDate\": \"2021-12-20\",\n           \"expirationDate\": \"2021-12-25\",\n           \"product\": {\n               \"flight\": {\n                   \"departure_airport_iata\": \"KIV\"\n               }\n           }\n}",
           "type": "json"
         }
       ]
