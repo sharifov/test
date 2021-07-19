@@ -8,6 +8,7 @@ use sales\entities\serializer\Serializable;
 use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\entity\couponClient\CouponClient;
+use sales\model\coupon\entity\couponProduct\CouponProduct;
 use sales\model\coupon\entity\couponSend\CouponSend;
 use sales\model\coupon\entity\couponUse\CouponUse;
 use Yii;
@@ -44,6 +45,7 @@ use yii\db\ActiveRecord;
  * @property CouponUse[] $couponUse
  * @property CouponClient[] $couponClient
  * @property CouponSend[] $couponSend
+ * @property CouponProduct[] $CouponProduct
  */
 class Coupon extends ActiveRecord implements Serializable
 {
@@ -102,7 +104,7 @@ class Coupon extends ActiveRecord implements Serializable
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'c_created_user_id',
                 'updatedByAttribute' => 'c_updated_user_id',
-                'defaultValue' => null, /* TODO:: api handler */ /* */
+                'defaultValue' => null,
             ],
         ];
     }
@@ -140,6 +142,11 @@ class Coupon extends ActiveRecord implements Serializable
     public function getCouponSend(): \yii\db\ActiveQuery
     {
         return $this->hasMany(CouponSend::class, ['cus_coupon_id' => 'c_id']);
+    }
+
+    public function getCouponProduct(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(CouponProduct::class, ['cup_coupon_id' => 'c_id']);
     }
 
     public function isSend(): bool
