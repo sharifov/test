@@ -207,6 +207,9 @@ class CallUserAccess extends \yii\db\ActiveRecord
 
         $call = $this->cuaCall;
 
+        // when direct call to online user and original user not answered
+        $isRedirectTransferCall = $call->c_source_type_id === Call::SOURCE_DIRECT_CALL && $call->c_created_user_id !== $this->cua_user_id;
+
         if ($insert) {
             if ($call && !$call->isHold() && !$this->isWarmTransfer()) {
                 if (
@@ -221,11 +224,13 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     }
                 } else {
                     $message = 'New incoming Call' . ' (' . $this->cua_call_id . ')';
-                    if (isset($call->cLead)) {
-                        $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
-                    }
-                    if (isset($call->cCase)) {
-                        $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                    if (!$isRedirectTransferCall) {
+                        if (isset($call->cLead)) {
+                            $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                        }
+                        if (isset($call->cCase)) {
+                            $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                        }
                     }
                     if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', $message, Notifications::TYPE_SUCCESS, true)) {
                         //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
@@ -244,7 +249,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
             if (
                 SettingHelper::isGeneralLinePriorityEnable()
-                && ($call->c_source_type_id === Call::SOURCE_GENERAL_LINE || $call->c_source_type_id === Call::SOURCE_REDIRECT_CALL)
+                && (($call->c_source_type_id === Call::SOURCE_GENERAL_LINE || $call->c_source_type_id === Call::SOURCE_REDIRECT_CALL) || $isRedirectTransferCall)
                 && !$call->isHold()
                 && !$this->isWarmTransfer()
             ) {
