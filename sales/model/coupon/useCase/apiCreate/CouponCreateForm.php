@@ -2,6 +2,7 @@
 
 namespace sales\model\coupon\useCase\apiCreate;
 
+use common\components\validators\CheckJsonValidator;
 use yii\base\Model;
 
 /**
@@ -14,6 +15,7 @@ use yii\base\Model;
  * @property $reusableCount
  * @property $public
  * @property $reusable
+ * @property $product
  */
 class CouponCreateForm extends Model
 {
@@ -25,6 +27,7 @@ class CouponCreateForm extends Model
     public $reusableCount;
     public $public;
     public $reusable;
+    public $product;
 
     public function rules(): array
     {
@@ -57,6 +60,8 @@ class CouponCreateForm extends Model
             [['reusable', 'public'], 'boolean'],
             [['reusable', 'public'], 'default', 'value' => false],
             [['reusable', 'public'], 'filter', 'filter' => 'boolval'],
+
+            ['product', CheckJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 

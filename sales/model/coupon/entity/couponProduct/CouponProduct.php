@@ -77,4 +77,14 @@ class CouponProduct extends \yii\db\ActiveRecord
     {
         return 'coupon_product';
     }
+
+    public static function create(int $couponId, int $productTypeId, $data): CouponProduct
+    {
+        $model = new self();
+        $model->cup_coupon_id = $couponId;
+        $model->cup_product_type_id = $productTypeId;
+        $model->cup_data_json = $data;
+
+        return $model;
+    }
 }

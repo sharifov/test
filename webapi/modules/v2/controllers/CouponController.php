@@ -2,12 +2,17 @@
 
 namespace webapi\modules\v2\controllers;
 
+use frontend\helpers\JsonHelper;
+use modules\product\src\entities\productType\ProductType;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\repository\CouponRepository;
 use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\coupon\service\CouponService;
+use sales\model\coupon\entity\couponProduct\CouponProduct;
+use sales\model\coupon\entity\couponProduct\repository\CouponProductRepository;
+use sales\model\coupon\entity\couponProduct\service\CouponProductBaseService;
 use sales\model\coupon\entity\couponUse\CouponUse;
 use sales\model\coupon\entity\couponUse\repository\CouponUseRepository;
 use sales\model\coupon\entity\couponUserAction\CouponUserAction;
@@ -81,6 +86,12 @@ class CouponController extends BaseController
      * @apiParam {string{format yyyy-mm-dd}}    [startDate]                 Start Date
      * @apiParam {string{format yyyy-mm-dd}}    [expirationDate]            Expiration Date
      * @apiParam {bool}                         [public]                    Public
+     * @apiParam {object}                       [product]                   Product additional info
+     * @apiParam {object}                       [product.flight]            Product type key
+     * @apiParam {string{3}}                    [product.flight.departure_airport_iata]     Departure airport iata
+     * @apiParam {string{3}}                    [product.flight.arrival_airport_iata]       Arrival airport iata
+     * @apiParam {string{2}}                    [product.flight.marketing_airline]          Marketing airline
+     * @apiParam {string{2}}                    [product.flight.cabin_class]                Cabin class
      *
      * @apiParamExample {json} Request-Example:
      *   {
@@ -89,7 +100,12 @@ class CouponController extends BaseController
             "percent": "",
             "reusableCount": 3,
             "startDate": "2021-12-20",
-            "expirationDate": "2021-12-25"
+            "expirationDate": "2021-12-25",
+            "product": {
+                "flight": {
+                    "departure_airport_iata": "KIV"
+                }
+            }
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -225,6 +241,26 @@ class CouponController extends BaseController
                     null
                 );
                 (new CouponUserActionRepository($couponUserAction))->save();
+
+                if ($couponCreateForm->product) {
+                    foreach ($couponCreateForm->product as $typeKey => $productFields) {
+                        if (!$productType = ProductType::find()->byKey($typeKey)->enabled()->one()) {
+                            throw new \DomainException('ProductType (' . $typeKey . ') not found');
+                        }
+
+                        $couponProductBaseService = new CouponProductBaseService($typeKey);
+                        $couponProductService = $couponProductBaseService->initClass();
+                        $couponProductService->load($productFields);
+                        if (!$couponProductService->validate()) {
+                            throw new \DomainException('Product (' . $typeKey . ') ' .
+                                ErrorsToStringHelper::extractFromModel($couponProductService));
+                        }
+                        $productFieldsDecoded = JsonHelper::decode($productFields);
+                        $couponProduct = CouponProduct::create($coupon->c_id, $productType->pt_id, $productFieldsDecoded);
+                        (new CouponProductRepository($couponProduct))->save();
+                    }
+                }
+
                 return $coupon;
             });
 
