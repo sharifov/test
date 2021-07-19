@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'c_start_date',
                 'value' => static function (Coupon $model) {
                     if ($model->c_start_date) {
-                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDate(strtotime($model->c_start_date));
+                        return '<i class="fa fa-calendar"></i> ' . date('Y-M-d', strtotime($model->c_start_date));
                     }
                     return Yii::$app->formatter->nullDisplay;
                 },
@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'c_exp_date',
                 'value' => static function (Coupon $model) {
                     if ($model->c_exp_date) {
-                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDate(strtotime($model->c_exp_date));
+                        return '<i class="fa fa-calendar"></i> ' . date('Y-M-d', strtotime($model->c_exp_date));
                     }
                     return Yii::$app->formatter->nullDisplay;
                 },
