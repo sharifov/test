@@ -2,6 +2,9 @@
 
 use modules\flight\models\Flight;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use sales\auth\Auth;
 use yii\bootstrap4\Alert;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
@@ -24,8 +27,10 @@ use yii\widgets\Pjax;
  * @var $searchForm FlightQuoteSearchForm
  * @var $pjaxId string
  * @var $flightQuoteSearchDTO \modules\flight\src\dto\flightQuoteSearchDTO\FlightQuoteSearchDTO
- * @var $isAdmin bool
  */
+
+$leadAbacDto = new LeadAbacDto($flight->flProduct->prLead ?? null, Auth::id());
+$canDisplayQuoteSearchParams = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_DISPLAY_QUOTE_SEARCH_PARAMS, LeadAbacObject::ACTION_ACCESS);
 
 if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
     $js = <<<JS
@@ -89,7 +94,7 @@ JS;
         <div class="search-results__wrapper">
             <?php $n = 0;
             $layout = '{pager}'; ?>
-                <?php if ($isAdmin) : ?>
+                <?php if ($canDisplayQuoteSearchParams) : ?>
                     <?php $layout = '<div class="d-flex justify-content-between align-items-center">{pager} <span data-toggle="collapse" href="#collapseSearchParams" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Search Query Params</span></div>'; ?>
                   <div id="collapseSearchParams" class="collapse">
                     <div class="card-body card">
@@ -215,7 +220,7 @@ JS;
             </div>
         <?php endif; ?>
         <p>No search results</p>
-        <?php if ($isAdmin && isset($flightQuoteSearchDTO)) : ?>
+        <?php if ($canDisplayQuoteSearchParams && isset($flightQuoteSearchDTO)) : ?>
           <div class="d-flex justify-content-between align-items-center"><span data-toggle="collapse" href="#collapseSearchParams" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Search Query Params</span></div>
           <div id="collapseSearchParams" class="collapse">
             <div class="card-body card">

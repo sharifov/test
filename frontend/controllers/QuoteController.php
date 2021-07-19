@@ -197,8 +197,10 @@ class QuoteController extends FController
                 $viewData['errorMessage'] = $throwable->getMessage();
             }
             $viewData['quotes'] = [];
+            if (isset($dto)) {
+                $viewData['searchServiceQuoteDto'] = $dto;
+            }
         }
-        $viewData['isAdmin'] = Auth::user()->isAdmin();
         return $this->renderAjax('partial/_quote_search_result', $viewData);
     }
 
