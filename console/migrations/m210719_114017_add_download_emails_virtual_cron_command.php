@@ -11,7 +11,7 @@ class m210719_114017_add_download_emails_virtual_cron_command extends Migration
     {
         try {
             $cs = new \kivork\VirtualCron\Models\CronScheduler();
-            $cs->cs_cron_expression = '* * * * *';
+            $cs->cs_cron_expression = '*/1 * * * *';
             $cs->cs_cron_command = 'email/download';
             $cs->cs_description = 'Download emails';
             $cs->cs_hash = \kivork\VirtualCron\Services\Hasher::generate(
