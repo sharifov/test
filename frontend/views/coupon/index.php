@@ -47,9 +47,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => CouponStatusColumn::class],
             ['class' => BooleanColumn::class, 'attribute' => 'c_disabled'],
             ['class' => CouponTypeColumn::class],
-
-            //['class' => DateTimeColumn::class, 'attribute' => 'c_exp_date'],
-            //['class' => DateTimeColumn::class, 'attribute' => 'c_start_date'],
             [
                 'attribute' => 'c_start_date',
                 'value' => static function (Coupon $model) {
@@ -69,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date',
+                        'placeholder' => 'Choose Date',
                         'readonly' => '1',
                     ],
                     'clientEvents' => [
@@ -96,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date',
+                        'placeholder' => 'Choose Date',
                         'readonly' => '1',
                     ],
                     'clientEvents' => [
