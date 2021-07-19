@@ -2352,10 +2352,13 @@ class CommunicationController extends ApiBaseController
                 }
             }
 
-            $filter['limit'] = 20;
+            Yii::$app->redis->set('new_email_message_received', true);
+
+//            $filter['limit'] = 20;
 //            $filter['mail_list'] = $this->getEmailsForReceivedMessages();
 
             // push job
+            /*
             $job = new ReceiveEmailsJob();
             $job->last_email_id = $filter['last_id'];
             $data = [
@@ -2363,14 +2366,12 @@ class CommunicationController extends ApiBaseController
 //                'email_list' => $filter['mail_list'],
                 'limit' => $filter['limit'],
             ];
-
-
-
             $job->request_data = $data;
-
             $jobId = \Yii::$app->queue_email_job->push($job);
+            */
+
             $response = [
-                'job_id' => $jobId,
+//                'job_id' => $jobId,
                 'last_id' => $filter['last_id'],
             ];
 

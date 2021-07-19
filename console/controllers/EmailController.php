@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\ClientEmail;
 use common\models\Email;
+use sales\model\email\useCase\DownloadEmails;
 use yii\console\Controller;
 use yii\db\Expression;
 use yii\db\Query;
@@ -49,6 +50,20 @@ class EmailController extends Controller
         }
         Console::endProgress("done." . PHP_EOL);
 
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionDownload(bool $debug = false, int $limit = 20)
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $time_start = microtime(true);
+
+        $download = \Yii::createObject(DownloadEmails::class);
+        $download->download($debug, $limit);
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
