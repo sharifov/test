@@ -32,7 +32,7 @@ class FlightQuoteSearchDTO
         }
 
         $this->cabin = $flight->getCabinRealCode($flight->fl_cabin_class);
-        $this->cid = $flight->flProduct->prLead->project->getAirSearchCid() ?? \Yii::$app->params['search']['sid'];
+        $this->cid = $flight->flProduct->prLead->project->getAirSearchCid() ?: \Yii::$app->params['search']['sid'];
         $this->adt = $flight->fl_adults;
         $this->chd = $flight->fl_children;
         $this->inf = $flight->fl_infants;
