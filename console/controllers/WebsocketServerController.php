@@ -89,7 +89,6 @@ class WebsocketServerController extends Controller
 
         $server->on('start', static function (Server $server) {
             echo ' Swoole WebSocket Server is started at ' . $server->host . ':' . $server->port . PHP_EOL;
-            \Yii::info(' Swoole WebSocket Server is started at ' . $server->host . ':' . $server->port, 'info\ws:actionStart:event:start');
 
             if (!empty(\Yii::$app->params['appInstance'])) {
                 $ucList = UserConnection::find()->where(['uc_app_instance' => \Yii::$app->params['appInstance']])->all();
@@ -103,8 +102,8 @@ class WebsocketServerController extends Controller
         });
 
         $server->on('workerStart', static function ($server, $workerId) use ($frontendConfig, $thisClass, $redisConfig) {
-            echo ' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
-            \Yii::info(' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s'), 'info\ws:actionStart:event:workerStart');
+            echo ' Websocket Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
+            \Yii::info('Websocket Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s'), 'info\ws:actionStart:event:workerStart');
 
 
             $server->tick(20000, static function () use ($server) {
@@ -188,7 +187,7 @@ class WebsocketServerController extends Controller
                 $userConnection->uc_lead_id = empty($request->get['lead_id']) ? null : (int) $request->get['lead_id'];
                 $userConnection->uc_controller_id = empty($request->get['controller_id']) ? null : substr($request->get['controller_id'], 0, 50);
                 $userConnection->uc_action_id = empty($request->get['action_id']) ? null : substr($request->get['action_id'], 0, 50);
-                $userConnection->uc_page_url = empty($request->get['page_url']) ? null : substr($request->get['page_url'], 0, 500);
+                $userConnection->uc_page_url = empty($request->get['page_url']) ? null : substr($request->get['page_url'], 0, 1400);
                 $userConnection->uc_user_agent = $ua;
                 $userConnection->uc_ip = $ip;
                 $userConnection->uc_user_id = $userId;

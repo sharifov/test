@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\UserOnlineQuery;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -133,5 +134,10 @@ class UserOnline extends ActiveRecord
                 return false;
             }
         }
+    }
+
+    public static function find(): UserOnlineQuery
+    {
+        return new UserOnlineQuery(static::class);
     }
 }
