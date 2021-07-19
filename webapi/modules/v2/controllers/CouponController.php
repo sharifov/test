@@ -10,6 +10,8 @@ use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\coupon\service\CouponService;
 use sales\model\coupon\entity\couponUse\CouponUse;
 use sales\model\coupon\entity\couponUse\repository\CouponUseRepository;
+use sales\model\coupon\entity\couponUserAction\CouponUserAction;
+use sales\model\coupon\entity\couponUserAction\repository\CouponUserActionRepository;
 use sales\model\coupon\useCase\apiCreate\CouponApiCreateService;
 use sales\model\coupon\useCase\apiCreate\CouponCreateForm;
 use sales\model\coupon\useCase\apiEdit\CouponApiEditService;
@@ -211,9 +213,18 @@ class CouponController extends BaseController
                 throw new \DomainException(ErrorsToStringHelper::extractFromModel($couponForm));
             }
 
-            $couponCreated = $this->transactionManager->wrap(static function () use ($couponCreateForm, $couponForm) {
+            $apiUserId = $this->auth->getId();
+            $couponCreated = $this->transactionManager->wrap(static function () use ($couponCreateForm, $couponForm, $apiUserId) {
                 $coupon = CouponApiCreateService::createFromAirSearch($couponCreateForm, $couponForm);
-                $coupon = (new CouponRepository($coupon))->save();
+                $coupon = (new CouponRepository($coupon))->save()->getModel();
+
+                $couponUserAction = CouponUserAction::create(
+                    $coupon->c_id,
+                    CouponUserAction::ACTION_CREATE,
+                    $apiUserId,
+                    null
+                );
+                (new CouponUserActionRepository($couponUserAction))->save();
                 return $coupon;
             });
 
@@ -664,7 +675,8 @@ class CouponController extends BaseController
                 throw new \DomainException('Coupon not found by code (' . $couponUseForm->code . ')');
             }
 
-            $couponUsed = $this->transactionManager->wrap(static function () use ($coupon, $couponUseForm) {
+            $apiUserId = $this->auth->getId();
+            $couponUsed = $this->transactionManager->wrap(static function () use ($coupon, $couponUseForm, $apiUserId) {
                 $couponUse = CouponUse::create($coupon->c_id, $couponUseForm->clientIp, $couponUseForm->clientUserAgent);
                 (new CouponUseRepository($couponUse))->save();
 
@@ -676,7 +688,16 @@ class CouponController extends BaseController
                 if (CouponService::checkChangeStatusToUse($coupon)) {
                     $coupon->statusUsed();
                 }
-                return (new CouponRepository($coupon))->save();
+                $coupon = (new CouponRepository($coupon))->save()->getModel();
+
+                $couponUserAction = CouponUserAction::create(
+                    $coupon->c_id,
+                    CouponUserAction::ACTION_USE,
+                    $apiUserId,
+                    null
+                );
+                (new CouponUserActionRepository($couponUserAction))->save();
+                return $coupon;
             });
 
             $couponInfo = (new CouponSerializer($couponUsed))->getDataExcept($exceptFields);
@@ -832,8 +853,21 @@ class CouponController extends BaseController
             if (!$coupon = Coupon::findOne(['c_code' => $couponEditForm->code])) {
                 throw new \DomainException('Coupon not found');
             }
-            $coupon = CouponApiEditService::editFromApiForm($coupon, $couponEditForm);
-            $coupon = (new CouponRepository($coupon))->save();
+
+            $apiUserId = $this->auth->getId();
+            $couponUpdated = $this->transactionManager->wrap(static function () use ($coupon, $couponEditForm, $apiUserId) {
+                $coupon = CouponApiEditService::editFromApiForm($coupon, $couponEditForm);
+                $coupon = (new CouponRepository($coupon))->save()->getModel();
+
+                $couponUserAction = CouponUserAction::create(
+                    $coupon->c_id,
+                    CouponUserAction::ACTION_UPDATE,
+                    $apiUserId,
+                    null
+                );
+                (new CouponUserActionRepository($couponUserAction))->save();
+                return $coupon;
+            });
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
@@ -847,7 +881,7 @@ class CouponController extends BaseController
 
         return new SuccessResponse(
             new DataMessage([
-                'coupon' => $coupon->serialize(),
+                'coupon' => $couponUpdated->serialize(),
             ])
         );
     }

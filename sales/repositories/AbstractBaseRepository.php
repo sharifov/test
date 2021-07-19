@@ -2,31 +2,33 @@
 
 namespace sales\repositories;
 
-use yii\db\ActiveRecord;
 use sales\helpers\ErrorsToStringHelper;
+use yii\db\ActiveRecordInterface;
 
 /**
  * Class AbstractBaseRepository
  *
- * @property ActiveRecord $model
+ * @property $model
  */
 abstract class AbstractBaseRepository
 {
-    protected ActiveRecord $model;
+    protected $model;
 
     /**
-     * @param ActiveRecord $model
+     * @param ActiveRecordInterface $model
      */
-    public function __construct(ActiveRecord $model)
+    public function __construct(ActiveRecordInterface $model)
     {
         $this->model = $model;
     }
 
-    public function save(bool $runValidation = false): ActiveRecord
+    public function save(bool $runValidation = false): AbstractBaseRepository
     {
         if (!$this->model->save($runValidation)) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($this->model));
         }
-        return $this->model;
+        return $this;
     }
+
+    abstract public function getModel(): ActiveRecordInterface;
 }

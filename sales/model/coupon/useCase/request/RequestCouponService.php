@@ -6,6 +6,8 @@ use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\CouponStatus;
 use sales\model\coupon\entity\coupon\CouponType;
 use sales\model\coupon\entity\couponCase\CouponCase;
+use sales\model\coupon\entity\couponUserAction\CouponUserAction;
+use sales\model\coupon\entity\couponUserAction\repository\CouponUserActionRepository;
 
 /**
  * Class RequestCouponService
@@ -59,6 +61,21 @@ class RequestCouponService
             $transaction->rollBack();
             return;
         }
+
+        $couponUserAction = CouponUserAction::create(
+            $coupon->c_id,
+            CouponUserAction::ACTION_CREATE,
+            null,
+            $form->getUserId()
+        );
+        try {
+            (new CouponUserActionRepository($couponUserAction))->save();
+        } catch (\Throwable $throwable) {
+            $this->addError(['model' => $couponUserAction->getAttributes(), 'errors' => $couponUserAction->getErrors()]);
+            $transaction->rollBack();
+            return;
+        }
+
         $transaction->commit();
     }
 

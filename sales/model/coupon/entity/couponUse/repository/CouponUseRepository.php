@@ -17,4 +17,9 @@ class CouponUseRepository extends AbstractBaseRepository
     {
         parent::__construct($model);
     }
+
+    public function getModel(): CouponUse
+    {
+        return $this->model;
+    }
 }

@@ -68,4 +68,9 @@ class RequestForm extends Model
 
         return $list;
     }
+
+    public function getUserId()
+    {
+        return $this->userId;
+    }
 }
