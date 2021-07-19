@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\coupon\entity\coupon\Coupon;
 use yii\grid\ActionColumn;
 use common\components\grid\BooleanColumn;
 use common\components\grid\coupon\CouponStatusColumn;
@@ -9,6 +10,7 @@ use common\components\grid\UserSelect2Column;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\coupon\entity\coupon\search\CouponSearch */
@@ -45,8 +47,61 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => CouponStatusColumn::class],
             ['class' => BooleanColumn::class, 'attribute' => 'c_disabled'],
             ['class' => CouponTypeColumn::class],
-            ['class' => DateTimeColumn::class, 'attribute' => 'c_exp_date'],
-            ['class' => DateTimeColumn::class, 'attribute' => 'c_start_date'],
+            [
+                'attribute' => 'c_start_date',
+                'value' => static function (Coupon $model) {
+                    if ($model->c_start_date) {
+                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDate(strtotime($model->c_start_date));
+                    }
+                    return Yii::$app->formatter->nullDisplay;
+                },
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'c_start_date',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' => 'Choose Date',
+                        'readonly' => '1',
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
+            ],
+            [
+                'attribute' => 'c_exp_date',
+                'value' => static function (Coupon $model) {
+                    if ($model->c_exp_date) {
+                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDate(strtotime($model->c_exp_date));
+                    }
+                    return Yii::$app->formatter->nullDisplay;
+                },
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'c_exp_date',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' => 'Choose Date',
+                        'readonly' => '1',
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
+            ],
+
             ['class' => DateTimeColumn::class, 'attribute' => 'c_created_dt'],
             ['class' => DateTimeColumn::class, 'attribute' => 'c_updated_dt'],
             ['class' => UserSelect2Column::class, 'attribute' => 'c_created_user_id', 'relation' => 'createdUser'],
