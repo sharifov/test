@@ -246,6 +246,11 @@ class CouponController extends BaseController
                         'Input param "expirationDate" (' . $inputExpirationDate . ') rewritten by result service (' . $serviceExpirationDate . ')';
                 }
             }
+        } catch (\DomainException $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($throwable->getMessage()),
+            );
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
@@ -386,6 +391,11 @@ class CouponController extends BaseController
             if (!$coupon = Coupon::findOne(['c_code' => $couponInfoForm->code])) {
                 throw new \DomainException('Coupon not found');
             }
+        } catch (\DomainException $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($throwable->getMessage()),
+            );
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
@@ -527,6 +537,11 @@ class CouponController extends BaseController
             if ($coupon = Coupon::findOne(['c_code' => $couponValidateForm->code])) {
                 $couponInfo = (new CouponSerializer($coupon))->getDataExcept($exceptFields);
             }
+        } catch (\DomainException $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($throwable->getMessage()),
+            );
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
@@ -701,6 +716,11 @@ class CouponController extends BaseController
             });
 
             $couponInfo = (new CouponSerializer($couponUsed))->getDataExcept($exceptFields);
+        } catch (\DomainException $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($throwable->getMessage()),
+            );
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
@@ -868,6 +888,11 @@ class CouponController extends BaseController
                 (new CouponUserActionRepository($couponUserAction))->save();
                 return $coupon;
             });
+        } catch (\DomainException $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage($throwable->getMessage()),
+            );
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ['throwable' => AppHelper::throwableLog($throwable), 'post' => $post],
