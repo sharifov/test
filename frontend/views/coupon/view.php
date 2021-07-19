@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\coupon\entity\coupon\Coupon;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -36,8 +37,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_amount',
                 'c_currency_code',
                 'c_percent',
-                'c_exp_date:byUserDateTime',
-                'c_start_date:byUserDateTime',
+                [
+                    'attribute' => 'c_start_date',
+                    'value' => static function (Coupon $model) {
+                        if ($model->c_start_date) {
+                            return '<i class="fa fa-calendar"></i> ' . date('Y-M-d', strtotime($model->c_start_date));
+                        }
+                        return Yii::$app->formatter->nullDisplay;
+                    },
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'c_exp_date',
+                    'value' => static function (Coupon $model) {
+                        if ($model->c_exp_date) {
+                            return '<i class="fa fa-calendar"></i> ' . date('Y-M-d', strtotime($model->c_exp_date));
+                        }
+                        return Yii::$app->formatter->nullDisplay;
+                    },
+                    'format' => 'raw',
+                ],
                 'c_reusable:booleanByLabel',
                 'c_reusable_count',
                 'c_used_count',
