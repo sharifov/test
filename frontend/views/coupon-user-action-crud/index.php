@@ -42,7 +42,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => CouponUserAction::ACTION_LIST
             ],
-            'cuu_api_user_id',
+            [
+                'attribute' => 'cuu_api_user_id',
+                'format' => 'raw',
+                'value' => static function (CouponUserAction $model) {
+                    return $model->cuuApiUser->au_name ?? Yii::$app->formatter->nullDisplay;
+                },
+                'filter' => \common\models\ApiUser::getList(),
+            ],
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'cuu_user_id',

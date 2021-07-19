@@ -41,7 +41,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         return CouponUserAction::getActionName($model->cuu_action_id);
                     },
                 ],
-                'cuu_api_user_id',
+                [
+                    'attribute' => 'cuu_api_user_id',
+                    'format' => 'raw',
+                    'value' => static function (CouponUserAction $model) {
+                        return $model->cuuApiUser->au_name ?? Yii::$app->formatter->nullDisplay;
+                    },
+                ],
                 'cuu_user_id:userName',
                 'cuu_description',
                 'cuu_created_dt:byUserDateTime',

@@ -127,6 +127,23 @@ class CouponUserAction extends \yii\db\ActiveRecord
         return 'coupon_user_action';
     }
 
+    public static function create(
+        int $couponId,
+        int $actionId,
+        ?int $apiUserId,
+        ?int $userId,
+        ?string $description = null
+    ): CouponUserAction {
+        $model = new self();
+        $model->cuu_coupon_id = $couponId;
+        $model->cuu_action_id = $actionId;
+        $model->cuu_api_user_id = $apiUserId;
+        $model->cuu_user_id = $userId;
+        $model->cuu_description = $description;
+
+        return $model;
+    }
+
     public static function getActionName(?int $actionId): string
     {
         return self::ACTION_LIST[$actionId] ?? '';
