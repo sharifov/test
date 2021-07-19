@@ -60,6 +60,7 @@ class SendEmailOnCaseCreationBOJob extends BaseJob implements JobInterface
                         throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
                     }
                 }
+                return true;
             }
             throw new \RuntimeException('Project(' . $case->cs_project_id . ') or CaseCategory(' . $case->cs_category_id . ') not found');
         } catch (\Throwable $e) {
