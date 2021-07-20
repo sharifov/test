@@ -57,9 +57,7 @@ class CouponCreateForm extends Model
             ['reusableCount', 'integer'],
             ['reusableCount', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            [['reusable', 'public'], 'boolean'],
-            [['reusable', 'public'], 'default', 'value' => false],
-            [['reusable', 'public'], 'filter', 'filter' => 'boolval'],
+            [['reusable', 'public'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
 
             ['product', CheckJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];

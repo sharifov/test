@@ -27,7 +27,7 @@ class CouponFlight extends AbstractCouponProduct
 
             ['marketing_airline', 'string', 'max' => 2],
 
-            ['cabin_class', 'string', 'max' => 2],
+            ['cabin_class', 'string', 'max' => 1],
         ];
     }
 }
