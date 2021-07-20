@@ -28,7 +28,7 @@ class m210720_075713_add_new_task_rule_lead_trash_check extends Migration
                 'reasons' => [],
                 'qa_task_category_key' => '',
             ]),
-            'tr_enabled' => true,
+            'tr_enabled' => false,
             'tr_created_dt' => date('Y-m-d H:i:s'),
             'tr_updated_dt' => date('Y-m-d H:i:s'),
         ]);
