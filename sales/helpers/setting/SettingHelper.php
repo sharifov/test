@@ -403,4 +403,9 @@ class SettingHelper
 
         return $finalSort;
     }
+
+    public static function getLimitUserConnection(): int
+    {
+        return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
+    }
 }
