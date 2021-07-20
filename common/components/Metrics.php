@@ -20,6 +20,8 @@ use yii\helpers\Inflector;
  * @property Counter[] $counterList
  * @property Histogram[] $histogramList
  * @property Gauge[] $gaugeList
+ * @property bool $isMetricsEnabled
+ * @property array $defaultBuckets
  */
 class Metrics extends Component
 {
@@ -53,7 +55,7 @@ class Metrics extends Component
      */
     public function jobCounter(string $name, array $labels = [], int $value = 1): void
     {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $name = strtolower($name);
             $keyName = 'job_' . $name . '_cnt';
             try {
@@ -81,7 +83,7 @@ class Metrics extends Component
      */
     public function jobGauge(string $name, float $value, array $labels = []): void
     {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $name = strtolower($name);
             $keyName = 'job_' . $name;
             try {
@@ -109,7 +111,7 @@ class Metrics extends Component
      */
     public function jobHistogram(string $name, float $value, array $labels = []): void
     {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $name = strtolower($name);
             $keyName = 'job_' . $name;
             try {
@@ -138,7 +140,7 @@ class Metrics extends Component
      */
     public function serviceCounter(string $name, array $labels = [], int $value = 1): void
     {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $name = strtolower($name);
             $keyName = 'service_' . $name . '_cnt';
             try {
@@ -166,7 +168,7 @@ class Metrics extends Component
         string $prefix = '',
         int $value = 1
     ): void {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $labels = self::prepareLabels($labels);
             try {
                 $counter = $this->registry->getOrRegisterCounter(
@@ -193,7 +195,7 @@ class Metrics extends Component
         string $prefix = '',
         array $buckets = []
     ): void {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $histogramBuckets = !empty($buckets) ? $buckets : $this->getDefaultBuckets();
             $labels = self::prepareLabels($labels);
 
@@ -222,7 +224,7 @@ class Metrics extends Component
         array $labels = [],
         string $prefix = ''
     ): void {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $labels = self::prepareLabels($labels, true);
             try {
                 $gauge = $this->registry->getOrRegisterGauge(
@@ -329,5 +331,10 @@ class Metrics extends Component
     public function getDefaultBuckets(): array
     {
         return $this->defaultBuckets;
+    }
+
+    public function isInitialized(): bool
+    {
+        return ($this->isMetricsEnabled && !empty($this->registry));
     }
 }
