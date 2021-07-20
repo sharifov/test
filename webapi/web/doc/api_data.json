@@ -2442,7 +2442,7 @@
           {
             "group": "Parameter",
             "type": "string",
-            "size": "2",
+            "size": "1",
             "optional": true,
             "field": "product.flight.cabin_class",
             "description": "<p>Cabin class</p>"
