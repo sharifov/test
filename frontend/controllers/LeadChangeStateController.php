@@ -4,6 +4,9 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Lead;
+use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
+use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\QaTaskCreateLeadTrashCheckService;
+use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\Rule;
 use sales\auth\Auth;
 use sales\forms\leadflow\FollowUpReasonForm;
 use sales\forms\leadflow\RejectReasonForm;
@@ -33,14 +36,15 @@ use yii\widgets\ActiveForm;
  * @property LeadAssignService $assignService
  * @property LeadStateService $stateService
  * @property FollowUpGuard $followUpGuard
+ * @property QaTaskCreateLeadTrashCheckService $leadCheckTrashService
  *
  */
 class LeadChangeStateController extends FController
 {
-
     private $assignService;
     private $stateService;
     private $followUpGuard;
+    private QaTaskCreateLeadTrashCheckService $leadCheckTrashService;
 
     /**
      * @param $id
@@ -48,6 +52,7 @@ class LeadChangeStateController extends FController
      * @param LeadAssignService $assignService
      * @param LeadStateService $stateService
      * @param FollowUpGuard $followUpGuard
+     * @param QaTaskCreateLeadTrashCheckService $leadCheckTrashService
      * @param array $config
      */
     public function __construct(
@@ -56,12 +61,14 @@ class LeadChangeStateController extends FController
         LeadAssignService $assignService,
         LeadStateService $stateService,
         FollowUpGuard $followUpGuard,
+        QaTaskCreateLeadTrashCheckService $leadCheckTrashService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->assignService = $assignService;
         $this->stateService = $stateService;
         $this->followUpGuard = $followUpGuard;
+        $this->leadCheckTrashService = $leadCheckTrashService;
     }
 
     public function behaviors(): array
@@ -200,7 +207,15 @@ class LeadChangeStateController extends FController
                 } else {
                     $this->stateService->trash($lead, $lead->employee_id, Yii::$app->user->id, $form->description);
                 }
+
                 Yii::$app->getSession()->setFlash('success', 'Success');
+
+                if (($parameters = QaTaskRules::getRule(QaTaskCreateLeadTrashCheckService::CATEGORY_KEY)) && $parameters->isEnabled()) {
+                    $rule = new Rule($parameters->getValue());
+                    if ($rule->guard($lead->lDep->dep_key ?? null, $lead->project->project_key ?? null, $form->reason)) {
+                        $this->leadCheckTrashService->handle($rule, $lead);
+                    }
+                }
             } catch (\DomainException $e) {
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             }
