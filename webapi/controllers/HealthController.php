@@ -4,6 +4,7 @@ namespace webapi\controllers;
 
 use webapi\behaviors\HttpBasicAuthHealthCheck;
 use yii\rest\Controller;
+use yii\web\Response;
 use yii\helpers\VarDumper;
 use Yii;
 use yii\web\NotFoundHttpException;
@@ -29,13 +30,6 @@ class HealthController extends Controller
         $behaviors = parent::behaviors();
         $behaviors['authenticator'] = [
             'class' => HttpBasicAuthHealthCheck::class,
-        ];
-
-        $behaviors['contentNegotiator'] = [
-            'class' => 'yii\filters\ContentNegotiator',
-            'formats' => [
-                'application/json' => \yii\web\Response::FORMAT_JSON,
-            ]
         ];
 
         return $behaviors;
@@ -84,48 +78,55 @@ class HealthController extends Controller
 
     public function actionIndex()
     {
-        $response = [];
+        Yii::$app->response->format = Response::FORMAT_RAW;
+        $response = '';
+        $tests_error = false;
 
         try {
             $connection = Yii::$app->db;
             $connection->attributes[\PDO::ATTR_TIMEOUT] = 1;      // setting mysql PDO connection timeout to 1 sec
             $connection->open();
             if ($connection->pdo == null) {
-                $response['mysql'] = false;
+                $response .= 'healthcheck_status{name="mysql"} 0';
+                $tests_error = true;
             } else {
-                $response['mysql'] = true;
+                $response .= 'healthcheck_status{name="mysql"} 1';
             }
         } catch (\Throwable $e) {
-            $response['mysql'] = false;
+            $response .= 'healthcheck_status{name="mysql"} 0';
+            $tests_error = true;
         }
-
+        $response .= "\r\n";
         try {
             $connection = Yii::$app->db_postgres;
             $connection->attributes[\PDO::ATTR_TIMEOUT] = 1;      // setting postgresql PDO connection timeout to 1 sec
             $connection->open();
             if ($connection->pdo == null) {
-                $response['postgresql'] = false;
+                $response .= 'healthcheck_status{name="postgresql"} 0';
+                $tests_error = true;
             } else {
-                $response['postgresql'] = true;
+                $response .= 'healthcheck_status{name="postgresql"} 1';
             }
         } catch (\Throwable $e) {
-            $response['postgresql'] = false;
+            $response .= 'healthcheck_status{name="postgresql"} 0';
+            $tests_error = true;
         }
+        $response .= "\r\n";
 
         try {
             $connection = Yii::$app->redis;
             $connection->connectionTimeout = 1;
             $connection->dataTimeout = 1;
             $connection->open();
-            $response['redis'] = true;
+            $response .= 'healthcheck_status{name="redis"} 1';
         } catch (\Throwable $e) {
-            $response['redis'] = false;
+            $response .= 'healthcheck_status{name="redis"} 0';
+            $tests_error = true;
         }
+        $response .= "\n";
 
-        foreach ($response as $passed) {
-            if (!$passed) {
+        if ($tests_error) {
                 Yii::$app->response->setStatusCode(503);
-            }
         }
 
         return $response;
