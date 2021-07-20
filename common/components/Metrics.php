@@ -2,6 +2,7 @@
 
 namespace common\components;
 
+use kivork\PrometheusClient\components\PrometheusClient;
 use Prometheus\CollectorRegistry;
 use Prometheus\Counter;
 use Prometheus\Gauge;
@@ -16,7 +17,7 @@ use yii\helpers\Inflector;
  * Class Metrics
  * @package common\components
  *
- * @property CollectorRegistry $registry
+ * @property CollectorRegistry|null $registry
  * @property Counter[] $counterList
  * @property Histogram[] $histogramList
  * @property Gauge[] $gaugeList
@@ -33,7 +34,7 @@ class Metrics extends Component
     private array $counterList = [];
     private array $histogramList = [];
     private array $gaugeList = [];
-    private CollectorRegistry $registry;
+    private ?CollectorRegistry $registry;
     private bool $isMetricsEnabled = false;
     private array $defaultBuckets = [0.2, 0.4, 0.6, 0.8, 1, 3, 5, 7, 10, 15];
 
@@ -333,17 +334,45 @@ class Metrics extends Component
         return $this->defaultBuckets;
     }
 
-    public function isInitialized(): bool
+    private function isInitialized(): bool
     {
         if (!$this->isMetricsEnabled) {
             return false;
         }
-        if (!empty($this->registry) && $this->registry instanceof CollectorRegistry) {
+        if ($this->checkRegistry($this->registry)) {
             return true;
         }
+        if ($this->checkRegistry($this->reInitRegistry())) {
+            return true;
+        }
+        return false;
+    }
 
+    private function checkRegistry($registry): bool
+    {
+        return !empty($registry) && $registry instanceof CollectorRegistry;
+    }
 
-        /* TODO::  */
-        //return ($this->isMetricsEnabled && !empty($this->registry));
+    private function reInitRegistry(): ?CollectorRegistry
+    {
+        try {
+            $prometheusOrig = \Yii::$app->prometheus;
+            $redisOptions = $prometheusOrig->redisOptions;
+            $redisOptions['prefix'] = php_uname('n');
+            $objectParams = [
+                'class' => PrometheusClient::class,
+                'redisOptions' => $redisOptions,
+                'useHttpBasicAuth' => $prometheusOrig->useHttpBasicAuth,
+                'authUsername' => $prometheusOrig->authUsername,
+                'authPassword' => $prometheusOrig->authPassword,
+            ];
+
+            $prometheus = \Yii::createObject($objectParams);
+            $this->registry = $prometheus->registry;
+            return $this->registry;
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:reInitRegistry');
+        }
+        return null;
     }
 }
