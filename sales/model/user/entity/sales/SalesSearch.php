@@ -40,6 +40,7 @@ use yii\db\Query;
  * @property string $minDate
  * @property string $maxDate
  * @property string $defaultMinDate
+ * @property int|null $status_id
  *
  * @property Employee $currentUser
  */
@@ -55,6 +56,7 @@ class SalesSearch extends Model
 
     public $id;
     public $final_profit;
+    public $status_id;
     public $l_status_dt;
     public $created;
     public $luc_created_dt;
@@ -99,6 +101,7 @@ class SalesSearch extends Model
 
             [['luc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['luc_description'], 'string', 'max' => 100],
+            ['status_id', 'safe'],
         ];
     }
 
@@ -107,6 +110,7 @@ class SalesSearch extends Model
         return [
             'luc_created_dt' => 'Qualified date',
             'luc_description' => 'Description',
+            'status_id' => 'Status',
         ];
     }
 
@@ -203,6 +207,11 @@ class SalesSearch extends Model
                         'desc' => ['luc_description' => SORT_DESC],
                         'label' => 'Description',
                     ],
+                    'status_id'  => [
+                        'asc' => ['status' => SORT_ASC],
+                        'desc' => ['status' => SORT_DESC],
+                        'label' => 'Status',
+                    ],
                 ],
             ],
             'pagination' => [
@@ -228,6 +237,8 @@ class SalesSearch extends Model
         ]);
 
         $query->andFilterWhere(['like', 'luc_description', $this->luc_description]);
+
+        $query->andFilterWhere(['=', 'status', $this->status_id]);
 
         $query->cache($cacheDuration);
 
