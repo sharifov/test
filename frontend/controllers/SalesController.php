@@ -4,7 +4,6 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use sales\auth\Auth;
-use sales\helpers\query\QueryHelper;
 use sales\model\user\entity\sales\SalesSearch;
 use Yii;
 

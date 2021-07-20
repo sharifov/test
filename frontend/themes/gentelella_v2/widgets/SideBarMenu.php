@@ -694,6 +694,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ]
         ];
 
+        $menuItems[] = ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'];
+
         $menuItems[] = [
             'label' => 'Stats & Reports',
             'url' => 'javascript:',
@@ -728,7 +730,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
-                ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'],
             ]
         ];
 

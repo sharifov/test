@@ -3,6 +3,7 @@
 use common\components\grid\DateColumn;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use sales\model\user\entity\sales\SalesSearch;
+use common\models\Lead;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -12,7 +13,7 @@ use yii\widgets\Pjax;
 /* @var yii\data\ActiveDataProvider $dataProvider */
 ?>
 
-<?php Pjax::begin(['id' => 'pjax-qualified-leads', 'timeout' => 5000, 'enablePushState' => false]); ?>
+<?php Pjax::begin(['id' => 'pjax-qualified-leads', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
 <?php echo GridView::widget([
         'dataProvider' => $dataProvider,
@@ -34,8 +35,15 @@ use yii\widgets\Pjax;
                 }
             ],
             [
+                'attribute' => 'status_id',
+                'value' => static function ($data) {
+                    return Lead::getStatus($data['status']);
+                },
+                'filter' => Lead::getStatusList(),
+            ],
+            [
                 'attribute' => 'luc_description',
-                'filter' => LeadUserConversionDictionary::DESCRIPTION_LIST,
+                'filter' =>  LeadUserConversionDictionary::DESCRIPTION_LIST,
             ],
             [
                 'attribute' => 'luc_created_dt',
