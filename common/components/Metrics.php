@@ -335,6 +335,15 @@ class Metrics extends Component
 
     public function isInitialized(): bool
     {
-        return ($this->isMetricsEnabled && !empty($this->registry));
+        if (!$this->isMetricsEnabled) {
+            return false;
+        }
+        if (!empty($this->registry) && $this->registry instanceof CollectorRegistry) {
+            return true;
+        }
+
+
+        /* TODO::  */
+        //return ($this->isMetricsEnabled && !empty($this->registry));
     }
 }
