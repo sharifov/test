@@ -91,7 +91,7 @@ class CouponController extends BaseController
      * @apiParam {string{3}}                    [product.flight.departure_airport_iata]     Departure airport iata
      * @apiParam {string{3}}                    [product.flight.arrival_airport_iata]       Arrival airport iata
      * @apiParam {string{2}}                    [product.flight.marketing_airline]          Marketing airline
-     * @apiParam {string{2}}                    [product.flight.cabin_class]                Cabin class
+     * @apiParam {string{1}}                    [product.flight.cabin_class]                Cabin class
      *
      * @apiParamExample {json} Request-Example:
      *   {
