@@ -660,4 +660,9 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     {
         return self::find()->where(['fq_flight_request_uid' => $flightRequestUid])->orderBy(['fq_id' => SORT_DESC])->one();
     }
+
+    public function getQuoteDetailsPageUrl(): string
+    {
+        return '/flight/flight-quote/ajax-quote-details';
+    }
 }

@@ -410,6 +410,30 @@ $js = <<<JS
         });
     });
     
+    $(document).on('click', '.btn-show-product-quote-details', function(e){        
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let gid = btn.data('product-quote-gid');
+        let modal = $('#modal-lg');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Product Quote [' + gid + '] Details');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
+    
     $(document).on('click', '.btn-invoice-status-log', function(e){        
         e.preventDefault();
         let url = $(this).data('url');
@@ -745,6 +769,13 @@ JS;
 
 $this->registerJs($js, View::POS_READY, 'case-order-js');
 
+$css = <<<CSS
+.btn-show-product-quote-details.disabled {
+    pointer-events: none;
+    cursor: default;
+}
+CSS;
+$this->registerCss($css);
 
 //$this->registerJs(
 //
