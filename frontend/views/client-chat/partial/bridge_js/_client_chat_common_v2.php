@@ -745,7 +745,7 @@ reloadChat = function(chatData) {
         // $('#_rc-iframe-wrapper').append(chatData.iframe);  
         window.initChatDialog({
             rid: chatData.rid,
-            readonly: chatData.readonly
+            readonly: chatData.readonly,
             server: '$server',
             'apiServer': '$apiServer'
         });
