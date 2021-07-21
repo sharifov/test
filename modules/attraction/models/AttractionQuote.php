@@ -341,4 +341,9 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
     {
         return ArrayHelper::getValue($this, 'atnqProductQuote.pqOrder');
     }
+
+    public function getQuoteDetailsPageUrl(): string
+    {
+        return '/attraction/attraction-quote/ajax-quote-details';
+    }
 }

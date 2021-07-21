@@ -14,7 +14,9 @@ use modules\order\src\processManager\Status;
 use modules\order\src\transaction\services\TransactionService;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 $process = OrderProcessManager::findOne($order->or_id);
@@ -193,14 +195,18 @@ $formatter = new \common\components\i18n\Formatter();
                         <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
                         <td>
-                            <?php
-                            echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
+                            <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
                                 'data-order-id' => $order->or_id,
                                 'data-product-quote-id' => $quote->pq_id,
                                 'class' => 'btn-delete-quote-from-order',
                                 'data-url' => \yii\helpers\Url::to(['/order/order-product/delete-ajax'])
-                            ]);
+                            ])
                             ?>
+                            <?= Html::a('<i class="fas fa-info-circle" data-toggle="tooltip" title="Details"></i>', null, [
+                                'data-product-quote-gid' => $productQuote->pq_gid,
+                                'class' => 'btn-show-product-quote-details',
+                                'data-url' => Url::to([$productQuote->getQuoteDetailsPageUrl(), 'id' => $productQuote->pq_id])
+                            ]); ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

@@ -257,4 +257,9 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable, ProductData
     {
         return ArrayHelper::getValue($this, 'rcqProductQuote.pqOrder');
     }
+
+    public function getQuoteDetailsPageUrl(): string
+    {
+        return '/rent-car/rent-car-quote/ajax-quote-details';
+    }
 }
