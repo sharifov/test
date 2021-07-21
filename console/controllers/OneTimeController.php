@@ -1163,33 +1163,34 @@ class OneTimeController extends Controller
 
         try {
             $db = \Yii::$app->db;
-            $db->createCommand()->truncateTable(LeadUserConversion::tableName())->execute();
+            //$db->createCommand()->truncateTable(LeadUserConversion::tableName())->execute();
 
             $sql = '
                 select 
-                    lead_id as luc_lead_id,
-                    lf_owner_id as luc_user_id,
+                    lead_id as lead_id,
+                    lf_owner_id as owner_id,
                     case
                         when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take"
                         when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id is null then "Call Auto Take"
                         when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is not null and ll.employee_id != lf_owner_id then "Clone"
-                        when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is null and ll.employee_id != lf_owner_id then "Manual"
+                        when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is null then "Manual"
                         when lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take Over"
-                    else null end as luc_description,
-                    min(lead_flow.created) as luc_created_dt
+                    else null end as description,
+                    min(lead_flow.created) as created
                 from lead_flow
                 left join leads l on l.id = lead_flow.lead_id
                 left join leads ll on ll.id = l.clone_id 
                 where 
-                    l.created >= "2021-06-01" and lf_owner_id is not null and
+                    lead_flow.created >= "2021-05-01 00:00:00" and lead_flow.created < "2021-06-21 09:46:00" 
+                    and
                     (
                         (lf_from_status_id = 1 and lead_flow.status = 2 and (lead_flow.employee_id = lf_owner_id or lead_flow.employee_id is null))
                         OR
-                        (lf_from_status_id is null and lead_flow.status = 2 and ll.employee_id != lf_owner_id)
+                        (lf_from_status_id is null and lead_flow.status = 2 and (ll.employee_id != lf_owner_id or l.clone_id is null) )
                         OR
                         (lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id)
                     )
-                group by luc_lead_id, luc_user_id, luc_description';
+                group by lead_id, owner_id, description';
 
             $result = Yii::$app->db->createCommand($sql)->queryAll();
 
