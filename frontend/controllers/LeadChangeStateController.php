@@ -7,6 +7,7 @@ use common\models\Lead;
 use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\QaTaskCreateLeadTrashCheckService;
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\Rule;
+use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\RuleException;
 use sales\auth\Auth;
 use sales\forms\leadflow\FollowUpReasonForm;
 use sales\forms\leadflow\RejectReasonForm;
@@ -216,8 +217,13 @@ class LeadChangeStateController extends FController
                         $this->leadCheckTrashService->handle($rule, $lead);
                     }
                 }
+            } catch (RuleException $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionTrash::RuleException');
             } catch (\DomainException $e) {
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionTrash::Throwable');
+                Yii::$app->getSession()->setFlash('danger', 'Server error occurred');
             }
         } else {
             return $this->renderAjax('reason_trash', [
