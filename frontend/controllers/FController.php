@@ -39,7 +39,7 @@ class FController extends Controller
     {
 //       $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main.php';
 
-        if (!\Yii::$app->user->isGuest) {
+        if (!\Yii::$app->user->isGuest && !\Yii::$app->request->isAjax) {
             /** @var Employee $user */
             $user = \Yii::$app->user->identity;
 
