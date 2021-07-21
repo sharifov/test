@@ -82,6 +82,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'us_has_call_access:boolean',
                 [
                     'class' => DateTimeColumn::class,
+                    'attribute' => 'us_phone_ready_time',
+                    'value' => static function (UserStatus $model) {
+                        return $model->us_phone_ready_time ? date('Y-m-d H:i:s', $model->us_phone_ready_time) : null;
+                    },
+                    'format' => 'byUserDateTimeWithSeconds',
+                ],
+                [
+                    'class' => DateTimeColumn::class,
                     'attribute' => 'us_updated_dt',
                 ],
 

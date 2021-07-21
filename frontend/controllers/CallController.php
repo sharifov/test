@@ -1228,7 +1228,15 @@ class CallController extends FController
                     'cua_user_id' => Auth::id(),
                     'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
                 ])
-                ->andWhere(['c_source_type_id' => [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]])
+                ->andWhere([
+                    'OR',
+                    ['c_source_type_id' => [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]],
+                    [
+                        'AND',
+                        ['c_source_type_id' => [Call::SOURCE_DIRECT_CALL]],
+                        ['<>', 'c_created_user_id', new Expression('cua_user_id')],
+                    ],
+                ])
                 ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD])
                 ->orderBy([
                     'cua_priority' => SORT_DESC,

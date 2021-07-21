@@ -8,11 +8,15 @@ use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\LeadPreferences;
 use common\models\search\ClientSearch;
+use common\models\search\lead\LeadSearchByClient;
 use frontend\models\LeadForm;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use sales\access\ClientInfoAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\LeadPreferencesAccess;
 use sales\auth\Auth;
+use sales\entities\cases\CasesSearchByClient;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\services\client\ClientCreateForm;
@@ -28,7 +32,10 @@ use Yii;
 use common\models\Lead;
 use common\models\search\lead\LeadSearchByIp;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\HttpException;
 use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
@@ -91,6 +98,12 @@ class LeadViewController extends FController
     public function actionSearchLeadsByIp(): string
     {
         $lead = $this->findLeadByGid((string)Yii::$app->request->get('gid'));
+
+        /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS, Restrict access to action search leads by ip*/
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         if (!$lead->request_ip) {
             throw new NotFoundHttpException('Not found Lead with request ip');
         }
@@ -175,11 +188,15 @@ class LeadViewController extends FController
      */
     public function actionAjaxAddClientPhoneModalContent(): string
     {
+        $gid = (string)Yii::$app->request->get('gid');
+        $lead = $this->findLeadByGid($gid);
+
+        /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS, Restrict access to action client details on lead*/
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         try {
-            $gid = (string)Yii::$app->request->get('gid');
-
-            $lead = $this->findLeadByGid($gid);
-
             $form = new PhoneCreateForm();
 
             return $this->renderAjax('partial/_client_add_phone_modal_content', [
@@ -224,14 +241,20 @@ class LeadViewController extends FController
      */
     public function actionAjaxAddClientPhone()
     {
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
         $gid = (string)Yii::$app->request->get('gid');
         $lead = $this->findLeadByGid($gid);
-
-        if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        /*if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
             throw new HttpException(403, 'Access Denied');
+        }*/
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_CREATE, Restrict access to action client add phone on lead*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
+
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
 
         try {
             $form = new PhoneCreateForm();
@@ -246,7 +269,8 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
                     'clientPhones' => $lead->client->clientPhones,
                     'lead' => $lead,
-                    'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'disableMasking' => $disableMasking,
+                    'leadAbacDto' => $leadAbacDto
                 ]);
             } else {
                 $response['error'] = true;
@@ -268,10 +292,16 @@ class LeadViewController extends FController
     public function actionAjaxEditClientPhoneModalContent()
     {
         if (Yii::$app->request->isAjax) {
+            $gid = (string)Yii::$app->request->get('gid');
+            $lead = $this->findLeadByGid($gid);
+
+            /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_ACCESS, Access to action client edit phone on lead*/
+            if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
             try {
                 $id = (int)Yii::$app->request->get('pid');
-                $gid = (string)Yii::$app->request->get('gid');
-                $lead = $this->findLeadByGid($gid);
                 if ($phone = ClientPhone::findOne($id)) {
                     $phoneForm = new PhoneCreateForm();
                     $phoneForm->id = $phone->id;
@@ -331,14 +361,23 @@ class LeadViewController extends FController
     {
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+        $gid = (string)Yii::$app->request->get('gid');
+        $lead = $this->findLeadByGid($gid);
+        $leadAbacDto = new LeadAbacDto($lead, $user->id);
+
+        /*if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+            throw new HttpException(403, 'Access Denied');
+        }*/
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_ACCESS, Restrict access to action edit phone on lead*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
+
         try {
-            $gid = (string)Yii::$app->request->get('gid');
-            $lead = $this->findLeadByGid($gid);
-
-            if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
-                throw new HttpException(403, 'Access Denied');
-            }
-
             $form = new PhoneCreateForm();
             $form->scenario = 'update';
 
@@ -358,15 +397,16 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
                     'clientPhones' => $lead->client->clientPhones,
                     'lead' => $lead,
-                    'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'disableMasking' => $disableMasking,
+                    'leadAbacDto' => $leadAbacDto
                 ]);
             } else {
                 $response['error'] = true;
                 $response['message'] = $this->getParsedErrors($form->getErrors());
             }
 
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return $response;
+
+            return $this->asJson($response);
         } catch (\Throwable $e) {
             Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientPhone:Throwable');
         }
@@ -380,11 +420,15 @@ class LeadViewController extends FController
      */
     public function actionAjaxAddClientEmailModalContent(): string
     {
+        $gid = (string)Yii::$app->request->get('gid');
+        $lead = $this->findLeadByGid($gid);
+
+        /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS, Restrict access to action add email on lead*/
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         try {
-            $gid = (string)Yii::$app->request->get('gid');
-
-            $lead = $this->findLeadByGid($gid);
-
             $form = new EmailCreateForm();
 
             return $this->renderAjax('partial/_client_add_email_modal_content', [
@@ -429,14 +473,20 @@ class LeadViewController extends FController
      */
     public function actionAjaxAddClientEmail()
     {
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
         $gid = (string)Yii::$app->request->get('gid');
         $lead = $this->findLeadByGid($gid);
-
-        if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        /*if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
             throw new HttpException(403, 'Access Denied');
+        }*/
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_CREATE, Restrict access to action client add email on lead*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
+
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
 
         try {
             $form = new EmailCreateForm();
@@ -451,7 +501,8 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
                     'clientEmails' => $lead->client->clientEmails,
                     'lead' => $lead,
-                    'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'leadAbacDto' => $leadAbacDto,
+                    'disableMasking' => $disableMasking
                 ]);
             } else {
                 $response['error'] = true;
@@ -473,10 +524,16 @@ class LeadViewController extends FController
     public function actionAjaxEditClientEmailModalContent()
     {
         if (Yii::$app->request->isAjax) {
+            $gid = (string)Yii::$app->request->get('gid');
+            $lead = $this->findLeadByGid($gid);
+
+            /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_ACCESS, Access to action client edit email on lead*/
+            if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
             try {
                 $id = (int)Yii::$app->request->get('pid');
-                $gid = (string)Yii::$app->request->get('gid');
-                $lead = $this->findLeadByGid($gid);
                 if ($email = ClientEmail::findOne($id)) {
                     $emailForm = new EmailCreateForm();
                     $emailForm->id = $email->id;
@@ -536,14 +593,23 @@ class LeadViewController extends FController
     {
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+        $gid = (string)Yii::$app->request->get('gid');
+        $lead = $this->findLeadByGid($gid);
+        $leadAbacDto = new LeadAbacDto($lead, $user->id);
+
+        /*if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+            throw new HttpException(403, 'Access Denied');
+        }*/
+
+        /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_UPDATE, Restrict access to action edit phone on lead*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
+
         try {
-            $gid = (string)Yii::$app->request->get('gid');
-            $lead = $this->findLeadByGid($gid);
-
-            if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
-                throw new HttpException(403, 'Access Denied');
-            }
-
             $form = new EmailCreateForm();
             $form->scenario = 'update';
 
@@ -563,7 +629,8 @@ class LeadViewController extends FController
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
                     'clientEmails' => $lead->client->clientEmails,
                     'lead' => $lead,
-                    'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
+                    'leadAbacDto' => $leadAbacDto,
+                    'disableMasking' => $disableMasking
                 ]);
             } else {
                 $response['error'] = true;
@@ -586,10 +653,15 @@ class LeadViewController extends FController
     public function actionAjaxEditClientNameModalContent(): string
     {
         if (Yii::$app->request->isAjax) {
-            try {
-                $gid = (string)Yii::$app->request->get('gid');
-                $lead = $this->findLeadByGid($gid);
+            $gid = (string)Yii::$app->request->get('gid');
+            $lead = $this->findLeadByGid($gid);
 
+            /** @abac new LeadAbacDto($lead), LeadAbacObject::ACT_CLIENT_UPDATE, LeadAbacObject::ACTION_ACCESS, Restrict access to action client update on lead*/
+            if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_CLIENT_UPDATE, LeadAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
+            try {
                 $form = new ClientCreateForm();
                 $form->id = $lead->client->id;
                 $form->firstName = $lead->client->first_name;
@@ -787,6 +859,95 @@ class LeadViewController extends FController
     }
 
     /**
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \ReflectionException
+     */
+    public function actionAjaxGetInfo(): string
+    {
+        $user = Auth::user();
+        $model = $this->findLeadById(Yii::$app->request->post('lead_id'));
+        $leadAbacDto = new LeadAbacDto($model, $user->id);
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS, Restrict access to action client details on lead*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+        $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
+
+        if (!$clientId = Yii::$app->request->post('client_id')) {
+            $clientId = Yii::$app->request->get('client_id');
+        }
+        $client = Client::findOne((int)$clientId);
+
+        $providers = [];
+        $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id, $user);
+        $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id, $user->id);
+
+        return $this->renderAjax('ajax_info', ArrayHelper::merge(
+            [
+                'model' => $client,
+                'disableMasking' => $disableMasking
+            ],
+            $providers
+        ));
+    }
+
+    /**
+     * @param int $clientId
+     * @param int $userId
+     * @return ActiveDataProvider
+     * @throws \ReflectionException
+     */
+    private function getCasesDataProvider(int $clientId, int $userId): ActiveDataProvider
+    {
+        $params[CasesSearchByClient::getShortName()]['clientId'] = $clientId;
+
+        $dataProvider = (new CasesSearchByClient())->search($params, $userId);
+
+        $dataProvider->query->orderBy(['cs_last_action_dt' => SORT_DESC]);
+
+        $dataProvider->sort = false;
+
+        $pagination = $dataProvider->pagination;
+        $pagination->pageSize = 10;
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->pageParam = 'case-page';
+        $pagination->pageSizeParam = 'case-per-page';
+        $dataProvider->pagination = $pagination;
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param int $clientId
+     * @param Employee $user
+     * @return ActiveDataProvider
+     * @throws \ReflectionException
+     */
+    private function getLeadsDataProvider(int $clientId, Employee $user): ActiveDataProvider
+    {
+        $params[LeadSearchByClient::getShortName()]['clientId'] = $clientId;
+
+        $dataProvider = (new LeadSearchByClient())->search($params, $user);
+
+        $dataProvider->query->orderBy(['l_last_action_dt' => SORT_DESC]);
+
+        $dataProvider->sort = false;
+
+        $pagination = $dataProvider->getPagination();
+        $pagination->pageSize = 10;
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->pageParam = 'lead-page';
+        $pagination->pageSizeParam = 'lead-per-page';
+        $dataProvider->setPagination($pagination);
+
+        return $dataProvider;
+    }
+
+    /**
      * @param string $gid
      * @return Lead the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -797,6 +958,19 @@ class LeadViewController extends FController
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @param $id
+     * @return Lead the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findLeadById($id): Lead
+    {
+        if ($model = Lead::findOne($id)) {
+            return $model;
+        }
+        throw new NotFoundHttpException('Not found lead ID:' . $id);
     }
 
     /**

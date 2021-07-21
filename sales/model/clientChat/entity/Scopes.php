@@ -85,6 +85,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['cch_status_id' => ClientChat::STATUS_CLOSED]);
     }
 
+    public function new(): self
+    {
+        return $this->andWhere(['cch_status_id' => ClientChat::STATUS_NEW]);
+    }
+
     public function last(): self
     {
         return $this->orderBy(['cch_id' => SORT_DESC])->limit(1);

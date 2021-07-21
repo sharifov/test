@@ -75,6 +75,8 @@ use common\components\validators\IsArrayValidator;
  * @property VisitorLog[] $visitorLogs
  * @property ProjectRelation[] $projectRelations
  * @property ProjectRelation $projectMainRelation
+ *
+ * @property string|null $airSearchSid
  */
 class Project extends \yii\db\ActiveRecord
 {
@@ -258,6 +260,11 @@ class Project extends \yii\db\ActiveRecord
     {
         $data = ProjectEmployeeAccess::find()->select(['project_id'])->with('project')->where(['employee_id' => $user_id])->all();
         return ArrayHelper::map($data, 'project_id', 'project.name');
+    }
+
+    public function getAirSearchSid(): ?string
+    {
+        return $this->p_params_json['airSearch']['sid'] ?? null;
     }
 
     public static function getListByUserWithProjectKeys(int $user_id = 0): array

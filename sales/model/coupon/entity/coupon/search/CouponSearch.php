@@ -34,7 +34,7 @@ class CouponSearch extends Coupon
 
             ['c_updated_user_id', 'integer'],
 
-            [['c_created_dt', 'c_exp_date', 'c_start_date', 'c_updated_dt', 'c_used_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['c_created_dt', 'c_exp_date', 'c_start_date', 'c_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -71,10 +71,6 @@ class CouponSearch extends Coupon
 
         if ($this->c_updated_dt) {
             \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_updated_dt', $this->c_updated_dt, $user->timezone);
-        }
-
-        if ($this->c_used_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_used_dt', $this->c_used_dt, $user->timezone);
         }
 
         $query->andFilterWhere([

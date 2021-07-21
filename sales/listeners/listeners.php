@@ -35,6 +35,8 @@ use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetListener;
 use sales\model\user\entity\profit\event\UserProfitCalculateByOrderTipsUserProfitsEvent;
 use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderTipsUserProfitsEventListener;
+use sales\model\visitorSubscription\event\VisitorSubscriptionEnabled;
+use sales\model\visitorSubscription\listener\FindChatsAndRunDistributionLogic;
 
 return [
     UserProfitCalculateByOrderTipsUserProfitsEvent::class => [UserProfitCalculateByOrderTipsUserProfitsEventListener::class],
@@ -83,6 +85,10 @@ return [
     ],
     ClientChatUpdateStatusEvent::class => [
         ClientChatUpdateStatusLogListener::class
+    ],
+
+    VisitorSubscriptionEnabled::class => [
+        FindChatsAndRunDistributionLogic::class
     ]
 
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],

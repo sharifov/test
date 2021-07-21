@@ -21,6 +21,24 @@ return [
             'enableSchemaCache' => env('common.config.main.components.db_postgres.enableSchemaCache', 'bool'),
             'schemaCacheDuration' => env('common.config.main.components.db_postgres.schemaCacheDuration', 'int'),
         ],
+        'db_slave' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => 'mysql:host=' . env('common.config.main.components.db_slave.dsn.host') . ';dbname=' . env('common.config.main.components.db_slave.dsn.dbname'),
+            'username' => env('common.config.main.components.db_slave.username'),
+            'password' => env('common.config.main.components.db_slave.password'),
+            'charset' => 'utf8mb4',
+            'enableSchemaCache' => env('common.config.main.components.db_slave.enableSchemaCache', 'bool'),
+            'schemaCacheDuration' => env('common.config.main.components.db_slave.schemaCacheDuration', 'int'),
+
+            'slaveConfig' => [
+                'username' => env('common.config.main.components.db_slave.slaveConfig.username'),
+                'password' => env('common.config.main.components.db_slave.slaveConfig.password'),
+            ],
+
+            'slaves' => [
+                ['dsn' => 'mysql:host=' . env('common.config.main.components.db_slave.slaves.0.dsn.host') . ';port=3306;dbname=' . env('common.config.main.components.db_slave.slaves.0.dsn.dbname'),]
+            ]
+        ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'timeZone' => 'Europe/Chisinau',

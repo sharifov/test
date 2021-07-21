@@ -14,15 +14,19 @@ use yii\web\View;
 use yii\helpers\Url;
 use yii\bootstrap4\Modal;
 use sales\auth\Auth;
+use modules\lead\src\abac\LeadAbacObject;
 
 /**
  * @var Employee $user
  * @var $unsubscribedEmails array
+ * @var $leadAbacDto \stdClass
+ * @var $unsubscribe bool
+ * @var $disableMasking bool
  */
 $user = Yii::$app->user->identity;
 
 $formId = sprintf('%s-form', $leadForm->getClient()->formName());
-$manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user);
+//$manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user);
 
 ?>
 
@@ -31,44 +35,64 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
             <h2><i class="fa fa-user-circle-o"></i> Client Info</h2>
             <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
             <ul class="nav navbar-right panel_toolbox">
-                <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess) : ?>
-                    <li>
-                        <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#', [
-                            'id' => 'btn-client-info-details',
-                            'data-client-id' => $leadForm->getClient()->id,
-                            'title' => 'Client Info',
-                        ])?>
-                    </li>
-                    <li>
-                        <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Phone', '#', [
-                            'id' => 'client-new-phone-button',
-                            'data-modal_id' => 'client-manage-info',
-                            'title' => 'Add Phone',
-                            'data-content-url' => Url::to(['lead-view/ajax-add-client-phone-modal-content', 'gid' => $lead->gid]),
-                            'class' => 'showModalButton'
-                        ])?>
-                    </li>
-                    <li>
-                        <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Email', '#', [
-                            'id' => 'client-new-email-button',
-                            'data-modal_id' => 'client-manage-info',
-                            'title' => 'Add Email',
-                            'data-content-url' => Url::to(['lead-view/ajax-add-client-email-modal-content', 'gid' => $lead->gid]),
-                            'class' => 'showModalButton'
-                        ])?>
-                    </li>
-                    <li>
-                        <?=Html::a('<i class="fas fa-edit warning"></i> Update Client', '#', [
-                            'id' => 'client-edit-user-name-button',
-                            'data-modal_id' => 'client-manage-info',
-                            'title' => 'Update user name',
-                            'data-content-url' => Url::to(['lead-view/ajax-edit-client-name-modal-content', 'gid' => $lead->gid]),
-                            'class' => 'showModalButton'
-                        ])?>
-                    </li>
+                <?php /*if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess) : */?>
+
+                <?php /** @abac $leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to Menu in Client Info block on lead */ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
+                    <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS, Access to button client details on lead */ ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS)) : ?>
+                        <li>
+                            <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#', [
+                                'id' => 'btn-client-info-details',
+                                'data-lead-id' => $lead->id,
+                                'data-client-id' => $leadForm->getClient()->id,
+                                'title' => 'Client Info',
+                            ])?>
+                        </li>
+                    <?php endif; ?>
+
+                    <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS, Access to button client add phone on lead*/ ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS)) : ?>
+                        <li>
+                            <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Phone', '#', [
+                                'id' => 'client-new-phone-button',
+                                'data-modal_id' => 'client-manage-info',
+                                'title' => 'Add Phone',
+                                'data-content-url' => Url::to(['lead-view/ajax-add-client-phone-modal-content', 'gid' => $lead->gid]),
+                                'class' => 'showModalButton'
+                            ])?>
+                        </li>
+                    <?php endif; ?>
+
+                    <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS, Access to button client add email on lead*/ ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS)) : ?>
+                        <li>
+                            <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Email', '#', [
+                                'id' => 'client-new-email-button',
+                                'data-modal_id' => 'client-manage-info',
+                                'title' => 'Add Email',
+                                'data-content-url' => Url::to(['lead-view/ajax-add-client-email-modal-content', 'gid' => $lead->gid]),
+                                'class' => 'showModalButton'
+                            ])?>
+                        </li>
+                    <?php endif; ?>
+
+                    <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_UPDATE, LeadAbacObject::ACTION_ACCESS, Access to button client add email on lead*/ ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_UPDATE, LeadAbacObject::ACTION_ACCESS)) : ?>
+                        <li>
+                            <?=Html::a('<i class="fas fa-edit warning"></i> Update Client', '#', [
+                                'id' => 'client-edit-user-name-button',
+                                'data-modal_id' => 'client-manage-info',
+                                'title' => 'Update user name',
+                                'data-content-url' => Url::to(['lead-view/ajax-edit-client-name-modal-content', 'gid' => $lead->gid]),
+                                'class' => 'showModalButton'
+                            ])?>
+                        </li>
+                    <?php endif; ?>
 
                     <?php if ($unsubscribe) : ?>
-                        <?php if (Auth::can('client-project/subscribe-client-ajax')) : ?>
+                        <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to button client subscribe on lead*/ ?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS)) : ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
@@ -82,7 +106,8 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                             </li>
                         <?php endif; ?>
                     <?php else : ?>
-                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')) : ?>
+                        <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to button client subscribe on lead*/ ?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_UNSUBSCRIBE, LeadAbacObject::ACTION_ACCESS)) : ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
@@ -133,7 +158,8 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                                     echo $this->render('_client_manage_phone', [
                                         'clientPhones' => $phones,
                                         'lead' => $lead,
-                                        'manageClientInfoAccess' => $manageClientInfoAccess
+                                        'leadAbacDto' => $leadAbacDto,
+                                        'disableMasking' => $disableMasking
                                     ]);
                                 }
                                 ?>
@@ -146,7 +172,9 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                                     echo $this->render('_client_manage_email', [
                                         'clientEmails' => $emails,
                                         'lead' => $lead,
-                                        'manageClientInfoAccess' => $manageClientInfoAccess
+                                        //'manageClientInfoAccess' => $manageClientInfoAccess
+                                        'leadAbacDto' => $leadAbacDto,
+                                        'disableMasking' => $disableMasking
                                     ]);
                                 }
                                 ?>
@@ -160,10 +188,12 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                             'userId' => $user->id
                         ]) ?>
 
-                        <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
-                            <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
+                        <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS, Access to btn search leads by ip on lead*/ ?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS)) : ?>
+                            <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
+                                <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
+                            <?php endif; ?>
                         <?php endif; ?>
-
                     </div>
                 </div>
             </div>
@@ -207,16 +237,17 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
 ])
 ?>
 <?php
-$clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
+$clientInfoUrl = \yii\helpers\Url::to(['/lead-view/ajax-get-info']);
 
 $js = <<<JS
     $(document).on('click', '#btn-client-info-details', function(e) {
         e.preventDefault();
         var client_id = $(this).data('client-id');
+        var lead_id = $(this).data('lead-id');
         $('#modalLead .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#modalLead-label').html('Client Details (' + client_id + ')');
         $('#modalLead').modal();
-        $.post('$clientInfoUrl', {client_id: client_id},
+        $.post('$clientInfoUrl', {client_id: client_id, lead_id: lead_id},
             function (data) {
                 $('#modalLead .modal-body').html(data);
             }

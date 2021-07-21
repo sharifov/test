@@ -37,10 +37,23 @@ class UserController extends Controller
             foreach ($userOnline as $item) {
                 $isUserIdle = UserMonitor::isUserIdle($item->uo_user_id);
                 if ((bool) $item->uo_idle_state !== $isUserIdle) {
+                    $previousAttributes = $item->getAttributes();
                     $item->uo_idle_state = $isUserIdle;
                     $item->uo_idle_state_dt = date('Y-m-d H:i:s');
-                    if (!$item->update()) {
-                        \Yii::error($item->errors, 'UserController:actionUpdateOnlineStatus:UserOnline:update');
+                    $result = $item->update();
+                    if ($result === false) {
+                        \Yii::error([
+                            'message' => 'UserOnlineStatus. Validation error',
+                            'errors' => $item->getErrors(),
+                            'attributes' => $item->getAttributes(),
+                        ], 'UserController:actionUpdateOnlineStatus:UserOnline:update');
+                    } elseif ($result === 0) {
+                        // todo change to info level
+                        \Yii::error([
+                            'message' => 'UserOnlineStatus. Record not updated',
+                            'previousAttributes' => $previousAttributes,
+                            'attributes' => $item->getAttributes(),
+                        ], 'UserController:actionUpdateOnlineStatus:UserOnline:update');
                     }
                     echo ' - ' . $item->uo_user_id . ' : ' . ($isUserIdle ? 'idle' : 'active') . PHP_EOL;
                 }

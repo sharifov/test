@@ -76,6 +76,9 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
 
 $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+
+/** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+$disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
 ?>
 
 <?= $this->render('partial/_view_header', [
@@ -136,6 +139,8 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id());
                     'is_manager' => $is_manager,
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
+                    'leadAbacDto' => $leadAbacDto,
+                    'disableMasking' => $disableMasking
                 ]) ?>
             <?php endif; ?>
 
@@ -195,6 +200,7 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id());
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
                     'smsEnabled' => $smsEnabled,
+                    'disableMasking' => $disableMasking
                 ]); ?>
                 <?php /*else: */ ?><!--
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>-->

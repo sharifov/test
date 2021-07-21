@@ -1,81 +1,6 @@
 [
   {
     "type": "get, post",
-    "url": "/health-check",
-    "title": "Health check action",
-    "version": "0.1.0",
-    "name": "HealthCheck_Sales",
-    "group": "App",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Array",
-            "optional": false,
-            "field": "data",
-            "description": "<p>components statuses (&quot;true&quot; or &quot;false&quot;)</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "Service",
-            "description": "<p>Unavailable 503</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/controllers/HealthCheckController.php",
-    "groupTitle": "App"
-  },
-  {
-    "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
     "version": "0.1.0",
@@ -1254,6 +1179,178 @@
   },
   {
     "type": "post",
+    "url": "/v1/client-chat/link-cases",
+    "title": "Client Chat Link Cases",
+    "version": "0.1.0",
+    "name": "ClientChat_Link_Cases",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 150",
+            "optional": false,
+            "field": "rid",
+            "description": "<p>Chat Room Id <code>Required</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array",
+            "optional": false,
+            "field": "caseIds",
+            "description": "<p>Cases Ids <code>Required</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n     \"rid\": \"e0ea61ca-ce03-497a-b740-asf4as6fcv\",\n     \"caseIds\": [\n         235344,\n         345567,\n         345466\n     ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Success-Response-With-Warning:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n   \"warning\": [\n        \"Case(254254) already linked to chat\"\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n            \"status\": 400,\n            \"message\": \"Some errors occurred while creating client chat request\",\n            \"errors\": [\n                \"Case id not exist: 235344\"\n            ],\n            \"code\": \"13101\"\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
+    "type": "post",
+    "url": "/v1/client-chat/link-leads",
+    "title": "Client Chat Link Leads",
+    "version": "0.1.0",
+    "name": "ClientChat_Link_Leads",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 150",
+            "optional": false,
+            "field": "rid",
+            "description": "<p>Chat Room Id <code>Required</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array",
+            "optional": false,
+            "field": "leadIds",
+            "description": "<p>Lead Ids <code>Required</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n            \"rid\": \"e0ea61ca-ce03-497a-b740-asf4as6fcv\",\n     \"leadIds\": [\n         235344,\n         345567,\n         345466\n     ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Success-Response-With-Warning:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n   \"warning\": [\n        \"Lead(254254) already linked to chat\"\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n            \"status\": 400,\n            \"message\": \"Some errors occurred while creating client chat request\",\n            \"errors\": [\n                \"Lead id not exist: 345567\"\n            ],\n            \"code\": \"13101\"\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
+    "type": "post",
     "url": "/v1/client-chat/subscribe",
     "title": "Client Chat Subscribe",
     "version": "0.1.0",
@@ -1827,6 +1924,225 @@
     },
     "filename": "webapi/modules/v1/controllers/CommunicationController.php",
     "groupTitle": "Communication"
+  },
+  {
+    "type": "post",
+    "url": "/v2/coupon/info",
+    "title": "Coupon info",
+    "version": "0.1.0",
+    "name": "Coupon_info",
+    "group": "Coupon",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "15",
+            "optional": false,
+            "field": "code",
+            "description": "<p>Coupon Code</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n           \"code\": \"D2EYEWH64BDGD3Y\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n          \"coupon\": {\n             \"c_id\": 9,\n             \"c_code\": \"HPCCZH68PNQB5FY\",\n             \"c_amount\": \"25.00\",\n             \"c_currency_code\": \"USD\",\n             \"c_percent\": null,\n             \"c_exp_date\": \"2022-07-12 00:00:00\",\n             \"c_start_date\": null,\n             \"c_reusable\": 0,\n             \"c_reusable_count\": null,\n             \"c_public\": 0,\n             \"c_status_id\": 2,\n             \"c_disabled\": null,\n             \"c_type_id\": 1,\n             \"c_created_dt\": \"2021-07-12 07:16:25\",\n             \"statusName\": \"Send\",\n             \"typeName\": \"Voucher\"\n         }\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Coupon not found\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}\n.",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (500):",
+          "content": "HTTP/1.1 500 Internal Server Error\n{\n       \"status\": \"Failed\",\n       \"source\": {\n           \"type\": 1,\n           \"status\": 500\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": \"Failed\",\n       \"message\": \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\",\n       \"errors\": [\n             \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\"\n       ],\n       \"code\": 0,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CouponController.php",
+    "groupTitle": "Coupon"
+  },
+  {
+    "type": "post",
+    "url": "/v2/coupon/create",
+    "title": "Create coupon",
+    "version": "0.1.0",
+    "name": "Create_coupon",
+    "group": "Coupon",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>Amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "currencyCode",
+            "description": "<p>Currency Code (USD)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "percent",
+            "description": "<p>Percent</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "reusable",
+            "description": "<p>Reusable</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "reusableCount",
+            "description": "<p>Reusable Count</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "startDate",
+            "description": "<p>Start Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "expirationDate",
+            "description": "<p>Expiration Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "public",
+            "description": "<p>Public</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n           \"amount\": 25,\n           \"currencyCode\": \"USD\",\n           \"percent\": \"\",\n           \"reusableCount\": 3,\n           \"startDate\": \"2021-12-20\",\n           \"expirationDate\": \"2021-12-25\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n           \"coupon\": {\n                    \"c_status_id\": 1,\n                    \"c_type_id\": 1,\n                    \"c_code\": \"KLCVZWDZGCCNFJE\",\n                    \"c_amount\": 25,\n                    \"c_currency_code\": \"USD\",\n                    \"c_public\": false,\n                    \"c_reusable\": false,\n                    \"c_reusable_count\": 3,\n                    \"c_percent\": 0,\n                    \"c_created_dt\": \"2021-07-16 08:37:02\",\n                    \"startDate\": \"2021-06-20\",\n                    \"expDate\": \"2022-07-16\",\n                    \"statusName\": \"Send\",\n                    \"typeName\": \"Voucher\"\n                },\n                \"serviceResponse\": {\n                    \"dec_coupon\": \"\",\n                    \"enc_coupon\": \"KLCVZWDZGCCNFJE\",\n                    \"exp_date\": \"2022-07-16\",\n                    \"amount\": 25,\n                    \"currency\": \"USD\",\n                    \"public\": false,\n                    \"reusable\": false,\n                    \"valid\": true\n                },\n                \"warning\": [\n                    \"Input param \\\"reusable\\\" (1) rewritten by result service (0)\",\n                    \"Input param \\\"expirationDate\\\" (2021-12-25) rewritten by result service (2022-07-16)\"\n                ]\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Coupon create is failed\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}\n.",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (500):",
+          "content": "HTTP/1.1 500 Internal Server Error\n{\n       \"status\": \"Failed\",\n       \"source\": {\n           \"type\": 1,\n           \"status\": 500\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": \"Failed\",\n       \"message\": \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\",\n       \"errors\": [\n             \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\"\n       ],\n       \"code\": 0,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CouponController.php",
+    "groupTitle": "Coupon"
   },
   {
     "type": "post",

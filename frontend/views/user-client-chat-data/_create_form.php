@@ -30,9 +30,9 @@ use dosamigos\datepicker\DatePicker;
                 ->textInput(['maxlength' => true, 'title' => 'Display name of the user', 'id' => 'rcName']) ?>
 
             <?php echo $form->field($model, 'uccd_username')
-                ->textInput(['maxlength' => true, 'title' => 'Username for the user', 'id' => 'rcUserName']) ?>
+                ->textInput(['maxlength' => true, 'title' => 'Username for the user', 'id' => 'rcUserName','autocomplete' => 'new-user']) ?>
 
-            <?php echo $form->field($model, 'uccd_password')->passwordInput(['maxlength' => true]) ?>
+            <?php echo $form->field($model, 'uccd_password')->passwordInput(['maxlength' => true, 'autocomplete' => 'new-password']) ?>
 
             <?php echo $form->field($model, 'uccd_chat_status_id')->dropDownList(UserClientChatData::getChatStatusList()) ?>
 

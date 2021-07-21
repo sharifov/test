@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\UserConnection;
+use sales\helpers\setting\SettingHelper;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
@@ -49,9 +50,11 @@ class FController extends Controller
 
             unset($user, $timezone);
 
-            if (isset(\Yii::$app->params['limitUserConnections']) && \Yii::$app->params['limitUserConnections'] > 0) {
+            $limitUserConnection = SettingHelper::getLimitUserConnection() ?: \Yii::$app->params['limitUserConnections'];
+
+            if ($limitUserConnection > 0) {
                 $countConnections = UserConnection::find()->where(['uc_user_id' => \Yii::$app->user->id])->count();
-                if ($countConnections > \Yii::$app->params['limitUserConnections'] && 'site/error' != \Yii::$app->controller->action->uniqueId) {
+                if ($countConnections > $limitUserConnection && 'site/error' != \Yii::$app->controller->action->uniqueId) {
                     throw new ForbiddenHttpException('Denied Access: You have too many connections (' . $countConnections . '). Close the old browser tabs and try again!');
                 }
             }

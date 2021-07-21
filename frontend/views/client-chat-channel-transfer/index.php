@@ -44,6 +44,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => ClientChatChannel::getList(),
             ],
+            [
+                'attribute' => 'channelProjectId',
+                'value' => static function (ClientChatChannelTransfer $model) {
+                    return $model->to->cccProject->name ?? null;
+                },
+                'filter' => \common\models\Project::getList()
+            ],
             ['class' => UserSelect2Column::class, 'attribute' => 'cctr_created_user_id', 'relation' => 'createdUser'],
             ['class' => DateTimeColumn::class, 'attribute' => 'cctr_created_dt'],
             ['class' => 'yii\grid\ActionColumn'],

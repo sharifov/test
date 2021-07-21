@@ -61,7 +61,7 @@ $pjaxId = 'pjax-create-credit-card'
 <!--                --><?php //= $form->field($model, 'cc_expiration_year')->dropDownList(array_combine($range, $range), ['prompt' => '-']) ?>
             </div>
             <div class="col-md-2">
-                <?= $form->field($model, 'cc_cvv')->passwordInput(['id' => 'cc_cvv', 'maxlength' => 4]) ?>
+                <?= $form->field($model, 'cc_cvv')->passwordInput(['id' => 'cc_cvv', 'maxlength' => 4, 'autocomplete' => 'new-password']) ?>
             </div>
         </div>
 

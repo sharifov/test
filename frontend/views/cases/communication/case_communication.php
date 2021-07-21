@@ -304,7 +304,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                     foreach ($clientEmails as $key => $element) {
                         $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element, $disableMasking);
                     }
-                        $clientPhones = $model->client ? $model->client->getPhoneNumbersSms() : [];
+                        $clientPhones = $model->client ? $model->client->getPhoneNumbersSms($disableMasking) : [];
 
                     if (Yii::$app->session->hasFlash('send-success')) {
                         echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';

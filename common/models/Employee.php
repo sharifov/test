@@ -14,6 +14,7 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\model\coupon\entity\couponSend\CouponSend;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\AccessCache;
 use sales\model\user\entity\ShiftTime;
@@ -83,6 +84,8 @@ use yii\web\NotFoundHttpException;
  * @property UserClientChatData $userClientChatData
  * @property UserOnline $userOnline
  * @property UserStatus $userStatus
+ * @property CouponSend[] $couponSend
+ *
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
  * @property int $callExpertCountByShiftTime
@@ -470,6 +473,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasOne(UserStatus::class, ['us_user_id' => 'id']);
     }
 
+    public function getCouponSend(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(CouponSend::class, ['cus_user_id' => 'id']);
+    }
 
     /**
      * @return ActiveQuery
@@ -2468,7 +2475,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         //$query->groupBy(['uo.uo_user_id']);
-        $query->orderBy(['us.us_gl_call_count' => SORT_ASC]);
+        $sort = self::getUsersForCallQueueSort($call);
+
+        $sortAttributes = [
+            'general_line_call_count' => 'us.us_gl_call_count',
+            'phone_ready_time' => 'us.us_phone_ready_time'
+        ];
+
+        if (!empty($sort)) {
+            foreach ($sort as $key => $item) {
+                if (isset($sortAttributes[$key])) {
+                    $query->addOrderBy([$sortAttributes[$key] => $item]);
+                }
+            }
+        } else {
+            $query->addOrderBy(['us.us_phone_ready_time' => SORT_ASC]);
+        }
 
         if ($limit > 0) {
             $query->limit($limit);
@@ -2786,5 +2808,24 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $list;
+    }
+
+    private static function getUsersForCallQueueSort(Call $call): array
+    {
+        if ($call->c_dep_id && $params = $call->cDep->getParams()) {
+            if ($params->queueDistribution->callDistributionSort && $params->queueDistribution->callDistributionSort->generalLineCallCount) {
+                $sort['general_line_call_count'] = $params->queueDistribution->callDistributionSort->generalLineCallCount;
+            }
+
+            if ($params->queueDistribution->callDistributionSort && $params->queueDistribution->callDistributionSort->phoneReadyTime) {
+                $sort['phone_ready_time'] = $params->queueDistribution->callDistributionSort->phoneReadyTime;
+            }
+
+            if (!empty($sort)) {
+                return $sort;
+            }
+        }
+        $sort = SettingHelper::getCallDistributionSort();
+        return $sort;
     }
 }

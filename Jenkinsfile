@@ -32,4 +32,26 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            wrap([$class: 'BuildUser']) {
+                mattermostSend(
+                    color: 'good',
+                    icon: "https://jenkins.io/images/logos/jenkins/jenkins.png",
+                    message: ":package: **CRM Sales**: <${env.BUILD_URL}console|${env.JOB_NAME}> #${env.BUILD_NUMBER} (*${currentBuild.currentResult}*) \nBranch: `${env.BRANCH_NAME}` \nRun by: ${env.BUILD_USER}",
+                    channel: "deploys",
+                    endpoint: "https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr"
+                )
+
+                mattermostSend(
+                    color: '#2A42EE',
+                    icon: "https://jenkins.io/images/logos/jenkins/jenkins.png",
+                    message: ":package: **CRM Sales**: <${env.BUILD_URL}console|${env.JOB_NAME}> #${env.BUILD_NUMBER} (*${currentBuild.currentResult}*) \nBranch: `${env.BRANCH_NAME}` \nRun by: ${env.BUILD_USER}",
+                    channel: "crm-developers",
+                    endpoint: "https://chat.travel-dev.com/hooks/sbchqikahidcuxjetpqjt3cp8h"
+                )
+            }
+        }
+    }
 }

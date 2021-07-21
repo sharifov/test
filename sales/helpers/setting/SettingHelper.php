@@ -370,4 +370,42 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['call_duration_seconds_gl_count'] ?? 20);
     }
+
+    public static function getCallDistributionSort(): array
+    {
+        $sort = [
+            'ASC' => SORT_ASC,
+            'DESC' => SORT_DESC
+        ];
+
+        $defaultSort = [
+            'general_line_call_count' => null,
+            'phone_ready_time' => $sort['ASC'],
+        ];
+
+        $callDistributionSort = Yii::$app->params['settings']['call_distribution_sort'] ?? [
+            'phone_ready_time' => $sort['ASC']
+        ];
+
+        $finalSort = [];
+
+        foreach ($callDistributionSort as $key => $item) {
+            $item = mb_strtoupper($item);
+
+            if (!empty($callDistributionSort[$key]) && array_key_exists($key, $defaultSort) && array_key_exists($item, $sort)) {
+                $finalSort[$key] = $sort[$item];
+            }
+        }
+
+        if (empty($finalSort['general_line_call_count'])) {
+            unset($finalSort['general_line_call_count']);
+        }
+
+        return $finalSort;
+    }
+
+    public static function getLimitUserConnection(): int
+    {
+        return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
+    }
 }

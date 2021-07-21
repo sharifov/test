@@ -2,6 +2,8 @@
 
 namespace sales\model\visitorSubscription\entity;
 
+use sales\entities\EventTrait;
+use sales\model\visitorSubscription\event\VisitorSubscriptionEnabled;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -18,6 +20,8 @@ use yii\db\ActiveRecord;
  */
 class VisitorSubscription extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public const SUBSCRIPTION_FLIZZARD = 1;
 
     public const SUBSCRIPTION_LIST_NAME = [
@@ -108,6 +112,7 @@ class VisitorSubscription extends \yii\db\ActiveRecord
     public function enabled(): void
     {
         $this->vs_enabled = 1;
+        $this->recordEvent(new VisitorSubscriptionEnabled($this->vs_subscription_uid));
     }
 
     public function disabled(): void

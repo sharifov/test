@@ -13,6 +13,7 @@ use sales\model\client\entity\events\ClientCreatedEvent;
 use sales\model\client\entity\events\ClientExcludedEvent;
 use sales\model\clientAccount\entity\ClientAccount;
 use sales\model\clientVisitor\entity\ClientVisitor;
+use sales\model\coupon\entity\couponClient\CouponClient;
 use thamtech\uuid\helpers\UuidHelper;
 use thamtech\uuid\validators\UuidValidator;
 use yii\behaviors\TimestampBehavior;
@@ -63,6 +64,7 @@ use yii\helpers\ArrayHelper;
  * @property Project|null $project
  * @property ClientAccount|null $clientAccount
  * @property ClientVisitor|null $clientVisitor
+ * @property CouponClient[] $couponClient
  *
  * @method clientPhonesByType(array $array)
  */
@@ -331,6 +333,11 @@ class Client extends ActiveRecord
         return $this->hasOne(ClientVisitor::class, ['cv_client_id' => 'id']);
     }
 
+    public function getCouponClient(): ActiveQuery
+    {
+        return $this->hasMany(CouponClient::class, ['cuc_client_id' => 'id']);
+    }
+
     public function beforeSave($insert): bool
     {
         if (!parent::beforeSave($insert)) {
@@ -418,13 +425,13 @@ class Client extends ActiveRecord
     /**
      * @return array
      */
-    public function getPhoneNumbersSms(): array
+    public function getPhoneNumbersSms($maskState = false): array
     {
         $phoneList = [];
         $phones = $this->clientPhones;
         if ($phones) {
             foreach ($phones as $phone) {
-                $phoneList[$phone->phone] = MaskPhoneHelper::masking($phone->phone) . ($phone->is_sms ? ' (sms)' : '');
+                $phoneList[$phone->phone] = MaskPhoneHelper::masking($phone->phone, $maskState) . ($phone->is_sms ? ' (sms)' : '');
             }
         }
         return $phoneList;

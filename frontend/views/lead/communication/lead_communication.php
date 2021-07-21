@@ -13,6 +13,7 @@
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
  * @var $unsubscribedEmails array
+ * @var $disableMasking bool
  */
 
 use common\models\Call;
@@ -86,8 +87,12 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
                         ],
                         'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
                         'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
-                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView) {
-                            return $this->render($listItemView, ['model' => $model, 'dataProvider' => $dataProvider]);
+                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView, $disableMasking) {
+                            return $this->render($listItemView, [
+                                    'model' => $model,
+                                    'dataProvider' => $dataProvider,
+                                    'disableMasking' => $disableMasking
+                                ]);
                         },
 
                         'itemOptions' => [
@@ -297,10 +302,10 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
                             $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
 
                             foreach ($clientEmails as $key => $element) {
-                                $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element);
+                                $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element, $disableMasking);
                             }
 
-                            $clientPhones = $leadForm->getClient()->getPhoneNumbersSms(); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
+                            $clientPhones = $leadForm->getClient()->getPhoneNumbersSms($disableMasking); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
 
                             if (Yii::$app->session->hasFlash('send-success')) {
                                 echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';

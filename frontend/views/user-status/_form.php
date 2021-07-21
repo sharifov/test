@@ -23,6 +23,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'us_has_call_access')->checkbox() ?>
 
+    <?= $form->field($model, 'us_phone_ready_time')->input('number') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

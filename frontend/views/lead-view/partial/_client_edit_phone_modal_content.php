@@ -15,8 +15,11 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
+use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use sales\auth\Auth;
 
-$user = Yii::$app->user->identity;
+$leadAbacDto = new LeadAbacDto($lead, Auth::id())
 ?>
 
 <div class="edit-phone-modal-content-ghj">
@@ -32,7 +35,8 @@ $user = Yii::$app->user->identity;
 
     <?= $form->errorSummary($editPhone); ?>
 
-    <?php if ($user->isAdmin() || $user->isSuperAdmin()) : ?>
+    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_PHONE_FROM_ADD_PHONE, LeadAbacObject::ACTION_ACCESS, Access Field Phone in form Edit Phone*/ ?>
+    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_PHONE_FORM_ADD_PHONE, LeadAbacObject::ACTION_UPDATE)) : ?>
         <?= $form->field($editPhone, 'phone', [
             'options' => [
                 'class' => 'form-group',
@@ -95,11 +99,19 @@ $('#client-edit-phone-form').on('beforeSubmit', function (e) {
             }
        },
        error: function (error) {
-            new PNotify({
-                title: 'Error',
-                text: 'Internal Server Error. Try again letter.',
-                type: 'error'                
-            });
+            if(error.status == 403) {
+                new PNotify({
+                    title: error.statusText,
+                    text: error.responseText,
+                    type: 'warning'                
+                });
+            } else {                
+                new PNotify({
+                    title: 'Error',
+                    text: 'Internal Server Error. Try again letter.',
+                    type: 'error'                
+                });
+            }
        }
     })
     return false;

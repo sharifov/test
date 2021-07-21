@@ -13,6 +13,7 @@ use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\phoneList\entity\PhoneList;
+use yii\db\Expression;
 
 class CurrentQueueCallsService
 {
@@ -387,6 +388,12 @@ class CurrentQueueCallsService
 
         foreach ($queue as $item) {
             $call = $item->cuaCall;
+
+            // this call is priority line call for this user
+            if ($call->c_source_type_id === Call::SOURCE_DIRECT_CALL && $call->c_created_user_id !== $item->cua_user_id) {
+                continue;
+            }
+
             $calls[] = new IncomingQueueCall([
                 'callSid' => $call->c_call_sid,
                 'conferenceSid' => $call->c_conference_sid,
@@ -505,7 +512,11 @@ class CurrentQueueCallsService
         }
 
         $queue = CallUserAccess::find()
-            ->select(['count(*) as count', Project::tableName() . '.name as project', 'dep_name as department'])
+            ->select([
+                'count(*) as count',
+                Project::tableName() . '.name as project',
+                'dep_name as department',
+            ])
             ->innerJoin(Call::tableName(), 'c_id = cua_call_id')
             ->innerJoin(Project::tableName(), 'c_project_id = ' . Project::tableName() . '.id')
             ->innerJoin(Department::tableName(), 'c_dep_id = dep_id')
@@ -513,7 +524,15 @@ class CurrentQueueCallsService
                 'cua_user_id' => $this->userId,
                 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
             ])
-            ->andWhere(['c_source_type_id' => [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]])
+            ->andWhere([
+                'OR',
+                ['c_source_type_id' => [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]],
+                [
+                    'AND',
+                    ['c_source_type_id' => [Call::SOURCE_DIRECT_CALL]],
+                    ['<>', 'c_created_user_id', new Expression('cua_user_id')],
+                ],
+            ])
             ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD])
             ->groupBy(['c_project_id', 'c_dep_id'])
             ->asArray()

@@ -14,9 +14,12 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
+use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use sales\auth\Auth;
 
-$user = Yii::$app->user->identity;
 $addEmail->client_id = $lead->client_id;
+$leadAbacDto = new LeadAbacDto($lead, Auth::id())
 ?>
 
 <div class="edit-email-modal-content-ghj">
@@ -32,7 +35,8 @@ $addEmail->client_id = $lead->client_id;
 
     <?= $form->errorSummary($addEmail) ?>
 
-    <?php if ($lead->isOwner($user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()) : ?>
+    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_EMAIL_FROM_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS, Access Field Email in form Add Email*/ ?>
+    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_EMAIL_FORM_ADD_EMAIL, LeadAbacObject::ACTION_CREATE)) : ?>
         <?=
         $form->field($addEmail, 'email', [
             'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
@@ -82,11 +86,19 @@ $('#client-add-email-form').on('beforeSubmit', function (e) {
             }
        },
        error: function (error) {
-            new PNotify({
-                title: 'Error',
-                text: 'Internal Server Error. Try again letter.',
-                type: 'error'                
-            });
+            if(error.status == 403) {
+                new PNotify({
+                    title: error.statusText,
+                    text: error.responseText,
+                    type: 'warning'                
+                });
+            } else {                
+                new PNotify({
+                    title: 'Error',
+                    text: 'Internal Server Error. Try again letter.',
+                    type: 'error'                
+                });
+            }
        }
     })
     return false;

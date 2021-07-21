@@ -22,6 +22,7 @@ use yii\db\ActiveRecord;
  * @property string|null $us_updated_dt
  *
  * @property Employee $usUser
+ * @property int $us_phone_ready_time [int]
  */
 class UserStatus extends ActiveRecord
 {
@@ -41,7 +42,7 @@ class UserStatus extends ActiveRecord
     public function rules()
     {
         return [
-            [['us_gl_call_count'], 'integer'],
+            [['us_gl_call_count', 'us_phone_ready_time'], 'integer'],
             [['us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'boolean'],
             [['us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'filter', 'filter' => 'boolval'],
             [['us_updated_dt'], 'safe'],
@@ -77,6 +78,7 @@ class UserStatus extends ActiveRecord
             'us_call_phone_status' => 'Call Phone Status',
             'us_is_on_call' => 'Is On Call',
             'us_has_call_access' => 'Has Call Access',
+            'us_phone_ready_time' => 'Phone Ready Time',
             'us_updated_dt' => 'Updated Dt',
         ];
     }
@@ -166,5 +168,10 @@ class UserStatus extends ActiveRecord
                 return false;
             }
         }
+    }
+
+    public function updatePhoneReadyTime(): void
+    {
+        $this->us_phone_ready_time = time();
     }
 }

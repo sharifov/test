@@ -4,7 +4,12 @@ namespace sales\model\coupon\entity\coupon;
 
 use common\models\Employee;
 use sales\entities\cases\Cases;
+use sales\entities\serializer\Serializable;
+use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\couponCase\CouponCase;
+use sales\model\coupon\entity\couponClient\CouponClient;
+use sales\model\coupon\entity\couponSend\CouponSend;
+use sales\model\coupon\entity\couponUse\CouponUse;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -24,7 +29,6 @@ use yii\db\ActiveRecord;
  * @property int|null $c_reusable_count
  * @property int|null $c_public
  * @property int|null $c_status_id
- * @property string|null $c_used_dt
  * @property int|null $c_disabled
  * @property int|null $c_type_id
  * @property string|null $c_created_dt
@@ -36,8 +40,11 @@ use yii\db\ActiveRecord;
  * @property Employee $updatedUser
  * @property Cases[] $cases
  * @property CouponCase[] $couponCases
+ * @property CouponUse[] $couponUse
+ * @property CouponClient[] $couponClient
+ * @property CouponSend[] $couponSend
  */
-class Coupon extends \yii\db\ActiveRecord
+class Coupon extends ActiveRecord implements Serializable
 {
     public function rules(): array
     {
@@ -73,8 +80,6 @@ class Coupon extends \yii\db\ActiveRecord
             ['c_type_id', 'required'],
             ['c_type_id', 'integer'],
             ['c_type_id', 'in', 'range' => array_keys(CouponType::getList())],
-
-            ['c_used_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -93,6 +98,7 @@ class Coupon extends \yii\db\ActiveRecord
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'c_created_user_id',
                 'updatedByAttribute' => 'c_updated_user_id',
+                'defaultValue' => null, /* TODO:: api handler */ /* */
             ],
         ];
     }
@@ -117,6 +123,21 @@ class Coupon extends \yii\db\ActiveRecord
         return $this->hasMany(CouponCase::class, ['cc_coupon_id' => 'c_id']);
     }
 
+    public function getCouponUse(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(CouponUse::class, ['cu_coupon_id' => 'c_id']);
+    }
+
+    public function getCouponClient(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(CouponClient::class, ['cuc_coupon_id' => 'c_id']);
+    }
+
+    public function getCouponSend(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(CouponSend::class, ['cus_coupon_id' => 'c_id']);
+    }
+
     public function isSend(): bool
     {
         return $this->c_status_id === CouponStatus::SEND;
@@ -136,7 +157,6 @@ class Coupon extends \yii\db\ActiveRecord
             'c_reusable_count' => 'Reusable Count',
             'c_public' => 'Public',
             'c_status_id' => 'Status',
-            'c_used_dt' => 'Used Dt',
             'c_disabled' => 'Disabled',
             'c_type_id' => 'Type',
             'c_created_dt' => 'Created Dt',
@@ -154,5 +174,10 @@ class Coupon extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return '{{%coupon}}';
+    }
+
+    public function serialize(): array
+    {
+        return (new CouponSerializer($this))->getData();
     }
 }

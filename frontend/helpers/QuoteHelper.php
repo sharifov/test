@@ -59,8 +59,8 @@ class QuoteHelper
                 data-toggle="tooltip"
                 data-html="true"
                 title="' . self::innerPenalties($penalties) . '">
-				    <i class="fa fa-expand"></i>
-			</span>';
+                    <i class="fa fa-expand"></i>
+            </span>';
         }
         return '';
     }
@@ -160,7 +160,7 @@ class QuoteHelper
 
     public static function checkPenaltiesInfo(array $penalties): bool
     {
-        return (!empty($penalties['exchange']) || !empty($penalties['refund']));
+        return (!empty($penalties['list']));
     }
 
     public static function getPenaltyTypeName(string $keyType): string
