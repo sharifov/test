@@ -1167,21 +1167,28 @@ class OneTimeController extends Controller
 
             $sql = '
                 select 
-                    lead_id as lead_id,
-                    lf_owner_id as owner_id,
+                    lead_id as result_lead_id,
+                    lf_owner_id as result_user_id,
                     case
                         when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take"
                         when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id is null then "Call Auto Take"
                         when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is not null and ll.employee_id != lf_owner_id then "Clone"
                         when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is null then "Manual"
                         when lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take Over"
-                    else null end as description,
-                    min(lead_flow.created) as created
+                    else null end as result_description,
+                    min(lead_flow.created) as result_created_dt
                 from lead_flow
                 left join leads l on l.id = lead_flow.lead_id
                 left join leads ll on ll.id = l.clone_id 
+                
+                LEFT JOIN lead_user_conversion 
+                    ON lead_user_conversion.luc_lead_id = lead_flow.lead_id AND lead_user_conversion.luc_user_id = lf_owner_id
+                
                 where 
                     lead_flow.created >= "2021-05-01 00:00:00" and lead_flow.created < "2021-06-21 09:46:00" 
+                    
+                    AND lead_user_conversion.luc_lead_id IS NULL
+                    
                     and
                     (
                         (lf_from_status_id = 1 and lead_flow.status = 2 and (lead_flow.employee_id = lf_owner_id or lead_flow.employee_id is null))
@@ -1190,7 +1197,7 @@ class OneTimeController extends Controller
                         OR
                         (lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id)
                     )
-                group by lead_id, owner_id, description';
+                group by result_lead_id, result_user_id, result_description';
 
             $result = Yii::$app->db->createCommand($sql)->queryAll();
 
