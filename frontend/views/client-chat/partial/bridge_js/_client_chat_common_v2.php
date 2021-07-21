@@ -746,6 +746,8 @@ reloadChat = function(chatData) {
         window.initChatDialog({
             rid: chatData.rid,
             readonly: chatData.readonly
+            server: '$server',
+            'apiServer': '$apiServer'
         });
         resolve(chatData);                  
     }); 
