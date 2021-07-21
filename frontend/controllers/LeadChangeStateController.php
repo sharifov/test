@@ -221,6 +221,9 @@ class LeadChangeStateController extends FController
                 Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionTrash::RuleException');
             } catch (\DomainException $e) {
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionTrash::Throwable');
+                Yii::$app->getSession()->setFlash('danger', 'Server error occurred');
             }
         } else {
             return $this->renderAjax('reason_trash', [
