@@ -132,10 +132,12 @@ $data = new OrderAbacDto(new Order());
     //                'placeholder' => 'Select User',
     //            ],
 
+            'or_sale_id',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'or_created_dt',
             ],
+
 //            [
 //                'class' => DateTimeColumn::class,
 //                'attribute' => 'or_updated_dt',
