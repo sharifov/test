@@ -176,6 +176,7 @@ return [
                     //'tokens' => ['{id}' => '<id:\\d+>']
                 ],
                 'health-check' => 'health/dummy',
+                'health-check/metrics' => 'health/dummy',
                 '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
