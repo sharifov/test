@@ -54,7 +54,7 @@ class FController extends Controller
 
             if ($limitUserConnection > 0) {
                 $countConnections = UserConnection::find()->where(['uc_user_id' => \Yii::$app->user->id])->count();
-                if ($countConnections > $limitUserConnection && 'site/error' != \Yii::$app->controller->action->uniqueId) {
+                if ($countConnections >= $limitUserConnection && 'site/error' != \Yii::$app->controller->action->uniqueId) {
                     throw new ForbiddenHttpException('Denied Access: You have too many connections (' . $countConnections . '). Close the old browser tabs and try again!');
                 }
             }
