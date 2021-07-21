@@ -106,4 +106,26 @@ class CouponApiCreateService
             throw new \DomainException($throwable->getMessage());
         }
     }
+
+    public static function paramsComparator(CouponCreateForm $couponCreateForm, CouponForm $couponForm): array
+    {
+        $warning = [];
+        if (($couponCreateForm->public !== null) && ((bool) $couponCreateForm->public !== (bool) $couponForm->public)) {
+            $warning[] =
+                'Input param "public" (' . (int) $couponCreateForm->public . ') rewritten by result service (' . (int) $couponForm->public . ')';
+        }
+        if (($couponCreateForm->reusable !== null) && ((bool) $couponCreateForm->reusable !== (bool) $couponForm->reusable)) {
+            $warning[] =
+                'Input param "reusable" (' . (int) $couponCreateForm->reusable . ') rewritten by result service (' . (int) $couponForm->reusable . ')';
+        }
+        if (!empty($couponCreateForm->expirationDate)) {
+            $inputExpirationDate = date('Y-m-d', strtotime($couponCreateForm->expirationDate));
+            $serviceExpirationDate = date('Y-m-d', strtotime($couponForm->exp_date));
+            if ($inputExpirationDate !== $serviceExpirationDate) {
+                $warning[] =
+                    'Input param "expirationDate" (' . $inputExpirationDate . ') rewritten by result service (' . $serviceExpirationDate . ')';
+            }
+        }
+        return $warning;
+    }
 }

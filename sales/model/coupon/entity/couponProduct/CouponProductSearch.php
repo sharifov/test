@@ -24,12 +24,14 @@ class CouponProductSearch extends CouponProduct
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['cup_coupon_id' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 

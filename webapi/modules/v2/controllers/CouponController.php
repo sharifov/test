@@ -12,7 +12,6 @@ use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\coupon\service\CouponService;
 use sales\model\coupon\entity\couponProduct\CouponProduct;
 use sales\model\coupon\entity\couponProduct\repository\CouponProductRepository;
-use sales\model\coupon\entity\couponProduct\service\CouponProductBaseService;
 use sales\model\coupon\entity\couponUse\CouponUse;
 use sales\model\coupon\entity\couponUse\repository\CouponUseRepository;
 use sales\model\coupon\entity\couponUserAction\CouponUserAction;
@@ -242,46 +241,21 @@ class CouponController extends BaseController
                 );
                 (new CouponUserActionRepository($couponUserAction))->save();
 
-                if ($couponCreateForm->product) {
-                    foreach ($couponCreateForm->product as $typeKey => $productFields) {
+                if ($couponCreateForm->getCouponProductServices()) {
+                    foreach ($couponCreateForm->getCouponProductServices() as $typeKey => $productFields) {
                         if (!$productType = ProductType::find()->byKey($typeKey)->enabled()->one()) {
                             throw new \DomainException('ProductType (' . $typeKey . ') not found');
                         }
-
-                        $couponProductBaseService = new CouponProductBaseService($typeKey);
-                        $couponProductService = $couponProductBaseService->initClass();
-                        $couponProductService->load($productFields);
-                        if (!$couponProductService->validate()) {
-                            throw new \DomainException('Product (' . $typeKey . ') ' .
-                                ErrorsToStringHelper::extractFromModel($couponProductService));
-                        }
-                        $productFieldsDecoded = JsonHelper::decode($productFields);
-                        $couponProduct = CouponProduct::create($coupon->c_id, $productType->pt_id, $productFieldsDecoded);
+                        $couponProduct = CouponProduct::create($coupon->c_id, $productType->pt_id, $productFields);
                         (new CouponProductRepository($couponProduct))->save();
                     }
                 }
-
                 return $coupon;
             });
 
             $dataMessage['coupon'] = $couponCreated->serialize();
             $dataMessage['serviceResponse'] = $couponAirSearch;
-            if (!empty($couponCreateForm->public) && ((bool) $couponCreateForm->public !== (bool) $couponForm->public)) {
-                $dataMessage['warning'][] =
-                    'Input param "public" (' . (int) $couponCreateForm->public . ') rewritten by result service (' . (int) $couponForm->public . ')';
-            }
-            if (!empty($couponCreateForm->reusable) && ((bool) $couponCreateForm->reusable !== (bool) $couponForm->reusable)) {
-                $dataMessage['warning'][] =
-                    'Input param "reusable" (' . (int) $couponCreateForm->reusable . ') rewritten by result service (' . (int) $couponForm->reusable . ')';
-            }
-            if (!empty($couponCreateForm->expirationDate)) {
-                $inputExpirationDate = date('Y-m-d', strtotime($couponCreateForm->expirationDate));
-                $serviceExpirationDate = date('Y-m-d', strtotime($couponForm->exp_date));
-                if ($inputExpirationDate !== $serviceExpirationDate) {
-                    $dataMessage['warning'][] =
-                        'Input param "expirationDate" (' . $inputExpirationDate . ') rewritten by result service (' . $serviceExpirationDate . ')';
-                }
-            }
+            $dataMessage['warning'] = CouponApiCreateService::paramsComparator($couponCreateForm, $couponForm);
         } catch (\DomainException $throwable) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
