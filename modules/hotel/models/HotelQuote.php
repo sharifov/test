@@ -565,4 +565,9 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
     {
         return ArrayHelper::getValue($this, 'hqProductQuote.pqOrder');
     }
+
+    public function getQuoteDetailsPageUrl(): string
+    {
+        return '/hotel/hotel-quote/ajax-quote-details';
+    }
 }
