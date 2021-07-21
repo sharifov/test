@@ -747,7 +747,8 @@ reloadChat = function(chatData) {
             rid: chatData.rid,
             readonly: chatData.readonly,
             server: '$server',
-            'apiServer': '$apiServer'
+            'apiServer': '$apiServer',
+            token: window.chatAgentToken
         });
         resolve(chatData);                  
     }); 
