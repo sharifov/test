@@ -21,6 +21,7 @@ use common\models\LeadFlow;
 use common\models\PhoneBlacklist;
 use common\models\Sms;
 use common\models\UserProjectParams;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
@@ -1161,6 +1162,8 @@ class OneTimeController extends Controller
         $fromDate = date("Y-m-01");
         $toDate = date("Y-m-d");
 
+        $result = [];
+
         try {
             $db = \Yii::$app->db;
             //$db->createCommand()->truncateTable(LeadUserConversion::tableName())->execute();
@@ -1201,18 +1204,31 @@ class OneTimeController extends Controller
 
             $result = Yii::$app->db->createCommand($sql)->queryAll();
 
-            $processed = $db->createCommand()
+            /*$processed = $db->createCommand()
                 ->batchInsert(
                     LeadUserConversion::tableName(),
                     ['luc_lead_id', 'luc_user_id', 'luc_description', 'luc_created_dt'],
                     $result
-                )->execute();
+                )->execute();*/
         } catch (\Throwable $throwable) {
             Yii::error(
                 AppHelper::throwableFormatter($throwable),
                 'OneTimeController:actionLeadUserConversion:Throwable'
             );
             echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+        }
+
+        foreach ($result as $value) {
+            $leadUserConversion = new LeadUserConversion();
+            $leadUserConversion->luc_lead_id = $value['result_lead_id'];
+            $leadUserConversion->luc_user_id = $value['result_user_id'];
+            $leadUserConversion->luc_description = $value['result_description'];
+            $leadUserConversion->luc_created_dt = $value['result_created_dt'];
+
+            if (!$leadUserConversion->save()) {
+                echo Console::renderColoredString('%r --- Not save : ' . ErrorsToStringHelper::extractFromModel($leadUserConversion) . ' %n'), PHP_EOL;
+                continue;
+            }
         }
 
         $time_end = microtime(true);
