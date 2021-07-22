@@ -31,7 +31,11 @@ use frontend\models\CasePreviewSmsForm;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
@@ -46,6 +50,7 @@ use sales\forms\cases\CasesLinkChatForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
@@ -112,6 +117,7 @@ use yii\widgets\ActiveForm;
  * @property TransactionManager $transaction
  * @property ClientChatActionPermission $chatActionPermission
  * @property UrlGenerator $fileStorageUrlGenerator
+ * @property OrderRepository $orderRepository
  */
 class CasesController extends FController
 {
@@ -130,6 +136,7 @@ class CasesController extends FController
     private $transaction;
     private $chatActionPermission;
     private UrlGenerator $fileStorageUrlGenerator;
+    private OrderRepository $orderRepository;
 
     public function __construct(
         $id,
@@ -149,6 +156,7 @@ class CasesController extends FController
         TransactionManager $transaction,
         ClientChatActionPermission $chatActionPermission,
         UrlGenerator $fileStorageUrlGenerator,
+        OrderRepository $orderRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -167,6 +175,7 @@ class CasesController extends FController
         $this->transaction = $transaction;
         $this->chatActionPermission = $chatActionPermission;
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
+        $this->orderRepository = $orderRepository;
     }
 
     public function behaviors(): array
@@ -868,66 +877,93 @@ class CasesController extends FController
         $hash = Yii::$app->request->post('h');
 
         try {
-            $transaction = Yii::$app->db->beginTransaction();
-            $model = $this->findModelByGid($gid);
+            $arr = explode('|', base64_decode($hash));
+            $saleId = (int) ($arr[1] ?? 0);
 
+            $model = $this->findModelByGid($gid);
+            if (CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleId])->exists()) {
+                throw new \RuntimeException('This sale (' . $saleId . ') exist in this Case Id ' . $model->cs_id);
+            }
             if (!Auth::can('cases/update', ['case' => $model])) {
                 throw new ForbiddenHttpException('Access denied.');
             }
 
-            $arr = explode('|', base64_decode($hash));
-            $id = (int)($arr[1] ?? 0);
-            $saleData = $this->casesSaleService->detailRequestToBackOffice($id, 0, 120, 1);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
+        } catch (\Throwable $throwable) {
+            Yii::info(AppHelper::throwableLog($throwable), 'info\CasesController::actionAddSale:RequestToBackOffice');
+            $out['error'] = $throwable->getMessage();
+            return $out;
+        }
 
-            $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
-            if ($cs) {
-                $out['error'] = 'This sale (' . $saleData['saleId'] . ') exist in this Case Id ' . $model->cs_id;
-            } else {
-                $cs = new CaseSale();
-                $cs->css_cs_id = $model->cs_id;
-                $cs->css_sale_id = $saleData['saleId'];
-                $cs->css_sale_data = $saleData;
-                $cs->css_sale_pnr = $saleData['pnr'] ?? null;
-                $cs->css_sale_created_dt = $saleData['created'] ?? null;
-                $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
-                $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
-                $cs->css_sale_data_updated = $cs->css_sale_data;
+        try {
+            $transaction = Yii::$app->db->beginTransaction();
 
-                $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
+            $cs = new CaseSale();
+            $cs->css_cs_id = $model->cs_id;
+            $cs->css_sale_id = $saleData['saleId'];
+            $cs->css_sale_data = $saleData;
+            $cs->css_sale_pnr = $saleData['pnr'] ?? null;
+            $cs->css_sale_created_dt = $saleData['created'] ?? null;
+            $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
+            $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
+            $cs->css_sale_data_updated = $cs->css_sale_data;
 
-                if (!$cs->save()) {
-                    Yii::error(VarDumper::dumpAsString($cs->errors) . ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
-                    throw new \RuntimeException($cs->getErrorSummary(false)[0]);
-                }
+            $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
-                if (empty($model->cs_order_uid)) {
-                    $model->cs_order_uid = $cs->css_sale_book_id;
-                    $out['caseBookingId'] = $model->cs_order_uid;
-                } elseif ($model->cs_order_uid !== $cs->css_sale_book_id) {
-                    $out['updateCaseBookingId'] = true;
-                    $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
-                        'caseBookingId' => $model->cs_order_uid,
-                        'saleBookingId' => $cs->css_sale_book_id,
-                        'caseId' => $model->cs_id,
-                        'saleId' => $cs->css_sale_id
-                    ]);
-                }
-                $this->casesRepository->save($model);
-                $this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
-
-                if ($client = $model->client) {
-                    $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
-                    $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
-                }
+            if (!$cs->save()) {
+                Yii::error(VarDumper::dumpAsString($cs->errors) . ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
+                throw new \RuntimeException($cs->getErrorSummary(false)[0]);
             }
 
-            $out['data'] = ['sale_id' => $saleData['saleId'], 'gid' => $gid, 'h' => $hash];
+            if (empty($model->cs_order_uid)) {
+                $model->cs_order_uid = $cs->css_sale_book_id;
+                $out['caseBookingId'] = $model->cs_order_uid;
+            } elseif ($model->cs_order_uid !== $cs->css_sale_book_id) {
+                $out['updateCaseBookingId'] = true;
+                $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
+                    'caseBookingId' => $model->cs_order_uid,
+                    'saleBookingId' => $cs->css_sale_book_id,
+                    'caseId' => $model->cs_id,
+                    'saleId' => $cs->css_sale_id
+                ]);
+            }
+
+            $this->casesRepository->save($model);
+            $this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
+
+            if ($client = $model->client) {
+                $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
+                $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
+            }
+
+            $out['data'] = ['sale_id' => $saleId, 'gid' => $gid, 'h' => $hash];
 
             $transaction->commit();
         } catch (\Throwable $exception) {
+            $transaction->rollBack();
             $out['error'] = $exception->getMessage();
             \Yii::info(VarDumper::dumpAsString($exception, 10), 'info\CasesController::actionAddSale:Exception');
-            $transaction->rollBack();
+        }
+
+        try {
+            if (empty($out['error']) && !empty($saleData)) {
+                if ($order = Order::findOne(['or_sale_id' => $saleId])) {
+                    /* TODO:: - update ? */
+                } else {
+                    $orderCreateFromSaleForm = OrderCreateFromSaleForm::fillForm($saleData);
+                    if (!$orderCreateFromSaleForm->validate()) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
+                    }
+                    $order = OrderCreateFromSaleService::create($orderCreateFromSaleForm, $saleId);
+                    $this->orderRepository->save($order);
+
+                    /* TODO:: product. flight + segments etc. */
+
+                }
+
+            }
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable), 'CasesController:actionAddSale:Order');
         }
 
         return $out;

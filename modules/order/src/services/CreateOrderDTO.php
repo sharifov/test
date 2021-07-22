@@ -20,30 +20,22 @@ use modules\order\src\entities\order\OrderStatus;
  * @property string|null $fareId
  * @property string|null $languageId
  * @property string|null $marketCountry
+ * @property int|null $saleId
  */
 class CreateOrderDTO
 {
     public $payStatus;
-
     public $status;
-
     public $leadId;
-
     public $requestData;
-
     public $clientCurrency;
-
     public $creationTypeId;
-
     public $requestId;
-
     public $projectId;
-
     public $fareId;
-
     public $languageId;
-
     public $marketCountry;
+    public $saleId;
 
     public function __construct(
         ?int $leadId,
@@ -55,7 +47,8 @@ class CreateOrderDTO
         ?int $status = OrderStatus::PENDING,
         ?string $fareId = null,
         ?string $languageId = null,
-        ?string $marketCountry = null
+        ?string $marketCountry = null,
+        ?int $saleId = null
     ) {
         $this->payStatus = OrderPayStatus::NOT_PAID;
         $this->status = $status;
@@ -68,5 +61,6 @@ class CreateOrderDTO
         $this->fareId = $fareId;
         $this->languageId = $languageId;
         $this->marketCountry = $marketCountry;
+        $this->saleId = $saleId;
     }
 }
