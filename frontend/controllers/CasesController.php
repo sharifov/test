@@ -84,6 +84,7 @@ use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -868,66 +869,72 @@ class CasesController extends FController
         $hash = Yii::$app->request->post('h');
 
         try {
-            $transaction = Yii::$app->db->beginTransaction();
-            $model = $this->findModelByGid($gid);
+            $arr = explode('|', base64_decode($hash));
+            $saleId = (int) ($arr[1] ?? 0);
 
+            $model = $this->findModelByGid($gid);
+            if (CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleId])->exists()) {
+                throw new \RuntimeException('This sale (' . $saleId . ') exist in this Case Id ' . $model->cs_id);
+            }
             if (!Auth::can('cases/update', ['case' => $model])) {
                 throw new ForbiddenHttpException('Access denied.');
             }
 
-            $arr = explode('|', base64_decode($hash));
-            $id = (int)($arr[1] ?? 0);
-            $saleData = $this->casesSaleService->detailRequestToBackOffice($id, 0, 120, 1);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
+        } catch (\Throwable $throwable) {
+            Yii::info(AppHelper::throwableLog($throwable), 'info\CasesController::actionAddSale:RequestToBackOffice');
+            $out['error'] = $throwable->getMessage();
+            return $out;
+        }
 
-            $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
-            if ($cs) {
-                $out['error'] = 'This sale (' . $saleData['saleId'] . ') exist in this Case Id ' . $model->cs_id;
-            } else {
-                $cs = new CaseSale();
-                $cs->css_cs_id = $model->cs_id;
-                $cs->css_sale_id = $saleData['saleId'];
-                $cs->css_sale_data = $saleData;
-                $cs->css_sale_pnr = $saleData['pnr'] ?? null;
-                $cs->css_sale_created_dt = $saleData['created'] ?? null;
-                $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
-                $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
-                $cs->css_sale_data_updated = $cs->css_sale_data;
+        $transaction = new Transaction(['db' => Yii::$app->db]);
+        try {
+            $cs = new CaseSale();
+            $cs->css_cs_id = $model->cs_id;
+            $cs->css_sale_id = $saleData['saleId'];
+            $cs->css_sale_data = $saleData;
+            $cs->css_sale_pnr = $saleData['pnr'] ?? null;
+            $cs->css_sale_created_dt = $saleData['created'] ?? null;
+            $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
+            $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
+            $cs->css_sale_data_updated = $cs->css_sale_data;
 
-                $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
+            $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
-                if (!$cs->save()) {
-                    Yii::error(VarDumper::dumpAsString($cs->errors) . ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
-                    throw new \RuntimeException($cs->getErrorSummary(false)[0]);
-                }
-
-                if (empty($model->cs_order_uid)) {
-                    $model->cs_order_uid = $cs->css_sale_book_id;
-                    $out['caseBookingId'] = $model->cs_order_uid;
-                } elseif ($model->cs_order_uid !== $cs->css_sale_book_id) {
-                    $out['updateCaseBookingId'] = true;
-                    $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
-                        'caseBookingId' => $model->cs_order_uid,
-                        'saleBookingId' => $cs->css_sale_book_id,
-                        'caseId' => $model->cs_id,
-                        'saleId' => $cs->css_sale_id
-                    ]);
-                }
-                $this->casesRepository->save($model);
-                $this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
-
-                if ($client = $model->client) {
-                    $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
-                    $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
-                }
+            if (empty($model->cs_order_uid)) {
+                $model->cs_order_uid = $cs->css_sale_book_id;
+                $out['caseBookingId'] = $model->cs_order_uid;
+            } elseif ($model->cs_order_uid !== $cs->css_sale_book_id) {
+                $out['updateCaseBookingId'] = true;
+                $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
+                    'caseBookingId' => $model->cs_order_uid,
+                    'saleBookingId' => $cs->css_sale_book_id,
+                    'caseId' => $model->cs_id,
+                    'saleId' => $cs->css_sale_id
+                ]);
             }
 
-            $out['data'] = ['sale_id' => $saleData['saleId'], 'gid' => $gid, 'h' => $hash];
+            $transaction->begin();
+
+            if (!$cs->save()) {
+                throw new \RuntimeException(VarDumper::dumpAsString($cs->errors) . ' Data: ' . VarDumper::dumpAsString($saleData));
+            }
+
+            $this->casesRepository->save($model);
+            $this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
+
+            if ($client = $model->client) {
+                $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
+                $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
+            }
 
             $transaction->commit();
+
+            $out['data'] = ['sale_id' => $saleId, 'gid' => $gid, 'h' => $hash];
         } catch (\Throwable $exception) {
-            $out['error'] = $exception->getMessage();
-            \Yii::info(VarDumper::dumpAsString($exception, 10), 'info\CasesController::actionAddSale:Exception');
             $transaction->rollBack();
+            $out['error'] = $exception->getMessage();
+            \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
         }
 
         return $out;
