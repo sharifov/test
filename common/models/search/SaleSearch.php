@@ -13,6 +13,7 @@ use yii\base\Exception;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
@@ -196,13 +197,10 @@ class SaleSearch extends Model
                 $result = $response->data;
                 if (isset($result['items']) && is_array($result['items'])) {
                     foreach ($result['items'] as $key => $item) {
-                        $leads = Lead::find()->select(['id', 'gid'])->where(['bo_flight_id' => $item['saleId']])->asArray()->all();
-                        $cases = Cases::find()->select(['cs_id', 'cs_gid'])
-                            ->leftJoin(CaseSale::tableName(), ['cs_id' => 'css_cs_id', 'css_sale_book_id' => $item['confirmationNumber']])
-                            ->where(['cs_order_uid' => $item['confirmationNumber']])
-                            ->asArray()->all();
-                        $result['items'][$key]['relatedLeads'] = $leads;
-                        $result['items'][$key]['relatedCases'] = $cases;
+                        $caseQuery = Cases::find()->select(['cs_id', 'cs_gid'])->where(['cs_order_uid' => $item['confirmationNumber']]);
+                        $caseSaleQuery = CaseSale::find()->select(['cs_id', 'cs_gid'])->innerJoin(Cases::tableName(), 'cs_id = css_cs_id')->where(['css_sale_book_id' => $item['confirmationNumber']]);
+                        $result['items'][$key]['relatedLeads'] = Lead::find()->select(['id', 'gid'])->where(['bo_flight_id' => $item['saleId']])->asArray()->all();
+                        $result['items'][$key]['relatedCases'] = $caseQuery->union($caseSaleQuery)->asArray()->all();
                     }
 
                     $searchData = $result['items'];
