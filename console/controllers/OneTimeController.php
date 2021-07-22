@@ -21,6 +21,7 @@ use common\models\LeadFlow;
 use common\models\PhoneBlacklist;
 use common\models\Sms;
 use common\models\UserProjectParams;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
@@ -1161,50 +1162,73 @@ class OneTimeController extends Controller
         $fromDate = date("Y-m-01");
         $toDate = date("Y-m-d");
 
+        $result = [];
+
         try {
             $db = \Yii::$app->db;
-            $db->createCommand()->truncateTable(LeadUserConversion::tableName())->execute();
+            //$db->createCommand()->truncateTable(LeadUserConversion::tableName())->execute();
 
             $sql = '
                 select 
-                    lead_id as luc_lead_id,
-                    lf_owner_id as luc_user_id,
+                    lead_id as result_lead_id,
+                    lf_owner_id as result_user_id,
                     case
                         when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take"
                         when lf_from_status_id = 1 and lead_flow.status = 2 and lead_flow.employee_id is null then "Call Auto Take"
                         when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is not null and ll.employee_id != lf_owner_id then "Clone"
-                        when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is null and ll.employee_id != lf_owner_id then "Manual"
+                        when lf_from_status_id is null and lead_flow.status = 2 and l.clone_id is null then "Manual"
                         when lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id then "Take Over"
-                    else null end as luc_description,
-                    min(lead_flow.created) as luc_created_dt
+                    else null end as result_description,
+                    min(lead_flow.created) as result_created_dt
                 from lead_flow
                 left join leads l on l.id = lead_flow.lead_id
                 left join leads ll on ll.id = l.clone_id 
+                
+                LEFT JOIN lead_user_conversion 
+                    ON lead_user_conversion.luc_lead_id = lead_flow.lead_id AND lead_user_conversion.luc_user_id = lf_owner_id
+                
                 where 
-                    l.created >= "2021-06-01" and lf_owner_id is not null and
+                    lead_flow.created >= "2021-05-01 00:00:00" and lead_flow.created < "2021-06-21 09:46:00" 
+                    
+                    AND lead_user_conversion.luc_lead_id IS NULL
+                    
+                    and
                     (
                         (lf_from_status_id = 1 and lead_flow.status = 2 and (lead_flow.employee_id = lf_owner_id or lead_flow.employee_id is null))
                         OR
-                        (lf_from_status_id is null and lead_flow.status = 2 and ll.employee_id != lf_owner_id)
+                        (lf_from_status_id is null and lead_flow.status = 2 and (ll.employee_id != lf_owner_id or l.clone_id is null) )
                         OR
                         (lf_from_status_id = 2 and lead_flow.status = 2 and lead_flow.employee_id = lf_owner_id)
                     )
-                group by luc_lead_id, luc_user_id, luc_description';
+                group by result_lead_id, result_user_id, result_description';
 
             $result = Yii::$app->db->createCommand($sql)->queryAll();
 
-            $processed = $db->createCommand()
+            /*$processed = $db->createCommand()
                 ->batchInsert(
                     LeadUserConversion::tableName(),
                     ['luc_lead_id', 'luc_user_id', 'luc_description', 'luc_created_dt'],
                     $result
-                )->execute();
+                )->execute();*/
         } catch (\Throwable $throwable) {
             Yii::error(
                 AppHelper::throwableFormatter($throwable),
                 'OneTimeController:actionLeadUserConversion:Throwable'
             );
             echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+        }
+
+        foreach ($result as $value) {
+            $leadUserConversion = new LeadUserConversion();
+            $leadUserConversion->luc_lead_id = $value['result_lead_id'];
+            $leadUserConversion->luc_user_id = $value['result_user_id'];
+            $leadUserConversion->luc_description = $value['result_description'];
+            $leadUserConversion->luc_created_dt = $value['result_created_dt'];
+
+            if (!$leadUserConversion->save()) {
+                echo Console::renderColoredString('%r --- Not save : ' . ErrorsToStringHelper::extractFromModel($leadUserConversion) . ' %n'), PHP_EOL;
+                continue;
+            }
         }
 
         $time_end = microtime(true);

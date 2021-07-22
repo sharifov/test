@@ -2,6 +2,9 @@
 
 namespace sales\services\lead;
 
+use sales\model\leadUserConversion\entity\LeadUserConversion;
+use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
+use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use Yii;
 use common\models\Call;
 use common\models\DepartmentPhoneProject;
@@ -154,9 +157,16 @@ class LeadRedialService
         $lead->answered();
         $lead->processing($user->id, $creatorId, 'Lead redial');
 
-        $this->transactionManager->wrap(function () use ($lead) {
+        $leadUserConversion = LeadUserConversion::create(
+            $lead->id,
+            $user->getId(),
+            LeadUserConversionDictionary::DESCRIPTION_TAKE
+        );
+
+        $this->transactionManager->wrap(function () use ($lead, $leadUserConversion) {
             $this->qCallService->remove($lead->id);
             $this->leadRepository->save($lead);
+            (new LeadUserConversionRepository())->save($leadUserConversion);
         });
     }
 
