@@ -955,12 +955,8 @@ class CasesController extends FController
                         throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
                     }
                     $order = OrderCreateFromSaleService::create($orderCreateFromSaleForm, $saleId);
-                    $this->orderRepository->save($order);
-
-                    /* TODO:: product. flight + segments etc. */
-
+                    $this->orderRepository->save($order); /* TODO:: product. flight + segments etc. */
                 }
-
             }
         } catch (\Throwable $throwable) {
             Yii::warning(AppHelper::throwableLog($throwable), 'CasesController:actionAddSale:Order');
