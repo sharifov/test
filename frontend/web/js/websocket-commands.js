@@ -417,8 +417,8 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                                 console.error('Error: reloadChatInfo - "data" required in "obj"');
                                 return;
                             }
-                            if (!('cchId' in obj.data) || !('message' in obj.data)) {
-                                console.error('Error: reloadChatInfo - "cchId" and "message" required in "obj.data"');
+                            if (!('cchId' in obj.data)) {
+                                console.error('Error: reloadChatInfo - "cchId" in "obj.data"');
                                 return;
                             }
 
@@ -427,7 +427,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                             if (activeChatId === cchId) {
                                 window.refreshChatInfo(cchId);
-                                createNotify('Warning', obj.data.message, 'warning');
+                                if (obj.data.message) {
+                                    createNotify('Warning', obj.data.message, 'warning');
+                                }
                             }
                         }
                     }

@@ -44,4 +44,15 @@ class ClientChatSocketCommands
             ['data' => ['chatId' => $chat->cch_id, 'leadId' => $leadId]]
         );
     }
+
+    public static function clientChatRefreshInfoBlock(int $chatId): void
+    {
+        Notifications::pub(
+            ['chat-' . $chatId],
+            'reloadChatInfo',
+            ['data' => [
+                'cchId' => $chatId
+            ]]
+        );
+    }
 }
