@@ -9,6 +9,7 @@ use sales\dto\email\EmailConfigsDTO;
 use sales\entities\cases\CaseCategory;
 use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
+use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 
 /**
@@ -72,7 +73,12 @@ class SendEmailOnCaseCreationBOJob extends BaseJob implements JobInterface
     {
         $emailConfigs = $project->getEmailConfigOnApiCaseCreate()[$caseCategory->cc_key] ?? null;
         if (!$emailConfigs) {
-            throw new \RuntimeException('Not Found email configs in project params by case category key (' . $caseCategory->cc_key . ')');
+            \Yii::error(VarDumper::dumpAsString([
+                'projectParams' => $project->p_params_json,
+                'categoryKey' => $caseCategory->cc_key,
+                'emailConfigs' => $emailConfigs
+            ]), 'SendEmailOnCaseCreationBOJob::getEmailConfigsDto');
+            throw new \RuntimeException('Not Found email configs in project(' . $project->name . ' - ' . $project->id . ') params by case category key (' . $caseCategory->cc_key . ')');
         }
         return new EmailConfigsDTO($emailConfigs);
     }
