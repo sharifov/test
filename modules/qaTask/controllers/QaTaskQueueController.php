@@ -64,7 +64,7 @@ class QaTaskQueueController extends FController
         return parent::beforeAction($action);
     }
 
-    public function actionSearch(): string
+    public function actionSearch()
     {
         $searchModel = QaTaskSearchSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
@@ -72,6 +72,9 @@ class QaTaskQueueController extends FController
             'userList' => $this->getAvailableUsers(),
             'queryAccessService' => $this->queryAccessService,
         ]));
+        if (Yii::$app->request->get('act') === 'select-all') {
+            return $this->asJson($searchModel->searchAsJson(Yii::$app->request->queryParams));
+        }
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('search', [

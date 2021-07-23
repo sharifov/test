@@ -16,6 +16,5 @@ use yii\helpers\Url;
         'data-url' => Url::to(['/qa-task/qa-task-action/user-assign', 'gid[]' => $model->t_gid]),
         'data-title' => 'Task [' . $model->t_id . '] User Assign',
         'data-modal-id' => 'modal-df',
-        'data-'
     ]
 );
