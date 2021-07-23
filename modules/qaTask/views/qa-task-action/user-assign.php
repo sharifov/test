@@ -1,7 +1,6 @@
 <?php
 
 /** @var \modules\qaTask\src\useCases\qaTask\userAssign\UserAssignForm $model */
-/** @var array $actionReasons */
 
 use common\models\Employee;
 use frontend\themes\gentelella_v2\widgets\FlashAlert;
@@ -31,8 +30,8 @@ $pjaxId = 'pjaxQaTaskUserAssign'
             ]
         ]) ?>
 
-        <?php if ($actionReasons) : ?>
-            <?= $form->field($model, 'actionId')->dropdownList($actionReasons, [
+        <?php if ($model->actionReasonsExists) : ?>
+            <?= $form->field($model, 'actionId')->dropdownList($model->actionReasons, [
                 'prompt' => '---',
             ]) ?>
 

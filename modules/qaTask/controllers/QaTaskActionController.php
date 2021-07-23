@@ -438,10 +438,7 @@ class QaTaskActionController extends FController
 
     public function actionUserAssign(): string
     {
-        $actionReasons = QaTaskActionReason::find()->select(['tar_name', 'tar_id'])->where(['tar_action_id' => QaTaskActions::USER_ASSIGN, 'tar_enabled' => 1])->indexBy('tar_id')->asArray()->column();
-
         $form = new UserAssignForm();
-        $form->actionReasonsExists = $actionReasons ? true : false;
 
         $form->gids = Yii::$app->request->get('gid', []);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
@@ -450,7 +447,7 @@ class QaTaskActionController extends FController
             return '<script>location.reload()</script>';
         }
 
-        return $this->renderAjax('user-assign', ['model' => $form, 'actionReasons' => $actionReasons]);
+        return $this->renderAjax('user-assign', ['model' => $form]);
     }
 
     /**
