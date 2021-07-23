@@ -2,6 +2,7 @@
 
 namespace modules\qaTask\controllers;
 
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelForm;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelService;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseForm;
@@ -14,10 +15,13 @@ use modules\qaTask\src\useCases\qaTask\decide\noAction\QaTaskDecideNoActionServi
 use modules\qaTask\src\useCases\qaTask\decide\QaTaskDecideService;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateForm;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateService;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\returnTask\toEscalate\QaTaskReturnToEscalateForm;
 use modules\qaTask\src\useCases\qaTask\returnTask\toEscalate\QaTaskReturnToEscalateService;
 use modules\qaTask\src\useCases\qaTask\returnTask\toPending\QaTaskReturnToPendingForm;
 use modules\qaTask\src\useCases\qaTask\returnTask\toPending\QaTaskReturnToPendingService;
+use modules\qaTask\src\useCases\qaTask\userAssign\UserAssignForm;
+use modules\qaTask\src\useCases\qaTask\userAssign\QaTaskUserAssignService;
 use Yii;
 use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\QaTask;
@@ -45,6 +49,7 @@ use yii\widgets\ActiveForm;
  * @property QaTaskDecideNoActionService $decideNoActionService
  * @property QaTaskDecideLeadReAssignService $decideLeadReAssignService
  * @property QaTaskDecideService $qaTaskDecideService
+ * @property QaTaskUserAssignService $qaTaskUserAssignService
  */
 class QaTaskActionController extends FController
 {
@@ -59,6 +64,7 @@ class QaTaskActionController extends FController
     private $decideNoActionService;
     private $decideLeadReAssignService;
     private $qaTaskDecideService;
+    private $qaTaskUserAssignService;
 
     public function __construct(
         $id,
@@ -74,6 +80,7 @@ class QaTaskActionController extends FController
         QaTaskDecideNoActionService $decideNoActionService,
         QaTaskDecideLeadReAssignService $decideLeadReAssignService,
         QaTaskDecideService $qaTaskDecideService,
+        QaTaskUserAssignService $qaTaskUserAssignService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -88,6 +95,7 @@ class QaTaskActionController extends FController
         $this->decideNoActionService = $decideNoActionService;
         $this->decideLeadReAssignService = $decideLeadReAssignService;
         $this->qaTaskDecideService = $qaTaskDecideService;
+        $this->qaTaskUserAssignService = $qaTaskUserAssignService;
     }
 
     public function behaviors(): array
@@ -105,6 +113,7 @@ class QaTaskActionController extends FController
                     'decide-no-action',
                     'decide-lead-send-to-redial-queue',
                     'decide-lead-re-assign',
+                    'user-assign'
                 ],
             ],
         ];
@@ -425,6 +434,23 @@ class QaTaskActionController extends FController
         return $this->renderAjax('decide-lead-re-assign', [
             'model' => $form
         ]);
+    }
+
+    public function actionUserAssign(): string
+    {
+        $actionReasons = QaTaskActionReason::find()->select(['tar_name', 'tar_id'])->where(['tar_action_id' => QaTaskActions::USER_ASSIGN, 'tar_enabled' => 1])->indexBy('tar_id')->asArray()->column();
+
+        $form = new UserAssignForm();
+        $form->actionReasonsExists = $actionReasons ? true : false;
+
+        $form->gids = Yii::$app->request->get('gid', []);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $this->qaTaskUserAssignService->handle($form, Auth::id());
+            \Yii::$app->session->addFlash('success', 'Success');
+            return '<script>location.reload()</script>';
+        }
+
+        return $this->renderAjax('user-assign', ['model' => $form, 'actionReasons' => $actionReasons]);
     }
 
     /**

@@ -39,7 +39,7 @@
         modal.find('.modal-body').load(url, function (response, status, xhr) {
             //$('#preloader').addClass('d-none');
             if (status == 'error') {
-                alert(response);
+                createNotify('Error', xhr.responseText, 'error');
             } else {
                 modal.modal({
                     // backdrop: 'static',

@@ -1216,7 +1216,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getList(): array
     {
-        return self::find()->select(['username', 'id'])->orderBy(['username' => SORT_ASC])->indexBy('id')->asArray()->column();
+        return self::find()->select(['username', 'id'])->orderBy(['username' => SORT_ASC])->indexBy('id')->cache(600)->asArray()->column();
     }
 
     /**
