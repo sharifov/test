@@ -20,6 +20,14 @@ class QaTaskRepository
         $this->eventDispatcher = $eventDispatcher;
     }
 
+    public function findByGid(string $gid): QaTask
+    {
+        if ($task = QaTask::findOne(['t_gid' => $gid])) {
+            return $task;
+        }
+        throw new NotFoundException('Qa Task is not found', QaTaskCodeException::QA_TASK_NOT_FOUND);
+    }
+
     public function find(int $id): QaTask
     {
         if ($task = QaTask::findOne($id)) {

@@ -13,5 +13,6 @@
 <?= $this->render('actions/cancel', ['model' => $model]) ?>
 <?= $this->render('actions/return', ['model' => $model]) ?>
 <?= $this->render('actions/decide', ['model' => $model]) ?>
+<?= $this->render('actions/user_assign', ['model' => $model]) ?>
 
 <?php
