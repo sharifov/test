@@ -1516,9 +1516,9 @@ class Quote extends \yii\db\ActiveRecord
         if ($quote) {
             $data = $quote->getQuoteInformationForExpert(true);
             BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
-            Yii::error('Not found Quote ID: ' . $this->id, 'Quote::sendUpdateBO');
             return true;
         }
+        Yii::error('Not found Quote ID: ' . $this->id, 'Quote::sendUpdateBO');
         return false;
     }
 
