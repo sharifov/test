@@ -80,7 +80,7 @@ class OrderRefund extends \yii\db\ActiveRecord
         return [
             [['orr_order_id', 'orr_uid'], 'required'],
             [['orr_order_id', 'orr_client_status_id', 'orr_status_id', 'orr_created_user_id', 'orr_updated_user_id'], 'integer'],
-            [['orr_selling_price', 'orr_penalty_amount', 'orr_processing_fee_amount', 'orr_charge_amount', 'orr_refund_amount', 'orr_client_currency_rate', 'orr_client_selling_price', 'orr_client_charge_amount', 'orr_client_refund_amount'], 'number'],
+            [['orr_selling_price', 'orr_penalty_amount', 'orr_processing_fee_amount', 'orr_charge_amount', 'orr_refund_amount', 'orr_client_currency_rate', 'orr_client_selling_price', 'orr_client_charge_amount', 'orr_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['orr_description'], 'string'],
             [['orr_expiration_dt', 'orr_created_dt', 'orr_updated_dt'], 'safe'],
 

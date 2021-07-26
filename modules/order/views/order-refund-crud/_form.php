@@ -19,15 +19,25 @@ use yii\widgets\ActiveForm;
 
       <?= $form->field($model, 'orr_order_id')->input('number') ?>
 
-      <?= $form->field($model, 'orr_selling_price')->input('number') ?>
+      <?= $form->field($model, 'orr_selling_price')->input('number', [
+          'step' => 'any',
+      ]) ?>
 
-      <?= $form->field($model, 'orr_penalty_amount')->input('number') ?>
+      <?= $form->field($model, 'orr_penalty_amount')->input('number', [
+          'step' => 'any',
+      ]) ?>
 
-      <?= $form->field($model, 'orr_processing_fee_amount')->input('number') ?>
+      <?= $form->field($model, 'orr_processing_fee_amount')->input('number', [
+          'step' => 'any',
+      ]) ?>
 
-      <?= $form->field($model, 'orr_charge_amount')->input('number') ?>
+      <?= $form->field($model, 'orr_charge_amount')->input('number', [
+          'step' => 'any',
+      ]) ?>
 
-      <?= $form->field($model, 'orr_refund_amount')->input('number') ?>
+      <?= $form->field($model, 'orr_refund_amount')->input('number', [
+          'step' => 'any',
+      ]) ?>
 
       <?= $form->field($model, 'orr_client_status_id')->dropDownList(OrderRefundClientStatus::getList(), [
           'prompt' => '---'
@@ -46,13 +56,21 @@ use yii\widgets\ActiveForm;
             'prompt' => '---'
         ]) ?>
 
-        <?= $form->field($model, 'orr_client_currency_rate')->input('number') ?>
+        <?= $form->field($model, 'orr_client_currency_rate')->input('number', [
+            'step' => 'any',
+        ]) ?>
 
-        <?= $form->field($model, 'orr_client_selling_price')->input('number') ?>
+        <?= $form->field($model, 'orr_client_selling_price')->input('number', [
+            'step' => 'any',
+        ]) ?>
 
-        <?= $form->field($model, 'orr_client_charge_amount')->input('number') ?>
+        <?= $form->field($model, 'orr_client_charge_amount')->input('number', [
+            'step' => 'any',
+        ]) ?>
 
-        <?= $form->field($model, 'orr_client_refund_amount')->input('number') ?>
+        <?= $form->field($model, 'orr_client_refund_amount')->input('number', [
+            'step' => 'any',
+        ]) ?>
 
         <?= $form->field($model, 'orr_description')->textarea(['rows' => 6]) ?>
 
