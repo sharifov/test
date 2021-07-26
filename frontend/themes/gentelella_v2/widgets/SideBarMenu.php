@@ -399,6 +399,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Lead Product Relation', 'url' => ['/lead-product-crud/index']],
                     ['label' => 'Order Contact', 'url' => ['/order/order-contact-crud/index']],
                     ['label' => 'Order Email', 'url' => ['/order/order-email-crud/index']],
+                    ['label' => 'Order Refund', 'url' => ['/order/order-refund-crud/index']],
                 ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],
