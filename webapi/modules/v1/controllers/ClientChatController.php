@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\models\ApiLog;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\linkCasesForm\LinkCasesForm;
 use sales\model\clientChat\useCase\linkLeadsForm\LinkLeadsForm;
@@ -376,6 +377,7 @@ class ClientChatController extends ApiBaseController
             try {
                 $clientChat = $this->clientChatRepository->findByRid($form->rid);
                 $result = $this->clientChatLeadMangeService->assignChatByLeadIds($form->leadIds, $clientChat->cch_id);
+                ClientChatSocketCommands::clientChatRefreshInfoBlock($clientChat->cch_id);
                 if ($result) {
                     return $this->endApiLog($apiLog, new SuccessResponse(
                         new StatusCodeMessage(200),
@@ -497,6 +499,7 @@ class ClientChatController extends ApiBaseController
             try {
                 $clientChat = $this->clientChatRepository->findByRid($form->rid);
                 $result = $this->clientChatCaseManageService->assignChatByCaseIds($form->caseIds, $clientChat->cch_id);
+                ClientChatSocketCommands::clientChatRefreshInfoBlock($clientChat->cch_id);
                 if ($result) {
                     return $this->endApiLog($apiLog, new SuccessResponse(
                         new StatusCodeMessage(200),

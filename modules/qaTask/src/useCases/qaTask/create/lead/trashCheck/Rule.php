@@ -44,7 +44,7 @@ class Rule
 
             Assert::notEmpty($params['qa_task_category_key'], 'QA Task Rule (lead_trash_check) has empty required field: qa_task_category_key');
         } catch (\Throwable $e) {
-            throw new \DomainException($e->getMessage());
+            throw new RuleException($e->getMessage());
         }
 
         $this->departments = $params['departments'];

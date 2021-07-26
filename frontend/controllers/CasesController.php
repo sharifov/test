@@ -89,6 +89,7 @@ use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -895,9 +896,8 @@ class CasesController extends FController
             return $out;
         }
 
+        $transaction = new Transaction(['db' => Yii::$app->db]);
         try {
-            $transaction = Yii::$app->db->beginTransaction();
-
             $cs = new CaseSale();
             $cs->css_cs_id = $model->cs_id;
             $cs->css_sale_id = $saleData['saleId'];
@@ -909,11 +909,6 @@ class CasesController extends FController
             $cs->css_sale_data_updated = $cs->css_sale_data;
 
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
-
-            if (!$cs->save()) {
-                Yii::error(VarDumper::dumpAsString($cs->errors) . ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
-                throw new \RuntimeException($cs->getErrorSummary(false)[0]);
-            }
 
             if (empty($model->cs_order_uid)) {
                 $model->cs_order_uid = $cs->css_sale_book_id;
@@ -928,6 +923,12 @@ class CasesController extends FController
                 ]);
             }
 
+            $transaction->begin();
+
+            if (!$cs->save()) {
+                throw new \RuntimeException(VarDumper::dumpAsString($cs->errors) . ' Data: ' . VarDumper::dumpAsString($saleData));
+            }
+
             $this->casesRepository->save($model);
             $this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
 
@@ -936,13 +937,13 @@ class CasesController extends FController
                 $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
             }
 
-            $out['data'] = ['sale_id' => $saleId, 'gid' => $gid, 'h' => $hash];
-
             $transaction->commit();
+
+            $out['data'] = ['sale_id' => $saleId, 'gid' => $gid, 'h' => $hash];
         } catch (\Throwable $exception) {
             $transaction->rollBack();
             $out['error'] = $exception->getMessage();
-            \Yii::info(VarDumper::dumpAsString($exception, 10), 'info\CasesController::actionAddSale:Exception');
+            \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
         }
 
         try {
