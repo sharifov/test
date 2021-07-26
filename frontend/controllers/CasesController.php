@@ -974,8 +974,6 @@ class CasesController extends FController
                     if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
                         $this->orderCreateFromSaleService->paymentCreate($authList, $orderId);
                     }
-
-
                 }
             }
         } catch (\Throwable $throwable) {
