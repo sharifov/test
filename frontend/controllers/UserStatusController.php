@@ -74,8 +74,12 @@ class UserStatusController extends FController
     {
         $model = new UserStatus();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->us_user_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->us_phone_ready_time = strtotime($model->us_phone_ready_dt);
+
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->us_user_id]);
+            }
         }
 
         return $this->render('create', [
@@ -94,9 +98,15 @@ class UserStatusController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->us_user_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->us_phone_ready_time = strtotime($model->us_phone_ready_dt);
+
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->us_user_id]);
+            }
         }
+
+        $model->us_phone_ready_dt = date('Y-m-d H:i:s', $model->us_phone_ready_time);
 
         return $this->render('update', [
             'model' => $model,

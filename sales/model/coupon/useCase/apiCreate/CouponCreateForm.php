@@ -2,6 +2,10 @@
 
 namespace sales\model\coupon\useCase\apiCreate;
 
+use common\components\validators\CheckJsonValidator;
+use modules\product\src\entities\productType\ProductType;
+use sales\helpers\ErrorsToStringHelper;
+use sales\model\coupon\entity\couponProduct\service\CouponProductBaseService;
 use yii\base\Model;
 
 /**
@@ -14,6 +18,9 @@ use yii\base\Model;
  * @property $reusableCount
  * @property $public
  * @property $reusable
+ * @property $product
+ *
+ * @property array $couponProductServices
  */
 class CouponCreateForm extends Model
 {
@@ -25,6 +32,9 @@ class CouponCreateForm extends Model
     public $reusableCount;
     public $public;
     public $reusable;
+    public $product;
+
+    private array $couponProductServices = [];
 
     public function rules(): array
     {
@@ -54,9 +64,10 @@ class CouponCreateForm extends Model
             ['reusableCount', 'integer'],
             ['reusableCount', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            [['reusable', 'public'], 'boolean'],
-            [['reusable', 'public'], 'default', 'value' => false],
-            [['reusable', 'public'], 'filter', 'filter' => 'boolval'],
+            [['reusable', 'public'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
+
+            ['product', CheckJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['product', 'checkProduct', 'skipOnEmpty' => true],
         ];
     }
 
@@ -64,6 +75,30 @@ class CouponCreateForm extends Model
     {
         if ($this->startDate && $this->expirationDate && ($this->startDate > $this->expirationDate)) {
             $this->addError($attribute, 'expirationDate must be older startDate');
+        }
+    }
+
+    public function checkProduct($attribute): void
+    {
+        foreach ($this->product as $typeKey => $productFields) {
+            if (!is_array($productFields) || empty($productFields)) {
+                $this->addError($attribute, 'Product error. Message: productFields must by array and not empty');
+                break;
+            }
+            if (!$productType = ProductType::find()->byKey($typeKey)->enabled()->one()) {
+                $this->addError($attribute, 'ProductType (' . $typeKey . ') not found');
+                break;
+            }
+
+            $couponProductBaseService = new CouponProductBaseService($typeKey);
+            $couponProductService = $couponProductBaseService->initClass();
+            $couponProductService->load($productFields);
+            if (!$couponProductService->validate()) {
+                $this->addError($attribute, 'Product (' . $typeKey . ') error. Message: ' .
+                    ErrorsToStringHelper::extractFromModel($couponProductService));
+                break;
+            }
+            $this->couponProductServices[$typeKey] = $couponProductService->getAttributes();
         }
     }
 
@@ -78,5 +113,10 @@ class CouponCreateForm extends Model
             return $this->currencyCode . $this->amount;
         }
         return null;
+    }
+
+    public function getCouponProductServices(): array
+    {
+        return $this->couponProductServices;
     }
 }

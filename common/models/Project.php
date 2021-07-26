@@ -76,7 +76,7 @@ use common\components\validators\IsArrayValidator;
  * @property ProjectRelation[] $projectRelations
  * @property ProjectRelation $projectMainRelation
  *
- * @property string|null $airSearchSid
+ * @property string|null $airSearchCid
  */
 class Project extends \yii\db\ActiveRecord
 {
@@ -262,9 +262,14 @@ class Project extends \yii\db\ActiveRecord
         return ArrayHelper::map($data, 'project_id', 'project.name');
     }
 
-    public function getAirSearchSid(): ?string
+    public function getAirSearchCid(): ?string
     {
-        return $this->p_params_json['airSearch']['sid'] ?? null;
+        return $this->p_params_json['airSearch']['cid'] ?? null;
+    }
+
+    public function getEmailConfigOnApiCaseCreate(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.sendEmailOnApiCaseCreate', []);
     }
 
     public static function getListByUserWithProjectKeys(int $user_id = 0): array

@@ -134,6 +134,7 @@ use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use sales\model\coupon\entity\coupon\service\CouponService;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\model\project\entity\projectLocale\ProjectLocaleScopes;
 use sales\repositories\client\ClientsQuery;
@@ -2161,24 +2162,6 @@ class TestController extends FController
 
     public function actionZ()
     {
-        $departmentPhone = DepartmentPhoneProject::findOne(11);
-        $client_phone_number = '+19374280853'; // '+19374280853'  +14145942152
-
-        try {
-            $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-            $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, Yii::createObject(CallService::class));
-            if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
-                $callFilterGuardService->runRepression([]);
-            }
-        } catch (CallDeclinedException $e) {
-            \Yii::warning($e->getMessage(), 'CommunicationController:voiceIncoming:callTerminate');
-            $vr = new VoiceResponse();
-            $vr->reject(['reason' => 'busy']);
-            CallFilterGuardService::getResponseChownData($vr, 404, 404, $e->getMessage());
-        } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:voiceIncoming:CallFilterGuardService');
-        }
-
         return $this->render('z');
     }
 

@@ -512,6 +512,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Coupon Client', 'url' => ['/coupon-client-crud/index'], 'icon' => 'list'],
                         ['label' => 'Coupon Send', 'url' => ['/coupon-send-crud/index'], 'icon' => 'list'],
                         ['label' => 'Coupon Product', 'url' => ['/coupon-product-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Coupon User Action', 'url' => ['/coupon-user-action-crud/index'], 'icon' => 'list'],
                     ],
                 ],
                 [
@@ -693,6 +694,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ]
         ];
 
+        $menuItems[] = ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'];
+
         $menuItems[] = [
             'label' => 'Stats & Reports',
             'url' => 'javascript:',
@@ -727,7 +730,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
-                ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'],
             ]
         ];
 

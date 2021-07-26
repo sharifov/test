@@ -56,7 +56,8 @@ class CreditCardForm extends Model
             [['cc_expiration'], 'validateDateFormat'],
             [['cc_expiration'], 'parseDate'],
             [['cc_holder_name'], 'string', 'max' => 50],
-            [['cc_cvv'], 'string', 'max' => 4],
+            [['cc_cvv'], 'string', 'skipOnEmpty' => true],
+            [['cc_cvv'], 'string', 'min' => 3, 'max' => 4],
         ];
     }
 

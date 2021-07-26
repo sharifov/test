@@ -58,8 +58,8 @@ class AppHelper
         int $typeCodeDelimiter = 0
     ): void {
         $errorMessage = $formatted ?
-            self::throwableFormatter($throwable) :
-            VarDumper::dumpAsString($throwable, 20);
+            self::throwableLog($throwable) :
+            self::throwableFormatter($throwable);
 
         if ($throwable->getCode() < $typeCodeDelimiter) {
             Yii::info($errorMessage, 'info\\' . $category);

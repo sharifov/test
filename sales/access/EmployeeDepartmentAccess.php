@@ -7,6 +7,7 @@ use common\models\Department;
 use common\models\Employee;
 use sales\helpers\user\UserFinder;
 use common\models\query\UserDepartmentQuery;
+use yii\db\ActiveQuery;
 
 class EmployeeDepartmentAccess
 {
@@ -103,5 +104,26 @@ class EmployeeDepartmentAccess
             }
         }
         return false;
+    }
+
+    /**
+     * @param int $userId
+     * @param int $cacheDuration // Cache disable = "-1"
+     * @return ActiveQuery
+     *
+     * Ex.
+     * $lead = lead::find()->andWhere(['employee_id' => EmployeeDepartmentAccess::usersIdsInCommonDepartmentsSubQuery($userId)])->all();
+     */
+    public static function usersIdsInCommonDepartmentsSubQuery(int $userId, int $cacheDuration = -1): ActiveQuery
+    {
+        return UserDepartment::find()
+            ->select('related_users.ud_user_id')
+            ->innerJoin(
+                UserDepartment::tableName() . ' AS related_users',
+                UserDepartment::tableName() . '.ud_dep_id = related_users.ud_dep_id'
+            )
+            ->where([UserDepartment::tableName() . '.ud_user_id' => $userId])
+            ->groupBy('related_users.ud_user_id')
+            ->cache($cacheDuration);
     }
 }

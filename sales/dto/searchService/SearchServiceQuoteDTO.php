@@ -52,7 +52,7 @@ class SearchServiceQuoteDTO
 
         $this->cabin = SearchService::getCabinRealCode($lead->cabin);
 
-        $sid = $lead->project->airSearchSid ?? null;
+        $sid = $lead->project->airSearchCid ?? null;
         $this->cid = $sid ?: \Yii::$app->params['search']['sid'];
         $this->adt = $lead->adults;
         $this->chd = $lead->children;

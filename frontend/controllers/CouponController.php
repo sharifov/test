@@ -23,6 +23,7 @@ use Yii;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\search\CouponSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -199,6 +200,8 @@ class CouponController extends FController
                     $result = $this->sendCouponsService->preview($form, $case, Auth::user());
 
                     if ($result['error']) {
+                        $result['error'] = @Json::decode($result['error']);
+                        $form->addError('general', 'Communication service error: ' . ($result['error']['name'] ?? '') . ' ( ' . ($result['error']['message']  ?? '') . ' )');
                     } else {
                         $previewEmailForm = new CaseCouponPreviewEmailForm($result['data']);
                         $previewEmailForm->e_email_from_name = Auth::user()->nickname;

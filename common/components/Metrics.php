@@ -2,6 +2,7 @@
 
 namespace common\components;
 
+use kivork\PrometheusClient\components\PrometheusClient;
 use Prometheus\CollectorRegistry;
 use Prometheus\Counter;
 use Prometheus\Gauge;
@@ -16,10 +17,12 @@ use yii\helpers\Inflector;
  * Class Metrics
  * @package common\components
  *
- * @property CollectorRegistry $registry
+ * @property CollectorRegistry|null $registry
  * @property Counter[] $counterList
  * @property Histogram[] $histogramList
  * @property Gauge[] $gaugeList
+ * @property bool $isMetricsEnabled
+ * @property array $defaultBuckets
  */
 class Metrics extends Component
 {
@@ -31,7 +34,7 @@ class Metrics extends Component
     private array $counterList = [];
     private array $histogramList = [];
     private array $gaugeList = [];
-    private CollectorRegistry $registry;
+    private ?CollectorRegistry $registry;
     private bool $isMetricsEnabled = false;
     private array $defaultBuckets = [0.2, 0.4, 0.6, 0.8, 1, 3, 5, 7, 10, 15];
 
@@ -53,7 +56,7 @@ class Metrics extends Component
      */
     public function jobCounter(string $name, array $labels = [], int $value = 1): void
     {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $name = strtolower($name);
             $keyName = 'job_' . $name . '_cnt';
             try {
@@ -81,7 +84,7 @@ class Metrics extends Component
      */
     public function jobGauge(string $name, float $value, array $labels = []): void
     {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $name = strtolower($name);
             $keyName = 'job_' . $name;
             try {
@@ -109,7 +112,7 @@ class Metrics extends Component
      */
     public function jobHistogram(string $name, float $value, array $labels = []): void
     {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $name = strtolower($name);
             $keyName = 'job_' . $name;
             try {
@@ -138,7 +141,7 @@ class Metrics extends Component
      */
     public function serviceCounter(string $name, array $labels = [], int $value = 1): void
     {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $name = strtolower($name);
             $keyName = 'service_' . $name . '_cnt';
             try {
@@ -166,7 +169,7 @@ class Metrics extends Component
         string $prefix = '',
         int $value = 1
     ): void {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $labels = self::prepareLabels($labels);
             try {
                 $counter = $this->registry->getOrRegisterCounter(
@@ -193,7 +196,7 @@ class Metrics extends Component
         string $prefix = '',
         array $buckets = []
     ): void {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $histogramBuckets = !empty($buckets) ? $buckets : $this->getDefaultBuckets();
             $labels = self::prepareLabels($labels);
 
@@ -222,7 +225,7 @@ class Metrics extends Component
         array $labels = [],
         string $prefix = ''
     ): void {
-        if ($this->isMetricsEnabled) {
+        if ($this->isInitialized()) {
             $labels = self::prepareLabels($labels, true);
             try {
                 $gauge = $this->registry->getOrRegisterGauge(
@@ -329,5 +332,47 @@ class Metrics extends Component
     public function getDefaultBuckets(): array
     {
         return $this->defaultBuckets;
+    }
+
+    private function isInitialized(): bool
+    {
+        if (!$this->isMetricsEnabled) {
+            return false;
+        }
+        if ($this->checkRegistry($this->registry)) {
+            return true;
+        }
+        if ($this->checkRegistry($this->reInitRegistry())) {
+            return true;
+        }
+        return false;
+    }
+
+    private function checkRegistry($registry): bool
+    {
+        return !empty($registry) && $registry instanceof CollectorRegistry;
+    }
+
+    private function reInitRegistry(): ?CollectorRegistry
+    {
+        try {
+            $prometheusOrig = \Yii::$app->prometheus;
+            $redisOptions = $prometheusOrig->redisOptions;
+            $redisOptions['prefix'] = php_uname('n');
+            $objectParams = [
+                'class' => PrometheusClient::class,
+                'redisOptions' => $redisOptions,
+                'useHttpBasicAuth' => $prometheusOrig->useHttpBasicAuth,
+                'authUsername' => $prometheusOrig->authUsername,
+                'authPassword' => $prometheusOrig->authPassword,
+            ];
+
+            $prometheus = \Yii::createObject($objectParams);
+            $this->registry = $prometheus->registry;
+            return $this->registry;
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:reInitRegistry');
+        }
+        return null;
     }
 }

@@ -67,10 +67,10 @@ class QuoteTrip extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['qt_duration', 'qt_quote_id'], 'integer'],
+            [['qt_quote_id'], 'integer'],
             [['qt_key'], 'string', 'max' => 255],
             [['qt_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['qt_quote_id' => 'id']],
-
+            ['qt_duration', 'integer', 'min' => 0, 'message' => 'Can not add Quote with negative segment duration'],
             //['qt_duration', 'integer', 'min' => - 60 * 24, 'message' => 'Duration must be no less than ' . - 60 * 24 . ' min (24h)'],
         ];
     }

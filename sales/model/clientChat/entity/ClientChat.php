@@ -441,7 +441,7 @@ class ClientChat extends \yii\db\ActiveRecord
         $this->recordEvent(new ClientChatTransferEvent(
             $this->cch_id,
             (int)$this->cch_status_id,
-            (int)$this->cch_owner_user_id,
+            $this->cch_owner_user_id,
             $userId,
             $description,
             (int)$this->cch_channel_id,

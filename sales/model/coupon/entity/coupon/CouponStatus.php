@@ -10,17 +10,26 @@ class CouponStatus
     public const SEND = 2;
     public const USED = 3;
     public const CANCEL = 4;
+    public const IN_PROGRESS = 5;
+
+    public const VALID_STATUS_LIST = [
+        self::NEW,
+        self::SEND,
+        self::IN_PROGRESS,
+    ];
 
     private const LIST = [
         self::NEW => 'New',
         self::SEND => 'Send',
         self::USED => 'Used',
         self::CANCEL => 'Cancel',
+        self::IN_PROGRESS => 'In Progress',
     ];
 
     private const CLASS_LIST = [
         self::NEW => 'info',
         self::SEND => 'warning',
+        self::IN_PROGRESS => 'warning',
         self::USED => 'success',
         self::CANCEL => 'success',
     ];

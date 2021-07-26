@@ -8,6 +8,7 @@ use sales\entities\serializer\Serializable;
 use sales\model\coupon\entity\coupon\serializer\CouponSerializer;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\entity\couponClient\CouponClient;
+use sales\model\coupon\entity\couponProduct\CouponProduct;
 use sales\model\coupon\entity\couponSend\CouponSend;
 use sales\model\coupon\entity\couponUse\CouponUse;
 use Yii;
@@ -35,6 +36,7 @@ use yii\db\ActiveRecord;
  * @property string|null $c_updated_dt
  * @property int|null $c_created_user_id
  * @property int|null $c_updated_user_id
+ * @property int $c_used_count
  *
  * @property Employee $createdUser
  * @property Employee $updatedUser
@@ -43,6 +45,7 @@ use yii\db\ActiveRecord;
  * @property CouponUse[] $couponUse
  * @property CouponClient[] $couponClient
  * @property CouponSend[] $couponSend
+ * @property CouponProduct[] $CouponProduct
  */
 class Coupon extends ActiveRecord implements Serializable
 {
@@ -80,6 +83,9 @@ class Coupon extends ActiveRecord implements Serializable
             ['c_type_id', 'required'],
             ['c_type_id', 'integer'],
             ['c_type_id', 'in', 'range' => array_keys(CouponType::getList())],
+
+            ['c_used_count', 'integer'],
+            ['c_used_count', 'default', 'value' => 0],
         ];
     }
 
@@ -98,7 +104,7 @@ class Coupon extends ActiveRecord implements Serializable
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'c_created_user_id',
                 'updatedByAttribute' => 'c_updated_user_id',
-                'defaultValue' => null, /* TODO:: api handler */ /* */
+                'defaultValue' => null,
             ],
         ];
     }
@@ -138,9 +144,24 @@ class Coupon extends ActiveRecord implements Serializable
         return $this->hasMany(CouponSend::class, ['cus_coupon_id' => 'c_id']);
     }
 
+    public function getCouponProduct(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(CouponProduct::class, ['cup_coupon_id' => 'c_id']);
+    }
+
     public function isSend(): bool
     {
         return $this->c_status_id === CouponStatus::SEND;
+    }
+
+    public function isUsed(): bool
+    {
+        return $this->c_status_id === CouponStatus::USED;
+    }
+
+    public function isInProgress(): bool
+    {
+        return $this->c_status_id === CouponStatus::IN_PROGRESS;
     }
 
     public function attributeLabels(): array
@@ -163,6 +184,7 @@ class Coupon extends ActiveRecord implements Serializable
             'c_updated_dt' => 'Updated Dt',
             'c_created_user_id' => 'Created User',
             'c_updated_user_id' => 'Updated User',
+            'c_used_count' => 'Used count',
         ];
     }
 
@@ -179,5 +201,23 @@ class Coupon extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new CouponSerializer($this))->getData();
+    }
+
+    public function usedCountIncrement(): Coupon
+    {
+        $this->c_used_count ++;
+        return $this;
+    }
+
+    public function statusUsed(): Coupon
+    {
+        $this->c_status_id = CouponStatus::USED;
+        return $this;
+    }
+
+    public function statusInProgress(): Coupon
+    {
+        $this->c_status_id = CouponStatus::IN_PROGRESS;
+        return $this;
     }
 }

@@ -156,41 +156,41 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width: 250px;white-space: normal;',
             ]
         ],
-        [
-            // 'attribute' => 'client_id',
-            'header' => 'Client',
-            'format' => 'raw',
-            'value' => static function (\common\models\Lead $model) use ($isAgent) {
-                if ($model->client) {
-                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
-                    if ($clientName === 'Client Name') {
-                        $clientName = '- - - ';
-                    } else {
-                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
-                    }
-
-                    if ($model->client->isExcluded()) {
-                        $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
-                    }
-                } else {
-                    $clientName = '-';
-                }
-
-                /*if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                    $emails = '- // - // - // -';
-                    $phones = '- // - // - // -';
-                } else {
-                    $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-                }*/
-
-                return $clientName /* . '<br/>' . $emails . '<br/>' . $phones*/;
-            },
-            'contentOptions' => [
-                'style' => 'width: 200px;'
-            ]
-            // 'filter' => \common\models\Employee::getList()
-        ],
+//        [
+//            // 'attribute' => 'client_id',
+//            'header' => 'Client',
+//            'format' => 'raw',
+//            'value' => static function (\common\models\Lead $model) use ($isAgent) {
+//                if ($model->client) {
+//                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+//                    if ($clientName === 'Client Name') {
+//                        $clientName = '- - - ';
+//                    } else {
+//                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+//                    }
+//
+//                    if ($model->client->isExcluded()) {
+//                        $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
+//                    }
+//                } else {
+//                    $clientName = '-';
+//                }
+//
+//                /*if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
+//                    $emails = '- // - // - // -';
+//                    $phones = '- // - // - // -';
+//                } else {
+//                    $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+//                    $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+//                }*/
+//
+//                return $clientName /* . '<br/>' . $emails . '<br/>' . $phones*/;
+//            },
+//            'contentOptions' => [
+//                'style' => 'width: 200px;'
+//            ]
+//            // 'filter' => \common\models\Employee::getList()
+//        ],
         [
             'label' => 'Destination',
             'value' => static function (\common\models\Lead $model) {

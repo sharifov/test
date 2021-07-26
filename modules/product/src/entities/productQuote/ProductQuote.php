@@ -99,12 +99,15 @@ use yii\db\ActiveRecord;
  * @property ProductQuote|null $relateParent
  *
  * @property Quotable|null $childQuote
+ * @property string|null $detailsPageUrl
  */
 class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
 
     private $childQuote;
+
+    private ?string $detailsPageUrl = null;
 
     private ?bool $isQuoteAlternative = null;
     private ?bool $isQuoteOrigin = null;
@@ -883,5 +886,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isOrigin(): bool
     {
         return $this->isQuoteOrigin ?? ($this->isQuoteOrigin = ProductQuoteRelationQuery::isOriginQuoteExists($this->pq_id));
+    }
+
+    public function getQuoteDetailsPageUrl()
+    {
+        if ($this->detailsPageUrl !== null) {
+            return $this->detailsPageUrl;
+        }
+
+        $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getQuoteDetailsPageUrl'];
+        $this->detailsPageUrl = $finder();
+        return $this->detailsPageUrl;
     }
 }

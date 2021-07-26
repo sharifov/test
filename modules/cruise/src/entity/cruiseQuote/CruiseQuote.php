@@ -134,4 +134,9 @@ class CruiseQuote extends \yii\db\ActiveRecord implements Quotable
 //        }
         return $result;
     }
+
+    public function getQuoteDetailsPageUrl(): string
+    {
+        return '/cruise/cruise-quote/ajax-quote-details';
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use common\components\i18n\Formatter;
 use common\models\Client;
 use frontend\widgets\clientChat\ClientChatClientInfoWidget;
 use modules\offer\src\entities\offer\OfferQuery;
@@ -35,6 +36,8 @@ $chatCounter = new ClientChatCounter($client->id);
 
 $chatSendQuoteListUrl = Url::toRoute('/client-chat/send-quote-list');
 $chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
+$formatter = new Formatter();
+$formatter->timeZone = Auth::user()->timezone;
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
@@ -56,8 +59,8 @@ $chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
                 <?= Html::encode($clientChat->cchChannel ? $clientChat->cchChannel->ccc_name : '-'); ?>
                 <br>
                 <small title="Created date & time">
-                    <i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDate($clientChat->cch_created_dt, 'php:F d Y'); ?> &nbsp;&nbsp;
-                    <i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asDate($clientChat->cch_created_dt, 'php:H:i'); ?> &nbsp;&nbsp;
+                    <i class="fa fa-calendar"></i> <?= $formatter->asDatetime($clientChat->cch_created_dt, 'php:F d Y'); ?> &nbsp;&nbsp;
+                    <i class="fa fa-clock-o"></i> <?= $formatter->asDatetime($clientChat->cch_created_dt, 'php:H:i') ?> &nbsp;&nbsp;
                     <span title="Owner"><i class="fa fa-user"></i> <?= $clientChat->cchOwnerUser ? Html::encode($clientChat->cchOwnerUser->username) : '-'; ?></span>
                 </small>
             </div>

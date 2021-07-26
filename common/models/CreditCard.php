@@ -107,6 +107,7 @@ class CreditCard extends ActiveRecord
             [['cc_display_number'], 'string', 'max' => 18],
             [['cc_holder_name'], 'string', 'max' => 50],
             [['cc_bo_link'], 'string', 'max' => 255],
+            [['cc_cvv'], 'string', 'skipOnEmpty' => true],
             [['cc_cvv', 'cc_security_hash'], 'string', 'max' => 32],
             [['cc_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cc_created_user_id' => 'id']],
             [['cc_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cc_updated_user_id' => 'id']],

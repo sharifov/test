@@ -9,6 +9,7 @@ use yii\helpers\ArrayHelper;
  * Class CouponProductBaseService
  *
  * @property array $classMap
+ * @property string $productType
  */
 class CouponProductBaseService
 {

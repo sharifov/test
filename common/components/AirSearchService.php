@@ -34,6 +34,8 @@ class AirSearchService extends Component
     public array $options = [CURLOPT_ENCODING => 'gzip'];
     public Request $request;
 
+    private const CURL_TIMEOUT_SECONDS = 30;
+
     public function init(): void
     {
         parent::init();
@@ -237,7 +239,9 @@ class AirSearchService extends Component
     public function searchQuotes(array $params, string $method = 'GET'): array
     {
         $result = ['data' => [], 'error' => ''];
-        $response = $this->sendRequest($this->searchQuoteEndpoint, $params, $method);
+        $response = $this->sendRequest($this->searchQuoteEndpoint, $params, $method, [], [
+            CURLOPT_TIMEOUT => self::CURL_TIMEOUT_SECONDS
+        ]);
 
         if ($response->isOk) {
             $result['data'] = $response->data;

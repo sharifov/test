@@ -43,4 +43,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['pt_id' => $id]);
     }
+
+    public function byKey(?string $key): self
+    {
+        return $this->andWhere(['pt_key' => $key]);
+    }
 }

@@ -19,7 +19,11 @@ $config = yii\helpers\ArrayHelper::merge(
     require __DIR__ . '/../config/main-local.php'
 );
 
-$config['components']['urlManager']['rules'] = ['health-check' => 'health/index'];
+$config['components']['urlManager']['rules'] = [
+    'health-check/metrics' => 'health/text',
+    'health-check/<param:.*>' => 'health/json',
+    'health-check' => 'health/json'
+];
 
 if (isset($config['components']['cache']['class'])) {
     $config['components']['cache']['class'] = 'yii\caching\DummyCache';

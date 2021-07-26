@@ -125,7 +125,7 @@ class ClientChatUserAccessService
         );
     }
 
-    public function disableAccessForOtherUsersBatch(int $chatId, int $ownerId): bool
+    public function disableAccessForOtherUsersBatch(int $chatId, ?int $ownerId): bool
     {
         $users = ClientChatUserAccess::find()->select(['ccua_user_id', 'ccua_id'])->where(new Expression('ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status', ['chatId' => $chatId, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]))->asArray()->all();
         if ($query = (bool)ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_CANCELED], new Expression('ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status', ['chatId' => $chatId, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]))) {

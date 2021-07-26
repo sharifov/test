@@ -3,6 +3,7 @@
 namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\CreateSaleFromBOJob;
+use common\components\jobs\SendEmailOnCaseCreationBOJob;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\model\cases\CaseCodeException;
@@ -248,6 +249,20 @@ class CasesController extends BaseController
                 $job->phone = $form->contact_phone;
                 Yii::$app->queue_job->priority(100)->push($job);
             } catch (\Throwable $throwable) {
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
+                );
+            }
+        }
+
+        if ($form->contact_email) {
+            try {
+                $job = new SendEmailOnCaseCreationBOJob();
+                $job->case_id = $result->csId;
+                $job->contact_email = $form->contact_email;
+                Yii::$app->queue_email_job->priority(10)->push($job);
+            } catch (\Throwable $e) {
                 Yii::error(
                     AppHelper::throwableFormatter($throwable),
                     'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'

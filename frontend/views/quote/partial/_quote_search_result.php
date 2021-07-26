@@ -1,6 +1,9 @@
 <?php
 
 use common\models\Lead;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use sales\auth\Auth;
 use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use yii\bootstrap4\Alert;
 use yii\data\ArrayDataProvider;
@@ -9,6 +12,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\View;
+use yii\widgets\ListView;
 use yii\widgets\Pjax;
 
 /**
@@ -23,9 +27,11 @@ use yii\widgets\Pjax;
  * @var $searchForm FlightQuoteSearchForm
  * @var $keyCache string
  * @var $searchServiceQuoteDto \sales\dto\searchService\SearchServiceQuoteDTO
- * @var $isAdmin bool
  */
 //\yii\helpers\VarDumper::dump($airlines);die;
+
+$leadAbacDto = new LeadAbacDto($lead ?? null, Auth::id());
+$canDisplayQuoteSearchParams = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_DISPLAY_QUOTE_SEARCH_PARAMS, LeadAbacObject::ACTION_ACCESS);
 if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
     $js = <<<JS
     $(document).on('click','.search_quote_details__btn', function (e) {
@@ -81,7 +87,7 @@ JS;
         <?php $n = 0;
         $layout = '{pager}'; ?>
 
-        <?php if ($isAdmin) : ?>
+        <?php if ($canDisplayQuoteSearchParams) : ?>
             <?php $layout = '<div class="d-flex justify-content-between align-items-center">{pager} <span data-toggle="collapse" href="#collapseSearchParams" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Search Query Params</span></div>'; ?>
           <div id="collapseSearchParams" class="collapse">
             <div class="card-body card">
@@ -90,7 +96,7 @@ JS;
             </div>
           </div>
         <?php endif; ?>
-        <?= \yii\widgets\ListView::widget([
+        <?= ListView::widget([
             'dataProvider' => $dataProvider,
             'emptyText' => '<div class="text-center">Not found quotes</div><br>',
             'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes, $keyCache, $lead) {
@@ -155,7 +161,7 @@ JS;
         <?php endif; ?>
         <p>No search results</p>
 
-        <?php if ($isAdmin && isset($searchServiceQuoteDto)) : ?>
+        <?php if ($canDisplayQuoteSearchParams && isset($searchServiceQuoteDto)) : ?>
             <div class="d-flex justify-content-between align-items-center"><span data-toggle="collapse" href="#collapseSearchParams" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Search Query Params</span></div>
             <div id="collapseSearchParams" class="collapse">
               <div class="card-body card">

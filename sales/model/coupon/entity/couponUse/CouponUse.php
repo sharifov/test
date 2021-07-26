@@ -31,7 +31,7 @@ class CouponUse extends \yii\db\ActiveRecord
             ['cu_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['cu_ip', 'string', 'max' => 40],
-            ['cu_user_agent', 'string', 'max' => 255],
+            ['cu_user_agent', 'string', 'max' => 500],
         ];
     }
 
@@ -74,5 +74,14 @@ class CouponUse extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'coupon_use';
+    }
+
+    public static function create(int $couponId, ?string $ip, ?string $userAgent): CouponUse
+    {
+        $model = new self();
+        $model->cu_coupon_id = $couponId;
+        $model->cu_ip = $ip;
+        $model->cu_user_agent = $userAgent;
+        return $model;
     }
 }
