@@ -913,7 +913,9 @@ class QuoteController extends FController
 
             $errorMessage = ($throwable instanceof AdditionalDataException) ?
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $throwable->getAdditionalData()) :
-                VarDumper::dumpAsString($throwable, 10);
+                AppHelper::throwableLog($throwable);
+
+            $errorMessage['post'] = Yii::$app->request->post();
 
             if ($throwable->getCode() >= 0) {
                 \Yii::error($errorMessage, 'QuoteController:actionSaveFromDump:Throwable');
