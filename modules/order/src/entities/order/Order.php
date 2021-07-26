@@ -223,6 +223,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         $this->or_request_id = $dto->requestId;
         $this->or_project_id = $dto->projectId;
         $this->or_type_id = $dto->creationTypeId;
+        $this->or_sale_id = $dto->saleId;
 
         return $this;
     }

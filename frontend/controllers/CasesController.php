@@ -16,6 +16,7 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Payment;
 use common\models\Quote;
 use common\models\search\CaseSaleSearch;
 use common\models\search\LeadSearch;
@@ -34,6 +35,8 @@ use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\order\src\payment\helpers\PaymentHelper;
+use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use sales\auth\Auth;
@@ -119,6 +122,8 @@ use yii\widgets\ActiveForm;
  * @property ClientChatActionPermission $chatActionPermission
  * @property UrlGenerator $fileStorageUrlGenerator
  * @property OrderRepository $orderRepository
+ * @property PaymentRepository $paymentRepository
+ * @property OrderCreateFromSaleService $orderCreateFromSaleService
  */
 class CasesController extends FController
 {
@@ -138,6 +143,8 @@ class CasesController extends FController
     private $chatActionPermission;
     private UrlGenerator $fileStorageUrlGenerator;
     private OrderRepository $orderRepository;
+    private PaymentRepository $paymentRepository;
+    private OrderCreateFromSaleService $orderCreateFromSaleService;
 
     public function __construct(
         $id,
@@ -158,6 +165,8 @@ class CasesController extends FController
         ClientChatActionPermission $chatActionPermission,
         UrlGenerator $fileStorageUrlGenerator,
         OrderRepository $orderRepository,
+        PaymentRepository $paymentRepository,
+        OrderCreateFromSaleService $orderCreateFromSaleService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -177,6 +186,8 @@ class CasesController extends FController
         $this->chatActionPermission = $chatActionPermission;
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->orderRepository = $orderRepository;
+        $this->paymentRepository = $paymentRepository;
+        $this->orderCreateFromSaleService = $orderCreateFromSaleService;
     }
 
     public function behaviors(): array
@@ -944,6 +955,7 @@ class CasesController extends FController
             $transaction->rollBack();
             $out['error'] = $exception->getMessage();
             \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
+            return $out;
         }
 
         try {
@@ -955,8 +967,13 @@ class CasesController extends FController
                     if (!$orderCreateFromSaleForm->validate()) {
                         throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
                     }
-                    $order = OrderCreateFromSaleService::create($orderCreateFromSaleForm, $saleId);
-                    $this->orderRepository->save($order); /* TODO:: product. flight + segments etc. */
+                    $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
+                    $order->or_app_total = $cs->css_charged;
+                    $orderId = $this->orderRepository->save($order); /* TODO:: product. flight + segments etc. */
+
+                    if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
+                        $this->orderCreateFromSaleService->paymentCreate($authList, $orderId);
+                    }
                 }
             }
         } catch (\Throwable $throwable) {

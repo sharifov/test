@@ -117,6 +117,11 @@ class Payment extends \yii\db\ActiveRecord
         $this->pay_status_id = self::STATUS_AUTHORIZED;
     }
 
+    public function setStatus(?int $statusId): void
+    {
+        $this->pay_status_id = $statusId;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -289,7 +294,7 @@ class Payment extends \yii\db\ActiveRecord
         string $currency,
         ?int $invoiceId,
         int $orderId,
-        string $code,
+        ?string $code,
         ?string $payDescription = null,
         ?int $billingInfoId = null
     ): self {
