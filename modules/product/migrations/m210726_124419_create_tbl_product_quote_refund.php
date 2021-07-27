@@ -24,6 +24,7 @@ class m210726_124419_create_tbl_product_quote_refund extends Migration
         $this->createTable($this->tableName, [
             'pqr_id' => $this->primaryKey(),
             'pqr_order_refund_id' => $this->integer()->notNull(),
+            'pqr_product_quote_id' => $this->integer()->notNull(),
             'pqr_selling_price' => $this->decimal(8, 2),
             'pqr_penalty_amount' => $this->decimal(8, 2),
             'pqr_processing_fee_amount' => $this->decimal(8, 2),
@@ -44,6 +45,7 @@ class m210726_124419_create_tbl_product_quote_refund extends Migration
         $this->addForeignKey('FK-product_quote_refund-pqr_client_currency', $this->tableName, 'pqr_client_currency', '{{%currency}}', 'cur_code', 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-product_quote_refund-pqr_created_user_id', $this->tableName, 'pqr_created_user_id', '{{%employees}}', 'id', 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-product_quote_refund-pqr_updated_user_id', $this->tableName, 'pqr_updated_user_id', '{{%employees}}', 'id', 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-product_quote_refund-pqr_product_quote_id', $this->tableName, 'pqr_product_quote_id', '{{%product_quote}}', 'pq_id', 'CASCADE', 'CASCADE');
 
         $this->createIndex('IND-product_quote_refund-pqr_status_id', $this->tableName, 'pqr_status_id');
     }
@@ -54,6 +56,10 @@ class m210726_124419_create_tbl_product_quote_refund extends Migration
     public function safeDown()
     {
         $this->dropForeignKey('FK-product_quote_refund-pqr_order_refund_id', $this->tableName);
+        $this->dropForeignKey('FK-product_quote_refund-pqr_client_currency', $this->tableName);
+        $this->dropForeignKey('FK-product_quote_refund-pqr_created_user_id', $this->tableName);
+        $this->dropForeignKey('FK-product_quote_refund-pqr_updated_user_id', $this->tableName);
+        $this->dropForeignKey('FK-product_quote_refund-pqr_product_quote_id', $this->tableName);
 
         $this->dropTable($this->tableName);
     }

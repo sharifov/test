@@ -6,6 +6,9 @@ use common\models\Currency;
 use common\models\Employee;
 use common\models\query\CurrencyQuery;
 use modules\order\src\entities\orderRefund\OrderRefund;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
+use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -15,6 +18,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $pqr_id
  * @property int $pqr_order_refund_id
+ * @property int $pqr_product_quote_id [int]
  * @property float|null $pqr_selling_price
  * @property float|null $pqr_penalty_amount
  * @property float|null $pqr_processing_fee_amount
@@ -33,6 +37,9 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property OrderRefund $orderRefund
  * @property Employee $updatedUser
+ * @property ProductQuote $pqrProductQuote
+ * @property ProductQuoteObjectRefund[] $productQuoteObjectRefunds
+ * @property ProductQuoteOptionRefund[] $productQuoteOptionRefunds
  */
 class ProductQuoteRefund extends \yii\db\ActiveRecord
 {
@@ -72,8 +79,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['pqr_order_refund_id'], 'required'],
-            [['pqr_order_refund_id', 'pqr_status_id', 'pqr_created_user_id', 'pqr_updated_user_id'], 'integer'],
+            [['pqr_order_refund_id', 'pqr_product_quote_id'], 'required'],
+            [['pqr_order_refund_id', 'pqr_product_quote_id', 'pqr_status_id', 'pqr_created_user_id', 'pqr_updated_user_id'], 'integer'],
             [['pqr_selling_price', 'pqr_penalty_amount', 'pqr_processing_fee_amount', 'pqr_refund_amount', 'pqr_client_currency_rate', 'pqr_client_selling_price', 'pqr_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['pqr_created_dt', 'pqr_updated_dt'], 'safe'],
             [['pqr_client_currency'], 'string', 'max' => 3],
@@ -83,6 +90,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             [['pqr_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqr_created_user_id' => 'id']],
             [['pqr_order_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrderRefund::class, 'targetAttribute' => ['pqr_order_refund_id' => 'orr_id']],
             [['pqr_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqr_updated_user_id' => 'id']],
+            [['pqr_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqr_product_quote_id' => 'pq_id']],
         ];
     }
 
@@ -94,6 +102,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         return [
             'pqr_id' => 'ID',
             'pqr_order_refund_id' => 'Order Refund ID',
+            'pqr_product_quote_id' => 'Product Quote Id',
             'pqr_selling_price' => 'Selling Price',
             'pqr_penalty_amount' => 'Penalty Amount',
             'pqr_processing_fee_amount' => 'Processing Fee Amount',
@@ -148,6 +157,35 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public function getUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'pqr_updated_user_id']);
+    }
+
+    /**
+     * Gets query for [[PqrProductQuote]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPqrProductQuote()
+    {
+        return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqr_product_quote_id']);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteObjectRefunds]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductQuoteObjectRefunds()
+    {
+        return $this->hasMany(ProductQuoteObjectRefund::class, ['pqor_product_quote_refund_id' => 'pqr_id']);
+    }
+    /**
+     * Gets query for [[ProductQuoteOptionRefunds]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductQuoteOptionRefunds()
+    {
+        return $this->hasMany(ProductQuoteOptionRefund::class, ['pqor_product_quote_refund_id' => 'pqr_id']);
     }
 
     /**

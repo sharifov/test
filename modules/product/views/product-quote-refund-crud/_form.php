@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
       <?= $form->errorSummary($model) ?>
 
       <?= $form->field($model, 'pqr_order_refund_id')->input('number') ?>
+        
+      <?= $form->field($model, 'pqr_product_quote_id')->input('number') ?>
 
       <?= $form->field($model, 'pqr_selling_price')->input('number', [
           'step' => 'any'

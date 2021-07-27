@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'pqr_id',
             'pqr_order_refund_id',
+            'pqr_product_quote_id',
             'pqr_selling_price',
             'pqr_penalty_amount',
             'pqr_processing_fee_amount',
