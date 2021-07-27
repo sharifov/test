@@ -177,6 +177,17 @@ class OrderCreateFromSaleService
             }
         }
 
+        if ($passengers = ArrayHelper::getValue($saleData, 'passengers')) {
+
+        }
+
+        /* TODO:: detect currency: from price.currency */
+        /* TODO::
+            detect client:
+            'phone' => '+1 8885328250'
+            'email' => 'sf_d__7ljr@mailinator.com'
+        */
+
         // FlightPax
         // FlightQuotePaxPrice
         // FlightQuoteTicket
