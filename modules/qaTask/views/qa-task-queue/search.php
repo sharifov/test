@@ -230,7 +230,7 @@ $(document).on('click', '.multiple-checkbox', function(e) {
     e.stopPropagation();
     let checked = $("input[name='selection[]']:checked").map(function () { return this.value; }).get();
     let unchecked = $("input[name='selection[]']:not(:checked)").map(function () { return this.value; }).get();
-    let data = [];
+    let data = {};
     if (sessionStorage.selectedTasks) {
         data = jQuery.parseJSON( sessionStorage.selectedTasks );
     }
@@ -258,7 +258,7 @@ $(document).on('click', '.multiple-checkbox', function(e) {
 $('body').on('change', '.select-on-check-all', function(e) {
     let checked = $("input[name='selection[]']:checked").map(function () { return this.value; }).get();
     let unchecked = $("input[name='selection[]']:not(:checked)").map(function () { return this.value; }).get();
-    let data = [];
+    let data = {};
     if (sessionStorage.selectedTasks) {
         data = jQuery.parseJSON( sessionStorage.selectedTasks );
     }
