@@ -7,7 +7,6 @@ use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model CreditCardForm */
-/* @var $modelCc CreditCard */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $isAjax bool */
 
@@ -42,7 +41,7 @@ $pjaxId = 'pjax-create-credit-card'
 
         <div class="row">
             <div class="col-md-12">
-                <?= $modelCc->isNewRecord ? $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]) : $form->field($model, 'cc_number')->hiddenInput(['id' => 'cc_number'])->label(false) ?>
+                <?= $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]) ?>
             </div>
         </div>
 
