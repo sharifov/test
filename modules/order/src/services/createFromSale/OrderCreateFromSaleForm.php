@@ -55,7 +55,7 @@ class OrderCreateFromSaleForm extends Model
         return $this->projectId;
     }
 
-    public static function fillForm(array $saleData): OrderCreateFromSaleForm /* TODO::  */
+    public static function fillForm(array $saleData): OrderCreateFromSaleForm
     {
         $form = new self();
         $form->project = ArrayHelper::getValue($saleData, 'project');

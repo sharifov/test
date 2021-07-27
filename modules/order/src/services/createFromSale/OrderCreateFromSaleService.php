@@ -18,15 +18,19 @@ use modules\flight\src\repositories\flightQuoteTripRepository\FlightQuoteTripRep
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
+use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderStatus;
+use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\payment\helpers\PaymentHelper;
 use modules\order\src\payment\method\PaymentMethodRepository;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\CreateOrderDTO;
+use modules\order\src\services\OrderContactManageService;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\product\ProductRepository;
+use modules\product\src\entities\productHolder\ProductHolder;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productType\ProductType;
@@ -46,6 +50,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteTripRepository $flightQuoteTripRepository
  * @property FlightQuoteSegmentRepository $flightQuoteSegmentRepository
  * @property ProductRepository $productRepository
+ * @property OrderContactManageService $orderContactManageService
  */
 class OrderCreateFromSaleService
 {
@@ -56,6 +61,7 @@ class OrderCreateFromSaleService
     private FlightQuoteTripRepository $flightQuoteTripRepository;
     private FlightQuoteSegmentRepository $flightQuoteSegmentRepository;
     private ProductRepository $productRepository;
+    private OrderContactManageService $orderContactManageService;
 
     /**
      * @param PaymentRepository $paymentRepository
@@ -65,6 +71,7 @@ class OrderCreateFromSaleService
      * @param FlightQuoteTripRepository $flightQuoteTripRepository
      * @param FlightQuoteSegmentRepository $flightQuoteSegmentRepository
      * @param ProductRepository $productRepository
+     * @param OrderContactManageService $orderContactManageService
      */
     public function __construct(
         PaymentRepository $paymentRepository,
@@ -73,7 +80,8 @@ class OrderCreateFromSaleService
         FlightQuoteRepository $flightQuoteRepository,
         FlightQuoteTripRepository $flightQuoteTripRepository,
         FlightQuoteSegmentRepository $flightQuoteSegmentRepository,
-        ProductRepository $productRepository
+        ProductRepository $productRepository,
+        OrderContactManageService $orderContactManageService
     ) {
         $this->paymentRepository = $paymentRepository;
         $this->productCreateService = $productCreateService;
@@ -82,6 +90,7 @@ class OrderCreateFromSaleService
         $this->flightQuoteTripRepository = $flightQuoteTripRepository;
         $this->flightQuoteSegmentRepository = $flightQuoteSegmentRepository;
         $this->productRepository = $productRepository;
+        $this->orderContactManageService = $orderContactManageService;
     }
 
     public function orderCreate(OrderCreateFromSaleForm $form, int $saleId): Order
@@ -102,7 +111,20 @@ class OrderCreateFromSaleService
         return (new Order())->create($dto);
     }
 
-    public function paymentCreate(array $authList, int $orderId): array
+    public function orderContactCreate(Order $order, OrderContactForm $orderContactForm): OrderContact
+    {
+        return $this->orderContactManageService->create(
+            $order->or_id,
+            $orderContactForm->first_name,
+            $orderContactForm->last_name,
+            null,
+            $orderContactForm->email,
+            $orderContactForm->phone_number,
+            $order->or_project_id
+        );
+    }
+
+    public function paymentCreate(array $authList, int $orderId, ?string $currency): array
     {
         $result = [];
         foreach ($authList as $value) {
@@ -110,7 +132,7 @@ class OrderCreateFromSaleService
                 null,
                 ArrayHelper::getValue($value, 'created'),
                 ArrayHelper::getValue($value, 'amount'),
-                null,
+                $currency,
                 null,
                 $orderId,
                 null,
@@ -128,81 +150,5 @@ class OrderCreateFromSaleService
             }
         }
         return $result;
-    }
-
-    public function productFlightCreate(int $orderId, int $projectId, array $saleData) /* TODO:: to FlightQuoteManageService->saleHandle */
-    {
-        /* TODO:: add check validate before save */
-
-        $productCreateForm = new ProductCreateForm(['pr_type_id' => ProductType::PRODUCT_FLIGHT, 'pr_project_id' => $projectId]);
-        $product = Product::create($productCreateForm->getDto());
-
-        $this->productRepository->save($product);
-
-        $flightProduct = Flight::create($product->pr_id);
-        $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, [], null), null);
-        $productQuote->pq_order_id = $orderId;
-        $productQuote->pq_status_id = ProductQuoteStatus::SOLD; /* TODO:: ??? */
-
-        $this->productQuoteRepository->save($productQuote);
-
-        $data = [
-            'recordLocator' => ArrayHelper::getValue($saleData, 'itinerary.0.segments.0.airlineRecordLocator'),
-            'gds' => SearchService::getGDSKeyByName(ArrayHelper::getValue($saleData, 'gds')),
-            'pcc' => ArrayHelper::getValue($saleData, 'pcc'),
-            'validatingCarrier' => ArrayHelper::getValue($saleData, 'validatingCarrier'),
-            'fareType' => ArrayHelper::getValue($saleData, 'fareType'),
-        ];
-        $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $data, null)));
-        $flightQuote->fq_flight_request_uid = ArrayHelper::getValue($saleData, 'bookingId');
-        $this->flightQuoteRepository->save($flightQuote);
-
-        if ($itinerary = ArrayHelper::getValue($saleData, 'itinerary')) {
-            foreach ($trips = self::prepareTrips($itinerary) as $keyTrip => $trip) {
-                $flightQuoteTrip = FlightQuoteTrip::create($flightQuote, (int) $trip['duration']);
-                $this->flightQuoteTripRepository->save($flightQuoteTrip);
-
-                if ($tripSegments = ArrayHelper::getValue($itinerary, "{$keyTrip}.segments")) {
-                    foreach ($tripSegments as $segment) {
-                        $segment['duration'] = ArrayHelper::getValue($segment, 'flightDuration', 0) + ArrayHelper::getValue($segment, 'layoverDuration', 0);
-                        $segment['departureAirportCode'] = $segment['departureAirport'];
-                        $segment['arrivalAirportCode'] = $segment['arrivalAirport'];
-                        $segment['operatingAirline'] = $segment['airline'];
-                        $segment['marketingAirline'] = $segment['mainAirline'];
-
-                        $flightQuoteSegment = FlightQuoteSegment::create((new FlightQuoteSegmentDTO($flightQuote, $flightQuoteTrip, $segment)));
-                        $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
-                    }
-                }
-            }
-        }
-
-        if ($passengers = ArrayHelper::getValue($saleData, 'passengers')) {
-            /* TODO::  */
-        }
-
-        /* TODO:: detect currency: from price.currency */
-        /* TODO::
-            detect client:
-            'phone' => '+1 8885328250'
-            'email' => 'sf_d__7ljr@mailinator.com'
-        */
-
-        // FlightPax
-        // FlightQuotePaxPrice
-        // FlightQuoteTicket
-        /* TODO::  */
-    }
-
-    public static function prepareTrips(array $itinerary)
-    {
-        $trips = [];
-        foreach ($itinerary as $key => $segments) {
-            foreach ($segments as $keySegment => $segment) {
-                $segmentDuration = ArrayHelper::getValue($segment, 'flightDuration', 0) + ArrayHelper::getValue($segment, 'layoverDuration', 0);
-                $trips[$key]['duration'] += $segmentDuration;
-            }
-        }
-        return $trips;
     }
 }

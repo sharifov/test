@@ -32,6 +32,7 @@ use frontend\models\CasePreviewSmsForm;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\search\OrderSearch;
@@ -969,10 +970,16 @@ class CasesController extends FController
                     }
                     $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
                     $order->or_app_total = $cs->css_charged;
-                    $orderId = $this->orderRepository->save($order); /* TODO:: product. flight + segments etc. */
+                    $orderId = $this->orderRepository->save($order);
+
+                    $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
+
+                    $currency = $orderCreateFromSaleForm->currency;
+
+                    $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
 
                     if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
-                        $this->orderCreateFromSaleService->paymentCreate($authList, $orderId);
+                        $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);
                     }
                 }
             }
