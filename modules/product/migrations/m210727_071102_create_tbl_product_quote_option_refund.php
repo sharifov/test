@@ -58,7 +58,7 @@ class m210727_071102_create_tbl_product_quote_option_refund extends Migration
         $this->dropForeignKey('FK-product_quote_option_refund-pqor_product_quote_option_id', $this->tableName);
         $this->dropForeignKey('FK-product_quote_option_refund-pqor_created_user_id', $this->tableName);
         $this->dropForeignKey('FK-product_quote_option_refund-pqor_updated_user_id', $this->tableName);
-//        $this->dropForeignKey('FK-product_quote_option_refund-pqor_client_currency', $this->tableName);
+        $this->dropForeignKey('FK-product_quote_option_refund-pqor_client_currency', $this->tableName);
 
         $this->dropTable($this->tableName);
     }
