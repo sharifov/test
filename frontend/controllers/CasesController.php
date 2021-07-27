@@ -32,6 +32,7 @@ use frontend\models\CasePreviewSmsForm;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\flight\src\useCases\sale\FlightFromSaleService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
@@ -125,6 +126,7 @@ use yii\widgets\ActiveForm;
  * @property OrderRepository $orderRepository
  * @property PaymentRepository $paymentRepository
  * @property OrderCreateFromSaleService $orderCreateFromSaleService
+ * @property FlightFromSaleService $flightFromSaleService
  */
 class CasesController extends FController
 {
@@ -146,6 +148,7 @@ class CasesController extends FController
     private OrderRepository $orderRepository;
     private PaymentRepository $paymentRepository;
     private OrderCreateFromSaleService $orderCreateFromSaleService;
+    private FlightFromSaleService $flightFromSaleService;
 
     public function __construct(
         $id,
@@ -168,6 +171,7 @@ class CasesController extends FController
         OrderRepository $orderRepository,
         PaymentRepository $paymentRepository,
         OrderCreateFromSaleService $orderCreateFromSaleService,
+        FlightFromSaleService $flightFromSaleService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -189,6 +193,7 @@ class CasesController extends FController
         $this->orderRepository = $orderRepository;
         $this->paymentRepository = $paymentRepository;
         $this->orderCreateFromSaleService = $orderCreateFromSaleService;
+        $this->flightFromSaleService = $flightFromSaleService;
     }
 
     public function behaviors(): array
@@ -959,32 +964,35 @@ class CasesController extends FController
             return $out;
         }
 
+        $transactionOrder = new Transaction(['db' => Yii::$app->db]);
         try {
             if (empty($out['error']) && !empty($saleData)) {
-                if ($order = Order::findOne(['or_sale_id' => $saleId])) {
-                    /* TODO:: - update ? */
-                } else {
+                if (!$order = Order::findOne(['or_sale_id' => $saleId])) {
                     $orderCreateFromSaleForm = OrderCreateFromSaleForm::fillForm($saleData);
                     if (!$orderCreateFromSaleForm->validate()) {
                         throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
                     }
-                    $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
-                    $order->or_app_total = $cs->css_charged;
+
+                    $transactionOrder->begin();
+                    $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId, $cs->css_charged);
                     $orderId = $this->orderRepository->save($order);
 
                     $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
-
                     $currency = $orderCreateFromSaleForm->currency;
 
-                    $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
+                    $this->flightFromSaleService->createHandler($order, $order->or_project_id, $saleData, $currency);
 
-                    if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
+                    if ($authList = ArrayHelper::getValue($saleData, 'authList')) { /* TODO:: test case */
                         $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);
                     }
+                    $transactionOrder->commit();
                 }
+
+                /* TODO:: - update if exist ? */
             }
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable), 'CasesController:actionAddSale:Order');
+            $transactionOrder->rollBack();
+            Yii::warning(AppHelper::throwableLog($throwable, true), 'CasesController:actionAddSale:Order'); /* TODO:: remove trace */
         }
 
         return $out;

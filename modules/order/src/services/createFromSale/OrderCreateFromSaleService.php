@@ -20,6 +20,7 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\orderContact\OrderContact;
@@ -93,8 +94,12 @@ class OrderCreateFromSaleService
         $this->orderContactManageService = $orderContactManageService;
     }
 
-    public function orderCreate(OrderCreateFromSaleForm $form, int $saleId): Order
-    {
+    public function orderCreate(
+        OrderCreateFromSaleForm $form,
+        int $saleId,
+        ?float $appTotal,
+        $payStatusId = OrderPayStatus::PAID
+    ): Order {
         $dto = new CreateOrderDTO(
             null,
             $form->currency,
@@ -108,7 +113,11 @@ class OrderCreateFromSaleService
             null,
             $saleId
         );
-        return (new Order())->create($dto);
+        $order = (new Order())->create($dto);
+        $order->or_pay_status_id = $payStatusId;
+        $order->or_app_total = $appTotal;
+        $order->or_client_total = $appTotal;
+        return $order;
     }
 
     public function orderContactCreate(Order $order, OrderContactForm $orderContactForm): OrderContact

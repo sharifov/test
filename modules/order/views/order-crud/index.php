@@ -49,6 +49,7 @@ $data = new OrderAbacDto(new Order());
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'or_id',
             'or_gid',

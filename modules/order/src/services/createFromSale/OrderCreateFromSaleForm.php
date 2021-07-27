@@ -30,6 +30,7 @@ class OrderCreateFromSaleForm extends Model
         return [
             [['saleId'], 'required'],
             [['saleId'], 'integer'],
+            [['saleId'], 'filter', 'filter' => 'intval', 'skipOnError' => true],
 
             [['currency'], 'trim', 'skipOnEmpty' => true, 'skipOnError' => true],
             [['currency'], 'string', 'max' => 3],
@@ -60,7 +61,7 @@ class OrderCreateFromSaleForm extends Model
         $form = new self();
         $form->project = ArrayHelper::getValue($saleData, 'project');
         $form->currency = ArrayHelper::getValue($saleData, 'price.currency');
-
+        $form->saleId = ArrayHelper::getValue($saleData, 'saleId');
         return $form;
     }
 }
