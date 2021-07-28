@@ -166,7 +166,8 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         ?string $middleName = null,
         ?string $dob = null,
         ?string $gender = null,
-        ?string $nationality = null
+        ?string $nationality = null,
+        ?string $email = null
     ): FlightPax {
         $flightPax = new self();
         $flightPax->fp_flight_id = $flightId;
@@ -177,6 +178,7 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         $flightPax->fp_dob = $dob;
         $flightPax->fp_gender = $gender;
         $flightPax->fp_nationality = $nationality;
+        $flightPax->fp_email = $email;
         return $flightPax;
     }
 

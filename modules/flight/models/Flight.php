@@ -76,10 +76,11 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         self::CABIN_CLASS_FIRST => self::CABIN_FIRST,
     ];
 
-    public static function create(int $productId): self
+    public static function create(int $productId, ?int $tripTypeId = null): self
     {
         $flight = new static();
         $flight->fl_product_id = $productId;
+        $flight->fl_trip_type_id = $tripTypeId;
         return $flight;
     }
 

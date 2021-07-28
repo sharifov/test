@@ -74,6 +74,7 @@ use modules\order\src\entities\orderData\OrderData;
  * @property int $or_request_id [int]
  * @property int $or_project_id [int]
  * @property int $or_type_id [tinyint(1)]
+ * @property int $or_sale_id
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -139,6 +140,9 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             [['or_type_id'], 'in', 'range' => array_keys(OrderSourceType::LIST), 'skipOnEmpty' => true],
 
             ['or_request_data', 'safe'],
+
+            [['or_sale_id'], 'integer'],
+            [['or_sale_id'], 'unique'],
         ];
     }
 
@@ -169,7 +173,8 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             'or_request_data' => 'Request Data',
             'or_project_id' => 'Project',
             'or_fare_id' => 'Fare Id',
-            'or_type_id' => 'Source Type'
+            'or_type_id' => 'Source Type',
+            'or_sale_id' => 'Sale Id',
         ];
     }
 
@@ -218,6 +223,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         $this->or_request_id = $dto->requestId;
         $this->or_project_id = $dto->projectId;
         $this->or_type_id = $dto->creationTypeId;
+        $this->or_sale_id = $dto->saleId;
 
         return $this;
     }
