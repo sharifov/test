@@ -20,6 +20,7 @@ use modules\flight\src\repositories\flightQuoteTripRepository\FlightQuoteTripRep
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
+use modules\flight\src\useCases\sale\dto\ProductQuoteCreateFromSaleDto;
 use modules\flight\src\useCases\sale\form\FlightPaxForm;
 use modules\flight\src\useCases\sale\form\PriceQuotesForm;
 use modules\order\src\entities\order\Order;
@@ -103,28 +104,29 @@ class FlightFromSaleService
         $product = Product::create(new CreateDto(null, ProductType::PRODUCT_FLIGHT, null, null, $projectId));
         $this->productRepository->save($product);
 
-        $flightProduct = Flight::create($product->pr_id);
-        $flightProduct->fl_trip_type_id = self::getFlightTripIdByName(ArrayHelper::getValue($saleData, 'tripType'));
+        $tripTypeId = self::getFlightTripIdByName(ArrayHelper::getValue($saleData, 'tripType'));
+        $flightProduct = Flight::create($product->pr_id, $tripTypeId);
+        if (!$flightProduct->validate()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightProduct));
+        }
         $this->flightRepository->save($flightProduct);
 
-        $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, [], null), null);
-        $productQuote->pq_order_id = $order->getId();
+        $productQuoteDto = new ProductQuoteCreateFromSaleDto(
+            $flightProduct,
+            $order->getId(),
+            $order->or_app_total,
+            $order->or_app_total,
+            $order->or_client_currency
+        );
+        $productQuote = ProductQuote::create($productQuoteDto, null);
         $productQuote->pq_status_id = self::detectProductQuoteStatus($saleData);
-        $productQuote->pq_origin_price = $order->or_app_total;
-        $productQuote->pq_origin_currency = $order->or_client_currency;
-        $productQuote->pq_client_price = $order->or_client_total;
+        if (!$productQuote->validate()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
+        }
         $this->productQuoteRepository->save($productQuote);
 
-        $data = [
-            'recordLocator' => ArrayHelper::getValue($saleData, 'itinerary.0.segments.0.airlineRecordLocator'),
-            'gds' => SearchService::getGDSKeyByName(ArrayHelper::getValue($saleData, 'gds')),
-            'pcc' => ArrayHelper::getValue($saleData, 'pcc'),
-            'validatingCarrier' => ArrayHelper::getValue($saleData, 'validatingCarrier'),
-            'fareType' => ArrayHelper::getValue($saleData, 'fareType'),
-            'key' => md5(serialize($saleData)),
-            'trips' => ArrayHelper::getValue($saleData, 'itinerary', [])
-        ];
-        $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $data, null)));
+        $flightQuoteData = self::prepareFlightQuoteData($saleData);
+        $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $flightQuoteData, null)));
         $flightQuote->fq_flight_request_uid = ArrayHelper::getValue($saleData, 'bookingId');
         $flightQuote->fq_hash_key = null;
         $flightQuote->fq_trip_type_id = $flightProduct->fl_trip_type_id;
@@ -192,27 +194,24 @@ class FlightFromSaleService
                 $priceQuotesForm = new PriceQuotesForm();
                 $priceQuotesForm->load($priceQuote);
 
-                if ($priceQuotesForm->validate()) {
-                    $flightQuotePaxPrice = new FlightQuotePaxPrice();
-                    $flightQuotePaxPrice->qpp_flight_pax_code_id = $priceQuotesForm->getPaxTypeId();
-                    $flightQuotePaxPrice->qpp_flight_quote_id = $flightQuote->getId();
-                    $flightQuotePaxPrice->qpp_origin_currency = $currency;
-                    $flightQuotePaxPrice->qpp_fare = $priceQuotesForm->fare;
-                    $flightQuotePaxPrice->qpp_tax = $priceQuotesForm->taxes;
-                    $flightQuotePaxPrice->qpp_system_mark_up = $priceQuotesForm->mark_up;
-                    $flightQuotePaxPrice->qpp_cnt = $priceQuotesForm->cnt;
-                    $flightQuotePaxPrice->qpp_client_currency = $currency;
-
-                    if ($flightQuotePaxPrice->validate()) {
-                        $this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
-                    } else {
-                        $warning = ['errors' => ErrorsToStringHelper::extractFromModel($flightQuotePaxPrice), 'data' => $priceQuotesForm->getAttributes()];
-                        \Yii::warning($warning, 'FlightFromSaleService:FlightQuotePaxPrice:validate');
-                    }
-                } else {
-                    $warning = ['errors' => ErrorsToStringHelper::extractFromModel($priceQuotesForm), 'data' => $priceQuote];
-                    \Yii::warning($warning, 'FlightFromSaleService:FlightQuotePaxPrice:validate');
+                if (!$priceQuotesForm->validate()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($priceQuotesForm));
                 }
+
+                $flightQuotePaxPrice = new FlightQuotePaxPrice();
+                $flightQuotePaxPrice->qpp_flight_pax_code_id = $priceQuotesForm->getPaxTypeId();
+                $flightQuotePaxPrice->qpp_flight_quote_id = $flightQuote->getId();
+                $flightQuotePaxPrice->qpp_origin_currency = $currency;
+                $flightQuotePaxPrice->qpp_fare = $priceQuotesForm->fare;
+                $flightQuotePaxPrice->qpp_tax = $priceQuotesForm->taxes;
+                $flightQuotePaxPrice->qpp_system_mark_up = $priceQuotesForm->mark_up;
+                $flightQuotePaxPrice->qpp_cnt = $priceQuotesForm->cnt;
+                $flightQuotePaxPrice->qpp_client_currency = $currency;
+
+                if (!$flightQuotePaxPrice->validate()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuotePaxPrice));
+                }
+                $this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
             }
         }
     }
@@ -244,5 +243,18 @@ class FlightFromSaleService
             return $tripSearch;
         }
         return null;
+    }
+
+    private static function prepareFlightQuoteData(array $saleData): array
+    {
+        return [
+            'recordLocator' => ArrayHelper::getValue($saleData, 'itinerary.0.segments.0.airlineRecordLocator'),
+            'gds' => SearchService::getGDSKeyByName(ArrayHelper::getValue($saleData, 'gds')),
+            'pcc' => ArrayHelper::getValue($saleData, 'pcc'),
+            'validatingCarrier' => ArrayHelper::getValue($saleData, 'validatingCarrier'),
+            'fareType' => ArrayHelper::getValue($saleData, 'fareType'),
+            'key' => ArrayHelper::getValue($saleData, 'bookingId', serialize($saleData)),
+            'trips' => ArrayHelper::getValue($saleData, 'itinerary', [])
+        ];
     }
 }

@@ -38,6 +38,8 @@ use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productType\ProductTypeRepository;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
+use sales\helpers\ErrorsToStringHelper;
+use sales\model\caseOrder\entity\CaseOrder;
 use sales\repositories\product\ProductQuoteRepository;
 use yii\helpers\ArrayHelper;
 
@@ -129,17 +131,34 @@ class OrderCreateFromSaleService
             null,
             $orderContactForm->email,
             $orderContactForm->phone_number,
-            $order->or_project_id
+            $order->or_project_id,
+            5
         );
+    }
+
+    public function caseOrderRelation(int $orderId, int $caseId): bool
+    {
+        if (!CaseOrder::findOne(['co_order_id' => $orderId, 'co_case_id' => $caseId])) {
+            $caseOrder = CaseOrder::create($caseId, $orderId);
+            if (!$caseOrder->validate()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($caseOrder));
+            }
+            $caseOrder->save();
+            return true;
+        }
+        return false;
     }
 
     public function paymentCreate(array $authList, int $orderId, ?string $currency): array
     {
         $result = [];
         foreach ($authList as $value) {
+            if ($payDate = ArrayHelper::getValue($value, 'created')) {
+                $payDate = date('Y-m-d', strtotime($payDate));
+            }
             $payment = Payment::create(
                 null,
-                ArrayHelper::getValue($value, 'created'),
+                $payDate,
                 ArrayHelper::getValue($value, 'amount'),
                 $currency,
                 null,

@@ -277,6 +277,11 @@ $jsCode = <<<JS
                     } else if ($('#pjax-case-communication-form').length) {
                         $.pjax.reload({container: '#pjax-case-communication-form', push: false, replace: false, timeout: 10000, async: false});
                     }
+                    
+                    if ($('#pjax-case-orders').length) {
+                        $.pjax.reload({container: '#pjax-case-orders', push: false, replace: false, timeout: 10000, async: false});
+                    }
+                    
                     new PNotify({
                         title: "Sale successfully added",
                         type: "success",

@@ -58,6 +58,7 @@ use sales\helpers\email\MaskEmailHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\caseOrder\entity\CaseOrder;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
@@ -977,9 +978,10 @@ class CasesController extends FController
                     $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId, $cs->css_charged);
                     $orderId = $this->orderRepository->save($order);
 
+                    $this->orderCreateFromSaleService->caseOrderRelation($orderId, $model->cs_id);
                     $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
-                    $currency = $orderCreateFromSaleForm->currency;
 
+                    $currency = $orderCreateFromSaleForm->currency;
                     $this->flightFromSaleService->createHandler($order, $order->or_project_id, $saleData, $currency);
 
                     if ($authList = ArrayHelper::getValue($saleData, 'authList')) { /* TODO:: test case */
@@ -987,12 +989,14 @@ class CasesController extends FController
                     }
                     $transactionOrder->commit();
                 }
-
-                /* TODO:: - update if exist ? */
+                /* TODO:: - update if exist ? caseOrderRelation */
+                /* TODO:: - remove sale from case */
             }
         } catch (\Throwable $throwable) {
             $transactionOrder->rollBack();
-            Yii::warning(AppHelper::throwableLog($throwable, true), 'CasesController:actionAddSale:Order'); /* TODO:: remove trace */
+            $message['throwable'] = AppHelper::throwableLog($throwable, true);
+            $message['saleData'] = $saleData;
+            Yii::error($message, 'CasesController:actionAddSale:Order');
         }
 
         return $out;

@@ -13,6 +13,7 @@ use yii\web\View;
 </style>
 
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-case-orders', 'enablePushState' => false, 'timeout' => 10000]) ?>
+<?php if ($dataProviderOrders->totalCount) : ?>
     <div class="x_panel x_panel_orders">
         <div class="x_title">
 
@@ -54,6 +55,7 @@ use yii\web\View;
 
         </div>
     </div>
+<?php endif; ?>
 <?php yii\widgets\Pjax::end() ?>
 
 
