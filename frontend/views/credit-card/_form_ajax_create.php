@@ -1,14 +1,12 @@
 <?php
 
 use common\models\CreditCard;
-use frontend\models\form\CreditCardForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model CreditCardForm */
+/* @var $model common\models\CreditCard */
 /* @var $form yii\widgets\ActiveForm */
-/* @var $isAjax bool */
 
 \frontend\assets\CreditCardAsset::register($this);
 
@@ -19,13 +17,11 @@ $pjaxId = 'pjax-create-credit-card'
 <div class="credit-card-form">
 
     <div class="col-md-12">
-        <?php if (!empty($modelCc) && $modelCc->isNewRecord) : ?>
         <div class="row">
             <div class="col-md-12">
                 <div class="card-wrapper"></div>
             </div>
         </div>
-        <?php endif; ?>
 
         <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
@@ -35,7 +31,6 @@ $pjaxId = 'pjax-create-credit-card'
 
         <div class="clearfix"></div>
 
-        <?php if (!empty($modelCc) && $modelCc->isNewRecord) : ?>
         <div class="row">
             <div class="col-md-12">
                 <?= $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]) ?>
@@ -50,7 +45,6 @@ $pjaxId = 'pjax-create-credit-card'
                 <?= $form->field($model, 'cc_cvv')->passwordInput(['id' => 'cc_cvv', 'maxlength' => 4, 'autocomplete' => 'new-password']) ?>
             </div>
         </div>
-        <?php endif; ?>
 
         <?= $form->field($model, 'cc_holder_name')->textInput(['id' => 'cc_holder_name', 'maxlength' => true]) ?>
 

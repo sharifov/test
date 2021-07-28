@@ -214,7 +214,7 @@ class CreditCardController extends FController
             $modelCc->addError('general', $e->getMessage());
         }
 
-        return $this->renderAjax('_form_ajax', [
+        return $this->renderAjax('_form_ajax_update', [
             'model' => $modelCc,
         ]);
     }
@@ -231,11 +231,11 @@ class CreditCardController extends FController
 
         try {
             $form = new CreditCardForm();
-            $model = new CreditCard();
 
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
                 $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
 
+                $model = new CreditCard();
                 $model->attributes = $form->attributes;
                 $model->cc_status_id = CreditCard::STATUS_VALID;
                 $model->updateSecureCardNumber();
@@ -274,11 +274,8 @@ class CreditCardController extends FController
             $form->addError('general', $e->getMessage());
         }
 
-        return $this->renderAjax('_form_ajax', [
-            'caseId' => $caseId,
-            'saleId' => $saleId,
+        return $this->renderAjax('_form_ajax_create', [
             'model' => $form,
-            'modelCc' => $model,
         ]);
     }
 

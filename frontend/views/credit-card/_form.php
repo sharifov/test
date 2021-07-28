@@ -5,8 +5,8 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model CreditCardForm */
-/* @var $modelCc CreditCard */
+/* @var $model common\models\CreditCard */
+/* @var $modelCc frontend\models\form\CreditCardForm */
 /* @var $form yii\widgets\ActiveForm */
 
 \frontend\assets\CreditCardAsset::register($this);
