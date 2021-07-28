@@ -25,7 +25,6 @@ $formatter = new \common\components\i18n\Formatter();
 
 <div class="x_panel">
     <div class="x_title">
-
         <small>
             <span class="badge badge-white">
                 <?php if (Auth::can('/order/order/view')) : ?>
@@ -35,7 +34,7 @@ $formatter = new \common\components\i18n\Formatter();
                             'data-pjax' => 0,
                         ])
                     ?>
-                <?php else: ?>
+                <?php else : ?>
                     <?php echo 'OR ' . $order->or_id ?>
                 <?php endif ?>
             </span>
