@@ -120,11 +120,11 @@ class CreditCardController extends FController
      */
     public function actionCreate()
     {
-        $model = new CreditCardForm();
+        $modelForm = new CreditCardForm();
         $modelCc = new CreditCard();
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $modelCc->attributes = $model->attributes;
+        if ($modelForm->load(Yii::$app->request->post()) && $modelForm->validate()) {
+            $modelCc->attributes = $modelForm->attributes;
             $modelCc->updateSecureCardNumber();
             $modelCc->updateSecureCvv();
 
@@ -134,7 +134,7 @@ class CreditCardController extends FController
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'model' => $modelForm,
             'modelCc' => $modelCc,
         ]);
     }
@@ -150,13 +150,13 @@ class CreditCardController extends FController
     {
         $modelCc = $this->findModel($id);
 
-        $model = new CreditCardForm();
-        if ($model->load(Yii::$app->request->post())) {
-            if ($model->validate()) {
-                $modelCc->attributes = $model->attributes;
+        $modelForm = new CreditCardForm();
+        if ($modelForm->load(Yii::$app->request->post())) {
+            if ($modelForm->validate()) {
+                $modelCc->attributes = $modelForm->attributes;
 
-                $modelCc->cc_expiration_month = $model->cc_expiration_month;
-                $modelCc->cc_expiration_year = $model->cc_expiration_year;
+                $modelCc->cc_expiration_month = $modelForm->cc_expiration_month;
+                $modelCc->cc_expiration_year = $modelForm->cc_expiration_year;
 
                 $modelCc->updateSecureCardNumber();
                 if (!empty($modelCc->cc_cvv)) {
@@ -172,16 +172,16 @@ class CreditCardController extends FController
                 }
             }
         } else {
-            $model->attributes = $modelCc->attributes;
-            $model->cc_number = str_replace('*', '0', $modelCc->cc_display_number); // $modelCc->initNumber;
-            $model->cc_cvv = ''; // $modelCc->initCvv;
-            $model->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year . '-' . $modelCc->cc_expiration_month . '-01'));
+            $modelForm->attributes = $modelCc->attributes;
+            $modelForm->cc_number = str_replace('*', '0', $modelCc->cc_display_number); // $modelCc->initNumber;
+            $modelForm->cc_cvv = ''; // $modelCc->initCvv;
+            $modelForm->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year . '-' . $modelCc->cc_expiration_month . '-01'));
         }
 
-        $model->cc_id = $modelCc->cc_id;
+        $modelForm->cc_id = $modelCc->cc_id;
 
         return $this->render('update', [
-            'model' => $model,
+            'model' => $modelForm,
             'modelCc' => $modelCc,
         ]);
     }
@@ -191,13 +191,17 @@ class CreditCardController extends FController
         $id = Yii::$app->request->get('id');
         $pjaxId = Yii::$app->request->get('pjaxId');
 
+        if (!Yii::$app->request->isPost && !Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException('actionAjaxUpdate is AJAX only action');
+        }
+
+        $modelCc = $this->findModel($id);
+
+        if (!$modelCc) {
+            throw new NotFoundException('Credit Card data is not found');
+        }
+
         try {
-            $modelCc = $this->findModel($id);
-
-            if (!$modelCc) {
-                throw new NotFoundException('Credit Card data is not found');
-            }
-
             $modelCc->scenario = CreditCard::SCENARIO_CASE_AJAX_UPDATE;
 
             if ($modelCc->load(Yii::$app->request->post()) && $modelCc->validate()) {
@@ -207,15 +211,11 @@ class CreditCardController extends FController
                 throw new \RuntimeException($modelCc->getErrorSummary(false)[0]);
             }
         } catch (\Throwable $e) {
-            if (!$modelCc) {
-                $modelCc = new CreditCard();
-            }
             $modelCc->addError('general', $e->getMessage());
         }
 
-        return $this->renderAjax('_form_ajax_update', [
+        return $this->renderAjax('_form_ajax', [
             'model' => $modelCc,
-            'isAjax' => true
         ]);
     }
 
@@ -231,11 +231,11 @@ class CreditCardController extends FController
 
         try {
             $form = new CreditCardForm();
+            $model = new CreditCard();
 
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
                 $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
 
-                $model = new CreditCard();
                 $model->attributes = $form->attributes;
                 $model->cc_status_id = CreditCard::STATUS_VALID;
                 $model->updateSecureCardNumber();
@@ -274,11 +274,11 @@ class CreditCardController extends FController
             $form->addError('general', $e->getMessage());
         }
 
-        return $this->renderAjax('_form', [
+        return $this->renderAjax('_form_ajax', [
             'caseId' => $caseId,
             'saleId' => $saleId,
             'model' => $form,
-            'isAjax' => true
+            'modelCc' => $model,
         ]);
     }
 
