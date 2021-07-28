@@ -507,7 +507,6 @@ class SyncController extends Controller
                 continue;
             }
             /* TODO::  */
-
         }
 
         $timeEnd = microtime(true);
