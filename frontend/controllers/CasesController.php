@@ -975,7 +975,7 @@ class CasesController extends FController
                     }
 
                     $transactionOrder->begin();
-                    $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId, $cs->css_charged);
+                    $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
                     $orderId = $this->orderRepository->save($order);
 
                     $this->orderCreateFromSaleService->caseOrderRelation($orderId, $model->cs_id);

@@ -21,7 +21,9 @@ use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\Sources;
+use sales\helpers\app\AppHelper;
 use sales\model\airportLang\service\AirportLangService;
+use sales\services\cases\CasesSaleService;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;
@@ -478,6 +480,34 @@ class SyncController extends Controller
                     echo Console::renderColoredString('%r --- Errored AirportLand: %R' . $message . ' %n'), PHP_EOL;
                 }
             }
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . ']%n'), PHP_EOL;
+    }
+
+    public function actionSales($limit = 20, $from_id = 1)
+    {
+        echo Console::renderColoredString('%y --- Start %w[' . date('Y-m-d H:i:s') . '] %y' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+        $timeStart = microtime(true);
+        $idLimit = $from_id + $limit;
+
+        $casesSaleService = Yii::createObject(CasesSaleService::class);
+
+        for ($saleId = $from_id; $saleId <= $idLimit; $saleId++) {
+            try {
+                $saleData = $casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
+            } catch (\Throwable $throwable) {
+                $message['throwable'] = AppHelper::throwableLog($throwable);
+                $message['saleId'] = $saleId;
+                Yii::warning(AppHelper::throwableLog($throwable), 'SyncController:actionSales:RequestToBO');
+                continue;
+            }
+            /* TODO::  */
+
         }
 
         $timeEnd = microtime(true);
