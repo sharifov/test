@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\product\src\entities\productQuoteObjectRefund\search\ProductQuoteObjectRefund */
+/* @var $searchModel modules\product\src\entities\productQuoteObjectRefund\search\ProductQuoteObjectRefundSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Product Quote Object Refunds';
@@ -31,6 +31,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'pqor_id',
             'pqor_product_quote_refund_id',
+            'pqor_quote_object_id',
+            'pqor_title',
             'pqor_selling_price',
             'pqor_penalty_amount',
             'pqor_processing_fee_amount',

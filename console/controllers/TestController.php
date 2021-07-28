@@ -31,6 +31,7 @@ use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
+use modules\product\src\entities\productQuoteObjectRefund\service\QuoteObjectRefundManageService;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
@@ -493,6 +494,8 @@ class TestController extends Controller
 
     public function actionTestQuoteObjectRefund(int $orderId, int $productQuoteId, int $objectId)
     {
+        $quoteObjectRefundService = \Yii::createObject(QuoteObjectRefundManageService::class);
+
         $orderRefund = new OrderRefund();
         $orderRefund->orr_uid = OrderRefund::generateUid();
         $orderRefund->orr_order_id = $orderId;
@@ -506,8 +509,9 @@ class TestController extends Controller
         $objectRefund = new ProductQuoteObjectRefund();
         $objectRefund->pqor_product_quote_refund_id = $productQuoteRefund->pqr_id;
         $objectRefund->pqor_quote_object_id = $objectId;
+        $structure = $quoteObjectRefundService->getQuoteObjectRefundStructure($productQuoteRefund->productQuote->pqProduct->pr_type_id, $objectId);
+        $objectRefund->pqor_title = $structure->getTitle();
         $objectRefund->save();
-        $structure = $objectRefund->getQuoteObjectRefundStructure();
 
         print_r($structure);
         die;

@@ -15,6 +15,7 @@ class m210727_132140_alter_tbl_product_quote_object_refund_add_new_column extend
     public function safeUp()
     {
         $this->addColumn('{{%product_quote_object_refund}}', 'pqor_quote_object_id', $this->integer()->notNull()->after('pqor_product_quote_refund_id'));
+        $this->addColumn('{{%product_quote_object_refund}}', 'pqor_title', $this->string(50)->after('pqor_client_refund_amount'));
     }
 
     /**
@@ -23,5 +24,6 @@ class m210727_132140_alter_tbl_product_quote_object_refund_add_new_column extend
     public function safeDown()
     {
         $this->dropColumn('{{%product_quote_object_refund}}', 'pqor_quote_object_id');
+        $this->dropColumn('{{%product_quote_object_refund}}', 'pqor_title');
     }
 }

@@ -11,7 +11,7 @@ class FlightQuoteRefundService implements ProductQuoteRefundService
 {
     public function getRefundStructureObject(int $id): ProductQuoteObjectRefundStructure
     {
-        $flightQuoteTicket = FlightQuoteTicket::findOne(['ftr_id' => $id]);
+        $flightQuoteTicket = FlightQuoteTicket::findOne(['fqt_pax_id' => $id]);
         if (!$flightQuoteTicket) {
             throw new NotFoundException('Not found flight ticket');
         }

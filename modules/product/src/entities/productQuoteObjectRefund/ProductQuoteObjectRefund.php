@@ -26,6 +26,7 @@ use yii\db\ActiveRecord;
  * @property float|null $pqor_client_currency_rate
  * @property float|null $pqor_client_selling_price
  * @property float|null $pqor_client_refund_amount
+ * @property string|null $pqor_title [varchar(50)]
  * @property int|null $pqor_created_user_id
  * @property int|null $pqor_updated_user_id
  * @property string|null $pqor_created_dt
@@ -35,12 +36,9 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property ProductQuoteRefund $productQuoteRefund
  * @property Employee $updatedUser
- * @property-read ProductQuoteObjectRefundStructure $quoteObjectRefundStructure
  */
 class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
 {
-    private ?ProductQuoteObjectRefundStructure $quoteObjectRefundStructure = null;
-
     /**
      * @return array
      */
@@ -82,6 +80,7 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
             [['pqor_selling_price', 'pqor_penalty_amount', 'pqor_processing_fee_amount', 'pqor_refund_amount', 'pqor_client_currency_rate', 'pqor_client_selling_price', 'pqor_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['pqor_created_dt', 'pqor_updated_dt'], 'safe'],
             [['pqor_client_currency'], 'string', 'max' => 3],
+            [['pqor_title'], 'string', 'max' => 50],
             [['pqor_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pqor_client_currency' => 'cur_code']],
             [['pqor_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_created_user_id' => 'id']],
             [['pqor_product_quote_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteRefund::class, 'targetAttribute' => ['pqor_product_quote_refund_id' => 'pqr_id']],
@@ -107,6 +106,7 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
             'pqor_client_currency_rate' => 'Client Currency Rate',
             'pqor_client_selling_price' => 'Client Selling Price',
             'pqor_client_refund_amount' => 'Client Refund Amount',
+            'pqor_title' => 'Title',
             'pqor_created_user_id' => 'Created User ID',
             'pqor_updated_user_id' => 'Updated User ID',
             'pqor_created_dt' => 'Created Dt',
@@ -161,20 +161,5 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
     public static function find()
     {
         return new Scopes(get_called_class());
-    }
-
-    public function getQuoteObjectRefundStructure()
-    {
-        if ($this->quoteObjectRefundStructure !== null) {
-            return $this->quoteObjectRefundStructure;
-        }
-
-        $productQuoteType = $this->productQuoteRefund->productQuote->pqProduct->pr_type_id ?? null;
-        if ($productQuoteType) {
-            $finder = [QuoteObjectRefundServiceClasses::getClass($productQuoteType), 'getRefundStructureObject'];
-            $this->quoteObjectRefundStructure =  $finder($this->pqor_quote_object_id);
-            return $this->quoteObjectRefundStructure;
-        }
-        throw new NotFoundException('Product type not found');
     }
 }

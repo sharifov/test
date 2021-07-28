@@ -29,4 +29,9 @@ class FlightQuoteRefundStructure implements ProductQuoteObjectRefundStructure
         $this->gds = $gds;
         $this->gdsPcc = $gdsPcc;
     }
+
+    public function getTitle(): string
+    {
+        return 'Flight Ticket ' . $this->ticketNumber;
+    }
 }

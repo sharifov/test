@@ -4,12 +4,12 @@ namespace modules\product\src\entities\productQuoteObjectRefund\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund as ProductQuoteObjectRefundModel;
+use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 
 /**
  * ProductQuoteObjectRefund represents the model behind the search form of `modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund`.
  */
-class ProductQuoteObjectRefund extends ProductQuoteObjectRefundModel
+class ProductQuoteObjectRefundSearch extends ProductQuoteObjectRefund
 {
     /**
      * {@inheritdoc}
@@ -17,9 +17,9 @@ class ProductQuoteObjectRefund extends ProductQuoteObjectRefundModel
     public function rules()
     {
         return [
-            [['pqor_id', 'pqor_product_quote_refund_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id'], 'integer'],
+            [['pqor_id', 'pqor_product_quote_refund_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id', 'pqor_quote_object_id'], 'integer'],
             [['pqor_selling_price', 'pqor_penalty_amount', 'pqor_processing_fee_amount', 'pqor_refund_amount', 'pqor_client_currency_rate', 'pqor_client_selling_price', 'pqor_client_refund_amount'], 'number'],
-            [['pqor_client_currency', 'pqor_created_dt', 'pqor_updated_dt'], 'safe'],
+            [['pqor_client_currency', 'pqor_created_dt', 'pqor_updated_dt', 'pqor_title'], 'safe'],
         ];
     }
 
@@ -41,7 +41,7 @@ class ProductQuoteObjectRefund extends ProductQuoteObjectRefundModel
      */
     public function search($params)
     {
-        $query = ProductQuoteObjectRefundModel::find();
+        $query = ProductQuoteObjectRefund::find();
 
         // add conditions that should always apply here
 
@@ -61,6 +61,7 @@ class ProductQuoteObjectRefund extends ProductQuoteObjectRefundModel
         $query->andFilterWhere([
             'pqor_id' => $this->pqor_id,
             'pqor_product_quote_refund_id' => $this->pqor_product_quote_refund_id,
+            'pqor_quote_object_id' => $this->pqor_quote_object_id,
             'pqor_selling_price' => $this->pqor_selling_price,
             'pqor_penalty_amount' => $this->pqor_penalty_amount,
             'pqor_processing_fee_amount' => $this->pqor_processing_fee_amount,
@@ -76,6 +77,7 @@ class ProductQuoteObjectRefund extends ProductQuoteObjectRefundModel
         ]);
 
         $query->andFilterWhere(['like', 'pqor_client_currency', $this->pqor_client_currency]);
+        $query->andFilterWhere(['like', 'pqor_title', $this->pqor_title]);
 
         return $dataProvider;
     }
