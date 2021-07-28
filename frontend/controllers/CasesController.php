@@ -984,13 +984,13 @@ class CasesController extends FController
                     $currency = $orderCreateFromSaleForm->currency;
                     $this->flightFromSaleService->createHandler($order, $order->or_project_id, $saleData, $currency);
 
-                    if ($authList = ArrayHelper::getValue($saleData, 'authList')) { /* TODO:: test case */
+                    if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
                         $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);
                     }
                     $transactionOrder->commit();
+                } else {
+                    $this->orderCreateFromSaleService->caseOrderRelation($order->getId(), $model->cs_id);
                 }
-                /* TODO:: - update if exist ? caseOrderRelation */
-                /* TODO:: - remove sale from case */
             }
         } catch (\Throwable $throwable) {
             $transactionOrder->rollBack();
