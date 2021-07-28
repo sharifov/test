@@ -5,6 +5,8 @@ namespace modules\product\src\entities\productQuoteObjectRefund;
 use common\models\Currency;
 use common\models\Employee;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use modules\product\src\interfaces\ProductQuoteObjectRefundStructure;
+use sales\repositories\NotFoundException;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -14,6 +16,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $pqor_id
  * @property int $pqor_product_quote_refund_id
+ * @property int $pqor_quote_object_id [int]
  * @property float|null $pqor_selling_price
  * @property float|null $pqor_penalty_amount
  * @property float|null $pqor_processing_fee_amount
@@ -32,9 +35,12 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property ProductQuoteRefund $productQuoteRefund
  * @property Employee $updatedUser
+ * @property-read ProductQuoteObjectRefundStructure $quoteObjectRefundStructure
  */
 class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
 {
+    private ?ProductQuoteObjectRefundStructure $quoteObjectRefundStructure = null;
+
     /**
      * @return array
      */
@@ -71,8 +77,8 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['pqor_product_quote_refund_id'], 'required'],
-            [['pqor_product_quote_refund_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id'], 'integer'],
+            [['pqor_product_quote_refund_id', 'pqor_quote_object_id'], 'required'],
+            [['pqor_product_quote_refund_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id', 'pqor_quote_object_id'], 'integer'],
             [['pqor_selling_price', 'pqor_penalty_amount', 'pqor_processing_fee_amount', 'pqor_refund_amount', 'pqor_client_currency_rate', 'pqor_client_selling_price', 'pqor_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['pqor_created_dt', 'pqor_updated_dt'], 'safe'],
             [['pqor_client_currency'], 'string', 'max' => 3],
@@ -91,6 +97,7 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
         return [
             'pqor_id' => 'ID',
             'pqor_product_quote_refund_id' => 'Product Quote Refund ID',
+            'pqor_quote_object_id' => 'Product Quote Object ID',
             'pqor_selling_price' => 'Selling Price',
             'pqor_penalty_amount' => 'Penalty Amount',
             'pqor_processing_fee_amount' => 'Processing Fee Amount',
@@ -154,5 +161,20 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
     public static function find()
     {
         return new Scopes(get_called_class());
+    }
+
+    public function getQuoteObjectRefundStructure()
+    {
+        if ($this->quoteObjectRefundStructure !== null) {
+            return $this->quoteObjectRefundStructure;
+        }
+
+        $productQuoteType = $this->productQuoteRefund->productQuote->pqProduct->pr_type_id ?? null;
+        if ($productQuoteType) {
+            $finder = [QuoteObjectRefundServiceClasses::getClass($productQuoteType), 'getRefundStructureObject'];
+            $this->quoteObjectRefundStructure =  $finder($this->pqor_quote_object_id);
+            return $this->quoteObjectRefundStructure;
+        }
+        throw new NotFoundException('Product type not found');
     }
 }
