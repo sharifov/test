@@ -61,6 +61,13 @@ $formatter = new \common\components\i18n\Formatter();
                         },
                         'format' => 'raw'
                     ],
+                    [
+                        'label' => 'Sale ID',
+                        'value' => static function (Order $model) {
+                            return $model->or_sale_id ?: ' - ';
+                        },
+                        'format' => 'raw'
+                    ],
                 ],
             ])
 ?>

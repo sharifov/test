@@ -32,7 +32,8 @@ class OrderContactManageService
         ?string $middleName,
         ?string $email,
         ?string $phoneNumber,
-        int $projectId
+        int $projectId,
+        int $delay = 0
     ): OrderContact {
         $orderContact = OrderContact::create(
             $orderId,
@@ -43,6 +44,7 @@ class OrderContactManageService
             $phoneNumber
         );
         $this->orderContactRepository->save($orderContact);
+        $this->queue->delay($delay);
         $this->queue->push(new OrderCreateClientByOrderContactJob($orderContact->oc_id, $projectId));
         return $orderContact;
     }

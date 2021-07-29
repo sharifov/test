@@ -25,8 +25,20 @@ $formatter = new \common\components\i18n\Formatter();
 
 <div class="x_panel">
     <div class="x_title">
-
-        <small><span class="badge badge-white">OR<?=($order->or_id)?></span></small>
+        <small>
+            <span class="badge badge-white">
+                <?php if (Auth::can('/order/order/view')) : ?>
+                    <?php
+                        echo Html::a('OR ' . $order->or_id . ' <span class="glyphicon glyphicon-eye-open"></span>', ['/order/order/view', 'gid' => $order->or_gid], [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                        ])
+                    ?>
+                <?php else : ?>
+                    <?php echo 'OR ' . $order->or_id ?>
+                <?php endif ?>
+            </span>
+        </small>
         (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>

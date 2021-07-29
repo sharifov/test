@@ -5,13 +5,16 @@ namespace frontend\controllers;
 use common\components\BackOffice;
 use common\models\CaseSale;
 use common\models\search\SaleSearch;
+use modules\order\src\entities\order\Order;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\caseOrder\entity\CaseOrder;
 use sales\services\cases\CasesSaleService;
 use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
+use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
@@ -149,6 +152,14 @@ class SaleController extends FController
 
             if ($sale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
                 try {
+                    if ($order = Order::findOne(['or_sale_id' => $saleId])) {
+                        $order->or_sale_id = null;
+                        $order->update();
+
+                        if ($caseOrder = CaseOrder::findOne(['co_order_id' => $order->getId(), 'co_case_id' => $csId])) {
+                            $caseOrder->delete();
+                        }
+                    }
                     $sale->delete();
                     $result['status'] = 1;
                 } catch (\Throwable $throwable) {

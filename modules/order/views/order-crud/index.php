@@ -49,6 +49,7 @@ $data = new OrderAbacDto(new Order());
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'or_id',
             'or_gid',
@@ -132,10 +133,12 @@ $data = new OrderAbacDto(new Order());
     //                'placeholder' => 'Select User',
     //            ],
 
+            'or_sale_id',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'or_created_dt',
             ],
+
 //            [
 //                'class' => DateTimeColumn::class,
 //                'attribute' => 'or_updated_dt',
