@@ -30,10 +30,12 @@ use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\airportLang\service\AirportLangService;
 use sales\services\cases\CasesSaleService;
 use yii\console\Controller;
 use Yii;
+use yii\console\ExitCode;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
@@ -531,6 +533,10 @@ class SyncController extends Controller
 
     public function actionSales($limit = 20, $from_id = 1)
     {
+        if (!SettingHelper::isEnableOrderFromSale()) {
+            echo Console::renderColoredString('%y --- %YWarning:%n%y Service is disabled.%n%w setting - enable_order_from_sale%n'), PHP_EOL;
+            return ExitCode::CONFIG;
+        }
         echo Console::renderColoredString('%y --- Start %w[' . date('Y-m-d H:i:s') . '] %y' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
@@ -592,6 +598,7 @@ class SyncController extends Controller
         echo Console::renderColoredString('%g --- Processed: %w[' . $processed . ' s] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . ']%n'), PHP_EOL;
+        return ExitCode::OK;
     }
 
     public static function showMessage($message, $lenght = 60)

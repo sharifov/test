@@ -965,40 +965,41 @@ class CasesController extends FController
             return $out;
         }
 
-        $transactionOrder = new Transaction(['db' => Yii::$app->db]);
-        try {
-            if (empty($out['error']) && !empty($saleData)) {
-                if (!$order = Order::findOne(['or_sale_id' => $saleId])) {
-                    $orderCreateFromSaleForm = OrderCreateFromSaleForm::fillForm($saleData);
-                    if (!$orderCreateFromSaleForm->validate()) {
-                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
+        if (SettingHelper::isEnableOrderFromSale()) {
+            $transactionOrder = new Transaction(['db' => Yii::$app->db]);
+            try {
+                if (empty($out['error']) && !empty($saleData)) {
+                    if (!$order = Order::findOne(['or_sale_id' => $saleId])) {
+                        $orderCreateFromSaleForm = OrderCreateFromSaleForm::fillForm($saleData);
+                        if (!$orderCreateFromSaleForm->validate()) {
+                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
+                        }
+
+                        $transactionOrder->begin();
+                        $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
+                        $orderId = $this->orderRepository->save($order);
+
+                        $this->orderCreateFromSaleService->caseOrderRelation($orderId, $model->cs_id);
+                        $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
+
+                        $currency = $orderCreateFromSaleForm->currency;
+                        $this->flightFromSaleService->createHandler($order, $order->or_project_id, $saleData, $currency);
+
+                        if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
+                            $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);
+                        }
+                        $transactionOrder->commit();
+                    } else {
+                        $this->orderCreateFromSaleService->caseOrderRelation($order->getId(), $model->cs_id);
                     }
-
-                    $transactionOrder->begin();
-                    $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
-                    $orderId = $this->orderRepository->save($order);
-
-                    $this->orderCreateFromSaleService->caseOrderRelation($orderId, $model->cs_id);
-                    $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
-
-                    $currency = $orderCreateFromSaleForm->currency;
-                    $this->flightFromSaleService->createHandler($order, $order->or_project_id, $saleData, $currency);
-
-                    if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
-                        $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);
-                    }
-                    $transactionOrder->commit();
-                } else {
-                    $this->orderCreateFromSaleService->caseOrderRelation($order->getId(), $model->cs_id);
                 }
+            } catch (\Throwable $throwable) {
+                $transactionOrder->rollBack();
+                $message['throwable'] = AppHelper::throwableLog($throwable, true);
+                $message['saleData'] = $saleData;
+                Yii::error($message, 'CasesController:actionAddSale:Order');
             }
-        } catch (\Throwable $throwable) {
-            $transactionOrder->rollBack();
-            $message['throwable'] = AppHelper::throwableLog($throwable, true);
-            $message['saleData'] = $saleData;
-            Yii::error($message, 'CasesController:actionAddSale:Order');
         }
-
         return $out;
     }
 
