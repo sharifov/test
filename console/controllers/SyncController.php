@@ -21,16 +21,57 @@ use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\Sources;
+use modules\flight\src\useCases\sale\FlightFromSaleService;
+use modules\flight\src\useCases\sale\form\OrderContactForm;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\payment\PaymentRepository;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\airportLang\service\AirportLangService;
 use sales\services\cases\CasesSaleService;
 use yii\console\Controller;
 use Yii;
+use yii\db\Transaction;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 
+/**
+ * Class SyncController
+ *
+ * @property OrderRepository $orderRepository
+ * @property PaymentRepository $paymentRepository
+ * @property OrderCreateFromSaleService $orderCreateFromSaleService
+ * @property FlightFromSaleService $flightFromSaleService,
+ */
 class SyncController extends Controller
 {
+    private OrderRepository $orderRepository;
+    private PaymentRepository $paymentRepository;
+    private OrderCreateFromSaleService $orderCreateFromSaleService;
+    private FlightFromSaleService $flightFromSaleService;
+
+    public function __construct(
+        $id,
+        $module,
+        OrderRepository $orderRepository,
+        PaymentRepository $paymentRepository,
+        OrderCreateFromSaleService $orderCreateFromSaleService,
+        FlightFromSaleService $flightFromSaleService,
+        $config = []
+    ) {
+        $this->orderRepository = $orderRepository;
+        $this->paymentRepository = $paymentRepository;
+        $this->orderCreateFromSaleService = $orderCreateFromSaleService;
+        $this->flightFromSaleService = $flightFromSaleService;
+
+        parent::__construct($id, $module, $config);
+    }
+
     public function actionProjects()
     {
         $result = BackOffice::sendRequest('default/projects');
@@ -492,26 +533,70 @@ class SyncController extends Controller
     {
         echo Console::renderColoredString('%y --- Start %w[' . date('Y-m-d H:i:s') . '] %y' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
         $timeStart = microtime(true);
         $idLimit = $from_id + $limit;
+        $processed = 0;
+        Console::startProgress(0, $limit);
 
         $casesSaleService = Yii::createObject(CasesSaleService::class);
 
-        for ($saleId = $from_id; $saleId <= $idLimit; $saleId++) {
+        for ($saleId = $from_id; $saleId < $idLimit; $saleId++) {
             try {
                 $saleData = $casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
             } catch (\Throwable $throwable) {
                 $message['throwable'] = AppHelper::throwableLog($throwable);
                 $message['saleId'] = $saleId;
                 Yii::warning(AppHelper::throwableLog($throwable), 'SyncController:actionSales:RequestToBO');
+                self::showMessage($throwable->getMessage());
                 continue;
             }
-            /* TODO::  */
+
+            $transactionOrder = new Transaction(['db' => Yii::$app->db]);
+            try {
+                if (!$order = Order::findOne(['or_sale_id' => $saleId])) {
+                    $orderCreateFromSaleForm = OrderCreateFromSaleForm::fillForm($saleData);
+                    if (!$orderCreateFromSaleForm->validate()) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
+                    }
+
+                    $transactionOrder->begin();
+                    $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
+                    $orderId = $this->orderRepository->save($order);
+
+                    $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
+
+                    $currency = $orderCreateFromSaleForm->currency;
+                    $this->flightFromSaleService->createHandler($order, $order->or_project_id, $saleData, $currency);
+
+                    if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
+                        $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);
+                    }
+                    $transactionOrder->commit();
+                }
+            } catch (\Throwable $throwable) {
+                $transactionOrder->rollBack();
+                $message['throwable'] = AppHelper::throwableLog($throwable, true);
+                $message['saleData'] = $saleData;
+                Yii::error($message, 'SyncController:actionSales::CreateFromSale');
+                self::showMessage($throwable->getMessage());
+            }
+            $processed++;
+            Console::updateProgress($processed, $limit);
         }
+
+        Console::endProgress(false);
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . ' s] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . ']%n'), PHP_EOL;
+    }
+
+    public static function showMessage($message, $lenght = 60)
+    {
+        $preparedMessage = StringHelper::truncate(VarDumper::dumpAsString($message), $lenght, '... %n%wFull text in the logs.');
+        echo Console::renderColoredString('%r --- %RError: %n%p' . $preparedMessage . ' %n'), PHP_EOL;
     }
 }
