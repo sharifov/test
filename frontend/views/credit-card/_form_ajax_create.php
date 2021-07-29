@@ -6,7 +6,6 @@ use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\CreditCard */
-/* @var $modelCc frontend\models\form\CreditCardForm */
 /* @var $form yii\widgets\ActiveForm */
 
 \frontend\assets\CreditCardAsset::register($this);
@@ -17,7 +16,7 @@ $pjaxId = 'pjax-create-credit-card'
 <script>pjaxOffFormSubmit('#<?= $pjaxId ?>');</script>
 <div class="credit-card-form">
 
-    <div class="col-md-4">
+    <div class="col-md-12">
         <div class="row">
             <div class="col-md-12">
                 <div class="card-wrapper"></div>
@@ -26,63 +25,34 @@ $pjaxId = 'pjax-create-credit-card'
 
         <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
-
         <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'credit-card-create-form']); ?>
 
         <?php echo $form->errorSummary($model); ?>
-
 
         <div class="clearfix"></div>
 
         <div class="row">
             <div class="col-md-12">
-                <?php if (!empty($modelCc) && $modelCc->isNewRecord) {
-                    echo $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]);
-                } else {
-                    echo $form->field($model, 'cc_number')->hiddenInput(['id' => 'cc_number'])->label(false);
-                }
-                ?>
+                <?= $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]) ?>
             </div>
         </div>
-
-        <?php //= $form->field($model, 'cc_display_number')->textInput(['maxlength' => true]) ?>
 
         <div class="row">
             <div class="col-md-5">
                 <?= $form->field($model, 'cc_expiration')->textInput(['id' => 'cc_expiration', 'maxlength' => 7]) ?>
-<!--                --><?php //= $form->field($model, 'cc_expiration_month')->dropDownList(array_combine(range(1, 12), range(1, 12)), ['prompt' => '-']) ?>
-<!--            </div>-->
-<!--            <div class="col-md-5">-->
-<!--                --><?php
-//                    $min = (int) date('Y', strtotime('-15 year'));
-//                    $max = (int) date('Y', strtotime('+5 year'));
-//                    $range = range($min, $max);
-//                ?>
-<!--                --><?php //= $form->field($model, 'cc_expiration_year')->dropDownList(array_combine($range, $range), ['prompt' => '-']) ?>
             </div>
             <div class="col-md-2">
                 <?= $form->field($model, 'cc_cvv')->passwordInput(['id' => 'cc_cvv', 'maxlength' => 4, 'autocomplete' => 'new-password']) ?>
             </div>
         </div>
+
         <?= $form->field($model, 'cc_holder_name')->textInput(['id' => 'cc_holder_name', 'maxlength' => true]) ?>
 
         <div class="row">
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_type_id')->dropDownList(CreditCard::getTypeList(), ['prompt' => '---']) ?>
             </div>
-            <div class="col-md-6">
-                <?= $form->field($model, 'cc_status_id')->dropDownList(CreditCard::getStatusList(), ['prompt' => '---']) ?>
-            </div>
         </div>
-            <?= $form->field($model, 'cc_is_expired')->checkbox() ?>
-
-        <!--    --><?php //= $form->field($model, 'cc_created_user_id')->textInput() ?>
-    <!---->
-    <!--    --><?php //= $form->field($model, 'cc_updated_user_id')->textInput() ?>
-    <!---->
-    <!--    --><?php //= $form->field($model, 'cc_created_dt')->textInput() ?>
-    <!---->
-    <!--    --><?php //= $form->field($model, 'cc_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
@@ -93,6 +63,7 @@ $pjaxId = 'pjax-create-credit-card'
     <?php \yii\widgets\Pjax::end(); ?>
     </div>
 </div>
+
 
 <?php
 $js = <<<JS

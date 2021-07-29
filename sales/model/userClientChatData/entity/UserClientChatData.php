@@ -71,8 +71,7 @@ class UserClientChatData extends \yii\db\ActiveRecord
 
             [['uccd_auth_token'], 'string', 'max' => 50],
             [['uccd_rc_user_id'], 'string', 'max' => 20],
-            [['uccd_password'], 'string', 'skipOnEmpty' => true],
-            [['uccd_password'], 'string', 'min' => 8, 'max' => 50],
+            [['uccd_password'], 'string', 'min' => 8, 'max' => 50, 'skipOnEmpty' => true],
 
             [['uccd_token_expired'], 'date', 'format' => 'php:Y-m-d H:i:s'],
 

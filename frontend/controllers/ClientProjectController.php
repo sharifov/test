@@ -2,13 +2,19 @@
 
 namespace frontend\controllers;
 
+use common\models\Lead;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use sales\auth\Auth;
 use Yii;
 use common\models\ClientProject;
 use common\models\search\ClientProjectSearch;
+use yii\base\Response;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\ForbiddenHttpException;
 
 /**
  * ClientProjectController implements the CRUD actions for ClientProject model.
@@ -25,6 +31,12 @@ class ClientProjectController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'allowActions' => [
+                    'unsubscribe-client-ajax',
+                    'subscribe-client-ajax',
                 ],
             ],
         ];
@@ -120,9 +132,31 @@ class ClientProjectController extends FController
         return $this->redirect(['index']);
     }
 
-    public function actionUnsubscribeClientAjax()
+    public function actionUnsubscribeClientAjax(): Response
     {
         $data = Yii::$app->request->get();
+        $leadAbacDto = new LeadAbacDto(Lead::findOne($data['leadID']), Auth::id());
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_UNSUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to action client unsubscribe*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_UNSUBSCRIBE, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        ClientProject::unSubScribe($data['clientID'], $data['projectID'], $data['action']);
+
+        return $this->asJson(['data' => ['action' => $data['action']]]);
+    }
+
+    public function actionSubscribeClientAjax(): Response
+    {
+        $data = Yii::$app->request->get();
+        $leadAbacDto = new LeadAbacDto(Lead::findOne($data['leadID']), Auth::id());
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to action client subscribe*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         ClientProject::unSubScribe($data['clientID'], $data['projectID'], $data['action']);
 
         return $this->asJson(['data' => ['action' => $data['action']]]);

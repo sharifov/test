@@ -51,8 +51,7 @@ class ApiUser extends ActiveRecord implements IdentityInterface, RateLimitInterf
 
 
             [['au_api_password'], 'required', 'on' => 'insert'],
-            [['au_api_password'], 'string', 'min' => 7],
-            [['au_api_password'], 'string', 'skipOnEmpty' => true],
+            [['au_api_password'], 'string', 'min' => 7, 'skipOnEmpty' => true],
 
             [['au_project_id'], 'integer'],
 

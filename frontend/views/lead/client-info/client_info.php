@@ -97,9 +97,10 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
                                     'title' => 'Allow communication with client',
-                                    'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
+                                    'data-unsubscribe-url' => Url::to(['client-project/subscribe-client-ajax',
                                         'clientID' => $lead->client_id,
                                         'projectID' => $lead->project_id,
+                                        'leadID' => $lead->id,
                                         'action' => false
                                     ]),
                                 ])?>
@@ -115,6 +116,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                                     'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
                                         'clientID' => $lead->client_id,
                                         'projectID' => $lead->project_id,
+                                        'leadID' => $lead->id,
                                         'action' => true
                                     ]),
                                 ])?>
