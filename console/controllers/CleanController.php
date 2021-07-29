@@ -10,6 +10,7 @@ use sales\services\cleaner\cleaners\CallCleaner;
 use sales\services\cleaner\cleaners\ClientChatUserAccessCleaner;
 use sales\services\cleaner\cleaners\GlobalLogCleaner;
 use sales\services\cleaner\cleaners\LogCleaner;
+use sales\services\cleaner\cleaners\NotificationsCleaner;
 use sales\services\cleaner\cleaners\UserMonitorCleaner;
 use sales\services\cleaner\cleaners\UserSiteActivityCleaner;
 use sales\services\cleaner\DbCleanerService;
@@ -114,6 +115,14 @@ class CleanController extends Controller
             \Yii::$app->runAction('clean/client-chat-user-access', $paramsClientChatUserAccess);
         } catch (\Throwable $throwable) {
             self::throwableHandler($throwable, 'actionOnceDay:ClientChatUserAccess');
+        }
+        try {
+            $paramsNotifications = [
+                'date' => DbCleanerService::daysToBeforeDate(SettingHelper::getNotificationsHistoryDays())
+            ];
+            \Yii::$app->runAction('clean/notifications', $paramsNotifications);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:Notifications');
         }
 
         $timeEnd = microtime(true);
@@ -371,6 +380,41 @@ class CleanController extends Controller
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
         self::outputResult($processed, $time, 'actionClientChatUserAccess:result');
+        return ExitCode::OK;
+    }
+
+    public function actionNotifications(): int
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $timeStart = microtime(true);
+        $params = $this->mappingParams();
+        $cleaner = new NotificationsCleaner();
+        $defaultDays = SettingHelper::getNotificationsHistoryDays();
+
+        try {
+            $dbCleanerParamsForm = (new DbCleanerParamsForm())
+                ->setTable($cleaner->getTable())
+                ->setColumn($cleaner->getColumn())
+                ->fillParam($params);
+
+            if ($defaultDays && self::isParamsEmpty($params)) {
+                $dbCleanerParamsForm->day = $defaultDays;
+            }
+            if (!$dbCleanerParamsForm->validate()) {
+                throw new Exception(ErrorsToStringHelper::extractFromModel($dbCleanerParamsForm));
+            }
+
+            $processed = $cleaner->runDeleteByForm($dbCleanerParamsForm);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionNotifications:throwable');
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        self::outputResult($processed, $time, 'actionNotifications:result');
         return ExitCode::OK;
     }
 

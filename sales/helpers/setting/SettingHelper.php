@@ -376,6 +376,11 @@ class SettingHelper
         return (bool) (Yii::$app->params['settings']['enable_order_from_sale'] ?? false);
     }
 
+    public static function getNotificationsHistoryDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['notifications_history_days'] ?? 30);
+    }
+
     public static function getCallDistributionSort(): array
     {
         $sort = [
