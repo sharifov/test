@@ -371,6 +371,11 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['call_duration_seconds_gl_count'] ?? 20);
     }
 
+    public static function isEnableOrderFromSale(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_order_from_sale'] ?? false);
+    }
+
     public static function getCallDistributionSort(): array
     {
         $sort = [

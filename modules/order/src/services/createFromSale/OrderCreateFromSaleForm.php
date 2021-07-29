@@ -4,7 +4,6 @@ namespace modules\order\src\services\createFromSale;
 
 use common\models\Currency;
 use common\models\Project;
-use modules\order\src\entities\order\Order;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 

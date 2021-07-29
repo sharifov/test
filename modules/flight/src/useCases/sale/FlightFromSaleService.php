@@ -114,8 +114,8 @@ class FlightFromSaleService
         $productQuoteDto = new ProductQuoteCreateFromSaleDto(
             $flightProduct,
             $order->getId(),
-            $order->or_app_total,
-            $order->or_app_total,
+            null, //$order->or_app_total, /* TODO::  */
+            null, //$order->or_app_total, /* TODO::  */
             $order->or_client_currency
         );
         $productQuote = ProductQuote::create($productQuoteDto, null);
@@ -187,6 +187,7 @@ class FlightFromSaleService
         $flightProduct->fl_infants = $paxTypeCount[FlightPax::PAX_INFANT] ?? 0;
         $flightProduct->update();
 
+        $estimationTotal = 0;
         if ($priceQuotes = ArrayHelper::getValue($saleData, 'price.priceQuotes')) {
             foreach ($priceQuotes as $paxType => $priceQuote) {
                 $priceQuote['paxType'] = $paxType;
@@ -212,8 +213,11 @@ class FlightFromSaleService
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuotePaxPrice));
                 }
                 $this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
+
+                $estimationTotal += ($priceQuotesForm->selling * $priceQuotesForm->cnt);
             }
         }
+        return $estimationTotal;
     }
 
     private static function detectProductQuoteStatus(array $saleData): int

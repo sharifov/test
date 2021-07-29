@@ -99,7 +99,6 @@ class OrderCreateFromSaleService
     public function orderCreate(
         OrderCreateFromSaleForm $form,
         int $saleId,
-        ?float $appTotal,
         $payStatusId = OrderPayStatus::PAID
     ): Order {
         $dto = new CreateOrderDTO(
@@ -117,8 +116,8 @@ class OrderCreateFromSaleService
         );
         $order = (new Order())->create($dto);
         $order->or_pay_status_id = $payStatusId;
-        $order->or_app_total = $appTotal;
-        $order->or_client_total = $appTotal;
+        //$order->or_app_total = $appTotal;
+        //$order->or_client_total = $appTotal; /* TODO::  */
         return $order;
     }
 

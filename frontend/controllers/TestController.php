@@ -126,6 +126,7 @@ use sales\entities\cases\CaseCategory;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
+use sales\helpers\setting\SettingHelper;
 use sales\model\airportLang\service\AirportLangService;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatForm\entity\ClientChatForm;
