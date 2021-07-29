@@ -25,6 +25,7 @@ class m210729_061243_add_setting_enable_order_from_sale extends Migration
                 's_value' => false,
                 's_updated_dt' => date('Y-m-d H:i:s'),
                 's_category_id' => $settingCategory->sc_id,
+                's_description' => 'this setting enables/disables import of sales into orders, on the case/view page when adding sales, as well as in the console script - sync/sales',
             ]
         );
 

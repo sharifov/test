@@ -548,6 +548,12 @@ class SyncController extends Controller
         $casesSaleService = Yii::createObject(CasesSaleService::class);
 
         for ($saleId = $from_id; $saleId < $idLimit; $saleId++) {
+            if ($order = Order::findOne(['or_sale_id' => $saleId])) {
+                echo Console::renderColoredString('%g --- SaleId: %w[' . $saleId . ']%g already processed in OrderId %w[' .
+                    $order->getId() . '] %n'), PHP_EOL;
+                continue;
+            }
+
             try {
                 $saleData = $casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
             } catch (\Throwable $throwable) {
@@ -584,7 +590,7 @@ class SyncController extends Controller
                 $transactionOrder->rollBack();
                 $message['throwable'] = AppHelper::throwableLog($throwable, true);
                 $message['saleData'] = $saleData;
-                Yii::error($message, 'SyncController:actionSales::CreateFromSale');
+                Yii::warning($message, 'SyncController:actionSales::CreateFromSale');
                 self::showMessage($throwable->getMessage());
             }
             $processed++;
