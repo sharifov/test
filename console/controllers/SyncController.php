@@ -534,7 +534,7 @@ class SyncController extends Controller
     public function actionSales($limit = 20, $from_id = 1)
     {
         if (!SettingHelper::isEnableOrderFromSale()) {
-            echo Console::renderColoredString('%y --- %YWarning:%n%y Service is disabled.%n%w setting - enable_order_from_sale%n'), PHP_EOL;
+            echo Console::renderColoredString('%y --- %YWarning:%n%y Service is disabled.%n%w setting - enable_order_from_sale = false%n'), PHP_EOL;
             return ExitCode::CONFIG;
         }
         echo Console::renderColoredString('%y --- Start %w[' . date('Y-m-d H:i:s') . '] %y' .
