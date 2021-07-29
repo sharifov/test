@@ -601,7 +601,7 @@ class SyncController extends Controller
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . ' s] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . ']%n'), PHP_EOL;
         return ExitCode::OK;
