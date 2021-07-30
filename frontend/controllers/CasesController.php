@@ -970,20 +970,23 @@ class CasesController extends FController
             try {
                 if (empty($out['error']) && !empty($saleData)) {
                     if (!$order = Order::findOne(['or_sale_id' => $saleId])) {
-                        $orderCreateFromSaleForm = OrderCreateFromSaleForm::fillForm($saleData);
+                        $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
+                        if (!$orderCreateFromSaleForm->load($saleData)) {
+                            throw new \RuntimeException('OrderCreateFromSaleForm not loaded');
+                        }
                         if (!$orderCreateFromSaleForm->validate()) {
                             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
                         }
+                        $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
 
                         $transactionOrder->begin();
-                        $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
                         $orderId = $this->orderRepository->save($order);
 
                         $this->orderCreateFromSaleService->caseOrderRelation($orderId, $model->cs_id);
                         $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
 
                         $currency = $orderCreateFromSaleForm->currency;
-                        $this->flightFromSaleService->createHandler($order, $order->or_project_id, $saleData, $currency);
+                        $this->flightFromSaleService->createHandler($order, $orderCreateFromSaleForm, $saleData);
 
                         if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
                             $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);

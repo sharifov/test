@@ -6,6 +6,8 @@ use common\components\SearchService;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
+use modules\flight\models\FlightQuoteBooking;
+use modules\flight\models\FlightQuoteFlight;
 use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\models\FlightQuoteSegment;
 use modules\flight\models\FlightQuoteTicket;
@@ -13,9 +15,12 @@ use modules\flight\models\FlightQuoteTrip;
 use modules\flight\src\dto\flightSegment\FlightQuoteSegmentApiBoDto;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightPaxRepository\FlightPaxRepository;
+use modules\flight\src\repositories\flightQuoteBooking\FlightQuoteBookingRepository;
+use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\flight\src\repositories\flightQuoteSegment\FlightQuoteSegmentRepository;
+use modules\flight\src\repositories\flightQuoteTicket\FlightQuoteTicketRepository;
 use modules\flight\src\repositories\flightQuoteTripRepository\FlightQuoteTripRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
@@ -25,6 +30,7 @@ use modules\flight\src\useCases\sale\form\FlightPaxForm;
 use modules\flight\src\useCases\sale\form\PriceQuotesForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\payment\PaymentRepository;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\product\ProductRepository;
@@ -49,6 +55,9 @@ use yii\helpers\ArrayHelper;
  * @property FlightPaxRepository $flightPaxRepository
  * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
  * @property FlightRepository $flightRepository
+ * @property FlightQuoteFlightRepository $flightQuoteFlightRepository
+ * @property FlightQuoteBookingRepository $flightQuoteBookingRepository
+ * @property FlightQuoteTicketRepository $flightQuoteTicketRepository
  */
 class FlightFromSaleService
 {
@@ -62,6 +71,9 @@ class FlightFromSaleService
     private FlightPaxRepository $flightPaxRepository;
     private FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository;
     private FlightRepository $flightRepository;
+    private FlightQuoteFlightRepository $flightQuoteFlightRepository;
+    private FlightQuoteBookingRepository $flightQuoteBookingRepository;
+    private FlightQuoteTicketRepository $flightQuoteTicketRepository;
 
     /**
      * @param PaymentRepository $paymentRepository
@@ -74,6 +86,8 @@ class FlightFromSaleService
      * @param FlightPaxRepository $flightPaxRepository
      * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
      * @param FlightRepository $flightRepository
+     * @param FlightQuoteFlightRepository $flightQuoteFlightRepository
+     * @param FlightQuoteBookingRepository $flightQuoteBookingRepository
      */
     public function __construct(
         PaymentRepository $paymentRepository,
@@ -85,7 +99,10 @@ class FlightFromSaleService
         ProductRepository $productRepository,
         FlightPaxRepository $flightPaxRepository,
         FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository,
-        FlightRepository $flightRepository
+        FlightRepository $flightRepository,
+        FlightQuoteFlightRepository $flightQuoteFlightRepository,
+        FlightQuoteBookingRepository $flightQuoteBookingRepository,
+        FlightQuoteTicketRepository $flightQuoteTicketRepository
     ) {
         $this->paymentRepository = $paymentRepository;
         $this->productCreateService = $productCreateService;
@@ -97,11 +114,19 @@ class FlightFromSaleService
         $this->flightPaxRepository = $flightPaxRepository;
         $this->flightQuotePaxPriceRepository = $flightQuotePaxPriceRepository;
         $this->flightRepository = $flightRepository;
+        $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
+        $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
+        $this->flightQuoteTicketRepository = $flightQuoteTicketRepository;
     }
 
-    public function createHandler(Order $order, int $projectId, array $saleData, ?string $currency)
-    {
-        $product = Product::create(new CreateDto(null, ProductType::PRODUCT_FLIGHT, null, null, $projectId));
+    public function createHandler(
+        Order $order,
+        OrderCreateFromSaleForm $orderCreateFromSaleForm,
+        array $saleData
+    ) {
+        $product = Product::create(
+            new CreateDto(null, ProductType::PRODUCT_FLIGHT, null, null, $orderCreateFromSaleForm->getProjectId())
+        );
         $this->productRepository->save($product);
 
         $tripTypeId = self::getFlightTripIdByName(ArrayHelper::getValue($saleData, 'tripType'));
@@ -125,7 +150,7 @@ class FlightFromSaleService
         }
         $this->productQuoteRepository->save($productQuote);
 
-        $flightQuoteData = self::prepareFlightQuoteData($saleData);
+        $flightQuoteData = self::prepareFlightQuoteData($saleData, $orderCreateFromSaleForm);
         $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $flightQuoteData, null)));
         $flightQuote->fq_flight_request_uid = ArrayHelper::getValue($saleData, 'bookingId');
         $flightQuote->fq_hash_key = null;
@@ -156,6 +181,35 @@ class FlightFromSaleService
             }
         }
 
+        $flightQuoteFlight = FlightQuoteFlight::create(
+            $flightQuote->getId(),
+            $orderCreateFromSaleForm->getTripTypeId(),
+            $orderCreateFromSaleForm->validatingCarrier,
+            $orderCreateFromSaleForm->booking_id,
+            null,
+            $orderCreateFromSaleForm->pnr,
+            $orderCreateFromSaleForm->validatingCarrier,
+            null
+        );
+        if (!$flightQuoteFlight->validate()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteFlight));
+        }
+        $flightQuoteFlightId = $this->flightQuoteFlightRepository->save($flightQuoteFlight);
+
+        $flightQuoteBooking = FlightQuoteBooking::create(
+            $flightQuoteFlightId,
+            $orderCreateFromSaleForm->booking_id,
+            $orderCreateFromSaleForm->pnr,
+            $orderCreateFromSaleForm->getGdsId(),
+            null,
+            $orderCreateFromSaleForm->validatingCarrier
+        );
+        if (!$flightQuoteBooking->validate()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteBooking));
+        }
+        $flightQuoteBookingId = $this->flightQuoteBookingRepository->save($flightQuoteBooking);
+
+
         $paxTypeCount = [];
         if ($passengers = ArrayHelper::getValue($saleData, 'passengers')) {
             foreach ($passengers as $passenger) {
@@ -172,7 +226,13 @@ class FlightFromSaleService
                         $flightPaxForm->birth_date,
                         $flightPaxForm->gender
                     );
-                    $this->flightPaxRepository->save($flightPax);
+                    $flightPaxId = $this->flightPaxRepository->save($flightPax);
+
+                    if ($flightPaxForm->ticket_number) {
+                        $flightQuoteTicket = FlightQuoteTicket::create($flightPaxId, $flightQuoteBookingId, $flightPaxForm->ticket_number);
+                        $this->flightQuoteTicketRepository->save($flightQuoteTicket);
+                    }
+
                     $cnt = ArrayHelper::getValue($paxTypeCount, $flightPaxForm->type, 0) + 1;
                     ArrayHelper::setValue($paxTypeCount, $flightPaxForm->type, $cnt);
                 } else {
@@ -202,12 +262,12 @@ class FlightFromSaleService
                 $flightQuotePaxPrice = new FlightQuotePaxPrice();
                 $flightQuotePaxPrice->qpp_flight_pax_code_id = $priceQuotesForm->getPaxTypeId();
                 $flightQuotePaxPrice->qpp_flight_quote_id = $flightQuote->getId();
-                $flightQuotePaxPrice->qpp_origin_currency = $currency;
+                $flightQuotePaxPrice->qpp_origin_currency = $orderCreateFromSaleForm->currency;
                 $flightQuotePaxPrice->qpp_fare = $priceQuotesForm->fare;
                 $flightQuotePaxPrice->qpp_tax = $priceQuotesForm->taxes;
                 $flightQuotePaxPrice->qpp_system_mark_up = $priceQuotesForm->mark_up;
                 $flightQuotePaxPrice->qpp_cnt = $priceQuotesForm->cnt;
-                $flightQuotePaxPrice->qpp_client_currency = $currency;
+                $flightQuotePaxPrice->qpp_client_currency = $orderCreateFromSaleForm->currency;
 
                 if (!$flightQuotePaxPrice->validate()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuotePaxPrice));
@@ -249,14 +309,14 @@ class FlightFromSaleService
         return null;
     }
 
-    private static function prepareFlightQuoteData(array $saleData): array
+    private static function prepareFlightQuoteData(array $saleData, OrderCreateFromSaleForm $orderCreateFromSaleForm): array
     {
         return [
             'recordLocator' => ArrayHelper::getValue($saleData, 'itinerary.0.segments.0.airlineRecordLocator'),
-            'gds' => SearchService::getGDSKeyByName(ArrayHelper::getValue($saleData, 'gds')),
-            'pcc' => ArrayHelper::getValue($saleData, 'pcc'),
-            'validatingCarrier' => ArrayHelper::getValue($saleData, 'validatingCarrier'),
-            'fareType' => ArrayHelper::getValue($saleData, 'fareType'),
+            'gds' => $orderCreateFromSaleForm->getGdsId(),
+            'pcc' => $orderCreateFromSaleForm->pcc,
+            'validatingCarrier' => $orderCreateFromSaleForm->validatingCarrier,
+            'fareType' => $orderCreateFromSaleForm->fareType,
             'key' => ArrayHelper::getValue($saleData, 'bookingId', serialize($saleData)),
             'trips' => ArrayHelper::getValue($saleData, 'itinerary', [])
         ];

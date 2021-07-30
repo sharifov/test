@@ -87,11 +87,10 @@ class SearchService
 
     public static function getGDSKeyByName(string $name, bool $strict = false): ?string
     {
-        $gdsKey = null;
         if ($gdsSearch = array_search($name, self::GDS_LIST, $strict)) {
-            $gdsKey = $gdsSearch;
+            return $gdsSearch;
         }
-        return $gdsKey;
+        return null;
     }
 
     /**
