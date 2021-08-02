@@ -11,6 +11,8 @@ use yii\data\ActiveDataProvider;
  */
 class QaTaskSearchPendingSearch extends QaTaskSearch
 {
+    public $objectOwner;
+
     public function rules(): array
     {
         return [
@@ -49,6 +51,8 @@ class QaTaskSearchPendingSearch extends QaTaskSearch
 
             ['t_updated_user_id', 'integer'],
             ['t_updated_user_id', 'in', 'range' => array_keys($this->getUserList())],
+
+            [['objectOwner'], 'integer'],
         ];
     }
 

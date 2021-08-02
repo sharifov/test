@@ -11,6 +11,8 @@ use yii\data\ActiveDataProvider;
  */
 class QaTaskSearchClosedSearch extends QaTaskSearch
 {
+    public $objectOwner;
+
     public function rules(): array
     {
         return [
@@ -52,6 +54,9 @@ class QaTaskSearchClosedSearch extends QaTaskSearch
 
             ['t_assigned_user_id', 'integer'],
             ['t_assigned_user_id', 'in', 'range' => array_keys($this->getUserList())],
+
+            [['objectOwner'], 'integer'],
+
         ];
     }
 
@@ -74,6 +79,10 @@ class QaTaskSearchClosedSearch extends QaTaskSearch
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->objectOwner) {
+            QueryHelper::getQaTasksByOwner($query, $this->objectOwner);
         }
 
         if ($this->t_created_dt) {
@@ -105,6 +114,7 @@ class QaTaskSearchClosedSearch extends QaTaskSearch
 
         $query->andFilterWhere(['like', 't_gid', $this->t_gid])
             ->andFilterWhere(['like', 't_description', $this->t_description]);
+//        echo $query->createCommand()->rawSql; exit;
 
         return $dataProvider;
     }
