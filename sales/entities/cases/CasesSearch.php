@@ -317,11 +317,10 @@ class CasesSearch extends Cases
             $query->andWhere(['cl_locale' => $this->locales]);
         }
 
-        if ($user->isExSuper() || $user->isSupSuper() || $user->isSupAgent()) {
-            if ($this->cs_user_id) {
-                $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
-            }
+        if ($this->cs_user_id) {
+            $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
         }
+
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
