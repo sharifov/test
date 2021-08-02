@@ -77,6 +77,10 @@ class QaTaskSearchPendingSearch extends QaTaskSearch
             return $dataProvider;
         }
 
+        if ($this->objectOwner) {
+            QueryHelper::getQaTasksByOwner($query, $this->objectOwner);
+        }
+
         if ($this->t_created_dt) {
             QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $this->user->timezone);
         }
