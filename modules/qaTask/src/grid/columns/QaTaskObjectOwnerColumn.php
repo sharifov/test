@@ -4,7 +4,6 @@ namespace modules\qaTask\src\grid\columns;
 
 use yii\grid\DataColumn;
 
-
 /**
  * Class QaTaskObjectOwnerColumn
  *
