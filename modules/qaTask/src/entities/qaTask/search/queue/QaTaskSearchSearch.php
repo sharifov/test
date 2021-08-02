@@ -83,7 +83,6 @@ class QaTaskSearchSearch extends QaTaskSearch
             return $dataProvider;
         }
 
-
         if ($this->objectOwner) {
             QueryHelper::getQaTasksByOwner($query, $this->objectOwner);
         }
