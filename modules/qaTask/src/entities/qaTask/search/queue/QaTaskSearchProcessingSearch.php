@@ -14,6 +14,8 @@ use yii\data\ActiveDataProvider;
  */
 class QaTaskSearchProcessingSearch extends QaTaskSearch
 {
+    public $objectOwner;
+
     public static function createSearch(CreateDto $dto): QaTaskSearch
     {
         $dto->statusList = QaTaskStatus::getProcessingQueueList();
@@ -64,6 +66,8 @@ class QaTaskSearchProcessingSearch extends QaTaskSearch
 
             ['t_assigned_user_id', 'integer'],
             ['t_assigned_user_id', 'in', 'range' => array_keys($this->getUserList())],
+
+            [['objectOwner'], 'integer'],
         ];
     }
 

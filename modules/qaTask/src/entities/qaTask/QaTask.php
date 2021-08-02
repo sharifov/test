@@ -5,6 +5,8 @@ namespace modules\qaTask\src\entities\qaTask;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
+use common\models\Lead;
+use sales\entities\cases\Cases;
 use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskCreatedEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskStatusCanceledEvent;
@@ -47,11 +49,14 @@ use yii\db\ActiveRecord;
  *
  * @property Project $project
  * @property QaTaskCategory $category
+ * @property Employee $owner
  * @property Employee $assignedUser
  * @property Employee $createdUser
  * @property Employee $updatedUser
  * @property Department $department
  * @property QaTaskStatusLog[] $statusLogs
+ * @property Lead|null $lead
+ * @property Cases|null $case
  */
 class QaTask extends \yii\db\ActiveRecord
 {
@@ -221,6 +226,8 @@ class QaTask extends \yii\db\ActiveRecord
             ['t_object_id', 'required'],
             ['t_object_id', 'integer'],
 
+//            ['owner', 'targetClass' => Employee::class],
+
             ['t_status_id', 'required'],
             ['t_status_id', 'integer'],
             ['t_status_id', 'in', 'range' => array_keys(QaTaskStatus::getList())],
@@ -289,6 +296,7 @@ class QaTask extends \yii\db\ActiveRecord
             't_deadline_dt' => 'Deadline Dt',
             't_assigned_user_id' => 'Assigned User',
             'assignedUser' => 'Assigned User',
+            'objectOwner' => 'Object Owner',
             't_created_user_id' => 'Created User',
             'createdUser' => 'Created User',
             't_updated_user_id' => 'Updated User',
@@ -332,6 +340,27 @@ class QaTask extends \yii\db\ActiveRecord
     public function getStatusLogs(): ActiveQuery
     {
         return $this->hasMany(QaTaskStatusLog::class, ['tsl_task_id' => 't_id']);
+    }
+
+    public function getLead(): ActiveQuery
+    {
+        return $this->hasOne(Lead::class, ['id' => 't_object_id']);
+    }
+
+    public function getCase(): ActiveQuery
+    {
+        return $this->hasOne(Cases::class, ['cs_id' => 't_object_id']);
+    }
+
+    public function getOwner()
+    {
+        if ($this->t_object_type_id === QaTaskObjectType::LEAD) {
+            return $this->lead->employee ?? null;
+        }
+        if ($this->t_object_type_id === QaTaskObjectType::CASE) {
+            return $this->case->owner ?? null;
+        }
+        return null;
     }
 
     public static function find(): Scopes

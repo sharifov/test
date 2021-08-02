@@ -6,6 +6,7 @@ use modules\qaTask\src\grid\columns\QaTaskCreatedTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskQueueActionColumn;
 use modules\qaTask\src\grid\columns\QaTaskRatingColumn;
 use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
+use modules\qaTask\src\grid\columns\QaTaskObjectOwnerColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\department\DepartmentColumn;
 use common\components\grid\project\ProjectColumn;
@@ -72,6 +73,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 't_department_id',
                 'relation' => 'department',
                 'filter' => $searchModel->getDepartmentList(),
+            ],
+
+            [
+                'class' => QaTaskObjectOwnerColumn::class,
             ],
 
             [
