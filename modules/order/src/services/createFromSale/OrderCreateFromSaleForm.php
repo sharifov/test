@@ -2,27 +2,50 @@
 
 namespace modules\order\src\services\createFromSale;
 
+use common\components\SearchService;
+use common\components\validators\IsArrayValidator;
 use common\models\Currency;
 use common\models\Project;
+use modules\flight\src\useCases\sale\FlightFromSaleService;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class OrderCreateFromSaleForm
  *
- * @property $currency
  * @property $saleId
  * @property $project
+ * @property $booking_id
+ * @property $pnr
+ * @property $price
+ * @property $tripType
+ * @property $validatingCarrier
+ * @property $gds
+ * @property $pcc
+ * @property $fareType
  *
  * @property $projectId
+ * @property $tripTypeId
+ * @property $gdsId
+ * @property $currency
  */
 class OrderCreateFromSaleForm extends Model
 {
-    public $currency;
     public $saleId;
     public $project;
+    public $booking_id;
+    public $pnr;
+    public $price;
+    public $tripType;
+    public $validatingCarrier;
+    public $gds;
+    public $pcc;
+    public $fareType;
 
     private ?int $projectId;
+    private ?string $tripTypeId;
+    private ?string $gdsId;
+    private ?string $currency;
 
     public function rules(): array
     {
@@ -31,13 +54,28 @@ class OrderCreateFromSaleForm extends Model
             [['saleId'], 'integer'],
             [['saleId'], 'filter', 'filter' => 'intval', 'skipOnError' => true],
 
-            [['currency'], 'trim', 'skipOnEmpty' => true, 'skipOnError' => true],
-            [['currency'], 'string', 'max' => 3],
-            [['currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['currency' => 'cur_code']],
-
             [['project'], 'required'],
             [['project'], 'string'],
             [['project'], 'detectProjectId'],
+
+            ['booking_id', 'string', 'max' => 50],
+
+            [['pnr'], 'string', 'max' => 10],
+
+            [['tripType'], 'string', 'max' => 50],
+            [['tripType'], 'detectTripTypeId'],
+
+            [['price'], IsArrayValidator::class],
+            [['price'], 'detectCurrency'],
+
+            [['validatingCarrier'], 'string', 'max' => 2],
+
+            [['gds'], 'string', 'max' => 50],
+            [['gds'], 'detectGdsId'],
+
+            [['pcc'], 'string', 'max' => 10],
+
+            [['fareType'], 'string', 'max' => 255],
         ];
     }
 
@@ -50,17 +88,45 @@ class OrderCreateFromSaleForm extends Model
         }
     }
 
+    public function detectCurrency()
+    {
+        $this->currency = ArrayHelper::getValue($this->price, 'currency');
+    }
+
+    public function detectTripTypeId($attribute)
+    {
+        if (!$this->tripTypeId = FlightFromSaleService::getFlightTripIdByName($this->tripType)) {
+            $this->addError($attribute, 'Trip tape ID not detected by (' . $this->tripType . ')');
+        }
+    }
+
+    public function detectGdsId($attribute)
+    {
+        $this->gdsId = SearchService::getGDSKeyByName($this->gds);
+    }
+
+    public function getTripTypeId(): ?string
+    {
+        return $this->tripTypeId;
+    }
+
     public function getProjectId(): ?int
     {
         return $this->projectId;
     }
 
-    public static function fillForm(array $saleData): OrderCreateFromSaleForm
+    public function getGdsId(): ?string
     {
-        $form = new self();
-        $form->project = ArrayHelper::getValue($saleData, 'project');
-        $form->currency = ArrayHelper::getValue($saleData, 'price.currency');
-        $form->saleId = ArrayHelper::getValue($saleData, 'saleId');
-        return $form;
+        return $this->gdsId;
+    }
+
+    public function getCurrency(): ?string
+    {
+        return $this->currency;
+    }
+
+    public function formName(): string
+    {
+        return '';
     }
 }
