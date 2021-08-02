@@ -2,21 +2,24 @@
 
 namespace modules\qaTask\src\grid\columns;
 
-use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use yii\grid\DataColumn;
+
 
 /**
  * Class QaTaskObjectOwnerColumn
  *
+ * @property int $minimumInputLength
+ * @property int $delay
+ * @property string $placeholder
+ * @property array $data
+ *
  * Ex.
     [
         'class' => \modules\qaTask\src\grid\columns\QaTaskObjectOwnerColumn::class,
-        'attribute' => 'objectOwner',
     ],
  */
 class QaTaskObjectOwnerColumn extends DataColumn
 {
-    public $url;
     public $minimumInputLength = 1;
     public $delay = 300;
     public $placeholder = '';

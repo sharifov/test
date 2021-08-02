@@ -114,7 +114,6 @@ class QaTaskSearchClosedSearch extends QaTaskSearch
 
         $query->andFilterWhere(['like', 't_gid', $this->t_gid])
             ->andFilterWhere(['like', 't_description', $this->t_description]);
-//        echo $query->createCommand()->rawSql; exit;
 
         return $dataProvider;
     }

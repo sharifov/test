@@ -64,7 +64,6 @@ class QaTaskSearchSearch extends QaTaskSearch
 
     public function search($params): ActiveDataProvider
     {
-//        VarDumper::dump($params); echo $this->t_object_type_id; die;
         $query = static::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
         $this->queryAccessService->processProject($this->user->getAccess(), $query);
@@ -119,8 +118,6 @@ class QaTaskSearchSearch extends QaTaskSearch
 
         $query->andFilterWhere(['like', 't_gid', $this->t_gid])
             ->andFilterWhere(['like', 't_description', $this->t_description]);
-
-//        echo $query->createCommand()->rawSql; exit;
 
         return $dataProvider;
     }
