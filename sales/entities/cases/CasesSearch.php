@@ -317,7 +317,7 @@ class CasesSearch extends Cases
             $query->andWhere(['cl_locale' => $this->locales]);
         }
 
-        if ($user->isExSuper() || $user->isSupSuper()) {
+        if ($user->isExSuper() || $user->isSupSuper() || $user->isSupAgent()) {
             if ($this->cs_user_id) {
                 $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
             }
