@@ -110,13 +110,21 @@ class WebsocketServerController extends Controller
                 if (!empty($server->tblConnections)) {
                     foreach ($server->tblConnections as $connection) {
                         // $server->push($connection['fd'], json_encode(['cmd' => 'pong', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
-                        $server->push($connection['fd'], 'ping', WEBSOCKET_OPCODE_PING);
+                        try {
+                            $server->push($connection['fd'], 'ping', WEBSOCKET_OPCODE_PING);
+                        } catch (\Throwable $e) {
+                            \Yii::error(AppHelper::throwableLog($e, true), 'ws:workerStart:tick20000');
+                        }
                     }
                 }
             });
 
             $server->tick(30000, static function () use ($server) {
-                \Yii::$app->db->createCommand('SELECT 1')->execute();
+                try {
+                    \Yii::$app->db->createCommand('SELECT 1')->execute();
+                } catch (\Throwable $e) {
+                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:workerStart:tick30000');
+                }
             });
 
 
@@ -142,6 +150,7 @@ class WebsocketServerController extends Controller
                                     $server->push($fd, $value);
                                 } catch (\Throwable $e) {
                                     echo 'Error: ' . $e->getMessage();
+                                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:workerStart:message:server:push');
                                 }
                             }
                         }
@@ -161,7 +170,11 @@ class WebsocketServerController extends Controller
             if ($user) {
                 $userId = $user->getId();
 
-                $server->push($request->fd, json_encode(['cmd' => 'userInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
+                try {
+                    $server->push($request->fd, json_encode(['cmd' => 'userInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
+                } catch (\Throwable $e) {
+                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:userInit');
+                }
 
 //                $server->tick(30000, static function() use ($server, $request) {
 //                    //$server->push($request->fd, json_encode(['cmd' => 'pong', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
@@ -195,57 +208,83 @@ class WebsocketServerController extends Controller
                 $userConnection->uc_sub_list = $subList ? @json_encode($subList) : null;
                 //$userConnection->uc_idle_state = false;
 
-                if ($userConnection->save()) {
+                try {
+                    if ($userConnection->save()) {
 //                    $um = UserMonitor::find()->where(['um_user_id' => $userId, 'um_type_id' => UserMonitor::TYPE_ONLINE])->limit(1)->orderBy(['um_id' => SORT_DESC])->one();
 //                    if (!$um) {
 //                        UserMonitor::addEvent($userId, UserMonitor::TYPE_ONLINE);
 //                    }
 
-                    $userOnline = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->one();
-                    if (!$userOnline) {
-                        $uo = new UserOnline();
-                        $uo->uo_user_id = $userConnection->uc_user_id;
-                        $uo->uo_idle_state = false;
-                        $uo->uo_idle_state_dt = date('Y-m-d H:i:s');
-
-                        if ($uo->save()) {
-                            UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ONLINE);
-                            UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ACTIVE);
+                        $userOnline = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->one();
+                        if (!$userOnline) {
+                            $uo = new UserOnline();
+                            $uo->uo_user_id = $userConnection->uc_user_id;
+                            $uo->uo_idle_state = false;
+                            $uo->uo_idle_state_dt = date('Y-m-d H:i:s');
 
                             try {
-                                ClientChatService::createJobAssigningUaToPendingChats((int)$uo->uo_user_id);
-                                \Yii::$app->db->createCommand()->update(UserStatus::tableName(), ['us_phone_ready_time' => time()], ['us_user_id' => $userId, 'us_call_phone_status' => 1])->execute();
+                                if ($uo->save()) {
+                                    UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ONLINE);
+                                    UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ACTIVE);
+
+                                    try {
+                                        ClientChatService::createJobAssigningUaToPendingChats((int)$uo->uo_user_id);
+                                        \Yii::$app->db->createCommand()->update(UserStatus::tableName(), ['us_phone_ready_time' => time()], ['us_user_id' => $userId, 'us_call_phone_status' => 1])->execute();
+                                    } catch (\Throwable $e) {
+                                        \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:UserStatus:update');
+                                    }
+                                } else {
+                                    echo 'Error: UserOnline:save' . PHP_EOL;
+                                    \Yii::error([
+                                        'model' => $uo->getAttributes(),
+                                        'errors' => $uo->getErrors(),
+                                    ], 'ws:open:UserOnline:save');
+                                }
                             } catch (\Throwable $e) {
-                                \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:UserStatus:update');
+                                \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:uo:save');
+                                if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                                    $userOnline = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->one();
+                                    if ($userOnline && $userOnline->uo_idle_state) {
+                                        $userOnline->uo_idle_state = false;
+                                        $userOnline->uo_idle_state_dt = date('Y-m-d H:i:s');
+                                        $userOnline->update();
+                                    }
+                                }
                             }
+                            unset($uo);
                         } else {
-                            echo 'Error: UserOnline:save' . PHP_EOL;
-                            \Yii::error($uo->errors, 'ws:open:UserOnline:save');
+                            if ($userOnline->uo_idle_state) {
+                                $userOnline->uo_idle_state = false;
+                                $userOnline->uo_idle_state_dt = date('Y-m-d H:i:s');
+                                $userOnline->update();
+                            }
                         }
-                        unset($uo);
+                        unset($userOnline);
                     } else {
-                        if ($userOnline->uo_idle_state) {
-                            $userOnline->uo_idle_state = false;
-                            $userOnline->uo_idle_state_dt = date('Y-m-d H:i:s');
-                            $userOnline->update();
-                        }
+                        echo 'Error: UserConnection:save' . PHP_EOL;
+                        \Yii::error([
+                            'model' => $userConnection->getAttributes(),
+                            'errors' => $userConnection->getErrors(),
+                        ], 'ws:open:UserConnection:save');
+                        // VarDumper::dump($userConnection->errors);
                     }
-                    unset($userOnline);
-                } else {
-                    echo 'Error: UserConnection:save' . PHP_EOL;
-                    \Yii::error($userConnection->errors, 'ws:open:UserConnection:save');
-                    // VarDumper::dump($userConnection->errors);
+                } catch (\Throwable $e) {
+                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:userConnection:save');
                 }
 
-                $server->tblConnections->set($request->fd, [
-                    'fd' => $request->fd,
-                    'uc_id' => $userConnection->uc_id,
-                    'uid' => $uid,
-                    'user_id' => $userId,
-                    'name' => $user->username,
-                    'dt' => date('Y-m-d H:i:s'),
-                    //'sub_list' => $userConnection->uc_sub_list
-                ]);
+                try {
+                    $server->tblConnections->set($request->fd, [
+                        'fd' => $request->fd,
+                        'uc_id' => $userConnection->uc_id,
+                        'uid' => $uid,
+                        'user_id' => $userId,
+                        'name' => $user->username,
+                        'dt' => date('Y-m-d H:i:s'),
+                        //'sub_list' => $userConnection->uc_sub_list
+                    ]);
+                } catch (\Throwable $e) {
+                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:tblConnections:set');
+                }
 
 //                foreach($server->tblConnections as $row)
 //                {
@@ -266,7 +305,11 @@ class WebsocketServerController extends Controller
 
 
                 $json = json_encode(['cmd' => 'initConnection', 'fd' => $userConnection->uc_connection_id, 'uc_id' => $userConnection->uc_id]);
-                $server->push($request->fd, $json); //WEBSOCKET_OPCODE_PING
+                try {
+                    $server->push($request->fd, $json); //WEBSOCKET_OPCODE_PING
+                } catch (\Throwable $e) {
+                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:InitConnection:push');
+                }
 
 
 
@@ -283,13 +326,17 @@ class WebsocketServerController extends Controller
 
 
                 foreach ($subList as $value) {
-                    $server->channelList[$value][$request->fd] = $request->fd;
-                    $server->redis->subscribe($value);
+                    try {
+                        $server->channelList[$value][$request->fd] = $request->fd;
+                        $server->redis->subscribe($value);
+                    } catch (\Throwable $e) {
+                        \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:redis:subscribe');
+                    }
                 }
 
                 unset($userConnection);
 
-            //VarDumper::dump($server->channelList);
+                //VarDumper::dump($server->channelList);
 
                 //$server->redis->subscribe('con-' . $userConnection->uc_id);
                 //$server->redis->subscribe('con-' . $userConnection->uc_id);
@@ -357,56 +404,64 @@ class WebsocketServerController extends Controller
                 //$redis->discard();
             } else {
                 echo ' : not init user' . PHP_EOL;
-                $server->push($request->fd, json_encode(['cmd' => 'userNotInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
-                $server->disconnect($request->fd, 403, 'Access denied');
+                try {
+                    $server->push($request->fd, json_encode(['cmd' => 'userNotInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
+                    $server->disconnect($request->fd, 403, 'Access denied');
+                } catch (\Throwable $e) {
+                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:notInitUser');
+                }
             }
         });
-
 
         $server->on('message', static function (Server $server, \Swoole\WebSocket\Frame $frame) use ($thisClass) {
             echo ' * ' . date('m-d H:i:s') . " received message: {$frame->data}\n";
 
-            $data = json_decode($frame->data, true);
-            $dataRequest = $thisClass->dataProcessing($server, $frame, $data);
-            if ($dataRequest) {
-                $server->push($frame->fd, json_encode($dataRequest));
+            try {
+                $data = json_decode($frame->data, true);
+                $dataRequest = $thisClass->dataProcessing($server, $frame, $data);
+                if ($dataRequest) {
+                    $server->push($frame->fd, json_encode($dataRequest));
+                }
+            } catch (\Throwable $e) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'ws:message');
             }
         });
 
         $server->on('close', static function (Server $server, int $fd) {
             echo '- ' . date('m-d H:i:s') . " -{$fd}\n";
-            $row = $server->tblConnections->get($fd);
-            $server->tblConnections->del($fd);
+            try {
+                $row = $server->tblConnections->get($fd);
+                $server->tblConnections->del($fd);
 
-            if (!empty($row['uid'])) {
-                $uc = UserConnection::find()->where(['uc_connection_uid' => $row['uid']])->limit(1)->one();
-                if ($uc) {
-                    if (!empty($uc->uc_sub_list)) {
-                        $subList = @json_decode($uc->uc_sub_list);
-                    } else {
-                        $subList = [];
-                    }
+                if (!empty($row['uid'])) {
+                    $uc = UserConnection::find()->where(['uc_connection_uid' => $row['uid']])->limit(1)->one();
+                    if ($uc) {
+                        if (!empty($uc->uc_sub_list)) {
+                            $subList = @json_decode($uc->uc_sub_list);
+                        } else {
+                            $subList = [];
+                        }
 
-                    $subList[] = 'user-' . $row['user_id'];
-                    $subList[] = 'con-' . $row['uc_id'];
+                        $subList[] = 'user-' . $row['user_id'];
+                        $subList[] = 'con-' . $row['uc_id'];
 
-                    foreach ($subList as $value) {
-                        if (isset($server->channelList[$value][$fd])) {
-                            unset($server->channelList[$value][$fd]);
+                        foreach ($subList as $value) {
+                            if (isset($server->channelList[$value][$fd])) {
+                                unset($server->channelList[$value][$fd]);
 
-                            if (isset($server->channelList[$value]) && empty($server->channelList[$value])) {
-                                unset($server->channelList[$value]);
-                                $server->redis->unsubscribe($value);
+                                if (isset($server->channelList[$value]) && empty($server->channelList[$value])) {
+                                    unset($server->channelList[$value]);
+                                    $server->redis->unsubscribe($value);
+                                }
                             }
                         }
+
+                        $uc->delete();
+                        unset($uc);
+
+                        UserMonitor::closeConnectionEvent($row['user_id']);
+                        //$userOnline = UserOnline::find()->where(['uo_user_id' => $row['user_id']])->one();
                     }
-
-                    $uc->delete();
-                    unset($uc);
-
-                    UserMonitor::closeConnectionEvent($row['user_id']);
-                    //$userOnline = UserOnline::find()->where(['uo_user_id' => $row['user_id']])->one();
-                }
 
 //                $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
 //                $userOnlineForDelete = UserOnline::find()->where(['NOT IN', 'uo_user_id', $subQuery])->all();
@@ -420,7 +475,10 @@ class WebsocketServerController extends Controller
 //                }
 //                unset($userOnlineForDelete);
 
-                //\Yii::$app->db->createCommand('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)')->execute();
+                    //\Yii::$app->db->createCommand('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)')->execute();
+                }
+            } catch (\Throwable $e) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'ws:close');
             }
 
 
@@ -440,7 +498,6 @@ class WebsocketServerController extends Controller
 //                unset($redisList[$fd]);
 //            }
         });
-
 
         $server->on('workerError', static function (Server $server, int $workerId, $workerPid, $exitCode, $signal) {
             $message = "Error Worker (Id: {$workerId}): pid={$workerPid} code={$exitCode} signal={$signal}";
@@ -632,40 +689,44 @@ class WebsocketServerController extends Controller
      */
     private function getIdentityByCookie(\Swoole\Http\Request $request, array $frontendConfig): ?IdentityInterface
     {
-        $cookieName = \Yii::$app->params['wsIdentityCookie']['name'] ?? '';
-        $cookieValue = $request->cookie[$cookieName] ?? null;
+        try {
+            $cookieName = \Yii::$app->params['wsIdentityCookie']['name'] ?? '';
+            $cookieValue = $request->cookie[$cookieName] ?? null;
 
-        $identityClass = $frontendConfig['components']['user']['identityClass'] ?? '';
-        $cookieValidationKey = $frontendConfig['components']['request']['cookieValidationKey'] ?? '';
+            $identityClass = $frontendConfig['components']['user']['identityClass'] ?? '';
+            $cookieValidationKey = $frontendConfig['components']['request']['cookieValidationKey'] ?? '';
 
-        $dataCookie = \Yii::$app->getSecurity()->validateData($cookieValue, $cookieValidationKey);
+            $dataCookie = \Yii::$app->getSecurity()->validateData($cookieValue, $cookieValidationKey);
 
-        if ($dataCookie) {
-            $data = @unserialize($dataCookie, ['allowed_classes' => false]);
-            if (is_array($data) && isset($data[0], $data[1]) && $data[0] === $cookieName) {
-                $data = json_decode($data[1], true);
+            if ($dataCookie) {
+                $data = @unserialize($dataCookie, ['allowed_classes' => false]);
+                if (is_array($data) && isset($data[0], $data[1]) && $data[0] === $cookieName) {
+                    $data = json_decode($data[1], true);
 
-                //\yii\helpers\VarDumper::dump($data);
+                    //\yii\helpers\VarDumper::dump($data);
 
-                if (is_array($data) && count($data) == 3) {
-                    list($id, $authKey, $duration) = $data;
-                    /* @var $class IdentityInterface */
-                    $class = $identityClass;
-                    $identity = $class::findIdentity($id);
-                    if ($identity !== null) {
-                        if (!$identity instanceof IdentityInterface) {
-                            ///throw new InvalidValueException("$class::findIdentity() must return an object implementing IdentityInterface.");
-                            \Yii::error("$class::findIdentity() must return an object implementing IdentityInterface.", 'WebSocketServer:IdentityInterface:' . __METHOD__);
-                            echo "$class::findIdentity() must return an object implementing IdentityInterface.";
-                        } elseif (!$identity->validateAuthKey($authKey)) {
-                            \Yii::warning("Invalid auth key attempted for user '$id': $authKey", 'WebSocketServer:validateAuthKey:' . __METHOD__);
-                            echo "Invalid auth key attempted for user '$id': $authKey";
-                        } else {
-                            return $identity;
+                    if (is_array($data) && count($data) == 3) {
+                        list($id, $authKey, $duration) = $data;
+                        /* @var $class IdentityInterface */
+                        $class = $identityClass;
+                        $identity = $class::findIdentity($id);
+                        if ($identity !== null) {
+                            if (!$identity instanceof IdentityInterface) {
+                                ///throw new InvalidValueException("$class::findIdentity() must return an object implementing IdentityInterface.");
+                                \Yii::error("$class::findIdentity() must return an object implementing IdentityInterface.", 'WebSocketServer:IdentityInterface:' . __METHOD__);
+                                echo "$class::findIdentity() must return an object implementing IdentityInterface.";
+                            } elseif (!$identity->validateAuthKey($authKey)) {
+                                \Yii::warning("Invalid auth key attempted for user '$id': $authKey", 'WebSocketServer:validateAuthKey:' . __METHOD__);
+                                echo "Invalid auth key attempted for user '$id': $authKey";
+                            } else {
+                                return $identity;
+                            }
                         }
                     }
                 }
             }
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'ws:getIdentityByCookie');
         }
 
         return null;
