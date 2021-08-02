@@ -98,7 +98,7 @@ class CallReportController extends Controller
         $fromDate = date('Y-m-d', strtotime('-7 day', $now));
         $toDate = date('Y-m-d', strtotime('-1 day', $now));
 
-        $fileName = 'Weekly Call Report_' . $fromDate . '->' . $toDate . $this->date . '.csv';
+        $fileName = 'Weekly Call Report_' . $fromDate . '->' . $toDate . '.csv';
 
         $report = (new WeeklyReportGenerator())->generate();
         $reportSender->send($report, $fileName);
