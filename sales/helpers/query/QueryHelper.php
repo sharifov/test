@@ -23,6 +23,15 @@ class QueryHelper
       }
      *
      */
+    public static function getQaTasksByOwner(ActiveQuery $query, $objectOwner): void
+    {
+        $query
+            ->leftJoin(\common\models\Lead::tableName() . ' as l', 'l.id = t_object_id AND t_object_type_id = ' . \modules\qaTask\src\entities\qaTask\QaTaskObjectType::LEAD)
+            ->leftJoin(\sales\entities\cases\Cases::tableName() . ' as ca', 'ca.cs_id = t_object_id AND t_object_type_id = ' . \modules\qaTask\src\entities\qaTask\QaTaskObjectType::CASE)
+            ->andWhere(['OR', ['ca.cs_user_id' => $objectOwner], ['l.employee_id' => $objectOwner]])
+            ;
+    }
+
     public static function dayEqualByUserTZ(ActiveQuery $query, string $dateFieldName, string $value, ?string $userTimeZone): void
     {
         $dateFrom = self::getDateFromUserTZToUtc($value, $userTimeZone);

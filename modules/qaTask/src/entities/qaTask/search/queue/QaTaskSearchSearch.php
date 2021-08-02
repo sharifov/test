@@ -11,6 +11,8 @@ use yii\data\ActiveDataProvider;
  */
 class QaTaskSearchSearch extends QaTaskSearch
 {
+    public $objectOwner;
+
     public function rules(): array
     {
         return [
@@ -55,6 +57,8 @@ class QaTaskSearchSearch extends QaTaskSearch
 
             ['t_assigned_user_id', 'integer'],
             ['t_assigned_user_id', 'in', 'range' => array_keys($this->getUserList())],
+
+            [['objectOwner'], 'integer'],
         ];
     }
 
@@ -67,7 +71,7 @@ class QaTaskSearchSearch extends QaTaskSearch
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
-                'defaultOrder' => ['t_id' => SORT_DESC]
+                'defaultOrder' => ['t_id' => SORT_DESC],
             ],
         ]);
 
@@ -77,6 +81,11 @@ class QaTaskSearchSearch extends QaTaskSearch
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+
+        if ($this->objectOwner) {
+            QueryHelper::getQaTasksByOwner($query, $this->objectOwner);
         }
 
         if ($this->t_created_dt) {
