@@ -49,11 +49,11 @@ class UserController extends Controller
                         ], 'UserController:actionUpdateOnlineStatus:UserOnline:update');
                     } elseif ($result === 0) {
                         // todo change to info level
-                        \Yii::error([
-                            'message' => 'UserOnlineStatus. Record not updated',
-                            'previousAttributes' => $previousAttributes,
-                            'attributes' => $item->getAttributes(),
-                        ], 'UserController:actionUpdateOnlineStatus:UserOnline:update');
+//                        \Yii::error([
+//                            'message' => 'UserOnlineStatus. Record not updated',
+//                            'previousAttributes' => $previousAttributes,
+//                            'attributes' => $item->getAttributes(),
+//                        ], 'UserController:actionUpdateOnlineStatus:UserOnline:update');
                     }
                     echo ' - ' . $item->uo_user_id . ' : ' . ($isUserIdle ? 'idle' : 'active') . PHP_EOL;
                 }
