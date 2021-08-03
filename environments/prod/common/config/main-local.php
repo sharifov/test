@@ -110,6 +110,7 @@ return [
             'class' => \common\components\HybridService::class,
             'username' => env('common.config.main.components.hybrid.username'),
             'password' => env('common.config.main.components.hybrid.password'),
+            'webHookEndpoint' => env('common.config.main.components.hybrid.webHookEndpoint'),
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
