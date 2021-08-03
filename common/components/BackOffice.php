@@ -127,6 +127,78 @@ class BackOffice
         return implode('.', [md5($md5), $expired, $md5]);
     }
 
+    public static function wh(string $type, array $data): array
+    {
+        if (!$type) {
+            throw new \DomainException('Type is empty.');
+        }
+
+        $settings = \Yii::$app->params['settings'];
+        if (!isset($settings['bo_web_hook_enable'])) {
+            throw new \DomainException('Not isset settings bo_web_hook_enable.');
+        }
+
+        $boUrl = Yii::$app->params['backOffice']['serverUrl'];
+        if (!$boUrl) {
+            throw new \DomainException('Not isset settings backOffice.serverUrl');
+        }
+
+        $boWhEndpoint = Yii::$app->params['backOffice']['webHookEndpoint'];
+        if (!$boWhEndpoint) {
+            throw new \DomainException('Not isset settings backOffice.webHookEndpoint');
+        }
+
+        $response = self::sendRequest2(
+            $boWhEndpoint,
+            array_merge(
+                ['type' => $type],
+                $data
+            ),
+            'POST',
+            30,
+            $boUrl,
+            false
+        );
+
+        if (!$response->isOk) {
+            \Yii::error([
+                'message' => 'BO Webhook server error',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'BackOffice:wh');
+            throw new \DomainException('BO Webhook server error.');
+        }
+
+        $data = $response->data;
+
+        if (!$data) {
+            \Yii::error([
+                'message' => 'BO response Data is empty',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'BackOffice:wh');
+            throw new \DomainException('BO response Data is empty.');
+        }
+
+        if (!is_array($data)) {
+            \Yii::error([
+                'message' => 'BO response Data type is invalid',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'BackOffice:wh');
+            throw new \DomainException('BO response Data type is invalid.');
+        }
+
+        return $data;
+    }
+
+    public static function whReprotection(array $data): array
+    {
+        return self::wh('reprotection', $data);
+    }
 
     /**
      * @param array $data
