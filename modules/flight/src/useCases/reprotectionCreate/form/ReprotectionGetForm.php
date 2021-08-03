@@ -16,7 +16,7 @@ class ReprotectionGetForm extends \yii\base\Model
     {
         return [
             ['flight_product_quote_gid', 'required'],
-            ['flight_product_quote_gid', 'string'],
+            ['flight_product_quote_gid', 'string', 'max' => 32],
         ];
     }
 
