@@ -17,6 +17,7 @@ class BoController extends BaseController
 {
     /**
      * @api {post} /v2/bo/wh Reprotection Update from BO
+     * @apiVersion 0.1.0
      * @apiName ReProtection Update
      * @apiGroup Webhook
      * @apiPermission Authorized User
@@ -28,11 +29,17 @@ class BoController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{10}}           booking_id                  Booking Id
+     * @apiParam {string{30}}           type                        Type of action on reprotection
+     * @apiParam {array[]}              data                        Any Data from BO
+     * @apiParam {string{10}}           data.booking_id             Booking Id
      *
      * @apiParamExample {json} Request-Example:
      *  {
-     *      "booking_id": "XXXYYYZ",
+     *      "type": "reprotection-update",
+     *      "data": {
+     *          "booking_id": "C4RB44",
+     *              ...
+     *      }
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -41,9 +48,6 @@ class BoController extends BaseController
      * {
      *     "status": 200,
      *     "message": "OK",
-     *     "data": {
-     *         "success": true
-     *      },
      *      "technical": {
      *           ...
      *      },
@@ -57,9 +61,6 @@ class BoController extends BaseController
      * {
      *      "status": 400,
      *      "message": "Load data error",
-     *      "data": {
-     *          "success": false
-     *      },
      *      "errors": [
      *          "Not found data on POST request"
      *       ],
@@ -77,12 +78,9 @@ class BoController extends BaseController
         $data = Yii::$app->request->post();
 
         if ($data) {
-            return new SuccessResponse(
-                new DataMessage(['success' => true])
-            );
+            return new SuccessResponse();
         } else {
             return new ErrorResponse(
-                new DataMessage(['success' => false]),
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
                 new ErrorsMessage('Not found data on POST request'),

@@ -8211,6 +8211,7 @@ define({ "api": [
     "type": "post",
     "url": "/v2/bo/wh",
     "title": "Reprotection Update from BO",
+    "version": "0.1.0",
     "name": "ReProtection_Update",
     "group": "Webhook",
     "permission": [
@@ -8244,9 +8245,24 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of action on reprotection</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": "<p>Any Data from BO</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
             "size": "10",
             "optional": false,
-            "field": "booking_id",
+            "field": "data.booking_id",
             "description": "<p>Booking Id</p>"
           }
         ]
@@ -8254,7 +8270,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"booking_id\": \"XXXYYYZ\",\n}",
+          "content": "{\n    \"type\": \"reprotection-update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n            ...\n    }\n}",
           "type": "json"
         }
       ]
@@ -8263,7 +8279,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": {\n        \"success\": true\n     },\n     \"technical\": {\n          ...\n     },\n     \"request\": {\n          ...\n     }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n     \"technical\": {\n          ...\n     },\n     \"request\": {\n          ...\n     }\n}",
           "type": "json"
         }
       ]
@@ -8272,12 +8288,11 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response:",
-          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"data\": {\n         \"success\": false\n     },\n     \"errors\": [\n         \"Not found data on POST request\"\n      ],\n     \"technical\": {\n          ...\n     },\n     \"request\": {\n          ...\n     }\n}",
+          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"errors\": [\n         \"Not found data on POST request\"\n      ],\n     \"technical\": {\n          ...\n     },\n     \"request\": {\n          ...\n     }\n}",
           "type": "json"
         }
       ]
     },
-    "version": "0.0.0",
     "filename": "webapi/modules/v2/controllers/BoController.php",
     "groupTitle": "Webhook"
   }
