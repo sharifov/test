@@ -25,10 +25,11 @@ class ReprotectionCreateForm extends Model
             [['booking_id'], 'required'],
             [['booking_id'], 'string', 'max' => 10],
 
-            [['is_automate'], 'boolean'],
+            [['is_automate'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
             [['is_automate'], 'default', 'value' => false],
 
-            [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
+            [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true], /* TODO::  */
+            /* TODO:: add check hash (duplicate) */
         ];
     }
 

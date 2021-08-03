@@ -67,7 +67,7 @@ class FlightController extends BaseController
      *
      * @apiParamExample {json} Request-Example:
      *   {
-     *      "fareId": "XXXYYYZ",
+     *      "booking_id": "XXXYYYZ",
      *      "is_automate": false,
      *      "flight_quote": {} // TODO::
      *  }
@@ -162,6 +162,7 @@ class FlightController extends BaseController
                 $flightRequest = FlightRequest::create(
                     $reprotectionCreateForm->booking_id,
                     FlightRequest::TYPE_REPRODUCTION_CREATE,
+                    FlightRequest::STATUS_PENDING,
                     $reprotectionCreateForm->getAttributes(),
                     $apiUserId
                 );

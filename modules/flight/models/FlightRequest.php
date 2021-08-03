@@ -143,6 +143,7 @@ class FlightRequest extends \yii\db\ActiveRecord
     /**
      * @param string $booking_id
      * @param int $type_id
+     * @param int $status_id
      * @param array $data_json
      * @param int|null $created_api_user_id
      * @return FlightRequest
@@ -150,12 +151,14 @@ class FlightRequest extends \yii\db\ActiveRecord
     public static function create(
         string $booking_id,
         int $type_id,
+        int $status_id,
         $data_json,
         ?int $created_api_user_id
     ): FlightRequest {
         $model = new self();
         $model->fr_booking_id = $booking_id;
         $model->fr_type_id = $type_id;
+        $model->fr_status_id = $status_id;
         $model->fr_data_json = $data_json;
         $model->fr_created_api_user_id = $created_api_user_id;
 
