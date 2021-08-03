@@ -419,7 +419,7 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
 
-    public static function getClientChatApiLogEnabled(): bool
+    public static function isClientChatApiLogEnabled(): bool
     {
         return (bool)(Yii::$app->params['settings']['client_chat_api_log_enabled'] ?? true);
     }

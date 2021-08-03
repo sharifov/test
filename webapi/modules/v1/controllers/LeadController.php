@@ -367,7 +367,7 @@ class LeadController extends ApiBaseController
     public function actionCreate()
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
         $warnings = [];
 
         $lead = Yii::$app->request->post('Lead');
@@ -824,7 +824,7 @@ class LeadController extends ApiBaseController
         $responseData['data']['response'] = $response;
         // $responseData['data']['request']                = $modelLead;
 
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
@@ -948,7 +948,7 @@ class LeadController extends ApiBaseController
     public function actionUpdate()
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
         $modelLead = new ApiLead();
         $modelLead->scenario = ApiLead::SCENARIO_UPDATE;
 
@@ -1113,7 +1113,7 @@ class LeadController extends ApiBaseController
         $responseData['data']['request'] = $modelLead;
 
 
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
@@ -1190,7 +1190,7 @@ class LeadController extends ApiBaseController
     public function actionGet()
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
 
         $modelLead = new ApiLead();
@@ -1254,7 +1254,7 @@ class LeadController extends ApiBaseController
         //$responseData['data']['request']                = $modelLead;
 
 
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
@@ -1273,7 +1273,7 @@ class LeadController extends ApiBaseController
     public function actionSoldUpdate()
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         $leadAttributes = Yii::$app->request->post((new Lead())->formName());
         if (empty($leadAttributes)) {
@@ -1420,7 +1420,7 @@ class LeadController extends ApiBaseController
 //        }
 
         $responseData = $response;
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
@@ -1568,7 +1568,7 @@ class LeadController extends ApiBaseController
     public function actionCallExpert(): array
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
         $response = [];
 
         $model = new ApiLeadCallExpert();
@@ -1644,7 +1644,7 @@ class LeadController extends ApiBaseController
         $responseData['data']['response'] = $response;
         //$responseData['data']['request'] = $model;
 
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
             $error_code = $response['error_code'] ?? 0;

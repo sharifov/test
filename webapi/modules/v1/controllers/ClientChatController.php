@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\models\ApiLog;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\linkCasesForm\LinkCasesForm;
@@ -130,7 +131,9 @@ class ClientChatController extends ApiBaseController
      */
     public function actionSubscribe()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
 
         $form = new ClientChatSubscribeForm();
 
@@ -163,7 +166,7 @@ class ClientChatController extends ApiBaseController
             try {
                 $this->service->createFlizzardSubscription($form);
 
-                return $this->endApiLog($apiLog, new SuccessResponse(
+                return $this->endApiLog(new SuccessResponse(
                     new StatusCodeMessage(200),
                     new MessageMessage('Ok'),
                 ));
@@ -174,7 +177,7 @@ class ClientChatController extends ApiBaseController
             }
         }
 
-        return $this->endApiLog($apiLog, new ErrorResponse(
+        return $this->endApiLog(new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('Some errors occurred while creating client chat request'),
             new ErrorsMessage($form->getErrorSummary(true)),
@@ -228,7 +231,9 @@ class ClientChatController extends ApiBaseController
      */
     public function actionUnsubscribe()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
 
         $form = new ClientChatUnsubscribeForm();
 
@@ -263,7 +268,7 @@ class ClientChatController extends ApiBaseController
                 $subscription->disabled();
                 $this->subscriptionRepository->save($subscription);
 
-                return $this->endApiLog($apiLog, new SuccessResponse(
+                return $this->endApiLog(new SuccessResponse(
                     new StatusCodeMessage(200),
                     new MessageMessage('Ok'),
                 ));
@@ -274,7 +279,7 @@ class ClientChatController extends ApiBaseController
             }
         }
 
-        return $this->endApiLog($apiLog, new ErrorResponse(
+        return $this->endApiLog(new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('Some errors occurred while creating client chat request'),
             new ErrorsMessage($form->getErrorSummary(true)),
@@ -344,7 +349,9 @@ class ClientChatController extends ApiBaseController
      */
     public function actionLinkLeads()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
 
         $form = new LinkLeadsForm();
 
@@ -379,14 +386,14 @@ class ClientChatController extends ApiBaseController
                 $result = $this->clientChatLeadMangeService->assignChatByLeadIds($form->leadIds, $clientChat->cch_id);
                 ClientChatSocketCommands::clientChatRefreshInfoBlock($clientChat->cch_id);
                 if ($result) {
-                    return $this->endApiLog($apiLog, new SuccessResponse(
+                    return $this->endApiLog(new SuccessResponse(
                         new StatusCodeMessage(200),
                         new MessageMessage('Ok'),
                         new Message('warning', $result),
                     ));
                 }
 
-                return $this->endApiLog($apiLog, new SuccessResponse(
+                return $this->endApiLog(new SuccessResponse(
                     new StatusCodeMessage(200),
                     new MessageMessage('Ok'),
                 ));
@@ -397,7 +404,7 @@ class ClientChatController extends ApiBaseController
             }
         }
 
-        return $this->endApiLog($apiLog, new ErrorResponse(
+        return $this->endApiLog(new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('Some errors occurred while creating client chat request'),
             new ErrorsMessage($form->getErrorSummary(true)),
@@ -466,7 +473,7 @@ class ClientChatController extends ApiBaseController
      */
     public function actionLinkCases()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         $form = new LinkCasesForm();
 
@@ -501,14 +508,14 @@ class ClientChatController extends ApiBaseController
                 $result = $this->clientChatCaseManageService->assignChatByCaseIds($form->caseIds, $clientChat->cch_id);
                 ClientChatSocketCommands::clientChatRefreshInfoBlock($clientChat->cch_id);
                 if ($result) {
-                    return $this->endApiLog($apiLog, new SuccessResponse(
+                    return $this->endApiLog(new SuccessResponse(
                         new StatusCodeMessage(200),
                         new MessageMessage('Ok'),
                         new Message('warning', $result),
                     ));
                 }
 
-                return $this->endApiLog($apiLog, new SuccessResponse(
+                return $this->endApiLog(new SuccessResponse(
                     new StatusCodeMessage(200),
                     new MessageMessage('Ok'),
                 ));
@@ -519,7 +526,7 @@ class ClientChatController extends ApiBaseController
             }
         }
 
-        return $this->endApiLog($apiLog, new ErrorResponse(
+        return $this->endApiLog(new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('Some errors occurred while creating client chat request'),
             new ErrorsMessage($form->getErrorSummary(true)),
@@ -532,9 +539,11 @@ class ClientChatController extends ApiBaseController
      * @param Response $response
      * @return Response
      */
-    private function endApiLog(ApiLog $apiLog, Response $response): Response
+    private function endApiLog(Response $response): Response
     {
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+        if ($this->apiLog) {
+            $this->apiLog->endApiLog(ArrayHelper::toArray($response));
+        }
         return $response;
     }
 }

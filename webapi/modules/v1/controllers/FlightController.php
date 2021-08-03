@@ -92,8 +92,8 @@ class FlightController extends ApiBaseController
 
     public function actionTicket()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
-        return $this->endApiLog($apiLog, new ErrorResponse(
+        $this->startApiLog($this->action->uniqueId);
+        return $this->endApiLog(new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('This endpoint has been replaced with "/v1/flight/ticket-issue", "/v1/flight/replace", "/v1/flight/fail"'),
         ));
@@ -365,7 +365,7 @@ class FlightController extends ApiBaseController
      */
     public function actionReplace()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         if (!Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -386,14 +386,14 @@ class FlightController extends ApiBaseController
         $post = Yii::$app->request->post();
         $flightRequestApiForm = new FlightRequestApiForm();
         if (!$flightRequestApiForm->load($post)) {
-            return $this->endApiLog($apiLog, self::notLoadErrorResponse('FlightTicketIssueRequestApiForm'));
+            return $this->endApiLog(self::notLoadErrorResponse('FlightTicketIssueRequestApiForm'));
         }
         if (!$flightRequestApiForm->validate()) {
             \Yii::warning(
                 ErrorsToStringHelper::extractFromModel($flightRequestApiForm),
                 'FlightController:actionReplace:FlightTicketIssueRequestApiForm'
             );
-            return $this->endApiLog($apiLog, self::validateErrorResponse($flightRequestApiForm));
+            return $this->endApiLog(self::validateErrorResponse($flightRequestApiForm));
         }
 
         try {
@@ -420,7 +420,7 @@ class FlightController extends ApiBaseController
             $dataMessage['orderResult'] = 'Order Gid(' . $flightRequestApiForm->order->or_gid . ') successful processed';
         } catch (\Throwable $throwable) {
             Yii::error(self::errorMessage($throwable, $post), 'FlightController:actionReplace:Throwable');
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage()),
                 new CodeMessage(FlightCodeException::API_FLIGHT_REPLACE_FAILED)
@@ -435,7 +435,7 @@ class FlightController extends ApiBaseController
                     'FlightController:actionReplace:PaymentFromBoForm'
                 );
                 $dataMessage['paymentResult'] = 'Payment processing validation failed';
-                return $this->endApiLog($apiLog, new ErrorResponse(
+                return $this->endApiLog(new ErrorResponse(
                     new MessageMessage(Messages::VALIDATION_ERROR),
                     new ErrorsMessage($paymentFromBoForm->getErrors()),
                     new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_VALIDATE),
@@ -454,7 +454,7 @@ class FlightController extends ApiBaseController
                     'FlightController:actionReplace:PaymentThrowable'
                 );
                 $dataMessage['paymentResult'] = 'Payment processing failed';
-                return $this->endApiLog($apiLog, new ErrorResponse(
+                return $this->endApiLog(new ErrorResponse(
                     new StatusCodeMessage(400),
                     new MessageMessage($throwable->getMessage()),
                     new CodeMessage(FlightCodeException::API_TICKET_ISSUE_FAILED),
@@ -463,7 +463,7 @@ class FlightController extends ApiBaseController
             }
         }
 
-        return $this->endApiLog($apiLog, new SuccessResponse(
+        return $this->endApiLog(new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage('OK'),
             new DataMessage($dataMessage)
@@ -737,7 +737,7 @@ class FlightController extends ApiBaseController
      */
     public function actionTicketIssue()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         if (!Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -758,14 +758,14 @@ class FlightController extends ApiBaseController
         $post = Yii::$app->request->post();
         $flightRequestApiForm = new FlightRequestApiForm();
         if (!$flightRequestApiForm->load($post)) {
-            return $this->endApiLog($apiLog, self::notLoadErrorResponse('FlightTicketIssueRequestApiForm'));
+            return $this->endApiLog(self::notLoadErrorResponse('FlightTicketIssueRequestApiForm'));
         }
         if (!$flightRequestApiForm->validate()) {
             \Yii::warning(
                 ErrorsToStringHelper::extractFromModel($flightRequestApiForm),
                 'FlightController:actionTicketIssue:FlightTicketIssueRequestApiForm'
             );
-            return $this->endApiLog($apiLog, self::validateErrorResponse($flightRequestApiForm));
+            return $this->endApiLog(self::validateErrorResponse($flightRequestApiForm));
         }
 
         try {
@@ -776,7 +776,7 @@ class FlightController extends ApiBaseController
             $dataMessage['orderResult'] = 'Order Gid(' . $flightRequestApiForm->order->or_gid . ') successful processed';
         } catch (\Throwable $throwable) {
             Yii::error(self::errorMessage($throwable, $post), 'FlightController:actionTicketIssue:Throwable');
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage()),
                 new CodeMessage(FlightCodeException::API_TICKET_ISSUE_FAILED)
@@ -791,7 +791,7 @@ class FlightController extends ApiBaseController
                     'FlightController:actionTicketIssue:PaymentFromBoForm'
                 );
                 $dataMessage['paymentResult'] = 'Payment processing validation failed';
-                return $this->endApiLog($apiLog, new ErrorResponse(
+                return $this->endApiLog(new ErrorResponse(
                     new MessageMessage(Messages::VALIDATION_ERROR),
                     new ErrorsMessage($paymentFromBoForm->getErrors()),
                     new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_VALIDATE),
@@ -810,7 +810,7 @@ class FlightController extends ApiBaseController
                     'FlightController:actionTicketIssue:PaymentThrowable'
                 );
                 $dataMessage['paymentResult'] = 'Payment processing failed';
-                return $this->endApiLog($apiLog, new ErrorResponse(
+                return $this->endApiLog(new ErrorResponse(
                     new StatusCodeMessage(400),
                     new MessageMessage($throwable->getMessage()),
                     new CodeMessage(FlightCodeException::API_TICKET_ISSUE_FAILED),
@@ -819,7 +819,7 @@ class FlightController extends ApiBaseController
             }
         }
 
-        return $this->endApiLog($apiLog, new SuccessResponse(
+        return $this->endApiLog(new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage('OK'),
             new DataMessage($dataMessage)
@@ -884,7 +884,7 @@ class FlightController extends ApiBaseController
      */
     public function actionFail()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         if (!Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -904,7 +904,7 @@ class FlightController extends ApiBaseController
         $flightFailRequestApiForm = new FlightFailRequestApiForm();
         $post = Yii::$app->request->post();
         if (!$flightFailRequestApiForm->load($post)) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
                 new ErrorsMessage('Not found data on request'),
@@ -916,7 +916,7 @@ class FlightController extends ApiBaseController
                 ErrorsToStringHelper::extractFromModel($flightFailRequestApiForm),
                 'FlightController:actionFail:flightUpdateApiForm'
             );
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($flightFailRequestApiForm->getErrors()),
                 new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_VALIDATE)
@@ -929,7 +929,7 @@ class FlightController extends ApiBaseController
                 $this->eventDispatcher->dispatch(new FlightProductProcessedErrorEvent($flightFailRequestApiForm->order->or_id));
             });
 
-            return $this->endApiLog($apiLog, new SuccessResponse(
+            return $this->endApiLog(new SuccessResponse(
                 new StatusCodeMessage(200),
                 new MessageMessage('OK'),
                 new DataMessage([
@@ -938,7 +938,7 @@ class FlightController extends ApiBaseController
             ));
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'FlightController:actionFail:FLIGHT_FAIL');
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage()),
                 new CodeMessage(FlightCodeException::API_FLIGHT_FAIL_FAILED)
@@ -946,9 +946,9 @@ class FlightController extends ApiBaseController
         }
     }
 
-    private function endApiLog(ApiLog $apiLog, Response $response): Response
+    private function endApiLog(Response $response): Response
     {
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+        $this->apiLog->endApiLog(ArrayHelper::toArray($response));
         return $response;
     }
 
