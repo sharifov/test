@@ -7,55 +7,56 @@ use yii\base\Model;
 /**
  * Class DecisionForm
  *
- * @property int $reprotectionId
- * @property string $type
- * @property $quote
+ * @property int $reprotection_id
+ * @property int $type_id
+ * @property $flight_product_quote
  */
 class DecisionForm extends Model
 {
-    public const TYPE_CONFIRM = 'confirm';
-    public const TYPE_MODIFY = 'modify';
-    public const TYPE_REFUND = 'refund';
+    public const TYPE_CONFIRM = 1;
+    public const TYPE_MODIFY = 2;
+    public const TYPE_REFUND = 3;
 
     public const TYPES = [
-        self::TYPE_CONFIRM => self::TYPE_CONFIRM,
-        self::TYPE_MODIFY => self::TYPE_MODIFY,
-        self::TYPE_REFUND => self::TYPE_REFUND,
+        self::TYPE_CONFIRM => 'confirm',
+        self::TYPE_MODIFY => 'modify',
+        self::TYPE_REFUND => 'refund',
     ];
 
-    public $reprotectionId;
-    public $type;
-    public $quote;
+    public $reprotection_id;
+    public $type_id;
+    public $flight_product_quote;
 
     public function rules(): array
     {
         return [
-            ['reprotectionId', 'required'],
-            ['reprotectionId', 'integer'],
+            ['reprotection_id', 'required'],
+            ['reprotection_id', 'integer'],
 
-            ['type', 'required'],
-            ['type', 'in', 'range' => array_keys(self::TYPES)],
+            ['type_id', 'required'],
+            ['type_id', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['type_id', 'in', 'range' => array_keys(self::TYPES)],
 
-            ['quote', 'required', 'when' => function () {
+            ['flight_product_quote', 'required', 'when' => function () {
                 return $this->isModify();
             }],
-            ['quote', 'safe'], // todo
+            ['flight_product_quote', 'safe'], // todo
         ];
     }
 
     public function isConfirm(): bool
     {
-        return $this->type === self::TYPE_CONFIRM;
+        return $this->type_id === self::TYPE_CONFIRM;
     }
 
     public function isModify(): bool
     {
-        return $this->type === self::TYPE_MODIFY;
+        return $this->type_id === self::TYPE_MODIFY;
     }
 
     public function isRefund(): bool
     {
-        return $this->type === self::TYPE_REFUND;
+        return $this->type_id === self::TYPE_REFUND;
     }
 
     public function formName(): string

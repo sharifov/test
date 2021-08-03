@@ -904,15 +904,15 @@ class FlightController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {int}           reprotectionId
-     * @apiParam {string=confirm, modify, refund}   type
-     * @apiParam {object}        quote
+     * @apiParam {int}           reprotection_id
+     * @apiParam {int=1-confirm, 2-modify, 3-refund}   type_id
+     * @apiParam {object}        flight_product_quote
      *
      * @apiParamExample {json} Request-Example:
      *   {
-     *      "reprotectionId": 1,
-     *      "type": "modify",
-     *      "quote: {} // todo
+     *      "reprotection_id": 1,
+     *      "type_id": 1,
+     *      "flight_product_quote": {} // todo
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -954,8 +954,8 @@ class FlightController extends BaseController
      *        "status": 422,
      *        "message": "Validation error",
      *        "errors": [
-     *            "type": [
-     *               "Type cannot be blank."
+     *            "type_id": [
+     *               "Type Id cannot be blank."
      *             ]
      *        ],
      *        "technical": {
@@ -988,11 +988,11 @@ class FlightController extends BaseController
 
         try {
             if ($form->isConfirm()) {
-                Yii::createObject(reprotectionDecision\Confirm::class)->handle($form->reprotectionId);
+                Yii::createObject(reprotectionDecision\Confirm::class)->handle($form->reprotection_id);
             } elseif ($form->isModify()) {
-                Yii::createObject(reprotectionDecision\Modify::class)->handle($form->reprotectionId, $form->quote);
+                Yii::createObject(reprotectionDecision\Modify::class)->handle($form->reprotection_id, $form->flight_product_quote);
             } elseif ($form->isRefund()) {
-                Yii::createObject(reprotectionDecision\Refund::class)->handle($form->reprotectionId);
+                Yii::createObject(reprotectionDecision\Refund::class)->handle($form->reprotection_id);
             } else {
                 throw new \DomainException('Undefined type');
             }

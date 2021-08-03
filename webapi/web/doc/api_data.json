@@ -3173,26 +3173,26 @@
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "reprotectionId",
+            "field": "reprotection_id",
             "description": ""
           },
           {
             "group": "Parameter",
-            "type": "string",
+            "type": "int",
             "allowedValues": [
-              "confirm",
-              "modify",
-              "refund"
+              "1-confirm",
+              "2-modify",
+              "3-refund"
             ],
             "optional": false,
-            "field": "type",
+            "field": "type_id",
             "description": ""
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": false,
-            "field": "quote",
+            "field": "flight_product_quote",
             "description": ""
           }
         ]
@@ -3200,7 +3200,7 @@
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"reprotectionId\": 1,\n    \"type\": \"modify\",\n    \"quote: {} // todo\n}",
+          "content": " {\n    \"reprotection_id\": 1,\n    \"type_id\": 1,\n    \"flight_product_quote\": {} // todo\n}",
           "type": "json"
         }
       ]
@@ -3223,7 +3223,7 @@
         },
         {
           "title": "Error-Response:",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type\": [\n              \"Type cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type_id\": [\n              \"Type Id cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
