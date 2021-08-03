@@ -189,38 +189,14 @@ $formatter = new \common\components\i18n\Formatter();
                     $ordClientTotalPrice += $quote->pq_client_price;
                     $ordOptionTotalPrice += $quote->optionAmountSum;
                     ?>
-                    <tr>
-                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?></td>
-                        <td title="<?=Html::encode($quote->pq_product_id)?>">
-                            <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
-                            <?=Html::encode($quote->pqProduct->prType->pt_name)?>
-                            <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
-                        </td>
-
-                        <!--                    <td>--><?php //=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
-
-                        <td><?=Html::encode($quote->pq_name)?></td>
-                        <td><?=ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-                        <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
-                        <td class="text-right"><?=number_format($quote->optionAmountSum, 2)?></td>
-                        <td class="text-right"><?=number_format($quote->pq_service_fee_sum, 2)?></td>
-                        <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
-                        <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
-                        <td>
-                            <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
-                                'data-order-id' => $order->or_id,
-                                'data-product-quote-id' => $quote->pq_id,
-                                'class' => 'btn-delete-quote-from-order',
-                                'data-url' => \yii\helpers\Url::to(['/order/order-product/delete-ajax'])
-                            ])
-                            ?>
-                            <?= Html::a('<i class="fas fa-info-circle" data-toggle="tooltip" title="Details"></i>', null, [
-                                'data-product-quote-gid' => $productQuote->pq_gid,
-                                'class' => 'btn-show-product-quote-details',
-                                'data-url' => Url::to([$productQuote->getQuoteDetailsPageUrl(), 'id' => $productQuote->pq_id])
-                            ]); ?>
-                        </td>
-                    </tr>
+                      <tr>
+                          <?= $this->render('_product_quote_item', [
+                              'quote' => $quote,
+                              'nr' => $nr++,
+                              'order' => $order,
+                              'isReprotection' => false
+                          ]) ?>
+                      </tr>
                 <?php endforeach; ?>
                 <?php
                     $ordTotalPrice = round($ordTotalPrice, 2);
@@ -565,3 +541,24 @@ $formatter = new \common\components\i18n\Formatter();
 
 
 </div>
+
+<?php
+
+$js = <<<JS
+$('body').off('click', '.has_reprotection_quotes').on('click', '.has_reprotection_quotes', function (e) {
+    e.preventDefault();
+    
+    let tr = $(this).closest('tr');
+    
+    tr.next(1).toggleClass('hidden');
+})
+JS;
+$this->registerJs($js);
+
+$css = <<<CSS
+.has_reprotection_quotes, .has_reprotection_quotes:focus {
+    text-decoration: underline;
+}
+CSS;
+$this->registerCss($css);
+
