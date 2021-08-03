@@ -29,6 +29,7 @@ use webapi\src\response\messages\StatusFailedMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
+use modules\flight\src\useCases\reprotectionDecision;
 
 /**
  * Class FlightController
@@ -885,6 +886,128 @@ class FlightController extends BaseController
                 new StatusCodeMessage(500),
                 new MessageMessage('Internal Server Error'),
                 new CodeMessage($e->getCode())
+            );
+        }
+    }
+
+    /**
+     * @api {post} /v2/flight/reprotection-decision Reprotection decision
+     * @apiVersion 0.1.0
+     * @apiName ReProtection Decision
+     * @apiGroup Flight
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {int}           reprotectionId
+     * @apiParam {string=confirm, modify, refund}   type
+     * @apiParam {object}        quote
+     *
+     * @apiParamExample {json} Request-Example:
+     *   {
+     *      "reprotectionId": 1,
+     *      "type": "modify",
+     *      "quote: {} // todo
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
+     *            "success" => true
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Load data error",
+     *        "errors": [
+     *           "Not found data on POST request"
+     *        ],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": 422,
+     *        "message": "Validation error",
+     *        "errors": [
+     *            "type": [
+     *               "Type cannot be blank."
+     *             ]
+     *        ],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionReprotectionDecision()
+    {
+        $post = Yii::$app->request->post();
+        $form = new reprotectionDecision\DecisionForm();
+
+        if (!$form->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+            );
+        }
+
+        try {
+            if ($form->isConfirm()) {
+                Yii::createObject(reprotectionDecision\Confirm::class)->handle($form->reprotectionId);
+            } elseif ($form->isModify()) {
+                Yii::createObject(reprotectionDecision\Modify::class)->handle($form->reprotectionId, $form->quote);
+            } elseif ($form->isRefund()) {
+                Yii::createObject(reprotectionDecision\Refund::class)->handle($form->reprotectionId);
+            } else {
+                throw new \DomainException('Undefined type');
+            }
+
+            return new SuccessResponse(
+                new DataMessage([
+                    'success' => true,
+                ])
+            );
+        } catch (\Throwable $e) {
+            return new ErrorResponse(
+                new DataMessage([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ])
             );
         }
     }
