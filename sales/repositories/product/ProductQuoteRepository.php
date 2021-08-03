@@ -2,9 +2,11 @@
 
 namespace sales\repositories\product;
 
+use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productType\ProductType;
 use sales\dispatchers\EventDispatcher;
-use yii\web\NotFoundHttpException;
+use sales\repositories\NotFoundException;
 
 /**
  * Class ProductQuoteRepository
@@ -41,6 +43,22 @@ class ProductQuoteRepository
         if ($productQuote = ProductQuote::findOne($productQuoteId)) {
             return $productQuote;
         }
-        throw new NotFoundHttpException('Product Quote not found');
+        throw new NotFoundException('Product Quote not found');
+    }
+
+    public function findByGidFlightProductQuote(string $gid): ProductQuote
+    {
+        $productQuote = ProductQuote::find()
+            ->where(['pq_gid' => $gid])
+            ->innerJoin(
+                Product::tableName(),
+                'pq_product_id = pr_id and pr_type_id = :flightProductTypeId',
+                ['flightProductTypeId' => ProductType::PRODUCT_FLIGHT]
+            )
+            ->one();
+        if ($productQuote) {
+            return $productQuote;
+        }
+        throw new NotFoundException('Product Quote not found');
     }
 }
