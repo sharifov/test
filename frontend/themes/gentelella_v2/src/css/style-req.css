@@ -117,6 +117,12 @@ pre {
   color: #ffffff;
 }
 
+.btn-success.disabled,
+.btn-success:disabled,
+.btn-success[disabled]{
+  background-color: #bbb;
+}
+
 .btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success {
   background-color: #72b97f;
   border-color: #72b97f;

@@ -280,7 +280,7 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
       </div>
     </div>
     <div class="quote__details" id="result_<?= $resultKey?>" style="display:none;">
-        <?php if (!$isQuoteAssignedToFlight) : ?>
+        <?php /*if (!$isQuoteAssignedToFlight) : ?>
           <div class="text-right">
               <?= Html::button('<i class="fa fa-check"></i>&nbsp; <span>Select</span>', [
                   'class' => 'btn btn-success flight_create_quote__btn',
@@ -290,7 +290,7 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
                   'data-result' => 'search-result__quote-' . $resultKey,
               ]) ?>
           </div>
-        <?php endif; ?>
+        <?php endif; */ ?>
       <div class="trip">
         <div class="trip__item">
           <!-- Depart -->

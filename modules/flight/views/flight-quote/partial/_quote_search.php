@@ -162,7 +162,8 @@ JS;
                     if (cardFooter.length) {
                         btn.html('<p>Quote already assigned</p>');
                     } else {
-                        btn.remove();
+                        // btn.remove();
+                        btn.attr('disabled', true).prop('disabled', true);
                     }
                     
 
