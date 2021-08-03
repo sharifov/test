@@ -37,6 +37,7 @@ class m210802_131652_create_tbl_flight_request extends Migration
 
         $this->createTable('{{%flight_request}}', [
             'fr_id' => $this->integer()->notNull(),
+            'fr_booking_id' => $this->string(10)->notNull(),
             'fr_hash' => $this->string(32),
             'fr_type_id' => $this->tinyInteger()->notNull(),
             'fr_data_json' => $this->json(),
@@ -58,6 +59,7 @@ class m210802_131652_create_tbl_flight_request extends Migration
         $this->createIndex('IND-flight_request-fr_created_dt', '{{%flight_request}}', ['fr_created_dt']);
         $this->createIndex('IND-flight_request-fr_year', '{{%flight_request}}', ['fr_year']);
         $this->createIndex('IND-flight_request-fr_month', '{{%flight_request}}', ['fr_month']);
+        $this->createIndex('IND-flight_request-fr_booking_id', '{{%flight_request}}', ['fr_booking_id']);
 
         Yii::$app->db->createCommand('ALTER TABLE `flight_request` PARTITION BY RANGE (`fr_year`)
             SUBPARTITION BY LINEAR HASH (`fr_month`)
