@@ -78,6 +78,8 @@ class FlightModule extends \yii\base\Module
             ['label' => 'Flight Quote Booking', 'url' => ['/' . $modulePath . '/flight-quote-booking-crud/index']],
             ['label' => 'Flight Quote Booking Airline', 'url' => ['/' . $modulePath . '/flight-quote-booking-airline-crud/index']],
             ['label' => 'Flight Quote Label', 'url' => ['/' . $modulePath . '/flight-quote-label-crud/index']],
+
+            ['label' => 'Flight Request', 'url' => ['/' . $modulePath . '/flight-request-crud/index']],
         ];
     }
 }
