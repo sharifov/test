@@ -4,7 +4,7 @@ namespace sales\repositories\product;
 
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\dispatchers\EventDispatcher;
-use yii\web\NotFoundHttpException;
+use sales\repositories\NotFoundException;
 
 /**
  * Class ProductQuoteRepository
@@ -41,6 +41,6 @@ class ProductQuoteRepository
         if ($productQuote = ProductQuote::findOne($productQuoteId)) {
             return $productQuote;
         }
-        throw new NotFoundHttpException('Product Quote not found');
+        throw new NotFoundException('Product Quote not found');
     }
 }

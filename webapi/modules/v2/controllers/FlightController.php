@@ -7,14 +7,19 @@ use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use sales\helpers\app\AppHelper;
+use sales\repositories\NotFoundException;
+use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
+use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
+use webapi\src\response\messages\StatusFailedMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -23,16 +28,22 @@ use yii\helpers\ArrayHelper;
  * Class FlightController
  *
  * @property TransactionManager $transactionManager
+ * @property-read ProductQuoteRepository $productQuoteRepository
  */
 class FlightController extends BaseController
 {
     private TransactionManager $transactionManager;
+    /**
+     * @var ProductQuoteRepository
+     */
+    private ProductQuoteRepository $productQuoteRepository;
 
     /**
      * @param $id
      * @param $module
      * @param ApiLogger $logger
      * @param TransactionManager $transactionManager
+     * @param ProductQuoteRepository $productQuoteRepository
      * @param array $config
      */
     public function __construct(
@@ -40,10 +51,11 @@ class FlightController extends BaseController
         $module,
         ApiLogger $logger,
         TransactionManager $transactionManager,
+        ProductQuoteRepository $productQuoteRepository,
         $config = []
     ) {
         $this->transactionManager = $transactionManager;
-
+        $this->productQuoteRepository = $productQuoteRepository;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -194,5 +206,53 @@ class FlightController extends BaseController
                 'id' => $resultId,
             ])
         );
+    }
+
+    public function actionReprotectionGet()
+    {
+        $flightProductQuoteId = (int)\Yii::$app->request->post('flight_product_quote_id');
+
+        try {
+            $productQuote = $this->productQuoteRepository->find($flightProductQuoteId);
+
+            $product = $productQuote->pqProduct;
+
+            $order = $productQuote->pqOrder;
+
+            $orderSerialized = $order ? $order->serialize() : [];
+            if ($orderSerialized && array_key_exists('quotes', $orderSerialized)) {
+                unset($orderSerialized['quotes']);
+            }
+
+            $orderContacts = [];
+            foreach ($order->orderContacts ?? [] as $orderContact) {
+                $orderContacts[] = $orderContact->serialize();
+            }
+
+            return new SuccessResponse(
+                new Message('origin_product_quote', $productQuote->serialize()),
+                new Message('product', $product->serialize() ?? []),
+                new Message('order', $orderSerialized),
+                new Message('order_contacts', $orderContacts)
+            );
+        } catch (NotFoundException $e) {
+            return new ErrorResponse(
+                new StatusFailedMessage(),
+                new MessageMessage($e->getMessage()),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        } catch (\RuntimeException $e) {
+            return new ErrorResponse(
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e), 'API:FlightController:actionReprotectionCreate:Throwable');
+            return new ErrorResponse(
+                new ErrorsMessage('Internal Server Error'),
+                new CodeMessage($e->getCode())
+            );
+        }
     }
 }
