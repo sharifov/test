@@ -6,12 +6,18 @@ use common\components\jobs\ReprotectionCreateJob;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
+use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
 use sales\helpers\app\AppHelper;
 use sales\repositories\NotFoundException;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
+use webapi\src\logger\behaviors\SimpleLoggerBehavior;
+use webapi\src\logger\behaviors\TechnicalInfoBehavior;
 use webapi\src\Messages;
+use webapi\src\response\behaviors\RequestBehavior;
+use webapi\src\response\behaviors\ResponseStatusCodeBehavior;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
@@ -57,6 +63,28 @@ class FlightController extends BaseController
         $this->transactionManager = $transactionManager;
         $this->productQuoteRepository = $productQuoteRepository;
         parent::__construct($id, $module, $logger, $config);
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['logger'] = [
+            'class' => SimpleLoggerBehavior::class,
+            'except' => ['reprotection-get'],
+        ];
+        $behaviors['request'] = [
+            'class' => RequestBehavior::class,
+            'except' => ['reprotection-get'],
+        ];
+        $behaviors['responseStatusCode'] = [
+            'class' => ResponseStatusCodeBehavior::class,
+            'except' => ['reprotection-get'],
+        ];
+        $behaviors['technical'] = [
+            'class' => TechnicalInfoBehavior::class,
+            'except' => ['reprotection-get'],
+        ];
+        return $behaviors;
     }
 
     /**
@@ -170,7 +198,6 @@ class FlightController extends BaseController
         try {
             $apiUserId = $this->auth->getId();
             $resultId = $this->transactionManager->wrap(function () use ($reprotectionCreateForm, $apiUserId) {
-
                 $flightRequest = FlightRequest::create(
                     $reprotectionCreateForm->booking_id,
                     FlightRequest::TYPE_REPRODUCTION_CREATE,
@@ -210,12 +237,26 @@ class FlightController extends BaseController
 
     public function actionReprotectionGet()
     {
-        $flightProductQuoteId = (int)\Yii::$app->request->post('flight_product_quote_id');
+        $form = new ReprotectionGetForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+            );
+        }
 
         try {
-            $productQuote = $this->productQuoteRepository->find($flightProductQuoteId);
+            $productQuote = $this->productQuoteRepository->findByGidFlightProductQuote($form->flight_product_quote_gid);
 
-            $product = $productQuote->pqProduct;
+            $originProductQuote = $productQuote->relateParent ? $productQuote->relateParent->serialize() : [];
 
             $order = $productQuote->pqOrder;
 
@@ -230,20 +271,15 @@ class FlightController extends BaseController
             }
 
             return new SuccessResponse(
-                new Message('origin_product_quote', $productQuote->serialize()),
-                new Message('product', $product->serialize() ?? []),
+                new Message('origin_product_quote', $originProductQuote),
+                new Message('reprotection_product_quote', $productQuote->serialize()),
                 new Message('order', $orderSerialized),
                 new Message('order_contacts', $orderContacts)
             );
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException | \RuntimeException $e) {
             return new ErrorResponse(
                 new StatusFailedMessage(),
                 new MessageMessage($e->getMessage()),
-                new ErrorsMessage($e->getMessage()),
-                new CodeMessage($e->getCode())
-            );
-        } catch (\RuntimeException $e) {
-            return new ErrorResponse(
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
