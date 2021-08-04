@@ -193,4 +193,12 @@ class FlightRequest extends \yii\db\ActiveRecord
         $this->fr_status_id = self::STATUS_DONE;
         return $this;
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFlightRequestLog()
+    {
+        return $this->hasMany(FlightRequestLog::class, ['flr_fr_id' => 'fr_id']);
+    }
 }
