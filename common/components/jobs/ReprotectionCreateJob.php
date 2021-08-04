@@ -3,6 +3,7 @@
 namespace common\components\jobs;
 
 use modules\flight\models\FlightRequest;
+use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
@@ -64,7 +65,7 @@ class ReprotectionCreateJob extends BaseJob implements RetryableJobInterface
             }
 
             if ($order = Order::findOne(['or_sale_id' => $orderCreateFromSaleForm->saleId])) {
-                /* TODO:: FOR DEBUG:: must by remove  */
+                /* TODO:: FOR DEBUG:: must by rewrote logic  */
                 throw new CheckRestrictionException('Order already exist. SaleId(' . $orderCreateFromSaleForm->saleId . ')');
             }
 
@@ -76,6 +77,9 @@ class ReprotectionCreateJob extends BaseJob implements RetryableJobInterface
             $reProtectionCreateService->createFlight($orderCreateFromSaleForm, $saleData, $order);
 
             $reProtectionCreateService->createPayment($orderCreateFromSaleForm, $saleData, $order);
+
+            $flightRequest->statusToPending();
+            (new FlightRequestRepository())->save($flightRequest);
             /* TODO::  */
         } catch (BoResponseException $throwable) {
             \Yii::warning(
@@ -88,11 +92,20 @@ class ReprotectionCreateJob extends BaseJob implements RetryableJobInterface
                 AppHelper::throwableLog($throwable),
                 'ReprotectionCreateJob:ValidationException'
             );
+            if (isset($flightRequest)) {
+                $flightRequest->statusToError();
+                (new FlightRequestRepository())->save($flightRequest);
+            }
+            /* TODO:: add log to flightRequestLog */
         } catch (\Throwable $throwable) {
             \Yii::error(
                 AppHelper::throwableLog($throwable, YII_DEBUG),
                 'ReprotectionCreateJob:throwable'
             );
+            if (isset($flightRequest)) {
+                $flightRequest->statusToError();
+                (new FlightRequestRepository())->save($flightRequest);
+            }
         }
         return false;
     }
