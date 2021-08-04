@@ -207,7 +207,6 @@ class FlightController extends BaseController
                 $flightRequest = FlightRequest::create(
                     $reprotectionCreateForm->booking_id,
                     FlightRequest::TYPE_REPRODUCTION_CREATE,
-                    FlightRequest::STATUS_PENDING,
                     $reprotectionCreateForm->getAttributes(),
                     $apiUserId
                 );
