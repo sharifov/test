@@ -18,6 +18,7 @@ use yii\httpclient\Response;
  * @property string $username
  * @property string $password
  * @property Request $request
+ * @property string $webHookEndpoint
  */
 
 class HybridService extends Component
@@ -25,6 +26,7 @@ class HybridService extends Component
     public $username;
     public $password;
     public $request;
+    public $webHookEndpoint;
 
     public function init(): void
     {
@@ -59,7 +61,7 @@ class HybridService extends Component
             throw new \DomainException('Not found link on Project. Id: ' . $projectId);
         }
 
-        $url = $project['link'] . $action;
+        $url = rtrim($project['link'], '/') . '/' . ltrim($action, '/');
 
         $this->request->setMethod($method)
             ->setUrl($url)
@@ -123,5 +125,67 @@ class HybridService extends Component
             ], 'Component:HybridService::updateStatus');
             throw new \DomainException($response->content);
         }
+    }
+
+    public function wh(int $projectId, string $type, array $data): array
+    {
+        if (!$type) {
+            throw new \DomainException('Type is empty.');
+        }
+
+        if (!$this->webHookEndpoint) {
+            throw new \DomainException('Not isset settings hybrid.webHookEndpoint');
+        }
+
+        $response = $this->sendRequest(
+            $projectId,
+            $this->webHookEndpoint,
+            array_merge(
+                ['type' => $type],
+                $data
+            ),
+            'POST',
+            [],
+            []
+        );
+
+        if (!$response->isOk) {
+            \Yii::error([
+                'message' => 'Hybrid Webhook server error',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'Hybrid:wh');
+            throw new \DomainException('Hybrid Webhook server error.');
+        }
+
+        $data = $response->data;
+
+        if (!$data) {
+            \Yii::error([
+                'message' => 'Hybrid response Data is empty',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'Hybrid:wh');
+            throw new \DomainException('Hybrid response Data is empty.');
+        }
+
+        if (!is_array($data)) {
+            \Yii::error([
+                'message' => 'Hybrid response Data type is invalid',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'Hybrid:wh');
+            throw new \DomainException('Hybrid response Data type is invalid.');
+        }
+
+        return $data;
+    }
+
+    public function whReprotection(int $projectId, array $data): array
+    {
+        return $this->wh($projectId, 'reprotection', $data);
     }
 }
