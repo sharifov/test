@@ -196,6 +196,11 @@ class FlightController extends BaseController
             );
         }
 
+        if ($reprotectionCreateForm->is_automate && empty($reprotectionCreateForm->flight_quote)) {
+            $reprotectionCreateForm->is_automate = false;
+            $dataMessage['warning'] = '"is_automate" parameter set to FALSE because "flight_quote" is empty';
+        }
+
         try {
             $apiUserId = $this->auth->getId();
             $resultId = $this->transactionManager->wrap(function () use ($reprotectionCreateForm, $apiUserId) {
@@ -217,6 +222,8 @@ class FlightController extends BaseController
 
                 return $flightRequest->fr_id;
             });
+            $dataMessage['resultMessage'] = 'FlightRequest created';
+            $dataMessage['id'] = $resultId;
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
@@ -229,10 +236,7 @@ class FlightController extends BaseController
         }
 
         return new SuccessResponse(
-            new DataMessage([
-                'resultMessage' => 'FlightRequest created',
-                'id' => $resultId,
-            ])
+            new DataMessage($dataMessage)
         );
     }
 

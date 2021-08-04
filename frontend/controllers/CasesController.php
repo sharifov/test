@@ -977,7 +977,7 @@ class CasesController extends FController
                         if (!$orderCreateFromSaleForm->validate()) {
                             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
                         }
-                        $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm, $saleId);
+                        $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm);
 
                         $transactionOrder->begin();
                         $orderId = $this->orderRepository->save($order);

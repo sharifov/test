@@ -137,7 +137,7 @@ class FlightRequest extends \yii\db\ActiveRecord
 
     public function getStatusName(): ?string
     {
-        return self::TYPE_LIST[$this->fr_status_id] ?? null;
+        return self::STATUS_LIST[$this->fr_status_id] ?? null;
     }
 
     /**
@@ -155,6 +155,7 @@ class FlightRequest extends \yii\db\ActiveRecord
         $data_json,
         ?int $created_api_user_id
     ): FlightRequest {
+
         $model = new self();
         $model->fr_booking_id = $booking_id;
         $model->fr_type_id = $type_id;

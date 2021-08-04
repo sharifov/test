@@ -98,7 +98,6 @@ class OrderCreateFromSaleService
 
     public function orderCreate(
         OrderCreateFromSaleForm $form,
-        int $saleId,
         $payStatusId = OrderPayStatus::PAID
     ): Order {
         $dto = new CreateOrderDTO(
@@ -112,7 +111,7 @@ class OrderCreateFromSaleService
             null,
             null,
             null,
-            $saleId
+            $form->saleId
         );
         $order = (new Order())->create($dto);
         $order->or_pay_status_id = $payStatusId;

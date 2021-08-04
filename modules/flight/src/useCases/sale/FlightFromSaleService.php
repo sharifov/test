@@ -185,7 +185,7 @@ class FlightFromSaleService
             $flightQuote->getId(),
             $orderCreateFromSaleForm->getTripTypeId(),
             $orderCreateFromSaleForm->validatingCarrier,
-            $orderCreateFromSaleForm->booking_id,
+            $orderCreateFromSaleForm->bookingId,
             null,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->validatingCarrier,
@@ -198,7 +198,7 @@ class FlightFromSaleService
 
         $flightQuoteBooking = FlightQuoteBooking::create(
             $flightQuoteFlightId,
-            $orderCreateFromSaleForm->booking_id,
+            $orderCreateFromSaleForm->bookingId,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->getGdsId(),
             null,
