@@ -80,6 +80,7 @@ class FlightModule extends \yii\base\Module
             ['label' => 'Flight Quote Label', 'url' => ['/' . $modulePath . '/flight-quote-label-crud/index']],
 
             ['label' => 'Flight Request', 'url' => ['/' . $modulePath . '/flight-request-crud/index']],
+            ['label' => 'Flight Request Log', 'url' => ['/' . $modulePath . '/flight-request-log-crud/index']],
         ];
     }
 }
