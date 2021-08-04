@@ -18,7 +18,6 @@ use yii\httpclient\Response;
  * @property string $username
  * @property string $password
  * @property Request $request
- * @property string $webHookEndpoint
  */
 
 class HybridService extends Component
@@ -26,7 +25,6 @@ class HybridService extends Component
     public $username;
     public $password;
     public $request;
-    public $webHookEndpoint;
 
     public function init(): void
     {
@@ -51,17 +49,12 @@ class HybridService extends Component
         return false;
     }
 
-    protected function sendRequest(int $projectId, string $action, array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
+    protected function sendRequest(string $host, string $action, array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
-        $project = Project::find()->select(['link'])->andWhere(['id' => $projectId])->asArray()->one();
-        if (!$project) {
-            throw new \DomainException('Not found Project. Id: ' . $projectId);
+        $url = rtrim($host, '/');
+        if ($action) {
+            $url .= '/' . ltrim($action, '/');
         }
-        if (!$project['link']) {
-            throw new \DomainException('Not found link on Project. Id: ' . $projectId);
-        }
-
-        $url = rtrim($project['link'], '/') . '/' . ltrim($action, '/');
 
         $this->request->setMethod($method)
             ->setUrl($url)
@@ -102,7 +95,17 @@ class HybridService extends Component
         ];
 
         if (SettingHelper::isWebhookOrderUpdateHybridEnabled()) {
-            $response = $this->sendRequest($projectId, SettingHelper::getWebhookOrderUpdateHybridEndpoint(), $data);
+            $projectUrls = $this->getProjectUrls($projectId);
+            if (!$projectUrls['link']) {
+                throw new \DomainException('Not found link on Project. Id: ' . $projectId);
+            }
+
+            $webHookOrderHybridEndpoint = SettingHelper::getWebhookOrderUpdateHybridEndpoint();
+            if (!$webHookOrderHybridEndpoint) {
+                throw new \DomainException('Not webhook order update hybrid endpoint.');
+            }
+
+            $response = $this->sendRequest($projectUrls['link'], $webHookOrderHybridEndpoint, $data);
 
             if ($response->isOk) {
                 if (array_key_exists('status', $response->data)) {
@@ -133,13 +136,17 @@ class HybridService extends Component
             throw new \DomainException('Type is empty.');
         }
 
-        if (!$this->webHookEndpoint) {
-            throw new \DomainException('Not isset settings hybrid.webHookEndpoint');
+        $projectUrls = $this->getProjectUrls($projectId);
+        if (!$projectUrls['link']) {
+            throw new \DomainException('Not found link on Project. Id: ' . $projectId);
+        }
+        if (!$projectUrls['webHookEndpoint']) {
+            throw new \DomainException('Not found webHookEndpoint on Project. Id: ' . $projectId);
         }
 
         $response = $this->sendRequest(
-            $projectId,
-            $this->webHookEndpoint,
+            $projectUrls['link'],
+            $projectUrls['webHookEndpoint'],
             array_merge(
                 ['type' => $type],
                 $data
@@ -187,5 +194,17 @@ class HybridService extends Component
     public function whReprotection(int $projectId, array $data): array
     {
         return $this->wh($projectId, 'reprotection', $data);
+    }
+
+    private function getProjectUrls(int $projectId): array
+    {
+        $project = Project::find()->andWhere(['id' => $projectId])->one();
+        if (!$project) {
+            throw new \DomainException('Not found Project. Id: ' . $projectId);
+        }
+        return [
+            'link' => $project->link,
+            'webHookEndpoint' => $project->getParams()->webHookEndpoint,
+        ];
     }
 }
