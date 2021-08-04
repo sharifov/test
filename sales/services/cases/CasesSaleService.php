@@ -9,6 +9,7 @@ use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
+use sales\exception\BoResponseException;
 use sales\forms\caseSale\CaseSaleRequestBoForm;
 use sales\helpers\app\AppHelper;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
@@ -480,11 +481,11 @@ class CasesSaleService
                 if (is_array($result) && array_key_exists('bookingId', $result)) {
                     return $result;
                 }
-                throw new \RuntimeException('BO request Error. Broken data. : ' . VarDumper::dumpAsString($response));
+                throw new BoResponseException('BO request Error. Broken data. : ' . VarDumper::dumpAsString($response));
             }
-            throw new \RuntimeException('BO request Error. Not isOk. : ' . VarDumper::dumpAsString($response->content));
+            throw new BoResponseException('BO request Error. Not isOk. : ' . VarDumper::dumpAsString($response->content));
         } catch (\Throwable $exception) {
-            throw new BadRequestHttpException($exception->getMessage());
+            throw new BoResponseException($exception->getMessage());
         }
     }
 

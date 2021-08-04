@@ -192,12 +192,6 @@ return [
             'port' => $commonParams['queue']['port'],
             'tube' => 'queue_virtual_cron',
         ],
-        'queue_flight_request' => [
-            'class' => \yii\queue\beanstalk\Queue::class,
-            'host' => $commonParams['queue']['host'],
-            'port' => $commonParams['queue']['port'],
-            'tube' => 'queue_flight_request', /* TODO:: ? */
-        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => '',

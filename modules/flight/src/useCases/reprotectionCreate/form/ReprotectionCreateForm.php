@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\reprotectionCreate\form;
 
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
+use modules\flight\models\FlightRequest;
 use yii\base\Model;
 
 /**
@@ -28,9 +29,18 @@ class ReprotectionCreateForm extends Model
             [['is_automate'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
             [['is_automate'], 'default', 'value' => false],
 
-            [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true], /* TODO::  */
-            /* TODO:: add check hash (duplicate) */
+            [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true], /* TODO:: tmp not processed */
+
+            [['booking_id'], 'checkExistByHash'],
         ];
+    }
+
+    public function checkExistByHash($attribute)
+    {
+        $hash = FlightRequest::generateHashFromDataJson($this->getAttributes());
+        if (FlightRequest::findOne(['fr_hash' => $hash])) {
+            $this->addError($attribute, 'FlightRequest already exist. Hash(' . $hash . ')');
+        }
     }
 
     public function formName(): string
