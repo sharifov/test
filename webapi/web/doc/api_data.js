@@ -8206,5 +8206,94 @@ define({ "api": [
     },
     "filename": "webapi/modules/v2/controllers/UserGroupController.php",
     "groupTitle": "UserGroup"
+  },
+  {
+    "type": "post",
+    "url": "/v2/bo/wh",
+    "title": "Reprotection Update from BO",
+    "version": "0.1.0",
+    "name": "ReProtection_Update",
+    "group": "Webhook",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of action on reprotection</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": "<p>Any Data from BO</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"type\": \"reprotection-update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n            ...\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n     \"technical\": {\n          ...\n     },\n     \"request\": {\n          ...\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"errors\": [\n         \"Not found data on POST request\"\n      ],\n     \"technical\": {\n          ...\n     },\n     \"request\": {\n          ...\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/BoController.php",
+    "groupTitle": "Webhook"
   }
 ] });
