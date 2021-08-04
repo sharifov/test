@@ -28,6 +28,8 @@ class m210804_095112_create_flight_request_log_tbl extends Migration
             'flr_created_dt' => $this->dateTime(),
             'flr_updated_dt' => $this->dateTime()
         ], $tableOptions);
+
+        $this->createIndex('IND-flight_request_log-flr_fr_id', '{{%flight_request_log}}', ['flr_fr_id']);
     }
 
     /**
