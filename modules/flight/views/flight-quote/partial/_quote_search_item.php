@@ -445,15 +445,14 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
               'data-title' => implode(', ', $tripsInfo),
               'data-target' => '#result_' . $resultKey,
           ]) ?>
-          <?php if (!$isQuoteAssignedToFlight) : ?>
-                <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
-                  'class' => 'btn btn-success flight_create_quote__btn',
-                  'data-title' => implode(', ', $tripsInfo),
-                  'data-key' => $result['key'],
-                  'data-gds' => $result['gds'],
-                  'data-result' => 'search-result__quote-' . $resultKey,
-              ]) ?>
-          <?php endif; ?>
+          <?= Html::button($isQuoteAssignedToFlight ? 'Quote assigned' : '<i class="fa fa-plus"></i>&nbsp; <span>' . 'Add Quote' . '</span>', [
+              'disabled' => $isQuoteAssignedToFlight,
+              'class' => 'btn btn-success flight_create_quote__btn',
+              'data-title' => implode(', ', $tripsInfo),
+              'data-key' => $result['key'],
+              'data-gds' => $result['gds'],
+              'data-result' => 'search-result__quote-' . $resultKey,
+          ]) ?>
       </div>
     </div>
   </div>
@@ -477,17 +476,14 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
                       <?php endif; ?>
                   </div>
                   <div class="card-footer p-1 text-center">
-                      <?php if (!$isQuoteAssignedToFlight) : ?>
-                            <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
-                            'class' => 'btn btn-success flight_create_quote__btn',
-                            'data-title' => implode(', ', $tripsInfo),
-                            'data-key' => $ngsItinerary['key'],
-                            'data-gds' => $ngsItinerary['gds'],
-                            'data-result' => 'bgs_item_' . $resultKey . '_' . $ngsItineraryKey,
-                      ]) ?>
-                      <?php else : ?>
-                        <p>Quote already assigned</p>
-                      <?php endif; ?>
+                      <?= Html::button($isQuoteAssignedToFlight ? 'Quote assigned' : '<i class="fa fa-plus"></i>&nbsp; <span>' . 'Add Quote' . '</span>', [
+                          'disabled' => $isQuoteAssignedToFlight,
+                          'class' => 'btn btn-success flight_create_quote__btn',
+                          'data-title' => implode(', ', $tripsInfo),
+                          'data-key' => $ngsItinerary['key'],
+                          'data-gds' => $ngsItinerary['gds'],
+                          'data-result' => 'bgs_item_' . $resultKey . '_' . $ngsItineraryKey,
+                  ]) ?>
                   </div>
                 </div>
               <?php endforeach; ?>

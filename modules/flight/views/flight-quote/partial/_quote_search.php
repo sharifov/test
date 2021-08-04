@@ -160,10 +160,11 @@ JS;
                     $('#'+searchResId).addClass('quote--selected')
                     let cardFooter = btn.closest('.card-footer');
                     if (cardFooter.length) {
-                        btn.html('<p>Quote already assigned</p>');
+                        btn.html('<p>Quote already assigned</p>'); // todo: is this trash (never executed)?
                     } else {
                         // btn.remove();
                         btn.attr('disabled', true).prop('disabled', true);
+                        btn.html('Quote assigned');
                     }
                     
 
