@@ -18,6 +18,13 @@ use yii\helpers\VarDumper;
  */
 class ApiUserColumn extends DataColumn
 {
+    public function init(): void
+    {
+        parent::init();
+
+        $this->format = 'raw';
+    }
+
     /**
      * @param mixed $model
      * @param mixed $key
