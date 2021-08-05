@@ -34,10 +34,26 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'fr_id',
+                'fr_booking_id',
                 'fr_hash',
-                'fr_type_id',
-                'fr_created_api_user_id',
-                'fr_status_id',
+                [
+                    'attribute' => 'fr_type_id',
+                    'value' => static function (FlightRequest $model) {
+                        return $model->getTypeName();
+                    }
+                ],
+                [
+                    'attribute' => 'fr_created_api_user_id',
+                    'value' => static function (FlightRequest $model) {
+                        return $model->getApiUsername() . ' (' . $model->fr_created_api_user_id . ')';
+                    },
+                ],
+                [
+                    'attribute' => 'fr_status_id',
+                    'value' => static function (FlightRequest $model) {
+                        return $model->getStatusName();
+                    }
+                ],
                 'fr_job_id',
                 'fr_created_dt',
                 'fr_updated_dt',
