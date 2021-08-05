@@ -54,7 +54,7 @@ class PhoneBlacklistLog extends \yii\db\ActiveRecord
 
             ['pbll_phone', 'required'],
             ['pbll_phone', 'string', 'max' => 30],
-            ['pbll_phone', PhoneInputValidator::class],
+//            ['pbll_phone', PhoneInputValidator::class],
         ];
     }
 
