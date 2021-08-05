@@ -30,6 +30,6 @@ class ApiUserColumn extends DataColumn
             return $model->getApiUsername() . ' (' . $model->fr_created_api_user_id . ')';
         }
 
-        return null;
+        return Yii::$app->formatter->nullDisplay;
     }
 }
