@@ -63,7 +63,9 @@ class CasesQRepository
      */
     public function getInboxQuery(Employee $user): ActiveQuery
     {
-        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_PENDING]);
+        $query = CasesQSearch::find()
+            ->andWhere(['cs_status' => CasesStatus::STATUS_PENDING])
+            ->andWhere(['<>', 'cs_is_automate', true]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -93,7 +95,8 @@ class CasesQRepository
     {
         $query = CasesQSearch::find()
             ->andWhere(['cs_need_action' => true])
-            ->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
+            ->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING])
+            ->andWhere(['<>', 'cs_is_automate', true]);
 
         $query->andWhere($this->createSubQueryForNeedAction($user->id, [], $checkDepPermission = true));
 
@@ -345,6 +348,7 @@ class CasesQRepository
         ])
         ->where(['not', ['nextFlight' => null]])
         ->andWhere('nextFlight <= ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+        ->andWhere(['<>', 'cs_is_automate', true])
         ->orderBy(['nextFlight' => SORT_ASC]);
         $query->joinWith(['client']);
 
@@ -390,7 +394,7 @@ class CasesQRepository
         ])
             ->where(['not', ['nextFlight' => null]])
             ->andWhere('nextFlight > ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
-
+            ->andWhere(['<>', 'cs_is_automate', true])
             ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
         $query->joinWith(['client']);
 
@@ -424,6 +428,7 @@ class CasesQRepository
         ])
             ->where('last_out_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
             ->andWhere('last_in_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+            ->andWhere(['<>', 'cs_is_automate', true])
             ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
         $query->joinWith(['client']);
 
