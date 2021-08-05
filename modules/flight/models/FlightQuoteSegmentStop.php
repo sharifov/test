@@ -135,4 +135,17 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
     {
         return (new FlightQuoteSegmentStopSerializer($this))->getData();
     }
+
+    public function fields(): array
+    {
+        return [
+            'qss_quote_segment_id',
+            'qss_location_iata',
+            'qss_equipment',
+            'qss_elapsed_time',
+            'qss_duration',
+            'qss_departure_dt',
+            'qss_arrival_dt',
+        ];
+    }
 }

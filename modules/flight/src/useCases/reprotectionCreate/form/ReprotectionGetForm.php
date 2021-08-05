@@ -2,8 +2,6 @@
 
 namespace modules\flight\src\useCases\reprotectionCreate\form;
 
-use yii\validators\StringValidator;
-
 /**
  * Class ReprotectionGetForm
  * @package modules\flight\src\useCases\reprotectionCreate\form

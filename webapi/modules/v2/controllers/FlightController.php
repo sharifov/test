@@ -88,6 +88,16 @@ class FlightController extends BaseController
         return $behaviors;
     }
 
+    protected function verbs(): array
+    {
+        return ArrayHelper::merge(
+            parent::verbs(),
+            [
+                'reprotection-get' => ['GET']
+            ]
+        );
+    }
+
     /**
      * @api {post} /v2/flight/reprotection-create Create flight reprotection from BO
      * @apiVersion 0.1.0
@@ -240,7 +250,7 @@ class FlightController extends BaseController
     }
 
     /**
-     * @api {post} /v2/flight/reprotection-get Get flight reprotection
+     * @api {get} /v2/flight/reprotection-get Get flight reprotection
      * @apiVersion 0.1.0
      * @apiName ReProtection Get
      * @apiGroup Flight
@@ -839,11 +849,11 @@ class FlightController extends BaseController
     {
         $form = new ReprotectionGetForm();
 
-        if (!$form->load(Yii::$app->request->post())) {
+        if (!$form->load(Yii::$app->request->get())) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
-                new ErrorsMessage('Not found data on POST request'),
+                new ErrorsMessage('Not found data on GET request'),
             );
         }
         if (!$form->validate()) {
@@ -872,7 +882,7 @@ class FlightController extends BaseController
 
             return new SuccessResponse(
                 new Message('origin_product_quote', $originProductQuote),
-                new Message('reprotection_product_quote', $productQuote->serialize()),
+                new Message('reprotection_product_quote', $productQuote->toArray()),
                 new Message('order', $orderSerialized),
                 new Message('order_contacts', $orderContacts)
             );

@@ -148,4 +148,19 @@ class FlightQuoteSegmentPaxBaggageCharge extends \yii\db\ActiveRecord
     {
         return (new FlightQuoteSegmentPaxBaggageChargeSerializer($this))->getData();
     }
+
+    public function fields(): array
+    {
+        return [
+            'qsbc_first_piece',
+            'qsbc_last_piece',
+            'qsbc_origin_price',
+            'qsbc_origin_currency',
+            'qsbc_price',
+            'qsbc_client_price',
+            'qsbc_client_currency',
+            'qsbc_max_weight',
+            'qsbc_max_size',
+        ];
+    }
 }

@@ -319,4 +319,88 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
         $segment->fqs_mileage = $dto->mileage;
         return $segment;
     }
+
+    public function fields(): array
+    {
+        $fields = [
+            'fqs_uid',
+            'fqs_departure_dt',
+            'fqs_arrival_dt',
+            'fqs_stop',
+            'fqs_flight_number',
+            'fqs_booking_class',
+            'fqs_duration',
+            'fqs_departure_airport_iata',
+            'fqs_departure_airport_terminal',
+            'fqs_arrival_airport_iata',
+            'fqs_arrival_airport_terminal',
+            'fqs_operating_airline',
+            'fqs_marketing_airline',
+            'fqs_air_equip_type',
+            'fqs_marriage_group',
+            'fqs_cabin_class',
+            'fqs_meal',
+            'fqs_fare_code',
+            'fqs_ticket_id',
+            'fqs_recheck_baggage',
+            'fqs_mileage'
+        ];
+        $fields['departureLocation'] = function () {
+            return Airports::getCityByIata($this->fqs_departure_airport_iata);
+        };
+        $fields['arrivalLocation'] = function () {
+            return Airports::getCityByIata($this->fqs_arrival_airport_iata);
+        };
+        $fields['cabin'] = function () {
+            return \common\components\SearchService::getCabin($this->fqs_cabin_class);
+        };
+        $fields['operatingAirline'] = function () {
+            $operatingAirline = '';
+            if ($this->fqs_operating_airline) {
+                $airLine = Airline::find()->andWhere(['iata' => $this->fqs_operating_airline])->asArray()->one();
+                if ($airLine) {
+                    $operatingAirline = $airLine['name'];
+                }
+            }
+            return $operatingAirline;
+        };
+        $fields['marketingAirline'] = function () {
+            $marketingAirline = '';
+            if ($this->fqs_marketing_airline) {
+                $airLine = Airline::find()->andWhere(['iata' => $this->fqs_marketing_airline])->asArray()->one();
+                if ($airLine) {
+                    $marketingAirline = $airLine['name'];
+                }
+            }
+            return $marketingAirline;
+        };
+        if ($this->flightQuoteSegmentStops) {
+            $fields['stops'] = function () {
+                $stops = [];
+                foreach ($this->flightQuoteSegmentStops as $stop) {
+                    $stops[] = $stop->toArray();
+                }
+                return $stops;
+            };
+        }
+        if ($this->flightQuoteSegmentPaxBaggages) {
+            $fields['baggages'] = function () {
+                $baggages = [];
+                foreach ($this->flightQuoteSegmentPaxBaggages as $baggage) {
+                    $baggages[] = $baggage->toArray();
+                }
+                return $baggages;
+            };
+        }
+        if ($this->flightQuoteSegmentPaxBaggageCharges) {
+            $fields['baggage_charges'] = function () {
+                $baggageCharges = [];
+                foreach ($this->flightQuoteSegmentPaxBaggageCharges as $charge) {
+                    $baggageCharges[] = $charge->toArray();
+                }
+                return $baggageCharges;
+            };
+        }
+        return $fields;
+    }
 }

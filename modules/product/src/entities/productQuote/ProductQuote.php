@@ -898,4 +898,34 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->detailsPageUrl = $finder();
         return $this->detailsPageUrl;
     }
+
+    public function fields(): array
+    {
+        $fields = [
+            'pq_gid',
+            'pq_name',
+            'pq_order_id',
+            'pq_description',
+            'pq_status_id',
+            'pq_price',
+            'pq_origin_price',
+            'pq_client_price',
+            'pq_service_fee_sum',
+            'pq_origin_currency',
+            'pq_client_currency',
+        ];
+        $fields['pq_status_name'] = function () {
+            return ProductQuoteStatus::getName($this->pq_status_id);
+        };
+        $fields['pq_files'] = function () {
+            return (new ProductQuoteFiles())->getList($this);
+        };
+        if ($quote = $this->getChildQuote()) {
+            $fields['data'] = static function () use ($quote) {
+                /** @var $quote ActiveRecord */
+                return $quote->toArray();
+            };
+        }
+        return $fields;
+    }
 }
