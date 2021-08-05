@@ -86,6 +86,102 @@ class CasesQRepository
      * @param Employee $user
      * @return int
      */
+    public function getErrorCount(Employee $user): int
+    {
+        return $this->getErrorQuery($user)->cache(self::CACHE_DURATION)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getErrorQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_ERROR]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->freeCase();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getAwaitingCount(Employee $user): int
+    {
+        return $this->getAwaitingQuery($user)->cache(self::CACHE_DURATION)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getAwaitingQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_AWAITING]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->freeCase();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getAutoProcessingCount(Employee $user): int
+    {
+        return $this->getAutoProcessingQuery($user)->cache(self::CACHE_DURATION)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getAutoProcessingQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_AUTO_PROCESSING]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->freeCase();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
     public function getNeedActionCount(Employee $user): int
     {
         return $this->getNeedActionQuery($user)->cache(self::CACHE_DURATION)->count();

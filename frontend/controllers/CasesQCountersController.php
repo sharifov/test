@@ -117,6 +117,21 @@ class CasesQCountersController extends FController
                         $result['pass-departure'] = $count;
                     }
                     break;
+                case 'error':
+                    if ($count = $this->getError()) {
+                        $result['error'] = $count;
+                    }
+                    break;
+                case 'awaiting':
+                    if ($count = $this->getAwaiting()) {
+                        $result['awaiting'] = $count;
+                    }
+                    break;
+                case 'auto-processing':
+                    if ($count = $this->getAutoProcessing()) {
+                        $result['auto-processing'] = $count;
+                    }
+                    break;
             }
         }
 
@@ -147,6 +162,45 @@ class CasesQCountersController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->casesQRepository->getInboxCount($user);
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getError(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/error')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getErrorCount($user);
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getAwaiting(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/waiting')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getAwaitingCount($user);
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getAutoProcessing(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/auto-processing')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getAutoProcessingCount($user);
     }
 
     /**
