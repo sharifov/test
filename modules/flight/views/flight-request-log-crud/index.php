@@ -1,5 +1,7 @@
 <?php
 
+use modules\flight\models\FlightRequestLog;
+use modules\flight\models\FlightRequest;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -24,11 +26,22 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
             'flr_id',
             'flr_fr_id',
-            'flr_status_id_old',
-            'flr_status_id_new',
+            [
+                'attribute' => 'flr_status_id_old',
+                'value' => static function (FlightRequestLog $model) {
+                    return $model->getOldStatusName() ?? Yii::$app->formatter->nullDisplay;
+                },
+                'filter' => FlightRequest::STATUS_LIST
+            ],
+            [
+                'attribute' => 'flr_status_id_new',
+                'value' => static function (FlightRequestLog $model) {
+                    return $model->getNewStatusName() ?? Yii::$app->formatter->nullDisplay;
+                },
+                'filter' => FlightRequest::STATUS_LIST
+            ],
             'flr_description',
             //'flr_created_dt',
             //'flr_updated_dt',

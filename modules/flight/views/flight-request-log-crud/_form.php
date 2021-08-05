@@ -1,5 +1,6 @@
 <?php
 
+use modules\flight\models\FlightRequest;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -14,9 +15,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'flr_fr_id')->textInput() ?>
 
-    <?= $form->field($model, 'flr_status_id_old')->textInput() ?>
+    <?= $form->field($model, 'flr_status_id_old')->dropDownList(FlightRequest::STATUS_LIST) ?>
 
-    <?= $form->field($model, 'flr_status_id_new')->textInput() ?>
+    <?= $form->field($model, 'flr_status_id_new')->dropDownList(FlightRequest::STATUS_LIST) ?>
 
     <?= $form->field($model, 'flr_description')->textInput(['maxlength' => true]) ?>
 
