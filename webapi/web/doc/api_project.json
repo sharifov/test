@@ -1,6 +1,6 @@
 {
   "name": "CRM Sales API",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "apiDoc CRM Sales",
   "title": "CRM Sales API",
   "url": "",
@@ -9,8 +9,8 @@
   "apidoc": "0.3.0",
   "generator": {
     "name": "apidoc",
-    "time": "2021-08-04T07:23:24.294Z",
-    "url": "http://apidocjs.com",
-    "version": "0.20.0"
+    "time": "2021-08-05T13:02:09.429Z",
+    "url": "https://apidocjs.com",
+    "version": "0.28.1"
   }
 }

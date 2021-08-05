@@ -895,7 +895,7 @@ class FlightController extends BaseController
 
     /**
      * @api {post} /v2/flight/reprotection-decision Reprotection decision
-     * @apiVersion 0.1.0
+     * @apiVersion 0.2.0
      * @apiName ReProtection Decision
      * @apiGroup Flight
      * @apiPermission Authorized User
@@ -907,15 +907,17 @@ class FlightController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {int}           reprotection_id
-     * @apiParam {int=1-confirm, 2-modify, 3-refund}   type_id
-     * @apiParam {object}        flight_product_quote
+     * @apiParam {string{32}}       origin_quote_gid Original Product Quote GID
+     * @apiParam {string="confirm", "modify", "refund"}  type  Re-protection Type
+     * @apiParam {string{32}}       [reprotection_quote_gid] Re-protection Product Quote GID (required for type = "confirm", "modify")
+     * @apiParam {string}        [flight_product_quote]   Flight Quote Data (required for type = "modify")
      *
      * @apiParamExample {json} Request-Example:
      *   {
-     *      "reprotection_id": 1,
-     *      "type_id": 1,
-     *      "flight_product_quote": {} // todo
+     *      "origin_quote_gid": "14f95e797313c99d85d955373e408722",
+     *      "type": "confirm",
+     *      "reprotection_quote_gid": "94f95e797313c99d85d955373e408788",
+     *      "flight_product_quote": "{}" // todo
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -957,8 +959,8 @@ class FlightController extends BaseController
      *        "status": 422,
      *        "message": "Validation error",
      *        "errors": [
-     *            "type_id": [
-     *               "Type Id cannot be blank."
+     *            "type": [
+     *               "Type cannot be blank."
      *             ]
      *        ],
      *        "technical": {
@@ -991,11 +993,11 @@ class FlightController extends BaseController
 
         try {
             if ($form->isConfirm()) {
-                Yii::createObject(reprotectionDecision\Confirm::class)->handle($form->reprotection_id);
+                Yii::createObject(reprotectionDecision\Confirm::class)->handle($form->reprotection_quote_gid);
             } elseif ($form->isModify()) {
-                Yii::createObject(reprotectionDecision\Modify::class)->handle($form->reprotection_id, $form->flight_product_quote);
+                Yii::createObject(reprotectionDecision\Modify::class)->handle($form->reprotection_quote_gid, $form->flight_product_quote);
             } elseif ($form->isRefund()) {
-                Yii::createObject(reprotectionDecision\Refund::class)->handle($form->reprotection_id);
+                Yii::createObject(reprotectionDecision\Refund::class)->handle($form->reprotection_quote_gid);
             } else {
                 throw new \DomainException('Undefined type');
             }

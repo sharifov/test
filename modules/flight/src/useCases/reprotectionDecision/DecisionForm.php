@@ -7,9 +7,10 @@ use yii\base\Model;
 /**
  * Class DecisionForm
  *
- * @property int $reprotection_id
- * @property int $type_id
- * @property $flight_product_quote
+ * @property string $origin_quote_gid
+ * @property string $reprotection_quote_gid
+ * @property string $type
+ * @property string $flight_product_quote
  */
 class DecisionForm extends Model
 {
@@ -23,19 +24,24 @@ class DecisionForm extends Model
         self::TYPE_REFUND => 'refund',
     ];
 
-    public $reprotection_id;
-    public $type_id;
+    public $origin_quote_gid;
+    public $reprotection_quote_gid;
+    public $type;
     public $flight_product_quote;
 
     public function rules(): array
     {
         return [
-            ['reprotection_id', 'required'],
-            ['reprotection_id', 'integer'],
 
-            ['type_id', 'required'],
-            ['type_id', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
-            ['type_id', 'in', 'range' => array_keys(self::TYPES)],
+            ['origin_quote_gid', 'required'],
+            [['origin_quote_gid', 'reprotection_quote_gid'], 'string', 'max' => 32],
+
+            ['type', 'required'],
+            ['type', 'in', 'range' => self::TYPES],
+
+            ['reprotection_quote_gid', 'required', 'when' => function () {
+                return $this->isModify() || $this->isConfirm();
+            }],
 
             ['flight_product_quote', 'required', 'when' => function () {
                 return $this->isModify();
@@ -46,17 +52,17 @@ class DecisionForm extends Model
 
     public function isConfirm(): bool
     {
-        return $this->type_id === self::TYPE_CONFIRM;
+        return $this->type === self::TYPES[self::TYPE_CONFIRM];
     }
 
     public function isModify(): bool
     {
-        return $this->type_id === self::TYPE_MODIFY;
+        return $this->type === self::TYPES[self::TYPE_MODIFY];
     }
 
     public function isRefund(): bool
     {
-        return $this->type_id === self::TYPE_REFUND;
+        return $this->type === self::TYPES[self::TYPE_REFUND];
     }
 
     public function formName(): string
