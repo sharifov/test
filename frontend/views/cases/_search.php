@@ -267,6 +267,9 @@ $select2Properties = [
         <div class="col-md-1">
             <?= $form->field($model, 'includedFiles')->dropDownList([0 => 'No', 1 => 'Yes'], ['prompt' => '-']) ?>
         </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'isAutomate')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+        </div>
     </div>
 
     <div class="row">

@@ -21,6 +21,7 @@ use yii\helpers\ArrayHelper;
 use sales\auth\Auth;
 use common\models\Language;
 use kartik\select2\Select2;
+use common\components\grid\BooleanColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -294,6 +295,11 @@ $gridId = 'cases-grid-id';
             ],
             [
                 'attribute' => 'cs_order_uid',
+            ],
+            [
+                'attribute' => 'cs_is_automate',
+                'class' => BooleanColumn::class,
+                'visible' => $searchModel->showFields && in_array('cs_is_automate', $searchModel->showFields, true),
             ],
             [
                 'attribute' => 'cs_created_dt',

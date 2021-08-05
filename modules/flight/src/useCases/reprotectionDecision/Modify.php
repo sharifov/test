@@ -4,7 +4,7 @@ namespace modules\flight\src\useCases\reprotectionDecision;
 
 class Modify
 {
-    public function handle(int $reprotectionId, $quote): void
+    public function handle(string $reprotectionQuoteGid, $quote): void
     {
         // todo
     }

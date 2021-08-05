@@ -3098,7 +3098,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"booking_id\": \"XXXYYYZ\",\n    \"is_automate\": false,\n    \"flight_quote\": {} // TODO::\n}",
+          "content": " {\n    \"booking_id\": \"XXXYYYZ\",\n    \"is_automate\": false,\n    \"flight_quote\": {\n               \"gds\": \"S\",\n               \"key\": \"2_T1ZBMTAxKlkxMDAwL0xBWFRQRTIwMjEtMDUtMTMvVFBFTEFYMjAyMS0wNi0yMCpQUn4jUFIxMDMjUFI4OTAjUFI4OTEjUFIxMDJ+bGM6ZW5fdXM=\",\n               \"pcc\": \"8KI0\",\n               \"cons\": \"GTT\",\n               \"keys\": {\n                   \"services\": {\n                       \"support\": {\n                           \"amount\": 75\n                       }\n                   },\n                   \"seatHoldSeg\": {\n                       \"trip\": 0,\n                       \"seats\": 9,\n                       \"segment\": 0\n                   },\n                   \"verification\": {\n                       \"headers\": {\n                           \"X-Client-Ip\": \"92.115.180.30\",\n                           \"X-Kiv-Cust-Ip\": \"92.115.180.30\",\n                           \"X-Kiv-Cust-ipv\": \"0\",\n                           \"X-Kiv-Cust-ssid\": \"ovago-dev-0484692\",\n                           \"X-Kiv-Cust-direct\": \"true\",\n                           \"X-Kiv-Cust-browser\": \"desktop\"\n                       }\n                   }\n               },\n               \"meta\": {\n                   \"eip\": 0,\n                   \"bags\": 2,\n                   \"best\": false,\n                   \"lang\": \"en\",\n                   \"rank\": 6,\n                   \"group1\": \"LAXTPE:PRPR:0:TPELAX:PRPR:0:767.75\",\n                   \"country\": \"us\",\n                   \"fastest\": false,\n                   \"noavail\": false,\n                   \"cheapest\": true,\n                   \"searchId\": \"T1ZBMTAxWTEwMDB8TEFYVFBFMjAyMS0wNS0xM3xUUEVMQVgyMDIxLTA2LTIw\"\n               },\n               \"cabin\": \"Y\",\n               \"trips\": [\n                   {\n                       \"tripId\": 1,\n                       \"duration\": 1150,\n                       \"segments\": [\n                           {\n                               \"meal\": \"D\",\n                               \"stop\": 0,\n                               \"cabin\": \"Y\",\n                               \"stops\": [],\n                               \"baggage\": {\n                                   \"ADT\": {\n                                       \"carryOn\": true,\n                                       \"airlineCode\": \"PR\",\n                                       \"allowPieces\": 2,\n                                       \"allowMaxSize\": \"UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS\",\n                                       \"allowMaxWeight\": \"UP TO 50 POUNDS/23 KILOGRAMS\"\n                                   }\n                               },\n                               \"mileage\": 7305,\n                               \"duration\": 870,\n                               \"fareCode\": \"U9XBUS\",\n                               \"segmentId\": 1,\n                               \"arrivalTime\": \"2021-05-15 04:00\",\n                               \"airEquipType\": \"773\",\n                               \"bookingClass\": \"U\",\n                               \"flightNumber\": \"103\",\n                               \"departureTime\": \"2021-05-13 22:30\",\n                               \"marriageGroup\": \"O\",\n                               \"recheckBaggage\": false,\n                               \"marketingAirline\": \"PR\",\n                               \"operatingAirline\": \"PR\",\n                               \"arrivalAirportCode\": \"MNL\",\n                               \"departureAirportCode\": \"LAX\",\n                               \"arrivalAirportTerminal\": \"2\",\n                               \"departureAirportTerminal\": \"B\"\n                           },\n                           {\n                               \"meal\": \"B\",\n                               \"stop\": 0,\n                               \"cabin\": \"Y\",\n                               \"stops\": [],\n                               \"baggage\": {\n                                   \"ADT\": {\n                                       \"carryOn\": true,\n                                       \"airlineCode\": \"PR\",\n                                       \"allowPieces\": 2,\n                                       \"allowMaxSize\": \"UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS\",\n                                       \"allowMaxWeight\": \"UP TO 50 POUNDS/23 KILOGRAMS\"\n                                   }\n                               },\n                               \"mileage\": 728,\n                               \"duration\": 130,\n                               \"fareCode\": \"U9XBUS\",\n                               \"segmentId\": 2,\n                               \"arrivalTime\": \"2021-05-15 08:40\",\n                               \"airEquipType\": \"321\",\n                               \"bookingClass\": \"U\",\n                               \"flightNumber\": \"890\",\n                               \"departureTime\": \"2021-05-15 06:30\",\n                               \"marriageGroup\": \"I\",\n                               \"recheckBaggage\": false,\n                               \"marketingAirline\": \"PR\",\n                               \"operatingAirline\": \"PR\",\n                               \"arrivalAirportCode\": \"TPE\",\n                               \"departureAirportCode\": \"MNL\",\n                               \"arrivalAirportTerminal\": \"1\",\n                               \"departureAirportTerminal\": \"1\"\n                           }\n                       ]\n                   }\n               ],\n               \"paxCnt\": 1,\n               \"prices\": {\n                   \"comm\": 0,\n                   \"isCk\": false,\n                   \"ccCap\": 16.900002,\n                   \"markup\": 50,\n                   \"oMarkup\": {\n                       \"amount\": 50,\n                       \"currency\": \"USD\"\n                   },\n                   \"markupId\": 8833,\n                   \"totalTax\": 321.75,\n                   \"markupUid\": \"1c7afe8c-a34f-434e-8fa3-87b9b7b1ff4e\",\n                   \"totalPrice\": 767.75,\n                   \"lastTicketDate\": \"2021-03-31\"\n               },\n               \"currency\": \"USD\",\n               \"fareType\": \"SR\",\n               \"maxSeats\": 9,\n               \"tripType\": \"RT\",\n               \"penalties\": {\n                   \"list\": [\n                       {\n                           \"type\": \"re\",\n                           \"permitted\": false,\n                           \"applicability\": \"before\"\n                       },\n                       {\n                           \"type\": \"re\",\n                           \"permitted\": false,\n                           \"applicability\": \"after\"\n                       },\n                       {\n                           \"type\": \"ex\",\n                           \"amount\": 425,\n                           \"oAmount\": {\n                               \"amount\": 425,\n                               \"currency\": \"USD\"\n                           },\n                           \"permitted\": true,\n                           \"applicability\": \"before\"\n                       },\n                       {\n                           \"type\": \"ex\",\n                           \"amount\": 425,\n                           \"oAmount\": {\n                               \"amount\": 425,\n                               \"currency\": \"USD\"\n                           },\n                           \"permitted\": true,\n                           \"applicability\": \"after\"\n                       }\n                   ],\n                   \"refund\": false,\n                   \"exchange\": true\n               },\n               \"routingId\": 1,\n               \"currencies\": [\n                   \"USD\"\n               ],\n               \"founded_dt\": \"2021-02-25 13:44:54.570\",\n               \"passengers\": {\n                   \"ADT\": {\n                       \"cnt\": 1,\n                       \"tax\": 321.75,\n                       \"comm\": 0,\n                       \"ccCap\": 16.900002,\n                       \"price\": 767.75,\n                       \"codeAs\": \"JCB\",\n                       \"markup\": 50,\n                       \"occCap\": {\n                           \"amount\": 16.900002,\n                           \"currency\": \"USD\"\n                       },\n                       \"baseTax\": 271.75,\n                       \"oMarkup\": {\n                           \"amount\": 50,\n                           \"currency\": \"USD\"\n                       },\n                       \"baseFare\": 446,\n                       \"oBaseTax\": {\n                           \"amount\": 271.75,\n                           \"currency\": \"USD\"\n                       },\n                       \"oBaseFare\": {\n                           \"amount\": 446,\n                           \"currency\": \"USD\"\n                       },\n                       \"pubBaseFare\": 446\n                   }\n               },\n               \"ngsFeatures\": {\n                   \"list\": null,\n                   \"name\": \"\",\n                   \"stars\": 3\n               },\n               \"currencyRates\": {\n                   \"CADUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"CAD\",\n                       \"rate\": 0.78417\n                   },\n                   \"DKKUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"DKK\",\n                       \"rate\": 0.16459\n                   },\n                   \"EURUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"EUR\",\n                       \"rate\": 1.23967\n                   },\n                   \"GBPUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"GBP\",\n                       \"rate\": 1.37643\n                   },\n                   \"KRWUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"KRW\",\n                       \"rate\": 0.00091\n                   },\n                   \"MYRUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"MYR\",\n                       \"rate\": 0.25006\n                   },\n                   \"SEKUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"SEK\",\n                       \"rate\": 0.12221\n                   },\n                   \"TWDUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"TWD\",\n                       \"rate\": 0.03592\n                   },\n                   \"USDCAD\": {\n                       \"to\": \"CAD\",\n                       \"from\": \"USD\",\n                       \"rate\": 1.30086\n                   },\n                   \"USDDKK\": {\n                       \"to\": \"DKK\",\n                       \"from\": \"USD\",\n                       \"rate\": 6.19797\n                   },\n                   \"USDEUR\": {\n                       \"to\": \"EUR\",\n                       \"from\": \"USD\",\n                       \"rate\": 0.83926\n                   },\n                   \"USDGBP\": {\n                       \"to\": \"GBP\",\n                       \"from\": \"USD\",\n                       \"rate\": 0.75587\n                   },\n                   \"USDKRW\": {\n                       \"to\": \"KRW\",\n                       \"from\": \"USD\",\n                       \"rate\": 1117.1008\n                   },\n                   \"USDMYR\": {\n                       \"to\": \"MYR\",\n                       \"from\": \"USD\",\n                       \"rate\": 4.07943\n                   },\n                   \"USDSEK\": {\n                       \"to\": \"SEK\",\n                       \"from\": \"USD\",\n                       \"rate\": 8.34736\n                   },\n                   \"USDTWD\": {\n                       \"to\": \"TWD\",\n                       \"from\": \"USD\",\n                       \"rate\": 28.96525\n                   },\n                   \"USDUSD\": {\n                       \"to\": \"USD\",\n                       \"from\": \"USD\",\n                       \"rate\": 1\n                   }\n               },\n               \"validatingCarrier\": \"PR\"\n           }\n}",
           "type": "json"
         }
       ]
@@ -3138,7 +3138,7 @@ define({ "api": [
     "type": "post",
     "url": "/v2/flight/reprotection-decision",
     "title": "Reprotection decision",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "name": "ReProtection_Decision",
     "group": "Flight",
     "permission": [
@@ -3171,36 +3171,45 @@ define({ "api": [
         "Parameter": [
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
+            "size": "7..10",
             "optional": false,
-            "field": "reprotection_id",
-            "description": ""
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "allowedValues": [
-              "1-confirm",
-              "2-modify",
-              "3-refund"
+              "\"confirm\"",
+              "\"modify\"",
+              "\"refund\""
             ],
             "optional": false,
-            "field": "type_id",
-            "description": ""
+            "field": "type",
+            "description": "<p>Re-protection Type</p>"
           },
           {
             "group": "Parameter",
-            "type": "object",
-            "optional": false,
+            "type": "string",
+            "size": "32",
+            "optional": true,
+            "field": "reprotection_quote_gid",
+            "description": "<p>Re-protection Product Quote GID (required for type = &quot;confirm&quot;, &quot;modify&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
             "field": "flight_product_quote",
-            "description": ""
+            "description": "<p>Flight Quote Data (required for type = &quot;modify&quot;)</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"reprotection_id\": 1,\n    \"type_id\": 1,\n    \"flight_product_quote\": {} // todo\n}",
+          "content": " {\n    \"booking_id\": \"W12RT56\",\n    \"type\": \"confirm\",\n    \"reprotection_quote_gid\": \"94f95e797313c99d85d955373e408788\",\n    \"flight_product_quote\": \"{}\" // todo\n}",
           "type": "json"
         }
       ]
@@ -3223,7 +3232,7 @@ define({ "api": [
         },
         {
           "title": "Error-Response:",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type_id\": [\n              \"Type Id cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type\": [\n              \"Type cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]

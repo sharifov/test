@@ -3,6 +3,10 @@
 namespace modules\flight\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
+use yii\helpers\StringHelper;
 
 /**
  * This is the model class for table "flight_request_log".
@@ -31,10 +35,26 @@ class FlightRequestLog extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['flr_fr_id'], 'required'],
             [['flr_fr_id', 'flr_status_id_old', 'flr_status_id_new'], 'integer'],
             [['flr_created_dt', 'flr_updated_dt'], 'safe'],
             [['flr_description'], 'string', 'max' => 500],
         ];
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['flr_created_dt', 'flr_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['flr_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -51,5 +71,19 @@ class FlightRequestLog extends \yii\db\ActiveRecord
             'flr_created_dt' => 'Created Dt',
             'flr_updated_dt' => 'Updated Dt',
         ];
+    }
+
+    public static function create(
+        int $flightRequestId,
+        ?int $oldStatus,
+        ?int $newStatus,
+        ?string $description
+    ): FlightRequestLog {
+        $model = new self();
+        $model->flr_fr_id = $flightRequestId;
+        $model->flr_status_id_old = $oldStatus;
+        $model->flr_status_id_new = $newStatus;
+        $model->flr_description = StringHelper::truncate($description, 499, '');
+        return $model;
     }
 }

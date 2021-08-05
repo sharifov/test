@@ -123,7 +123,7 @@ class FlightFromSaleService
         Order $order,
         OrderCreateFromSaleForm $orderCreateFromSaleForm,
         array $saleData
-    ) {
+    ): ProductQuote {
         $product = Product::create(
             new CreateDto(null, ProductType::PRODUCT_FLIGHT, null, null, $orderCreateFromSaleForm->getProjectId())
         );
@@ -277,7 +277,7 @@ class FlightFromSaleService
                 $estimationTotal += ($priceQuotesForm->selling * $priceQuotesForm->cnt);
             }
         }
-        return $estimationTotal;
+        return $productQuote;
     }
 
     private static function detectProductQuoteStatus(array $saleData): int

@@ -148,11 +148,13 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public const TYPE_BASE = 0;
     public const TYPE_ORIGINAL = 1;
     public const TYPE_ALTERNATIVE = 2;
+    public const TYPE_REPROTECTION = 3;
 
     public const TYPE_LIST = [
         self::TYPE_BASE => 'Base',
         self::TYPE_ORIGINAL => 'Original',
         self::TYPE_ALTERNATIVE => 'Alternative',
+        self::TYPE_REPROTECTION => 'ReProtection',
     ];
 
     public const SERVICE_FEE = 0.035;
@@ -517,6 +519,16 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function alternative(): void
     {
         $this->fq_type_id = self::TYPE_ALTERNATIVE;
+    }
+
+    public function isTypeReProtection(): bool
+    {
+        return $this->fq_type_id === self::TYPE_REPROTECTION;
+    }
+
+    public function setTypeReProtection(): void
+    {
+        $this->fq_type_id = self::TYPE_REPROTECTION;
     }
 
     /**

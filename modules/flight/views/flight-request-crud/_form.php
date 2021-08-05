@@ -16,6 +16,8 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
+        <?= $form->field($model, 'fr_booking_id')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'fr_hash')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'fr_type_id')->dropDownList(FlightRequest::TYPE_LIST) ?>

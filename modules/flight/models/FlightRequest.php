@@ -5,6 +5,7 @@ namespace modules\flight\models;
 use common\components\validators\CheckJsonValidator;
 use modules\flight\models\query\FlightRequestQuery;
 use sales\behaviors\StringToJsonBehavior;
+use common\models\ApiUser;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -141,6 +142,15 @@ class FlightRequest extends \yii\db\ActiveRecord
     }
 
     /**
+     * returns ApiUser full name
+     * @return string|null
+     */
+    public function getApiUsername(): ?string
+    {
+        return ApiUser::findOne($this->fr_created_api_user_id)->au_name ?? null;
+    }
+
+    /**
      * @param string $booking_id
      * @param int $type_id
      * @param array $data_json
@@ -200,5 +210,15 @@ class FlightRequest extends \yii\db\ActiveRecord
     public function getFlightRequestLog()
     {
         return $this->hasMany(FlightRequestLog::class, ['flr_fr_id' => 'fr_id']);
+    }
+
+    public function getFlightQuoteData()
+    {
+        return ArrayHelper::getValue($this, 'fr_data_json.flight_quote');
+    }
+
+    public function getIsAutomateDataJson(): bool
+    {
+        return (bool) ArrayHelper::getValue($this, 'fr_data_json.flight_quote', false);
     }
 }
