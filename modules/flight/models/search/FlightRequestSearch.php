@@ -64,7 +64,7 @@ class FlightRequestSearch extends FlightRequest
         ]);
 
         $query->andFilterWhere(['like', 'fr_hash', $this->fr_hash])
-            ->andFilterWhere(['lake', 'fr_booking_id', $this->fr_booking_id])
+            ->andFilterWhere(['like', 'fr_booking_id', $this->fr_booking_id])
             ->andFilterWhere(['like', 'fr_data_json', $this->fr_data_json]);
 
         return $dataProvider;

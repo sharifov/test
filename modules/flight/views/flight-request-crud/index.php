@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
 
             'fr_id',
+            'fr_booking_id',
             'fr_hash',
             [
                 'attribute' => 'fr_type_id',
@@ -47,7 +48,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => FlightRequest::STATUS_LIST
             ],
-            'fr_created_api_user_id',
+            [
+                'attribute' => 'fr_created_api_user_id',
+                'class' => common\components\grid\ApiUserColumn::class,
+            ],
             'fr_job_id',
             ['class' => DateTimeColumn::class, 'attribute' => 'fr_created_dt'],
             //'fr_updated_dt',

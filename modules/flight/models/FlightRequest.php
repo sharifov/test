@@ -5,6 +5,7 @@ namespace modules\flight\models;
 use common\components\validators\CheckJsonValidator;
 use modules\flight\models\query\FlightRequestQuery;
 use sales\behaviors\StringToJsonBehavior;
+use common\models\ApiUser;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -138,6 +139,15 @@ class FlightRequest extends \yii\db\ActiveRecord
     public function getStatusName(): ?string
     {
         return self::STATUS_LIST[$this->fr_status_id] ?? null;
+    }
+
+    /**
+     * returns ApiUser full name
+     * @return string|null
+     */
+    public function getApiUsername(): ?string
+    {
+        return ApiUser::findOne($this->fr_created_api_user_id)->au_name ?? null;
     }
 
     /**
