@@ -50,9 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'fr_created_api_user_id',
-                'value' => static function (FlightRequest $model) {
-                    return $model->getApiUsername() . ' (' . $model->fr_created_api_user_id . ')';
-                },
+                'class' => common\components\grid\ApiUserColumn::class,
             ],
             'fr_job_id',
             ['class' => DateTimeColumn::class, 'attribute' => 'fr_created_dt'],

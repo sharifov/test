@@ -141,9 +141,13 @@ class FlightRequest extends \yii\db\ActiveRecord
         return self::STATUS_LIST[$this->fr_status_id] ?? null;
     }
 
-    public function getApiUsername(): string
+    /**
+     * returns ApiUser full name
+     * @return string|null
+     */
+    public function getApiUsername(): ?string
     {
-        return ApiUser::findOne($this->fr_created_api_user_id)->au_name;
+        return ApiUser::findOne($this->fr_created_api_user_id)->au_name ?? null;
     }
 
     /**
