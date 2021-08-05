@@ -56,6 +56,7 @@ use Yii;
  * @property string|null $cs_deadline_dt
  * @property bool $cs_need_action
  * @property string|null $cs_order_uid
+ * @property bool $cs_is_automate
  *
  * @property CaseCategory $category
  * @property Department $department
@@ -622,7 +623,8 @@ class Cases extends ActiveRecord implements Objectable
             'cs_source_type_id' => 'Source type',
             'cs_deadline_dt' => 'Deadline',
             'cs_need_action' => 'Need Action',
-            'cs_order_uid' => 'Booking ID ',
+            'cs_order_uid' => 'Booking ID',
+            'cs_is_automate' => 'Is Automate',
         ];
     }
 

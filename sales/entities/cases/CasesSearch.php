@@ -77,6 +77,7 @@ use yii\helpers\ArrayHelper;
  * @property array $showFields
  * @property int|null $includedFiles
  * @property $count_files
+ * @property bool $isAutomate
  */
 class CasesSearch extends Cases
 {
@@ -134,6 +135,7 @@ class CasesSearch extends Cases
 
     public int $cacheDuration = 60 * 1;
     public $includedFiles;
+    public $isAutomate;
     public $count_files;
 
     /**
@@ -169,6 +171,7 @@ class CasesSearch extends Cases
             ['cs_need_action', 'boolean'],
 
             ['cs_order_uid', 'string'],
+            ['cs_is_automate', 'boolean'],
 
             [['cssChargedFrom', 'cssChargedTo', 'cssProfitFrom', 'cssProfitTo'], 'number'],
             [['cssOutDate', 'cssInDate'], 'date'],
@@ -192,6 +195,7 @@ class CasesSearch extends Cases
             }, 'skipOnEmpty' => true],
             ['client_locale', 'safe'],
             ['includedFiles', 'in', 'range' => [0, 1]],
+            ['isAutomate', 'boolean'],
         ];
     }
 
@@ -242,6 +246,7 @@ class CasesSearch extends Cases
             'caseUserGroup' => 'Case User Group',
             'locales' => 'Client Locale',
             'includedFiles' => 'Included Files',
+            'cs_is_automate' => 'Is Automate'
         ];
     }
 
@@ -307,6 +312,7 @@ class CasesSearch extends Cases
             'cs_source_type_id' => $this->cs_source_type_id,
             'cs_need_action' => $this->cs_need_action,
             'cs_client_id' => $this->cs_client_id,
+            'cs_is_automate' => $this->cs_is_automate,
         ]);
 
         $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
@@ -544,6 +550,7 @@ class CasesSearch extends Cases
             'cs_source_type_id' => $this->cs_source_type_id,
             'cs_need_action' => $this->cs_need_action,
             'cs_status' => $this->cs_status,
+            'cs_is_automate' => $this->cs_is_automate,
         ]);
 
         $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
@@ -553,6 +560,10 @@ class CasesSearch extends Cases
 
         if (!empty($this->locales)) {
             $query->andWhere(['cl_locale' => $this->locales]);
+        }
+
+        if ($this->isAutomate) {
+            $query->andWhere(['cs_is_automate' => $this->isAutomate]);
         }
 
         if ($this->cs_user_id) {
@@ -1085,6 +1096,7 @@ class CasesSearch extends Cases
             'status_dt' => 'Status Dt',
             'client_locale' => 'Client locale',
             'count_files' => 'Files',
+            'cs_is_automate' => 'Is Automate',
         ];
     }
 }
