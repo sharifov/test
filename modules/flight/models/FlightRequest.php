@@ -211,4 +211,14 @@ class FlightRequest extends \yii\db\ActiveRecord
     {
         return $this->hasMany(FlightRequestLog::class, ['flr_fr_id' => 'fr_id']);
     }
+
+    public function getFlightQuoteData()
+    {
+        return ArrayHelper::getValue($this, 'fr_data_json.flight_quote');
+    }
+
+    public function getIsAutomateDataJson(): bool
+    {
+        return (bool) ArrayHelper::getValue($this, 'fr_data_json.flight_quote', false);
+    }
 }

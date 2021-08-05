@@ -418,4 +418,14 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
+
+    public static function getReProtectionCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['reprotection_case_category'] ?? null;
+    }
+
+    public static function getSchdCaseDeadlineHours(): int
+    {
+        return (int)(Yii::$app->params['settings']['schd_case_deadline_hours'] ?? 0);
+    }
 }

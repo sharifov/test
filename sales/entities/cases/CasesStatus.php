@@ -11,6 +11,7 @@ class CasesStatus
     public const STATUS_FOLLOW_UP       = 5;
     public const STATUS_SOLVED          = 10;
     public const STATUS_TRASH           = 11;
+    public const STATUS_NEW             = 12;
     public const STATUS_AWAITING        = 13;
     public const STATUS_AUTO_PROCESSING = 14;
     public const STATUS_ERROR           = 15;
@@ -24,6 +25,7 @@ class CasesStatus
         self::STATUS_AWAITING        => 'Awaiting',
         self::STATUS_AUTO_PROCESSING => 'Auto Processing',
         self::STATUS_ERROR           => 'Error',
+        self::STATUS_NEW            => 'New',
     ];
 
     public const STATUS_LIST_CLASS = [
@@ -35,6 +37,7 @@ class CasesStatus
         self::STATUS_AWAITING        => 'll-awaiting',
         self::STATUS_AUTO_PROCESSING => 'll-auto_processing',
         self::STATUS_ERROR           => 'll-error',
+        self::STATUS_NEW             => 'll-pending',
     ];
 
     public const STATUS_ROUTE_RULES = [
@@ -47,6 +50,13 @@ class CasesStatus
             self::STATUS_AWAITING,
             self::STATUS_AUTO_PROCESSING,
             self::STATUS_ERROR,
+            self::STATUS_NEW,
+        ],
+        self::STATUS_NEW => [
+            self::STATUS_PENDING,
+            self::STATUS_AUTO_PROCESSING,
+            self::STATUS_ERROR,
+            self::STATUS_NEW,
         ],
         self::STATUS_PENDING => [
             self::STATUS_PROCESSING,

@@ -60,7 +60,7 @@ class FlightModule extends \yii\base\Module
     {
         return [
             ['label' => 'Main', 'url' => ['/' . $modulePath . '/default/index']],
-            ['label' => 'Flight Request', 'url' => ['/' . $modulePath . '/flight/index']],
+            ['label' => 'Flight', 'url' => ['/' . $modulePath . '/flight/index']],
             ['label' => 'Flight Segments', 'url' => ['/' . $modulePath . '/flight-segment/index']],
             ['label' => 'Quotes', 'url' => ['/' . $modulePath . '/flight-quote/index']],
             ['label' => 'Quote Trip', 'url' => ['/' . $modulePath . '/flight-quote-trip/index']],

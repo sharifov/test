@@ -19,6 +19,7 @@ use sales\entities\cases\events\CasesAwaitingStatusEvent;
 use sales\entities\cases\events\CasesCreatedEvent;
 use sales\entities\cases\events\CasesErrorStatusEvent;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
+use sales\entities\cases\events\CasesNewStatusEvent;
 use sales\entities\cases\events\CasesOwnerChangeEvent;
 use sales\entities\cases\events\CasesOwnerFreedEvent;
 use sales\entities\cases\events\CasesPendingStatusEvent;
@@ -38,25 +39,27 @@ use Yii;
  * Class Cases
  *
  * @property int $cs_id
- * @property string $cs_subject
- * @property string $cs_description
- * @property string $cs_category_id
+ * @property string|null $cs_gid
+ * @property string|null $cs_subject
+ * @property string|null $cs_description
+ * @property string $cs_category [varchar(50)]
+ * @property int|null $cs_category_id
  * @property int $cs_status
  * @property int|null $cs_user_id
- * @property int $cs_lead_id
- * @property int $cs_call_id
- * @property int $cs_dep_id
- * @property int $cs_project_id
- * @property int $cs_client_id
- * @property string $cs_created_dt
- * @property string $cs_updated_dt
- * @property string $cs_gid
- * @property string $cs_last_action_dt
+ * @property int|null $cs_lead_id
+ * @property int|null $cs_call_id
+ * @property int|null $cs_dep_id
+ * @property int|null $cs_project_id
+ * @property int|null $cs_client_id
+ * @property string|null $cs_created_dt
+ * @property string|null $cs_updated_dt
+ * @property string|null $cs_last_action_dt
  * @property int|null $cs_source_type_id
  * @property string|null $cs_deadline_dt
- * @property bool $cs_need_action
+ * @property bool|null $cs_need_action
  * @property string|null $cs_order_uid
- * @property bool $cs_is_automate
+ * @property string|null $cs_chatbot_token
+ * @property bool|null $cs_is_automate
  *
  * @property CaseCategory $category
  * @property Department $department
@@ -69,7 +72,6 @@ use Yii;
  * @property CaseStatusLog[] $caseStatusLogs
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  * @property CaseSale[] $caseSale
- * @property string $cs_category [varchar(50)]
  */
 class Cases extends ActiveRecord implements Objectable
 {
@@ -225,6 +227,22 @@ class Cases extends ActiveRecord implements Objectable
         return $case;
     }
 
+    public static function createByApiReProtection(
+        int $departmentId,
+        int $categoryId,
+        string $orderUid
+    ): self {
+        $case = self::create();
+        $case->cs_dep_id = $departmentId;
+        $case->cs_category_id = $categoryId;
+        $case->cs_order_uid = $orderUid;
+        $case->cs_subject = 'Flight Schedule Change';
+        $case->cs_source_type_id = CasesSourceType::API;
+        $case->cs_is_automate = true;
+        $case->statusToNew(null, 'Flight ReProtection Create');
+        return $case;
+    }
+
     /**
      * @return string
      */
@@ -295,6 +313,21 @@ class Cases extends ActiveRecord implements Objectable
     public function isPending(): bool
     {
         return $this->cs_status === CasesStatus::STATUS_PENDING;
+    }
+
+    public function statusToNew(?int $creatorId, ?string $description = ''): void
+    {
+        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_NEW);
+        $this->recordEvent(new CasesNewStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
+        $this->setStatus(CasesStatus::STATUS_NEW);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusNew(): bool
+    {
+        return $this->cs_status === CasesStatus::STATUS_NEW;
     }
 
     /**
@@ -599,6 +632,63 @@ class Cases extends ActiveRecord implements Objectable
         return $this->hasMany(CaseSale::class, ['css_cs_id' => 'cs_id'])->orderBy(['css_sale_id' => SORT_DESC]);
     }
 
+    /*
+    public function rules(): array
+    {
+        return [
+            ['cs_call_id', 'integer'],
+            ['cs_call_id', 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cs_call_id' => 'c_id']],
+
+            ['cs_category', 'string', 'max' => 50],
+
+            ['cs_category_id', 'integer'],
+            ['cs_category_id', 'exist', 'skipOnError' => true, 'targetClass' => CaseCategory::class, 'targetAttribute' => ['cs_category_id' => 'cc_id']],
+
+            ['cs_chatbot_token', 'string', 'max' => 100],
+
+            ['cs_client_id', 'integer'],
+            ['cs_client_id', 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['cs_client_id' => 'id']],
+
+            ['cs_created_dt', 'safe'],
+
+            ['cs_deadline_dt', 'safe'],
+
+            ['cs_dep_id', 'integer'],
+            ['cs_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['cs_dep_id' => 'dep_id']],
+
+            ['cs_description', 'string'],
+
+            ['cs_gid', 'string', 'max' => 32],
+            ['cs_gid', 'unique'],
+
+            ['cs_is_automate', 'integer'],
+
+            ['cs_last_action_dt', 'safe'],
+
+            ['cs_lead_id', 'integer'],
+            ['cs_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['cs_lead_id' => 'id']],
+
+            ['cs_need_action', 'integer'],
+
+            ['cs_order_uid', 'string', 'max' => 7],
+
+            ['cs_project_id', 'integer'],
+
+            ['cs_source_type_id', 'integer'],
+
+            ['cs_status', 'integer'],
+            ['cs_status', 'required'],
+
+            ['cs_subject', 'string', 'max' => 255],
+
+            ['cs_updated_dt', 'safe'],
+
+            ['cs_user_id', 'integer'],
+            ['cs_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cs_user_id' => 'id']],
+        ];
+    }
+    */
+
     /**
      * @return array
      */
@@ -707,5 +797,22 @@ class Cases extends ActiveRecord implements Objectable
     public function getTypeCreateName(): string
     {
         return CasesSourceType::getName($this->cs_source_type_id);
+    }
+
+    public function onIsAutomate(): Cases
+    {
+        $this->cs_is_automate = true;
+        return $this;
+    }
+
+    public function offIsAutomate(): Cases
+    {
+        $this->cs_is_automate = false;
+        return $this;
+    }
+
+    public function isAutomate(): bool
+    {
+        return $this->cs_is_automate;
     }
 }

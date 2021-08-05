@@ -110,7 +110,304 @@ class FlightController extends BaseController
      *   {
      *      "booking_id": "XXXYYYZ",
      *      "is_automate": false,
-     *      "flight_quote": {} // TODO::
+     *      "flight_quote": {
+                "gds": "S",
+                "key": "2_T1ZBMTAxKlkxMDAwL0xBWFRQRTIwMjEtMDUtMTMvVFBFTEFYMjAyMS0wNi0yMCpQUn4jUFIxMDMjUFI4OTAjUFI4OTEjUFIxMDJ+bGM6ZW5fdXM=",
+                "pcc": "8KI0",
+                "cons": "GTT",
+                "keys": {
+                    "services": {
+                        "support": {
+                            "amount": 75
+                        }
+                    },
+                    "seatHoldSeg": {
+                        "trip": 0,
+                        "seats": 9,
+                        "segment": 0
+                    },
+                    "verification": {
+                        "headers": {
+                            "X-Client-Ip": "92.115.180.30",
+                            "X-Kiv-Cust-Ip": "92.115.180.30",
+                            "X-Kiv-Cust-ipv": "0",
+                            "X-Kiv-Cust-ssid": "ovago-dev-0484692",
+                            "X-Kiv-Cust-direct": "true",
+                            "X-Kiv-Cust-browser": "desktop"
+                        }
+                    }
+                },
+                "meta": {
+                    "eip": 0,
+                    "bags": 2,
+                    "best": false,
+                    "lang": "en",
+                    "rank": 6,
+                    "group1": "LAXTPE:PRPR:0:TPELAX:PRPR:0:767.75",
+                    "country": "us",
+                    "fastest": false,
+                    "noavail": false,
+                    "cheapest": true,
+                    "searchId": "T1ZBMTAxWTEwMDB8TEFYVFBFMjAyMS0wNS0xM3xUUEVMQVgyMDIxLTA2LTIw"
+                },
+                "cabin": "Y",
+                "trips": [
+                    {
+                        "tripId": 1,
+                        "duration": 1150,
+                        "segments": [
+                            {
+                                "meal": "D",
+                                "stop": 0,
+                                "cabin": "Y",
+                                "stops": [],
+                                "baggage": {
+                                    "ADT": {
+                                        "carryOn": true,
+                                        "airlineCode": "PR",
+                                        "allowPieces": 2,
+                                        "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
+                                        "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS"
+                                    }
+                                },
+                                "mileage": 7305,
+                                "duration": 870,
+                                "fareCode": "U9XBUS",
+                                "segmentId": 1,
+                                "arrivalTime": "2021-05-15 04:00",
+                                "airEquipType": "773",
+                                "bookingClass": "U",
+                                "flightNumber": "103",
+                                "departureTime": "2021-05-13 22:30",
+                                "marriageGroup": "O",
+                                "recheckBaggage": false,
+                                "marketingAirline": "PR",
+                                "operatingAirline": "PR",
+                                "arrivalAirportCode": "MNL",
+                                "departureAirportCode": "LAX",
+                                "arrivalAirportTerminal": "2",
+                                "departureAirportTerminal": "B"
+                            },
+                            {
+                                "meal": "B",
+                                "stop": 0,
+                                "cabin": "Y",
+                                "stops": [],
+                                "baggage": {
+                                    "ADT": {
+                                        "carryOn": true,
+                                        "airlineCode": "PR",
+                                        "allowPieces": 2,
+                                        "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
+                                        "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS"
+                                    }
+                                },
+                                "mileage": 728,
+                                "duration": 130,
+                                "fareCode": "U9XBUS",
+                                "segmentId": 2,
+                                "arrivalTime": "2021-05-15 08:40",
+                                "airEquipType": "321",
+                                "bookingClass": "U",
+                                "flightNumber": "890",
+                                "departureTime": "2021-05-15 06:30",
+                                "marriageGroup": "I",
+                                "recheckBaggage": false,
+                                "marketingAirline": "PR",
+                                "operatingAirline": "PR",
+                                "arrivalAirportCode": "TPE",
+                                "departureAirportCode": "MNL",
+                                "arrivalAirportTerminal": "1",
+                                "departureAirportTerminal": "1"
+                            }
+                        ]
+                    }
+                ],
+                "paxCnt": 1,
+                "prices": {
+                    "comm": 0,
+                    "isCk": false,
+                    "ccCap": 16.900002,
+                    "markup": 50,
+                    "oMarkup": {
+                        "amount": 50,
+                        "currency": "USD"
+                    },
+                    "markupId": 8833,
+                    "totalTax": 321.75,
+                    "markupUid": "1c7afe8c-a34f-434e-8fa3-87b9b7b1ff4e",
+                    "totalPrice": 767.75,
+                    "lastTicketDate": "2021-03-31"
+                },
+                "currency": "USD",
+                "fareType": "SR",
+                "maxSeats": 9,
+                "tripType": "RT",
+                "penalties": {
+                    "list": [
+                        {
+                            "type": "re",
+                            "permitted": false,
+                            "applicability": "before"
+                        },
+                        {
+                            "type": "re",
+                            "permitted": false,
+                            "applicability": "after"
+                        },
+                        {
+                            "type": "ex",
+                            "amount": 425,
+                            "oAmount": {
+                                "amount": 425,
+                                "currency": "USD"
+                            },
+                            "permitted": true,
+                            "applicability": "before"
+                        },
+                        {
+                            "type": "ex",
+                            "amount": 425,
+                            "oAmount": {
+                                "amount": 425,
+                                "currency": "USD"
+                            },
+                            "permitted": true,
+                            "applicability": "after"
+                        }
+                    ],
+                    "refund": false,
+                    "exchange": true
+                },
+                "routingId": 1,
+                "currencies": [
+                    "USD"
+                ],
+                "founded_dt": "2021-02-25 13:44:54.570",
+                "passengers": {
+                    "ADT": {
+                        "cnt": 1,
+                        "tax": 321.75,
+                        "comm": 0,
+                        "ccCap": 16.900002,
+                        "price": 767.75,
+                        "codeAs": "JCB",
+                        "markup": 50,
+                        "occCap": {
+                            "amount": 16.900002,
+                            "currency": "USD"
+                        },
+                        "baseTax": 271.75,
+                        "oMarkup": {
+                            "amount": 50,
+                            "currency": "USD"
+                        },
+                        "baseFare": 446,
+                        "oBaseTax": {
+                            "amount": 271.75,
+                            "currency": "USD"
+                        },
+                        "oBaseFare": {
+                            "amount": 446,
+                            "currency": "USD"
+                        },
+                        "pubBaseFare": 446
+                    }
+                },
+                "ngsFeatures": {
+                    "list": null,
+                    "name": "",
+                    "stars": 3
+                },
+                "currencyRates": {
+                    "CADUSD": {
+                        "to": "USD",
+                        "from": "CAD",
+                        "rate": 0.78417
+                    },
+                    "DKKUSD": {
+                        "to": "USD",
+                        "from": "DKK",
+                        "rate": 0.16459
+                    },
+                    "EURUSD": {
+                        "to": "USD",
+                        "from": "EUR",
+                        "rate": 1.23967
+                    },
+                    "GBPUSD": {
+                        "to": "USD",
+                        "from": "GBP",
+                        "rate": 1.37643
+                    },
+                    "KRWUSD": {
+                        "to": "USD",
+                        "from": "KRW",
+                        "rate": 0.00091
+                    },
+                    "MYRUSD": {
+                        "to": "USD",
+                        "from": "MYR",
+                        "rate": 0.25006
+                    },
+                    "SEKUSD": {
+                        "to": "USD",
+                        "from": "SEK",
+                        "rate": 0.12221
+                    },
+                    "TWDUSD": {
+                        "to": "USD",
+                        "from": "TWD",
+                        "rate": 0.03592
+                    },
+                    "USDCAD": {
+                        "to": "CAD",
+                        "from": "USD",
+                        "rate": 1.30086
+                    },
+                    "USDDKK": {
+                        "to": "DKK",
+                        "from": "USD",
+                        "rate": 6.19797
+                    },
+                    "USDEUR": {
+                        "to": "EUR",
+                        "from": "USD",
+                        "rate": 0.83926
+                    },
+                    "USDGBP": {
+                        "to": "GBP",
+                        "from": "USD",
+                        "rate": 0.75587
+                    },
+                    "USDKRW": {
+                        "to": "KRW",
+                        "from": "USD",
+                        "rate": 1117.1008
+                    },
+                    "USDMYR": {
+                        "to": "MYR",
+                        "from": "USD",
+                        "rate": 4.07943
+                    },
+                    "USDSEK": {
+                        "to": "SEK",
+                        "from": "USD",
+                        "rate": 8.34736
+                    },
+                    "USDTWD": {
+                        "to": "TWD",
+                        "from": "USD",
+                        "rate": 28.96525
+                    },
+                    "USDUSD": {
+                        "to": "USD",
+                        "from": "USD",
+                        "rate": 1
+                    }
+                },
+                "validatingCarrier": "PR"
+            }
      *  }
      *
      * @apiSuccessExample {json} Success-Response:

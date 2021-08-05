@@ -111,7 +111,7 @@ class OrderCreateFromSaleService
             null,
             null,
             null,
-            $form->saleId
+            null
         );
         $order = (new Order())->create($dto);
         $order->or_pay_status_id = $payStatusId;

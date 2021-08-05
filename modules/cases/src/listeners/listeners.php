@@ -2,6 +2,7 @@
 
 use sales\entities\cases\events\CasesCreatedEvent;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
+use sales\entities\cases\events\CasesNewStatusEvent;
 use sales\entities\cases\events\CasesPendingStatusEvent;
 use sales\entities\cases\events\CasesProcessingStatusEvent;
 use sales\entities\cases\events\CasesSolvedStatusEvent;
@@ -10,6 +11,7 @@ use sales\entities\cases\events\CasesAwaitingStatusEvent;
 use sales\entities\cases\events\CasesAutoProcessingStatusEvent;
 use sales\entities\cases\events\CasesErrorStatusEvent;
 use sales\listeners\cases\CasesFollowUpStatusEventLogListener;
+use sales\listeners\cases\CasesNewStatusEventLogListener;
 use sales\listeners\cases\CasesPendingStatusEventLogListener;
 use sales\listeners\cases\CasesProcessingStatusEventLogListener;
 use sales\listeners\cases\CasesProcessingStatusEventNotificationsListener;
@@ -26,6 +28,7 @@ return [
     CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],
     CasesSolvedStatusEvent::class => [CasesSolvedStatusEventLogListener::class],
     CasesTrashStatusEvent::class => [CasesTrashStatusEventLogListener::class],
+    CasesNewStatusEvent::class => [CasesNewStatusEventLogListener::class],
     CasesAwaitingStatusEvent::class => [CasesAwaitingStatusEventLogListener::class],
     CasesAutoProcessingStatusEvent::class => [CasesAutoProcessingStatusEventListener::class],
     CasesErrorStatusEvent::class => [CasesErrorStatusEventLogListener::class],
