@@ -677,4 +677,77 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     {
         return '/flight/flight-quote/ajax-quote-details';
     }
+
+    public function fields(): array
+    {
+        $fields = [
+            'fq_flight_id',
+            'fq_source_id',
+            'fq_product_quote_id',
+            'fq_gds',
+            'fq_gds_pcc',
+            'fq_gds_offer_id',
+            'fq_type_id',
+            'fq_cabin_class',
+            'fq_trip_type_id',
+            'fq_main_airline',
+            'fq_fare_type_id',
+            'fq_last_ticket_date',
+            'fq_origin_search_data',
+            'fq_json_booking',
+            'fq_ticket_json',
+        ];
+        $fields['booking_id'] = function () {
+            $lastFlightQuoteFlight = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $this->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+            if ($lastFlightQuoteFlight) {
+                return $lastFlightQuoteFlight;
+            }
+            return null;
+        };
+        $fields['fq_type_name'] = function () {
+            return FlightQuote::getTypeName($this->fq_type_id);
+        };
+        $fields['fq_fare_type_name'] = function () {
+            return FlightQuote::getFareTypeNameById($this->fq_fare_type_id);
+        };
+        if ($this->fqFlight) {
+            $fields['flight'] = function () {
+                return $this->fqFlight->toArray();
+            };
+        }
+        if ($this->flightQuoteTrips) {
+            $fields['trips'] = function () {
+                $trips = [];
+                foreach ($this->flightQuoteTrips as $flightQuoteTrip) {
+                    $trip = $flightQuoteTrip->toArray();
+                    $segmentNumber = 1;
+                    foreach ($flightQuoteTrip->flightQuoteSegments as $flightQuoteSegment) {
+                        $trip['segments'][] = array_merge(["segmentId" => $segmentNumber], $flightQuoteSegment->toArray());
+                        $segmentNumber++;
+                    }
+                    $trips[] = $trip;
+                }
+                return $trips;
+            };
+        }
+        if ($this->flightQuotePaxPrices) {
+            $fields['pax_prices'] = function () {
+                $prices = [];
+                foreach ($this->flightQuotePaxPrices as $price) {
+                    $prices[] = $price->toArray();
+                }
+                return $prices;
+            };
+        }
+        if ($this->fqFlight->flightPaxes) {
+            $fields['paxes'] = function () {
+                $paxes = [];
+                foreach ($this->fqFlight->flightPaxes as $flightPax) {
+                    $paxes[] = $flightPax->toArray();
+                }
+                return $paxes;
+            };
+        }
+        return $fields;
+    }
 }

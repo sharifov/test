@@ -88,6 +88,16 @@ class FlightController extends BaseController
         return $behaviors;
     }
 
+    protected function verbs(): array
+    {
+        return ArrayHelper::merge(
+            parent::verbs(),
+            [
+                'reprotection-get' => ['GET']
+            ]
+        );
+    }
+
     /**
      * @api {post} /v2/flight/reprotection-create Create flight reprotection from BO
      * @apiVersion 0.1.0
@@ -537,7 +547,7 @@ class FlightController extends BaseController
     }
 
     /**
-     * @api {post} /v2/flight/reprotection-get Get flight reprotection
+     * @api {get} /v2/flight/reprotection-get Get flight reprotection
      * @apiVersion 0.1.0
      * @apiName ReProtection Get
      * @apiGroup Flight
@@ -593,6 +603,7 @@ class FlightController extends BaseController
                     "fq_last_ticket_date": "2021-07-31",
                     "fq_json_booking": null,
                     "fq_ticket_json": null,
+                    "booking_id": "O230850",
                     "fq_type_name": "Base",
                     "fq_fare_type_name": "Public",
                     "flight": {
@@ -613,22 +624,23 @@ class FlightController extends BaseController
                             "fqt_duration": 280,
                             "segments": [
                                 {
+                                    "segmentId": 1,
                                     "fqs_uid": "fqs6103c9469c3c8",
-                                    "fqs_departure_dt": "2022-01-12 16:00:00",
-                                    "fqs_arrival_dt": "2022-01-12 16:45:00",
+                                    "departureTime": "2022-01-12 16:00",
+                                    "arrivalTime": "2022-01-12 16:45",
                                     "fqs_stop": 0,
-                                    "fqs_flight_number": 656,
-                                    "fqs_booking_class": "K",
+                                    "flightNumber": 656,
+                                    "bookingClass": "K",
                                     "fqs_duration": 105,
-                                    "fqs_departure_airport_iata": "KIV",
-                                    "fqs_departure_airport_terminal": "",
-                                    "fqs_arrival_airport_iata": "VIE",
-                                    "fqs_arrival_airport_terminal": "3",
-                                    "fqs_operating_airline": "OS",
-                                    "fqs_marketing_airline": "OS",
+                                    "departureAirportCode": "KIV",
+                                    "departureAirportTerminal": "",
+                                    "arrivalAirportCode": "VIE",
+                                    "arrivalAirportTerminal": "3",
+                                    "fqs_operating_airline": "RO",
+                                    "fqs_marketing_airline": "RO",
                                     "fqs_air_equip_type": "E95",
                                     "fqs_marriage_group": "I",
-                                    "fqs_cabin_class": "Y",
+                                    "cabin": "Y",
                                     "fqs_meal": "",
                                     "fqs_fare_code": "K03CLSE8",
                                     "fqs_ticket_id": null,
@@ -639,6 +651,18 @@ class FlightController extends BaseController
                                     "cabin": "Economy",
                                     "operatingAirline": "Austrian Airlines",
                                     "marketingAirline": "Austrian Airlines",
+                                    "stop": 1,
+                                    "stops": [
+                                        {
+                                            "qss_quote_segment_id": 9,
+                                            "qss_location_iata": "SCL",
+                                            "qss_equipment": "",
+                                            "qss_elapsed_time": 120,
+                                            "qss_duration": 120,
+                                            "qss_departure_dt": "2021-09-09 00:00:00",
+                                            "qss_arrival_dt": "2021-09-08 00:00:00"
+                                        }
+                                    ],
                                     "baggages": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
@@ -665,22 +689,23 @@ class FlightController extends BaseController
                                     ]
                                 },
                                 {
+                                    "segmentId": 2,
                                     "fqs_uid": "fqs6103c9469e37b",
-                                    "fqs_departure_dt": "2022-01-12 17:15:00",
-                                    "fqs_arrival_dt": "2022-01-12 18:40:00",
+                                    "departureTime": "2022-01-12 17:15",
+                                    "arrivalTime": "2022-01-12 18:40",
                                     "fqs_stop": 0,
-                                    "fqs_flight_number": 455,
-                                    "fqs_booking_class": "K",
+                                    "flightNumber": 455,
+                                    "bookingClass": "K",
                                     "fqs_duration": 145,
-                                    "fqs_departure_airport_iata": "VIE",
-                                    "fqs_departure_airport_terminal": "3",
-                                    "fqs_arrival_airport_iata": "LHR",
-                                    "fqs_arrival_airport_terminal": "2",
+                                    "departureAirportCode": "VIE",
+                                    "departureAirportTerminal": "3",
+                                    "arrivalAirportCode": "LHR",
+                                    "arrivalAirportTerminal": "2",
                                     "fqs_operating_airline": "OS",
                                     "fqs_marketing_airline": "OS",
                                     "fqs_air_equip_type": "321",
                                     "fqs_marriage_group": "O",
-                                    "fqs_cabin_class": "Y",
+                                    "cabin": "Y",
                                     "fqs_meal": "",
                                     "fqs_fare_code": "K03CLSE8",
                                     "fqs_ticket_id": null,
@@ -691,6 +716,8 @@ class FlightController extends BaseController
                                     "cabin": "Economy",
                                     "operatingAirline": "Austrian Airlines",
                                     "marketingAirline": "Austrian Airlines",
+                                    "stop": 0,
+                                    "stops": [],
                                     "baggages": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
@@ -725,22 +752,23 @@ class FlightController extends BaseController
                             "fqt_duration": 95,
                             "segments": [
                                 {
+                                    "segmentId": 1,
                                     "fqs_uid": "fqs6103c9469fa85",
-                                    "fqs_departure_dt": "2022-01-15 11:30:00",
-                                    "fqs_arrival_dt": "2022-01-15 14:05:00",
+                                    "departureTime": "2022-01-15 11:30",
+                                    "arrivalTime": "2022-01-15 14:05",
                                     "fqs_stop": 0,
-                                    "fqs_flight_number": 905,
-                                    "fqs_booking_class": "Q",
+                                    "flightNumber": 905,
+                                    "bookingClass": "Q",
                                     "fqs_duration": 95,
-                                    "fqs_departure_airport_iata": "LHR",
-                                    "fqs_departure_airport_terminal": "2",
-                                    "fqs_arrival_airport_iata": "FRA",
-                                    "fqs_arrival_airport_terminal": "1",
+                                    "departureAirportCode": "LHR",
+                                    "departureAirportTerminal": "2",
+                                    "arrivalAirportCode": "FRA",
+                                    "arrivalAirportTerminal": "1",
                                     "fqs_operating_airline": "LH",
                                     "fqs_marketing_airline": "LH",
                                     "fqs_air_equip_type": "32N",
                                     "fqs_marriage_group": "O",
-                                    "fqs_cabin_class": "Y",
+                                    "cabin": "Y",
                                     "fqs_meal": "",
                                     "fqs_fare_code": "Q03CLSE0",
                                     "fqs_ticket_id": null,
@@ -751,6 +779,8 @@ class FlightController extends BaseController
                                     "cabin": "Economy",
                                     "operatingAirline": "Lufthansa",
                                     "marketingAirline": "Lufthansa",
+                                    "stop": 0,
+                                    "stops": [],
                                     "baggages": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
@@ -785,22 +815,23 @@ class FlightController extends BaseController
                             "fqt_duration": 140,
                             "segments": [
                                 {
+                                    "segmentId": 1,
                                     "fqs_uid": "fqs6103c946a0d33",
-                                    "fqs_departure_dt": "2022-01-24 09:45:00",
-                                    "fqs_arrival_dt": "2022-01-24 13:05:00",
+                                    "departureTime": "2022-01-24 09:45",
+                                    "arrivalTime": "2022-01-24 13:05",
                                     "fqs_stop": 0,
-                                    "fqs_flight_number": 1474,
-                                    "fqs_booking_class": "Q",
+                                    "flightNumber": 1474,
+                                    "bookingClass": "Q",
                                     "fqs_duration": 140,
-                                    "fqs_departure_airport_iata": "FRA",
-                                    "fqs_departure_airport_terminal": "1",
-                                    "fqs_arrival_airport_iata": "KIV",
-                                    "fqs_arrival_airport_terminal": "",
-                                    "fqs_operating_airline": "CL",
-                                    "fqs_marketing_airline": "LH",
+                                    "departureAirportCode": "FRA",
+                                    "departureAirportTerminal": "1",
+                                    "arrivalAirportCode": "KIV",
+                                    "arrivalAirportTerminal": "",
+                                    "fqs_operating_airline": "RO",
+                                    "fqs_marketing_airline": "RO",
                                     "fqs_air_equip_type": "E90",
                                     "fqs_marriage_group": "O",
-                                    "fqs_cabin_class": "Y",
+                                    "cabin": "Y",
                                     "fqs_meal": "",
                                     "fqs_fare_code": "Q03CLSE0",
                                     "fqs_ticket_id": null,
@@ -811,6 +842,8 @@ class FlightController extends BaseController
                                     "cabin": "Economy",
                                     "operatingAirline": "Lufthansa CityLine",
                                     "marketingAirline": "Lufthansa",
+                                    "stop": 0,
+                                    "stops": [],
                                     "baggages": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
@@ -928,6 +961,7 @@ class FlightController extends BaseController
                     "fq_last_ticket_date": "2021-07-28",
                     "fq_json_booking": null,
                     "fq_ticket_json": null,
+                    "booking_id": "O230851",
                     "fq_type_name": "Base",
                     "fq_fare_type_name": "Public",
                     "flight": {
@@ -948,22 +982,23 @@ class FlightController extends BaseController
                             "fqt_duration": 395,
                             "segments": [
                                 {
+                                    "segmentId": 1,
                                     "fqs_uid": "fqs61015f3554892",
-                                    "fqs_departure_dt": "2021-07-29 09:30:00",
-                                    "fqs_arrival_dt": "2021-07-29 10:45:00",
+                                    "departureTime": "2021-07-29 09:30",
+                                    "arrivalTime": "2021-07-29 10:45",
                                     "fqs_stop": 0,
-                                    "fqs_flight_number": 202,
-                                    "fqs_booking_class": "E",
+                                    "flightNumber": 202,
+                                    "bookingClass": "E",
                                     "fqs_duration": 75,
-                                    "fqs_departure_airport_iata": "KIV",
-                                    "fqs_departure_airport_terminal": "",
-                                    "fqs_arrival_airport_iata": "OTP",
-                                    "fqs_arrival_airport_terminal": "",
+                                    "departureAirportCode": "KIV",
+                                    "departureAirportTerminal": "",
+                                    "arrivalAirportCode": "OTP",
+                                    "arrivalAirportTerminal": "",
                                     "fqs_operating_airline": "RO",
                                     "fqs_marketing_airline": "RO",
                                     "fqs_air_equip_type": "AT7",
                                     "fqs_marriage_group": "",
-                                    "fqs_cabin_class": "Y",
+                                    "cabin": "Y",
                                     "fqs_meal": "",
                                     "fqs_fare_code": "EOWSVRMD",
                                     "fqs_ticket_id": null,
@@ -974,6 +1009,8 @@ class FlightController extends BaseController
                                     "cabin": "Economy",
                                     "operatingAirline": "TAROM",
                                     "marketingAirline": "TAROM",
+                                    "stop": 0,
+                                    "stops": [],
                                     "baggages": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
@@ -989,22 +1026,23 @@ class FlightController extends BaseController
                                     ]
                                 },
                                 {
+                                    "segmentId": 2,
                                     "fqs_uid": "fqs61015f35565ef",
-                                    "fqs_departure_dt": "2021-07-29 12:20:00",
-                                    "fqs_arrival_dt": "2021-07-29 14:05:00",
+                                    "departureTime": "2021-07-29 12:20",
+                                    "arrivalTime": "2021-07-29 14:05",
                                     "fqs_stop": 0,
-                                    "fqs_flight_number": 391,
-                                    "fqs_booking_class": "E",
+                                    "flightNumber": 391,
+                                    "bookingClass": "E",
                                     "fqs_duration": 225,
-                                    "fqs_departure_airport_iata": "OTP",
-                                    "fqs_departure_airport_terminal": "",
-                                    "fqs_arrival_airport_iata": "LHR",
-                                    "fqs_arrival_airport_terminal": "",
+                                    "departureAirportCode": "OTP",
+                                    "departureAirportTerminal": "",
+                                    "arrivalAirportCode": "LHR",
+                                    "arrivalAirportTerminal": "",
                                     "fqs_operating_airline": "RO",
                                     "fqs_marketing_airline": "RO",
                                     "fqs_air_equip_type": "318",
                                     "fqs_marriage_group": "",
-                                    "fqs_cabin_class": "Y",
+                                    "cabin": "Y",
                                     "fqs_meal": "",
                                     "fqs_fare_code": "EOWSVRGB",
                                     "fqs_ticket_id": null,
@@ -1015,6 +1053,8 @@ class FlightController extends BaseController
                                     "cabin": "Economy",
                                     "operatingAirline": "TAROM",
                                     "marketingAirline": "TAROM",
+                                    "stop": 0,
+                                    "stops": [],
                                     "baggages": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
@@ -1136,11 +1176,11 @@ class FlightController extends BaseController
     {
         $form = new ReprotectionGetForm();
 
-        if (!$form->load(Yii::$app->request->post())) {
+        if (!$form->load(Yii::$app->request->get())) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
-                new ErrorsMessage('Not found data on POST request'),
+                new ErrorsMessage('Not found data on GET request'),
             );
         }
         if (!$form->validate()) {
@@ -1153,7 +1193,7 @@ class FlightController extends BaseController
         try {
             $productQuote = $this->productQuoteRepository->findByGidFlightProductQuote($form->flight_product_quote_gid);
 
-            $originProductQuote = $productQuote->relateParent ? $productQuote->relateParent->serialize() : [];
+            $originProductQuote = $productQuote->relateParent ? $productQuote->relateParent->toArray() : [];
 
             $order = $productQuote->pqOrder;
 
@@ -1169,7 +1209,7 @@ class FlightController extends BaseController
 
             return new SuccessResponse(
                 new Message('origin_product_quote', $originProductQuote),
-                new Message('reprotection_product_quote', $productQuote->serialize()),
+                new Message('reprotection_product_quote', $productQuote->toArray()),
                 new Message('order', $orderSerialized),
                 new Message('order_contacts', $orderContacts)
             );

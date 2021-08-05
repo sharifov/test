@@ -319,4 +319,93 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
         $segment->fqs_mileage = $dto->mileage;
         return $segment;
     }
+
+    public function fields(): array
+    {
+        $fields = [
+            'fqs_uid',
+            'departureTime' => function () {
+                return date('Y-m-d H:i', strtotime($this->fqs_departure_dt));
+            },
+            'arrivalTime' => function () {
+                return date('Y-m-d H:i', strtotime($this->fqs_arrival_dt));
+            },
+            'fqs_stop',
+            'flightNumber' => 'fqs_flight_number',
+            'bookingClass' => 'fqs_booking_class',
+            'fqs_duration',
+            'departureAirportCode' => 'fqs_departure_airport_iata',
+            'departureAirportTerminal' => 'fqs_departure_airport_terminal',
+            'arrivalAirportCode' => 'fqs_arrival_airport_iata',
+            'arrivalAirportTerminal' => 'fqs_arrival_airport_terminal',
+            'operatingAirline' => 'fqs_operating_airline',
+            'marketingAirline' => 'fqs_marketing_airline',
+            'fqs_air_equip_type',
+            'fqs_marriage_group',
+            'cabin' => 'fqs_cabin_class',
+            'fqs_meal',
+            'fqs_fare_code',
+            'fqs_ticket_id',
+            'fqs_recheck_baggage',
+            'fqs_mileage'
+        ];
+        $fields['departureLocation'] = function () {
+            return Airports::getCityByIata($this->fqs_departure_airport_iata);
+        };
+        $fields['arrivalLocation'] = function () {
+            return Airports::getCityByIata($this->fqs_arrival_airport_iata);
+        };
+        $fields['cabin'] = function () {
+            return \common\components\SearchService::getCabin($this->fqs_cabin_class);
+        };
+        $fields['operatingAirline'] = function () {
+            $operatingAirline = '';
+            if ($this->fqs_operating_airline) {
+                $airLine = Airline::find()->andWhere(['iata' => $this->fqs_operating_airline])->asArray()->one();
+                if ($airLine) {
+                    $operatingAirline = $airLine['name'];
+                }
+            }
+            return $operatingAirline;
+        };
+        $fields['marketingAirline'] = function () {
+            $marketingAirline = '';
+            if ($this->fqs_marketing_airline) {
+                $airLine = Airline::find()->andWhere(['iata' => $this->fqs_marketing_airline])->asArray()->one();
+                if ($airLine) {
+                    $marketingAirline = $airLine['name'];
+                }
+            }
+            return $marketingAirline;
+        };
+        $fields['stop'] = function () {
+            return count($this->flightQuoteSegmentStops);
+        };
+        $fields['stops'] = function () {
+            $stops = [];
+            foreach ($this->flightQuoteSegmentStops as $stop) {
+                $stops[] = $stop->toArray();
+            }
+            return $stops;
+        };
+        if ($this->flightQuoteSegmentPaxBaggages) {
+            $fields['baggages'] = function () {
+                $baggages = [];
+                foreach ($this->flightQuoteSegmentPaxBaggages as $baggage) {
+                    $baggages[] = $baggage->toArray();
+                }
+                return $baggages;
+            };
+        }
+        if ($this->flightQuoteSegmentPaxBaggageCharges) {
+            $fields['baggage_charges'] = function () {
+                $baggageCharges = [];
+                foreach ($this->flightQuoteSegmentPaxBaggageCharges as $charge) {
+                    $baggageCharges[] = $charge->toArray();
+                }
+                return $baggageCharges;
+            };
+        }
+        return $fields;
+    }
 }

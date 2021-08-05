@@ -140,4 +140,14 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
     {
         return uniqid('fqt');
     }
+
+    public function fields(): array
+    {
+        return [
+            'fqt_id',
+            'fqt_uid',
+            'fqt_key',
+            'fqt_duration'
+        ];
+    }
 }

@@ -28,6 +28,7 @@ use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
@@ -71,6 +72,13 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+    public function actionX()
+    {
+        $productQuote = ProductQuote::find()->andWhere(['pq_gid' => '1865ef55f3c6c01dca1f4f3128e82733'])->one();
+        $r = ArrayHelper::toArray($productQuote);
+        VarDumper::dump($r);
+            die;
+    }
     /*public function actionSmsNotify()
     {
         $smsIncomingForm  = new SmsIncomingForm();

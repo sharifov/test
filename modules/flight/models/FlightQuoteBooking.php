@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use common\models\Airline;
 use common\models\Client;
 use common\models\Lead;
 use common\models\Project;
@@ -159,5 +160,40 @@ class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDa
     public function getId(): int
     {
         return $this->fqb_id;
+    }
+
+    public function fields(): array
+    {
+        $fields = [
+            'fqb_booking_id',
+            'fqb_pnr',
+            'fqb_gds',
+            'fqb_validating_carrier',
+        ];
+        $fields['paxes'] = function () {
+            $paxes = [];
+            if ($this->fqtPaxes) {
+                foreach ($this->fqtPaxes as $keyPax => $flightPax) {
+                    $paxes[$keyPax] = $flightPax->toArray();
+                    $paxes[$keyPax]['ticketNumber'] = $flightPax->flightQuoteTicket->fqt_ticket_number ?? '';
+                }
+            }
+            return $paxes;
+        };
+        $fields['airlines'] = function () {
+            $airlines = [];
+            if ($this->flightQuoteBookingAirlines) {
+                foreach ($this->flightQuoteBookingAirlines as $keyAirline => $bookingAirline) {
+                    $airlines[$keyAirline]['record_locator'] = $bookingAirline->fqba_record_locator;
+                    $airlines[$keyAirline]['airline_code'] = $bookingAirline->fqba_airline_code;
+                    $airlines[$keyAirline]['airline'] = '';
+                    if ($airline = Airline::findIdentity($bookingAirline->fqba_airline_code)) {
+                        $airlines[$keyAirline]['airline'] = $airline->name;
+                    }
+                }
+            }
+            return $airlines;
+        };
+        return $fields;
     }
 }
