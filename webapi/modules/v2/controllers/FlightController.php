@@ -1204,14 +1204,14 @@ class FlightController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{32}}       origin_quote_gid Original Product Quote GID
+     * @apiParam {string{7..10}}       booking_id Booking ID
      * @apiParam {string="confirm", "modify", "refund"}  type  Re-protection Type
      * @apiParam {string{32}}       [reprotection_quote_gid] Re-protection Product Quote GID (required for type = "confirm", "modify")
      * @apiParam {string}        [flight_product_quote]   Flight Quote Data (required for type = "modify")
      *
      * @apiParamExample {json} Request-Example:
      *   {
-     *      "origin_quote_gid": "14f95e797313c99d85d955373e408722",
+     *      "booking_id": "W12RT56",
      *      "type": "confirm",
      *      "reprotection_quote_gid": "94f95e797313c99d85d955373e408788",
      *      "flight_product_quote": "{}" // todo

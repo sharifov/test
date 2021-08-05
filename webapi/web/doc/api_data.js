@@ -3022,10 +3022,10 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "32",
+            "size": "7..10",
             "optional": false,
-            "field": "origin_quote_gid",
-            "description": "<p>Original Product Quote GID</p>"
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
           },
           {
             "group": "Parameter",
@@ -3059,7 +3059,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"origin_quote_gid\": \"14f95e797313c99d85d955373e408722\",\n    \"type\": \"confirm\",\n    \"reprotection_quote_gid\": \"94f95e797313c99d85d955373e408788\",\n    \"flight_product_quote\": \"{}\" // todo\n}",
+          "content": " {\n    \"booking_id\": \"W12RT56\",\n    \"type\": \"confirm\",\n    \"reprotection_quote_gid\": \"94f95e797313c99d85d955373e408788\",\n    \"flight_product_quote\": \"{}\" // todo\n}",
           "type": "json"
         }
       ]
