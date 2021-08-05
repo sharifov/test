@@ -685,6 +685,13 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             'fq_json_booking',
             'fq_ticket_json',
         ];
+        $fields['booking_id'] = function () {
+            $lastFlightQuoteFlight = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $this->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+            if ($lastFlightQuoteFlight) {
+                return $lastFlightQuoteFlight;
+            }
+            return null;
+        };
         $fields['fq_type_name'] = function () {
             return FlightQuote::getTypeName($this->fq_type_id);
         };

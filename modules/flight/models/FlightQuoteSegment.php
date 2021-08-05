@@ -324,21 +324,25 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     {
         $fields = [
             'fqs_uid',
-            'fqs_departure_dt',
-            'fqs_arrival_dt',
+            'departureTime' => function () {
+                return date('Y-m-d H:i', strtotime($this->fqs_departure_dt));
+            },
+            'arrivalTime' => function () {
+                return date('Y-m-d H:i', strtotime($this->fqs_arrival_dt));
+            },
             'fqs_stop',
-            'fqs_flight_number',
-            'fqs_booking_class',
+            'flightNumber' => 'fqs_flight_number',
+            'bookingClass' => 'fqs_booking_class',
             'fqs_duration',
-            'fqs_departure_airport_iata',
-            'fqs_departure_airport_terminal',
-            'fqs_arrival_airport_iata',
-            'fqs_arrival_airport_terminal',
-            'fqs_operating_airline',
-            'fqs_marketing_airline',
+            'departureAirportCode' => 'fqs_departure_airport_iata',
+            'departureAirportTerminal' => 'fqs_departure_airport_terminal',
+            'arrivalAirportCode' => 'fqs_arrival_airport_iata',
+            'arrivalAirportTerminal' => 'fqs_arrival_airport_terminal',
+            'operatingAirline' => 'fqs_operating_airline',
+            'marketingAirline' => 'fqs_marketing_airline',
             'fqs_air_equip_type',
             'fqs_marriage_group',
-            'fqs_cabin_class',
+            'cabin' => 'fqs_cabin_class',
             'fqs_meal',
             'fqs_fare_code',
             'fqs_ticket_id',
@@ -374,15 +378,16 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             }
             return $marketingAirline;
         };
-        if ($this->flightQuoteSegmentStops) {
-            $fields['stops'] = function () {
-                $stops = [];
-                foreach ($this->flightQuoteSegmentStops as $stop) {
-                    $stops[] = $stop->toArray();
-                }
-                return $stops;
-            };
-        }
+        $fields['stop'] = function () {
+            return count($this->flightQuoteSegmentStops);
+        };
+        $fields['stops'] = function () {
+            $stops = [];
+            foreach ($this->flightQuoteSegmentStops as $stop) {
+                $stops[] = $stop->toArray();
+            }
+            return $stops;
+        };
         if ($this->flightQuoteSegmentPaxBaggages) {
             $fields['baggages'] = function () {
                 $baggages = [];
