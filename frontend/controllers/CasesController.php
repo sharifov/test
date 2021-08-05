@@ -1370,6 +1370,15 @@ class CasesController extends FController
                     case CasesStatus::STATUS_PROCESSING:
                         $this->casesManageService->processing($case->cs_id, $statusForm->userId, $user->id, $statusForm->message);
                         break;
+                    case CasesStatus::STATUS_AWAITING:
+                        $this->casesManageService->awaiting($case->cs_id, $user->id, $statusForm->message);
+                        break;
+                    case CasesStatus::STATUS_AUTO_PROCESSING:
+                        $this->casesManageService->autoProcessing($case->cs_id, $user->id, $statusForm->message);
+                        break;
+                    case CasesStatus::STATUS_ERROR:
+                        $this->casesManageService->error($case->cs_id, $user->id, $statusForm->message);
+                        break;
                     default:
                         Yii::$app->session->setFlash('error', 'Undefined status');
                         return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);

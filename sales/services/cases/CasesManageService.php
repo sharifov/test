@@ -186,6 +186,42 @@ class CasesManageService
      * @param int|Cases $case
      * @param int|null $creatorId
      * @param string|null $description
+     */
+    public function awaiting($case, ?int $creatorId, ?string $description = ''): void
+    {
+        $case = $this->finder->caseFind($case);
+        $case->awaiting($creatorId, $description);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int|Cases $case
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function autoProcessing($case, ?int $creatorId, ?string $description = ''): void
+    {
+        $case = $this->finder->caseFind($case);
+        $case->autoProcessing($creatorId, $description);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int|Cases $case
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function error($case, ?int $creatorId, ?string $description = ''): void
+    {
+        $case = $this->finder->caseFind($case);
+        $case->error($creatorId, $description);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int|Cases $case
+     * @param int|null $creatorId
+     * @param string|null $description
      * @param string|null $deadline
      */
     public function followUp($case, ?int $creatorId, ?string $description, ?string $deadline): void
