@@ -130,7 +130,7 @@ class HybridService extends Component
         }
     }
 
-    public function wh(int $projectId, string $type, array $data): array
+    public function wh(int $projectId, string $type, array $data): ?array
     {
         if (!$type) {
             throw new \DomainException('Type is empty.');
@@ -141,7 +141,8 @@ class HybridService extends Component
             throw new \DomainException('Not found link on Project. Id: ' . $projectId);
         }
         if (!$projectUrls['webHookEndpoint']) {
-            throw new \DomainException('Not found webHookEndpoint on Project. Id: ' . $projectId);
+            \Yii::warning('Not found webHookEndpoint on Project. Id: ' . $projectId, 'HybridService:wh:webHookEndpoint');
+            return null;
         }
 
         $response = $this->sendRequest(
