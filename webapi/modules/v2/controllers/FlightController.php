@@ -1221,7 +1221,7 @@ class FlightController extends BaseController
                 new CodeMessage($e->getCode())
             );
         } catch (\Throwable $e) {
-            \Yii::error(AppHelper::throwableLog($e), 'API:FlightController:actionReprotectionCreate:Throwable');
+            \Yii::error(AppHelper::throwableLog($e), 'API:FlightController:actionReprotectionGet:Throwable');
             return new ErrorResponse(
                 new StatusCodeMessage(500),
                 new MessageMessage('Internal Server Error'),
