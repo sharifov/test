@@ -38,14 +38,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (FlightRequestLog $model) {
                     return $model->getOldStatusName() ?? Yii::$app->formatter->nullDisplay;
                 },
-                'filter' => FlightRequest::STATUS_LIST
+                'filter' => FlightRequest::STATUS_LIST,
+                'format' => 'raw',
             ],
             [
                 'attribute' => 'flr_status_id_new',
                 'value' => static function (FlightRequestLog $model) {
                     return $model->getNewStatusName() ?? Yii::$app->formatter->nullDisplay;
                 },
-                'filter' => FlightRequest::STATUS_LIST
+                'filter' => FlightRequest::STATUS_LIST,
+                'format' => 'raw',
             ],
             'flr_description',
             'flr_created_dt',
