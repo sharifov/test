@@ -2,6 +2,7 @@
 
 use modules\flight\models\FlightRequestLog;
 use modules\flight\models\FlightRequest;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -45,8 +46,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'flr_description',
-            //'flr_created_dt',
-            //'flr_updated_dt',
+            ['class' => DateTimeColumn::class, 'attribute' => 'flr_created_dt'],
+            ['class' => DateTimeColumn::class, 'attribute' => 'flr_updated_dt'],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
