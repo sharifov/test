@@ -39,6 +39,7 @@ class FlightRequestLog extends \yii\db\ActiveRecord
             [['flr_fr_id'], 'required'],
             [['flr_fr_id', 'flr_status_id_old', 'flr_status_id_new'], 'integer'],
             [['flr_created_dt', 'flr_updated_dt'], 'safe'],
+            [['flr_created_dt', 'flr_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['flr_description'], 'string', 'max' => 500],
         ];
     }

@@ -52,8 +52,8 @@ class FlightRequestLogSearch extends FlightRequestLog
             'flr_fr_id' => $this->flr_fr_id,
             'flr_status_id_old' => $this->flr_status_id_old,
             'flr_status_id_new' => $this->flr_status_id_new,
-            'flr_created_dt' => $this->flr_created_dt,
-            'flr_updated_dt' => $this->flr_updated_dt,
+            'DATE(flr_created_dt)' => $this->flr_created_dt,
+            'DATE(flr_updated_dt)' => $this->flr_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'flr_description', $this->flr_description]);
