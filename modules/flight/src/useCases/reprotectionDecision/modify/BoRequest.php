@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\flight\src\useCases\reprotectionDecision\confirm;
+namespace modules\flight\src\useCases\reprotectionDecision\modify;
 
 use common\components\BackOffice;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -33,7 +33,7 @@ class BoRequest
 
         $bookingId = $this->getBookingId($quote);
 
-        $responseBO = BackOffice::reprotectionCustomerDecisionConfirm($bookingId, $data);
+        $responseBO = BackOffice::reprotectionCustomerDecisionModify($bookingId, $data);
 
         if ($responseBO) {
             $this->successProcessing($quote);

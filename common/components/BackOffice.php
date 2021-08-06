@@ -266,7 +266,22 @@ class BackOffice
         }
     }
 
-    public static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote): bool
+    public static function reprotectionCustomerDecisionConfirm(string $bookingId, array $quote): bool
+    {
+        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote);
+    }
+
+    public static function reprotectionCustomerDecisionModify(string $bookingId, array $quote): bool
+    {
+        return self::reprotectionCustomerDecision($bookingId, 'modify', $quote);
+    }
+
+    public static function reprotectionCustomerDecisionRefund(string $bookingId, array $quote): bool
+    {
+        return self::reprotectionCustomerDecision($bookingId, 'refund', $quote);
+    }
+
+    private static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote): bool
     {
         if (!$bookingId) {
             throw new \DomainException('Booking ID is empty');
