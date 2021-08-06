@@ -21,10 +21,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'flr_description')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'flr_created_dt')->textInput() ?>
-
-    <?= $form->field($model, 'flr_updated_dt')->textInput() ?>
-
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
