@@ -4,6 +4,7 @@ namespace common\components;
 
 use http\Client\Request;
 use http\Client\Response;
+use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use Yii;
 use yii\base\Exception;
@@ -262,6 +263,82 @@ class BackOffice
             }
         } else {
             \Yii::error('Not provided endpoint', 'BackOffice:orderUpdateWebhook');
+        }
+    }
+
+    public static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote): bool
+    {
+        if (!$bookingId) {
+            throw new \DomainException('Booking ID is empty');
+        }
+        if (!in_array($type, ['confirm', 'modify', 'refund'])) {
+            throw new \DomainException('Undefined Type');
+        }
+        if (in_array($type, ['confirm', 'modify']) && !$quote) {
+            throw new \DomainException('Quote is empty');
+        }
+
+        // todo changed to endpoint
+        $endpoint = 'reprotection/customer-decision';
+
+        try {
+            $response = self::sendRequest2($endpoint, [
+                'bookingId' => $bookingId,
+                'type' => $type,
+                'quote' => $quote,
+            ]);
+
+            if (!$response->isOk) {
+                \Yii::error([
+                    'message' => 'BO reprotection customer decision server error',
+                    'bookingId' => $bookingId,
+                    'type' => $type,
+                    'quote' => $quote,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:reprotectionCustomerDecision:serverError');
+                return false;
+            }
+
+            $data = $response->data;
+
+            if (!$data) {
+                \Yii::error([
+                    'message' => 'BO reprotection customer decision data is empty',
+                    'bookingId' => $bookingId,
+                    'type' => $type,
+                    'quote' => $quote,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:reprotectionCustomerDecision:dataIsEmpty');
+                return false;
+            }
+
+            if (!is_array($data)) {
+                \Yii::error([
+                    'message' => 'BO reprotection customer decision response Data type is invalid',
+                    'bookingId' => $bookingId,
+                    'type' => $type,
+                    'quote' => $quote,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:reprotectionCustomerDecision:dataIsInvalid');
+                return false;
+            }
+
+            // todo change to correct data property
+            if (!isset($response->data['data']['success'])) {
+                \Yii::error([
+                    'message' => 'BO reprotection customer decision response Data object error',
+                    'bookingId' => $bookingId,
+                    'type' => $type,
+                    'quote' => $quote,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:reprotectionCustomerDecision:dataObjectInvalid');
+                return false;
+            }
+
+            return (bool)($response->data['data']['success']);
+        } catch (\Throwable $exception) {
+            \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:reprotectionCustomerDecision');
+            return false;
         }
     }
 }

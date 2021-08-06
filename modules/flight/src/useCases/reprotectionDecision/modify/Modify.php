@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\flight\src\useCases\reprotectionDecision;
+namespace modules\flight\src\useCases\reprotectionDecision\modify;
 
 class Modify
 {

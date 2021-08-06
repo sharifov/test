@@ -8,38 +8,37 @@ use yii\base\Model;
  * Class DecisionForm
  *
  * @property string $booking_id
- * @property string $reprotection_quote_gid
  * @property string $type
+ * @property string $reprotection_quote_gid
  * @property string $flight_product_quote
  */
 class DecisionForm extends Model
 {
-    public const TYPE_CONFIRM = 1;
-    public const TYPE_MODIFY = 2;
-    public const TYPE_REFUND = 3;
+    public const TYPE_CONFIRM = 'confirm';
+    public const TYPE_MODIFY = 'modify';
+    public const TYPE_REFUND = 'refund';
 
     public const TYPES = [
-        self::TYPE_CONFIRM => 'confirm',
-        self::TYPE_MODIFY => 'modify',
-        self::TYPE_REFUND => 'refund',
+        self::TYPE_CONFIRM,
+        self::TYPE_MODIFY,
+        self::TYPE_REFUND,
     ];
 
     public $booking_id;
-    public $reprotection_quote_gid;
     public $type;
+    public $reprotection_quote_gid;
     public $flight_product_quote;
 
     public function rules(): array
     {
         return [
-
             ['booking_id', 'required'],
-            [['booking_id'], 'string', 'min' => 7, 'max' => 10],
-            [['reprotection_quote_gid'], 'string', 'max' => 32],
+            ['booking_id', 'string', 'min' => 7, 'max' => 10],
 
             ['type', 'required'],
             ['type', 'in', 'range' => self::TYPES],
 
+            ['reprotection_quote_gid', 'string', 'max' => 32],
             ['reprotection_quote_gid', 'required', 'when' => function () {
                 return $this->isModify() || $this->isConfirm();
             }],
@@ -53,17 +52,17 @@ class DecisionForm extends Model
 
     public function isConfirm(): bool
     {
-        return $this->type === self::TYPES[self::TYPE_CONFIRM];
+        return $this->type === self::TYPE_CONFIRM;
     }
 
     public function isModify(): bool
     {
-        return $this->type === self::TYPES[self::TYPE_MODIFY];
+        return $this->type === self::TYPE_MODIFY;
     }
 
     public function isRefund(): bool
     {
-        return $this->type === self::TYPES[self::TYPE_REFUND];
+        return $this->type === self::TYPE_REFUND;
     }
 
     public function formName(): string
