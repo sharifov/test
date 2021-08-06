@@ -192,7 +192,7 @@ class HybridService extends Component
         return $data;
     }
 
-    public function whReprotection(int $projectId, array $data): array
+    public function whReprotection(int $projectId, array $data): ?array
     {
         return $this->wh($projectId, 'flight/schedule-change', $data);
     }
