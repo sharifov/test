@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\models\FlightRequest;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -60,13 +61,29 @@ class FlightRequestLog extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
+    public function getOldStatusName(): ?string
+    {
+        return FlightRequest::STATUS_LIST[$this->flr_status_id_old] ?? null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getNewStatusName(): ?string
+    {
+        return FlightRequest::STATUS_LIST[$this->flr_status_id_new] ?? null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function attributeLabels()
     {
         return [
             'flr_id' => 'ID',
-            'flr_fr_id' => 'Flr Fr ID',
-            'flr_status_id_old' => 'Status Id Old',
-            'flr_status_id_new' => 'Status Id New',
+            'flr_fr_id' => 'Flight Request ID',
+            'flr_status_id_old' => 'Status Old',
+            'flr_status_id_new' => 'Status New',
             'flr_description' => 'Description',
             'flr_created_dt' => 'Created Dt',
             'flr_updated_dt' => 'Updated Dt',
