@@ -57,8 +57,8 @@ class FlightRequestSearch extends FlightRequest
             'fr_created_api_user_id' => $this->fr_created_api_user_id,
             'fr_status_id' => $this->fr_status_id,
             'fr_job_id' => $this->fr_job_id,
-            'fr_created_dt' => $this->fr_created_dt,
-            'fr_updated_dt' => $this->fr_updated_dt,
+            'DATE(fr_created_dt)' => $this->fr_created_dt,
+            'DATE(fr_updated_dt)' => $this->fr_updated_dt,
             'fr_year' => $this->fr_year,
             'fr_month' => $this->fr_month,
         ]);
