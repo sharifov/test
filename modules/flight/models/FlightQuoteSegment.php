@@ -347,7 +347,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             'fqs_fare_code',
             'fqs_ticket_id',
             'fqs_recheck_baggage',
-            'fqs_mileage'
+            'fqs_mileage',
         ];
         $fields['departureLocation'] = function () {
             return Airports::getCityByIata($this->fqs_departure_airport_iata);
@@ -358,26 +358,26 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
         $fields['cabin'] = function () {
             return \common\components\SearchService::getCabin($this->fqs_cabin_class);
         };
-        $fields['operatingAirline'] = function () {
-            $operatingAirline = '';
-            if ($this->fqs_operating_airline) {
-                $airLine = Airline::find()->andWhere(['iata' => $this->fqs_operating_airline])->asArray()->one();
-                if ($airLine) {
-                    $operatingAirline = $airLine['name'];
-                }
-            }
-            return $operatingAirline;
-        };
-        $fields['marketingAirline'] = function () {
-            $marketingAirline = '';
-            if ($this->fqs_marketing_airline) {
-                $airLine = Airline::find()->andWhere(['iata' => $this->fqs_marketing_airline])->asArray()->one();
-                if ($airLine) {
-                    $marketingAirline = $airLine['name'];
-                }
-            }
-            return $marketingAirline;
-        };
+//        $fields['operatingAirline'] = function () {
+//            $operatingAirline = '';
+//            if ($this->fqs_operating_airline) {
+//                $airLine = Airline::find()->andWhere(['iata' => $this->fqs_operating_airline])->asArray()->one();
+//                if ($airLine) {
+//                    $operatingAirline = $airLine['name'];
+//                }
+//            }
+//            return $operatingAirline;
+//        };
+//        $fields['marketingAirline'] = function () {
+//            $marketingAirline = '';
+//            if ($this->fqs_marketing_airline) {
+//                $airLine = Airline::find()->andWhere(['iata' => $this->fqs_marketing_airline])->asArray()->one();
+//                if ($airLine) {
+//                    $marketingAirline = $airLine['name'];
+//                }
+//            }
+//            return $marketingAirline;
+//        };
         $fields['stop'] = function () {
             return count($this->flightQuoteSegmentStops);
         };

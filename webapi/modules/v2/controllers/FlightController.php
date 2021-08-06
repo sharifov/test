@@ -649,8 +649,8 @@ class FlightController extends BaseController
                                     "departureLocation": "Chisinau",
                                     "arrivalLocation": "Vienna",
                                     "cabin": "Economy",
-                                    "operatingAirline": "Austrian Airlines",
-                                    "marketingAirline": "Austrian Airlines",
+                                    "operatingAirline": "RO",
+                                    "marketingAirline": "RO",
                                     "stop": 1,
                                     "stops": [
                                         {
@@ -714,8 +714,8 @@ class FlightController extends BaseController
                                     "departureLocation": "Vienna",
                                     "arrivalLocation": "London",
                                     "cabin": "Economy",
-                                    "operatingAirline": "Austrian Airlines",
-                                    "marketingAirline": "Austrian Airlines",
+                                    "operatingAirline": "OS",
+                                    "marketingAirline": "OS",
                                     "stop": 0,
                                     "stops": [],
                                     "baggages": [
@@ -777,8 +777,8 @@ class FlightController extends BaseController
                                     "departureLocation": "London",
                                     "arrivalLocation": "Frankfurt am Main",
                                     "cabin": "Economy",
-                                    "operatingAirline": "Lufthansa",
-                                    "marketingAirline": "Lufthansa",
+                                    "operatingAirline": "LH",
+                                    "marketingAirline": "LH",
                                     "stop": 0,
                                     "stops": [],
                                     "baggages": [
@@ -840,8 +840,8 @@ class FlightController extends BaseController
                                     "departureLocation": "Frankfurt am Main",
                                     "arrivalLocation": "Chisinau",
                                     "cabin": "Economy",
-                                    "operatingAirline": "Lufthansa CityLine",
-                                    "marketingAirline": "Lufthansa",
+                                    "operatingAirline": "LH",
+                                    "marketingAirline": "LH",
                                     "stop": 0,
                                     "stops": [],
                                     "baggages": [
@@ -1007,8 +1007,8 @@ class FlightController extends BaseController
                                     "departureLocation": "Chisinau",
                                     "arrivalLocation": "Bucharest",
                                     "cabin": "Economy",
-                                    "operatingAirline": "TAROM",
-                                    "marketingAirline": "TAROM",
+                                    "operatingAirline": "RO",
+                                    "marketingAirline": "RO",
                                     "stop": 0,
                                     "stops": [],
                                     "baggages": [
@@ -1051,8 +1051,8 @@ class FlightController extends BaseController
                                     "departureLocation": "Bucharest",
                                     "arrivalLocation": "London",
                                     "cabin": "Economy",
-                                    "operatingAirline": "TAROM",
-                                    "marketingAirline": "TAROM",
+                                    "operatingAirline": "RO",
+                                    "marketingAirline": "RO",
                                     "stop": 0,
                                     "stops": [],
                                     "baggages": [
