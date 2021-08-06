@@ -167,7 +167,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     if (!$clientId = $case->cs_client_id) {
                         throw new CheckRestrictionException('Client not found in Case');
                     }
-                    if ($clientEmail = ClientEmail::getGeneralEmail($clientId)) {
+                    if (!$clientEmail = ClientEmail::getGeneralEmail($clientId)) {
                         throw new CheckRestrictionException('ClientEmail not found');
                     }
                     $resultStatus = (new SendEmailByCase($case->cs_id, $clientEmail))->getResultStatus();
