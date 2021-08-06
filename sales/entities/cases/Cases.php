@@ -322,12 +322,14 @@ class Cases extends ActiveRecord implements Objectable
         $this->setStatus(CasesStatus::STATUS_NEW);
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusNew(): bool
     {
         return $this->cs_status === CasesStatus::STATUS_NEW;
+    }
+
+    public function isStatusAutoProcessing(): bool
+    {
+        return $this->cs_status === CasesStatus::STATUS_AUTO_PROCESSING;
     }
 
     /**

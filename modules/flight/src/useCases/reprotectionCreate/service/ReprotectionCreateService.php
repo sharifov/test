@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\reprotectionCreate\service;
 
 use common\models\Client;
+use common\models\ClientEmail;
 use common\models\Project;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -147,6 +148,16 @@ class ReprotectionCreateService
         return $case;
     }
 
+    public function caseToAutoProcessing(Cases $case, ?string $description = null): Cases
+    {
+        $case->onIsAutomate();
+        if (!$case->isStatusAutoProcessing()) {
+            $case->autoProcessing(null, $description);
+        }
+        $this->casesRepository->save($case);
+        return $case;
+    }
+
     public function createCaseOld(OrderCreateFromSaleForm $orderCreateFromSaleForm, Client $client)
     {
         if (!$caseCategory = CaseCategory::findOne(['cc_key' => self::CASE_CATEGORY_SCHEDULE_CHANGE])) {
@@ -241,10 +252,18 @@ class ReprotectionCreateService
         return $case;
     }
 
-    public function flightRequestToPending(FlightRequest $flightRequest, $description): FlightRequest
+    public function flightRequestChangeStatus(FlightRequest $flightRequest, int $newStatus, $description): FlightRequest
     {
         $oldStatus = $flightRequest->fr_status_id;
-        $flightRequest->statusToPending();
+        if ($newStatus === FlightRequest::STATUS_PENDING) {
+            $flightRequest->statusToPending();
+        } elseif ($newStatus === FlightRequest::STATUS_ERROR) {
+            $flightRequest->statusToError();
+        } elseif ($newStatus === FlightRequest::STATUS_DONE) {
+            $flightRequest->statusToDone();
+        } else {
+            $flightRequest->fr_status_id = $newStatus;
+        }
         (new FlightRequestRepository())->save($flightRequest);
 
         $flightRequestLog = FlightRequestLog::create(
@@ -254,24 +273,6 @@ class ReprotectionCreateService
             VarDumper::dumpAsString($description)
         );
         (new FlightRequestLogRepository())->save($flightRequestLog);
-
-        return $flightRequest;
-    }
-
-    public function flightRequestToError(FlightRequest $flightRequest, $description): FlightRequest
-    {
-        $oldStatus = $flightRequest->fr_status_id;
-        $flightRequest->statusToError();
-        (new FlightRequestRepository())->save($flightRequest);
-
-        $flightRequestLog = FlightRequestLog::create(
-            $flightRequest->fr_id,
-            $oldStatus,
-            $flightRequest->fr_status_id,
-            VarDumper::dumpAsString($description)
-        );
-        (new FlightRequestLogRepository())->save($flightRequestLog);
-
         return $flightRequest;
     }
 }

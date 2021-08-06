@@ -3,6 +3,7 @@
 namespace common\components\jobs;
 
 use common\components\HybridService;
+use common\models\ClientEmail;
 use DomainException;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
@@ -18,6 +19,7 @@ use sales\exception\ValidationException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\services\cases\CasesSaleService;
+use sales\services\email\SendEmailByCase;
 use Yii;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
@@ -54,7 +56,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             if ($order = $reProtectionCreateService->getOrderByBookingId($flightRequest->fr_booking_id)) {
                 if (!$oldProductQuote = $reProtectionCreateService->declineOldProductQuote($order)) {
                     $reProtectionCreateService->caseToManual($case, 'Flight quote not updated');
-                    $reProtectionCreateService->flightRequestToPending($flightRequest, 'Original quote not declined');
+                    $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, 'Original quote not declined');
                 }
 
                 try {
@@ -142,15 +144,15 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if ($flightRequest->getIsAutomateDataJson() === false && $case->isAutomate()) {
                 $reProtectionCreateService->caseToManual($case, 'Manual processing requested');
-                $reProtectionCreateService->flightRequestToPending($flightRequest, 'Manual processing requested');
+                $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, 'Manual processing requested');
             }
 
             try {
                 $hybridService = Yii::createObject(HybridService::class);
                 $data = [
-                    'bookingId' => $flightRequest->fr_booking_id,
-                    'reProtectionProductQuoteGid' => $flightQuote->fqProductQuote->pq_gid,
-                    'caseGid' => $case->cs_gid,
+                    'booking_id' => $flightRequest->fr_booking_id,
+                    'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
+                    'case_gid' => $case->cs_gid,
                 ];
                 $hybridService->whReprotection($order->or_project_id, $data);
             } catch (\Throwable $throwable) {
@@ -162,18 +164,25 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if ($case->isAutomate()) {
                 try {
-                    /* TODO::  */
-                    // Если кейс еще помечен для автообработки отправить письмо с альтернативной квотой клиенту
-                    // в случае успеха перевести Case в статус Auto Processing
-                    $flightRequest->statusToDone();
-                    \Yii::info(
-                        $flightQuote->serialize(),
-                        'info\Debug:' . self::class . ':' . __FUNCTION__
-                    );
-                    /* TODO: FOR DEBUG:: must by remove */
+                    if (!$clientId = $case->cs_client_id) {
+                        throw new CheckRestrictionException('Client not found in Case');
+                    }
+                    if ($clientEmail = ClientEmail::getGeneralEmail($clientId)) {
+                        throw new CheckRestrictionException('ClientEmail not found');
+                    }
+                    $resultStatus = (new SendEmailByCase($case->cs_id, $clientEmail))->getResultStatus();
+                    if ($resultStatus === SendEmailByCase::RESULT_NOT_ENABLE) {
+                        throw new CheckRestrictionException('ClientEmail not send. EmailConfigs not enabled.');
+                    }
+                    if ($resultStatus !== SendEmailByCase::RESULT_SEND) {
+                        throw new CheckRestrictionException('ClientEmail not send');
+                    }
+
+                    $reProtectionCreateService->caseToAutoProcessing($case);
+                    $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_DONE, 'Client Email send');
                 } catch (\Throwable $throwable) {
                     $reProtectionCreateService->caseToManual($case, 'Auto SCHD Email not sent');
-                    $reProtectionCreateService->flightRequestToPending($flightRequest, $throwable->getMessage());
+                    $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, $throwable->getMessage());
                 }
             }
         } catch (\Throwable $throwable) {
@@ -182,7 +191,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 'ReprotectionCreateJob:throwable'
             );
             if (isset($flightRequest)) {
-                $reProtectionCreateService->flightRequestToError($flightRequest, $throwable->getMessage());
+                $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_ERROR, $throwable->getMessage());
             }
         }
     }
