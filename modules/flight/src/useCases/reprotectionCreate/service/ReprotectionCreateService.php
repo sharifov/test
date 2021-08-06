@@ -12,6 +12,7 @@ use modules\flight\models\FlightRequest;
 use modules\flight\models\FlightRequestLog;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\repositories\flightRequestLog\FlightRequestLogRepository;
+use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\sale\FlightFromSaleService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
@@ -47,6 +48,7 @@ use yii\helpers\VarDumper;
  * @property OrderRepository $orderRepository
  * @property FlightFromSaleService $flightFromSaleService
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property FlightQuoteManageService $flightQuoteManageService
  */
 class ReprotectionCreateService
 {
@@ -66,6 +68,7 @@ class ReprotectionCreateService
     private OrderRepository $orderRepository;
     private FlightFromSaleService $flightFromSaleService;
     private ProductQuoteRepository $productQuoteRepository;
+    private FlightQuoteManageService $flightQuoteManageService;
 
     /**
      * @param CasesSaleService $casesSaleService
@@ -76,6 +79,7 @@ class ReprotectionCreateService
      * @param OrderRepository $orderRepository
      * @param FlightFromSaleService $flightFromSaleService
      * @param ProductQuoteRepository $productQuoteRepository
+     * @param FlightQuoteManageService $flightQuoteManageService
      */
     public function __construct(
         CasesSaleService $casesSaleService,
@@ -85,7 +89,8 @@ class ReprotectionCreateService
         OrderCreateFromSaleService $orderCreateFromSaleService,
         OrderRepository $orderRepository,
         FlightFromSaleService $flightFromSaleService,
-        ProductQuoteRepository $productQuoteRepository
+        ProductQuoteRepository $productQuoteRepository,
+        FlightQuoteManageService $flightQuoteManageService
     ) {
         $this->casesSaleService = $casesSaleService;
         $this->clientManageService = $clientManageService;
@@ -95,6 +100,7 @@ class ReprotectionCreateService
         $this->orderRepository = $orderRepository;
         $this->flightFromSaleService = $flightFromSaleService;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->flightQuoteManageService = $flightQuoteManageService;
     }
 
     public function getOrCreateClient(OrderCreateFromSaleForm $orderCreateFromSaleForm, OrderContactForm $orderContactForm): Client
@@ -208,7 +214,7 @@ class ReprotectionCreateService
     public function getOrderByBookingId(string $bookingId): ?Order
     {
         if ($flightQuoteFlight = FlightQuoteFlight::find()->where(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one()) {
-            return $flightQuoteFlight->fqfFq->fqProductQuote->pqOrder ?? null;
+            return ArrayHelper::getValue($flightQuoteFlight, 'fqfFq.fqProductQuote.pqOrder');
         }
         return null;
     }
@@ -216,7 +222,7 @@ class ReprotectionCreateService
     public function getFlightByBookingId(string $bookingId): ?Flight
     {
         if ($flightQuoteFlight = FlightQuoteFlight::find()->where(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one()) {
-            return $flightQuoteFlight->fqfFq->fqFlight ?? null;
+            return ArrayHelper::getValue($flightQuoteFlight, 'fqfFq.fqFlight');
         }
         return null;
     }

@@ -25,6 +25,7 @@ use modules\flight\src\repositories\flightQuoteTripRepository\FlightQuoteTripRep
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
+use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\sale\dto\ProductQuoteCreateFromSaleDto;
 use modules\flight\src\useCases\sale\form\FlightPaxForm;
 use modules\flight\src\useCases\sale\form\PriceQuotesForm;
@@ -58,6 +59,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteFlightRepository $flightQuoteFlightRepository
  * @property FlightQuoteBookingRepository $flightQuoteBookingRepository
  * @property FlightQuoteTicketRepository $flightQuoteTicketRepository
+ * @property FlightQuoteManageService $flightQuoteManageService
  */
 class FlightFromSaleService
 {
@@ -74,6 +76,7 @@ class FlightFromSaleService
     private FlightQuoteFlightRepository $flightQuoteFlightRepository;
     private FlightQuoteBookingRepository $flightQuoteBookingRepository;
     private FlightQuoteTicketRepository $flightQuoteTicketRepository;
+    private FlightQuoteManageService $flightQuoteManageService;
 
     /**
      * @param PaymentRepository $paymentRepository
@@ -88,6 +91,8 @@ class FlightFromSaleService
      * @param FlightRepository $flightRepository
      * @param FlightQuoteFlightRepository $flightQuoteFlightRepository
      * @param FlightQuoteBookingRepository $flightQuoteBookingRepository
+     * @param FlightQuoteTicketRepository $flightQuoteTicketRepository
+     * @param FlightQuoteManageService $flightQuoteManageService
      */
     public function __construct(
         PaymentRepository $paymentRepository,
@@ -102,7 +107,8 @@ class FlightFromSaleService
         FlightRepository $flightRepository,
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
         FlightQuoteBookingRepository $flightQuoteBookingRepository,
-        FlightQuoteTicketRepository $flightQuoteTicketRepository
+        FlightQuoteTicketRepository $flightQuoteTicketRepository,
+        FlightQuoteManageService $flightQuoteManageService
     ) {
         $this->paymentRepository = $paymentRepository;
         $this->productCreateService = $productCreateService;
@@ -117,6 +123,7 @@ class FlightFromSaleService
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
         $this->flightQuoteTicketRepository = $flightQuoteTicketRepository;
+        $this->flightQuoteManageService = $flightQuoteManageService;
     }
 
     public function createHandler(
@@ -277,6 +284,9 @@ class FlightFromSaleService
                 $estimationTotal += ($priceQuotesForm->selling * $priceQuotesForm->cnt);
             }
         }
+
+        $this->flightQuoteManageService->calcProductQuotePrice($productQuote, $flightQuote);
+
         return $productQuote;
     }
 

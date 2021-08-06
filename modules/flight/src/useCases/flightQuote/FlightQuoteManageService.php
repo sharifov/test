@@ -305,7 +305,7 @@ class FlightQuoteManageService implements ProductQuoteService
      * @param ProductQuote $productQuote
      * @param FlightQuote $flightQuote
      */
-    private function calcProductQuotePrice(ProductQuote $productQuote, FlightQuote $flightQuote): void
+    public function calcProductQuotePrice(ProductQuote $productQuote, FlightQuote $flightQuote): void
     {
         $prices = (new FlightQuotePriceCalculator())->calculate($flightQuote, $productQuote->pq_origin_currency_rate);
         $productQuote->updatePrices(
@@ -570,7 +570,7 @@ class FlightQuoteManageService implements ProductQuoteService
 
             $this->createQuotePaxPrice($flightQuote, $productQuote, $quote);
 
-            //$this->calcProductQuotePrice($productQuote, $flightQuote); /* TODO::  */
+            $this->calcProductQuotePrice($productQuote, $flightQuote);
 
             $this->createFlightTrip($flightQuote, $quote);
 
