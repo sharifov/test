@@ -563,6 +563,7 @@ class FlightQuoteManageService implements ProductQuoteService
 
             $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
             $flightQuote->setTypeReProtection();
+            $flightQuote->setServiceFeePercent(0);
             $this->flightQuoteRepository->save($flightQuote);
 
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
