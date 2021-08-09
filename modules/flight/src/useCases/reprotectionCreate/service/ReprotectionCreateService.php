@@ -228,6 +228,18 @@ class ReprotectionCreateService
         return null;
     }
 
+    public function getFlight(Order $order): ?Flight
+    {
+        if ($productQuotes = $order->productQuotes) {
+            foreach ($productQuotes as $productQuote) {
+                if ($productQuote->isFlight() && ($flightQuote = $productQuote->flightQuote) && $flightQuote->fqFlight) {
+                    return $flightQuote->fqFlight;
+                }
+            }
+        }
+        return null;
+    }
+
     public function declineOldProductQuote(Order $order): ?ProductQuote
     {
         $oldProductQuote = null;

@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\sale;
 
 use common\components\SearchService;
+use frontend\helpers\JsonHelper;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
@@ -10,16 +11,20 @@ use modules\flight\models\FlightQuoteBooking;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\models\FlightQuoteSegment;
+use modules\flight\models\FlightQuoteSegmentPaxBaggage;
 use modules\flight\models\FlightQuoteTicket;
 use modules\flight\models\FlightQuoteTrip;
 use modules\flight\src\dto\flightSegment\FlightQuoteSegmentApiBoDto;
+use modules\flight\src\entities\flightQuoteOption\FlightQuoteOption;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightPaxRepository\FlightPaxRepository;
 use modules\flight\src\repositories\flightQuoteBooking\FlightQuoteBookingRepository;
 use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
+use modules\flight\src\repositories\flightQuoteOption\FlightQuoteOptionRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\flight\src\repositories\flightQuoteSegment\FlightQuoteSegmentRepository;
+use modules\flight\src\repositories\flightQuoteSegmentPaxBaggageRepository\FlightQuoteSegmentPaxBaggageRepository;
 use modules\flight\src\repositories\flightQuoteTicket\FlightQuoteTicketRepository;
 use modules\flight\src\repositories\flightQuoteTripRepository\FlightQuoteTripRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
@@ -32,15 +37,20 @@ use modules\flight\src\useCases\sale\form\PriceQuotesForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\product\ProductQuoteRepository;
+use webapi\src\forms\flight\flights\trips\SegmentApiForm;
+use webapi\src\forms\flight\options\OptionApiForm;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -60,6 +70,12 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteBookingRepository $flightQuoteBookingRepository
  * @property FlightQuoteTicketRepository $flightQuoteTicketRepository
  * @property FlightQuoteManageService $flightQuoteManageService
+ * @property FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository
+ * @property ProductQuoteOptionRepository $productQuoteOptionRepository
+ * @property FlightQuoteOptionRepository $flightQuoteOptionRepository
+ * @property OrderPriceUpdater $orderPriceUpdater
+ *
+ * @property array $options
  */
 class FlightFromSaleService
 {
@@ -77,6 +93,14 @@ class FlightFromSaleService
     private FlightQuoteBookingRepository $flightQuoteBookingRepository;
     private FlightQuoteTicketRepository $flightQuoteTicketRepository;
     private FlightQuoteManageService $flightQuoteManageService;
+    private FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository;
+    private ProductQuoteOptionRepository $productQuoteOptionRepository;
+    private FlightQuoteOptionRepository $flightQuoteOptionRepository;
+    private OrderPriceUpdater $orderPriceUpdater;
+
+    private array $options = [
+        'package', 'cfar', 'flexibleTicket', 'autoCheckIn', 'pdp', 'travelInsurance'
+    ];
 
     /**
      * @param PaymentRepository $paymentRepository
@@ -93,6 +117,10 @@ class FlightFromSaleService
      * @param FlightQuoteBookingRepository $flightQuoteBookingRepository
      * @param FlightQuoteTicketRepository $flightQuoteTicketRepository
      * @param FlightQuoteManageService $flightQuoteManageService
+     * @param FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository
+     * @param ProductQuoteOptionRepository $productQuoteOptionRepository
+     * @param FlightQuoteOptionRepository $flightQuoteOptionRepository
+     * @param OrderPriceUpdater $orderPriceUpdater
      */
     public function __construct(
         PaymentRepository $paymentRepository,
@@ -108,7 +136,11 @@ class FlightFromSaleService
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
         FlightQuoteBookingRepository $flightQuoteBookingRepository,
         FlightQuoteTicketRepository $flightQuoteTicketRepository,
-        FlightQuoteManageService $flightQuoteManageService
+        FlightQuoteManageService $flightQuoteManageService,
+        FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository,
+        ProductQuoteOptionRepository $productQuoteOptionRepository,
+        FlightQuoteOptionRepository $flightQuoteOptionRepository,
+        OrderPriceUpdater $orderPriceUpdater
     ) {
         $this->paymentRepository = $paymentRepository;
         $this->productCreateService = $productCreateService;
@@ -124,6 +156,10 @@ class FlightFromSaleService
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
         $this->flightQuoteTicketRepository = $flightQuoteTicketRepository;
         $this->flightQuoteManageService = $flightQuoteManageService;
+        $this->flightQuoteSegmentPaxBaggageRepository = $flightQuoteSegmentPaxBaggageRepository;
+        $this->productQuoteOptionRepository = $productQuoteOptionRepository;
+        $this->flightQuoteOptionRepository = $flightQuoteOptionRepository;
+        $this->orderPriceUpdater = $orderPriceUpdater;
     }
 
     public function createHandler(
@@ -173,16 +209,33 @@ class FlightFromSaleService
 
                 if ($tripSegments = ArrayHelper::getValue($itinerary, "{$keyTrip}.segments")) {
                     foreach ($tripSegments as $segment) {
-                        $segment['duration'] = ArrayHelper::getValue($segment, 'flightDuration', 0) + ArrayHelper::getValue($segment, 'layoverDuration', 0);
-                        $segment['departureAirportCode'] = $segment['departureAirport'];
-                        $segment['arrivalAirportCode'] = $segment['arrivalAirport'];
-                        $segment['operatingAirline'] = $segment['airline'];
-                        $segment['marketingAirline'] = $segment['mainAirline'];
-                        $segment['cabin'] = FlightQuoteSegmentApiBoDto::mapCabinCalss(ArrayHelper::getValue($segment, 'cabin'));
+                        $segmentApiForm = new SegmentApiForm($keyTrip);
+                        if (!$segmentApiForm->load($segment)) {
+                            throw new \RuntimeException('SegmentApiForm not loaded');
+                        }
+                        if (!$segmentApiForm->validate()) {
+                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($segmentApiForm));
+                        }
+
+                        $segment['duration'] = (int) $segmentApiForm->flightDuration + (int) $segmentApiForm->layoverDuration;
+                        $segment['departureAirportCode'] = $segmentApiForm->departureAirport;
+                        $segment['arrivalAirportCode'] = $segmentApiForm->arrivalAirport;
+                        $segment['operatingAirline'] = $segmentApiForm->airline;
+                        $segment['marketingAirline'] = $segmentApiForm->mainAirline;
+                        $segment['cabin'] = FlightQuoteSegmentApiBoDto::mapCabinCalss($segmentApiForm->cabin);
 
                         $flightQuoteSegment = FlightQuoteSegment::create((new FlightQuoteSegmentDTO($flightQuote, $flightQuoteTrip, $segment)));
                         $flightQuoteSegment->fqs_recheck_baggage = null;
                         $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
+
+                        $flightQuoteSegmentPaxBaggage = FlightQuoteSegmentPaxBaggage::createByParams(
+                            FlightPax::getPaxId(FlightPax::PAX_ADULT),
+                            $flightQuoteSegment->fqs_id,
+                            $segmentApiForm->carryOn,
+                            $segmentApiForm->airline,
+                            $segmentApiForm->baggage
+                        );
+                        $this->flightQuoteSegmentPaxBaggageRepository->save($flightQuoteSegmentPaxBaggage);
                     }
                 }
             }
@@ -216,7 +269,6 @@ class FlightFromSaleService
         }
         $flightQuoteBookingId = $this->flightQuoteBookingRepository->save($flightQuoteBooking);
 
-
         $paxTypeCount = [];
         if ($passengers = ArrayHelper::getValue($saleData, 'passengers')) {
             foreach ($passengers as $passenger) {
@@ -249,6 +301,12 @@ class FlightFromSaleService
             }
         }
 
+        foreach ($this->options as $optionKey) {
+            if (self::checkOption($optionKey, $saleData)) {
+                $this->createOption($optionKey, $saleData[$optionKey], $flightQuote);
+            }
+        }
+
         $flightProduct->fl_adults = $paxTypeCount[FlightPax::PAX_ADULT] ?? 0;
         $flightProduct->fl_children = $paxTypeCount[FlightPax::PAX_CHILD] ?? 0;
         $flightProduct->fl_infants = $paxTypeCount[FlightPax::PAX_INFANT] ?? 0;
@@ -258,7 +316,7 @@ class FlightFromSaleService
         if ($priceQuotes = ArrayHelper::getValue($saleData, 'price.priceQuotes')) {
             foreach ($priceQuotes as $paxType => $priceQuote) {
                 $priceQuote['paxType'] = $paxType;
-                $priceQuote['cnt'] = $paxTypeCount[$paxType] ?? 1;
+                $priceQuote['cnt'] = $priceQuote['cnt'] ?? $paxTypeCount[$paxType] ?? 1;
                 $priceQuotesForm = new PriceQuotesForm();
                 $priceQuotesForm->load($priceQuote);
 
@@ -286,8 +344,63 @@ class FlightFromSaleService
         }
 
         $this->flightQuoteManageService->calcProductQuotePrice($productQuote, $flightQuote);
+        $this->orderPriceUpdater->update($order->getId());
 
         return $productQuote;
+    }
+
+    private static function checkOption(string $optionKey, array $saleData): bool
+    {
+        return (array_key_exists($optionKey, $saleData) && is_array($saleData[$optionKey]) && !empty($saleData[$optionKey]));
+    }
+
+    public function createOption(string $optionKey, array $data, FlightQuote $flightQuote): ?ProductQuoteOption
+    {
+        if (ArrayHelper::getValue($data, 'isActivated', false) !== true) {
+            return null;
+        }
+        $optionApiForm = new OptionApiForm();
+        $optionApiForm->pqo_key = $optionKey;
+        $optionApiForm->pqo_name = $data['title'] ?? $optionKey;
+        $optionApiForm->pqo_price = $data['amount'] ?? null;
+        $optionApiForm->pqo_markup = 0.00;
+        $optionApiForm->pqo_description = 'from ReProtection request';
+        $optionApiForm->pqo_request_data = $data;
+
+        if (!$optionApiForm->validate()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($optionApiForm));
+        }
+
+        $productQuoteOption = ProductQuoteOption::create(
+            $flightQuote->fq_product_quote_id,
+            $optionApiForm->getProductOption()->po_id,
+            $optionApiForm->pqo_name,
+            $optionApiForm->pqo_description,
+            $optionApiForm->pqo_price,
+            $optionApiForm->pqo_price + $optionApiForm->pqo_markup,
+            $optionApiForm->pqo_markup,
+            JsonHelper::encode($optionApiForm->pqo_request_data)
+        );
+        $productQuoteOption->done();
+        $this->productQuoteOptionRepository->save($productQuoteOption);
+
+        $flightQuoteOption = FlightQuoteOption::create(
+            $productQuoteOption->pqo_id,
+            null,
+            null,
+            null,
+            $optionApiForm->pqo_name,
+            $optionApiForm->pqo_markup,
+            $optionApiForm->pqo_markup,
+            $optionApiForm->pqo_price,
+            $optionApiForm->pqo_price,
+            $optionApiForm->pqo_price,
+            $optionApiForm->pqo_price,
+            null
+        );
+        $this->flightQuoteOptionRepository->save($flightQuoteOption);
+
+        return $productQuoteOption;
     }
 
     private static function detectProductQuoteStatus(array $saleData): int

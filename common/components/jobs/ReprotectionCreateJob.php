@@ -63,7 +63,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     if (empty($flightRequest->getFlightQuoteData()) || !is_array($flightRequest->getFlightQuoteData())) {
                         throw new CheckRestrictionException('FlightQuote is empty/wrong data in FlightRequest/data_json');
                     }
-                    if (!$flight = $reProtectionCreateService->getFlightByBookingId($flightRequest->fr_booking_id)) {
+                    if (!$flight = $reProtectionCreateService->getFlight($order)) {
                         throw new CheckRestrictionException('Flight not found');
                     }
 
