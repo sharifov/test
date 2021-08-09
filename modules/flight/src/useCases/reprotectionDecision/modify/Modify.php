@@ -28,7 +28,12 @@ class Modify
     {
         $reprotectionQuote = $this->productQuoteRepository->findByGidFlightProductQuote($reprotectionQuoteGid);
 
-        $quote = $this->createNewReprotectionQuote($newQuote);
+        try {
+            $quote = $this->createNewReprotectionQuote($newQuote);
+        } catch (\Throwable $e) {
+            $this->processingCaseByError($newQuote);
+            return;
+        }
 
         $this->markQuoteToApplied($quote);
 
