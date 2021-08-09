@@ -12,6 +12,7 @@ use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateSer
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
 use sales\exception\BoResponseException;
@@ -46,6 +47,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
         $productQuoteRelationRepository = Yii::createObject(ProductQuoteRelationRepository::class);
         $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
+        $orderCreateFromSaleService = Yii::createObject(OrderCreateFromSaleService::class);
 
         try {
             if (!$flightRequest = FlightRequest::findOne($this->flight_request_id)) {
@@ -90,6 +92,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     );
                 }
                 $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
+                $orderCreateFromSaleService->caseOrderRelation($order->getId(), $case->cs_id);
             } else {
                 try {
                     $saleSearch = $casesSaleService->getSaleFromBo($flightRequest->fr_booking_id);
