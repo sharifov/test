@@ -10,6 +10,7 @@ use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
+use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
@@ -81,6 +82,14 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     $reProtectionCreateService->caseToManual($case, 'New quote not created');
                     throw new CheckRestrictionException($throwable->getMessage());
                 }
+
+                if (!$client = $reProtectionCreateService->getClientByOrderProject($order->getId(), $flightRequest->fr_project_id)) {
+                    $reProtectionCreateService->caseToManual($case, 'Client not found in OrderContact');
+                    throw new CheckRestrictionException(
+                        'Client not found in OrderContact. OrderId(' . $order->getId() . ') ProjectId(' . $flightRequest->fr_project_id . ')'
+                    );
+                }
+                $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
             } else {
                 try {
                     $saleSearch = $casesSaleService->getSaleFromBo($flightRequest->fr_booking_id);

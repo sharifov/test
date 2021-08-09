@@ -17,6 +17,7 @@ use modules\flight\src\useCases\sale\FlightFromSaleService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -298,5 +299,15 @@ class ReprotectionCreateService
         );
         (new FlightRequestLogRepository())->save($flightRequestLog);
         return $flightRequest;
+    }
+
+    public function getClientByOrderProject(int $orderId, int $projectId): ?Client
+    {
+        return Client::find()
+            ->select(Client::tableName() . '.*')
+            ->innerJoin(OrderContact::tableName() . ' AS order_contact', Client::tableName() . '.id = order_contact.oc_client_id')
+            ->where(['cl_project_id' => $projectId])
+            ->orderBy([Client::tableName() . '.id' => SORT_DESC])
+            ->one();
     }
 }
