@@ -3,6 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
+/* @var $caseId integer */
 
 use common\models\Currency;
 use common\models\Payment;
@@ -194,7 +195,8 @@ $formatter = new \common\components\i18n\Formatter();
                               'quote' => $quote,
                               'nr' => $nr++,
                               'order' => $order,
-                              'isReprotection' => false
+                              'isReprotection' => false,
+                              'caseId' => $caseId
                           ]) ?>
                       </tr>
                 <?php endforeach; ?>
@@ -551,7 +553,28 @@ $('body').off('click', '.has_reprotection_quotes').on('click', '.has_reprotectio
     let tr = $(this).closest('tr');
     
     tr.next(1).toggleClass('hidden');
-})
+});
+$('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-send-reprotection-quote-email', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-md');
+    $('#modal-md-label').html('Send Flight Schedule Change Email');
+    modal.find('.modal-body').html('');
+    let id = $(this).attr('data-id');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        modal.modal('show');
+    });
+});
 JS;
 $this->registerJs($js);
 

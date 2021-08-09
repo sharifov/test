@@ -10,6 +10,7 @@ use yii\helpers\Url;
  * @var Order $order
  * @var ProductQuote $quote
  * @var int $nr
+ * @var int $caseId
  * @var \yii\web\View $this
  * @var bool $isReprotection
  */
@@ -50,9 +51,9 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
         <div class="dropdown-menu">
         <?php if ($isReprotection) : ?>
               <?php
-                echo Html::a('<i class="fa fa-envelope text-success" title="Send Email"></i> Send Email to Client', null, [
+                echo Html::a('<i class="fa fa-envelope text-success" title="Send Email"></i> Send Flight Schedule Change Email', null, [
                   'class' => 'dropdown-item btn-send-reprotection-quote-email',
-                  'data-url' => Url::to(['/product/product-quote/send-reprotection-quote', 'data-reprotection-quote-id' => $quote->pq_id])
+                  'data-url' => Url::to(['/product/product-quote/preview-reprotection-quote-email', 'reprotection-quote-id' => $quote->pq_id, 'case-id' => $caseId])
                 ]);
                 ?>
         <?php else : ?>
@@ -80,8 +81,9 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
               'quote' => $reprotectionQuote,
               'nr' => null,
               'order' => $order,
-              'isReprotection' => true
-          ]) ?>
+              'isReprotection' => true,
+              'caseId' => $caseId
+            ]) ?>
         <?php endforeach; ?>
       </tr>
     <?php endif; ?>
