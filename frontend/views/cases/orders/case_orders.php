@@ -3,6 +3,7 @@
 /**
  * @var $this View
  * @var $dataProviderOrders \yii\data\ActiveDataProvider
+ * @var $case \sales\entities\cases\Cases
  */
 
 use yii\web\View;
@@ -43,8 +44,8 @@ use yii\web\View;
                 ],*/
                 'emptyText' => '<div class="text-center">Not found orders</div>',
                 //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
-                'itemView' => function ($model, $key, $index, $widget) {
-                    return $this->render('_list_item', ['order' => $model, 'index' => $index]);
+                'itemView' => function ($model, $key, $index, $widget) use ($case) {
+                    return $this->render('_list_item', ['order' => $model, 'index' => $index, 'caseId' => $case->cs_id]);
                 },
 
                 'itemOptions' => [

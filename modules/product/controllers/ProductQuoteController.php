@@ -2,16 +2,25 @@
 
 namespace modules\product\controllers;
 
+use common\models\Email;
+use common\models\EmailTemplateType;
 use common\models\Notifications;
+use common\models\UserProjectParams;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
+use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
+use sales\entities\cases\Cases;
+use sales\repositories\cases\CasesRepository;
+use sales\services\cases\CasesCommunicationService;
 use Yii;
 use frontend\controllers\FController;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -21,6 +30,8 @@ use yii\web\Response;
  * @property ProductQuoteCloneService $productQuoteCloneService
  * @property EventDispatcher $eventDispatcher
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property CasesRepository $casesRepository
+ * @property CasesCommunicationService $casesCommunicationService
  */
 class ProductQuoteController extends FController
 {
@@ -33,6 +44,14 @@ class ProductQuoteController extends FController
      * @var ProductQuoteRepository
      */
     private $productQuoteRepository;
+    /**
+     * @var CasesRepository
+     */
+    private CasesRepository $casesRepository;
+    /**
+     * @var CasesCommunicationService
+     */
+    private CasesCommunicationService $casesCommunicationService;
 
     /**
      * ProductQuoteController constructor.
@@ -49,12 +68,16 @@ class ProductQuoteController extends FController
         ProductQuoteCloneService $productQuoteCloneService,
         EventDispatcher $eventDispatcher,
         ProductQuoteRepository $productQuoteRepository,
+        CasesRepository $casesRepository,
+        CasesCommunicationService $casesCommunicationService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->productQuoteCloneService = $productQuoteCloneService;
         $this->eventDispatcher = $eventDispatcher;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->casesRepository = $casesRepository;
+        $this->casesCommunicationService = $casesCommunicationService;
     }
 
     /**
@@ -120,6 +143,134 @@ class ProductQuoteController extends FController
         }
 
         return ['message' => 'Successfully removed product quote (' . $model->pq_id . ')'];
+    }
+
+    public function actionPreviewReprotectionQuoteEmail()
+    {
+        $caseId = Yii::$app->request->get('case-id');
+        $quoteId = Yii::$app->request->get('reprotection-quote-id');
+
+        $form = new ReprotectionQuoteSendEmailForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $case = $this->casesRepository->find($form->caseId);
+                $quote = $this->productQuoteRepository->find($form->quoteId);
+                $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
+                $emailData['reprotection_quote'] = $quote->serialize();
+                $emailData['order'] = $quote->pqOrder->serialize();
+                $emailFrom = Auth::user()->email;
+
+                if ($case->cs_project_id) {
+                    $upp = UserProjectParams::find()->where(['upp_project_id' => $case->cs_project_id, 'upp_user_id' => Auth::id()])->withEmailList()->one();
+                    if ($upp) {
+                        $emailFrom = $upp->getEmail() ?: $emailFrom;
+                    }
+                }
+
+                if (!$emailFrom) {
+                    throw new \RuntimeException('Agent not has assigned email');
+                }
+                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $form->emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
+                if ($previewEmailResult['error']) {
+                    $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
+                    $form->addError('general', 'Communication service error: ' . ($result['error']['name'] ?? '') . ' ( ' . ($result['error']['message']  ?? '') . ' )');
+                } else {
+                    $previewEmailForm = new ReprotectionQuotePreviewEmailForm($previewEmailResult['data']);
+                    $previewEmailForm->email_from_name = Auth::user()->nickname;
+
+                    $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
+                    if ($emailTemplateType) {
+                        $previewEmailForm->email_tpl_id = $emailTemplateType->etp_id;
+                    }
+
+                    return $this->renderAjax('partial/_reprotection_quote_preview_email', [
+                        'previewEmailForm' => $previewEmailForm,
+                    ]);
+                }
+            } catch (\DomainException | \RuntimeException $e) {
+                Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewReprotectionQuoteEmail::DomainException|RuntimeException');
+                $form->addError('error', $e->getMessage());
+            } catch (\Throwable $e) {
+                $form->addError('general', $e->getMessage());
+            }
+        }
+
+        if (!$case = Cases::findOne((int)$caseId)) {
+            $form->addError('general', 'Case Not Found');
+        }
+
+        $form->caseId = $caseId;
+        $form->quoteId = $quoteId;
+
+        return $this->renderAjax('partial/_reprotection_quote_choose_client_email', [
+            'form' => $form,
+            'case' => $case
+        ]);
+    }
+
+    public function actionReprotectionQuoteSendEmail()
+    {
+        $previewEmailForm = new ReprotectionQuotePreviewEmailForm();
+
+        if ($previewEmailForm->load(Yii::$app->request->post())) {
+            if ($previewEmailForm->validate()) {
+                try {
+                    $case = $this->casesRepository->find($previewEmailForm->case_id);
+
+                    $mail = new Email();
+                    $mail->e_project_id = $case->cs_project_id;
+                    $mail->e_case_id = $case->cs_id;
+                    if ($previewEmailForm->email_tpl_id) {
+                        $mail->e_template_type_id = $previewEmailForm->email_tpl_id;
+                    }
+                    $mail->e_type_id = Email::TYPE_OUTBOX;
+                    $mail->e_status_id = Email::STATUS_PENDING;
+                    $mail->e_email_subject = $previewEmailForm->email_subject;
+                    $mail->body_html = $previewEmailForm->email_message;
+                    $mail->e_email_from = $previewEmailForm->email_from;
+
+                    $mail->e_email_from_name = $previewEmailForm->email_from_name;
+                    $mail->e_email_to_name = $previewEmailForm->email_to_name;
+
+                    if ($previewEmailForm->language_id) {
+                        $mail->e_language_id = $previewEmailForm->language_id;
+                    }
+
+                    $mail->e_email_to = $previewEmailForm->email_to;
+                    //$mail->email_data = [];
+                    $mail->e_created_dt = date('Y-m-d H:i:s');
+                    $mail->e_created_user_id = Yii::$app->user->id;
+
+                    if ($mail->save()) {
+                        $mail->e_message_id = $mail->generateMessageId();
+                        $mail->update();
+
+                        $previewEmailForm->is_send = true;
+
+                        $mailResponse = $mail->sendMail();
+
+                        if (isset($mailResponse['error']) && $mailResponse['error']) {
+                            $previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                        }
+
+                        return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success")</script>';
+                    }
+
+                    throw new \RuntimeException($mail->getErrorSummary(false)[0]);
+                } catch (\DomainException | \RuntimeException $e) {
+                    Yii::error($e->getMessage(), 'ProductQuoteController::actionReprotectionQuoteSendEmail::DomainException|RuntimeException');
+                    $previewEmailForm->addError('error', $e->getMessage());
+                } catch (\Throwable $e) {
+                    $previewEmailForm->addError('error', 'Internal Server Error');
+                    Yii::error($e->getMessage(), 'ProductQuoteController::actionReprotectionQuoteSendEmail::Throwable');
+                }
+            }
+        }
+        $previewEmailForm->case_id = $previewEmailForm->case_id ?: 0;
+
+        return $this->renderAjax('partial/_reprotection_quote_preview_email', [
+            'previewEmailForm' => $previewEmailForm
+        ]);
     }
 
     /**
