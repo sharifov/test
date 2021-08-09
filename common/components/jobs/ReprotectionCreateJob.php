@@ -51,7 +51,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 throw new DomainException('FlightRequest not found by (' . $this->flight_request_id . ')');
             }
 
-            $case = $reProtectionCreateService->createCase($flightRequest->fr_booking_id);
+            $case = $reProtectionCreateService->createCase($flightRequest);
 
             if ($order = $reProtectionCreateService->getOrderByBookingId($flightRequest->fr_booking_id)) {
                 if (!$oldProductQuote = $reProtectionCreateService->declineOldProductQuote($order)) {
