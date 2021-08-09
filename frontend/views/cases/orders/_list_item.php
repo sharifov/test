@@ -183,7 +183,7 @@ $formatter = new \common\components\i18n\Formatter();
                     <th>Client Price</th>
                     <th></th>
                 </tr>
-                <?php foreach ($order->productQuotes as $productQuote) :
+                <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
                     $quote = $productQuote;
                     $ordTotalPrice += $quote->pq_price;
                     $ordTotalFee += $quote->pq_service_fee_sum;
