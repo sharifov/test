@@ -10,6 +10,7 @@ use sales\entities\cases\Cases;
 class ReprotectionQuotePreviewEmailForm extends \yii\base\Model
 {
     public $case_id;
+    public $productQuoteId;
     public $email_from;
     public $email_to;
     public $email_from_name;
@@ -46,10 +47,10 @@ class ReprotectionQuotePreviewEmailForm extends \yii\base\Model
     public function rules(): array
     {
         return [
-            [['case_id', 'email_from', 'email_to', 'email_message', 'email_subject'], 'required'],
+            [['case_id', 'productQuoteId', 'email_from', 'email_to', 'email_message', 'email_subject'], 'required'],
             [['email_subject', 'email_message'], 'trim'],
             [['email_to', 'email_from'], 'email'],
-            [['email_tpl_id', 'case_id'], 'integer'],
+            [['email_tpl_id', 'case_id', 'productQuoteId'], 'integer'],
             [['email_message'], 'string'],
             [['email_subject'], 'string', 'max' => 200, 'min' => 5],
             [['email_from_name', 'email_to_name'], 'string', 'max' => 50],

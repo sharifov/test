@@ -12,11 +12,11 @@ $url = Url::to(['/product/product-quote/reprotection-quote-send-email']);
 ?>
 
   <script>
-      pjaxOffFormSubmit('#reprotection_quotpreview_email_pjax');
+      pjaxOffFormSubmit('#reprotection_quote_preview_email_pjax');
   </script>
 <?php
 \yii\widgets\Pjax::begin([
-    'id' => 'reprotection_quotpreview_email_pjax',
+    'id' => 'reprotection_quote_preview_email_pjax',
     'enablePushState' => false,
     'enableReplaceState' => false,
     'timeout' => 3000,
@@ -28,7 +28,7 @@ $url = Url::to(['/product/product-quote/reprotection-quote-send-email']);
         'data-pjax' => 1,
         'class' => 'panel-body',
     ],
-    'id' => 'reprotection_quotpreview_email_form',
+    'id' => 'reprotection_quote_preview_email_form',
     'enableClientValidation' => false,
     'action' => $url
 ]);
@@ -44,6 +44,7 @@ echo $activeForm->errorSummary($previewEmailForm);
 
 
             <?= $activeForm->field($previewEmailForm, 'case_id')->hiddenInput()->label(false); ?>
+            <?= $activeForm->field($previewEmailForm, 'productQuoteId')->hiddenInput()->label(false); ?>
             <?= $activeForm->field($previewEmailForm, 'language_id')->hiddenInput()->label(false); ?>
             <?= $activeForm->field($previewEmailForm, 'email_tpl_id')->hiddenInput()->label(false); ?>
         </div>

@@ -2,6 +2,7 @@
 
 namespace modules\product\controllers;
 
+use common\components\HybridService;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Notifications;
@@ -14,6 +15,8 @@ use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
+use sales\exception\CheckRestrictionException;
+use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
 use Yii;
@@ -177,6 +180,7 @@ class ProductQuoteController extends FController
                 } else {
                     $previewEmailForm = new ReprotectionQuotePreviewEmailForm($previewEmailResult['data']);
                     $previewEmailForm->email_from_name = Auth::user()->nickname;
+                    $previewEmailForm->productQuoteId = $quote->pq_id;
 
                     $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
                     if ($emailTemplateType) {
@@ -251,6 +255,18 @@ class ProductQuoteController extends FController
 
                         if (isset($mailResponse['error']) && $mailResponse['error']) {
                             $previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                        }
+
+                        try {
+                            $hybridService = Yii::createObject(HybridService::class);
+                            $data = [
+                                'booking_id' => $case->cs_order_uid,
+                                'reprotection_quote_gid' => $previewEmailForm->productQuoteId,
+                                'case_gid' => $case->cs_gid,
+                            ];
+                            $hybridService->whReprotection($case->cs_project_id, $data);
+                        } catch (\Throwable $throwable) {
+                            Yii::warning('OTA site is not informed; Reason: ' . AppHelper::throwableFormatter($throwable), 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
                         }
 
                         return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success")</script>';
