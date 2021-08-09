@@ -103,10 +103,10 @@ class ReprotectionCreateService
         $this->flightQuoteManageService = $flightQuoteManageService;
     }
 
-    public function getOrCreateClient(OrderCreateFromSaleForm $orderCreateFromSaleForm, OrderContactForm $orderContactForm): Client
+    public function getOrCreateClient(int $projectId, OrderContactForm $orderContactForm): Client
     {
         $clientForm = new ClientCreateForm();
-        $clientForm->projectId = $orderCreateFromSaleForm->projectId;
+        $clientForm->projectId = $projectId;
         $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
         $clientForm->firstName = $orderContactForm->first_name;
         $clientForm->lastName = $orderContactForm->last_name;
@@ -185,12 +185,17 @@ class ReprotectionCreateService
         return $case;
     }
 
-    public function createOrder(OrderCreateFromSaleForm $orderCreateFromSaleForm, OrderContactForm $orderContactForm, Cases $case): Order
-    {
+    public function createOrder(
+        OrderCreateFromSaleForm $orderCreateFromSaleForm,
+        OrderContactForm $orderContactForm,
+        Cases $case,
+        int $projectId
+    ): Order {
         $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm);
         if (!$order->validate()) {
             throw new ValidationException(ErrorsToStringHelper::extractFromModel($order));
         }
+        $order->or_project_id = $projectId;
         $orderId = $this->orderRepository->save($order);
 
         $this->orderCreateFromSaleService->caseOrderRelation($orderId, $case->cs_id);

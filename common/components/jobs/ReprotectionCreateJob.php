@@ -103,7 +103,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     }
 
                     $casesSaleService->createSaleByData($case->cs_id, $saleData);
-                    $order = $reProtectionCreateService->createOrder($orderCreateFromSaleForm, $orderContactForm, $case);
+                    $order = $reProtectionCreateService->createOrder($orderCreateFromSaleForm, $orderContactForm, $case, $flightRequest->fr_project_id);
 
                     $oldProductQuote = $reProtectionCreateService->createFlightInfrastructure($orderCreateFromSaleForm, $saleData, $order);
                     $oldProductQuote->declined();
@@ -111,8 +111,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
                     $reProtectionCreateService->createPayment($orderCreateFromSaleForm, $saleData, $order);
 
-                    $client = $reProtectionCreateService->getOrCreateClient($orderCreateFromSaleForm, $orderContactForm);
-                    $reProtectionCreateService->additionalFillingCase($case, $client->id, $orderCreateFromSaleForm->getProjectId());
+                    $client = $reProtectionCreateService->getOrCreateClient($flightRequest->fr_project_id, $orderContactForm);
+                    $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
                 } catch (\Throwable $throwable) {
                     $reProtectionCreateService->caseToManual($case, 'Order not created');
                     throw new CheckRestrictionException($throwable->getMessage());
@@ -154,7 +154,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
                     'case_gid' => $case->cs_gid,
                 ];
-                $hybridService->whReprotection($order->or_project_id, $data);
+                $hybridService->whReprotection($flightRequest->fr_project_id, $data);
             } catch (\Throwable $throwable) {
                 $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
                 throw new CheckRestrictionException($throwable->getMessage());
