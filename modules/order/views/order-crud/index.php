@@ -56,6 +56,24 @@ $data = new OrderAbacDto(new Order());
             'or_uid',
             'or_fare_id',
             'or_name',
+            [
+                'label' => 'Booking Ids',
+                'value' => static function (Order $order) {
+                    $value = '';
+                    foreach ($order->productQuotes as $productQuote) {
+                        if ($productQuote->isFlight() && $flightQuote = $productQuote->getChildQuote()) {
+                            /** @var \modules\flight\models\FlightQuote $flightQuote */
+                            foreach ($flightQuote->flightQuoteFlights as $flightQuoteFlight) {
+                                if ($flightQuoteFlight->fqf_booking_id) {
+                                    $value .= Html::tag('code', $flightQuoteFlight->fqf_booking_id);
+                                }
+                            }
+                        }
+                    }
+                    return $value ?: null;
+                },
+                'format' => 'raw',
+            ],
             /*[
                 'class' => LeadColumn::class,
                 'attribute' => 'or_lead_id',
