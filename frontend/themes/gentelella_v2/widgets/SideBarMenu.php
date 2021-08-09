@@ -337,6 +337,14 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
                 [
+                    'label' => 'Cases',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Case Event Log', 'url' => ['/case-event-log-crud/index']]
+                    ]
+                ],
+                [
                     'label' => 'Contact Phone numbers',
                     'url' => 'javascript:',
                     'icon' => 'list',
