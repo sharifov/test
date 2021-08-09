@@ -49,6 +49,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => FlightRequest::STATUS_LIST
             ],
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'fr_project_id',
+                'relation' => 'project',
+            ],
+            [
                 'attribute' => 'fr_created_api_user_id',
                 'class' => common\components\grid\ApiUserColumn::class,
             ],

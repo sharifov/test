@@ -3,11 +3,13 @@
 namespace modules\flight\models;
 
 use common\components\validators\CheckJsonValidator;
+use common\models\Project;
 use modules\flight\models\query\FlightRequestQuery;
 use sales\behaviors\StringToJsonBehavior;
 use common\models\ApiUser;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -26,6 +28,9 @@ use yii\helpers\ArrayHelper;
  * @property int $fr_year
  * @property int $fr_month
  * @property string $fr_booking_id
+ * @property int $fr_project_id
+ *
+ * @property Project $project
  */
 class FlightRequest extends \yii\db\ActiveRecord
 {
@@ -81,6 +86,10 @@ class FlightRequest extends \yii\db\ActiveRecord
 
             ['fr_year', 'required'],
             ['fr_year', 'integer'],
+
+            [['fr_project_id'], 'required'],
+            [['fr_project_id'], 'integer'],
+            [['fr_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['fr_project_id' => 'id']],
         ];
     }
 
@@ -118,6 +127,7 @@ class FlightRequest extends \yii\db\ActiveRecord
             'fr_updated_dt' => 'Updated Dt',
             'fr_year' => 'Year',
             'fr_month' => 'Month',
+            'fr_project_id' => 'Project',
         ];
     }
 
@@ -150,10 +160,16 @@ class FlightRequest extends \yii\db\ActiveRecord
         return ApiUser::findOne($this->fr_created_api_user_id)->au_name ?? null;
     }
 
+    public function getProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'fr_project_id']);
+    }
+
     /**
      * @param string $booking_id
      * @param int $type_id
      * @param array $data_json
+     * @param int $projectId
      * @param int|null $created_api_user_id
      * @return FlightRequest
      */
@@ -161,6 +177,7 @@ class FlightRequest extends \yii\db\ActiveRecord
         string $booking_id,
         int $type_id,
         $data_json,
+        int $projectId,
         ?int $created_api_user_id
     ): FlightRequest {
 
@@ -170,6 +187,7 @@ class FlightRequest extends \yii\db\ActiveRecord
         $model->fr_status_id = self::STATUS_NEW;
         $model->fr_data_json = $data_json;
         $model->fr_created_api_user_id = $created_api_user_id;
+        $model->fr_project_id = $projectId;
 
         $model->fr_hash = self::generateHashFromDataJson($data_json);
 

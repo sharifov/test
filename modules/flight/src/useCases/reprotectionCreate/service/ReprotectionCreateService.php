@@ -118,7 +118,7 @@ class ReprotectionCreateService
         );
     }
 
-    public function createCase(string $bookingId): Cases
+    public function createCase(FlightRequest $flightRequest): Cases
     {
         if (!$caseCategoryKey = SettingHelper::getReProtectionCaseCategory()) {
             throw new CheckRestrictionException('Setting "reprotection_case_category" is empty');
@@ -130,7 +130,8 @@ class ReprotectionCreateService
         $case = Cases::createByApiReProtection(
             $caseCategory->cc_dep_id,
             $caseCategory->cc_id,
-            $bookingId
+            $flightRequest->fr_booking_id,
+            $flightRequest->fr_project_id
         );
         $this->casesRepository->save($case);
         return $case;

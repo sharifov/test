@@ -24,6 +24,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fr_status_id')->dropDownList(FlightRequest::STATUS_LIST) ?>
 
+        <?= $form->field($model, 'fr_project_id')->dropDownList(\common\models\Project::getList()) ?>
+
         <?= $form->field($model, 'fr_created_api_user_id')->textInput() ?>
 
         <?= $form->field($model, 'fr_job_id')->textInput() ?>

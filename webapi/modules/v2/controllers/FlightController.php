@@ -113,6 +113,7 @@ class FlightController extends BaseController
      *  }
      *
      * @apiParam {string{10}}           booking_id                  Booking Id
+     * @apiParam {string{50}}           project_key                 Project key
      * @apiParam {bool}                 [is_automate]               Is automate (default false)
      * @apiParam {object}               [flight_quote]              Flight quote
      *
@@ -515,6 +516,7 @@ class FlightController extends BaseController
                     $reprotectionCreateForm->booking_id,
                     FlightRequest::TYPE_REPRODUCTION_CREATE,
                     $post,
+                    $reprotectionCreateForm->getProject()->id,
                     $apiUserId
                 );
                 $flightRequest = (new FlightRequestRepository())->save($flightRequest);

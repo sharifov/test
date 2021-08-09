@@ -52,6 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         return $model->getStatusName();
                     }
                 ],
+                'fr_project_id:projectName',
                 'fr_job_id',
                 'fr_created_dt',
                 'fr_updated_dt',

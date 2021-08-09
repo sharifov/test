@@ -230,7 +230,8 @@ class Cases extends ActiveRecord implements Objectable
     public static function createByApiReProtection(
         int $departmentId,
         int $categoryId,
-        string $orderUid
+        string $orderUid,
+        int $projectId
     ): self {
         $case = self::create();
         $case->cs_dep_id = $departmentId;
@@ -239,6 +240,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_subject = 'Flight Schedule Change';
         $case->cs_source_type_id = CasesSourceType::API;
         $case->cs_is_automate = true;
+        $case->cs_project_id = $projectId;
         $case->statusToNew(null, 'Flight ReProtection Create');
         return $case;
     }
