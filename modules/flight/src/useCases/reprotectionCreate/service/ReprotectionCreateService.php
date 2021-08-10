@@ -310,4 +310,12 @@ class ReprotectionCreateService
             ->orderBy([Client::tableName() . '.id' => SORT_DESC])
             ->one();
     }
+
+    public function createSimpleClient(int $projectId): Client
+    {
+        $clientForm = ClientCreateForm::createWidthDefaultName();
+        $clientForm->projectId = $projectId;
+        $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
+        return $this->clientManageService->create($clientForm, null);
+    }
 }

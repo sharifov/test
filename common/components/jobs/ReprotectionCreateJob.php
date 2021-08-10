@@ -3,6 +3,7 @@
 namespace common\components\jobs;
 
 use common\components\HybridService;
+use common\models\Client;
 use common\models\ClientEmail;
 use DomainException;
 use modules\flight\models\FlightRequest;
@@ -21,6 +22,7 @@ use sales\exception\ValidationException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\services\cases\CasesSaleService;
+use sales\services\client\ClientCreateForm;
 use sales\services\email\SendEmailByCase;
 use Yii;
 use yii\queue\JobInterface;
@@ -49,6 +51,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
         $orderCreateFromSaleService = Yii::createObject(OrderCreateFromSaleService::class);
 
+        $client = null;
+
         try {
             if (!$flightRequest = FlightRequest::findOne($this->flight_request_id)) {
                 throw new DomainException('FlightRequest not found by (' . $this->flight_request_id . ')');
@@ -63,10 +67,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 }
 
                 if (!$client = $reProtectionCreateService->getClientByOrderProject($order->getId(), $flightRequest->fr_project_id)) {
-                    $reProtectionCreateService->caseToManual($case, 'Client not found in OrderContact');
-                    throw new CheckRestrictionException(
-                        'Client not found in OrderContact. OrderId(' . $order->getId() . ') ProjectId(' . $flightRequest->fr_project_id . ')'
-                    );
+                    $reProtectionCreateService->caseToManual($case, 'Client not found in OrderContact. Created default client.');
+                } else {
+                    $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
                 }
                 $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
                 $orderCreateFromSaleService->caseOrderRelation($order->getId(), $case->cs_id);
@@ -204,6 +207,10 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             );
             if (isset($flightRequest)) {
                 $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_ERROR, $throwable->getMessage());
+            }
+            if (isset($case, $flightRequest) && $client === null) {
+                $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
+                $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
             }
         }
     }
