@@ -572,9 +572,13 @@ $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-s
     modal.find('.modal-body').html('');
     let id = $(this).attr('data-id');
     modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
         btn.find('i').replaceWith(btnIconHtml);
         btn.removeClass('disabled');
-        modal.modal('show');
     });
 });
 JS;

@@ -9,6 +9,7 @@ use common\models\Notifications;
 use common\models\UserProjectParams;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
@@ -156,6 +157,7 @@ class ProductQuoteController extends FController
     {
         $caseId = Yii::$app->request->get('case-id');
         $quoteId = Yii::$app->request->get('reprotection-quote-id');
+        $orderId = Yii::$app->request->get('order-id');
 
         $form = new ReprotectionQuoteSendEmailForm();
 
@@ -166,6 +168,10 @@ class ProductQuoteController extends FController
         $caseAbacDto = new CasesAbacDto($case);
         if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
+
+        if (!$order = Order::findOne((int)$orderId)) {
+            throw new BadRequestHttpException('Order not found');
         }
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
@@ -217,7 +223,8 @@ class ProductQuoteController extends FController
 
         return $this->renderAjax('partial/_reprotection_quote_choose_client_email', [
             'form' => $form,
-            'case' => $case
+            'case' => $case,
+            'order' => $order
         ]);
     }
 

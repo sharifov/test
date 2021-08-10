@@ -4,10 +4,15 @@
  * @var $form \modules\product\src\forms\ReprotectionQuoteSendEmailForm
  * @var $case \sales\entities\cases\Cases
  * @var $this \yii\web\View
+ * @var $order \modules\order\src\entities\order\Order
  */
 use yii\helpers\Html;
 
-$clientEmails = $case->client ? $case->client->getEmailList() : [];
+$clientEmails = [];
+foreach ($order->orderContacts as $orderContact) {
+    $clientEmails[$orderContact->oc_email] = $orderContact->oc_email;
+}
+$clientEmails = \yii\helpers\ArrayHelper::merge($clientEmails, $case->client ? $case->client->getEmailList() : []);
 ?>
 <script>
     pjaxOffFormSubmit('#reprotection_quote_preview_email_pjax');
