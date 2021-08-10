@@ -7,11 +7,12 @@ use modules\product\src\entities\productQuoteChange\search\ProductQuoteChangeSea
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use frontend\controllers\FController;
 
 /**
  * ProductQuoteChangeCrudController implements the CRUD actions for ProductQuoteChange model.
  */
-class ProductQuoteChangeCrudController extends Controller
+class ProductQuoteChangeCrudController extends FController
 {
     /**
      * @inheritDoc
