@@ -190,7 +190,6 @@ class FlightRequest extends \yii\db\ActiveRecord
         $model->fr_project_id = $projectId;
 
         $model->fr_hash = self::generateHashFromDataJson($data_json);
-
         $model->fr_created_dt = date('Y-m-d H:i:s');
         $createdDt = strtotime($model->fr_created_dt);
         $model->fr_year = date('Y', $createdDt);
@@ -201,7 +200,7 @@ class FlightRequest extends \yii\db\ActiveRecord
 
     public static function generateHashFromDataJson(array $dataJson): string
     {
-        return md5(serialize($dataJson));
+        return md5(serialize(ksort($dataJson)));
     }
 
     public function statusToPending(): FlightRequest

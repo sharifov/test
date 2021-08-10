@@ -62,6 +62,15 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, 'Original quote not declined');
                 }
 
+                if (!$client = $reProtectionCreateService->getClientByOrderProject($order->getId(), $flightRequest->fr_project_id)) {
+                    $reProtectionCreateService->caseToManual($case, 'Client not found in OrderContact');
+                    throw new CheckRestrictionException(
+                        'Client not found in OrderContact. OrderId(' . $order->getId() . ') ProjectId(' . $flightRequest->fr_project_id . ')'
+                    );
+                }
+                $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
+                $orderCreateFromSaleService->caseOrderRelation($order->getId(), $case->cs_id);
+
                 try {
                     if (empty($flightRequest->getFlightQuoteData()) || !is_array($flightRequest->getFlightQuoteData())) {
                         throw new CheckRestrictionException('FlightQuote is empty/wrong data in FlightRequest/data_json');
@@ -84,15 +93,6 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     $reProtectionCreateService->caseToManual($case, 'New quote not created');
                     throw new CheckRestrictionException($throwable->getMessage());
                 }
-
-                if (!$client = $reProtectionCreateService->getClientByOrderProject($order->getId(), $flightRequest->fr_project_id)) {
-                    $reProtectionCreateService->caseToManual($case, 'Client not found in OrderContact');
-                    throw new CheckRestrictionException(
-                        'Client not found in OrderContact. OrderId(' . $order->getId() . ') ProjectId(' . $flightRequest->fr_project_id . ')'
-                    );
-                }
-                $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
-                $orderCreateFromSaleService->caseOrderRelation($order->getId(), $case->cs_id);
             } else {
                 try {
                     $saleSearch = $casesSaleService->getSaleFromBo($flightRequest->fr_booking_id);
@@ -114,6 +114,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         throw new ValidationException(ErrorsToStringHelper::extractFromModel($orderContactForm));
                     }
 
+                    $client = $reProtectionCreateService->getOrCreateClient($flightRequest->fr_project_id, $orderContactForm);
+                    $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
+
                     $casesSaleService->createSaleByData($case->cs_id, $saleData);
                     $order = $reProtectionCreateService->createOrder($orderCreateFromSaleForm, $orderContactForm, $case, $flightRequest->fr_project_id);
 
@@ -122,9 +125,6 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     $productQuoteRepository->save($oldProductQuote);
 
                     $reProtectionCreateService->createPayment($orderCreateFromSaleForm, $saleData, $order);
-
-                    $client = $reProtectionCreateService->getOrCreateClient($flightRequest->fr_project_id, $orderContactForm);
-                    $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
                 } catch (\Throwable $throwable) {
                     $reProtectionCreateService->caseToManual($case, 'Order not created');
                     throw new CheckRestrictionException($throwable->getMessage());
