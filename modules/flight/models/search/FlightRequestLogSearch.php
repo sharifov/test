@@ -5,6 +5,7 @@ namespace modules\flight\models\search;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\flight\models\FlightRequestLog;
+use yii\helpers\VarDumper;
 
 /**
  * FlightRequestLogSearch represents the model behind the search form of `modules\flight\models\FlightRequestLog`.
@@ -33,6 +34,29 @@ class FlightRequestLogSearch extends FlightRequestLog
     {
         $query = FlightRequestLog::find();
 
+        return $this->getSearchDataProvider($params, $query);
+    }
+
+    /**
+     * @param int $flightRequestId
+     * @param array $params
+     * @return ActiveDataProvider
+     */
+    public function searchByFlightRequestId(int $flightRequestId, array $params): ActiveDataProvider
+    {
+        $query = FlightRequestLog::find();
+        $query->where(['flr_fr_id' => $flightRequestId]);
+
+        return $this->getSearchDataProvider($params, $query);
+    }
+
+    /**
+     * @param array $params
+     * @param ActiveQuery $query
+     * @return ActiveDataProvider
+     */
+    public function getSearchDataProvider($params, $query): ActiveDataProvider
+    {
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['flr_id' => SORT_DESC]],

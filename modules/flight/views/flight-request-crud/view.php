@@ -1,14 +1,20 @@
 <?php
 
 use modules\flight\models\FlightRequest;
+use modules\flight\models\FlightRequestLog;
 use yii\bootstrap4\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
+use yii\grid\GridView;
+use common\components\grid\DateTimeColumn;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model modules\flight\models\FlightRequest */
+/* @var $searchModel modules\flight\models\search\FlightRequestLogSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = $model->fr_id;
+$this->title = 'Flight Request ID: ' .  $model->fr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Flight Requests', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -20,8 +26,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
 
         <p>
-            <?= Html::a('Update', ['update', 'fr_id' => $model->fr_id, 'fr_year' => $model->fr_year, 'fr_month' => $model->fr_month], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Delete', ['delete', 'fr_id' => $model->fr_id, 'fr_year' => $model->fr_year, 'fr_month' => $model->fr_month], [
+            <?= Html::a('<i class="fa fa-pencil"></i> Update', ['update', 'fr_id' => $model->fr_id, 'fr_year' => $model->fr_year, 'fr_month' => $model->fr_month], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('<i class="fa fa-remove"></i> Delete', ['delete', 'fr_id' => $model->fr_id, 'fr_year' => $model->fr_year, 'fr_month' => $model->fr_month], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => 'Are you sure you want to delete this item?',
@@ -72,4 +78,38 @@ $this->params['breadcrumbs'][] = $this->title;
 
     </div>
 
-</div>
+    </div>
+
+    <?php Pjax::begin(['id' => 'pjax-flight-request']); ?>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            'flr_id',
+            [
+                'attribute' => 'flr_status_id_old',
+                'value' => static function (FlightRequestLog $searchModel) {
+                    return $searchModel->getOldStatusName() ?? Yii::$app->formatter->nullDisplay;
+                },
+                'filter' => FlightRequest::STATUS_LIST,
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'flr_status_id_new',
+                'value' => static function (FlightRequestLog $searchModel) {
+                    return $searchModel->getNewStatusName() ?? Yii::$app->formatter->nullDisplay;
+                },
+                'filter' => FlightRequest::STATUS_LIST,
+                'format' => 'raw',
+            ],
+            'flr_description',
+            ['class' => DateTimeColumn::class, 'attribute' => 'flr_created_dt'],
+            ['class' => DateTimeColumn::class, 'attribute' => 'flr_updated_dt'],
+
+            ['class' => 'yii\grid\ActionColumn'],
+        ],
+    ]); ?>
+
+    <?php Pjax::end(); ?>
+
