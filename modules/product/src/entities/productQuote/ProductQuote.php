@@ -592,6 +592,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pq_status_id === ProductQuoteStatus::DECLINED;
     }
 
+    public function isCanceled(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::CANCELED;
+    }
+
     /**
      * @param Currency $currency
      */
@@ -897,6 +902,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getQuoteDetailsPageUrl'];
         $this->detailsPageUrl = $finder();
         return $this->detailsPageUrl;
+    }
+
+    public function isEqual(ProductQuote $quote): bool
+    {
+        return $this->pq_id === $quote->pq_id;
     }
 
     public function fields(): array

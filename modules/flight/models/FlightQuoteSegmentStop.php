@@ -140,12 +140,12 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
     {
         return [
             'qss_quote_segment_id',
-            'qss_location_iata',
-            'qss_equipment',
-            'qss_elapsed_time',
-            'qss_duration',
+            'locationCode' => 'qss_location_iata',
+            'equipment' => 'qss_equipment',
+            'elapsedTime' => 'qss_elapsed_time',
+            'duration' => 'qss_duration',
             'qss_departure_dt',
-            'qss_arrival_dt',
+            'arrivalDateTime' => 'qss_arrival_dt',
         ];
     }
 }

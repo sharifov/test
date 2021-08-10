@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 
 use common\components\BackOffice;
+use modules\flight\models\FlightQuoteFlight;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
@@ -89,13 +90,15 @@ class BoRequest
 
     private function getBookingId(ProductQuote $quote): string
     {
-        // todo
-        return '';
+        $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $quote->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+        if ($lastFlightQuoteFlightBookingId) {
+            return $lastFlightQuoteFlightBookingId;
+        }
+        throw new \DomainException('Not found Booking Id. Quote ID: ' . $quote->pq_id);
     }
 
     private function prepareQuoteToRequestData(ProductQuote $quote): array
     {
-        // todo
-        return [];
+        return $quote->flightQuote->toArray(['trips']);
     }
 }

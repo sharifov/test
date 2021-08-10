@@ -3,29 +3,35 @@
 namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\repositories\product\ProductQuoteRepository;
+use sales\services\TransactionManager;
 
 /**
  * Class Confirm
  *
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property TransactionManager $transactionManager
  */
 class Confirm
 {
     private ProductQuoteRepository $productQuoteRepository;
+    private TransactionManager $transactionManager;
 
-    public function __construct(ProductQuoteRepository $productQuoteRepository)
+    public function __construct(ProductQuoteRepository $productQuoteRepository, TransactionManager $transactionManager)
     {
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->transactionManager = $transactionManager;
     }
 
     public function handle(string $reprotectionQuoteGid): void
     {
         $quote = $this->productQuoteRepository->findByGidFlightProductQuote($reprotectionQuoteGid);
 
-        $this->markQuoteToApplied($quote);
-
-        $this->cancelAlternativeQuotes($quote);
+        $this->transactionManager->wrap(function () use ($quote) {
+            $this->markQuoteToApplied($quote);
+            $this->cancelOtherReprotectionQuotes($quote);
+        });
 
         $this->createBoRequestJob($quote);
     }
@@ -45,15 +51,36 @@ class Confirm
 
     private function markQuoteToApplied(ProductQuote $quote): void
     {
-        if (!$quote->isApplied()) {
-            // todo
+        if ($quote->isApplied()) {
+            throw new \DomainException('Quote is already applied.');
         }
         $quote->applied();
         $this->productQuoteRepository->save($quote);
     }
 
-    private function cancelAlternativeQuotes(ProductQuote $quote): void
+    private function cancelOtherReprotectionQuotes(ProductQuote $quote): void
     {
-        // todo
+        $parentRelatedId = ProductQuoteRelation::find()->select(['pqr_parent_pq_id'])->andWhere(['pqr_related_pq_id' => $quote->pq_id])->scalar();
+        if (!$parentRelatedId) {
+            return;
+        }
+
+        $quotes = ProductQuote::find()
+            ->andWhere([
+                'pq_id' => ProductQuoteRelation::find()
+                    ->select(['pqr_related_pq_id'])
+                    ->andWhere([
+                        'pqr_parent_pq_id' => (int)$parentRelatedId,
+                        'pqr_type_id' => ProductQuoteRelation::TYPE_REPROTECTION
+                    ])
+            ])
+            ->all();
+
+        foreach ($quotes as $productQuote) {
+            if (!$productQuote->isEqual($quote) && $productQuote->isFlight() && !$productQuote->isCanceled()) {
+                $productQuote->cancelled(null, 'Canceled from reProtection');
+                $this->productQuoteRepository->save($productQuote);
+            }
+        }
     }
 }
