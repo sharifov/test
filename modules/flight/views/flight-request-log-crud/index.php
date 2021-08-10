@@ -5,6 +5,7 @@ use modules\flight\models\FlightRequest;
 use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightRequestLogSearch */
@@ -22,6 +23,8 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?php Pjax::begin(['id' => 'pjax-flight-request-log']); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -53,5 +56,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 
+    <?php Pjax::end(); ?>
 
 </div>
