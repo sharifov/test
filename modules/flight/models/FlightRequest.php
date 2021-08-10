@@ -200,7 +200,8 @@ class FlightRequest extends \yii\db\ActiveRecord
 
     public static function generateHashFromDataJson(array $dataJson): string
     {
-        return md5(serialize(ksort($dataJson)));
+        ksort($dataJson, SORT_STRING);
+        return md5(serialize($dataJson));
     }
 
     public function statusToPending(): FlightRequest
