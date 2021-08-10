@@ -6,6 +6,9 @@ use Yii;
 use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "product_quote_change".
@@ -21,11 +24,26 @@ use common\models\Employee;
  * @property string|null $pqc_decision_dt
  *
  * @property Cases $pqcCase
- * @property Employees $pqcDecisionUser
+ * @property Employee $pqcDecisionUser
  * @property ProductQuote $pqcPq
  */
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['pqc_created_dt', 'pqc_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['pqc_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -44,7 +62,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             [['pqc_pq_id', 'pqc_case_id', 'pqc_decision_user', 'pqc_status_id', 'pqc_decision_type_id'], 'integer'],
             [['pqc_created_dt', 'pqc_updated_dt', 'pqc_decision_dt'], 'safe'],
             [['pqc_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['pqc_case_id' => 'cs_id']],
-            [['pqc_decision_user'], 'exist', 'skipOnError' => true, 'targetClass' => Employees::class, 'targetAttribute' => ['pqc_decision_user' => 'id']],
+            [['pqc_decision_user'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqc_decision_user' => 'id']],
             [['pqc_pq_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqc_pq_id' => 'pq_id']],
         ];
     }
@@ -84,7 +102,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
      */
     public function getPqcDecisionUser()
     {
-        return $this->hasOne(Employees::class, ['id' => 'pqc_decision_user']);
+        return $this->hasOne(Employee::class, ['id' => 'pqc_decision_user']);
     }
 
     /**
