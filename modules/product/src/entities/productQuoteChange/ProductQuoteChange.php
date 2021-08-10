@@ -29,6 +29,36 @@ use yii\helpers\ArrayHelper;
  */
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
+    public const STATUS_NEW         = 1;
+    public const STATUS_DECISION    = 2;
+    public const STATUS_IN_PROGRESS = 3;
+    public const STATUS_COMPLETE    = 4;
+    public const STATUS_CANCELED    = 5;
+    public const STATUS_ERROR       = 6;
+    public const STATUS_DECLINED    = 7;
+    public const STATUS_DECIDED     = 8;
+
+    public const STATUS_LIST = [
+        self::STATUS_NEW         => 'New',
+        self::STATUS_DECISION    => 'Decision Pending',
+        self::STATUS_IN_PROGRESS => 'In Progress',
+        self::STATUS_COMPLETE    => 'Complete',
+        self::STATUS_CANCELED    => 'Canceled',
+        self::STATUS_ERROR       => 'Error',
+        self::STATUS_DECLINED    => 'Declined',
+        self::STATUS_DECIDED     => 'Decided',
+    ];
+
+    public const DECISION_CONFIRM = 1;
+    public const DECISION_MODIFY  = 2;
+    public const DECISION_REFUND  = 3;
+
+    public const DECISION_LIST = [
+        self::DECISION_CONFIRM => 'Confirm',
+        self::DECISION_MODIFY  => 'Modify',
+        self::DECISION_REFUND  => 'Refund',
+    ];
+
     public function behaviors(): array
     {
         $behaviors = [
@@ -64,6 +94,8 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             [['pqc_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['pqc_case_id' => 'cs_id']],
             [['pqc_decision_user'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqc_decision_user' => 'id']],
             [['pqc_pq_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqc_pq_id' => 'pq_id']],
+            ['pqc_status_id', 'in', 'range' => array_keys(self::STATUS_LIST)],
+            ['pqc_decision_type_id', 'in', 'range' => array_keys(self::DECISION_LIST)],
         ];
     }
 
