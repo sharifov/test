@@ -18,7 +18,7 @@ class ProductQuoteChangeSearch extends ProductQuoteChange
     {
         return [
             [['pqc_id', 'pqc_pq_id', 'pqc_case_id', 'pqc_decision_user', 'pqc_status_id', 'pqc_decision_type_id'], 'integer'],
-            [['pqc_created_dt', 'pqc_updated_dt', 'pqc_decision_dt'], 'safe'],
+            [['pqc_created_dt', 'pqc_updated_dt', 'pqc_decision_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
