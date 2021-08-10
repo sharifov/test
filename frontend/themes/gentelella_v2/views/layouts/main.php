@@ -87,6 +87,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
 </head>
 <body class="nav-<?= !empty($_COOKIE['menuIsCollapsed']) && $_COOKIE['menuIsCollapsed'] === 'true' ? 'sm' : 'md' ?>">
 <?php $this->beginBody(); ?>
+<?= \frontend\widgets\YandexMetrikaWidget::widget(); ?>
 
 <div id="page-loader" class="overlay" style="display: block">
     <div class="preloader">
