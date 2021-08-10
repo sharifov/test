@@ -53,6 +53,4 @@ class m210810_141935_add_site_setting_YandexMetrika_params extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
 }
