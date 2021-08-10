@@ -1,5 +1,6 @@
 <?php
 
+use modules\cases\src\abac\CasesAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -13,6 +14,7 @@ use yii\helpers\Url;
  * @var int $caseId
  * @var \yii\web\View $this
  * @var bool $isReprotection
+ * @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto
  */
 
 $hasReprotection = false;
@@ -50,12 +52,14 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
         </button>
         <div class="dropdown-menu">
         <?php if ($isReprotection) : ?>
-              <?php
+            <?php
+            if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                 echo Html::a('<i class="fa fa-envelope text-success" title="Send Email"></i> Send Flight Schedule Change Email', null, [
                   'class' => 'dropdown-item btn-send-reprotection-quote-email',
-                  'data-url' => Url::to(['/product/product-quote/preview-reprotection-quote-email', 'reprotection-quote-id' => $quote->pq_id, 'case-id' => $caseId])
+                  'data-url' => Url::to(['/product/product-quote/preview-reprotection-quote-email', 'reprotection-quote-id' => $quote->pq_id, 'case-id' => $caseId, 'order-id' => $order->or_id])
                 ]);
-                ?>
+            }
+            ?>
         <?php else : ?>
             <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Remove', null, [
                 'data-order-id' => $order->or_id,
@@ -82,7 +86,8 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
               'nr' => null,
               'order' => $order,
               'isReprotection' => true,
-              'caseId' => $caseId
+              'caseId' => $caseId,
+                'caseAbacDto' => $caseAbacDto
             ]) ?>
         <?php endforeach; ?>
       </tr>

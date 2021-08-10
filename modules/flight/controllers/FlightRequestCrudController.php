@@ -6,6 +6,7 @@ use frontend\controllers\FController;
 use Yii;
 use modules\flight\models\FlightRequest;
 use modules\flight\models\search\FlightRequestSearch;
+use modules\flight\models\search\FlightRequestLogSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -57,8 +58,14 @@ class FlightRequestCrudController extends FController
      */
     public function actionView($fr_id, $fr_year, $fr_month): string
     {
+        $searchModel = new FlightRequestLogSearch();
+        $flightRequestId = (int) $this->request->queryParams['fr_id'] ?? 0;
+        $dataProvider = $searchModel->searchByFlightRequestId($flightRequestId, $this->request->queryParams);
+
         return $this->render('view', [
             'model' => $this->findModel($fr_id, $fr_year, $fr_month),
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

@@ -15,6 +15,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
+    public const REPROTECTION_QUOTE_SEND_EMAIL = self::NS . 'reprotection_quote/send_email';
 
     /** UI PERMISSION */
     public const UI_BLOCK_EVENT_LOG_LIST  = self::NS . 'ui/block/event-log-list';
@@ -24,6 +25,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::LOGIC_CLIENT_DATA => self::LOGIC_CLIENT_DATA,
         self::UI_BLOCK_EVENT_LOG_LIST => self::UI_BLOCK_EVENT_LOG_LIST,
         self::UI_BTN_EVENT_LOG_VIEW => self::UI_BTN_EVENT_LOG_VIEW,
+        self::REPROTECTION_QUOTE_SEND_EMAIL => self::REPROTECTION_QUOTE_SEND_EMAIL,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -36,7 +38,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJECT_ACTION_LIST = [
         self::LOGIC_CLIENT_DATA  => [self::ACTION_UNMASK],
         self::UI_BLOCK_EVENT_LOG_LIST  => [self::ACTION_ACCESS],
-        self::UI_BTN_EVENT_LOG_VIEW  => [self::ACTION_READ]
+        self::UI_BTN_EVENT_LOG_VIEW  => [self::ACTION_READ],
+        self::REPROTECTION_QUOTE_SEND_EMAIL => [self::ACTION_ACCESS]
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -55,6 +58,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER],
+        self::REPROTECTION_QUOTE_SEND_EMAIL => [self::ATTR_CASE_IS_OWNER],
     ];
 
     /**

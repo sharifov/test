@@ -7,6 +7,9 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Notifications;
 use common\models\UserProjectParams;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
@@ -24,6 +27,8 @@ use frontend\controllers\FController;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
+use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -152,37 +157,57 @@ class ProductQuoteController extends FController
     {
         $caseId = Yii::$app->request->get('case-id');
         $quoteId = Yii::$app->request->get('reprotection-quote-id');
+        $orderId = Yii::$app->request->get('order-id');
 
         $form = new ReprotectionQuoteSendEmailForm();
+
+        if (!$case = Cases::findOne((int)$caseId)) {
+            $form->addError('general', 'Case Not Found');
+        }
+
+        $caseAbacDto = new CasesAbacDto($case);
+        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
+
+        if (!$order = Order::findOne((int)$orderId)) {
+            throw new BadRequestHttpException('Order not found');
+        }
+
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $case = $this->casesRepository->find($form->caseId);
                 $quote = $this->productQuoteRepository->find($form->quoteId);
                 $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
                 $emailData['reprotection_quote'] = $quote->serialize();
                 $emailData['order'] = $quote->pqOrder->serialize();
                 $emailFrom = Auth::user()->email;
+                $emailTemplateType = null;
 
                 if ($case->cs_project_id) {
-                    $upp = UserProjectParams::find()->where(['upp_project_id' => $case->cs_project_id, 'upp_user_id' => Auth::id()])->withEmailList()->one();
-                    if ($upp) {
-                        $emailFrom = $upp->getEmail() ?: $emailFrom;
+                    $project = $case->project;
+                    if ($project && $emailConfig = $project->getReprotectionQuoteEmailConfig()) {
+                        $emailFrom = $emailConfig['emailFrom'] ?? '';
+                        $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
                     }
                 }
 
                 if (!$emailFrom) {
                     throw new \RuntimeException('Agent not has assigned email');
                 }
-                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $form->emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
+
+                if (!$emailTemplateType) {
+                    throw new \RuntimeException('Email template type is not set in project params');
+                }
+                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
                 if ($previewEmailResult['error']) {
                     $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
-                    $form->addError('general', 'Communication service error: ' . ($result['error']['name'] ?? '') . ' ( ' . ($result['error']['message']  ?? '') . ' )');
+                    $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');
                 } else {
                     $previewEmailForm = new ReprotectionQuotePreviewEmailForm($previewEmailResult['data']);
                     $previewEmailForm->email_from_name = Auth::user()->nickname;
                     $previewEmailForm->productQuoteId = $quote->pq_id;
 
-                    $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
+                    $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $emailTemplateType]);
                     if ($emailTemplateType) {
                         $previewEmailForm->email_tpl_id = $emailTemplateType->etp_id;
                     }
@@ -192,15 +217,11 @@ class ProductQuoteController extends FController
                     ]);
                 }
             } catch (\DomainException | \RuntimeException $e) {
-                Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewReprotectionQuoteEmail::DomainException|RuntimeException');
                 $form->addError('error', $e->getMessage());
             } catch (\Throwable $e) {
-                $form->addError('general', $e->getMessage());
+                Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewReprotectionQuoteEmail::Throwable');
+                $form->addError('general', 'Internal Server Error');
             }
-        }
-
-        if (!$case = Cases::findOne((int)$caseId)) {
-            $form->addError('general', 'Case Not Found');
         }
 
         $form->caseId = $caseId;
@@ -208,7 +229,8 @@ class ProductQuoteController extends FController
 
         return $this->renderAjax('partial/_reprotection_quote_choose_client_email', [
             'form' => $form,
-            'case' => $case
+            'case' => $case,
+            'order' => $order
         ]);
     }
 
@@ -217,9 +239,20 @@ class ProductQuoteController extends FController
         $previewEmailForm = new ReprotectionQuotePreviewEmailForm();
 
         if ($previewEmailForm->load(Yii::$app->request->post())) {
+            if (!$case = Cases::findOne((int)$previewEmailForm->case_id)) {
+                throw new BadRequestHttpException('Case Not Found');
+            }
+
+            $caseAbacDto = new CasesAbacDto($case);
+            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+            }
             if ($previewEmailForm->validate()) {
                 try {
-                    $case = $this->casesRepository->find($previewEmailForm->case_id);
+                    $caseAbacDto = new CasesAbacDto($case);
+                    if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                        throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+                    }
 
                     $mail = new Email();
                     $mail->e_project_id = $case->cs_project_id;

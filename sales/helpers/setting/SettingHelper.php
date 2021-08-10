@@ -428,4 +428,9 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['schd_case_deadline_hours'] ?? 0);
     }
+
+    public static function getYandexMetrika(): array
+    {
+        return ArrayHelper::getValue(Yii::$app->params['settings'], 'yandex_metrika');
+    }
 }

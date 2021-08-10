@@ -4,6 +4,7 @@
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
 /* @var $caseId integer */
+/* @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto */
 
 use common\models\Currency;
 use common\models\Payment;
@@ -196,7 +197,8 @@ $formatter = new \common\components\i18n\Formatter();
                               'nr' => $nr++,
                               'order' => $order,
                               'isReprotection' => false,
-                              'caseId' => $caseId
+                              'caseId' => $caseId,
+                              'caseAbacDto' => $caseAbacDto
                           ]) ?>
                       </tr>
                 <?php endforeach; ?>
@@ -570,9 +572,13 @@ $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-s
     modal.find('.modal-body').html('');
     let id = $(this).attr('data-id');
     modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
         btn.find('i').replaceWith(btnIconHtml);
         btn.removeClass('disabled');
-        modal.modal('show');
     });
 });
 JS;
