@@ -42,6 +42,7 @@ use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use sales\auth\Auth;
+use sales\entities\cases\CaseEventLogSearch;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CaseStatusLogSearch;
@@ -1970,5 +1971,16 @@ class CasesController extends FController
         }
 
         return $this->redirect(['/cases/view', 'gid' => $model->cs_gid]);
+    }
+
+    public function actionAjaxCaseEventLog()
+    {
+        $searchModel = new CaseEventLogSearch();
+        $dataProvider = $searchModel->searchByCase(Yii::$app->request->queryParams);
+
+        return $this->renderAjax('event-log/event-log', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 }

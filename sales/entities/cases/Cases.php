@@ -72,6 +72,7 @@ use Yii;
  * @property CaseStatusLog[] $caseStatusLogs
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  * @property CaseSale[] $caseSale
+ * @property CaseEventLog[] $caseEventLogs
  */
 class Cases extends ActiveRecord implements Objectable
 {
@@ -636,6 +637,16 @@ class Cases extends ActiveRecord implements Objectable
         return $this->hasMany(CaseSale::class, ['css_cs_id' => 'cs_id'])->orderBy(['css_sale_id' => SORT_DESC]);
     }
 
+    /**
+     * Gets query for [[CaseEventLogs]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCaseEventLogs()
+    {
+        return $this->hasMany(CaseEventLog::class, ['cel_case_id' => 'cs_id']);
+    }
+
     /*
     public function rules(): array
     {
@@ -818,5 +829,10 @@ class Cases extends ActiveRecord implements Objectable
     public function isAutomate(): bool
     {
         return $this->cs_is_automate;
+    }
+
+    public function addEventLog(string $description, $data = [])
+    {
+        CaseEventLog::add($this->cs_id, $description, $data);
     }
 }

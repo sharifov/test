@@ -1,0 +1,96 @@
+<?php
+
+use yii\helpers\Html;
+use yii\grid\GridView;
+use sales\entities\cases\CaseEventLog;
+use frontend\helpers\JsonHelper;
+use yii\helpers\StringHelper;
+use yii\helpers\VarDumper;
+use yii\widgets\Pjax;
+use yii\bootstrap4\Modal;
+use common\components\grid\DateTimeColumn;
+use yii\grid\ActionColumn;
+
+/* @var $this yii\web\View */
+/* @var $searchModel sales\entities\cases\CaseEventLogSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = 'Case Event Logs';
+$this->params['breadcrumbs'][] = $this->title;
+?>
+<div class="case-event-log-index">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+
+    <p>
+        <?= Html::a('Create Case Event Log', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
+
+    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php Pjax::begin(['id' => 'pjax-lead-request']); ?>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            'cel_id',
+            'cel_case_id',
+            'cel_description',
+            //'cel_data_json',
+            [
+                'attribute' => 'cel_data_json',
+                'format' => 'raw',
+                'value' => static function (CaseEventLog $model) {
+                    $resultStr = '-';
+                    if ($decodedData = JsonHelper::decode($model->cel_data_json)) {
+                        $truncatedStr = StringHelper::truncate(
+                            Html::encode(VarDumper::dumpAsString($decodedData)),
+                            300,
+                            '...',
+                            null,
+                            false
+                        );
+
+                        $detailData = VarDumper::dumpAsString($decodedData, 10, true);
+                        $detailBox = '<div id="detail_' . $model->cel_id . '" style="display: none;">' . $detailData . '</div>';
+                        $detailBtn = ' <i class="fas fa-eye green showDetail" style="cursor: pointer;" data-idt="' . $model->cel_id . '"></i>';
+
+                        $resultStr = $truncatedStr . $detailBox . $detailBtn;
+                    }
+                    return '<small>' . $resultStr . '</small>';
+                },
+                'filter' => false
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cel_created_dt',
+            ],
+            ['class' => ActionColumn::class],
+        ],
+    ]); ?>
+    <?php Pjax::end(); ?>
+</div>
+
+<?php
+Modal::begin([
+    'title' => 'Detail',
+    'id' => 'modal',
+    'size' => Modal::SIZE_DEFAULT,
+]);
+Modal::end();
+
+$jsCode = <<<JS
+    $(document).on('click', '.showDetail', function(){
+        
+        let logId = $(this).data('idt');
+        let detailEl = $('#detail_' + logId);
+        let modalBodyEl = $('#modal .modal-body');
+        
+        modalBodyEl.html(detailEl.html()); 
+        $('#modal-label').html('Detail (' + logId + ')');       
+        $('#modal').modal('show');
+        return false;
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);
