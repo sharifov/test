@@ -42,6 +42,7 @@ use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use sales\auth\Auth;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\CaseEventLogSearch;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
@@ -1097,6 +1098,7 @@ class CasesController extends FController
             try {
                 /** @var Cases $case */
                 $case = $this->casesCreateService->createByWeb($form, $user->id);
+                $case->addEventLog(CaseEventLog::CASE_CREATED, CasesStatus::STATUS_LIST[$case->cs_status] . ' Case created for category: ' . $case->category->cc_name . ' and by source: ' . CasesSourceType::getList()[$case->cs_source_type_id]);
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
