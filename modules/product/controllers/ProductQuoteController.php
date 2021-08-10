@@ -7,6 +7,8 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Notifications;
 use common\models\UserProjectParams;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
@@ -24,6 +26,8 @@ use frontend\controllers\FController;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
+use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -154,9 +158,18 @@ class ProductQuoteController extends FController
         $quoteId = Yii::$app->request->get('reprotection-quote-id');
 
         $form = new ReprotectionQuoteSendEmailForm();
+
+        if (!$case = Cases::findOne((int)$caseId)) {
+            $form->addError('general', 'Case Not Found');
+        }
+
+        $caseAbacDto = new CasesAbacDto($case);
+        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
+
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $case = $this->casesRepository->find($form->caseId);
                 $quote = $this->productQuoteRepository->find($form->quoteId);
                 $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
                 $emailData['reprotection_quote'] = $quote->serialize();
@@ -199,10 +212,6 @@ class ProductQuoteController extends FController
             }
         }
 
-        if (!$case = Cases::findOne((int)$caseId)) {
-            $form->addError('general', 'Case Not Found');
-        }
-
         $form->caseId = $caseId;
         $form->quoteId = $quoteId;
 
@@ -217,9 +226,20 @@ class ProductQuoteController extends FController
         $previewEmailForm = new ReprotectionQuotePreviewEmailForm();
 
         if ($previewEmailForm->load(Yii::$app->request->post())) {
+            if (!$case = Cases::findOne((int)$previewEmailForm->case_id)) {
+                throw new BadRequestHttpException('Case Not Found');
+            }
+
+            $caseAbacDto = new CasesAbacDto($case);
+            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+            }
             if ($previewEmailForm->validate()) {
                 try {
-                    $case = $this->casesRepository->find($previewEmailForm->case_id);
+                    $caseAbacDto = new CasesAbacDto($case);
+                    if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                        throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+                    }
 
                     $mail = new Email();
                     $mail->e_project_id = $case->cs_project_id;

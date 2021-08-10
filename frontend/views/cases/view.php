@@ -151,7 +151,8 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
 
             <?= $this->render('orders/case_orders', [
                 'dataProviderOrders' => $dataProviderOrders,
-                'case' => $model
+                'case' => $model,
+                'caseAbacDto' => $caseAbacDto
             ]) ?>
         </div>
 

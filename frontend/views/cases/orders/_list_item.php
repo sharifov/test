@@ -4,6 +4,7 @@
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
 /* @var $caseId integer */
+/* @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto */
 
 use common\models\Currency;
 use common\models\Payment;
@@ -196,7 +197,8 @@ $formatter = new \common\components\i18n\Formatter();
                               'nr' => $nr++,
                               'order' => $order,
                               'isReprotection' => false,
-                              'caseId' => $caseId
+                              'caseId' => $caseId,
+                              'caseAbacDto' => $caseAbacDto
                           ]) ?>
                       </tr>
                 <?php endforeach; ?>
