@@ -10,7 +10,6 @@ class ReprotectionQuoteSendEmailForm extends \yii\base\Model
     public $quoteId;
 
     public $clientEmail;
-    public $emailTemplateType;
 
     public function rules(): array
     {
@@ -21,9 +20,6 @@ class ReprotectionQuoteSendEmailForm extends \yii\base\Model
             [['clientEmail'],'required'],
             [['clientEmail'],'string'],
             [['clientEmail'],'email'],
-
-            ['emailTemplateType', 'required'],
-            ['emailTemplateType', 'exist', 'targetAttribute' => 'etp_key', 'targetClass' => EmailTemplateType::class],
         ];
     }
 }

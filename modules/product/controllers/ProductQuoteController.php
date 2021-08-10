@@ -181,27 +181,33 @@ class ProductQuoteController extends FController
                 $emailData['reprotection_quote'] = $quote->serialize();
                 $emailData['order'] = $quote->pqOrder->serialize();
                 $emailFrom = Auth::user()->email;
+                $emailTemplateType = null;
 
                 if ($case->cs_project_id) {
-                    $upp = UserProjectParams::find()->where(['upp_project_id' => $case->cs_project_id, 'upp_user_id' => Auth::id()])->withEmailList()->one();
-                    if ($upp) {
-                        $emailFrom = $upp->getEmail() ?: $emailFrom;
+                    $project = $case->project;
+                    if ($project && $emailConfig = $project->getReprotectionQuoteEmailConfig()) {
+                        $emailFrom = $emailConfig['emailFrom'] ?? '';
+                        $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
                     }
                 }
 
                 if (!$emailFrom) {
                     throw new \RuntimeException('Agent not has assigned email');
                 }
-                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $form->emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
+
+                if (!$emailTemplateType) {
+                    throw new \RuntimeException('Email template type is not set in project params');
+                }
+                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
                 if ($previewEmailResult['error']) {
                     $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
-                    $form->addError('general', 'Communication service error: ' . ($result['error']['name'] ?? '') . ' ( ' . ($result['error']['message']  ?? '') . ' )');
+                    $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');
                 } else {
                     $previewEmailForm = new ReprotectionQuotePreviewEmailForm($previewEmailResult['data']);
                     $previewEmailForm->email_from_name = Auth::user()->nickname;
                     $previewEmailForm->productQuoteId = $quote->pq_id;
 
-                    $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
+                    $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $emailTemplateType]);
                     if ($emailTemplateType) {
                         $previewEmailForm->email_tpl_id = $emailTemplateType->etp_id;
                     }
@@ -211,10 +217,10 @@ class ProductQuoteController extends FController
                     ]);
                 }
             } catch (\DomainException | \RuntimeException $e) {
-                Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewReprotectionQuoteEmail::DomainException|RuntimeException');
                 $form->addError('error', $e->getMessage());
             } catch (\Throwable $e) {
-                $form->addError('general', $e->getMessage());
+                Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewReprotectionQuoteEmail::Throwable');
+                $form->addError('general', 'Internal Server Error');
             }
         }
 
