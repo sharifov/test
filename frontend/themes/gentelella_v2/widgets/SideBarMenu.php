@@ -399,6 +399,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Product Quote Refund', 'url' => ['/product/product-quote-refund-crud/index']],
                     ['label' => 'Product Quote Option Refund', 'url' => ['/product/product-quote-option-refund-crud/index']],
                     ['label' => 'Product Quote Object Refund', 'url' => ['/product/product-quote-object-refund-crud/index']],
+                    ['label' => 'Product Quote Change', 'url' => ['/product/product-quote-change-crud/index']],
                 ], 'hasChild' => true],
 
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
