@@ -11,6 +11,7 @@ use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
@@ -261,6 +262,13 @@ class ProductQuoteController extends FController
                         throw new ForbiddenHttpException('You do not have access to perform this action', 403);
                     }
 
+                    $reprotectionQuote = $this->productQuoteRepository->find($previewEmailForm->productQuoteId);
+
+                    $originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id);
+                    if (!$originQuote) {
+                        throw new \RuntimeException('Origin quote not found');
+                    }
+
                     $mail = new Email();
                     $mail->e_project_id = $case->cs_project_id;
                     $mail->e_case_id = $case->cs_id;
@@ -294,14 +302,22 @@ class ProductQuoteController extends FController
                         $mailResponse = $mail->sendMail();
 
                         if (isset($mailResponse['error']) && $mailResponse['error']) {
-                            $previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                            throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                        }
+
+                        $productQuoteChange = $originQuote->productQuoteLastChange;
+                        if ($productQuoteChange) {
+                            $productQuoteChange->decisionPending();
+                            if (!$productQuoteChange->save()) {
+                                Yii::warning('ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0], 'ProductQuoteController::actionReprotectionQuoteSendEmail::ProductQuoteChange::save');
+                            }
                         }
 
                         try {
                             $hybridService = Yii::createObject(HybridService::class);
                             $data = [
                                 'booking_id' => $case->cs_order_uid,
-                                'reprotection_quote_gid' => $previewEmailForm->productQuoteId,
+                                'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
                                 'case_gid' => $case->cs_gid,
                             ];
                             $hybridService->whReprotection($case->cs_project_id, $data);
