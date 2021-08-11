@@ -19,7 +19,7 @@ use yii\web\View;
     <div class="x_panel x_panel_orders">
         <div class="x_title">
 
-            <h2><i class="fas fa-money-check-alt"></i> Orders (<?=$dataProviderOrders->totalCount?>)</h2>
+            <h2><i class="fas fa-money-check-alt"></i> Order List (<?=$dataProviderOrders->totalCount?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <!--
                 <li>

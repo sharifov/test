@@ -431,6 +431,6 @@ class SettingHelper
 
     public static function getYandexMetrika(): array
     {
-        return ArrayHelper::getValue(Yii::$app->params['settings'], 'yandex_metrika');
+        return Yii::$app->params['settings']['yandex_metrika'] ?? [];
     }
 }

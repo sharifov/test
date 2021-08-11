@@ -7,8 +7,10 @@ use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteLead\ProductQuoteLead;
 use modules\product\src\entities\productQuoteLead\ProductQuoteLeadQuery;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
@@ -97,6 +99,8 @@ use yii\db\ActiveRecord;
  * @property AttractionQuote| $attractionQuote
  * @property ProductQuote[]|null $relates
  * @property ProductQuote|null $relateParent
+ * @property ProductQuoteChange|null $productQuoteLastChange
+ * @property ProductQuoteRefund|null $productQuoteLastRefund
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
@@ -251,6 +255,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->hasOne(static::class, ['pq_id' => 'pqr_parent_pq_id'])
             ->viaTable('product_quote_relation', ['pqr_related_pq_id' => 'pq_id']);
+    }
+
+    public function getProductQuoteLastChange(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->orderBy(['pqc_pq_id' => SORT_DESC]);
+    }
+
+    public function getProductQuoteLastRefund(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->orderBy(['pqr_id' => SORT_DESC]);
     }
 
     /**
