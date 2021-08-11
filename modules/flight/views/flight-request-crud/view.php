@@ -69,7 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
-    <h5>FlightRequestLog:</h5>
+    <h5>Flight Request Logs:</h5>
     <div class="row">
         <div class="col-md-12">
             <?php Pjax::begin(['id' => 'pjax-flight-request']); ?>
@@ -98,8 +98,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'flr_description',
                     ['class' => DateTimeColumn::class, 'attribute' => 'flr_created_dt'],
                     ['class' => DateTimeColumn::class, 'attribute' => 'flr_updated_dt'],
-
-                    ['class' => 'yii\grid\ActionColumn'],
                 ],
             ]); ?>
 
