@@ -106,8 +106,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'flr_description',
             ['class' => DateTimeColumn::class, 'attribute' => 'flr_created_dt'],
             ['class' => DateTimeColumn::class, 'attribute' => 'flr_updated_dt'],
-
-            ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 
