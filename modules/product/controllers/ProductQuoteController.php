@@ -102,10 +102,12 @@ class ProductQuoteController extends FController
                     'clone' => ['POST'],
                 ],
             ],
-        ];
-        $behaviors['request'] = [
-            'class' => RequestBehavior::class,
-            'except' => ['preview-reprotection-quote-email', 'reprotection-quote-send-email'],
+            'access' => [
+                'allowActions' => [
+                    'preview-reprotection-quote-email',
+                    'reprotection-quote-send-email'
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
