@@ -22,6 +22,7 @@ use sales\exception\CheckRestrictionException;
 use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
+use webapi\src\response\behaviors\RequestBehavior;
 use Yii;
 use frontend\controllers\FController;
 use yii\filters\VerbFilter;
@@ -101,6 +102,10 @@ class ProductQuoteController extends FController
                     'clone' => ['POST'],
                 ],
             ],
+        ];
+        $behaviors['request'] = [
+            'class' => RequestBehavior::class,
+            'except' => ['preview-reprotection-quote-email', 'reprotection-quote-send-email'],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
