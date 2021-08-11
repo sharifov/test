@@ -60,6 +60,8 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageD
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productType\ProductType;
@@ -93,6 +95,7 @@ use yii\helpers\VarDumper;
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  * @property FlightQuoteFlightRepository $flightQuoteFlightRepository
  * @property FlightQuoteBookingRepository $flightQuoteBookingRepository
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  */
 class FlightQuoteManageService implements ProductQuoteService
 {
@@ -163,6 +166,7 @@ class FlightQuoteManageService implements ProductQuoteService
 
     private FlightQuoteFlightRepository $flightQuoteFlightRepository;
     private FlightQuoteBookingRepository $flightQuoteBookingRepository;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     public function __construct(
         FlightQuoteRepository $flightQuoteRepository,
@@ -181,7 +185,8 @@ class FlightQuoteManageService implements ProductQuoteService
         ProductOptionRepository $productOptionRepository,
         ProductQuoteOptionRepository $productQuoteOptionRepository,
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
-        FlightQuoteBookingRepository $flightQuoteBookingRepository
+        FlightQuoteBookingRepository $flightQuoteBookingRepository,
+        ProductQuoteChangeRepository $productQuoteChangeRepository
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -200,6 +205,7 @@ class FlightQuoteManageService implements ProductQuoteService
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
     /**
@@ -553,13 +559,17 @@ class FlightQuoteManageService implements ProductQuoteService
         array $quote,
         int $orderId,
         string $bookingId,
+        int $caseId,
         ?int $userId = null,
         ?float $productTypeServiceFee = null
     ): FlightQuote {
-        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId) {
+        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId, $caseId) {
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), $productTypeServiceFee);
             $productQuote->pq_order_id = $orderId;
             $this->productQuoteRepository->save($productQuote);
+
+            $productQuoteChange = ProductQuoteChange::createNew($productQuote->pq_id, $caseId);
+            $this->productQuoteChangeRepository->save($productQuoteChange);
 
             $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
             $flightQuote->setTypeReProtection();

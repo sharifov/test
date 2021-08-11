@@ -86,7 +86,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $flight,
                         $flightRequest->getFlightQuoteData(),
                         $order->getId(),
-                        $flightRequest->fr_booking_id
+                        $flightRequest->fr_booking_id,
+                        $case->cs_id
                     );
                     if ($oldProductQuote) {
                         $relation = ProductQuoteRelation::createReProtection($oldProductQuote->pq_id, $flightQuote->fq_product_quote_id);
@@ -145,7 +146,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $flight,
                         $flightRequest->getFlightQuoteData(),
                         $order->getId(),
-                        $flightRequest->fr_booking_id
+                        $flightRequest->fr_booking_id,
+                        $case->cs_id
                     );
                     if ($oldProductQuote) {
                         $relation = ProductQuoteRelation::createReProtection($oldProductQuote->pq_id, $flightQuote->fq_product_quote_id);
