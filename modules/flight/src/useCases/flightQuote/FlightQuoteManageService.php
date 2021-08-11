@@ -563,13 +563,10 @@ class FlightQuoteManageService implements ProductQuoteService
         ?int $userId = null,
         ?float $productTypeServiceFee = null
     ): FlightQuote {
-        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId, $caseId) {
+        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId) {
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), $productTypeServiceFee);
             $productQuote->pq_order_id = $orderId;
             $this->productQuoteRepository->save($productQuote);
-
-            $productQuoteChange = ProductQuoteChange::createNew($productQuote->pq_id, $caseId);
-            $this->productQuoteChangeRepository->save($productQuoteChange);
 
             $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
             $flightQuote->setTypeReProtection();
