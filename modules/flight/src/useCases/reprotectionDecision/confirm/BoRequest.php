@@ -5,6 +5,8 @@ namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 use common\components\BackOffice;
 use modules\flight\models\FlightQuoteFlight;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\product\ProductQuoteRepository;
@@ -14,66 +16,94 @@ use sales\repositories\product\ProductQuoteRepository;
  *
  * @property ProductQuoteRepository $productQuoteRepository
  * @property CasesRepository $casesRepository
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  */
 class BoRequest
 {
     private ProductQuoteRepository $productQuoteRepository;
     private CasesRepository $casesRepository;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
-    public function __construct(ProductQuoteRepository $productQuoteRepository, CasesRepository $casesRepository)
-    {
+    public function __construct(
+        ProductQuoteRepository $productQuoteRepository,
+        CasesRepository $casesRepository,
+        ProductQuoteChangeRepository $productQuoteChangeRepository
+    ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesRepository = $casesRepository;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
     public function appliedQuote(string $quoteGid): void
     {
         $quote = $this->productQuoteRepository->findByGidFlightProductQuote($quoteGid);
+        if (!$quote->isApplied()) {
+            throw new \DomainException('Quote is not applied. ID: ' . $quote->pq_id);
+        }
 
-        $data = $this->prepareQuoteToRequestData($quote);
+        $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($quote->pq_id);
+        if (!$productQuoteChange->isCustomerDecisionConfirm()) {
+            throw new \DomainException('Product Quote Change customer decision status is invalid.');
+        }
 
-        $bookingId = $this->getBookingId($quote);
-
-        $responseBO = BackOffice::reprotectionCustomerDecisionConfirm($bookingId, $data);
+        $responseBO = BackOffice::reprotectionCustomerDecisionConfirm(
+            $this->getBookingId($quote),
+            $this->prepareQuoteToRequestData($quote)
+        );
 
         if ($responseBO) {
-            $this->successProcessing($quote);
+            $this->successProcessing($quote, $productQuoteChange);
             return;
         }
 
-        $this->errorProcessing($quote);
+        $this->errorProcessing($quote, $productQuoteChange);
     }
 
-    private function successProcessing(ProductQuote $quote): void
+    private function successProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
     {
         $this->markQuoteToInProgress($quote);
-        $this->processingCaseBySuccessResult($quote);
+        $this->markQuoteChangeToInProgress($productQuoteChange);
+        $case = $this->getCase($productQuoteChange);
+        if ($case) {
+            $this->processingCaseBySuccessResult($case);
+        }
     }
 
-    private function errorProcessing(ProductQuote $quote): void
+    private function markQuoteChangeToInProgress(ProductQuoteChange $productQuoteChange): void
+    {
+        $productQuoteChange->inProgress();
+        $this->productQuoteChangeRepository->save($productQuoteChange);
+    }
+
+    private function errorProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
     {
         $this->markQuoteToError($quote);
-        $this->processingCaseByErrorResult($quote);
+        // todo may be $productQuoteChange -> to error ?
+        $case = $this->getCase($productQuoteChange);
+        if ($case) {
+            $this->processingCaseByErrorResult($case);
+        }
     }
 
-    private function processingCaseByErrorResult(ProductQuote $quote): void
+    private function processingCaseByErrorResult(Cases $case): void
     {
-        $case = $this->getCase($quote);
         $case->offIsAutomate();
         $case->error(null, 'Reprotection quote book error');
         $this->casesRepository->save($case);
     }
 
-    private function processingCaseBySuccessResult(ProductQuote $quote): void
+    private function processingCaseBySuccessResult(Cases $case): void
     {
-        $case = $this->getCase($quote);
         $case->awaiting(null, 'Awaiting for reprotection quote status update');
         $this->casesRepository->save($case);
     }
 
-    private function getCase(ProductQuote $quote): Cases
+    private function getCase(ProductQuoteChange $productQuoteChange): ?Cases
     {
-        // todo find case
+        if ($productQuoteChange->pqc_case_id) {
+            return $productQuoteChange->pqcCase;
+        }
+        return null;
     }
 
     private function markQuoteToError(ProductQuote $quote): void

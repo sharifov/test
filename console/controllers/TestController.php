@@ -13,6 +13,7 @@ use common\models\UserOnline;
 use Faker\Factory;
 use frontend\widgets\notification\NotificationMessage;
 use modules\flight\components\api\FlightQuoteBookService;
+use modules\flight\src\useCases\reprotectionDecision\confirm\BoRequest;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\lead\src\services\LeadFailBooking;
@@ -74,6 +75,9 @@ class TestController extends Controller
 {
     public function actionX()
     {
+        \Yii::createObject(BoRequest::class)->appliedQuote('1865ef55f3c6c01dca1f4f3128e82733');
+        die;
+
         $productQuote = ProductQuote::find()->andWhere(['pq_gid' => '1865ef55f3c6c01dca1f4f3128e82733'])->one();
         $r = ArrayHelper::toArray($productQuote);
         VarDumper::dump($r);

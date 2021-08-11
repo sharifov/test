@@ -296,12 +296,16 @@ class BackOffice
         // todo changed to endpoint
         $endpoint = 'reprotection/customer-decision';
 
+        $request = [
+            'bookingId' => $bookingId,
+            'type' => $type,
+            'quote' => $quote,
+        ];
+
+//        VarDumper::dump($request);die;
+
         try {
-            $response = self::sendRequest2($endpoint, [
-                'bookingId' => $bookingId,
-                'type' => $type,
-                'quote' => $quote,
-            ]);
+            $response = self::sendRequest2($endpoint, $request);
 
             if (!$response->isOk) {
                 \Yii::error([

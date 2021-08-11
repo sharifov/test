@@ -2,7 +2,6 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
-use Yii;
 use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
@@ -72,6 +71,29 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function customerDecisionConfirm(?int $userId, \DateTimeImmutable $date): void
+    {
+        $this->pqc_decision_user = $userId;
+        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::CONFIRM;
+        $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+    }
+
+    public function isCustomerDecisionConfirm(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::CONFIRM;
+    }
+
+    public function isDecisionPending(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECISION_PENDING;
+    }
+
+    public function inProgress(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::IN_PROGRESS;
     }
 
     /**
@@ -145,5 +167,10 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function getPqcPq()
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqc_pq_id']);
+    }
+
+    public static function find(): Scopes
+    {
+        return new Scopes(static::class);
     }
 }
