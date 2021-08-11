@@ -51,9 +51,22 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
     }
 
+    public function customerDecisionModify(?int $userId, \DateTimeImmutable $date): void
+    {
+        $this->pqc_decision_user = $userId;
+        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::MODIFY;
+        $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+    }
+
     public function isCustomerDecisionConfirm(): bool
     {
         return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::CONFIRM;
+    }
+
+    public function isCustomerDecisionModify(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::MODIFY;
     }
 
     public function isDecisionPending(): bool
@@ -64,6 +77,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function inProgress(): void
     {
         $this->pqc_status_id = ProductQuoteChangeStatus::IN_PROGRESS;
+    }
+
+    public function error(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::ERROR;
     }
 
     /**

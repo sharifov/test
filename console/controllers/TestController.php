@@ -75,7 +75,9 @@ class TestController extends Controller
 {
     public function actionX()
     {
-        \Yii::createObject(BoRequest::class)->appliedQuote('1865ef55f3c6c01dca1f4f3128e82733');
+        $productQuote = ProductQuote::find()->andWhere(['pq_gid' => '1865ef55f3c6c01dca1f4f3128e82733'])->one();
+        $r = \Yii::createObject(BoRequest::class)->prepareQuoteToRequestData($productQuote);
+        VarDumper::dump($r);
         die;
 
         $productQuote = ProductQuote::find()->andWhere(['pq_gid' => '1865ef55f3c6c01dca1f4f3128e82733'])->one();

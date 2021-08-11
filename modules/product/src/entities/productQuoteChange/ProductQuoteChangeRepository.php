@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
+use modules\product\src\entities\productQuote\ProductQuote;
 use sales\repositories\NotFoundException;
 
 class ProductQuoteChangeRepository
@@ -12,6 +13,15 @@ class ProductQuoteChangeRepository
             return $productQuote;
         }
         throw new NotFoundException('Product Quote Change is not found.');
+    }
+
+    public function findParentRelated(ProductQuote $productQuote): ProductQuoteChange
+    {
+        $relatedParent = $productQuote->relateParent;
+        if (!$relatedParent) {
+            throw new \DomainException('No found related parent quote.');
+        }
+        return $this->findByProductQuoteId($relatedParent->pq_id);
     }
 
     public function save(ProductQuoteChange $change): void

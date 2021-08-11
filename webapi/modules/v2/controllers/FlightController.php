@@ -1347,6 +1347,12 @@ class FlightController extends BaseController
                 ])
             );
         } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Reprotection decision error',
+                'request' => $form->getAttributes(),
+                'error' => $e->getMessage(),
+                'exception' => AppHelper::throwableLog($e, true),
+            ], 'FlightController:reprotectionDecision');
             return new ErrorResponse(
                 new DataMessage([
                     'success' => false,

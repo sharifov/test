@@ -10,6 +10,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\product\ProductQuoteRepository;
+use sales\services\TransactionManager;
 
 /**
  * Class BoRequest
@@ -17,31 +18,38 @@ use sales\repositories\product\ProductQuoteRepository;
  * @property ProductQuoteRepository $productQuoteRepository
  * @property CasesRepository $casesRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property TransactionManager $transactionManager
  */
 class BoRequest
 {
     private ProductQuoteRepository $productQuoteRepository;
     private CasesRepository $casesRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private TransactionManager $transactionManager;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
         CasesRepository $casesRepository,
-        ProductQuoteChangeRepository $productQuoteChangeRepository
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
+        TransactionManager $transactionManager
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesRepository = $casesRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->transactionManager = $transactionManager;
     }
 
     public function appliedQuote(string $quoteGid): void
     {
         $quote = $this->productQuoteRepository->findByGidFlightProductQuote($quoteGid);
+        if (!$quote->flightQuote->isTypeReProtection()) {
+            throw new \DomainException('Quote is not reprotection quote.');
+        }
         if (!$quote->isApplied()) {
             throw new \DomainException('Quote is not applied. ID: ' . $quote->pq_id);
         }
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($quote->pq_id);
+        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($quote);
         if (!$productQuoteChange->isCustomerDecisionConfirm()) {
             throw new \DomainException('Product Quote Change customer decision status is invalid.');
         }
@@ -52,11 +60,15 @@ class BoRequest
         );
 
         if ($responseBO) {
-            $this->successProcessing($quote, $productQuoteChange);
+            $this->transactionManager->wrap(function () use ($quote, $productQuoteChange) {
+                $this->successProcessing($quote, $productQuoteChange);
+            });
             return;
         }
 
-        $this->errorProcessing($quote, $productQuoteChange);
+        $this->transactionManager->wrap(function () use ($quote, $productQuoteChange) {
+            $this->errorProcessing($quote, $productQuoteChange);
+        });
     }
 
     private function successProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
@@ -69,20 +81,26 @@ class BoRequest
         }
     }
 
+    private function errorProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
+    {
+        $this->markQuoteToError($quote);
+        $this->markQuoteChangeToError($productQuoteChange);
+        $case = $this->getCase($productQuoteChange);
+        if ($case) {
+            $this->processingCaseByErrorResult($case);
+        }
+    }
+
     private function markQuoteChangeToInProgress(ProductQuoteChange $productQuoteChange): void
     {
         $productQuoteChange->inProgress();
         $this->productQuoteChangeRepository->save($productQuoteChange);
     }
 
-    private function errorProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
+    private function markQuoteChangeToError(ProductQuoteChange $productQuoteChange): void
     {
-        $this->markQuoteToError($quote);
-        // todo may be $productQuoteChange -> to error ?
-        $case = $this->getCase($productQuoteChange);
-        if ($case) {
-            $this->processingCaseByErrorResult($case);
-        }
+        $productQuoteChange->error();
+        $this->productQuoteChangeRepository->save($productQuoteChange);
     }
 
     private function processingCaseByErrorResult(Cases $case): void
@@ -129,6 +147,9 @@ class BoRequest
 
     private function prepareQuoteToRequestData(ProductQuote $quote): array
     {
-        return $quote->flightQuote->toArray(['trips']);
+        return array_merge(
+            ['gid' => $quote->pq_gid],
+            $quote->flightQuote->toArray(['trips']),
+        );
     }
 }

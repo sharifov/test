@@ -605,4 +605,36 @@ class FlightQuoteManageService implements ProductQuoteService
             return $flightQuote;
         });
     }
+
+    public function createReprotectionModify(Flight $flight, array $quote, int $orderId): ProductQuote
+    {
+        $userId = null;
+        $productTypeServiceFee = null;
+        $productType = ProductType::find()->select(['pt_service_fee_percent'])->byFlight()->asArray()->one();
+        if ($productType && $productType['pt_service_fee_percent']) {
+            $productTypeServiceFee = $productType['pt_service_fee_percent'];
+        }
+        $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), $productTypeServiceFee);
+        $productQuote->pq_order_id = $orderId;
+        $this->productQuoteRepository->save($productQuote);
+
+        $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
+        $flightQuote->setTypeReProtection();
+        $this->flightQuoteRepository->save($flightQuote);
+
+        $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
+        $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
+
+        $this->createQuotePaxPrice($flightQuote, $productQuote, $quote);
+
+        $this->calcProductQuotePrice($productQuote, $flightQuote);
+
+        $this->createFlightTrip($flightQuote, $quote);
+
+        $this->createFlightQuoteFlight($flightQuote);
+
+        FlightQuoteLabelService::processingQuoteLabel($quote, $flightQuote->fq_id);
+
+        return $productQuote;
+    }
 }
