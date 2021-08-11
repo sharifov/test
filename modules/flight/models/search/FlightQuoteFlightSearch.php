@@ -2,11 +2,17 @@
 
 namespace modules\flight\models\search;
 
+use modules\flight\models\FlightQuote;
+use modules\order\src\entities\order\Order;
+use modules\product\src\entities\productQuote\ProductQuote;
 use yii\data\ActiveDataProvider;
 use modules\flight\models\FlightQuoteFlight;
+use yii\helpers\ArrayHelper;
 
 class FlightQuoteFlightSearch extends FlightQuoteFlight
 {
+    public $orderId;
+
     public function rules(): array
     {
         return [
@@ -16,7 +22,7 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
             ['fqf_original_data_json', 'string'],
             ['fqf_validating_carrier', 'string', 'max' => 2],
 
-            [['fqf_fq_id', 'fqf_id', 'fqf_status_id', 'fqf_trip_type_id'], 'integer'],
+            [['fqf_fq_id', 'fqf_id', 'fqf_status_id', 'fqf_trip_type_id', 'orderId'], 'integer'],
 
             [['fqf_created_dt', 'fqf_updated_dt'], 'datetime', 'format' => 'php:Y-m-d'],
         ];
@@ -25,6 +31,10 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
     public function search($params): ActiveDataProvider
     {
         $query = static::find();
+
+        $query->alias('fqf');
+
+        $query->addSelect(['fqf.*', 'or_id as orderId']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -38,6 +48,10 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
             return $dataProvider;
         }
 
+        $query->leftJoin(FlightQuote::tableName(), 'fq_id = fqf_fq_id');
+        $query->leftJoin(ProductQuote::tableName(), 'pq_id = fq_product_quote_id');
+        $query->leftJoin(Order::tableName(), 'or_id = pq_order_id');
+
         $query->andFilterWhere([
             'fqf_id' => $this->fqf_id,
             'fqf_fq_id' => $this->fqf_fq_id,
@@ -45,6 +59,7 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
             'fqf_status_id' => $this->fqf_status_id,
             'DATE(fqf_created_dt)' => $this->fqf_created_dt,
             'DATE(fqf_updated_dt)' => $this->fqf_updated_dt,
+            'or_id' => $this->orderId
         ]);
 
         $query
