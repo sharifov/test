@@ -1356,31 +1356,31 @@ class CasesController extends FController
 
                 switch ((int)$statusForm->statusId) {
                     case CasesStatus::STATUS_FOLLOW_UP:
-                        $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message, $statusForm->getConvertedDeadline());
+                        $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message, $statusForm->getConvertedDeadline(), $user->username);
                         break;
                     case CasesStatus::STATUS_TRASH:
-                        $this->casesManageService->trash($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->trash($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     case CasesStatus::STATUS_SOLVED:
-                        $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message, $user->username);
                         if ($statusForm->isSendFeedback()) {
                             $this->sendFeedbackEmailProcess($case, $statusForm, Auth::user());
                         }
                         break;
                     case CasesStatus::STATUS_PENDING:
-                        $this->casesManageService->pending($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->pending($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     case CasesStatus::STATUS_PROCESSING:
                         $this->casesManageService->processing($case->cs_id, $statusForm->userId, $user->id, $statusForm->message);
                         break;
                     case CasesStatus::STATUS_AWAITING:
-                        $this->casesManageService->awaiting($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->awaiting($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     case CasesStatus::STATUS_AUTO_PROCESSING:
-                        $this->casesManageService->autoProcessing($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->autoProcessing($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     case CasesStatus::STATUS_ERROR:
-                        $this->casesManageService->error($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->error($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     default:
                         Yii::$app->session->setFlash('error', 'Undefined status');
@@ -1715,7 +1715,8 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
-            ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name')
+            ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name'),
+            Auth::user()->username
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {

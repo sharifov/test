@@ -21,10 +21,14 @@ use yii\db\ActiveRecord;
  */
 class CaseEventLog extends ActiveRecord
 {
-    public const CASE_CREATED     = 1;
+    public const CASE_CREATED         = 1;
+    public const CASE_STATUS_CHANGED  = 2;
+    public const CASE_CATEGORY_CHANGE = 3;
 
     public const CASE_EVENT_LOG_LIST = [
-        self::CASE_CREATED      => 'Case created',
+        self::CASE_CREATED         => 'Case created',
+        self::CASE_STATUS_CHANGED  => 'Case status changed',
+        self::CASE_CATEGORY_CHANGE => 'Case category changed',
     ];
 
     /**
