@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\flight\src\useCases\reprotectionDecision\modify;
+namespace modules\flight\src\useCases\reprotectionDecision\refund;
 
 use common\components\BackOffice;
 use modules\flight\models\FlightQuoteFlight;
@@ -39,56 +39,88 @@ class BoRequest
         $this->transactionManager = $transactionManager;
     }
 
-    public function appliedQuote(string $quoteGid): void
+    public function refund(string $bookingId): void
     {
-        $quote = $this->productQuoteRepository->findByGidFlightProductQuote($quoteGid);
-        if (!$quote->flightQuote->isTypeReProtection()) {
-            throw new \DomainException('Quote is not reprotection quote.');
+        $flightQuoteFLight = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $bookingId])->one();
+        if (!$flightQuoteFLight) {
+            throw new \DomainException('Not found Flight Quote Flight with bookingId: ' . $bookingId);
         }
-        if (!$quote->isApplied()) {
-            throw new \DomainException('Quote is not applied. ID: ' . $quote->pq_id);
-        }
-
-        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($quote);
-        if (!$productQuoteChange->isCustomerDecisionModify()) {
-            throw new \DomainException('Product Quote Change customer decision status is invalid.');
+        $productQuote = $flightQuoteFLight->fqfFq->fqProductQuote ?? null;
+        if (!$productQuote) {
+            throw new \DomainException('Not found Product Quote with bookingId: ' . $bookingId);
         }
 
-        $responseBO = BackOffice::reprotectionCustomerDecisionModify(
-            $this->getBookingId($quote),
-            $this->prepareQuoteToRequestData($quote)
+        $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($productQuote->pq_id);
+        if (!$productQuoteChange->isCustomerDecisionRefund()) {
+            throw new \DomainException('Product Quote Change status is invalid.');
+        }
+
+        $responseBO = BackOffice::reprotectionCustomerDecisionRefund(
+            $this->getBookingId($productQuote)
         );
 
         if ($responseBO) {
-            $this->transactionManager->wrap(function () use ($quote, $productQuoteChange) {
-                $this->successProcessing($quote, $productQuoteChange);
+            $this->transactionManager->wrap(function () use ($productQuoteChange) {
+                $this->successProcessing($productQuoteChange);
             });
             return;
         }
 
-        $this->transactionManager->wrap(function () use ($quote, $productQuoteChange) {
-            $this->errorProcessing($quote, $productQuoteChange);
+        $this->transactionManager->wrap(function () use ($productQuoteChange) {
+            $this->errorProcessing($productQuoteChange);
         });
     }
 
-    private function successProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
+    private function successProcessing(ProductQuoteChange $productQuoteChange): void
     {
-        $this->markQuoteToInProgress($quote);
         $this->markQuoteChangeToInProgress($productQuoteChange);
+        $this->markRefundsToInProgress();
         $case = $this->getCase($productQuoteChange);
         if ($case) {
             $this->processingCaseBySuccessResult($case);
         }
     }
 
-    private function errorProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
+    private function errorProcessing(ProductQuoteChange $productQuoteChange): void
     {
-        $this->markQuoteToError($quote);
         $this->markQuoteChangeToError($productQuoteChange);
+        $this->markRefundsToError();
         $case = $this->getCase($productQuoteChange);
         if ($case) {
             $this->processingCaseByErrorResult($case);
         }
+    }
+
+    private function markRefundsToError(): void
+    {
+        $this->markOrderRefundToError();
+        $this->markProductQuoteRefundToError();
+    }
+
+    private function markOrderRefundToError(): void
+    {
+        // todo
+    }
+
+    private function markProductQuoteRefundToError(): void
+    {
+        // todo
+    }
+
+    private function markRefundsToInProgress(): void
+    {
+        $this->markOrderRefundToInProgress();
+        $this->markProductQuoteRefundToInProgress();
+    }
+
+    private function markOrderRefundToInProgress(): void
+    {
+        // todo
+    }
+
+    private function markProductQuoteRefundToInProgress(): void
+    {
+        // todo
     }
 
     private function markQuoteChangeToInProgress(ProductQuoteChange $productQuoteChange): void
@@ -106,13 +138,13 @@ class BoRequest
     private function processingCaseByErrorResult(Cases $case): void
     {
         $case->offIsAutomate();
-        $case->error(null, 'Reprotection quote book error');
+        $case->error(null, 'Refund request error');
         $this->casesRepository->save($case);
     }
 
     private function processingCaseBySuccessResult(Cases $case): void
     {
-        $case->awaiting(null, 'Awaiting for reprotection quote status update');
+        $case->awaiting(null, 'Awaiting for Refund request update');
         $this->casesRepository->save($case);
     }
 
@@ -124,18 +156,6 @@ class BoRequest
         return null;
     }
 
-    private function markQuoteToError(ProductQuote $quote): void
-    {
-        $quote->error(null, 'Reprotection quote book error');
-        $this->productQuoteRepository->save($quote);
-    }
-
-    private function markQuoteToInProgress(ProductQuote $quote): void
-    {
-        $quote->inProgress(null, 'Awaiting for reprotection quote status update');
-        $this->productQuoteRepository->save($quote);
-    }
-
     private function getBookingId(ProductQuote $quote): string
     {
         $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $quote->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
@@ -143,13 +163,5 @@ class BoRequest
             return $lastFlightQuoteFlightBookingId;
         }
         throw new \DomainException('Not found Booking Id. Quote ID: ' . $quote->pq_id);
-    }
-
-    private function prepareQuoteToRequestData(ProductQuote $quote): array
-    {
-        return array_merge(
-            ['gid' => $quote->pq_gid],
-            $quote->flightQuote->toArray(['trips']),
-        );
     }
 }

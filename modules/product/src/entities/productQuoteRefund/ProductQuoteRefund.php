@@ -43,6 +43,12 @@ use yii\db\ActiveRecord;
  */
 class ProductQuoteRefund extends \yii\db\ActiveRecord
 {
+    public static function createByScheduleChange(): self
+    {
+        $refund = new self();
+        return $refund;
+    }
+
     /**
      * @return array
      */

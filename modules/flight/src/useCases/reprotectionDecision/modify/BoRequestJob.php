@@ -22,7 +22,7 @@ class BoRequestJob extends BaseJob implements JobInterface
             $requestBo = \Yii::createObject(BoRequest::class);
             $requestBo->appliedQuote($this->quoteGid);
         } catch (\Throwable $e) {
-            \Yii::error(AppHelper::throwableLog($e, true), 'BoRequestJob:reprotection:modify');
+            \Yii::error(array_merge(['quoteGid' => $this->quoteGid], AppHelper::throwableLog($e, true)), 'BoRequestJob:reprotection:modify');
         }
     }
 }

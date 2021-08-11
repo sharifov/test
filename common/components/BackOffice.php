@@ -276,9 +276,9 @@ class BackOffice
         return self::reprotectionCustomerDecision($bookingId, 'modify', $quote);
     }
 
-    public static function reprotectionCustomerDecisionRefund(string $bookingId, array $quote): bool
+    public static function reprotectionCustomerDecisionRefund(string $bookingId): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'refund', $quote);
+        return self::reprotectionCustomerDecision($bookingId, 'refund', []);
     }
 
     private static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote): bool
@@ -299,8 +299,10 @@ class BackOffice
         $request = [
             'bookingId' => $bookingId,
             'type' => $type,
-            'quote' => $quote,
         ];
+        if ($quote) {
+            $request['quote'] = $quote;
+        }
 
 //        VarDumper::dump($request);die;
 

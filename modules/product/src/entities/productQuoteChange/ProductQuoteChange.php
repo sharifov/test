@@ -51,6 +51,14 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
     }
 
+    public function customerDecisionRefund(?int $userId, \DateTimeImmutable $date): void
+    {
+        $this->pqc_decision_user = $userId;
+        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::REFUND;
+        $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+    }
+
     public function customerDecisionModify(?int $userId, \DateTimeImmutable $date): void
     {
         $this->pqc_decision_user = $userId;
@@ -67,6 +75,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function isCustomerDecisionModify(): bool
     {
         return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::MODIFY;
+    }
+
+    public function isCustomerDecisionRefund(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::REFUND;
     }
 
     public function isDecisionPending(): bool
