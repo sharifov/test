@@ -31,10 +31,10 @@ $orderAbacDto = new OrderAbacDto($order);
 
 <div class="x_panel">
     <div class="x_title">
-      <?php /*
         <small>
             <span class="badge badge-white">
-                <?php if (Auth::can('/order/order/view')) : ?>
+                <?php echo 'OR ' . $order->or_id ?>
+                <?php /* if (Auth::can('/order/order/view')) : ?>
                     <?php
                         echo Html::a('OR ' . $order->or_id . ' <span class="glyphicon glyphicon-eye-open"></span>', ['/order/order/view', 'gid' => $order->or_gid], [
                             'target' => '_blank',
@@ -43,9 +43,9 @@ $orderAbacDto = new OrderAbacDto($order);
                     ?>
                 <?php else : ?>
                     <?php echo 'OR ' . $order->or_id ?>
-                <?php endif ?>
+                <?php endif*/ ?>
             </span>
-        </small> */ ?>
+        </small>
         (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
