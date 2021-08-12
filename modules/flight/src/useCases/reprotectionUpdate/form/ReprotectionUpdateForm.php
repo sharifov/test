@@ -1,11 +1,11 @@
 <?php
 
-namespace modules\flight\src\useCases\reprotectionCreate\form;
+namespace modules\flight\src\useCases\reprotectionUpdate\form;
 
 use yii\base\Model;
 
 /**
- * Class ReprotectionCreateForm
+ * Class ReprotectionUpdateForm
  *
  * @property string $type
  * @property array $data

@@ -23,7 +23,7 @@ use webapi\src\response\SuccessResponse;
 use Yii;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\cases\CasesManageService;
-use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionUpdateForm;
+use modules\flight\src\useCases\reprotectionUpdate\form\ReprotectionUpdateForm;
 
 class BoController extends BaseController
 {
