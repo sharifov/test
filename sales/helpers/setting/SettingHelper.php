@@ -429,5 +429,4 @@ class SettingHelper
     {
         return (bool)(Yii::$app->params['settings']['call_lead_auto_redial_enabled'] ?? false);
     }
-
 }
