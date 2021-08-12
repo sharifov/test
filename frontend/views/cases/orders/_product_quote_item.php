@@ -28,7 +28,7 @@ $changeStatusId = $quote->productQuoteLastChange->pqc_status_id ?? null;
 $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
 ?>
 
-    <td title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>"><?= $nr ?></td>
+    <td data-toggle="tooltip" data-original-title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>" title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>"><?= $nr ?></td>
     <td title="Product ID: <?=Html::encode($quote->pq_product_id)?>">
         <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
         <?=Html::encode($quote->pqProduct->prType->pt_name)?>
