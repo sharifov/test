@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'orr_id',
             'orr_uid',
             'orr_order_id',
+            'orr_case_id',
             'orr_selling_price',
             'orr_penalty_amount',
             'orr_processing_fee_amount',

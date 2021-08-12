@@ -61,6 +61,8 @@ use yii\widgets\ActiveForm;
             'step' => 'any'
         ]) ?>
 
+        <?= $form->field($model, 'pqr_case_id')->textInput() ?>
+
     </div>
 
     <?php ActiveForm::end(); ?>

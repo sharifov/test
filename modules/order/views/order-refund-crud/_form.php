@@ -75,6 +75,8 @@ use yii\widgets\ActiveForm;
         <?= $form->field($model, 'orr_description')->textarea(['rows' => 6]) ?>
 
         <?= $form->field($model, 'orr_expiration_dt')->widget(\sales\widgets\DateTimePicker::class) ?>
+
+        <?= $form->field($model, 'orr_case_id')->textInput() ?>
     </div>
   <?php ActiveForm::end(); ?>
 </div>

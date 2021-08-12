@@ -7,6 +7,7 @@ use yii\helpers\Html;
 class OrderRefundStatus
 {
     public const NEW = 1;
+    public const PENDING = 2;
     public const PROCESSING = 3;
     public const ACCEPT = 4;
     public const DECLINE = 5;
@@ -15,6 +16,7 @@ class OrderRefundStatus
 
     private const LIST = [
         self::NEW => 'New',
+        self::PENDING => 'Pending',
         self::PROCESSING => 'Processing',
         self::ACCEPT => 'Accept',
         self::DECLINE => 'Decline',
@@ -24,6 +26,7 @@ class OrderRefundStatus
 
     private const CSS_CLASS_LIST = [
         self::NEW => 'info',
+        self::PENDING => 'info',
         self::PROCESSING => 'warning',
         self::ACCEPT => 'success',
         self::DECLINE => 'secondary',

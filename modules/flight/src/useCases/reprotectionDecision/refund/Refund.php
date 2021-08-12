@@ -4,11 +4,13 @@ namespace modules\flight\src\useCases\reprotectionDecision\refund;
 
 use modules\flight\models\FlightQuoteFlight;
 use modules\order\src\entities\orderRefund\OrderRefund;
+use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
@@ -23,6 +25,8 @@ use sales\services\TransactionManager;
  * @property TransactionManager $transactionManager
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  * @property CasesRepository $casesRepository
+ * @property OrderRefundRepository $orderRefundRepository
+ * @property ProductQuoteRefundRepository $productQuoteRefundRepository
  */
 class Refund
 {
@@ -30,17 +34,23 @@ class Refund
     private TransactionManager $transactionManager;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
     private CasesRepository $casesRepository;
+    private OrderRefundRepository $orderRefundRepository;
+    private ProductQuoteRefundRepository $productQuoteRefundRepository;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
         TransactionManager $transactionManager,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        CasesRepository $casesRepository
+        CasesRepository $casesRepository,
+        OrderRefundRepository $orderRefundRepository,
+        ProductQuoteRefundRepository $productQuoteRefundRepository
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->transactionManager = $transactionManager;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->casesRepository = $casesRepository;
+        $this->orderRefundRepository = $orderRefundRepository;
+        $this->productQuoteRefundRepository = $productQuoteRefundRepository;
     }
 
     public function handle(string $bookingId): void
@@ -60,10 +70,10 @@ class Refund
         }
 
         try {
-            $this->transactionManager->wrap(function () use ($productQuote, $productQuoteChange) {
+            [$orderRefundId, $productQuoteRefundId] = $this->transactionManager->wrap(function () use ($productQuote, $productQuoteChange) {
                 $this->refundProductQuoteChange($productQuoteChange);
                 $this->cancelReprotectionQuotes($productQuote);
-                $this->createRefunds();
+                return $this->createRefunds($productQuote, $productQuoteChange);
             });
         } catch (\Throwable $e) {
             $case = $this->getCase($productQuoteChange);
@@ -73,25 +83,48 @@ class Refund
             throw $e;
         }
 
-        $this->createBoRequestJob($bookingId);
+        $this->createBoRequestJob($bookingId, $orderRefundId, $productQuoteRefundId);
     }
 
-    private function createRefunds()
+    private function createRefunds(ProductQuote $productQuote, ProductQuoteChange $productQuoteChange): array
     {
-        $this->createOrderRefund();
-        $this->createProductQuoteRefund();
+        $caseId = null;
+        if ($case = $this->getCase($productQuoteChange)) {
+            $caseId = $case->cs_id;
+        }
+
+        $orderRefundId = $this->createOrderRefund($productQuote, $caseId);
+        $productQuoteRefundId = $this->createProductQuoteRefund($productQuote, $orderRefundId, $caseId);
+        return [$orderRefundId, $productQuoteRefundId];
     }
 
-    private function createOrderRefund()
+    private function createOrderRefund(ProductQuote $productQuote, ?int $caseId): int
     {
-        $refund = OrderRefund::createByScheduleChange();
-        // todo
+        $orderRefund = OrderRefund::createByScheduleChange(
+            OrderRefund::generateUid(),
+            $productQuote->pq_order_id,
+            $productQuote->pq_price,
+            $productQuote->pqOrder->or_client_currency,
+            $productQuote->pq_client_currency_rate,
+            $productQuote->pqOrder->or_app_total,
+            $caseId
+        );
+        $this->orderRefundRepository->save($orderRefund);
+        return $orderRefund->orr_id;
     }
 
-    private function createProductQuoteRefund()
+    private function createProductQuoteRefund(ProductQuote $productQuote, int $orderRefundId, ?int $caseId): int
     {
-        $refund = ProductQuoteRefund::createByScheduleChange();
-        // todo
+        $refund = ProductQuoteRefund::createByScheduleChange(
+            $orderRefundId,
+            $productQuote->pq_id,
+            $productQuote->pq_price,
+            $productQuote->pqOrder->or_client_currency,
+            $productQuote->pqOrder->or_client_currency_rate,
+            $caseId
+        );
+        $this->productQuoteRefundRepository->save($refund);
+        return $refund->pqr_id;
     }
 
     private function refundProductQuoteChange(ProductQuoteChange $change): void
@@ -101,10 +134,12 @@ class Refund
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::REFUND]);
     }
 
-    private function createBoRequestJob(string $bookingId): void
+    private function createBoRequestJob(string $bookingId, int $orderRefundId, int $productQuoteRefundId): void
     {
         $boJob = new BoRequestJob();
         $boJob->bookingId = $bookingId;
+        $boJob->orderRefundId = $orderRefundId;
+        $boJob->productQuoteRefundId = $productQuoteRefundId;
         $jobId = \Yii::$app->queue_job->push($boJob);
         if (!$jobId) {
             \Yii::error([
