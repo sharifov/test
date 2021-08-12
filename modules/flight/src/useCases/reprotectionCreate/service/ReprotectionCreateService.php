@@ -229,6 +229,14 @@ class ReprotectionCreateService
         return null;
     }
 
+    public function getProductQuoteByBookingId(string $bookingId): ?ProductQuote
+    {
+        if ($flightQuoteFlight = FlightQuoteFlight::find()->where(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one()) {
+            return ArrayHelper::getValue($flightQuoteFlight, 'fqfFq.fqProductQuote');
+        }
+        return null;
+    }
+
     public function getFlightByBookingId(string $bookingId): ?Flight
     {
         if ($flightQuoteFlight = FlightQuoteFlight::find()->where(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one()) {
@@ -249,19 +257,16 @@ class ReprotectionCreateService
         return null;
     }
 
-    public function declineOldProductQuote(Order $order): ?ProductQuote
+    public function declineOldProductQuote(Order $order): void
     {
-        $oldProductQuote = null;
         if ($productQuotes = $order->productQuotes) {
             foreach ($productQuotes as $productQuote) {
                 if ($productQuote->isFlight() && !$productQuote->isDeclined()) {
                     $productQuote->declined(null, 'Declined from reProtection');
                     $this->productQuoteRepository->save($productQuote);
-                    $oldProductQuote = $productQuote;
                 }
             }
         }
-        return $oldProductQuote;
     }
 
     public function setCaseDeadline(Cases $case, FlightQuote $flightQuote): Cases

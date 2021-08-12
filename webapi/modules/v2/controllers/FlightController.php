@@ -121,11 +121,8 @@ class FlightController extends BaseController
      *   {
      *      "booking_id": "XXXYYYZ",
      *      "is_automate": false,
-     *      "flight_quote": {
-            "booking_id":"O53827C",
-            "project_key":"ovago",
-            "is_automate":true,
-            "flight_quote":{
+     *      "project_key":"ovago",
+     *      "flight_quote":{
                 "gds": "S",
                 "pcc": "8KI0",
                 "validatingCarrier": "PR",

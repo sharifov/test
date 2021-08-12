@@ -63,9 +63,12 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             $case = $reProtectionCreateService->createCase($flightRequest);
 
             if ($order = $reProtectionCreateService->getOrderByBookingId($flightRequest->fr_booking_id)) {
-                if (!$oldProductQuote = $reProtectionCreateService->declineOldProductQuote($order)) {
+
+                if (!$oldProductQuote = $reProtectionCreateService->getProductQuoteByBookingId($flightRequest->fr_booking_id)) {
                     $reProtectionCreateService->caseToManual($case, 'Flight quote not updated');
                     $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, 'Original quote not declined');
+                } else {
+                    $reProtectionCreateService->declineOldProductQuote($order);
                 }
 
                 if (!$client = $reProtectionCreateService->getClientByOrderProject($order->getId(), $flightRequest->fr_project_id)) {
@@ -88,7 +91,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $flight,
                         $flightRequest->getFlightQuoteData(),
                         $order->getId(),
-                        $flightRequest->fr_booking_id,
+                        null,
                         $case->cs_id
                     );
                     if ($oldProductQuote) {
@@ -152,7 +155,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $flight,
                         $flightRequest->getFlightQuoteData(),
                         $order->getId(),
-                        $flightRequest->fr_booking_id,
+                        null,
                         $case->cs_id
                     );
                     if ($oldProductQuote) {

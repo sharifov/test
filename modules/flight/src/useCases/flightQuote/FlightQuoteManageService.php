@@ -567,7 +567,7 @@ class FlightQuoteManageService implements ProductQuoteService
         Flight $flight,
         array $quote,
         int $orderId,
-        string $bookingId,
+        ?string $bookingId,
         int $caseId,
         ?int $userId = null,
         ?float $productTypeServiceFee = null
