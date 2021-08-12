@@ -2,6 +2,9 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 
 /* @var $this yii\web\View */
 /* @var $model modules\product\src\entities\productQuoteChange\ProductQuoteChange */
@@ -32,12 +35,24 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqc_id',
             'pqc_pq_id',
             'pqc_case_id',
-            'pqc_decision_user',
-            'pqc_status_id',
-            'pqc_decision_type_id',
-            'pqc_created_dt',
-            'pqc_updated_dt',
-            'pqc_decision_dt',
+            'pqc_decision_user:username',
+            [
+                'attribute' => 'pqc_status_id',
+                'value' => static function (ProductQuoteChange $model) {
+                    return ProductQuoteChangeStatus::asFormat($model->pqc_status_id);
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'pqc_decision_type_id',
+                'value' => static function (ProductQuoteChange $model) {
+                    return ProductQuoteChangeDecisionType::asFormat($model->pqc_decision_type_id);
+                },
+                'format' => 'raw'
+            ],
+            'pqc_created_dt:byUserDateTime',
+            'pqc_updated_dt:byUserDateTime',
+            'pqc_decision_dt:byUserDateTime',
         ],
     ]) ?>
 

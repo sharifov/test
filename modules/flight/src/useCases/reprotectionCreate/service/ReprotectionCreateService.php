@@ -22,6 +22,7 @@ use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\cases\CaseCategory;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\exception\CheckRestrictionException;
 use sales\exception\ValidationException;
@@ -153,6 +154,7 @@ class ReprotectionCreateService
             $case->pending(null, $description);
         }
         $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, 'Case auto processing: disabled');
         return $case;
     }
 
@@ -163,6 +165,7 @@ class ReprotectionCreateService
             $case->autoProcessing(null, $description);
         }
         $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, 'Case auto processing: enabled');
         return $case;
     }
 

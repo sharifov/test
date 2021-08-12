@@ -18,18 +18,21 @@ class Command
     public $subject;
     public $description;
     public $orderUid;
+    public $username;
 
     public function __construct(
         int $caseId,
         int $categoryId,
         ?string $subject,
         ?string $description,
-        ?string $orderUid
+        ?string $orderUid,
+        ?string $username
     ) {
         $this->caseId = $caseId;
         $this->categoryId = $categoryId;
         $this->subject = $subject;
         $this->description = $description;
         $this->orderUid = $orderUid;
+        $this->username = $username;
     }
 }

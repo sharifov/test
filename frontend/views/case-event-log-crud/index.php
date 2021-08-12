@@ -36,6 +36,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'cel_id',
             'cel_case_id',
             'cel_description',
+            [
+                'attribute' => 'cel_type_id',
+                'value' => static function (CaseEventLog $model) {
+                    return CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id];
+                }
+            ],
             //'cel_data_json',
             [
                 'attribute' => 'cel_data_json',
