@@ -2,7 +2,6 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
-use Yii;
 use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
@@ -29,36 +28,6 @@ use yii\helpers\ArrayHelper;
  */
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
-    public const STATUS_NEW         = 1;
-    public const STATUS_DECISION    = 2;
-    public const STATUS_IN_PROGRESS = 3;
-    public const STATUS_COMPLETE    = 4;
-    public const STATUS_CANCELED    = 5;
-    public const STATUS_ERROR       = 6;
-    public const STATUS_DECLINED    = 7;
-    public const STATUS_DECIDED     = 8;
-
-    public const STATUS_LIST = [
-        self::STATUS_NEW         => 'New',
-        self::STATUS_DECISION    => 'Decision Pending',
-        self::STATUS_IN_PROGRESS => 'In Progress',
-        self::STATUS_COMPLETE    => 'Complete',
-        self::STATUS_CANCELED    => 'Canceled',
-        self::STATUS_ERROR       => 'Error',
-        self::STATUS_DECLINED    => 'Declined',
-        self::STATUS_DECIDED     => 'Decided',
-    ];
-
-    public const DECISION_CONFIRM = 1;
-    public const DECISION_MODIFY  = 2;
-    public const DECISION_REFUND  = 3;
-
-    public const DECISION_LIST = [
-        self::DECISION_CONFIRM => 'Confirm',
-        self::DECISION_MODIFY  => 'Modify',
-        self::DECISION_REFUND  => 'Refund',
-    ];
-
     public function behaviors(): array
     {
         $behaviors = [
@@ -72,6 +41,65 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function customerDecisionConfirm(?int $userId, \DateTimeImmutable $date): void
+    {
+        $this->pqc_decision_user = $userId;
+        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::CONFIRM;
+        $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+    }
+
+    public function customerDecisionRefund(?int $userId, \DateTimeImmutable $date): void
+    {
+        $this->pqc_decision_user = $userId;
+        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::REFUND;
+        $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+    }
+
+    public function customerDecisionModify(?int $userId, \DateTimeImmutable $date): void
+    {
+        $this->pqc_decision_user = $userId;
+        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::MODIFY;
+        $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+    }
+
+    public function isCustomerDecisionConfirm(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::CONFIRM;
+    }
+
+    public function isCustomerDecisionModify(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::MODIFY;
+    }
+
+    public function isCustomerDecisionRefund(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::REFUND;
+    }
+
+    public function isDecisionPending(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECISION_PENDING;
+    }
+
+    public function inProgress(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::IN_PROGRESS;
+    }
+
+    public function decisionPending(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::DECISION_PENDING;
+    }
+
+    public function error(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::ERROR;
     }
 
     /**
@@ -94,8 +122,8 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             [['pqc_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['pqc_case_id' => 'cs_id']],
             [['pqc_decision_user'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqc_decision_user' => 'id']],
             [['pqc_pq_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqc_pq_id' => 'pq_id']],
-            ['pqc_status_id', 'in', 'range' => array_keys(self::STATUS_LIST)],
-            ['pqc_decision_type_id', 'in', 'range' => array_keys(self::DECISION_LIST)],
+            ['pqc_status_id', 'in', 'range' => array_keys(ProductQuoteChangeStatus::LIST)],
+            ['pqc_decision_type_id', 'in', 'range' => array_keys(ProductQuoteChangeDecisionType::LIST)],
         ];
     }
 
@@ -110,7 +138,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_case_id' => 'Case ID',
             'pqc_decision_user' => 'Decision User',
             'pqc_status_id' => 'Status ID',
-            'pqc_decision_type_id' => 'Decision Type ID',
+            'pqc_decision_type_id' => 'Decision Type',
             'pqc_created_dt' => 'Created Dt',
             'pqc_updated_dt' => 'Updated Dt',
             'pqc_decision_dt' => 'Decision Dt',
@@ -145,5 +173,19 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function getPqcPq()
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqc_pq_id']);
+    }
+
+    public static function find(): Scopes
+    {
+        return new Scopes(static::class);
+    }
+
+    public static function createNew(int $productQuoteId, ?int $caseId): ProductQuoteChange
+    {
+        $model = new self();
+        $model->pqc_pq_id = $productQuoteId;
+        $model->pqc_case_id = $caseId;
+        $model->pqc_status_id = ProductQuoteChangeStatus::NEW;
+        return $model;
     }
 }

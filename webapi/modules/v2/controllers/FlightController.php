@@ -623,7 +623,7 @@ class FlightController extends BaseController
                             "fqt_id": 526,
                             "fqt_uid": "fqt6103c94699a2e",
                             "fqt_key": null,
-                            "fqt_duration": 280,
+                            "duration": 280,
                             "segments": [
                                 {
                                     "segmentId": 1,
@@ -633,21 +633,21 @@ class FlightController extends BaseController
                                     "fqs_stop": 0,
                                     "flightNumber": 656,
                                     "bookingClass": "K",
-                                    "fqs_duration": 105,
+                                    "duration": 105,
                                     "departureAirportCode": "KIV",
                                     "departureAirportTerminal": "",
                                     "arrivalAirportCode": "VIE",
                                     "arrivalAirportTerminal": "3",
                                     "fqs_operating_airline": "RO",
                                     "fqs_marketing_airline": "RO",
-                                    "fqs_air_equip_type": "E95",
-                                    "fqs_marriage_group": "I",
+                                    "airEquipType": "E95",
+                                    "marriageGroup": "I",
                                     "cabin": "Y",
-                                    "fqs_meal": "",
-                                    "fqs_fare_code": "K03CLSE8",
+                                    "meal": "",
+                                    "fareCode": "K03CLSE8",
                                     "fqs_ticket_id": null,
                                     "fqs_recheck_baggage": 0,
-                                    "fqs_mileage": 583,
+                                    "mileage": 583,
                                     "departureLocation": "Chisinau",
                                     "arrivalLocation": "Vienna",
                                     "cabin": "Economy",
@@ -657,15 +657,15 @@ class FlightController extends BaseController
                                     "stops": [
                                         {
                                             "qss_quote_segment_id": 9,
-                                            "qss_location_iata": "SCL",
-                                            "qss_equipment": "",
-                                            "qss_elapsed_time": 120,
-                                            "qss_duration": 120,
+                                            "locationCode": "SCL",
+                                            "equipment": "",
+                                            "elapsedTime": 120,
+                                            "duration": 120,
                                             "qss_departure_dt": "2021-09-09 00:00:00",
-                                            "qss_arrival_dt": "2021-09-08 00:00:00"
+                                            "arrivalDateTime": "2021-09-08 00:00:00"
                                         }
                                     ],
-                                    "baggages": [
+                                    "baggage": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
                                             "qsb_flight_quote_segment_id": 1076,
@@ -698,21 +698,21 @@ class FlightController extends BaseController
                                     "fqs_stop": 0,
                                     "flightNumber": 455,
                                     "bookingClass": "K",
-                                    "fqs_duration": 145,
+                                    "duration": 145,
                                     "departureAirportCode": "VIE",
                                     "departureAirportTerminal": "3",
                                     "arrivalAirportCode": "LHR",
                                     "arrivalAirportTerminal": "2",
                                     "fqs_operating_airline": "OS",
                                     "fqs_marketing_airline": "OS",
-                                    "fqs_air_equip_type": "321",
-                                    "fqs_marriage_group": "O",
+                                    "airEquipType": "321",
+                                    "marriageGroup": "O",
                                     "cabin": "Y",
-                                    "fqs_meal": "",
-                                    "fqs_fare_code": "K03CLSE8",
+                                    "meal": "",
+                                    "fareCode": "K03CLSE8",
                                     "fqs_ticket_id": null,
                                     "fqs_recheck_baggage": 0,
-                                    "fqs_mileage": 774,
+                                    "mileage": 774,
                                     "departureLocation": "Vienna",
                                     "arrivalLocation": "London",
                                     "cabin": "Economy",
@@ -720,7 +720,7 @@ class FlightController extends BaseController
                                     "marketingAirline": "OS",
                                     "stop": 0,
                                     "stops": [],
-                                    "baggages": [
+                                    "baggage": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
                                             "qsb_flight_quote_segment_id": 1077,
@@ -751,7 +751,7 @@ class FlightController extends BaseController
                             "fqt_id": 527,
                             "fqt_uid": "fqt6103c9469f378",
                             "fqt_key": null,
-                            "fqt_duration": 95,
+                            "duration": 95,
                             "segments": [
                                 {
                                     "segmentId": 1,
@@ -761,21 +761,21 @@ class FlightController extends BaseController
                                     "fqs_stop": 0,
                                     "flightNumber": 905,
                                     "bookingClass": "Q",
-                                    "fqs_duration": 95,
+                                    "duration": 95,
                                     "departureAirportCode": "LHR",
                                     "departureAirportTerminal": "2",
                                     "arrivalAirportCode": "FRA",
                                     "arrivalAirportTerminal": "1",
                                     "fqs_operating_airline": "LH",
                                     "fqs_marketing_airline": "LH",
-                                    "fqs_air_equip_type": "32N",
-                                    "fqs_marriage_group": "O",
+                                    "airEquipType": "32N",
+                                    "marriageGroup": "O",
                                     "cabin": "Y",
-                                    "fqs_meal": "",
-                                    "fqs_fare_code": "Q03CLSE0",
+                                    "meal": "",
+                                    "fareCode": "Q03CLSE0",
                                     "fqs_ticket_id": null,
                                     "fqs_recheck_baggage": 0,
-                                    "fqs_mileage": 390,
+                                    "mileage": 390,
                                     "departureLocation": "London",
                                     "arrivalLocation": "Frankfurt am Main",
                                     "cabin": "Economy",
@@ -783,7 +783,7 @@ class FlightController extends BaseController
                                     "marketingAirline": "LH",
                                     "stop": 0,
                                     "stops": [],
-                                    "baggages": [
+                                    "baggage": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
                                             "qsb_flight_quote_segment_id": 1078,
@@ -814,7 +814,7 @@ class FlightController extends BaseController
                             "fqt_id": 528,
                             "fqt_uid": "fqt6103c946a08d6",
                             "fqt_key": null,
-                            "fqt_duration": 140,
+                            "duration": 140,
                             "segments": [
                                 {
                                     "segmentId": 1,
@@ -824,21 +824,21 @@ class FlightController extends BaseController
                                     "fqs_stop": 0,
                                     "flightNumber": 1474,
                                     "bookingClass": "Q",
-                                    "fqs_duration": 140,
+                                    "duration": 140,
                                     "departureAirportCode": "FRA",
                                     "departureAirportTerminal": "1",
                                     "arrivalAirportCode": "KIV",
                                     "arrivalAirportTerminal": "",
                                     "fqs_operating_airline": "RO",
                                     "fqs_marketing_airline": "RO",
-                                    "fqs_air_equip_type": "E90",
-                                    "fqs_marriage_group": "O",
+                                    "airEquipType": "E90",
+                                    "marriageGroup": "O",
                                     "cabin": "Y",
-                                    "fqs_meal": "",
-                                    "fqs_fare_code": "Q03CLSE0",
+                                    "meal": "",
+                                    "fareCode": "Q03CLSE0",
                                     "fqs_ticket_id": null,
                                     "fqs_recheck_baggage": 0,
-                                    "fqs_mileage": 953,
+                                    "mileage": 953,
                                     "departureLocation": "Frankfurt am Main",
                                     "arrivalLocation": "Chisinau",
                                     "cabin": "Economy",
@@ -846,7 +846,7 @@ class FlightController extends BaseController
                                     "marketingAirline": "LH",
                                     "stop": 0,
                                     "stops": [],
-                                    "baggages": [
+                                    "baggage": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
                                             "qsb_flight_quote_segment_id": 1079,
@@ -981,7 +981,7 @@ class FlightController extends BaseController
                             "fqt_id": 525,
                             "fqt_uid": "fqt61015f35534ec",
                             "fqt_key": null,
-                            "fqt_duration": 395,
+                            "duration": 395,
                             "segments": [
                                 {
                                     "segmentId": 1,
@@ -991,21 +991,21 @@ class FlightController extends BaseController
                                     "fqs_stop": 0,
                                     "flightNumber": 202,
                                     "bookingClass": "E",
-                                    "fqs_duration": 75,
+                                    "duration": 75,
                                     "departureAirportCode": "KIV",
                                     "departureAirportTerminal": "",
                                     "arrivalAirportCode": "OTP",
                                     "arrivalAirportTerminal": "",
                                     "fqs_operating_airline": "RO",
                                     "fqs_marketing_airline": "RO",
-                                    "fqs_air_equip_type": "AT7",
-                                    "fqs_marriage_group": "",
+                                    "airEquipType": "AT7",
+                                    "marriageGroup": "",
                                     "cabin": "Y",
-                                    "fqs_meal": "",
-                                    "fqs_fare_code": "EOWSVRMD",
+                                    "meal": "",
+                                    "fareCode": "EOWSVRMD",
                                     "fqs_ticket_id": null,
                                     "fqs_recheck_baggage": 0,
-                                    "fqs_mileage": null,
+                                    "mileage": null,
                                     "departureLocation": "Chisinau",
                                     "arrivalLocation": "Bucharest",
                                     "cabin": "Economy",
@@ -1013,7 +1013,7 @@ class FlightController extends BaseController
                                     "marketingAirline": "RO",
                                     "stop": 0,
                                     "stops": [],
-                                    "baggages": [
+                                    "baggage": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
                                             "qsb_flight_quote_segment_id": 1074,
@@ -1035,21 +1035,21 @@ class FlightController extends BaseController
                                     "fqs_stop": 0,
                                     "flightNumber": 391,
                                     "bookingClass": "E",
-                                    "fqs_duration": 225,
+                                    "duration": 225,
                                     "departureAirportCode": "OTP",
                                     "departureAirportTerminal": "",
                                     "arrivalAirportCode": "LHR",
                                     "arrivalAirportTerminal": "",
                                     "fqs_operating_airline": "RO",
                                     "fqs_marketing_airline": "RO",
-                                    "fqs_air_equip_type": "318",
-                                    "fqs_marriage_group": "",
+                                    "airEquipType": "318",
+                                    "marriageGroup": "",
                                     "cabin": "Y",
-                                    "fqs_meal": "",
-                                    "fqs_fare_code": "EOWSVRGB",
+                                    "meal": "",
+                                    "fareCode": "EOWSVRGB",
                                     "fqs_ticket_id": null,
                                     "fqs_recheck_baggage": 0,
-                                    "fqs_mileage": null,
+                                    "mileage": null,
                                     "departureLocation": "Bucharest",
                                     "arrivalLocation": "London",
                                     "cabin": "Economy",
@@ -1057,7 +1057,7 @@ class FlightController extends BaseController
                                     "marketingAirline": "RO",
                                     "stop": 0,
                                     "stops": [],
-                                    "baggages": [
+                                    "baggage": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
                                             "qsb_flight_quote_segment_id": 1075,
@@ -1336,7 +1336,7 @@ class FlightController extends BaseController
             } elseif ($form->isModify()) {
                 Yii::createObject(reprotectionDecision\modify\Modify::class)->handle($form->reprotection_quote_gid, $form->flight_product_quote);
             } elseif ($form->isRefund()) {
-                Yii::createObject(reprotectionDecision\refund\Refund::class)->handle($form->reprotection_quote_gid);
+                Yii::createObject(reprotectionDecision\refund\Refund::class)->handle($form->booking_id);
             } else {
                 throw new \DomainException('Undefined type');
             }
@@ -1347,6 +1347,12 @@ class FlightController extends BaseController
                 ])
             );
         } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Reprotection decision error',
+                'request' => $form->getAttributes(),
+                'error' => $e->getMessage(),
+                'exception' => AppHelper::throwableLog($e, true),
+            ], 'FlightController:reprotectionDecision');
             return new ErrorResponse(
                 new DataMessage([
                     'success' => false,

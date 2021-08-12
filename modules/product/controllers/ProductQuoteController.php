@@ -11,6 +11,7 @@ use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
@@ -22,6 +23,7 @@ use sales\exception\CheckRestrictionException;
 use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
+use webapi\src\response\behaviors\RequestBehavior;
 use Yii;
 use frontend\controllers\FController;
 use yii\filters\VerbFilter;
@@ -101,6 +103,12 @@ class ProductQuoteController extends FController
                     'clone' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'preview-reprotection-quote-email',
+                    'reprotection-quote-send-email'
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -181,27 +189,33 @@ class ProductQuoteController extends FController
                 $emailData['reprotection_quote'] = $quote->serialize();
                 $emailData['order'] = $quote->pqOrder->serialize();
                 $emailFrom = Auth::user()->email;
+                $emailTemplateType = null;
 
                 if ($case->cs_project_id) {
-                    $upp = UserProjectParams::find()->where(['upp_project_id' => $case->cs_project_id, 'upp_user_id' => Auth::id()])->withEmailList()->one();
-                    if ($upp) {
-                        $emailFrom = $upp->getEmail() ?: $emailFrom;
+                    $project = $case->project;
+                    if ($project && $emailConfig = $project->getReprotectionQuoteEmailConfig()) {
+                        $emailFrom = $emailConfig['emailFrom'] ?? '';
+                        $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
                     }
                 }
 
                 if (!$emailFrom) {
                     throw new \RuntimeException('Agent not has assigned email');
                 }
-                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $form->emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
+
+                if (!$emailTemplateType) {
+                    throw new \RuntimeException('Email template type is not set in project params');
+                }
+                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
                 if ($previewEmailResult['error']) {
                     $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
-                    $form->addError('general', 'Communication service error: ' . ($result['error']['name'] ?? '') . ' ( ' . ($result['error']['message']  ?? '') . ' )');
+                    $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');
                 } else {
                     $previewEmailForm = new ReprotectionQuotePreviewEmailForm($previewEmailResult['data']);
                     $previewEmailForm->email_from_name = Auth::user()->nickname;
                     $previewEmailForm->productQuoteId = $quote->pq_id;
 
-                    $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
+                    $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $emailTemplateType]);
                     if ($emailTemplateType) {
                         $previewEmailForm->email_tpl_id = $emailTemplateType->etp_id;
                     }
@@ -211,10 +225,10 @@ class ProductQuoteController extends FController
                     ]);
                 }
             } catch (\DomainException | \RuntimeException $e) {
-                Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewReprotectionQuoteEmail::DomainException|RuntimeException');
                 $form->addError('error', $e->getMessage());
             } catch (\Throwable $e) {
-                $form->addError('general', $e->getMessage());
+                Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewReprotectionQuoteEmail::Throwable');
+                $form->addError('general', 'Internal Server Error');
             }
         }
 
@@ -246,6 +260,13 @@ class ProductQuoteController extends FController
                     $caseAbacDto = new CasesAbacDto($case);
                     if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                         throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+                    }
+
+                    $reprotectionQuote = $this->productQuoteRepository->find($previewEmailForm->productQuoteId);
+
+                    $originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id);
+                    if (!$originQuote) {
+                        throw new \RuntimeException('Origin quote not found');
                     }
 
                     $mail = new Email();
@@ -281,14 +302,22 @@ class ProductQuoteController extends FController
                         $mailResponse = $mail->sendMail();
 
                         if (isset($mailResponse['error']) && $mailResponse['error']) {
-                            $previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                            throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                        }
+
+                        $productQuoteChange = $originQuote->productQuoteLastChange;
+                        if ($productQuoteChange) {
+                            $productQuoteChange->decisionPending();
+                            if (!$productQuoteChange->save()) {
+                                Yii::warning('ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0], 'ProductQuoteController::actionReprotectionQuoteSendEmail::ProductQuoteChange::save');
+                            }
                         }
 
                         try {
                             $hybridService = Yii::createObject(HybridService::class);
                             $data = [
                                 'booking_id' => $case->cs_order_uid,
-                                'reprotection_quote_gid' => $previewEmailForm->productQuoteId,
+                                'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
                                 'case_gid' => $case->cs_gid,
                             ];
                             $hybridService->whReprotection($case->cs_project_id, $data);

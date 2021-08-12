@@ -4,6 +4,8 @@ use modules\cases\src\abac\CasesAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -22,6 +24,8 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
     $hasReprotection = true;
 }
 
+$changeStatusId = $quote->productQuoteLastChange->pqc_status_id ?? null;
+$refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
 ?>
 
     <td title="Product Quote ID: <?= Html::encode($quote->pq_id)?>"><?= $nr ?></td>
@@ -29,20 +33,15 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
         <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
         <?=Html::encode($quote->pqProduct->prType->pt_name)?>
         <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
-      <br>
-      <?= $hasReprotection ? Html::a('Has reprotection quotes', '#', [
-          'class' => 'has_reprotection_quotes',
-      ]) : '' ?>
     </td>
 
     <!--                    <td>--><?php //=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
 
     <td><?=Html::encode($quote->pq_name)?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
+    <td><?= $changeStatusId ? ProductQuoteChangeStatus::asFormat($changeStatusId) : '--' ?></td>
+    <td><?= $refundStatusId ? ProductQuoteRefundStatus::asFormat($refundStatusId) : '--' ?></td>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
-    <td class="text-right"><?=number_format($quote->optionAmountSum, 2)?></td>
-    <td class="text-right"><?=number_format($quote->pq_service_fee_sum, 2)?></td>
-    <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
     <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
     <td>
       <div class="btn-group">
@@ -78,17 +77,31 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
       </div>
     </td>
 
-    <?php if ($nr && $reprotectionQuotes) : ?>
-      <tr class="<?= $hasReprotection ? 'hidden' : '' ?>">
-        <?php foreach ($reprotectionQuotes as $reprotectionQuote) : ?>
-            <?= $this->render('_product_quote_item', [
-              'quote' => $reprotectionQuote,
-              'nr' => null,
-              'order' => $order,
-              'isReprotection' => true,
-              'caseId' => $caseId,
-                'caseAbacDto' => $caseAbacDto
-            ]) ?>
-        <?php endforeach; ?>
+    <?php if ($reprotectionQuotes) : ?>
+      <tr>
+        <td></td>
+        <td colspan="8">
+          <p>Reprotection Quotes:</p>
+          <table style="width: 100%;">
+            <tr>
+              <th style="padding:5px;">Product</th>
+              <th style="padding:5px;">Name</th>
+              <th style="padding:5px;">Status</th>
+              <th style="padding:5px;">Created</th>
+              <th style="padding:5px;width: 10px;"></th>
+            </tr>
+            <?php foreach ($reprotectionQuotes as $reprotectionQuote) : ?>
+                <tr>
+                    <?= $this->render('_reprotection_quote_item', [
+                      'quote' => $reprotectionQuote,
+                      'order' => $order,
+                      'isReprotection' => true,
+                      'caseId' => $caseId,
+                      'caseAbacDto' => $caseAbacDto
+                    ]) ?>
+                </tr>
+            <?php endforeach; ?>
+          </table>
+        </td>
       </tr>
     <?php endif; ?>

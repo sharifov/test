@@ -7,8 +7,9 @@ use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteLead\ProductQuoteLead;
-use modules\product\src\entities\productQuoteLead\ProductQuoteLeadQuery;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
@@ -97,6 +98,9 @@ use yii\db\ActiveRecord;
  * @property AttractionQuote| $attractionQuote
  * @property ProductQuote[]|null $relates
  * @property ProductQuote|null $relateParent
+ * @property ProductQuoteChange|null $productQuoteLastChange
+ * @property ProductQuoteRefund|null $productQuoteLastRefund
+ * @property ProductQuote|null $originProductQuote
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
@@ -253,6 +257,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             ->viaTable('product_quote_relation', ['pqr_related_pq_id' => 'pq_id']);
     }
 
+    public function getProductQuoteLastChange(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->orderBy(['pqc_pq_id' => SORT_DESC]);
+    }
+
+    public function getProductQuoteLastRefund(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->orderBy(['pqr_id' => SORT_DESC]);
+    }
+
     /**
      * @return ActiveQuery
      */
@@ -366,6 +380,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteOptions(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id']);
+    }
+
+    public function getOriginProductQuote(): ActiveQuery
+    {
+        return $this->hasOne(self::class, ['pqr_parent_pq_id' => 'pq_id'])->innerJoin(ProductQuoteRelation::tableName(), 'pq_id = pqr_related_pq_id');
     }
 
     /**
@@ -590,6 +609,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isDeclined(): bool
     {
         return $this->pq_status_id === ProductQuoteStatus::DECLINED;
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::CANCELED;
     }
 
     /**
@@ -897,6 +921,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getQuoteDetailsPageUrl'];
         $this->detailsPageUrl = $finder();
         return $this->detailsPageUrl;
+    }
+
+    public function isEqual(ProductQuote $quote): bool
+    {
+        return $this->pq_id === $quote->pq_id;
     }
 
     public function fields(): array

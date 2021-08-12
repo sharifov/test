@@ -14,6 +14,8 @@ use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
 use sales\exception\BoResponseException;
@@ -86,11 +88,14 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $flight,
                         $flightRequest->getFlightQuoteData(),
                         $order->getId(),
-                        $flightRequest->fr_booking_id
+                        $flightRequest->fr_booking_id,
+                        $case->cs_id
                     );
                     if ($oldProductQuote) {
                         $relation = ProductQuoteRelation::createReProtection($oldProductQuote->pq_id, $flightQuote->fq_product_quote_id);
                         $productQuoteRelationRepository->save($relation);
+                        $productQuoteChange = ProductQuoteChange::createNew($oldProductQuote->pq_id, $case->cs_id);
+                        (new ProductQuoteChangeRepository())->save($productQuoteChange);
                     }
                 } catch (\Throwable $throwable) {
                     $reProtectionCreateService->caseToManual($case, 'New quote not created');
@@ -126,6 +131,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     $oldProductQuote = $reProtectionCreateService->createFlightInfrastructure($orderCreateFromSaleForm, $saleData, $order);
                     $oldProductQuote->declined();
                     $productQuoteRepository->save($oldProductQuote);
+                    $productQuoteChange = ProductQuoteChange::createNew($oldProductQuote->pq_id, $case->cs_id);
+                    (new ProductQuoteChangeRepository())->save($productQuoteChange);
 
                     $reProtectionCreateService->createPayment($orderCreateFromSaleForm, $saleData, $order);
                 } catch (\Throwable $throwable) {
@@ -145,7 +152,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $flight,
                         $flightRequest->getFlightQuoteData(),
                         $order->getId(),
-                        $flightRequest->fr_booking_id
+                        $flightRequest->fr_booking_id,
+                        $case->cs_id
                     );
                     if ($oldProductQuote) {
                         $relation = ProductQuoteRelation::createReProtection($oldProductQuote->pq_id, $flightQuote->fq_product_quote_id);

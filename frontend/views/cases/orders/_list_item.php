@@ -27,6 +27,7 @@ $formatter = new \common\components\i18n\Formatter();
 
 <div class="x_panel">
     <div class="x_title">
+      <?php /*
         <small>
             <span class="badge badge-white">
                 <?php if (Auth::can('/order/order/view')) : ?>
@@ -40,16 +41,16 @@ $formatter = new \common\components\i18n\Formatter();
                     <?php echo 'OR ' . $order->or_id ?>
                 <?php endif ?>
             </span>
-        </small>
+        </small> */ ?>
         (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
         <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
         "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
 
-        <?php if ($order->or_profit_amount > 0) : ?>
+        <?php /* if ($order->or_profit_amount > 0) : ?>
             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
-        <?php endif; ?>
+        <?php endif; */ ?>
         <?php if ($process) : ?>
             &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= Status::LIST[$process->opm_status] ?? 'undefined'?>)
         <?php endif; ?>
@@ -57,6 +58,7 @@ $formatter = new \common\components\i18n\Formatter();
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
             <!--            </li>-->
+          <?php /*
             <li>
                 <?= Html::a('<i class="fas fa-dollar-sign text-success"></i> Split Profit', null, [
                     'class' => 'text-success btn-split',
@@ -76,6 +78,7 @@ $formatter = new \common\components\i18n\Formatter();
                     ]) ?>
                 </li>
             <?php endif; ?>
+ */ ?>
 
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle text-warning" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars"></i> Actions</a>
@@ -84,6 +87,15 @@ $formatter = new \common\components\i18n\Formatter();
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
+                    <?php if (Auth::can('/order/order/view')) : ?>
+                        <?php
+                        echo Html::a('OR ' . $order->or_id . ' <span class="glyphicon glyphicon-eye-open"></span> Detail view', ['/order/order/view', 'gid' => $order->or_gid], [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                            'class' => 'dropdown-item'
+                        ])
+                        ?>
+                    <?php endif; ?>
 
                     <?php if ($process) : ?>
                         <?php if ($process->isRunning()) : ?>
@@ -177,10 +189,9 @@ $formatter = new \common\components\i18n\Formatter();
                     <th>Product</th>
                     <th>Name</th>
                     <th>Status</th>
+                    <th>Change Status</th>
+                    <th>Refund Status</th>
                     <th>Created</th>
-                    <th title="Options, USD">Options, USD</th>
-                    <th title="Service FEE">FEE</th>
-                    <th title="Origin Price, USD">Price, USD</th>
                     <th>Client Price</th>
                     <th></th>
                 </tr>
@@ -215,8 +226,9 @@ $formatter = new \common\components\i18n\Formatter();
                     $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
 
                 ?>
+                <?php /*
                 <tr>
-                    <th class="text-right" colspan="5">Order Amount: </th>
+                    <th class="text-right" colspan="2">Order Amount: </th>
                     <th class="text-right"><?=number_format($ordOptionTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($ordTotalFee, 2)?></th>
                     <th class="text-right"><?=number_format($ordTotalPrice, 2)?></th>
@@ -224,25 +236,17 @@ $formatter = new \common\components\i18n\Formatter();
                     <th></th>
                 </tr>
                 <tr>
-                    <th class="text-right" colspan="5">Tips: </th>
+                    <th class="text-right" colspan="2">Tips: </th>
                     <td class="text-center" colspan="2">(DB)</td>
                     <th class="text-right"><?=number_format($orderTipsAmount, 2)?></th>
                     <th class="text-right"><?=number_format($orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
+ */ ?>
                 <tr>
-                    <th class="text-right" colspan="5">Calc Total: </th>
-                    <td class="text-center" colspan="2">(price + opt + tips)</td>
-                    <th class="text-right"><?=number_format($calcTotalPrice, 2)?></th>
-                    <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <th class="text-right" colspan="5">Total: </th>
-                    <td class="text-center" colspan="2">(DB + Tips)</td>
-                    <th class="text-right"><?=number_format($order->or_app_total + $orderTipsAmount, 2)?></th>
-                    <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
-                    <th></th>
+                    <th class="text-right" colspan="4">Total: </th>
+                    <td class="text-center" colspan="3">(price + opt + tips)</td>
+                    <th class="text-right" colspan="2"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                 </tr>
             <?php endif; ?>
         </table>
@@ -251,9 +255,12 @@ $formatter = new \common\components\i18n\Formatter();
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($order->or_created_dt)) ?>,
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($order->or_client_currency)?> <span title="Rate: <?=$order->or_client_currency_rate?>">(<?=round($order->or_client_currency_rate, 3)?>)</span>
 
+      <?php /*
         <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum  + $orderTipsAmount, 2)?> USD, Total: <?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></h4></div>
+ */ ?>
 
         <hr>
+        <?php /*
         <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-invoice-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
             <h4><i class="fas fa-file-invoice-dollar"></i> Invoice List</h4>
             <?php
@@ -418,8 +425,8 @@ $formatter = new \common\components\i18n\Formatter();
                             <td><?= Payment::getStatusName($payment->pay_status_id) ?></td>
                             <td>
                                 <?php if ($payment->pay_method_id) {
-                                        echo $payment->payMethod->pm_name;
-                                } ?>
+                            echo $payment->payMethod->pm_name;
+                        } ?>
                             </td>
                             <td class="text-right <?=$payment->pay_amount > 0 ? 'text-success' : 'text-danger' ?>"><?=number_format($payment->pay_amount, 2)?></td>
                             <td>
@@ -541,6 +548,8 @@ $formatter = new \common\components\i18n\Formatter();
             <?php Pjax::end() ?>
         <?php endif ?>
 
+      */ ?>
+
     </div>
 
 
@@ -590,4 +599,3 @@ $css = <<<CSS
 }
 CSS;
 $this->registerCss($css);
-

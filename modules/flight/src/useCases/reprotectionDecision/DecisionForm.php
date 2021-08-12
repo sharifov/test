@@ -2,6 +2,8 @@
 
 namespace modules\flight\src\useCases\reprotectionDecision;
 
+use common\components\validators\CheckJsonValidator;
+use common\components\validators\IsArrayValidator;
 use yii\base\Model;
 
 /**
@@ -10,7 +12,7 @@ use yii\base\Model;
  * @property string $booking_id
  * @property string $type
  * @property string $reprotection_quote_gid
- * @property string $flight_product_quote
+ * @property array $flight_product_quote
  */
 class DecisionForm extends Model
 {
@@ -46,7 +48,8 @@ class DecisionForm extends Model
             ['flight_product_quote', 'required', 'when' => function () {
                 return $this->isModify();
             }],
-            ['flight_product_quote', 'safe'], // todo
+            ['flight_product_quote', CheckJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['flight_product_quote', IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 

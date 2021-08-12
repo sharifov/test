@@ -40,10 +40,9 @@ echo $activeForm->errorSummary($form);
 
 <?= $activeForm->field($form, 'caseId')->hiddenInput()->label(false) ?>
 <?= $activeForm->field($form, 'quoteId')->hiddenInput()->label(false) ?>
-<?= $activeForm->field($form, 'emailTemplateType')->hiddenInput(['value' => 'reprotection_quote'])->label(false) ?>
     <div class="row">
         <div class="col-sm-12 form-group">
-            <?= $activeForm->field($form, 'clientEmail')->dropDownList($clientEmails, ['prompt' => '---']) ?>
+            <?= $activeForm->field($form, 'clientEmail')->dropDownList($clientEmails) ?>
         </div>
     </div>
 

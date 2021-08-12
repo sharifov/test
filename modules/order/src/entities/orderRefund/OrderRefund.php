@@ -43,6 +43,17 @@ use yii\db\ActiveRecord;
  */
 class OrderRefund extends \yii\db\ActiveRecord
 {
+    public static function createByScheduleChange(): self
+    {
+        $refund = new self();
+        $refund->orr_processing_fee_amount = 0;
+        $refund->orr_penalty_amount = 0;
+        $refund->orr_charge_amount = 0;
+        $refund->orr_description = 'Schedule change refund request';
+        //$refund->orr_status_id = OrderRefundStatus::PE;
+        return $refund;
+    }
+
     /**
      * @return array
      */
