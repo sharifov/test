@@ -3,6 +3,7 @@
 namespace webapi\modules\v2\controllers;
 
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use sales\entities\cases\CaseEventLog;
 use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
@@ -156,7 +157,8 @@ class BoController extends BaseController
 
                 $case = $productQuote->relateParent->productQuoteLastChange->pqcCase;
                 $case->cs_is_automate = false;
-                Yii::createObject(CasesManageService::class)->solved($case, null, 'system:Bo Webhook');
+                $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, 'Case auto processing: disabled');
+                Yii::createObject(CasesManageService::class)->solved($case, null, 'system: Bo Webhook');
                 $caseRepo = Yii::createObject(CasesRepository::class);
                 $caseRepo->save($case);
             }

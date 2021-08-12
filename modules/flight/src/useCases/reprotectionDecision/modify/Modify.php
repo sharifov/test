@@ -6,9 +6,11 @@ use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reprotectionDecision\CancelOtherReprotectionQuotes;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
+use sales\entities\cases\CaseEventLog;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 
@@ -77,6 +79,7 @@ class Modify
     {
         $change->customerDecisionModify(null, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::MODIFY]);
     }
 
     private function createBoRequestJob(ProductQuote $quote): void
