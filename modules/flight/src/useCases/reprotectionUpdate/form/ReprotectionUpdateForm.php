@@ -15,7 +15,6 @@ class ReprotectionUpdateForm extends Model
 {
     public $type;
     public $data;
-    public $reprotection_quote_gid;
 
     public function rules(): array
     {
