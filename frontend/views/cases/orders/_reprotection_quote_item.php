@@ -25,6 +25,7 @@ use yii\helpers\Url;
 <td style="padding:5px;"><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
 */ ?>
 <td style="padding:5px;"><?=($nr + 1)?></td>
+<td style="padding:5px;"><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
 <td style="padding:5px;"><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
 <td style="padding:5px;">
     <div class="btn-group">
