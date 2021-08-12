@@ -8277,17 +8277,30 @@
           {
             "group": "Parameter",
             "type": "string",
-            "size": "10",
             "optional": false,
             "field": "data.booking_id",
             "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "data.project_key",
+            "description": "<p>Project Key Ex: (ovago, hop2)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "data.reprotection_quote_gid",
+            "description": "<p>Project Key Ex: (ovago, hop2)</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"type\": \"reprotection-update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n            ...\n    }\n}",
+          "content": "{\n    \"type\": \"reprotection-update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"reprotection_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n    }\n}",
           "type": "json"
         }
       ]
@@ -8296,7 +8309,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n     \"technical\": {\n          ...\n     },\n     \"request\": {\n          ...\n     }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n     \"data\": {\n         \"success\": true\n     }\n}",
           "type": "json"
         }
       ]
@@ -8305,7 +8318,7 @@
       "examples": [
         {
           "title": "Error-Response:",
-          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"errors\": [\n         \"Not found data on POST request\"\n      ],\n     \"technical\": {\n          ...\n     },\n     \"request\": {\n          ...\n     }\n}",
+          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"errors\": [\n         \"Not found data on POST request\"\n      ]\n}",
           "type": "json"
         }
       ]
