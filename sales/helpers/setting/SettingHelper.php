@@ -413,4 +413,21 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
+
+    /**
+     * @return int
+     */
+    public static function getLeadAutoRedialDelay(): int
+    {
+        return (int)(Yii::$app->params['settings']['call_lead_auto_redial_delay'] ?? 0);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function getLeadAutoRedialEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['call_lead_auto_redial_enabled'] ?? false);
+    }
+
 }
