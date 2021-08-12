@@ -3,6 +3,7 @@
 namespace modules\order\src\services\createFromSale;
 
 use common\components\SearchService;
+use common\models\Currency;
 use common\models\Payment;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
@@ -115,8 +116,8 @@ class OrderCreateFromSaleService
         );
         $order = (new Order())->create($dto);
         $order->or_pay_status_id = $payStatusId;
-        //$order->or_app_total = $appTotal;
-        //$order->or_client_total = $appTotal; /* TODO::  */
+        $order->or_client_currency_rate = $form->currency === Currency::DEFAULT_CURRENCY ? Currency::DEFAULT_CURRENCY_CLIENT_RATE : null;
+
         return $order;
     }
 
