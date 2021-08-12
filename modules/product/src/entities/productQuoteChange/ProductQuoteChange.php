@@ -137,7 +137,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_pq_id' => 'Product Quote ID',
             'pqc_case_id' => 'Case ID',
             'pqc_decision_user' => 'Decision User',
-            'pqc_status_id' => 'Status ID',
+            'pqc_status_id' => 'Status',
             'pqc_decision_type_id' => 'Decision Type',
             'pqc_created_dt' => 'Created Dt',
             'pqc_updated_dt' => 'Updated Dt',

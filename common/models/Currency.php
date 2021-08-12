@@ -29,9 +29,9 @@ use yii\helpers\VarDumper;
  */
 class Currency extends \yii\db\ActiveRecord
 {
-    private const DEFAULT_CURRENCY = 'USD';
+    public const DEFAULT_CURRENCY = 'USD';
 
-    private const DEFAULT_CURRENCY_CLIENT_RATE = 1.00;
+    public const DEFAULT_CURRENCY_CLIENT_RATE = 1.00;
 
     private const DEFAULT_CURRENCY_BASE_RATE = 1.00;
 

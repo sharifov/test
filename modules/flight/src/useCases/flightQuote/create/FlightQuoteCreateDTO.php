@@ -50,10 +50,11 @@ class FlightQuoteCreateDTO
      */
     public function __construct(Flight $flight, ProductQuote $productQuote, array $quote, ?int $userId)
     {
+        $key = $quote['key'] ?? uniqid('', true); /* TODO:: for test from BO */
         $this->flightId = $flight->fl_id;
         $this->sourceId = null;
         $this->productQuoteId = $productQuote->pq_id;
-        $this->hashKey = FlightQuoteHelper::generateHashQuoteKey($quote['key']);
+        $this->hashKey = FlightQuoteHelper::generateHashQuoteKey($key);
 
         $paymentFee = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id);
         if ($paymentFee) {
