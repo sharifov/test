@@ -42,7 +42,7 @@ class ReprotectionCreateForm extends Model
 
             [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
 
-            [['booking_id'], 'checkExistByHash'],
+            //[['booking_id'], 'checkExistByHash'],
         ];
     }
 

@@ -342,6 +342,9 @@ class FlightQuoteManageService implements ProductQuoteService
      */
     private function createQuotePaxPrice(FlightQuote $flightQuote, ProductQuote $productQuote, array $quote): void
     {
+        if (!array_key_exists('passengers', $quote)) {
+            return; /* TODO::  */
+        }
         foreach ($quote['passengers'] as $passengerType => $passenger) {
             $flightQuotePaxPrice = FlightQuotePaxPrice::create((new FlightQuotePaxPriceDTO($flightQuote, $productQuote, $passenger, $passengerType, $quote)));
             $this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
@@ -359,6 +362,9 @@ class FlightQuoteManageService implements ProductQuoteService
      */
     private function createFlightTrip(FlightQuote $flightQuote, array $quote): void
     {
+        if (!array_key_exists('trips', $quote)) {
+            return; /* TODO::  */
+        }
         foreach ($quote['trips'] as $tripKey => $trip) {
             $tripNr = (int)$tripKey + 1;
             $segmentNr = 1;
@@ -379,6 +385,9 @@ class FlightQuoteManageService implements ProductQuoteService
      */
     private function createSegment(array $trip, FlightQuote $flightQuote, FlightQuoteTrip $flightQuoteTrip, int $tripNr, int $segmentNr): void
     {
+        if (!array_key_exists('segments', $trip)) {
+            return; /* TODO::  */
+        }
         foreach ($trip['segments'] as $segment) {
             $ticketId = FlightQuoteHelper::getTicketId($flightQuote, $tripNr, $segmentNr);
 

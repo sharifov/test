@@ -244,7 +244,7 @@ $formatter = new \common\components\i18n\Formatter();
                 </tr>
  */ ?>
                 <tr>
-                    <th class="text-right" colspan="4">Calc Total: </th>
+                    <th class="text-right" colspan="4">Total: </th>
                     <td class="text-center" colspan="3">(price + opt + tips)</td>
                     <th class="text-right" colspan="2"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                 </tr>

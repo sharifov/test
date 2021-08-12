@@ -5,7 +5,9 @@ namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 use modules\flight\src\useCases\reprotectionDecision\CancelOtherReprotectionQuotes;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use sales\entities\cases\CaseEventLog;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 
@@ -64,6 +66,7 @@ class Confirm
     {
         $change->customerDecisionConfirm(null, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]);
     }
 
     private function createBoRequestJob(ProductQuote $quote): void

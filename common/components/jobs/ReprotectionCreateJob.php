@@ -201,6 +201,11 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         throw new CheckRestrictionException('ClientEmail not send');
                     }
 
+                    if ($oldProductQuote && isset($productQuoteChange)) {
+                        $productQuoteChange->decisionPending();
+                        (new ProductQuoteChangeRepository())->save($productQuoteChange);
+                    }
+
                     $reProtectionCreateService->caseToAutoProcessing($case);
                     $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_DONE, 'Client Email send');
                 } catch (\Throwable $throwable) {

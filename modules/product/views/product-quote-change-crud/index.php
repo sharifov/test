@@ -3,9 +3,13 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\product\src\entities\productQuoteRefund\ProductQuoteChangeSearch */
+/* @var $searchModel modules\product\src\entities\productQuoteChange\search\ProductQuoteChangeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Product Quote Changes';
@@ -28,9 +32,28 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqc_id',
             'pqc_pq_id',
             'pqc_case_id',
-            'pqc_decision_user',
-            'pqc_status_id',
-            'pqc_decision_type_id',
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'pqc_decision_user',
+                'relation' => 'pqcDecisionUser',
+                'placeholder' => 'Decision User'
+            ],
+            [
+                'attribute' => 'pqc_status_id',
+                'value' => static function (ProductQuoteChange $model) {
+                    return ProductQuoteChangeStatus::asFormat($model->pqc_status_id);
+                },
+                'filter' => ProductQuoteChangeStatus::getList(),
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'pqc_decision_type_id',
+                'value' => static function (ProductQuoteChange $model) {
+                    return ProductQuoteChangeDecisionType::asFormat($model->pqc_decision_type_id);
+                },
+                'filter' => ProductQuoteChangeDecisionType::getList(),
+                'format' => 'raw'
+            ],
             [
                 'attribute' => 'pqc_created_dt',
                 'class' => DateTimeColumn::class

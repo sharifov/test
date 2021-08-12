@@ -7,10 +7,12 @@ use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\product\ProductQuoteRepository;
@@ -129,6 +131,7 @@ class Refund
     {
         $change->customerDecisionRefund(null, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::REFUND]);
     }
 
     private function createBoRequestJob(string $bookingId, int $orderRefundId, int $productQuoteRefundId): void
