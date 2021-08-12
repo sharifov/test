@@ -603,6 +603,39 @@ $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-s
         btn.removeClass('disabled');
     });
 });
+$('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotection-confirm', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    $.ajax({
+        type: 'POST',
+        data: {
+            quoteId: btn.data('reprotection-quote-id')
+        },
+        url: url     
+    })
+    .done(function (data) {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        if (data.error) {
+            createNotify('Reprotection confirm', data.message, 'error');
+        } else {
+            createNotify('Reprotection confirm', 'Success', 'success');
+        }
+    })
+    .fail(function () {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        createNotify('Reprotection confirm', 'Server error', 'error');
+    });
+});
 JS;
 $this->registerJs($js);
 

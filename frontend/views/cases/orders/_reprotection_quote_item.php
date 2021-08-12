@@ -49,6 +49,11 @@ use yii\helpers\Url;
                     'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id])
                 ]) ?>
             <?php endif; ?>
+            <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Confirm', null, [
+                    'class' => 'dropdown-item btn-reprotection-confirm',
+                    'data-url' => Url::to(['/product/product-quote/reprotection-confirm']),
+                    'data-reprotection-quote-id' => $quote->pq_id
+            ]); ?>
         </div>
     </div>
 </td>

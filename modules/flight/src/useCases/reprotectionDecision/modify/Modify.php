@@ -49,7 +49,7 @@ class Modify
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
     }
 
-    public function handle(string $reprotectionQuoteGid, array $newQuote): void
+    public function handle(string $reprotectionQuoteGid, array $newQuote, ?int $userId): void
     {
         $reprotectionQuote = $this->productQuoteRepository->findByGidFlightProductQuote($reprotectionQuoteGid);
         if (!$reprotectionQuote->flightQuote->isTypeReProtection()) {
@@ -64,28 +64,29 @@ class Modify
             throw new \DomainException('Product Quote Change status is invalid.');
         }
 
-        $quote = $this->transactionManager->wrap(function () use ($reprotectionQuote, $newQuote, $productQuoteChange) {
-            $quote = $this->createNewReprotectionQuote($reprotectionQuote, $newQuote);
+        $quote = $this->transactionManager->wrap(function () use ($reprotectionQuote, $newQuote, $productQuoteChange, $userId) {
+            $quote = $this->createNewReprotectionQuote($reprotectionQuote, $newQuote, $userId);
             $this->markQuoteToApplied($quote);
-            $this->cancelOtherReprotectionQuotes->cancel($quote);
-            $this->modifyProductQuoteChange($productQuoteChange);
+            $this->cancelOtherReprotectionQuotes->cancel($quote, $userId);
+            $this->modifyProductQuoteChange($productQuoteChange, $userId);
             return $quote;
         });
 
-        $this->createBoRequestJob($quote);
+        $this->createBoRequestJob($quote, $userId);
     }
 
-    private function modifyProductQuoteChange(ProductQuoteChange $change): void
+    private function modifyProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
     {
-        $change->customerDecisionModify(null, new \DateTimeImmutable());
+        $change->customerDecisionModify($userId, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::MODIFY]);
     }
 
-    private function createBoRequestJob(ProductQuote $quote): void
+    private function createBoRequestJob(ProductQuote $quote, ?int $userId): void
     {
         $boJob = new BoRequestJob();
         $boJob->quoteGid = $quote->pq_gid;
+        $boJob->userId = $userId;
         $jobId = \Yii::$app->queue_job->push($boJob);
         if (!$jobId) {
             \Yii::error([
@@ -101,10 +102,10 @@ class Modify
         $this->productQuoteRepository->save($quote);
     }
 
-    private function createNewReprotectionQuote(ProductQuote $lastReprotectionQuote, array $quote): ProductQuote
+    private function createNewReprotectionQuote(ProductQuote $lastReprotectionQuote, array $quote, ?int $userId): ProductQuote
     {
         $newQuote = $this->flightQuoteManageService->createReprotectionModify($lastReprotectionQuote->flightQuote->fqFlight, $quote, $lastReprotectionQuote->pq_order_id);
-        $relation = ProductQuoteRelation::createReProtection($lastReprotectionQuote->relateParent->pq_id, $newQuote->pq_id);
+        $relation = ProductQuoteRelation::createReProtection($lastReprotectionQuote->relateParent->pq_id, $newQuote->pq_id, $userId);
         $this->productQuoteRelationRepository->save($relation);
         return $newQuote;
     }

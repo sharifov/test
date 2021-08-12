@@ -20,7 +20,7 @@ class CancelOtherReprotectionQuotes
         $this->productQuoteRepository = $productQuoteRepository;
     }
 
-    public function cancel(ProductQuote $quote): void
+    public function cancel(ProductQuote $quote, ?int $userId): void
     {
         $parentRelatedId = ProductQuoteRelation::find()->select(['pqr_parent_pq_id'])->byRelatedQuoteId($quote->pq_id)->scalar();
         if (!$parentRelatedId) {
@@ -38,7 +38,7 @@ class CancelOtherReprotectionQuotes
 
         foreach ($quotes as $productQuote) {
             if (!$productQuote->isEqual($quote) && !$productQuote->isCanceled() && $productQuote->isFlight() && $productQuote->flightQuote->isTypeReProtection()) {
-                $productQuote->cancelled(null, 'Canceled from reProtection');
+                $productQuote->cancelled($userId, 'Canceled from reProtection');
                 $this->productQuoteRepository->save($productQuote);
             }
         }

@@ -1260,11 +1260,11 @@ class FlightController extends BaseController
 
         try {
             if ($form->isConfirm()) {
-                Yii::createObject(reprotectionDecision\confirm\Confirm::class)->handle($form->reprotection_quote_gid);
+                Yii::createObject(reprotectionDecision\confirm\Confirm::class)->handle($form->reprotection_quote_gid, null);
             } elseif ($form->isModify()) {
-                Yii::createObject(reprotectionDecision\modify\Modify::class)->handle($form->reprotection_quote_gid, $form->flight_product_quote);
+                Yii::createObject(reprotectionDecision\modify\Modify::class)->handle($form->reprotection_quote_gid, $form->flight_product_quote, null);
             } elseif ($form->isRefund()) {
-                Yii::createObject(reprotectionDecision\refund\Refund::class)->handle($form->booking_id);
+                Yii::createObject(reprotectionDecision\refund\Refund::class)->handle($form->booking_id, null);
             } else {
                 throw new \DomainException('Undefined type');
             }

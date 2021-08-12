@@ -53,7 +53,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $sellingPrice,
         $clientCurrency,
         $clientCurrencyRate,
-        $caseId
+        $caseId,
+        $userId
     ): self {
         $refund = new self();
         $refund->pqr_order_refund_id = $orderRefundId;
@@ -68,6 +69,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $refund->pqr_client_selling_price = CurrencyHelper::roundUp($refund->pqr_selling_price * $refund->pqr_client_currency_rate);
         $refund->pqr_client_refund_amount = CurrencyHelper::roundUp($refund->pqr_refund_amount * $refund->pqr_client_currency_rate);
         $refund->pqr_case_id = $caseId;
+        $refund->detachBehavior('user');
+        $refund->pqr_created_user_id = $userId;
         return $refund;
     }
 

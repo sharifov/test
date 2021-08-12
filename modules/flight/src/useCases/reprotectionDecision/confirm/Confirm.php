@@ -38,7 +38,7 @@ class Confirm
         $this->cancelOtherReprotectionQuotes = $cancelOtherReprotectionQuotes;
     }
 
-    public function handle(string $reprotectionQuoteGid): void
+    public function handle(string $reprotectionQuoteGid, ?int $userId): void
     {
         $reprotectionQuote = $this->productQuoteRepository->findByGidFlightProductQuote($reprotectionQuoteGid);
         if (!$reprotectionQuote->flightQuote->isTypeReProtection()) {
@@ -53,26 +53,27 @@ class Confirm
             throw new \DomainException('Product Quote Change status is invalid.');
         }
 
-        $this->transactionManager->wrap(function () use ($reprotectionQuote, $productQuoteChange) {
+        $this->transactionManager->wrap(function () use ($reprotectionQuote, $productQuoteChange, $userId) {
             $this->markQuoteToApplied($reprotectionQuote);
-            $this->cancelOtherReprotectionQuotes->cancel($reprotectionQuote);
-            $this->confirmProductQuoteChange($productQuoteChange);
+            $this->cancelOtherReprotectionQuotes->cancel($reprotectionQuote, $userId);
+            $this->confirmProductQuoteChange($productQuoteChange, $userId);
         });
 
-        $this->createBoRequestJob($reprotectionQuote);
+        $this->createBoRequestJob($reprotectionQuote, $userId);
     }
 
-    private function confirmProductQuoteChange(ProductQuoteChange $change): void
+    private function confirmProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
     {
-        $change->customerDecisionConfirm(null, new \DateTimeImmutable());
+        $change->customerDecisionConfirm($userId, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]);
     }
 
-    private function createBoRequestJob(ProductQuote $quote): void
+    private function createBoRequestJob(ProductQuote $quote, ?int $userId): void
     {
         $boJob = new BoRequestJob();
         $boJob->quoteGid = $quote->pq_gid;
+        $boJob->userId = $userId;
         $jobId = \Yii::$app->queue_job->push($boJob);
         if (!$jobId) {
             \Yii::error([

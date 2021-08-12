@@ -9,6 +9,7 @@ use common\models\Notifications;
 use common\models\UserProjectParams;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
+use modules\flight\src\useCases\reprotectionDecision\confirm\Confirm;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
@@ -106,7 +107,8 @@ class ProductQuoteController extends FController
             'access' => [
                 'allowActions' => [
                     'preview-reprotection-quote-email',
-                    'reprotection-quote-send-email'
+                    'reprotection-quote-send-email',
+                    'reprotection-confirm',
                 ]
             ]
         ];
@@ -343,6 +345,35 @@ class ProductQuoteController extends FController
         return $this->renderAjax('partial/_reprotection_quote_preview_email', [
             'previewEmailForm' => $previewEmailForm
         ]);
+    }
+
+    public function actionReprotectionConfirm()
+    {
+        try {
+            $quoteId = Yii::$app->request->post('quoteId');
+            if (!$quoteId) {
+                throw new \Exception('Not found Quote ID');
+            }
+
+            $quote = Yii::createObject(ProductQuoteRepository::class)->find($quoteId);
+            if (!$quote->isFlight()) {
+                throw new \Exception('Quote is not flight quote.');
+            }
+            if (!$quote->flightQuote->isTypeReProtection()) {
+                throw new \Exception('Quote is not reprotection.');
+            }
+
+            Yii::createObject(Confirm::class)->handle($quote->pq_gid, Auth::id());
+
+            return $this->asJson([
+                'error' => false,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
