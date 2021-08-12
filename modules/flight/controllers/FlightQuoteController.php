@@ -4,6 +4,7 @@ namespace modules\flight\controllers;
 
 use common\models\Notifications;
 use frontend\helpers\JsonHelper;
+use modules\cases\src\abac\CasesAbacObject;
 use modules\flight\components\api\ApiFlightQuoteSearchService;
 use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\Flight;
@@ -141,6 +142,11 @@ class FlightQuoteController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'ajax-quote-details'
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -378,6 +384,10 @@ class FlightQuoteController extends FController
     public function actionAjaxQuoteDetails(): string
     {
         $productQuoteId = Yii::$app->request->get('id');
+
+        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
 
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
         $lead = $productQuote->pqProduct->prLead;

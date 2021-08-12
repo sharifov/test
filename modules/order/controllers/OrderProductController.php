@@ -3,7 +3,9 @@
 namespace modules\order\controllers;
 
 use frontend\controllers\FController;
+use modules\cases\src\abac\CasesAbacObject;
 use modules\lead\src\services\LeadFailBooking;
+use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderSourceType;
@@ -22,6 +24,7 @@ use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\filters\VerbFilter;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use sales\model\leadProduct\entity\LeadProductRepository;
 
@@ -78,6 +81,11 @@ class OrderProductController extends FController
                     'delete-ajax' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'delete-ajax'
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -152,6 +160,10 @@ class OrderProductController extends FController
     {
         $orderId = (int) Yii::$app->request->post('order_id');
         $productQuoteId = (int) Yii::$app->request->post('product_quote_id');
+
+        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
 
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db->beginTransaction();

@@ -5,6 +5,7 @@ namespace modules\hotel\controllers;
 use common\models\Lead;
 use common\models\Notifications;
 use frontend\controllers\FController;
+use modules\cases\src\abac\CasesAbacObject;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
@@ -42,6 +43,7 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -97,6 +99,11 @@ class HotelQuoteController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'ajax-quote-details'
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -638,6 +645,11 @@ class HotelQuoteController extends FController
     public function actionAjaxQuoteDetails(): string
     {
         $productQuoteId = Yii::$app->request->get('id');
+
+        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
 
         return $this->renderAjax('partial/_quote_view_details', [
