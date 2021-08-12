@@ -63,7 +63,6 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             $case = $reProtectionCreateService->createCase($flightRequest);
 
             if ($order = $reProtectionCreateService->getOrderByBookingId($flightRequest->fr_booking_id)) {
-
                 if (!$oldProductQuote = $reProtectionCreateService->getProductQuoteByBookingId($flightRequest->fr_booking_id)) {
                     $reProtectionCreateService->caseToManual($case, 'Flight quote not updated');
                     $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, 'Original quote not declined');
