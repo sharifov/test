@@ -33,6 +33,8 @@ use common\models\Project;
 use common\models\Quote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
@@ -892,5 +894,23 @@ class Formatter extends \yii\i18n\Formatter
             return '<span class="label-warning label" title="' . strip_tags($relative) . '">expired</span>';
         }
         return $relative;
+    }
+
+    public function asProductQuoteChangeStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return ProductQuoteChangeStatus::asFormat($value);
+    }
+
+    public function asProductQuoteChangeDecisionType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return ProductQuoteChangeDecisionType::asFormat($value);
     }
 }

@@ -276,9 +276,9 @@ class BackOffice
         return self::reprotectionCustomerDecision($bookingId, 'modify', $quote);
     }
 
-    public static function reprotectionCustomerDecisionRefund(string $bookingId, array $quote): bool
+    public static function reprotectionCustomerDecisionRefund(string $bookingId): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'refund', $quote);
+        return self::reprotectionCustomerDecision($bookingId, 'refund', []);
     }
 
     private static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote): bool
@@ -296,12 +296,18 @@ class BackOffice
         // todo changed to endpoint
         $endpoint = 'reprotection/customer-decision';
 
+        $request = [
+            'bookingId' => $bookingId,
+            'type' => $type,
+        ];
+        if ($quote) {
+            $request['quote'] = $quote;
+        }
+
+//        VarDumper::dump($request);die;
+
         try {
-            $response = self::sendRequest2($endpoint, [
-                'bookingId' => $bookingId,
-                'type' => $type,
-                'quote' => $quote,
-            ]);
+            $response = self::sendRequest2($endpoint, $request);
 
             if (!$response->isOk) {
                 \Yii::error([

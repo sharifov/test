@@ -333,21 +333,21 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             'fqs_stop',
             'flightNumber' => 'fqs_flight_number',
             'bookingClass' => 'fqs_booking_class',
-            'fqs_duration',
+            'duration' => 'fqs_duration',
             'departureAirportCode' => 'fqs_departure_airport_iata',
             'departureAirportTerminal' => 'fqs_departure_airport_terminal',
             'arrivalAirportCode' => 'fqs_arrival_airport_iata',
             'arrivalAirportTerminal' => 'fqs_arrival_airport_terminal',
             'operatingAirline' => 'fqs_operating_airline',
             'marketingAirline' => 'fqs_marketing_airline',
-            'fqs_air_equip_type',
-            'fqs_marriage_group',
+            'airEquipType' => 'fqs_air_equip_type',
+            'marriageGroup' => 'fqs_marriage_group',
             'cabin' => 'fqs_cabin_class',
-            'fqs_meal',
-            'fqs_fare_code',
+            'meal' => 'fqs_meal',
+            'fareCode' => 'fqs_fare_code',
             'fqs_ticket_id',
             'fqs_recheck_baggage',
-            'fqs_mileage',
+            'mileage' => 'fqs_mileage',
         ];
         $fields['departureLocation'] = function () {
             return Airports::getCityByIata($this->fqs_departure_airport_iata);
@@ -389,7 +389,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             return $stops;
         };
         if ($this->flightQuoteSegmentPaxBaggages) {
-            $fields['baggages'] = function () {
+            $fields['baggage'] = function () {
                 $baggages = [];
                 foreach ($this->flightQuoteSegmentPaxBaggages as $baggage) {
                     $baggages[] = $baggage->toArray();

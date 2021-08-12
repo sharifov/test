@@ -2,32 +2,68 @@
 
 namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 
+use modules\flight\src\useCases\reprotectionDecision\CancelOtherReprotectionQuotes;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use sales\repositories\product\ProductQuoteRepository;
+use sales\services\TransactionManager;
 
 /**
  * Class Confirm
  *
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property TransactionManager $transactionManager
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes
  */
 class Confirm
 {
     private ProductQuoteRepository $productQuoteRepository;
+    private TransactionManager $transactionManager;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes;
 
-    public function __construct(ProductQuoteRepository $productQuoteRepository)
-    {
+    public function __construct(
+        ProductQuoteRepository $productQuoteRepository,
+        TransactionManager $transactionManager,
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
+        CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes
+    ) {
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->transactionManager = $transactionManager;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->cancelOtherReprotectionQuotes = $cancelOtherReprotectionQuotes;
     }
 
     public function handle(string $reprotectionQuoteGid): void
     {
-        $quote = $this->productQuoteRepository->findByGidFlightProductQuote($reprotectionQuoteGid);
+        $reprotectionQuote = $this->productQuoteRepository->findByGidFlightProductQuote($reprotectionQuoteGid);
+        if (!$reprotectionQuote->flightQuote->isTypeReProtection()) {
+            throw new \DomainException('Quote is not reprotection quote.');
+        }
+        if ($reprotectionQuote->isApplied()) {
+            throw new \DomainException('Quote is already applied.');
+        }
 
-        $this->markQuoteToApplied($quote);
+        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote);
+        if (!$productQuoteChange->isDecisionPending()) {
+            throw new \DomainException('Product Quote Change status is invalid.');
+        }
 
-        $this->cancelAlternativeQuotes($quote);
+        $this->transactionManager->wrap(function () use ($reprotectionQuote, $productQuoteChange) {
+            $this->markQuoteToApplied($reprotectionQuote);
+            $this->cancelOtherReprotectionQuotes->cancel($reprotectionQuote);
+            $this->confirmProductQuoteChange($productQuoteChange);
+        });
 
-        $this->createBoRequestJob($quote);
+        $this->createBoRequestJob($reprotectionQuote);
+    }
+
+    private function confirmProductQuoteChange(ProductQuoteChange $change): void
+    {
+        $change->customerDecisionConfirm(null, new \DateTimeImmutable());
+        $this->productQuoteChangeRepository->save($change);
     }
 
     private function createBoRequestJob(ProductQuote $quote): void
@@ -45,15 +81,7 @@ class Confirm
 
     private function markQuoteToApplied(ProductQuote $quote): void
     {
-        if (!$quote->isApplied()) {
-            // todo
-        }
         $quote->applied();
         $this->productQuoteRepository->save($quote);
-    }
-
-    private function cancelAlternativeQuotes(ProductQuote $quote): void
-    {
-        // todo
     }
 }

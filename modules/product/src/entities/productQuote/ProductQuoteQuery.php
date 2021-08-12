@@ -21,6 +21,19 @@ class ProductQuoteQuery
         return $query->one();
     }
 
+    public static function getOriginProductQuoteByReprotection(int $reprotectionQuoteId): ?ProductQuote
+    {
+        $query = ProductQuote::find()
+            ->innerJoin(
+                ProductQuoteRelation::tableName(),
+                new Expression(
+                    'pq_id = pqr_parent_pq_id and pqr_related_pq_id = :quoteId and pqr_type_id = :typeId',
+                    ['quoteId' => $reprotectionQuoteId, 'typeId' => ProductQuoteRelation::TYPE_REPROTECTION]
+                )
+            );
+        return $query->one();
+    }
+
     /**
      * @param int $offerId
      * @return ProductQuote[]

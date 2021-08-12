@@ -147,7 +147,7 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
             'fqt_id',
             'fqt_uid',
             'fqt_key',
-            'fqt_duration'
+            'duration' => 'fqt_duration',
         ];
     }
 }

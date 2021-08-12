@@ -42,7 +42,7 @@ echo $activeForm->errorSummary($form);
 <?= $activeForm->field($form, 'quoteId')->hiddenInput()->label(false) ?>
     <div class="row">
         <div class="col-sm-12 form-group">
-            <?= $activeForm->field($form, 'clientEmail')->dropDownList($clientEmails, ['prompt' => '---']) ?>
+            <?= $activeForm->field($form, 'clientEmail')->dropDownList($clientEmails) ?>
         </div>
     </div>
 
