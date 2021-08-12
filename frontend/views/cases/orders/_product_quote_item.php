@@ -39,8 +39,8 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
 
     <td><?=Html::encode($quote->pq_name)?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-    <td><?= $changeStatusId ? ProductQuoteChangeStatus::asFormat($changeStatusId) : '(not set)' ?></td>
-    <td><?= $refundStatusId ? ProductQuoteRefundStatus::asFormat($refundStatusId) : '(not set)' ?></td>
+    <td><?= $changeStatusId ? ProductQuoteChangeStatus::asFormat($changeStatusId) : '--' ?></td>
+    <td><?= $refundStatusId ? ProductQuoteRefundStatus::asFormat($refundStatusId) : '--' ?></td>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
     <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
     <td>
