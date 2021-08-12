@@ -5,6 +5,7 @@
  * @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto
  * @var $order \modules\order\src\entities\order\Order
  * @var int $caseId
+ * @var int $nr
  * */
 
 use modules\cases\src\abac\CasesAbacObject;
@@ -13,14 +14,17 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 ?>
+<?php
+/*
 
-<td style="padding:5px;" title="<?=Html::encode($quote->pq_product_id)?>">
+<td style="padding:5px;" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>">
     <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
     <?=Html::encode($quote->pqProduct->prType->pt_name)?>
     <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
 </td>
-<td style="padding:5px;"><?=Html::encode($quote->pq_name)?></td>
 <td style="padding:5px;"><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
+*/ ?>
+<td style="padding:5px;"><?=($nr + 1)?></td>
 <td style="padding:5px;"><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
 <td style="padding:5px;">
     <div class="btn-group">

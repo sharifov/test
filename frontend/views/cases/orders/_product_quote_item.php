@@ -76,20 +76,20 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
           <p>Reprotection Quotes:</p>
           <table style="width: 100%;">
             <tr>
-              <th style="padding:5px;">Product</th>
-              <th style="padding:5px;">Name</th>
+              <th style="padding:5px;width: 30px;">Nr</th>
               <th style="padding:5px;">Status</th>
-              <th style="padding:5px;">Created</th>
+              <th style="padding:5px;width: 120px">Created</th>
               <th style="padding:5px;width: 10px;"></th>
             </tr>
-            <?php foreach ($reprotectionQuotes as $reprotectionQuote) : ?>
+            <?php foreach ($reprotectionQuotes as $nr => $reprotectionQuote) : ?>
                 <tr>
                     <?= $this->render('_reprotection_quote_item', [
-                      'quote' => $reprotectionQuote,
-                      'order' => $order,
-                      'isReprotection' => true,
-                      'caseId' => $caseId,
-                      'caseAbacDto' => $caseAbacDto
+                            'nr' => $nr,
+                            'quote' => $reprotectionQuote,
+                            'order' => $order,
+                            'isReprotection' => true,
+                            'caseId' => $caseId,
+                            'caseAbacDto' => $caseAbacDto
                     ]) ?>
                 </tr>
             <?php endforeach; ?>
