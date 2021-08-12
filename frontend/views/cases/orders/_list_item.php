@@ -262,7 +262,9 @@ $orderAbacDto = new OrderAbacDto($order);
             <?php endif; ?>
         </table>
 
+        <?php if ($order->or_created_user_id && $order->orCreatedUser) : ?>
         <i class="fa fa-user"></i> <?=$order->orCreatedUser ? Html::encode($order->orCreatedUser->username) : '-'?>,
+        <?php endif; ?>
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($order->or_created_dt)) ?>,
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($order->or_client_currency)?> <span title="Rate: <?=$order->or_client_currency_rate?>">(<?=round($order->or_client_currency_rate, 3)?>)</span>
 

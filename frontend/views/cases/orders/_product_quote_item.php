@@ -28,8 +28,8 @@ $changeStatusId = $quote->productQuoteLastChange->pqc_status_id ?? null;
 $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
 ?>
 
-    <td title="Product Quote ID: <?= Html::encode($quote->pq_id)?>"><?= $nr ?></td>
-    <td title="<?=Html::encode($quote->pq_product_id)?>">
+    <td title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>"><?= $nr ?></td>
+    <td title="Product ID: <?=Html::encode($quote->pq_product_id)?>">
         <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
         <?=Html::encode($quote->pqProduct->prType->pt_name)?>
         <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
@@ -39,8 +39,8 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
 
     <td><?=Html::encode($quote->pq_name)?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-    <td><?= $changeStatusId ? ProductQuoteChangeStatus::asFormat($changeStatusId) : '--' ?></td>
-    <td><?= $refundStatusId ? ProductQuoteRefundStatus::asFormat($refundStatusId) : '--' ?></td>
+    <td><?= $changeStatusId ? ProductQuoteChangeStatus::asFormat($changeStatusId) : '-' ?></td>
+    <td><?= $refundStatusId ? ProductQuoteRefundStatus::asFormat($refundStatusId) : '-' ?></td>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
     <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
     <td>
@@ -78,7 +78,7 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
             <tr>
               <th style="padding:5px;width: 30px;">Nr</th>
               <th style="padding:5px;">Status</th>
-              <th style="padding:5px;width: 120px">Created</th>
+              <th style="padding:5px;width: 180px">Created</th>
               <th style="padding:5px;width: 10px;"></th>
             </tr>
             <?php foreach ($reprotectionQuotes as $nr => $reprotectionQuote) : ?>
