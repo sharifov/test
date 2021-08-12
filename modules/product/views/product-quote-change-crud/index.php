@@ -3,9 +3,10 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\product\src\entities\productQuoteRefund\ProductQuoteChangeSearch */
+/* @var $searchModel modules\product\src\entities\productQuoteChange\search\ProductQuoteChangeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Product Quote Changes';
@@ -28,7 +29,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqc_id',
             'pqc_pq_id',
             'pqc_case_id',
-            'pqc_decision_user',
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'pqc_decision_user',
+                'relation' => 'pqcDecisionUser',
+                'placeholder' => 'Decision User'
+            ],
             'pqc_status_id',
             'pqc_decision_type_id',
             [
