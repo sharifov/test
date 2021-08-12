@@ -4,9 +4,11 @@ namespace modules\flight\src\useCases\reprotectionDecision\refund;
 
 use common\components\BackOffice;
 use modules\flight\models\FlightQuoteFlight;
+use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\product\ProductQuoteRepository;
@@ -19,6 +21,8 @@ use sales\services\TransactionManager;
  * @property CasesRepository $casesRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  * @property TransactionManager $transactionManager
+ * @property OrderRefundRepository $orderRefundRepository
+ * @property ProductQuoteRefundRepository $productQuoteRefundRepository
  */
 class BoRequest
 {
@@ -26,20 +30,26 @@ class BoRequest
     private CasesRepository $casesRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
     private TransactionManager $transactionManager;
+    private OrderRefundRepository $orderRefundRepository;
+    private ProductQuoteRefundRepository $productQuoteRefundRepository;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
         CasesRepository $casesRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        OrderRefundRepository $orderRefundRepository,
+        ProductQuoteRefundRepository $productQuoteRefundRepository
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesRepository = $casesRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->transactionManager = $transactionManager;
+        $this->orderRefundRepository = $orderRefundRepository;
+        $this->productQuoteRefundRepository = $productQuoteRefundRepository;
     }
 
-    public function refund(string $bookingId): void
+    public function refund(string $bookingId, int $orderRefundId, int $productQuoteRefundId): void
     {
         $flightQuoteFLight = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $bookingId])->one();
         if (!$flightQuoteFLight) {
@@ -60,67 +70,75 @@ class BoRequest
         );
 
         if ($responseBO) {
-            $this->transactionManager->wrap(function () use ($productQuoteChange) {
-                $this->successProcessing($productQuoteChange);
+            $this->transactionManager->wrap(function () use ($productQuoteChange, $orderRefundId, $productQuoteRefundId) {
+                $this->successProcessing($productQuoteChange, $orderRefundId, $productQuoteRefundId);
             });
             return;
         }
 
-        $this->transactionManager->wrap(function () use ($productQuoteChange) {
-            $this->errorProcessing($productQuoteChange);
+        $this->transactionManager->wrap(function () use ($productQuoteChange, $orderRefundId, $productQuoteRefundId) {
+            $this->errorProcessing($productQuoteChange, $orderRefundId, $productQuoteRefundId);
         });
     }
 
-    private function successProcessing(ProductQuoteChange $productQuoteChange): void
+    private function successProcessing(ProductQuoteChange $productQuoteChange, int $orderRefundId, int $productQuoteRefundId): void
     {
         $this->markQuoteChangeToInProgress($productQuoteChange);
-        $this->markRefundsToInProgress();
+        $this->markRefundsToProcessing($orderRefundId, $productQuoteRefundId);
         $case = $this->getCase($productQuoteChange);
         if ($case) {
             $this->processingCaseBySuccessResult($case);
         }
     }
 
-    private function errorProcessing(ProductQuoteChange $productQuoteChange): void
+    private function errorProcessing(ProductQuoteChange $productQuoteChange, int $orderRefundId, int $productQuoteRefundId): void
     {
         $this->markQuoteChangeToError($productQuoteChange);
-        $this->markRefundsToError();
+        $this->markRefundsToError($orderRefundId, $productQuoteRefundId);
         $case = $this->getCase($productQuoteChange);
         if ($case) {
             $this->processingCaseByErrorResult($case);
         }
     }
 
-    private function markRefundsToError(): void
+    private function markRefundsToError(int $orderRefundId, int $productQuoteRefundId): void
     {
-        $this->markOrderRefundToError();
-        $this->markProductQuoteRefundToError();
+        $this->markOrderRefundToError($orderRefundId);
+        $this->markProductQuoteRefundToError($productQuoteRefundId);
     }
 
-    private function markOrderRefundToError(): void
+    private function markOrderRefundToError(int $orderRefundId): void
     {
-        // todo
+        $refund = $this->orderRefundRepository->find($orderRefundId);
+        $refund->error();
+        $this->orderRefundRepository->save($refund);
     }
 
-    private function markProductQuoteRefundToError(): void
+    private function markProductQuoteRefundToError(int $productQuoteRefundId): void
     {
-        // todo
+        $refund = $this->productQuoteRefundRepository->find($productQuoteRefundId);
+        $refund->error();
+        $this->productQuoteRefundRepository->save($refund);
     }
 
-    private function markRefundsToInProgress(): void
+    private function markRefundsToProcessing(int $orderRefundId, int $productQuoteRefundId): void
     {
-        $this->markOrderRefundToInProgress();
-        $this->markProductQuoteRefundToInProgress();
+        $this->markOrderRefundToProcessing($orderRefundId);
+        $this->markProductQuoteRefundToProcessing($productQuoteRefundId);
     }
 
-    private function markOrderRefundToInProgress(): void
+    private function markOrderRefundToProcessing(int $orderRefundId): void
     {
-        // todo
+        $refund = $this->orderRefundRepository->find($orderRefundId);
+        $refund->processing();
+        $this->orderRefundRepository->save($refund);
     }
 
-    private function markProductQuoteRefundToInProgress(): void
+    private function markProductQuoteRefundToProcessing(int $productQuoteRefundId): void
     {
-        // todo
+        $refund = $this->productQuoteRefundRepository->find($productQuoteRefundId);
+        $refund->processing();
+        $this->productQuoteRefundRepository->save($refund);
     }
 
     private function markQuoteChangeToInProgress(ProductQuoteChange $productQuoteChange): void
