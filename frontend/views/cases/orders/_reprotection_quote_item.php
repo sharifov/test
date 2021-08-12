@@ -42,6 +42,13 @@ use yii\helpers\Url;
                 ]);
             }
             ?>
+            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) : ?>
+                <?= Html::a('<i class="fas fa-info-circle" data-toggle="tooltip" title="Details"></i> Details', null, [
+                    'data-product-quote-gid' => $quote->pq_gid,
+                    'class' => 'dropdown-item btn-show-product-quote-details',
+                    'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id])
+                ]) ?>
+            <?php endif; ?>
         </div>
     </div>
 </td>
