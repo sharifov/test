@@ -34,21 +34,21 @@ use yii\helpers\Url;
             <i class="fa fa-bars"></i>
         </button>
         <div class="dropdown-menu">
-            <?php
-            if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
-                echo Html::a('<i class="fa fa-envelope text-success" title="Send Email"></i> Send Flight Schedule Change Email', null, [
-                    'class' => 'dropdown-item btn-send-reprotection-quote-email',
-                    'data-url' => Url::to(['/product/product-quote/preview-reprotection-quote-email', 'reprotection-quote-id' => $quote->pq_id, 'case-id' => $caseId, 'order-id' => $order->or_id])
-                ]);
-            }
-            ?>
             <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) : ?>
-                <?= Html::a('<i class="fas fa-info-circle" data-toggle="tooltip" title="Details"></i> Details', null, [
+                <?= Html::a('<i class="fas fa-info-circle" data-toggle="tooltip" title="Details"></i> View Details', null, [
                     'data-product-quote-gid' => $quote->pq_gid,
                     'class' => 'dropdown-item btn-show-product-quote-details',
                     'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id])
                 ]) ?>
             <?php endif; ?>
+            <?php
+            if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                echo Html::a('<i class="fa fa-envelope" title="Send Email"></i> Send Schedule Change Email', null, [
+                    'class' => 'dropdown-item btn-send-reprotection-quote-email',
+                    'data-url' => Url::to(['/product/product-quote/preview-reprotection-quote-email', 'reprotection-quote-id' => $quote->pq_id, 'case-id' => $caseId, 'order-id' => $order->or_id])
+                ]);
+            }
+            ?>
             <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS, Flight Reprotection confirm*/ ?>
             <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) : ?>
                 <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Confirm', null, [
