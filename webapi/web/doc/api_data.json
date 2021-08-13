@@ -2950,6 +2950,162 @@
             "optional": true,
             "field": "flight_quote",
             "description": "<p>Flight quote</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "flight_quote.gds",
+            "description": "<p>Gds</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "flight_quote.pcc",
+            "description": "<p>pcc</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "flight_quote.fareType",
+            "description": "<p>ValidatingCarrier</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "flight_quote.trips.duration",
+            "description": "<p>Trip Duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "flight_quote.trips.segments.departureTime",
+            "description": "<p>DepartureTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "flight_quote.trips.segments.arrivalTime",
+            "description": "<p>ArrivalTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "flight_quote.trips.segments.departureAirportCode",
+            "description": "<p>Departure Airport Code IATA</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "flight_quote.trips.segments.arrivalAirportCode",
+            "description": "<p>Arrival Airport Code IATA</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_quote.trips.segments.flightNumber",
+            "description": "<p>Flight Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "1",
+            "optional": true,
+            "field": "flight_quote.trips.segments.bookingClass",
+            "description": "<p>BookingClass</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_quote.trips.segments.duration",
+            "description": "<p>Segment duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_quote.trips.segments.departureAirportTerminal",
+            "description": "<p>Departure Airport Terminal Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_quote.trips.segments.arrivalAirportTerminal",
+            "description": "<p>Arrival Airport Terminal Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_quote.trips.segments.operatingAirline",
+            "description": "<p>Operating Airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_quote.trips.segments.marketingAirline",
+            "description": "<p>Marketing Airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "flight_quote.trips.segments.airEquipType",
+            "description": "<p>AirEquipType</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_quote.trips.segments.marriageGroup",
+            "description": "<p>MarriageGroup</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_quote.trips.segments.mileage",
+            "description": "<p>Mileage</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_quote.trips.segments.meal",
+            "description": "<p>Meal</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "flight_quote.trips.segments.fareCode",
+            "description": "<p>Fare Code</p>"
           }
         ]
       },

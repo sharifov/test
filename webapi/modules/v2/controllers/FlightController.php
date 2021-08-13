@@ -112,10 +112,30 @@ class FlightController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{10}}           booking_id                  Booking Id
-     * @apiParam {string{50}}           project_key                 Project key
-     * @apiParam {bool}                 [is_automate]               Is automate (default false)
-     * @apiParam {object}               [flight_quote]              Flight quote
+     * @apiParam {string{10}}           booking_id                              Booking Id
+     * @apiParam {string{50}}           project_key                             Project key
+     * @apiParam {bool}                 [is_automate]                           Is automate (default false)
+     * @apiParam {object}               [flight_quote]                          Flight quote
+     * @apiParam {string{2}}            flight_quote.gds                        Gds
+     * @apiParam {string{10}}           flight_quote.pcc                        pcc
+     * @apiParam {string{50}}           flight_quote.fareType                   ValidatingCarrier
+     * @apiParam {int}                  flight_quote.trips.duration             Trip Duration
+     * @apiParam {string{format Y-m-d H:i}}    flight_quote.trips.segments.departureTime            DepartureTime
+     * @apiParam {string{format Y-m-d H:i}}    flight_quote.trips.segments.arrivalTime              ArrivalTime
+     * @apiParam {string{3}}                   flight_quote.trips.segments.departureAirportCode     Departure Airport Code IATA
+     * @apiParam {string{3}}                   flight_quote.trips.segments.arrivalAirportCode       Arrival Airport Code IATA
+     * @apiParam {int}                         [flight_quote.trips.segments.flightNumber]           Flight Number
+     * @apiParam {string{1}}                   [flight_quote.trips.segments.bookingClass]           BookingClass
+     * @apiParam {int}                         [flight_quote.trips.segments.duration]               Segment duration
+     * @apiParam {string{3}}                   [flight_quote.trips.segments.departureAirportTerminal]     Departure Airport Terminal Code
+     * @apiParam {string{3}}                   [flight_quote.trips.segments.arrivalAirportTerminal]       Arrival Airport Terminal Code
+     * @apiParam {string{2}}                   [flight_quote.trips.segments.operatingAirline]       Operating Airline
+     * @apiParam {string{2}}                   [flight_quote.trips.segments.marketingAirline]       Marketing Airline
+     * @apiParam {string{30}}                  [flight_quote.trips.segments.airEquipType]          AirEquipType
+     * @apiParam {string{3}}                   [flight_quote.trips.segments.marriageGroup]          MarriageGroup
+     * @apiParam {int}                         [flight_quote.trips.segments.mileage]                Mileage
+     * @apiParam {string{2}}                   [flight_quote.trips.segments.meal]                   Meal
+     * @apiParam {string{50}}                  [flight_quote.trips.segments.fareCode]               Fare Code
      *
      * @apiParamExample {json} Request-Example:
      *   {

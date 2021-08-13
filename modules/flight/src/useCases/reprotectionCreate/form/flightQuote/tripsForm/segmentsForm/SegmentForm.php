@@ -56,8 +56,8 @@ class SegmentForm extends Model
         return [
             [['departureTime', 'arrivalTime', 'departureAirportCode', 'arrivalAirportCode'], 'required'],
 
-            //[['departureTime', 'arrivalTime'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-            [['departureTime', 'arrivalTime'], 'safe'],
+            [['departureTime', 'arrivalTime'], 'datetime', 'format' => 'php:Y-m-d H:i'],
+            //[['departureTime', 'arrivalTime'], 'safe'],
 
             [['departureAirportCode', 'arrivalAirportCode'], 'string', 'max' => 3],
 
