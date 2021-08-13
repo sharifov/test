@@ -42,7 +42,7 @@ use yii\helpers\Url;
                 ]) ?>
             <?php endif; ?>
             <?php
-            if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+            if (!$quote->isDeclined() && Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                 echo Html::a('<i class="fa fa-envelope" title="Send Email"></i> Send Schedule Change Email', null, [
                     'class' => 'dropdown-item btn-send-reprotection-quote-email',
                     'data-url' => Url::to(['/product/product-quote/preview-reprotection-quote-email', 'reprotection-quote-id' => $quote->pq_id, 'case-id' => $caseId, 'order-id' => $order->or_id])
