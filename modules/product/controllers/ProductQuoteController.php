@@ -15,6 +15,7 @@ use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
@@ -351,11 +352,6 @@ class ProductQuoteController extends FController
 
     public function actionFlightReprotectionConfirm()
     {
-        /*$caseAbacDto = new CasesAbacDto($case);
-        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-        }*/
-
         try {
             $quoteId = Yii::$app->request->post('quoteId');
             if (!$quoteId) {
@@ -368,6 +364,15 @@ class ProductQuoteController extends FController
             }
             if (!$quote->flightQuote->isTypeReProtection()) {
                 throw new \Exception('Quote is not reprotection.');
+            }
+            $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findParentRelated($quote);
+            $case = $productQuoteChange->pqcCase;
+            if (!$case) {
+                throw new \DomainException('Not found related case.');
+            }
+            $caseAbacDto = new CasesAbacDto($case);
+            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) {
+                throw new \Exception('You do not have access to perform this action.');
             }
 
             Yii::createObject(reprotectionDecision\confirm\Confirm::class)->handle($quote->pq_gid, Auth::id());
@@ -385,11 +390,6 @@ class ProductQuoteController extends FController
 
     public function actionFlightReprotectionRefund()
     {
-        /*$caseAbacDto = new CasesAbacDto($case);
-        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-        }*/
-
         try {
             $quoteId = Yii::$app->request->post('quoteId');
             if (!$quoteId) {
@@ -402,6 +402,16 @@ class ProductQuoteController extends FController
             }
             if (!$quote->flightQuote->isTypeReProtection()) {
                 throw new \Exception('Quote is not reprotection.');
+            }
+
+            $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findParentRelated($quote);
+            $case = $productQuoteChange->pqcCase;
+            if (!$case) {
+                throw new \DomainException('Not found related case.');
+            }
+            $caseAbacDto = new CasesAbacDto($case);
+            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS)) {
+                throw new \Exception('You do not have access to perform this action');
             }
 
             $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $quote->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
