@@ -51,6 +51,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_BTN_EVENT_LOG_VIEW  => [self::ACTION_READ],
         self::REPROTECTION_QUOTE_SEND_EMAIL => [self::ACTION_ACCESS],
         self::ACT_PRODUCT_QUOTE_REMOVE => [self::ACTION_ACCESS],
+        self::ACT_PRODUCT_QUOTE_VIEW_DETAILS => [self::ACTION_ACCESS],
         self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ACTION_ACCESS],
         self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ACTION_ACCESS],
     ];
