@@ -56,7 +56,9 @@ use modules\cases\src\abac\dto\CasesAbacDto;
                         'style' => 'width:180px'
                     ],
                 ],
-                ['class' => 'yii\grid\ActionColumn',
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    'header' => 'Data',
                     'template' => '{view}',
                     'buttons' => [
                         'view' => static function ($url, CaseEventLog $model) {
@@ -70,7 +72,7 @@ use modules\cases\src\abac\dto\CasesAbacDto;
                                 new CasesAbacDto($model->celCase),
                                 CasesAbacObject::UI_BTN_EVENT_LOG_VIEW,
                                 CasesAbacObject::ACTION_READ
-                            );
+                            ) && !empty($model->cel_data_json);
                         },
 
                     ],
