@@ -195,12 +195,14 @@ class ProductQuoteController extends FController
                 $emailData['order'] = $quote->pqOrder->serialize();
                 $emailFrom = Auth::user()->email;
                 $emailTemplateType = null;
+                $emailFromName = Auth::user()->nickname;
 
                 if ($case->cs_project_id) {
                     $project = $case->project;
                     if ($project && $emailConfig = $project->getReprotectionQuoteEmailConfig()) {
                         $emailFrom = $emailConfig['emailFrom'] ?? '';
                         $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
+                        $emailFromName = $emailConfig['emailFromName'] ?? $emailFromName;
                     }
                 }
 
@@ -217,7 +219,7 @@ class ProductQuoteController extends FController
                     $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');
                 } else {
                     $previewEmailForm = new ReprotectionQuotePreviewEmailForm($previewEmailResult['data']);
-                    $previewEmailForm->email_from_name = Auth::user()->nickname;
+                    $previewEmailForm->email_from_name = $emailFromName;
                     $previewEmailForm->productQuoteId = $quote->pq_id;
 
                     $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $emailTemplateType]);
