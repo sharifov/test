@@ -39,14 +39,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'pqc_status_id',
                 'value' => static function (ProductQuoteChange $model) {
-                    return ProductQuoteChangeStatus::asFormat($model->pqc_status_id);
+                    return $model->pqc_status_id ? ProductQuoteChangeStatus::asFormat($model->pqc_status_id) : $model->pqc_status_id;
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'pqc_decision_type_id',
                 'value' => static function (ProductQuoteChange $model) {
-                    return ProductQuoteChangeDecisionType::asFormat($model->pqc_decision_type_id);
+                    return $model->pqc_decision_type_id ? ProductQuoteChangeDecisionType::asFormat($model->pqc_decision_type_id) : $model->pqc_decision_type_id;
                 },
                 'format' => 'raw'
             ],
