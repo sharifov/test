@@ -205,8 +205,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 }
                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService sent successfully');
             } catch (\Throwable $throwable) {
-                $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
+                $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
                 throw new CheckRestrictionException($throwable->getMessage());
             }
 
