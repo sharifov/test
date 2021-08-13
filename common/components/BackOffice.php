@@ -273,7 +273,7 @@ class BackOffice
 
     public static function reprotectionCustomerDecisionModify(string $bookingId, array $quote): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'modify', $quote);
+        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote);
     }
 
     public static function reprotectionCustomerDecisionRefund(string $bookingId): bool
@@ -286,28 +286,31 @@ class BackOffice
         if (!$bookingId) {
             throw new \DomainException('Booking ID is empty');
         }
-        if (!in_array($type, ['confirm', 'modify', 'refund'])) {
+        if (!in_array($type, ['confirm', 'refund'])) {
             throw new \DomainException('Undefined Type');
         }
-        if (in_array($type, ['confirm', 'modify']) && !$quote) {
+        if ($type === 'confirm' && !$quote) {
             throw new \DomainException('Quote is empty');
         }
-
-        // todo changed to endpoint
-        $endpoint = 'reprotection/customer-decision';
 
         $request = [
             'bookingId' => $bookingId,
             'type' => $type,
         ];
         if ($quote) {
-            $request['quote'] = $quote;
+            $request['flightQuote'] = $quote;
         }
 
 //        VarDumper::dump($request);die;
 
         try {
-            $response = self::sendRequest2($endpoint, $request);
+            $response = self::sendRequest2(
+                'flight-request/reprotection-decision',
+                $request,
+                'POST',
+                30,
+                Yii::$app->params['backOffice']['serverUrlV3']
+            );
 
             if (!$response->isOk) {
                 \Yii::error([

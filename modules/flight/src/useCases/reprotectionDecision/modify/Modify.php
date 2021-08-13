@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\reprotectionDecision\modify;
 
+use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reprotectionDecision\CancelOtherReprotectionQuotes;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -49,23 +50,17 @@ class Modify
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
     }
 
-    public function handle(string $reprotectionQuoteGid, array $newQuote, ?int $userId): void
+    public function handle(string $bookingId, array $newQuote, ?int $userId): void
     {
-        $reprotectionQuote = $this->productQuoteRepository->findByGidFlightProductQuote($reprotectionQuoteGid);
-        if (!$reprotectionQuote->flightQuote->isTypeReProtection()) {
-            throw new \DomainException('Quote is not reprotection quote.');
-        }
-        if ($reprotectionQuote->isApplied()) {
-            throw new \DomainException('Quote is already applied.');
-        }
+        $originalProductQuote = $this->getProductQuote($bookingId);
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote);
+        $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($originalProductQuote->pq_id);
         if (!$productQuoteChange->isDecisionPending()) {
             throw new \DomainException('Product Quote Change status is invalid.');
         }
 
-        $quote = $this->transactionManager->wrap(function () use ($reprotectionQuote, $newQuote, $productQuoteChange, $userId) {
-            $quote = $this->createNewReprotectionQuote($reprotectionQuote, $newQuote, $userId);
+        $quote = $this->transactionManager->wrap(function () use ($originalProductQuote, $newQuote, $productQuoteChange, $userId) {
+            $quote = $this->createNewReprotectionQuote($originalProductQuote, $newQuote, $userId);
             $this->markQuoteToApplied($quote);
             $this->cancelOtherReprotectionQuotes->cancel($quote, $userId);
             $this->modifyProductQuoteChange($productQuoteChange, $userId);
@@ -73,6 +68,19 @@ class Modify
         });
 
         $this->createBoRequestJob($quote, $userId);
+    }
+
+    private function getProductQuote(string $bookingId): ProductQuote
+    {
+        $flight = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one();
+        if (!$flight) {
+            throw new \DomainException('Not found Flight Quote Flight. BookingId: ' . $bookingId);
+        }
+        $productQuote = $flight->fqfFq->fqProductQuote ?? null;
+        if ($productQuote) {
+            return $productQuote;
+        }
+        throw new \DomainException('Not found Product Quote. BookingId: ' . $bookingId);
     }
 
     private function modifyProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
@@ -102,10 +110,10 @@ class Modify
         $this->productQuoteRepository->save($quote);
     }
 
-    private function createNewReprotectionQuote(ProductQuote $lastReprotectionQuote, array $quote, ?int $userId): ProductQuote
+    private function createNewReprotectionQuote(ProductQuote $originalProductQuote, array $quote, ?int $userId): ProductQuote
     {
-        $newQuote = $this->flightQuoteManageService->createReprotectionModify($lastReprotectionQuote->flightQuote->fqFlight, $quote, $lastReprotectionQuote->pq_order_id);
-        $relation = ProductQuoteRelation::createReProtection($lastReprotectionQuote->relateParent->pq_id, $newQuote->pq_id, $userId);
+        $newQuote = $this->flightQuoteManageService->createReprotectionModify($originalProductQuote->flightQuote->fqFlight, $quote, $originalProductQuote->pq_order_id);
+        $relation = ProductQuoteRelation::createReProtection($originalProductQuote->pq_id, $newQuote->pq_id, $userId);
         $this->productQuoteRelationRepository->save($relation);
         return $newQuote;
     }

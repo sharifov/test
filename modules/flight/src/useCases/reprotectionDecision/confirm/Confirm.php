@@ -2,7 +2,6 @@
 
 namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 
-use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\useCases\reprotectionDecision\CancelOtherReprotectionQuotes;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -48,9 +47,6 @@ class Confirm
         if ($reprotectionQuote->isApplied()) {
             throw new \DomainException('Quote is already applied.');
         }
-        if (!$this->existBookingId($reprotectionQuote)) {
-            throw new \DomainException('Not found Booking Id. Quote ID: ' . $reprotectionQuote->pq_id);
-        }
 
         $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote);
         if (!$productQuoteChange->isDecisionPending()) {
@@ -64,15 +60,6 @@ class Confirm
         });
 
         $this->createBoRequestJob($reprotectionQuote, $userId);
-    }
-
-    private function existBookingId(ProductQuote $quote): bool
-    {
-        $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $quote->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
-        if ($lastFlightQuoteFlightBookingId) {
-            return true;
-        }
-        return false;
     }
 
     private function confirmProductQuoteChange(ProductQuoteChange $change, ?int $userId): void

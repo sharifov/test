@@ -55,7 +55,7 @@ class BoRequest
         }
 
         $responseBO = BackOffice::reprotectionCustomerDecisionModify(
-            $this->getBookingId($quote),
+            $this->getBookingId($productQuoteChange),
             $this->prepareQuoteToRequestData($quote)
         );
 
@@ -136,20 +136,17 @@ class BoRequest
         $this->productQuoteRepository->save($quote);
     }
 
-    private function getBookingId(ProductQuote $quote): string
+    private function getBookingId(ProductQuoteChange $change): string
     {
-        $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $quote->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+        $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $change->pqcPq->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
         if ($lastFlightQuoteFlightBookingId) {
             return $lastFlightQuoteFlightBookingId;
         }
-        throw new \DomainException('Not found Booking Id. Quote ID: ' . $quote->pq_id);
+        throw new \DomainException('Not found Booking Id. Quote ID: ' . $change->pqc_pq_id);
     }
 
     private function prepareQuoteToRequestData(ProductQuote $quote): array
     {
-        return array_merge(
-            ['gid' => $quote->pq_gid],
-            $quote->flightQuote->toArray(['trips']),
-        );
+        return $quote->flightQuote->toArray(['gds', 'pcc', 'fareType', 'validatingCarrier', 'itineraryDump', 'trips']);
     }
 }

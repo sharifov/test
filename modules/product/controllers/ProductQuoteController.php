@@ -416,7 +416,7 @@ class ProductQuoteController extends FController
                 throw new \Exception('You do not have access to perform this action');
             }
 
-            $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $quote->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+            $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $productQuoteChange->pqcPq->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
             if (!$lastFlightQuoteFlightBookingId) {
                 throw new \DomainException('Not found Booking Id. Quote ID: ' . $quote->pq_id);
             }
