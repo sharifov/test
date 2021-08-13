@@ -119,7 +119,9 @@ class FlightController extends BaseController
      * @apiParam {string{2}}            flight_quote.gds                        Gds
      * @apiParam {string{10}}           flight_quote.pcc                        pcc
      * @apiParam {string{50}}           flight_quote.fareType                   ValidatingCarrier
-     * @apiParam {int}                  flight_quote.trips.duration             Trip Duration
+     * @apiParam {object}               flight_quote.trips                      Trips
+     * @apiParam {int}                  [flight_quote.trips.duration]           Trip Duration
+     * @apiParam {object}               flight_quote.trips.segments             Segments
      * @apiParam {string{format Y-m-d H:i}}    flight_quote.trips.segments.departureTime            DepartureTime
      * @apiParam {string{format Y-m-d H:i}}    flight_quote.trips.segments.arrivalTime              ArrivalTime
      * @apiParam {string{3}}                   flight_quote.trips.segments.departureAirportCode     Departure Airport Code IATA

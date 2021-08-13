@@ -2977,10 +2977,24 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "object",
             "optional": false,
+            "field": "flight_quote.trips",
+            "description": "<p>Trips</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
             "field": "flight_quote.trips.duration",
             "description": "<p>Trip Duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "flight_quote.trips.segments",
+            "description": "<p>Segments</p>"
           },
           {
             "group": "Parameter",
