@@ -33,20 +33,21 @@ use modules\cases\src\abac\dto\CasesAbacDto;
         <?php echo GridView::widget([
             'id' => 'case-event-grid',
             'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
+            //'filterModel' => $searchModel,
             //'filterUrl' => ['/cases/ajax-case-event-log'],
             'columns' => [
-                'cel_id',
+                ['class' => 'yii\grid\SerialColumn'],
+                //'cel_id',
                 /*[
                     'attribute' => 'cel_case_id',
                     'filter' => false,
                 ],*/
-                [
-                    'attribute' => 'cel_type_id',
-                    'value' => static function (CaseEventLog $model) {
-                        return CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id];
-                    }
-                ],
+//                [
+//                    'attribute' => 'cel_type_id',
+//                    'value' => static function (CaseEventLog $model) {
+//                        return CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id];
+//                    }
+//                ],
                 'cel_description',
                 [
                     'attribute' => 'cel_created_dt',
