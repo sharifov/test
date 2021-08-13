@@ -9,7 +9,8 @@ use common\models\Notifications;
 use common\models\UserProjectParams;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
-use modules\flight\src\useCases\reprotectionDecision\confirm\Confirm;
+use modules\flight\models\FlightQuoteFlight;
+use modules\flight\src\useCases\reprotectionDecision;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
@@ -109,6 +110,7 @@ class ProductQuoteController extends FController
                     'preview-reprotection-quote-email',
                     'reprotection-quote-send-email',
                     'reprotection-confirm',
+                    'reprotection-refund',
                 ]
             ]
         ];
@@ -363,7 +365,41 @@ class ProductQuoteController extends FController
                 throw new \Exception('Quote is not reprotection.');
             }
 
-            Yii::createObject(Confirm::class)->handle($quote->pq_gid, Auth::id());
+            Yii::createObject(reprotectionDecision\confirm\Confirm::class)->handle($quote->pq_gid, Auth::id());
+
+            return $this->asJson([
+                'error' => false,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function actionReprotectionRefund()
+    {
+        try {
+            $quoteId = Yii::$app->request->post('quoteId');
+            if (!$quoteId) {
+                throw new \Exception('Not found Quote ID');
+            }
+
+            $quote = Yii::createObject(ProductQuoteRepository::class)->find($quoteId);
+            if (!$quote->isFlight()) {
+                throw new \Exception('Quote is not flight quote.');
+            }
+            if (!$quote->flightQuote->isTypeReProtection()) {
+                throw new \Exception('Quote is not reprotection.');
+            }
+
+            $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $quote->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+            if (!$lastFlightQuoteFlightBookingId) {
+                throw new \DomainException('Not found Booking Id. Quote ID: ' . $quote->pq_id);
+            }
+
+            Yii::createObject(reprotectionDecision\refund\Refund::class)->handle($lastFlightQuoteFlightBookingId, Auth::id());
 
             return $this->asJson([
                 'error' => false,
