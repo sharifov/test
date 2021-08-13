@@ -52,6 +52,9 @@ use modules\cases\src\abac\dto\CasesAbacDto;
                 [
                     'attribute' => 'cel_created_dt',
                     'class' => \common\components\grid\DateTimeColumn::class,
+                    'options' => [
+                        'style' => 'width:180px'
+                    ],
                 ],
                 ['class' => 'yii\grid\ActionColumn',
                     'template' => '{view}',
