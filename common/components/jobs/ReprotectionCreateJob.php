@@ -243,10 +243,12 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         } catch (\Throwable $throwable) {
             $message['throwable'] = AppHelper::throwableLog($throwable);
             $message['flightRequestID'] = $this->flight_request_id;
-            \Yii::error(
-                $message,
-                'ReprotectionCreateJob:throwable'
-            );
+            if ($throwable instanceof CheckRestrictionException) {
+                \Yii::warning($message, 'ReprotectionCreateJob:throwable');
+            } else {
+                \Yii::error($message, 'ReprotectionCreateJob:throwable');
+            }
+
             if (isset($flightRequest)) {
                 $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_ERROR, $throwable->getMessage());
             }
