@@ -71,7 +71,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     $reProtectionCreateService->caseToManual($case, 'Flight quote not updated');
                     $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, 'Original quote not declined');
                 } else {
-                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Origin ProductQuote found');
+                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Origin ProductQuote found (' . $oldProductQuote->pq_gid . ')');
                     $reProtectionCreateService->declineOldProductQuote($order);
                     $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Old ProductQuotes declined');
                 }
@@ -148,7 +148,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Order created (' . $order->or_gid . ')');
 
                     $oldProductQuote = $reProtectionCreateService->createFlightInfrastructure($orderCreateFromSaleForm, $saleData, $order);
-                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Origin ProductQuote created');
+                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Origin ProductQuote created (' . $oldProductQuote->pq_gid . ')');
                     $oldProductQuote->declined();
                     $productQuoteRepository->save($oldProductQuote);
                     $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Origin ProductQuote declined');
@@ -200,7 +200,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
                     'case_gid' => $case->cs_gid,
                 ];
-                $hybridService->whReprotection($flightRequest->fr_project_id, $data);
+                if (!$result = $hybridService->whReprotection($flightRequest->fr_project_id, $data)) {
+                    throw new CheckRestrictionException('Not found webHookEndpoint in project (' . $flightRequest->fr_project_id . ')');
+                }
                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService sent successfully');
             } catch (\Throwable $throwable) {
                 $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
