@@ -109,8 +109,8 @@ class ProductQuoteController extends FController
                 'allowActions' => [
                     'preview-reprotection-quote-email',
                     'reprotection-quote-send-email',
-                    'reprotection-confirm',
-                    'reprotection-refund',
+                    'flight-reprotection-confirm',
+                    'flight-reprotection-refund',
                 ]
             ]
         ];
@@ -349,8 +349,13 @@ class ProductQuoteController extends FController
         ]);
     }
 
-    public function actionReprotectionConfirm()
+    public function actionFlightReprotectionConfirm()
     {
+        /*$caseAbacDto = new CasesAbacDto($case);
+        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }*/
+
         try {
             $quoteId = Yii::$app->request->post('quoteId');
             if (!$quoteId) {
@@ -378,8 +383,13 @@ class ProductQuoteController extends FController
         }
     }
 
-    public function actionReprotectionRefund()
+    public function actionFlightReprotectionRefund()
     {
+        /*$caseAbacDto = new CasesAbacDto($case);
+        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }*/
+
         try {
             $quoteId = Yii::$app->request->post('quoteId');
             if (!$quoteId) {

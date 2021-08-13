@@ -19,6 +19,10 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_PRODUCT_QUOTE_REMOVE = self::NS . 'product_quote/remove';
     public const ACT_PRODUCT_QUOTE_VIEW_DETAILS = self::NS . 'product_quote/view_details';
 
+    /** ACTION PERMISSION */
+    public const ACT_FLIGHT_REPROTECTION_CONFIRM  = self::NS . 'act/flight-reprotection-confirm';
+    public const ACT_FLIGHT_REPROTECTION_REFUND  = self::NS . 'act/flight-reprotection-refund';
+
     /** UI PERMISSION */
     public const UI_BLOCK_EVENT_LOG_LIST  = self::NS . 'ui/block/event-log-list';
     public const UI_BTN_EVENT_LOG_VIEW     = self::NS . 'ui/btn/event-log-view';
@@ -30,6 +34,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::REPROTECTION_QUOTE_SEND_EMAIL => self::REPROTECTION_QUOTE_SEND_EMAIL,
         self::ACT_PRODUCT_QUOTE_REMOVE => self::ACT_PRODUCT_QUOTE_REMOVE,
         self::ACT_PRODUCT_QUOTE_VIEW_DETAILS => self::ACT_PRODUCT_QUOTE_VIEW_DETAILS,
+        self::ACT_FLIGHT_REPROTECTION_CONFIRM => self::ACT_FLIGHT_REPROTECTION_CONFIRM,
+        self::ACT_FLIGHT_REPROTECTION_REFUND => self::ACT_FLIGHT_REPROTECTION_REFUND,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -45,7 +51,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_BTN_EVENT_LOG_VIEW  => [self::ACTION_READ],
         self::REPROTECTION_QUOTE_SEND_EMAIL => [self::ACTION_ACCESS],
         self::ACT_PRODUCT_QUOTE_REMOVE => [self::ACTION_ACCESS],
-        self::ACT_PRODUCT_QUOTE_VIEW_DETAILS => [self::ACTION_ACCESS],
+        self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ACTION_ACCESS],
+        self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ACTION_ACCESS],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -65,6 +72,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER],
         self::REPROTECTION_QUOTE_SEND_EMAIL => [self::ATTR_CASE_IS_OWNER],
+        self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ATTR_CASE_IS_OWNER],
+        self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ATTR_CASE_IS_OWNER],
     ];
 
     /**

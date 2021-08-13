@@ -49,16 +49,22 @@ use yii\helpers\Url;
                     'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id])
                 ]) ?>
             <?php endif; ?>
-            <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Confirm', null, [
+            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS, Flight Reprotection confirm*/ ?>
+            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) : ?>
+                <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Confirm', null, [
                     'class' => 'dropdown-item btn-reprotection-confirm',
-                    'data-url' => Url::to(['/product/product-quote/reprotection-confirm']),
+                    'data-url' => Url::to(['/product/product-quote/flight-reprotection-confirm']),
                     'data-reprotection-quote-id' => $quote->pq_id
             ]); ?>
-            <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Refund', null, [
+            <?php endif; ?>
+            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS, Flight Reprotection refund*/ ?>
+            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS)) : ?>
+                <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Refund', null, [
                     'class' => 'dropdown-item btn-reprotection-refund',
-                    'data-url' => Url::to(['/product/product-quote/reprotection-refund']),
+                    'data-url' => Url::to(['/product/product-quote/flight-reprotection-refund']),
                     'data-reprotection-quote-id' => $quote->pq_id
             ]); ?>
+            <?php endif; ?>
         </div>
     </div>
 </td>
