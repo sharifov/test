@@ -72,7 +72,6 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
                 if (!$client = $reProtectionCreateService->getClientByOrderProject($order->getId(), $flightRequest->fr_project_id)) {
                     $reProtectionCreateService->caseToManual($case, 'Client not found in OrderContact. Created default client.');
-                } else {
                     $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
                 }
                 $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
@@ -216,8 +215,10 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 }
             }
         } catch (\Throwable $throwable) {
+            $message['throwable'] = AppHelper::throwableLog($throwable);
+            $message['flightRequestID'] = $this->flight_request_id;
             \Yii::error(
-                AppHelper::throwableLog($throwable, YII_DEBUG),
+                $message,
                 'ReprotectionCreateJob:throwable'
             );
             if (isset($flightRequest)) {

@@ -142,8 +142,8 @@ class FlightController extends BaseController
                         "duration":848,
                         "segments":[
                             {
-                                "departureTime":"2021-06-10 21:30:00",
-                                "arrivalTime":"2021-06-11 07:30:00",
+                                "departureTime":"2021-06-10 21:30",
+                                "arrivalTime":"2021-06-11 07:30",
                                 "flightNumber":"8727",
                                 "bookingClass":"E",
                                 "stop":0,
@@ -169,8 +169,8 @@ class FlightController extends BaseController
                                 "brandId":null
                             },
                             {
-                                "departureTime":"2021-06-11 10:15:00",
-                                "arrivalTime":"2021-06-11 12:55:00",
+                                "departureTime":"2021-06-11 10:15",
+                                "arrivalTime":"2021-06-11 12:55",
                                 "flightNumber":"8395",
                                 "bookingClass":"E",
                                 "stop":0,
@@ -196,8 +196,8 @@ class FlightController extends BaseController
                                 "brandId":null
                             },
                             {
-                                "departureTime":"2021-06-11 17:46:00",
-                                "arrivalTime":"2021-06-11 19:14:00",
+                                "departureTime":"2021-06-11 17:46",
+                                "arrivalTime":"2021-06-11 19:14",
                                 "flightNumber":"3580",
                                 "bookingClass":"E",
                                 "stop":0,

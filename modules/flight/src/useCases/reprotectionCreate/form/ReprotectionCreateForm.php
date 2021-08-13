@@ -6,6 +6,8 @@ use common\components\validators\CheckJsonValidator;
 use common\models\Project;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\reprotectionCreate\form\flightQuote\FlightQuoteForm;
+use sales\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 
 /**
@@ -17,6 +19,7 @@ use yii\base\Model;
  * @property $project_key
  *
  * @property Project|null $project
+ * @property FlightQuoteForm|null $flightQuoteForm
  */
 class ReprotectionCreateForm extends Model
 {
@@ -26,6 +29,7 @@ class ReprotectionCreateForm extends Model
     public $project_key;
 
     private ?Project $project;
+    private ?FlightQuoteForm $flightQuoteForm;
 
     public function rules(): array
     {
@@ -41,9 +45,24 @@ class ReprotectionCreateForm extends Model
             [['is_automate'], 'default', 'value' => false],
 
             [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
+            [['flight_quote'], 'checkFlightQuoteForm'],
 
             //[['booking_id'], 'checkExistByHash'],
         ];
+    }
+
+    public function checkFlightQuoteForm($attribute)
+    {
+        if (!empty($this->flight_quote)) {
+            $flightQuoteForm = new FlightQuoteForm();
+            if (!$flightQuoteForm->load($this->flight_quote)) {
+                $this->addError($attribute, 'FlightQuoteForm not loaded');
+            } elseif (!$flightQuoteForm->validate()) {
+                $this->addError($attribute, ErrorsToStringHelper::extractFromModel($flightQuoteForm, ' '));
+            } else {
+                $this->flightQuoteForm = $flightQuoteForm;
+            }
+        }
     }
 
     public function checkExistByHash($attribute)
@@ -71,5 +90,10 @@ class ReprotectionCreateForm extends Model
     public function getProject(): ?Project
     {
         return $this->project;
+    }
+
+    public function getFlightQuoteForm(): ?ReProtectionFlightQuoteForm
+    {
+        return $this->flightQuoteForm;
     }
 }
