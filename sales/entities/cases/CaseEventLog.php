@@ -50,7 +50,8 @@ class CaseEventLog extends ActiveRecord
     {
         return [
             [['cel_case_id', 'cel_type_id'], 'integer'],
-            [['cel_data_json', 'cel_created_dt'], 'safe'],
+            [['cel_data_json'], 'safe'],
+            ['cel_created_dt', 'date', 'format' => 'php:Y-m-d'],
             [['cel_description'], 'string', 'max' => 255],
             [['cel_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['cel_case_id' => 'cs_id']],
         ];

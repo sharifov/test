@@ -18,7 +18,9 @@ class CaseEventLogSearch extends CaseEventLog
     {
         return [
             [['cel_id', 'cel_case_id'], 'integer'],
-            [['cel_description', 'cel_data_json', 'cel_created_dt'], 'safe'],
+            [['cel_data_json'], 'safe'],
+            ['cel_description', 'string'],
+            ['cel_created_dt', 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -60,7 +62,7 @@ class CaseEventLogSearch extends CaseEventLog
         $query->andFilterWhere([
             'cel_id' => $this->cel_id,
             'cel_case_id' => $this->cel_case_id,
-            'cel_created_dt' => $this->cel_created_dt,
+            'date(cel_created_dt)' => $this->cel_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'cel_description', $this->cel_description])
