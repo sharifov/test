@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\helpers\VarDumper;
+use sales\entities\cases\CaseEventLog;
 
 /* @var $this yii\web\View */
 /* @var $model sales\entities\cases\CaseEventLog */
@@ -32,6 +33,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'cel_id',
             'cel_case_id',
+            [
+                'attribute' => 'cel_type_id',
+                'value' => static function (CaseEventLog $model) {
+                    return CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id];
+                }
+            ],
             'cel_description',
             'cel_created_dt',
         ],
