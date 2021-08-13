@@ -62,7 +62,10 @@ use modules\cases\src\abac\dto\CasesAbacDto;
                     'template' => '{view}',
                     'buttons' => [
                         'view' => static function ($url, CaseEventLog $model) {
-                            return '<span data-toggle="tooltip" data-placement="top" title="' . Html::encode(VarDumper::dumpAsString($model->cel_data_json)) . '"><i class="fas fa-info-circle"></i></span>';
+                            if ($model->cel_data_json) {
+                                return '<span data-toggle="tooltip" data-placement="top" title="' . Html::encode(VarDumper::dumpAsString($model->cel_data_json)) . '"><i class="fas fa-info-circle"></i> Details</span>';
+                            }
+                            return '';
                         },
                     ],
                     'visibleButtons' => [

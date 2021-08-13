@@ -26,7 +26,7 @@ use yii\helpers\Url;
 */ ?>
 <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>"><?=($nr + 1)?></td>
 <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-<td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
+<td><small><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></small></td>
 <td>
     <div class="btn-group">
 

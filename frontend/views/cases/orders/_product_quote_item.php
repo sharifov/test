@@ -73,8 +73,8 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
 
     <?php if ($reprotectionQuotes) : ?>
       <tr>
-        <td></td>
-        <td colspan="8">
+          <td></td>
+          <td colspan="7">
           <p>Reprotection Quotes:</p>
           <table class="table table-bordered table-striped">
               <thead>
@@ -101,5 +101,6 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
               </tbody>
           </table>
         </td>
+          <td></td>
       </tr>
     <?php endif; ?>

@@ -31,7 +31,8 @@ $orderAbacDto = new OrderAbacDto($order);
 
 <div class="x_panel">
     <div class="x_title">
-        <small>
+        <small data-toggle="tooltip" data-original-title="Order UID: <?=\yii\helpers\Html::encode($order->or_uid)?>, Order GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"
+               title="Order UID: <?=\yii\helpers\Html::encode($order->or_uid)?>, Order GID: <?=\yii\helpers\Html::encode($order->or_gid)?>">
             <span class="badge badge-white">
                 <?php echo 'OR ' . $order->or_id ?>
                 <?php /* if (Auth::can('/order/order/view')) : ?>
@@ -46,10 +47,11 @@ $orderAbacDto = new OrderAbacDto($order);
                 <?php endif*/ ?>
             </span>
         </small>
-        (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
+        <?php /*(<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)*/ ?>
+        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?> -
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
-        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
+
         "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
 
         <?php /* if ($order->or_profit_amount > 0) : ?>
@@ -255,9 +257,9 @@ $orderAbacDto = new OrderAbacDto($order);
                 </tr>
  */ ?>
                 <tr>
-                    <th class="text-right" colspan="4">Total: </th>
-                    <td class="text-center" colspan="3">(price + opt + tips)</td>
-                    <th class="text-right" colspan="2"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <th class="text-right" colspan="7">Total (price + opt + tips): </th>
+                    <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <td></td>
                 </tr>
             <?php endif; ?>
         </table>
@@ -271,8 +273,6 @@ $orderAbacDto = new OrderAbacDto($order);
       <?php /*
         <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum  + $orderTipsAmount, 2)?> USD, Total: <?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></h4></div>
  */ ?>
-
-        <hr>
         <?php /*
         <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-invoice-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
             <h4><i class="fas fa-file-invoice-dollar"></i> Invoice List</h4>
