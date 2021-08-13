@@ -99,7 +99,7 @@ $orderAbacDto = new OrderAbacDto($order);
                             ])*/ ?>
                     <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_DETAIL_VIEW, OrderAbacObject::ACTION_ACCESS)) : ?>
                         <?php
-                        echo Html::a('OR ' . $order->or_id . ' <span class="glyphicon glyphicon-eye-open"></span> Detail view', ['/order/order/view', 'gid' => $order->or_gid], [
+                        echo Html::a('<i class="glyphicon glyphicon-eye-open"></i> View Details', ['/order/order/view', 'gid' => $order->or_gid], [
                             'target' => '_blank',
                             'data-pjax' => 0,
                             'class' => 'dropdown-item'
@@ -119,7 +119,7 @@ $orderAbacDto = new OrderAbacDto($order);
                         <?php endif;?>
                     <?php else : ?>
                         <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_START_AUTO_PROCESSING, OrderAbacObject::ACTION_ACCESS)) : ?>
-                            <?= Html::a('Start Auto Processing', null, [
+                            <?= Html::a('<i class="fa fa-play-circle-o"></i> Start Auto Processing', null, [
                                 'data-url' => \yii\helpers\Url::to(['/order/order-process-actions/start-process']),
                                 'class' => 'dropdown-item btn-start-process',
                                 'data-order-id' => $order->or_id,
@@ -127,12 +127,7 @@ $orderAbacDto = new OrderAbacDto($order);
                         <?php endif;?>
                     <?php endif;?>
 
-                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_CANCEL_ORDER, OrderAbacObject::ACTION_ACCESS)) : ?>
-                        <?= Html::a('Cancel Order', null, [
-                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/cancel', 'orderId' => $order->or_id]),
-                            'class' => 'dropdown-item btn-cancel-order'
-                        ])?>
-                    <?php endif ?>
+
 
                     <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_COMPLETE, OrderAbacObject::ACTION_ACCESS)) : ?>
                         <?= Html::a('Complete Order', null, [
@@ -142,7 +137,7 @@ $orderAbacDto = new OrderAbacDto($order);
                     <?php endif ?>
 
                     <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_SEND_EMAIL_CONFIRMATION, OrderAbacObject::ACTION_ACCESS)) : ?>
-                        <?= Html::a('Send Email Confirmation', null, [
+                        <?= Html::a('<i class="fa fa-envelope-o"></i> Send Email Confirmation', null, [
                             'data-url' => \yii\helpers\Url::to(['/order/order-actions/send-email-confirmation']),
                             'data-id' => $order->or_id,
                             'class' => 'dropdown-item btn-order-send-email-confirmation'
@@ -173,6 +168,12 @@ $orderAbacDto = new OrderAbacDto($order);
                     <?php endif; ?>
 
                     <div class="dropdown-divider"></div>
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_CANCEL_ORDER, OrderAbacObject::ACTION_ACCESS)) : ?>
+                        <?= Html::a('<i class="fa fa-remove"></i> Cancel Order', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/cancel', 'orderId' => $order->or_id]),
+                            'class' => 'dropdown-item btn-cancel-order text-danger'
+                        ])?>
+                    <?php endif ?>
 
                     <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_DELETE, OrderAbacObject::ACTION_ACCESS)) : ?>
                         <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
