@@ -663,7 +663,7 @@ class Formatter extends \yii\i18n\Formatter
             throw new \InvalidArgumentException('value must be Project|int|string|null');
         }
 
-        return Html::tag('span', Html::encode($name), ['class' => 'badge badge-info']);
+        return Html::tag('span', Html::encode($name), ['class' => 'badge badge-info', 'data-toggle' => 'tooltip',  'data-original-title' => 'Project']);
     }
 
     public function asPercentInteger($value): string

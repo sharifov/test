@@ -48,11 +48,15 @@ $orderAbacDto = new OrderAbacDto($order);
             </span>
         </small>
         <?php /*(<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)*/ ?>
-        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?> -
+        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
+        <?php if ($order->or_name) : ?>
+        "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
+        <?php endif; ?>
+        -
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
 
-        "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
+
 
         <?php /* if ($order->or_profit_amount > 0) : ?>
             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>

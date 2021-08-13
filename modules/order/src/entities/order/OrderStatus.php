@@ -119,7 +119,7 @@ class OrderStatus
         return Html::tag(
             'span',
             self::getName($value),
-            ['class' => 'badge badge-' . self::getClassName($value)]
+            ['class' => 'badge badge-' . self::getClassName($value), 'data-toggle' => 'tooltip',  'data-original-title' => 'Order status']
         );
     }
 
