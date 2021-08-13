@@ -24,10 +24,10 @@ use yii\helpers\Url;
 </td>
 <td style="padding:5px;"><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
 */ ?>
-<td style="padding:5px;" data-toggle="tooltip" data-original-title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>"><?=($nr + 1)?></td>
-<td style="padding:5px;"><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-<td style="padding:5px;"><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
-<td style="padding:5px;">
+<td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>"><?=($nr + 1)?></td>
+<td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
+<td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
+<td>
     <div class="btn-group">
 
         <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

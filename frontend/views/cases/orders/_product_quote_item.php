@@ -20,6 +20,8 @@ use yii\helpers\Url;
  */
 
 $hasReprotection = false;
+$reprotectionQuotes = [];
+
 if ($nr && $reprotectionQuotes = $quote->relates) {
     $hasReprotection = true;
 }
@@ -74,25 +76,29 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
         <td></td>
         <td colspan="8">
           <p>Reprotection Quotes:</p>
-          <table style="width: 100%;">
-            <tr>
-              <th style="padding:5px;width: 30px;">Nr</th>
-              <th style="padding:5px;">Status</th>
-              <th style="padding:5px;width: 180px">Created</th>
-              <th style="padding:5px;width: 10px;"></th>
-            </tr>
-            <?php foreach ($reprotectionQuotes as $nr => $reprotectionQuote) : ?>
+          <table class="table table-bordered table-striped">
+              <thead>
                 <tr>
-                    <?= $this->render('_reprotection_quote_item', [
-                            'nr' => $nr,
-                            'quote' => $reprotectionQuote,
-                            'order' => $order,
-                            'isReprotection' => true,
-                            'caseId' => $caseId,
-                            'caseAbacDto' => $caseAbacDto
-                    ]) ?>
+                  <th style="width: 30px;">Nr</th>
+                  <th>Status</th>
+                  <th style="width: 180px">Created</th>
+                  <th style="width: 10px;"></th>
                 </tr>
-            <?php endforeach; ?>
+              </thead>
+              <tbody>
+                <?php foreach ($reprotectionQuotes as $nr => $reprotectionQuote) : ?>
+                    <tr>
+                        <?= $this->render('_reprotection_quote_item', [
+                                'nr' => $nr,
+                                'quote' => $reprotectionQuote,
+                                'order' => $order,
+                                'isReprotection' => true,
+                                'caseId' => $caseId,
+                                'caseAbacDto' => $caseAbacDto
+                        ]) ?>
+                    </tr>
+                <?php endforeach; ?>
+              </tbody>
           </table>
         </td>
       </tr>
