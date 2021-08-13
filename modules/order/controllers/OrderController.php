@@ -158,7 +158,7 @@ class OrderController extends FController
         $model = new OrderForm();
         $model->or_lead_id = $modelOrder->or_lead_id;
         $model->or_id = $modelOrder->or_id;
-        $model->od_language_id = $modelOrder->orderData->od_language_id;
+        $model->od_language_id = $modelOrder->orderData->od_language_id ?? null;
         $model->od_market_country = $modelOrder->orderData->od_market_country;
 
         if ($model->load(Yii::$app->request->post())) {
