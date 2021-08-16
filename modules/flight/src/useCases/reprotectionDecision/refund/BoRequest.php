@@ -66,6 +66,7 @@ class BoRequest
         }
 
         $responseBO = BackOffice::reprotectionCustomerDecisionRefund(
+            $productQuote->pqProduct->pr_project_id,
             $this->getBookingId($productQuote)
         );
 

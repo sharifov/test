@@ -2,6 +2,7 @@
 
 namespace common\components;
 
+use common\models\Project;
 use http\Client\Request;
 use http\Client\Response;
 use sales\helpers\app\AppHelper;
@@ -266,22 +267,22 @@ class BackOffice
         }
     }
 
-    public static function reprotectionCustomerDecisionConfirm(string $bookingId, array $quote, string $reprotectionQuoteGid): bool
+    public static function reprotectionCustomerDecisionConfirm(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote, $reprotectionQuoteGid);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid);
     }
 
-    public static function reprotectionCustomerDecisionModify(string $bookingId, array $quote, string $reprotectionQuoteGid): bool
+    public static function reprotectionCustomerDecisionModify(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote, $reprotectionQuoteGid);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid);
     }
 
-    public static function reprotectionCustomerDecisionRefund(string $bookingId): bool
+    public static function reprotectionCustomerDecisionRefund(int $projectId, string $bookingId): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'refund', [], null);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'refund', [], null);
     }
 
-    private static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid): bool
+    private static function reprotectionCustomerDecision(int $projectId, string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid): bool
     {
         if (!$bookingId) {
             throw new \DomainException('Booking ID is empty');
@@ -293,7 +294,13 @@ class BackOffice
             throw new \DomainException('Quote is empty');
         }
 
+        $projectApiKey = Project::find()->select(['api_key'])->andWhere(['id' => $projectId])->scalar();
+        if (!$projectApiKey) {
+            throw new \DomainException('Not found API key. ProjectId: ' . $projectId);
+        }
+
         $request = [
+            'apiKey' => $projectApiKey,
             'bookingId' => $bookingId,
             'type' => $type,
         ];

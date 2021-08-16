@@ -55,6 +55,7 @@ class BoRequest
         }
 
         $responseBO = BackOffice::reprotectionCustomerDecisionConfirm(
+            $quote->pqProduct->pr_project_id,
             $this->getBookingId($productQuoteChange),
             $this->prepareQuoteToRequestData($quote),
             $quote->pq_gid
