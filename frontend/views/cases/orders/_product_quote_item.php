@@ -48,7 +48,7 @@ $pQRefundId = $quote->productQuoteLastRefund->pqr_id ?? null;
     <td <?= $pQChangeId ? 'data-toggle="tooltip" data-original-title="ProductQuoteChange ID: "' . $pQChangeId : ''?>>
         <?= $changeStatusId ? ProductQuoteChangeStatus::asFormat($changeStatusId) : '-' ?>
     </td>
-    <td <?= $pQChangeId ? 'data-toggle="tooltip" data-original-title="ProductQuoteRefund ID: "' . $pQRefundId : ''?>>
+    <td <?= $pQRefundId ? 'data-toggle="tooltip" data-original-title="ProductQuoteRefund ID: "' . $pQRefundId : ''?>>
         <?= $refundStatusId ? ProductQuoteRefundStatus::asFormat($refundStatusId) : '-' ?>
     </td>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
