@@ -58,8 +58,8 @@ class ReProtectionQuoteCreateForm extends Model
             ['quoteCreator', 'integer'],
 
             [['reservationDump'], 'string'],
-            ['recordLocator', 'string', 'length' => 8],
-            ['pcc', 'string', 'length' => 10],
+            ['recordLocator', 'string', 'max' => 8],
+            ['pcc', 'string', 'max' => 10],
             [['quoteCreator'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['quoteCreator' => 'id']],
             ['gds', 'in',  'range' => array_keys(FlightQuote::getGdsList())],
             ['tripType', 'in',  'range' => array_keys(Flight::getTripTypeList())],
