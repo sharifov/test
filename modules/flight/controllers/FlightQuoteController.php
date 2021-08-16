@@ -6,6 +6,7 @@ use common\models\Notifications;
 use common\models\Quote;
 use frontend\helpers\JsonHelper;
 use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\flight\components\api\ApiFlightQuoteSearchService;
 use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\Flight;
@@ -30,6 +31,7 @@ use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\useCases\product\create\ProductCreateService;
@@ -740,6 +742,15 @@ class FlightQuoteController extends FController
         }
         if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
             throw new NotFoundException('Origin FlightQuotePaxPrices not found');
+        }
+
+        $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findParentRelated($originProductQuote);
+        $case = $productQuoteChange->pqcCase;
+
+        /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Act Flight Create Reprotection quote from dump*/
+        $caseAbacDto = new CasesAbacDto($case);
+        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action.');
         }
 
         $form = new ReProtectionQuoteCreateForm(Auth::id());

@@ -53,6 +53,7 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
           <i class="fa fa-bars"></i>
         </button>
         <div class="dropdown-menu">
+            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS, Product quote view details */ ?>
             <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) : ?>
                 <?= Html::a('<i class="fas fa-info-circle" data-toggle="tooltip" title="Details"></i> View Details', null, [
                     'data-product-quote-gid' => $quote->pq_gid,
@@ -60,15 +61,19 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
                     'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id])
                 ]) ?>
             <?php endif; ?>
-            <?php /* TODO:: add ABAC */ ?>
-            <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
-                <?= Html::a('<i class="fas fa-plus-circle" data-toggle="tooltip" title="Details"></i> Create from dump', null, [
-                    'data-flight-id' => $flight->getId(),
-                    'class' => 'dropdown-item btn_create_from_dump',
-                    'data-url' => Url::to(['/flight/flight-quote/create-re-protection-quote', 'flight_id' => $flight->getId()]),
-                ]) ?>
+
+            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
+            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
+                <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
+                    <?= Html::a('<i class="fas fa-plus-circle" data-toggle="tooltip" title="Details"></i> Create from dump', null, [
+                        'data-flight-id' => $flight->getId(),
+                        'class' => 'dropdown-item btn_create_from_dump',
+                        'data-url' => Url::to(['/flight/flight-quote/create-re-protection-quote', 'flight_id' => $flight->getId()]),
+                    ]) ?>
+                <?php endif ?>
             <?php endif ?>
 
+            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS, Remove product from order*/ ?>
             <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) : ?>
                 <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Remove', null, [
                     'data-order-id' => $order->or_id,
