@@ -56,7 +56,7 @@ class Refund
 
     public function handle(string $bookingId, ?int $userId): void
     {
-        $flightQuoteFLight = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $bookingId])->one();
+        $flightQuoteFLight = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one();
         if (!$flightQuoteFLight) {
             throw new \DomainException('Not found Flight Quote Flight with bookingId: ' . $bookingId);
         }
