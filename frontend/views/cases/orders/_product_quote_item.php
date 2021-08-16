@@ -96,7 +96,7 @@ if ($quote->productQuoteLastChange) {
             <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
             <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
                 <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
-                    <?= Html::a('<i class="fas fa-plus-circle" data-toggle="tooltip" title="Details"></i> Create from dump', null, [
+                    <?= Html::a('<i class="fas fa-plus-circle" data-toggle="tooltip" title="Details"></i> Add ReProtection Quote', null, [
                         'data-flight-id' => $flight->getId(),
                         'class' => 'dropdown-item btn_create_from_dump',
                         'data-url' => Url::to(['/flight/flight-quote/create-re-protection-quote', 'flight_id' => $flight->getId()]),
