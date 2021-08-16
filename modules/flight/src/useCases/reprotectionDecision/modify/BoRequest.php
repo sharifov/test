@@ -56,7 +56,8 @@ class BoRequest
 
         $responseBO = BackOffice::reprotectionCustomerDecisionModify(
             $this->getBookingId($productQuoteChange),
-            $this->prepareQuoteToRequestData($quote)
+            $this->prepareQuoteToRequestData($quote),
+            $quote->pq_gid
         );
 
         if ($responseBO) {
@@ -147,6 +148,9 @@ class BoRequest
 
     private function prepareQuoteToRequestData(ProductQuote $quote): array
     {
-        return $quote->flightQuote->toArray(['gds', 'pcc', 'fareType', 'validatingCarrier', 'itineraryDump', 'trips']);
+        return array_merge(
+            ['reprotection_quote_gid' => $quote->pq_gid],
+            $quote->flightQuote->toArray(['gds', 'pcc', 'fareType', 'validatingCarrier', 'itineraryDump', 'trips'])
+        );
     }
 }

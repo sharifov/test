@@ -266,22 +266,22 @@ class BackOffice
         }
     }
 
-    public static function reprotectionCustomerDecisionConfirm(string $bookingId, array $quote): bool
+    public static function reprotectionCustomerDecisionConfirm(string $bookingId, array $quote, string $reprotectionQuoteGid): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote);
+        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote, $reprotectionQuoteGid);
     }
 
-    public static function reprotectionCustomerDecisionModify(string $bookingId, array $quote): bool
+    public static function reprotectionCustomerDecisionModify(string $bookingId, array $quote, string $reprotectionQuoteGid): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote);
+        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote, $reprotectionQuoteGid);
     }
 
     public static function reprotectionCustomerDecisionRefund(string $bookingId): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'refund', []);
+        return self::reprotectionCustomerDecision($bookingId, 'refund', [], null);
     }
 
-    private static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote): bool
+    private static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid): bool
     {
         if (!$bookingId) {
             throw new \DomainException('Booking ID is empty');
@@ -297,6 +297,9 @@ class BackOffice
             'bookingId' => $bookingId,
             'type' => $type,
         ];
+        if ($reprotectionQuoteGid) {
+            $request['reprotection_quote_gid'] = $reprotectionQuoteGid;
+        }
         if ($quote) {
             $request['flightQuote'] = $quote;
         }
