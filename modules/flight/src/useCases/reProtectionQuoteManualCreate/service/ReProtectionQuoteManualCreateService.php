@@ -39,6 +39,7 @@ use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
+use sales\auth\Auth;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\product\ProductQuoteRepository;
@@ -116,8 +117,16 @@ class ReProtectionQuoteManualCreateService
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
     }
 
-    public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form): FlightQuote
+    public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form, ?int $userId): FlightQuote
     {
+        if ($flight->flightQuotes) {
+            foreach ($flight->flightQuotes as $flightQuote) {
+                $oldProductQuote = $flightQuote->fqProductQuote;
+                $oldProductQuote->cancelled($userId, 'Create ReProtection Quote');
+                $this->productQuoteRepository->save($oldProductQuote);
+            }
+        }
+
         $originFlightQuote = $originProductQuote->flightQuote;
         $productQuote = $this->productQuoteCloneService->clone(
             $originProductQuote->pq_id,

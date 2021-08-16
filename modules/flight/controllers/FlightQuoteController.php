@@ -796,7 +796,7 @@ class FlightQuoteController extends FController
                 if (!$form->validate()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
                 }
-                $flightQuote = $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form);
+                $flightQuote = $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, Auth::id());
 
                 $response['message'] = 'Success. FlightQuote ID( ' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
