@@ -6,6 +6,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -59,6 +60,15 @@ $refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
                     'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id])
                 ]) ?>
             <?php endif; ?>
+            <?php /* TODO:: add ABAC */ ?>
+            <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
+                <?= Html::a('<i class="fas fa-plus-circle" data-toggle="tooltip" title="Details"></i> Create from dump', null, [
+                    'data-flight-id' => $flight->getId(),
+                    'class' => 'dropdown-item btn_create_from_dump',
+                    'data-url' => Url::to(['/flight/flight-quote/create-re-protection-quote', 'flight_id' => $flight->getId()]),
+                ]) ?>
+            <?php endif ?>
+
             <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) : ?>
                 <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Remove', null, [
                     'data-order-id' => $order->or_id,

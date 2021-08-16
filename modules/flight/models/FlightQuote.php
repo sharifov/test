@@ -310,7 +310,7 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 
     public function getFlightQuoteFlights(): ActiveQuery
     {
-        return $this->hasMany(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id']);
+        return $this->hasMany(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id'])->orderBy(['fqf_fq_id' => SORT_DESC]);
     }
 
     public function getQuoteLabel(): ActiveQuery

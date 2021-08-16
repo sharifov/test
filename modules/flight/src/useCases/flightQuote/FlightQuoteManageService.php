@@ -23,6 +23,7 @@ use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\services\OfferPriceUpdater;
 use modules\order\src\exceptions\OrderC2BDtoException;
@@ -67,6 +68,7 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
+use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -96,6 +98,7 @@ use yii\helpers\VarDumper;
  * @property FlightQuoteFlightRepository $flightQuoteFlightRepository
  * @property FlightQuoteBookingRepository $flightQuoteBookingRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property ProductQuoteCloneService $productQuoteCloneService
  */
 class FlightQuoteManageService implements ProductQuoteService
 {
@@ -167,6 +170,7 @@ class FlightQuoteManageService implements ProductQuoteService
     private FlightQuoteFlightRepository $flightQuoteFlightRepository;
     private FlightQuoteBookingRepository $flightQuoteBookingRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteCloneService $productQuoteCloneService;
 
     public function __construct(
         FlightQuoteRepository $flightQuoteRepository,
@@ -186,7 +190,8 @@ class FlightQuoteManageService implements ProductQuoteService
         ProductQuoteOptionRepository $productQuoteOptionRepository,
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
         FlightQuoteBookingRepository $flightQuoteBookingRepository,
-        ProductQuoteChangeRepository $productQuoteChangeRepository
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
+        ProductQuoteCloneService $productQuoteCloneService
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -206,6 +211,7 @@ class FlightQuoteManageService implements ProductQuoteService
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->productQuoteCloneService = $productQuoteCloneService;
     }
 
     /**
@@ -546,7 +552,7 @@ class FlightQuoteManageService implements ProductQuoteService
         }
     }
 
-    private function createFlightQuoteFlight(FlightQuote $flightQuote, ?string $bookingId = null): FlightQuoteFlight
+    public function createFlightQuoteFlight(FlightQuote $flightQuote, ?string $bookingId = null): FlightQuoteFlight
     {
         $flightQuoteFlight = FlightQuoteFlight::create(
             $flightQuote->getId(),
@@ -597,8 +603,8 @@ class FlightQuoteManageService implements ProductQuoteService
                 $flightQuoteFlight->getId(),
                 $bookingId,
                 null,
-                null,
-                null,
+                $flightQuote->fq_gds,
+                $flightQuote->fq_gds_pcc,
                 $flightQuoteFlight->fqf_main_airline
             );
             if (!$flightQuoteBooking->validate()) {

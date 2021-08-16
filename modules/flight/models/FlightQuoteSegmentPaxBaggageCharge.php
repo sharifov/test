@@ -161,6 +161,35 @@ class FlightQuoteSegmentPaxBaggageCharge extends \yii\db\ActiveRecord
             'qsbc_client_currency',
             'qsbc_max_weight',
             'qsbc_max_size',
+            'qsbc_flight_pax_code_id',
         ];
+    }
+
+    public static function createByParams(
+        int $flightPaxCodeId,
+        int $flightQuoteSegmentId,
+        ?int $firstPiece,
+        ?int $lastPiece,
+        ?float $originPrice,
+        ?string $originCurrency,
+        ?float $price,
+        ?float $clientPrice,
+        ?string $clientCurrency,
+        ?string $maxWeight,
+        ?string $maxSize
+    ): self {
+        $baggageCharge = new self();
+        $baggageCharge->qsbc_flight_pax_code_id = $flightPaxCodeId;
+        $baggageCharge->qsbc_flight_quote_segment_id = $flightQuoteSegmentId;
+        $baggageCharge->qsbc_first_piece = $firstPiece;
+        $baggageCharge->qsbc_last_piece = $lastPiece;
+        $baggageCharge->qsbc_origin_price = $originPrice;
+        $baggageCharge->qsbc_origin_currency = $originCurrency;
+        $baggageCharge->qsbc_price = $price;
+        $baggageCharge->qsbc_client_price = $clientPrice;
+        $baggageCharge->qsbc_client_currency = $clientCurrency;
+        $baggageCharge->qsbc_max_weight = $maxWeight;
+        $baggageCharge->qsbc_max_size = $maxSize;
+        return $baggageCharge;
     }
 }

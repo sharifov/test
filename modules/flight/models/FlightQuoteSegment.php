@@ -7,6 +7,7 @@ use common\models\Airports;
 use modules\flight\src\dto\flightSegment\FlightQuoteSegmentApiBoDto;
 use modules\flight\src\entities\flightQuoteSegment\serializer\FlightQuoteSegmentSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
+use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTOInterface;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
@@ -224,7 +225,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
      * @param FlightQuoteSegmentDTO $dto
      * @return FlightQuoteSegment
      */
-    public static function create(FlightQuoteSegmentDTO $dto): self
+    public static function create(FlightQuoteSegmentDTOInterface $dto): self
     {
         $segment = new self();
 

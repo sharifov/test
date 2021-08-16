@@ -20,6 +20,12 @@ class BaggageHelper
         return $result ?? [];
     }
 
+    public static function getBaggageHeightValuesCombine(): array
+    {
+        $baggageHeightValues = self::getBaggageHeightValues();
+        return array_combine($baggageHeightValues, $baggageHeightValues);
+    }
+
     /**
      * @return array
      */
@@ -31,5 +37,11 @@ class BaggageHelper
             $result[] = sprintf('UP TO %d POUNDS/%d KILOGRAMS', $heights[0], $heights[1]);
         }
         return $result ?? [];
+    }
+
+    public static function getBaggageWeightValuesCombine(): array
+    {
+        $baggageWeightValues = self::getBaggageWeightValues();
+        return array_combine($baggageWeightValues, $baggageWeightValues);
     }
 }

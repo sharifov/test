@@ -43,7 +43,7 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
             [['fqt_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqt_flight_quote_id' => 'fq_id']],
 
             [['fqt_flight_id'], 'integer'],
-            [['fqt_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqt_flight_id' => 'fqf_id']],
+            [['fqt_flight_id'], 'exist', 'skipOnEmpty' => true, 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqt_flight_id' => 'fqf_id']],
         ];
     }
 
@@ -105,13 +105,12 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
      * @param int|null $flightId
      * @return FlightQuoteTrip
      */
-    public static function create(FlightQuote $flightQuote, ?int $duration, ?int $flightId = null): self
+    public static function create(FlightQuote $flightQuote, ?int $duration): self
     {
         $trip = new self();
 
         $trip->fqt_flight_quote_id = $flightQuote->fq_id;
         $trip->fqt_duration = $duration;
-        $trip->fqt_flight_id = $flightId;
 
         return $trip;
     }
