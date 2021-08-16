@@ -73,7 +73,7 @@ class Refund
             [$orderRefundId, $productQuoteRefundId] = $this->transactionManager->wrap(function () use ($productQuote, $productQuoteChange, $userId) {
                 $this->refundProductQuoteChange($productQuoteChange, $userId);
                 $this->cancelReprotectionQuotes($productQuote, $userId);
-                return $this->createRefunds($productQuote, $productQuoteChange, $userId);
+                return $this->createRefunds($productQuote, $productQuoteChange);
             });
         } catch (\Throwable $e) {
             $case = $this->getCase($productQuoteChange);
@@ -86,35 +86,34 @@ class Refund
         $this->createBoRequestJob($bookingId, $orderRefundId, $productQuoteRefundId, $userId);
     }
 
-    private function createRefunds(ProductQuote $productQuote, ProductQuoteChange $productQuoteChange, ?int $userId): array
+    private function createRefunds(ProductQuote $productQuote, ProductQuoteChange $productQuoteChange): array
     {
         $caseId = null;
         if ($case = $this->getCase($productQuoteChange)) {
             $caseId = $case->cs_id;
         }
 
-        $orderRefundId = $this->createOrderRefund($productQuote, $caseId, $userId);
-        $productQuoteRefundId = $this->createProductQuoteRefund($productQuote, $orderRefundId, $caseId, $userId);
+        $orderRefundId = $this->createOrderRefund($productQuote, $caseId);
+        $productQuoteRefundId = $this->createProductQuoteRefund($productQuote, $orderRefundId, $caseId);
         return [$orderRefundId, $productQuoteRefundId];
     }
 
-    private function createOrderRefund(ProductQuote $productQuote, ?int $caseId, ?int $userId): int
+    private function createOrderRefund(ProductQuote $productQuote, ?int $caseId): int
     {
         $orderRefund = OrderRefund::createByScheduleChange(
             OrderRefund::generateUid(),
             $productQuote->pq_order_id,
-            $productQuote->pq_price,
-            $productQuote->pqOrder->or_client_currency,
-            $productQuote->pq_client_currency_rate,
             $productQuote->pqOrder->or_app_total,
-            $caseId,
-            $userId
+            $productQuote->pqOrder->or_client_currency,
+            $productQuote->pqOrder->or_client_currency_rate,
+            $productQuote->pqOrder->or_client_total,
+            $caseId
         );
         $this->orderRefundRepository->save($orderRefund);
         return $orderRefund->orr_id;
     }
 
-    private function createProductQuoteRefund(ProductQuote $productQuote, int $orderRefundId, ?int $caseId, ?int $userId): int
+    private function createProductQuoteRefund(ProductQuote $productQuote, int $orderRefundId, ?int $caseId): int
     {
         $refund = ProductQuoteRefund::createByScheduleChange(
             $orderRefundId,
@@ -122,8 +121,7 @@ class Refund
             $productQuote->pq_price,
             $productQuote->pqOrder->or_client_currency,
             $productQuote->pqOrder->or_client_currency_rate,
-            $caseId,
-            $userId
+            $caseId
         );
         $this->productQuoteRefundRepository->save($refund);
         return $refund->pqr_id;

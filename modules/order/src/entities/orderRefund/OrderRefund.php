@@ -53,8 +53,7 @@ class OrderRefund extends \yii\db\ActiveRecord
         $clientCurrency,
         $clientCurrencyRate,
         $clientSellingPrice,
-        $caseId,
-        $userId
+        $caseId
     ): self {
         $refund = new self();
         $refund->orr_uid = $uuid;
@@ -74,7 +73,6 @@ class OrderRefund extends \yii\db\ActiveRecord
         $refund->orr_description = 'Schedule change refund request';
         $refund->orr_case_id = $caseId;
         $refund->detachBehavior('user');
-        $refund->orr_created_user_id = $userId;
         return $refund;
     }
 
