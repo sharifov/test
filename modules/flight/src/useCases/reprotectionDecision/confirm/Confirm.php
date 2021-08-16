@@ -7,6 +7,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use sales\entities\cases\CaseEventLog;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -50,7 +51,7 @@ class Confirm
 
         $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote);
         if (!$productQuoteChange->isDecisionPending()) {
-            throw new \DomainException('Product Quote Change status is invalid.');
+            throw new \DomainException('Product Quote Change status is not in "Decision pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"');
         }
 
         $this->transactionManager->wrap(function () use ($reprotectionQuote, $productQuoteChange, $userId) {
