@@ -122,8 +122,10 @@ class ReProtectionQuoteManualCreateService
         if ($flight->flightQuotes) {
             foreach ($flight->flightQuotes as $flightQuote) {
                 $oldProductQuote = $flightQuote->fqProductQuote;
-                $oldProductQuote->cancelled($userId, 'Create ReProtection Quote');
-                $this->productQuoteRepository->save($oldProductQuote);
+                if (!$oldProductQuote->isCanceled() || $oldProductQuote->isDeclined()) {
+                    $oldProductQuote->cancelled($userId, 'Create ReProtection Quote');
+                    $this->productQuoteRepository->save($oldProductQuote);
+                }
             }
         }
 
