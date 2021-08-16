@@ -26,7 +26,7 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
 /**
- * Class MonitorFlowController
+ * Class CaseController
  *
  * @property CasesRepository $caseRepository
  */
