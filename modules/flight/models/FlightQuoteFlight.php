@@ -255,4 +255,12 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
         };
         return $fields;
     }
+
+    public static function clone(FlightQuoteFlight $originFlightQuoteFlight, int $flightQuoteId): self
+    {
+        $clone = new self();
+        $clone->attributes = $originFlightQuoteFlight->attributes;
+        $clone->fqf_fq_id = $flightQuoteId;
+        return $clone;
+    }
 }

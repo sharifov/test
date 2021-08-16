@@ -223,7 +223,7 @@ $paxCntTypes = [
                                 ],
                                 'template' => '{input}'
                             ])->dropDownList(ParsingDump::QUOTE_GDS_TYPE_MAP, [
-                                'prompt' => 'Select',
+                                'prompt' => '---',
                                 'required' => 'required'
                             ]) ?>
                         </div>
@@ -272,7 +272,7 @@ $paxCntTypes = [
                             'template' => '{input}'
                         ])->widget(Select2::class, [
                             'data' => Airline::getAirlinesMapping(true),
-                            'options' => ['placeholder' => 'Select'],
+                            'options' => ['placeholder' => '---'],
                             'pluginOptions' => [
                                 'allowClear' => false
                             ],

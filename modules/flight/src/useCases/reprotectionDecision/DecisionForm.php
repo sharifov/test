@@ -42,7 +42,7 @@ class DecisionForm extends Model
 
             ['reprotection_quote_gid', 'string', 'max' => 32],
             ['reprotection_quote_gid', 'required', 'when' => function () {
-                return $this->isModify() || $this->isConfirm();
+                return $this->isConfirm();
             }],
 
             ['flight_product_quote', 'required', 'when' => function () {

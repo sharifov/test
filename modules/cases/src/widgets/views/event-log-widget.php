@@ -29,7 +29,7 @@ $.ajax({
         error: function (error) {            
             new PNotify({
                 title: 'Error',
-                text: 'Internal Server Error. Try again letter.',
+                text: 'Event Log: Internal Server Error',
                 type: 'error'                
             });
             //$('#some-id').html('Internal Server Error. Try again letter.');

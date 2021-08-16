@@ -61,13 +61,14 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $refund->pqr_selling_price = $sellingPrice;
         $refund->pqr_penalty_amount = 0;
         $refund->pqr_processing_fee_amount = 0;
-        $refund->pqr_refund_amount = $refund->pqr_selling_price;
+        $refund->pqr_refund_amount = $refund->pqr_selling_price - $refund->pqr_penalty_amount - $refund->pqr_processing_fee_amount;
         $refund->pqr_status_id = ProductQuoteRefundStatus::PENDING;
         $refund->pqr_client_currency = $clientCurrency;
         $refund->pqr_client_currency_rate = $clientCurrencyRate;
         $refund->pqr_client_selling_price = CurrencyHelper::roundUp($refund->pqr_selling_price * $refund->pqr_client_currency_rate);
         $refund->pqr_client_refund_amount = CurrencyHelper::roundUp($refund->pqr_refund_amount * $refund->pqr_client_currency_rate);
         $refund->pqr_case_id = $caseId;
+        $refund->detachBehavior('user');
         return $refund;
     }
 

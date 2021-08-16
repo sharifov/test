@@ -315,6 +315,7 @@ class ReprotectionCreateService
             ->select(Client::tableName() . '.*')
             ->innerJoin(OrderContact::tableName() . ' AS order_contact', Client::tableName() . '.id = order_contact.oc_client_id')
             ->where(['cl_project_id' => $projectId])
+            ->andWhere(['oc_order_id' => $orderId])
             ->orderBy([Client::tableName() . '.id' => SORT_DESC])
             ->one();
     }

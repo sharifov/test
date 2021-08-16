@@ -266,48 +266,54 @@ class BackOffice
         }
     }
 
-    public static function reprotectionCustomerDecisionConfirm(string $bookingId, array $quote): bool
+    public static function reprotectionCustomerDecisionConfirm(string $bookingId, array $quote, string $reprotectionQuoteGid): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote);
+        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote, $reprotectionQuoteGid);
     }
 
-    public static function reprotectionCustomerDecisionModify(string $bookingId, array $quote): bool
+    public static function reprotectionCustomerDecisionModify(string $bookingId, array $quote, string $reprotectionQuoteGid): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'modify', $quote);
+        return self::reprotectionCustomerDecision($bookingId, 'confirm', $quote, $reprotectionQuoteGid);
     }
 
     public static function reprotectionCustomerDecisionRefund(string $bookingId): bool
     {
-        return self::reprotectionCustomerDecision($bookingId, 'refund', []);
+        return self::reprotectionCustomerDecision($bookingId, 'refund', [], null);
     }
 
-    private static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote): bool
+    private static function reprotectionCustomerDecision(string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid): bool
     {
         if (!$bookingId) {
             throw new \DomainException('Booking ID is empty');
         }
-        if (!in_array($type, ['confirm', 'modify', 'refund'])) {
+        if (!in_array($type, ['confirm', 'refund'])) {
             throw new \DomainException('Undefined Type');
         }
-        if (in_array($type, ['confirm', 'modify']) && !$quote) {
+        if ($type === 'confirm' && !$quote) {
             throw new \DomainException('Quote is empty');
         }
-
-        // todo changed to endpoint
-        $endpoint = 'reprotection/customer-decision';
 
         $request = [
             'bookingId' => $bookingId,
             'type' => $type,
         ];
+        if ($reprotectionQuoteGid) {
+            $request['reprotection_quote_gid'] = $reprotectionQuoteGid;
+        }
         if ($quote) {
-            $request['quote'] = $quote;
+            $request['flightQuote'] = $quote;
         }
 
 //        VarDumper::dump($request);die;
 
         try {
-            $response = self::sendRequest2($endpoint, $request);
+            $response = self::sendRequest2(
+                'flight-request/reprotection-decision',
+                $request,
+                'POST',
+                30,
+                Yii::$app->params['backOffice']['serverUrlV3']
+            );
 
             if (!$response->isOk) {
                 \Yii::error([

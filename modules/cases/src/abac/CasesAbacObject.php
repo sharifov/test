@@ -19,6 +19,11 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_PRODUCT_QUOTE_REMOVE = self::NS . 'product_quote/remove';
     public const ACT_PRODUCT_QUOTE_VIEW_DETAILS = self::NS . 'product_quote/view_details';
 
+    /** ACTION PERMISSION */
+    public const ACT_FLIGHT_REPROTECTION_CONFIRM  = self::NS . 'act/flight-reprotection-confirm';
+    public const ACT_FLIGHT_REPROTECTION_REFUND  = self::NS . 'act/flight-reprotection-refund';
+    public const ACT_FLIGHT_REPROTECTION_QUOTE  = self::NS . 'act/flight-reprotection-quote';
+
     /** UI PERMISSION */
     public const UI_BLOCK_EVENT_LOG_LIST  = self::NS . 'ui/block/event-log-list';
     public const UI_BTN_EVENT_LOG_VIEW     = self::NS . 'ui/btn/event-log-view';
@@ -30,6 +35,9 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::REPROTECTION_QUOTE_SEND_EMAIL => self::REPROTECTION_QUOTE_SEND_EMAIL,
         self::ACT_PRODUCT_QUOTE_REMOVE => self::ACT_PRODUCT_QUOTE_REMOVE,
         self::ACT_PRODUCT_QUOTE_VIEW_DETAILS => self::ACT_PRODUCT_QUOTE_VIEW_DETAILS,
+        self::ACT_FLIGHT_REPROTECTION_CONFIRM => self::ACT_FLIGHT_REPROTECTION_CONFIRM,
+        self::ACT_FLIGHT_REPROTECTION_REFUND => self::ACT_FLIGHT_REPROTECTION_REFUND,
+        self::ACT_FLIGHT_REPROTECTION_QUOTE => self::ACT_FLIGHT_REPROTECTION_QUOTE,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -37,6 +45,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_UNMASK  = 'unmask';
     public const ACTION_ACCESS  = 'access';
     public const ACTION_READ  = 'read';
+    public const ACTION_CREATE  = 'create';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -46,6 +55,9 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::REPROTECTION_QUOTE_SEND_EMAIL => [self::ACTION_ACCESS],
         self::ACT_PRODUCT_QUOTE_REMOVE => [self::ACTION_ACCESS],
         self::ACT_PRODUCT_QUOTE_VIEW_DETAILS => [self::ACTION_ACCESS],
+        self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ACTION_ACCESS],
+        self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ACTION_ACCESS],
+        self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ACTION_CREATE],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -65,6 +77,9 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER],
         self::REPROTECTION_QUOTE_SEND_EMAIL => [self::ATTR_CASE_IS_OWNER],
+        self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ATTR_CASE_IS_OWNER],
+        self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ATTR_CASE_IS_OWNER],
+        self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ATTR_CASE_IS_OWNER],
     ];
 
     /**

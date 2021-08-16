@@ -14,7 +14,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $pqr_parent_pq_id
  * @property int $pqr_related_pq_id
- * @property int $pqr_type_id 1 - replace, 2 - clone
+ * @property int $pqr_type_id 1 - replace, 2 - clone, 3 - alternative, 4 - reProtection
  * @property int|null $pqr_created_user_id
  * @property string|null $pqr_created_dt
  *

@@ -49,7 +49,7 @@ class BoRequest
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
     }
 
-    public function refund(string $bookingId, int $orderRefundId, int $productQuoteRefundId): void
+    public function refund(string $bookingId, int $orderRefundId, int $productQuoteRefundId, ?int $userId): void
     {
         $flightQuoteFLight = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $bookingId])->one();
         if (!$flightQuoteFLight) {
@@ -70,34 +70,34 @@ class BoRequest
         );
 
         if ($responseBO) {
-            $this->transactionManager->wrap(function () use ($productQuoteChange, $orderRefundId, $productQuoteRefundId) {
-                $this->successProcessing($productQuoteChange, $orderRefundId, $productQuoteRefundId);
+            $this->transactionManager->wrap(function () use ($productQuoteChange, $orderRefundId, $productQuoteRefundId, $userId) {
+                $this->successProcessing($productQuoteChange, $orderRefundId, $productQuoteRefundId, $userId);
             });
             return;
         }
 
-        $this->transactionManager->wrap(function () use ($productQuoteChange, $orderRefundId, $productQuoteRefundId) {
-            $this->errorProcessing($productQuoteChange, $orderRefundId, $productQuoteRefundId);
+        $this->transactionManager->wrap(function () use ($productQuoteChange, $orderRefundId, $productQuoteRefundId, $userId) {
+            $this->errorProcessing($productQuoteChange, $orderRefundId, $productQuoteRefundId, $userId);
         });
     }
 
-    private function successProcessing(ProductQuoteChange $productQuoteChange, int $orderRefundId, int $productQuoteRefundId): void
+    private function successProcessing(ProductQuoteChange $productQuoteChange, int $orderRefundId, int $productQuoteRefundId, ?int $userId): void
     {
         $this->markQuoteChangeToInProgress($productQuoteChange);
         $this->markRefundsToProcessing($orderRefundId, $productQuoteRefundId);
         $case = $this->getCase($productQuoteChange);
         if ($case) {
-            $this->processingCaseBySuccessResult($case);
+            $this->processingCaseBySuccessResult($case, $userId);
         }
     }
 
-    private function errorProcessing(ProductQuoteChange $productQuoteChange, int $orderRefundId, int $productQuoteRefundId): void
+    private function errorProcessing(ProductQuoteChange $productQuoteChange, int $orderRefundId, int $productQuoteRefundId, ?int $userId): void
     {
         $this->markQuoteChangeToError($productQuoteChange);
         $this->markRefundsToError($orderRefundId, $productQuoteRefundId);
         $case = $this->getCase($productQuoteChange);
         if ($case) {
-            $this->processingCaseByErrorResult($case);
+            $this->processingCaseByErrorResult($case, $userId);
         }
     }
 
@@ -153,16 +153,16 @@ class BoRequest
         $this->productQuoteChangeRepository->save($productQuoteChange);
     }
 
-    private function processingCaseByErrorResult(Cases $case): void
+    private function processingCaseByErrorResult(Cases $case, ?int $userId): void
     {
         $case->offIsAutomate();
-        $case->error(null, 'Refund request error');
+        $case->error($userId, 'Refund request error');
         $this->casesRepository->save($case);
     }
 
-    private function processingCaseBySuccessResult(Cases $case): void
+    private function processingCaseBySuccessResult(Cases $case, ?int $userId): void
     {
-        $case->awaiting(null, 'Awaiting for Refund request update');
+        $case->awaiting($userId, 'Awaiting for Refund request update');
         $this->casesRepository->save($case);
     }
 

@@ -9,10 +9,13 @@ use common\models\Notifications;
 use common\models\UserProjectParams;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
+use modules\flight\models\FlightQuoteFlight;
+use modules\flight\src\useCases\reprotectionDecision;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
@@ -106,7 +109,9 @@ class ProductQuoteController extends FController
             'access' => [
                 'allowActions' => [
                     'preview-reprotection-quote-email',
-                    'reprotection-quote-send-email'
+                    'reprotection-quote-send-email',
+                    'flight-reprotection-confirm',
+                    'flight-reprotection-refund',
                 ]
             ]
         ];
@@ -190,12 +195,14 @@ class ProductQuoteController extends FController
                 $emailData['order'] = $quote->pqOrder->serialize();
                 $emailFrom = Auth::user()->email;
                 $emailTemplateType = null;
+                $emailFromName = Auth::user()->nickname;
 
                 if ($case->cs_project_id) {
                     $project = $case->project;
                     if ($project && $emailConfig = $project->getReprotectionQuoteEmailConfig()) {
                         $emailFrom = $emailConfig['emailFrom'] ?? '';
                         $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
+                        $emailFromName = $emailConfig['emailFromName'] ?? $emailFromName;
                     }
                 }
 
@@ -212,7 +219,7 @@ class ProductQuoteController extends FController
                     $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');
                 } else {
                     $previewEmailForm = new ReprotectionQuotePreviewEmailForm($previewEmailResult['data']);
-                    $previewEmailForm->email_from_name = Auth::user()->nickname;
+                    $previewEmailForm->email_from_name = $emailFromName;
                     $previewEmailForm->productQuoteId = $quote->pq_id;
 
                     $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $emailTemplateType]);
@@ -343,6 +350,88 @@ class ProductQuoteController extends FController
         return $this->renderAjax('partial/_reprotection_quote_preview_email', [
             'previewEmailForm' => $previewEmailForm
         ]);
+    }
+
+    public function actionFlightReprotectionConfirm()
+    {
+        try {
+            $quoteId = Yii::$app->request->post('quoteId');
+            if (!$quoteId) {
+                throw new \Exception('Not found Quote ID');
+            }
+
+            $quote = Yii::createObject(ProductQuoteRepository::class)->find($quoteId);
+            if (!$quote->isFlight()) {
+                throw new \Exception('Quote is not flight quote.');
+            }
+            if (!$quote->flightQuote->isTypeReProtection()) {
+                throw new \Exception('Quote is not reprotection.');
+            }
+            $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findParentRelated($quote);
+            $case = $productQuoteChange->pqcCase;
+            if (!$case) {
+                throw new \DomainException('Not found related case.');
+            }
+            $caseAbacDto = new CasesAbacDto($case);
+            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) {
+                throw new \Exception('You do not have access to perform this action.');
+            }
+
+            Yii::createObject(reprotectionDecision\confirm\Confirm::class)->handle($quote->pq_gid, Auth::id());
+
+            return $this->asJson([
+                'error' => false,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function actionFlightReprotectionRefund()
+    {
+        try {
+            $quoteId = Yii::$app->request->post('quoteId');
+            if (!$quoteId) {
+                throw new \Exception('Not found Quote ID');
+            }
+
+            $quote = Yii::createObject(ProductQuoteRepository::class)->find($quoteId);
+            if (!$quote->isFlight()) {
+                throw new \Exception('Quote is not flight quote.');
+            }
+            if (!$quote->flightQuote->isTypeReProtection()) {
+                throw new \Exception('Quote is not reprotection.');
+            }
+
+            $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findParentRelated($quote);
+            $case = $productQuoteChange->pqcCase;
+            if (!$case) {
+                throw new \DomainException('Not found related case.');
+            }
+            $caseAbacDto = new CasesAbacDto($case);
+            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS)) {
+                throw new \Exception('You do not have access to perform this action');
+            }
+
+            $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $productQuoteChange->pqcPq->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+            if (!$lastFlightQuoteFlightBookingId) {
+                throw new \DomainException('Not found Booking Id. Quote ID: ' . $quote->pq_id);
+            }
+
+            Yii::createObject(reprotectionDecision\refund\Refund::class)->handle($lastFlightQuoteFlightBookingId, Auth::id());
+
+            return $this->asJson([
+                'error' => false,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

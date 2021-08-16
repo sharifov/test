@@ -9,6 +9,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -53,7 +54,7 @@ class Refund
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
     }
 
-    public function handle(string $bookingId): void
+    public function handle(string $bookingId, ?int $userId): void
     {
         $flightQuoteFLight = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $bookingId])->one();
         if (!$flightQuoteFLight) {
@@ -66,24 +67,24 @@ class Refund
 
         $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($productQuote->pq_id);
         if (!$productQuoteChange->isDecisionPending()) {
-            throw new \DomainException('Product Quote Change status is invalid.');
+            throw new \DomainException('Product Quote Change status is not in "Decision pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"');
         }
 
         try {
-            [$orderRefundId, $productQuoteRefundId] = $this->transactionManager->wrap(function () use ($productQuote, $productQuoteChange) {
-                $this->refundProductQuoteChange($productQuoteChange);
-                $this->cancelReprotectionQuotes($productQuote);
+            [$orderRefundId, $productQuoteRefundId] = $this->transactionManager->wrap(function () use ($productQuote, $productQuoteChange, $userId) {
+                $this->refundProductQuoteChange($productQuoteChange, $userId);
+                $this->cancelReprotectionQuotes($productQuote, $userId);
                 return $this->createRefunds($productQuote, $productQuoteChange);
             });
         } catch (\Throwable $e) {
             $case = $this->getCase($productQuoteChange);
             if ($case) {
-                $this->processingCaseByError($case);
+                $this->processingCaseByError($case, $userId);
             }
             throw $e;
         }
 
-        $this->createBoRequestJob($bookingId, $orderRefundId, $productQuoteRefundId);
+        $this->createBoRequestJob($bookingId, $orderRefundId, $productQuoteRefundId, $userId);
     }
 
     private function createRefunds(ProductQuote $productQuote, ProductQuoteChange $productQuoteChange): array
@@ -103,10 +104,10 @@ class Refund
         $orderRefund = OrderRefund::createByScheduleChange(
             OrderRefund::generateUid(),
             $productQuote->pq_order_id,
-            $productQuote->pq_price,
-            $productQuote->pqOrder->or_client_currency,
-            $productQuote->pq_client_currency_rate,
             $productQuote->pqOrder->or_app_total,
+            $productQuote->pqOrder->or_client_currency,
+            $productQuote->pqOrder->or_client_currency_rate,
+            $productQuote->pqOrder->or_client_total,
             $caseId
         );
         $this->orderRefundRepository->save($orderRefund);
@@ -127,19 +128,20 @@ class Refund
         return $refund->pqr_id;
     }
 
-    private function refundProductQuoteChange(ProductQuoteChange $change): void
+    private function refundProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
     {
-        $change->customerDecisionRefund(null, new \DateTimeImmutable());
+        $change->customerDecisionRefund($userId, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::REFUND]);
     }
 
-    private function createBoRequestJob(string $bookingId, int $orderRefundId, int $productQuoteRefundId): void
+    private function createBoRequestJob(string $bookingId, int $orderRefundId, int $productQuoteRefundId, ?int $userId): void
     {
         $boJob = new BoRequestJob();
         $boJob->bookingId = $bookingId;
         $boJob->orderRefundId = $orderRefundId;
         $boJob->productQuoteRefundId = $productQuoteRefundId;
+        $boJob->userId = $userId;
         $jobId = \Yii::$app->queue_job->push($boJob);
         if (!$jobId) {
             \Yii::error([
@@ -149,7 +151,7 @@ class Refund
         }
     }
 
-    public function cancelReprotectionQuotes(ProductQuote $quote): void
+    public function cancelReprotectionQuotes(ProductQuote $quote, ?int $userId): void
     {
         $quotes = ProductQuote::find()
             ->andWhere([
@@ -162,7 +164,7 @@ class Refund
 
         foreach ($quotes as $productQuote) {
             if (!$productQuote->isCanceled() && $productQuote->isFlight() && $productQuote->flightQuote->isTypeReProtection()) {
-                $productQuote->cancelled(null, 'Canceled from reProtection');
+                $productQuote->cancelled($userId, 'Canceled from reProtection');
                 $this->productQuoteRepository->save($productQuote);
             }
         }
@@ -176,10 +178,10 @@ class Refund
         return null;
     }
 
-    private function processingCaseByError(Cases $case): void
+    private function processingCaseByError(Cases $case, ?int $userId): void
     {
         $case->offIsAutomate();
-        $case->error(null, 'Create refund error');
+        $case->error($userId, 'Create refund error');
         $this->casesRepository->save($case);
     }
 }

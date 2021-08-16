@@ -182,8 +182,8 @@ class FlightFromSaleService
         $productQuoteDto = new ProductQuoteCreateFromSaleDto(
             $flightProduct,
             $order->getId(),
-            null, //$order->or_app_total, /* TODO::  */
-            null, //$order->or_app_total, /* TODO::  */
+            null,
+            null,
             $order->or_client_currency
         );
         $productQuote = ProductQuote::create($productQuoteDto, null);
@@ -428,6 +428,9 @@ class FlightFromSaleService
         }
         if (($tripSearch = array_search($name, Flight::TRIP_TYPE_LIST, $strict)) !== false) {
             return $tripSearch;
+        }
+        if ($name === 'Multidestination') {
+            return (string) Flight::TRIP_TYPE_MULTI_DESTINATION;
         }
         return null;
     }

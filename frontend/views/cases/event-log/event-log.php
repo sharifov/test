@@ -33,30 +33,39 @@ use modules\cases\src\abac\dto\CasesAbacDto;
         <?php echo GridView::widget([
             'id' => 'case-event-grid',
             'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
+            //'filterModel' => $searchModel,
             //'filterUrl' => ['/cases/ajax-case-event-log'],
             'columns' => [
-                'cel_id',
+                ['class' => 'yii\grid\SerialColumn'],
+                //'cel_id',
                 /*[
                     'attribute' => 'cel_case_id',
                     'filter' => false,
                 ],*/
-                [
-                    'attribute' => 'cel_type_id',
-                    'value' => static function (CaseEventLog $model) {
-                        return CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id];
-                    }
-                ],
+//                [
+//                    'attribute' => 'cel_type_id',
+//                    'value' => static function (CaseEventLog $model) {
+//                        return CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id];
+//                    }
+//                ],
                 'cel_description',
                 [
                     'attribute' => 'cel_created_dt',
                     'class' => \common\components\grid\DateTimeColumn::class,
+                    'options' => [
+                        'style' => 'width:180px'
+                    ],
                 ],
-                ['class' => 'yii\grid\ActionColumn',
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    'header' => 'Data',
                     'template' => '{view}',
                     'buttons' => [
                         'view' => static function ($url, CaseEventLog $model) {
-                            return '<span data-toggle="tooltip" data-placement="top" title="' . Html::encode(VarDumper::dumpAsString($model->cel_data_json)) . '"><i class="fas fa-info-circle"></i></span>';
+                            if ($model->cel_data_json) {
+                                return '<span data-toggle="tooltip" data-placement="top" title="' . Html::encode(VarDumper::dumpAsString($model->cel_data_json)) . '"><i class="fas fa-info-circle"></i> Details</span>';
+                            }
+                            return '';
                         },
                     ],
                     'visibleButtons' => [
@@ -66,7 +75,7 @@ use modules\cases\src\abac\dto\CasesAbacDto;
                                 new CasesAbacDto($model->celCase),
                                 CasesAbacObject::UI_BTN_EVENT_LOG_VIEW,
                                 CasesAbacObject::ACTION_READ
-                            );
+                            ) && !empty($model->cel_data_json);
                         },
 
                     ],

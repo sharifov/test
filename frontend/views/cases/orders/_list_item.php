@@ -31,7 +31,8 @@ $orderAbacDto = new OrderAbacDto($order);
 
 <div class="x_panel">
     <div class="x_title">
-        <small>
+        <small data-toggle="tooltip" data-original-title="Order UID: <?=\yii\helpers\Html::encode($order->or_uid)?>, Order GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"
+               title="Order UID: <?=\yii\helpers\Html::encode($order->or_uid)?>, Order GID: <?=\yii\helpers\Html::encode($order->or_gid)?>">
             <span class="badge badge-white">
                 <?php echo 'OR ' . $order->or_id ?>
                 <?php /* if (Auth::can('/order/order/view')) : ?>
@@ -46,11 +47,16 @@ $orderAbacDto = new OrderAbacDto($order);
                 <?php endif*/ ?>
             </span>
         </small>
-        (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
+        <?php /*(<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)*/ ?>
+        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
+        <?php if ($order->or_name) : ?>
+        "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
+        <?php endif; ?>
+        -
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
-        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
-        "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
+
+
 
         <?php /* if ($order->or_profit_amount > 0) : ?>
             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
@@ -93,7 +99,7 @@ $orderAbacDto = new OrderAbacDto($order);
                             ])*/ ?>
                     <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_DETAIL_VIEW, OrderAbacObject::ACTION_ACCESS)) : ?>
                         <?php
-                        echo Html::a('OR ' . $order->or_id . ' <span class="glyphicon glyphicon-eye-open"></span> Detail view', ['/order/order/view', 'gid' => $order->or_gid], [
+                        echo Html::a('<i class="glyphicon glyphicon-eye-open"></i> View Details', ['/order/order/view', 'gid' => $order->or_gid], [
                             'target' => '_blank',
                             'data-pjax' => 0,
                             'class' => 'dropdown-item'
@@ -113,7 +119,7 @@ $orderAbacDto = new OrderAbacDto($order);
                         <?php endif;?>
                     <?php else : ?>
                         <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_START_AUTO_PROCESSING, OrderAbacObject::ACTION_ACCESS)) : ?>
-                            <?= Html::a('Start Auto Processing', null, [
+                            <?= Html::a('<i class="fa fa-play-circle-o"></i> Start Auto Processing', null, [
                                 'data-url' => \yii\helpers\Url::to(['/order/order-process-actions/start-process']),
                                 'class' => 'dropdown-item btn-start-process',
                                 'data-order-id' => $order->or_id,
@@ -121,12 +127,7 @@ $orderAbacDto = new OrderAbacDto($order);
                         <?php endif;?>
                     <?php endif;?>
 
-                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_CANCEL_ORDER, OrderAbacObject::ACTION_ACCESS)) : ?>
-                        <?= Html::a('Cancel Order', null, [
-                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/cancel', 'orderId' => $order->or_id]),
-                            'class' => 'dropdown-item btn-cancel-order'
-                        ])?>
-                    <?php endif ?>
+
 
                     <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_COMPLETE, OrderAbacObject::ACTION_ACCESS)) : ?>
                         <?= Html::a('Complete Order', null, [
@@ -136,7 +137,7 @@ $orderAbacDto = new OrderAbacDto($order);
                     <?php endif ?>
 
                     <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_SEND_EMAIL_CONFIRMATION, OrderAbacObject::ACTION_ACCESS)) : ?>
-                        <?= Html::a('Send Email Confirmation', null, [
+                        <?= Html::a('<i class="fa fa-envelope-o"></i> Send Email Confirmation', null, [
                             'data-url' => \yii\helpers\Url::to(['/order/order-actions/send-email-confirmation']),
                             'data-id' => $order->or_id,
                             'class' => 'dropdown-item btn-order-send-email-confirmation'
@@ -167,6 +168,12 @@ $orderAbacDto = new OrderAbacDto($order);
                     <?php endif; ?>
 
                     <div class="dropdown-divider"></div>
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_CANCEL_ORDER, OrderAbacObject::ACTION_ACCESS)) : ?>
+                        <?= Html::a('<i class="fa fa-remove"></i> Cancel Order', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/cancel', 'orderId' => $order->or_id]),
+                            'class' => 'dropdown-item btn-cancel-order text-danger'
+                        ])?>
+                    <?php endif ?>
 
                     <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_DELETE, OrderAbacObject::ACTION_ACCESS)) : ?>
                         <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
@@ -200,7 +207,7 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Product</th>
                     <th>Name</th>
                     <th>Status</th>
-                    <th>Change Status</th>
+                    <th>Change Status / Decision</th>
                     <th>Refund Status</th>
                     <th>Created</th>
                     <th>Client Price</th>
@@ -255,9 +262,9 @@ $orderAbacDto = new OrderAbacDto($order);
                 </tr>
  */ ?>
                 <tr>
-                    <th class="text-right" colspan="4">Total: </th>
-                    <td class="text-center" colspan="3">(price + opt + tips)</td>
-                    <th class="text-right" colspan="2"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <th class="text-right" colspan="7">Total (price + opt + tips): </th>
+                    <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <td></td>
                 </tr>
             <?php endif; ?>
         </table>
@@ -271,8 +278,6 @@ $orderAbacDto = new OrderAbacDto($order);
       <?php /*
         <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum  + $orderTipsAmount, 2)?> USD, Total: <?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></h4></div>
  */ ?>
-
-        <hr>
         <?php /*
         <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-invoice-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
             <h4><i class="fas fa-file-invoice-dollar"></i> Invoice List</h4>
@@ -601,6 +606,39 @@ $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-s
         }
         btn.find('i').replaceWith(btnIconHtml);
         btn.removeClass('disabled');
+    });
+});
+$('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotection-confirm', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    $.ajax({
+        type: 'POST',
+        data: {
+            quoteId: btn.data('reprotection-quote-id')
+        },
+        url: url     
+    })
+    .done(function (data) {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        if (data.error) {
+            createNotify('Reprotection confirm', data.message, 'error');
+        } else {
+            createNotify('Reprotection confirm', 'Success', 'success');
+        }
+    })
+    .fail(function () {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        createNotify('Reprotection confirm', 'Server error', 'error');
     });
 });
 JS;

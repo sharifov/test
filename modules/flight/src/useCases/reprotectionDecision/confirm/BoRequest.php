@@ -39,7 +39,7 @@ class BoRequest
         $this->transactionManager = $transactionManager;
     }
 
-    public function appliedQuote(string $quoteGid): void
+    public function appliedQuote(string $quoteGid, ?int $userId): void
     {
         $quote = $this->productQuoteRepository->findByGidFlightProductQuote($quoteGid);
         if (!$quote->flightQuote->isTypeReProtection()) {
@@ -55,39 +55,40 @@ class BoRequest
         }
 
         $responseBO = BackOffice::reprotectionCustomerDecisionConfirm(
-            $this->getBookingId($quote),
-            $this->prepareQuoteToRequestData($quote)
+            $this->getBookingId($productQuoteChange),
+            $this->prepareQuoteToRequestData($quote),
+            $quote->pq_gid
         );
 
         if ($responseBO) {
-            $this->transactionManager->wrap(function () use ($quote, $productQuoteChange) {
-                $this->successProcessing($quote, $productQuoteChange);
+            $this->transactionManager->wrap(function () use ($quote, $productQuoteChange, $userId) {
+                $this->successProcessing($quote, $productQuoteChange, $userId);
             });
             return;
         }
 
-        $this->transactionManager->wrap(function () use ($quote, $productQuoteChange) {
-            $this->errorProcessing($quote, $productQuoteChange);
+        $this->transactionManager->wrap(function () use ($quote, $productQuoteChange, $userId) {
+            $this->errorProcessing($quote, $productQuoteChange, $userId);
         });
     }
 
-    private function successProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
+    private function successProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange, ?int $userId): void
     {
-        $this->markQuoteToInProgress($quote);
+        $this->markQuoteToInProgress($quote, $userId);
         $this->markQuoteChangeToInProgress($productQuoteChange);
         $case = $this->getCase($productQuoteChange);
         if ($case) {
-            $this->processingCaseBySuccessResult($case);
+            $this->processingCaseBySuccessResult($case, $userId);
         }
     }
 
-    private function errorProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange): void
+    private function errorProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange, ?int $userId): void
     {
-        $this->markQuoteToError($quote);
+        $this->markQuoteToError($quote, $userId);
         $this->markQuoteChangeToError($productQuoteChange);
         $case = $this->getCase($productQuoteChange);
         if ($case) {
-            $this->processingCaseByErrorResult($case);
+            $this->processingCaseByErrorResult($case, $userId);
         }
     }
 
@@ -103,16 +104,16 @@ class BoRequest
         $this->productQuoteChangeRepository->save($productQuoteChange);
     }
 
-    private function processingCaseByErrorResult(Cases $case): void
+    private function processingCaseByErrorResult(Cases $case, ?int $userId): void
     {
         $case->offIsAutomate();
-        $case->error(null, 'Reprotection quote book error');
+        $case->error($userId, 'Reprotection quote book error');
         $this->casesRepository->save($case);
     }
 
-    private function processingCaseBySuccessResult(Cases $case): void
+    private function processingCaseBySuccessResult(Cases $case, ?int $userId): void
     {
-        $case->awaiting(null, 'Awaiting for reprotection quote status update');
+        $case->awaiting($userId, 'Awaiting for reprotection quote status update');
         $this->casesRepository->save($case);
     }
 
@@ -124,32 +125,29 @@ class BoRequest
         return null;
     }
 
-    private function markQuoteToError(ProductQuote $quote): void
+    private function markQuoteToError(ProductQuote $quote, ?int $userId): void
     {
-        $quote->error(null, 'Reprotection quote book error');
+        $quote->error($userId, 'Reprotection quote book error');
         $this->productQuoteRepository->save($quote);
     }
 
-    private function markQuoteToInProgress(ProductQuote $quote): void
+    private function markQuoteToInProgress(ProductQuote $quote, ?int $userId): void
     {
-        $quote->inProgress(null, 'Awaiting for reprotection quote status update');
+        $quote->inProgress($userId, 'Awaiting for reprotection quote status update');
         $this->productQuoteRepository->save($quote);
     }
 
-    private function getBookingId(ProductQuote $quote): string
+    private function getBookingId(ProductQuoteChange $change): string
     {
-        $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $quote->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+        $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $change->pqcPq->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
         if ($lastFlightQuoteFlightBookingId) {
             return $lastFlightQuoteFlightBookingId;
         }
-        throw new \DomainException('Not found Booking Id. Quote ID: ' . $quote->pq_id);
+        throw new \DomainException('Not found Booking Id. Quote ID: ' . $change->pqc_pq_id);
     }
 
     private function prepareQuoteToRequestData(ProductQuote $quote): array
     {
-        return array_merge(
-            ['gid' => $quote->pq_gid],
-            $quote->flightQuote->toArray(['trips']),
-        );
+        return $quote->flightQuote->toArray(['gds', 'pcc', 'fareType', 'validatingCarrier', 'itineraryDump', 'trips']);
     }
 }
