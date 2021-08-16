@@ -429,6 +429,9 @@ class FlightFromSaleService
         if (($tripSearch = array_search($name, Flight::TRIP_TYPE_LIST, $strict)) !== false) {
             return $tripSearch;
         }
+        if ($name === 'Multidestination') {
+            return (string) Flight::TRIP_TYPE_MULTI_DESTINATION;
+        }
         return null;
     }
 
