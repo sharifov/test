@@ -9,6 +9,7 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 
 /**
  * @var Order $order
@@ -27,11 +28,24 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
     $hasReprotection = true;
 }
 
-$changeStatusId = $quote->productQuoteLastChange->pqc_status_id ?? null;
-$refundStatusId = $quote->productQuoteLastRefund->pqr_status_id ?? null;
+$changeTitle = '';
+if ($quote->productQuoteLastChange) {
+    $titleData = [];
+    if ($quote->productQuoteLastChange->pqc_id) {
+        $titleData[] = 'PQ Change ID: ' . $quote->productQuoteLastChange->pqc_id;
+    }
+    if ($quote->productQuoteLastChange->pqc_decision_type_id) {
+        $titleData[] = 'Client Decision: ' . ProductQuoteChangeDecisionType::getName($quote->productQuoteLastChange->pqc_decision_type_id);
+    }
 
-$pQChangeId = $quote->productQuoteLastChange->pqc_id ?? null;
-$pQRefundId = $quote->productQuoteLastRefund->pqr_id ?? null;
+    if ($quote->productQuoteLastChange->pqc_decision_dt) {
+        $titleData[] = 'Client Decision DateTime: ' . Yii::$app->formatter->asDatetime(strtotime($quote->productQuoteLastChange->pqc_decision_dt));
+    }
+    if ($titleData) {
+        $changeTitle = implode(", \r\n", $titleData);
+    }
+}
+
 ?>
 
     <td data-toggle="tooltip" data-original-title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>" title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>"><?= $nr ?></td>
@@ -45,12 +59,22 @@ $pQRefundId = $quote->productQuoteLastRefund->pqr_id ?? null;
 
     <td><?=Html::encode($quote->pq_name)?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-    <td <?= $pQChangeId ? 'data-toggle="tooltip" data-original-title="ProductQuoteChange ID: "' . $pQChangeId : ''?>>
-        <?= $changeStatusId ? ProductQuoteChangeStatus::asFormat($changeStatusId) : '-' ?>
-    </td>
-    <td <?= $pQRefundId ? 'data-toggle="tooltip" data-original-title="ProductQuoteRefund ID: "' . $pQRefundId : ''?>>
-        <?= $refundStatusId ? ProductQuoteRefundStatus::asFormat($refundStatusId) : '-' ?>
-    </td>
+    <?php if ($quote->productQuoteLastChange) : ?>
+        <td <?= $changeTitle ? 'data-toggle="tooltip" data-original-title="' . $changeTitle . '"' : ''?>>
+            <?= $quote->productQuoteLastChange->pqc_status_id ? ProductQuoteChangeStatus::asFormat($quote->productQuoteLastChange->pqc_status_id) : '-' ?>
+            <?= $quote->productQuoteLastChange->pqc_decision_type_id ? ' - ' . ProductQuoteChangeDecisionType::asFormat($quote->productQuoteLastChange->pqc_decision_type_id) : '' ?>
+        </td>
+    <?php else : ?>
+        <td>-</td>
+    <?php endif; ?>
+
+    <?php if ($quote->productQuoteLastRefund) : ?>
+        <td <?= $quote->productQuoteLastRefund->pqr_id ? 'data-toggle="tooltip" data-original-title="PQ Refund ID: ' . $quote->productQuoteLastRefund->pqr_id . '"' : ''?>>
+            <?= $quote->productQuoteLastRefund->pqr_status_id ? ProductQuoteRefundStatus::asFormat($quote->productQuoteLastRefund->pqr_status_id) : '-' ?>
+        </td>
+    <?php else : ?>
+        <td>-</td>
+    <?php endif; ?>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
     <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
     <td>

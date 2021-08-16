@@ -207,7 +207,7 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Product</th>
                     <th>Name</th>
                     <th>Status</th>
-                    <th>Change Status</th>
+                    <th>Change Status / Decision</th>
                     <th>Refund Status</th>
                     <th>Created</th>
                     <th>Client Price</th>
