@@ -148,9 +148,6 @@ class BoRequest
 
     private function prepareQuoteToRequestData(ProductQuote $quote): array
     {
-        return array_merge(
-            ['reprotection_quote_gid' => $quote->pq_gid],
-            $quote->flightQuote->toArray(['gds', 'pcc', 'fareType', 'validatingCarrier', 'itineraryDump', 'trips'])
-        );
+        return $quote->flightQuote->toArray(['gds', 'pcc', 'fareType', 'validatingCarrier', 'itineraryDump', 'trips']);
     }
 }
