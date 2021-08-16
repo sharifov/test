@@ -46,6 +46,11 @@ class CaseEventLogSearch extends CaseEventLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'cel_id' => SORT_DESC,
+                ]
+            ],
         ]);
 
         $this->load($params);
