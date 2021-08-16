@@ -3,15 +3,12 @@
 namespace common\components\jobs;
 
 use common\components\HybridService;
-use common\models\Client;
 use common\models\ClientEmail;
 use DomainException;
 use modules\flight\models\FlightRequest;
-use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
-use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -25,7 +22,6 @@ use sales\exception\ValidationException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\services\cases\CasesSaleService;
-use sales\services\client\ClientCreateForm;
 use sales\services\email\SendEmailByCase;
 use Yii;
 use yii\queue\JobInterface;
@@ -243,7 +239,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         } catch (\Throwable $throwable) {
             $message['throwable'] = AppHelper::throwableLog($throwable);
             $message['flightRequestID'] = $this->flight_request_id;
-            if ($throwable instanceof CheckRestrictionException) {
+            if ($throwable instanceof DomainException) {
                 \Yii::warning($message, 'ReprotectionCreateJob:throwable');
             } else {
                 \Yii::error($message, 'ReprotectionCreateJob:throwable');
