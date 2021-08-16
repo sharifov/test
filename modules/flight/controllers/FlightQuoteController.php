@@ -752,9 +752,8 @@ class FlightQuoteController extends FController
         ];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('partial/_add_re_protection_manual', $params);
-        } else {
-            return $this->render('partial/_add_re_protection_manual', $params);
         }
+        return $this->render('partial/_add_re_protection_manual', $params);
     }
 
     public function actionAjaxSaveReProtection()
