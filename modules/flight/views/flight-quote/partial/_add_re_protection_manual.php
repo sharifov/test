@@ -185,14 +185,14 @@ $pjaxId = 'pjax-container-prices';
     $urlPrepareDump = \yii\helpers\Url::to(['/flight/flight-quote/ajax-prepare-dump']);
     $urlSave = \yii\helpers\Url::to(['/flight/flight-quote/ajax-save-re-protection', 'flight_id' => $flight->getId()]);
     $js = <<<JS
-    let form = $('#add-quote-form');
+    var addRPQuoteForm = $('#add-quote-form');
     
     $(document).on('beforeSubmit', '#add-quote-form', function(event) {
         let baggageData = $('.segment_baggage_forms').serialize();
         $('#baggage_data').val(baggageData);
     });
     
-    form.on('click', '#save_dump_btn', function () {
+    addRPQuoteForm.on('click', '#save_dump_btn', function () {
 
         $('#error_summary_box').html('');
         let baggageData = $('.segment_baggage_forms').serialize();
@@ -203,7 +203,7 @@ $pjaxId = 'pjax-container-prices';
         $.ajax({
             url: '{$urlSave}',
             type: 'POST',
-            data: form.serialize(),
+            data: addRPQuoteForm.serialize(),
             dataType: 'json'
         })
         .done(function(dataResponse) {
@@ -248,7 +248,7 @@ $pjaxId = 'pjax-container-prices';
         });
     });
 
-    form.on('click', '#prepare_dump_btn', function () {
+    addRPQuoteForm.on('click', '#prepare_dump_btn', function () {
 
         $('#error_summary_box').html('');
         let dump = $('#reservationdump').val();
