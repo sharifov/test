@@ -21,6 +21,7 @@ use sales\exception\CheckRestrictionException;
 use sales\exception\ValidationException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\services\cases\CasesSaleService;
 use sales\services\email\SendEmailByCase;
 use Yii;
@@ -189,21 +190,25 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, 'Manual processing requested');
             }
 
-            try {
-                $hybridService = Yii::createObject(HybridService::class);
-                $data = [
-                    'booking_id' => $flightRequest->fr_booking_id,
-                    'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
-                    'case_gid' => $case->cs_gid,
-                ];
-                if (!$result = $hybridService->whReprotection($flightRequest->fr_project_id, $data)) {
-                    throw new CheckRestrictionException('Not found webHookEndpoint in project (' . $flightRequest->fr_project_id . ')');
+            if (SettingHelper::isEnableSendHookToOtaReProtectionCreate()) {
+                try {
+                    $hybridService = Yii::createObject(HybridService::class);
+                    $data = [
+                        'booking_id' => $flightRequest->fr_booking_id,
+                        'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
+                        'case_gid' => $case->cs_gid,
+                    ];
+                    if (!$result = $hybridService->whReprotection($flightRequest->fr_project_id, $data)) {
+                        throw new CheckRestrictionException(
+                            'Not found webHookEndpoint in project (' . $flightRequest->fr_project_id . ')'
+                        );
+                    }
+                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService sent successfully');
+                } catch (\Throwable $throwable) {
+                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
+                    $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
+                    throw new CheckRestrictionException($throwable->getMessage());
                 }
-                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService sent successfully');
-            } catch (\Throwable $throwable) {
-                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
-                $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
-                throw new CheckRestrictionException($throwable->getMessage());
             }
 
             $reProtectionCreateService->setCaseDeadline($case, $flightQuote);

@@ -433,4 +433,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['yandex_metrika'] ?? [];
     }
+
+    public static function isEnableSendHookToOtaReProtectionCreate(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_send_hook_to_ota_re_protection_create'] ?? true);
+    }
 }
