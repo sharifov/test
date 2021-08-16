@@ -449,7 +449,7 @@ $js = <<<JS
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Create from dump');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            if (status == 'error') {
+            if (status == 'error' && xhr.status !== 403) {
                 createNotify('Error', xhr.responseText, 'error');
             } else {
                 modal.modal({
