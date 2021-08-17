@@ -116,7 +116,7 @@ $pjaxId = 'pjax-container-prices';
 
                                 <?= $form->field($createQuoteForm, 'cabin', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getCabinClassList(), ['prompt' => '---']) ?>
 
-                                <?= $form->field($createQuoteForm, 'fareType', ['labelOptions' => ['class' => 'control-label'], 'options' => ['style' => 'margin-top: 9px;']])->dropDownList(FlightQuote::getFareTypeList(), ['prompt' => '---']) ?>
+                                <?= $form->field($createQuoteForm, 'fareType', ['labelOptions' => ['class' => 'control-label']])->dropDownList(FlightQuote::getFareTypeList(), ['prompt' => '---']) ?>
 
                                 <?= $form->field($createQuoteForm, 'quoteCreator')->hiddenInput()->label(false) ?>
                             </div>
@@ -125,12 +125,11 @@ $pjaxId = 'pjax-container-prices';
 
                                 <?= $form->field($createQuoteForm, 'tripType', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getTripTypeList(), ['prompt' => '---']) ?>
 
-                                <label for="" class="control-label"><?= $createQuoteForm->getAttributeLabel('validatingCarrier') ?></label>
                                 <?= $form->field($createQuoteForm, 'validatingCarrier', [
                                     'options' => [
                                         'tag' => false,
                                     ],
-                                    'template' => '{input}',
+                                    'template' => '<div class="form-group required">{label}{input}</div>',
                                     'labelOptions' => ['class' => 'control-label']
                                 ])->widget(Select2::class, [
                                     'data' => Airline::getAirlinesMapping(true),

@@ -11,6 +11,7 @@ use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\order\search\OrderCrudSearch;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\order\src\entities\orderData\OrderData;
 use modules\order\src\entities\orderData\OrderDataActions;
 use modules\order\src\forms\OrderForm;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
@@ -159,7 +160,7 @@ class OrderController extends FController
         $model->or_lead_id = $modelOrder->or_lead_id;
         $model->or_id = $modelOrder->or_id;
         $model->od_language_id = $modelOrder->orderData->od_language_id ?? null;
-        $model->od_market_country = $modelOrder->orderData->od_market_country;
+        $model->od_market_country = $modelOrder->orderData->od_market_country ?? null;
 
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
@@ -172,9 +173,17 @@ class OrderController extends FController
                 $modelOrder->or_app_total = $model->or_app_total;
                 $modelOrder->or_agent_markup = $model->or_agent_markup;
                 $modelOrder->or_app_markup = $model->or_app_markup;
-                $orderData = $modelOrder->orderData;
-                $orderData->od_language_id = $model->od_language_id;
-                $orderData->od_market_country = $model->od_market_country;
+
+                if ($modelOrder->orderData) {
+                    $orderData = $modelOrder->orderData;
+                    $orderData->od_language_id = $model->od_language_id;
+                    $orderData->od_market_country = $model->od_market_country;
+                } else {
+                    $orderData = new OrderData();
+                    $orderData->od_order_id = $modelOrder->or_id;
+                    $orderData->od_language_id = $model->od_language_id;
+                    $orderData->od_market_country = $model->od_market_country;
+                }
 
                 $modelOrder->updateOrderTotalByCurrency();
 
