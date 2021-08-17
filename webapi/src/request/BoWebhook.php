@@ -4,7 +4,7 @@ namespace webapi\src\request;
 
 use modules\product\src\services\ProductQuoteService;
 use sales\interfaces\BoWebhookService;
-use webapi\src\boWebhook\FlightRefundUpdateForm;
+use webapi\src\forms\boWebhook\FlightRefundUpdateForm;
 use webapi\src\forms\boWebhook\ReprotectionUpdateForm;
 use webapi\src\services\flight\FlightManageApiService;
 use yii\base\Model;

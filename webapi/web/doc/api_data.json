@@ -8483,7 +8483,7 @@
   {
     "type": "post",
     "url": "/v2/bo/wh",
-    "title": "Reprotection Update from BO",
+    "title": "BO Webhook",
     "version": "0.1.0",
     "name": "ReProtection_Update",
     "group": "Webhook",
@@ -8519,6 +8519,10 @@
             "group": "Parameter",
             "type": "string",
             "size": "30",
+            "allowedValues": [
+              "reprotection_update",
+              "flight_refund_update"
+            ],
             "optional": false,
             "field": "type",
             "description": "<p>Type of action on reprotection</p>"
@@ -8540,7 +8544,7 @@
           {
             "group": "Parameter",
             "type": "string",
-            "optional": false,
+            "optional": true,
             "field": "data.project_key",
             "description": "<p>Project Key Ex: (ovago, hop2)</p>"
           },
@@ -8549,14 +8553,19 @@
             "type": "string",
             "optional": false,
             "field": "data.reprotection_quote_gid",
-            "description": "<p>Project Key Ex: (ovago, hop2)</p>"
+            "description": "<p>Reprotection quote gid</p>"
           }
         ]
       },
       "examples": [
         {
-          "title": "Request-Example:",
-          "content": "{\n    \"type\": \"reprotection-update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"reprotection_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n    }\n}",
+          "title": "Request-Example Reprotection Update:",
+          "content": "{\n    \"type\": \"reprotection_update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"reprotection_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n    }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Request-Example Flight Refund Update:",
+          "content": "{\n    \"type\": \"flight_refund_update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n    }\n}",
           "type": "json"
         }
       ]

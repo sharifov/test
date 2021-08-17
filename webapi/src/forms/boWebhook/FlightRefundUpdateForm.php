@@ -1,6 +1,6 @@
 <?php
 
-namespace webapi\src\boWebhook;
+namespace webapi\src\forms\boWebhook;
 
 /**
  * Class FlightRefundUpdateForm

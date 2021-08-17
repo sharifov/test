@@ -1,6 +1,6 @@
 <?php
 
-namespace webapi\src\boWebhook;
+namespace webapi\src\forms\boWebhook;
 
 use webapi\src\request\BoWebhook;
 use yii\base\Model;
@@ -24,7 +24,7 @@ class BoWebhookForm extends Model
     {
         return [
             ['type', 'required'],
-            ['type', 'string'],
+            ['type', 'string', 'max' => 30],
             ['type', 'in', 'range' => BoWebhook::LIST_NAME],
             ['data', 'required'],
             ['data', IsArrayValidator::class],

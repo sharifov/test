@@ -7,7 +7,7 @@ use sales\entities\cases\CaseEventLog;
 use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
-use webapi\src\boWebhook\BoWebhookForm;
+use webapi\src\forms\boWebhook\BoWebhookForm;
 use webapi\src\forms\boWebhook\ReprotectionUpdateForm;
 use webapi\src\jobs\BoWebhookHandleJob;
 use webapi\src\logger\ApiLogger;
@@ -77,7 +77,7 @@ class BoController extends BaseController
     }
 
     /**
-     * @api {post} /v2/bo/wh Reprotection Update from BO
+     * @api {post} /v2/bo/wh BO Webhook
      * @apiVersion 0.1.0
      * @apiName ReProtection Update
      * @apiGroup Webhook
@@ -90,19 +90,27 @@ class BoController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{30}}           type                        Type of action on reprotection
-     * @apiParam {array[]}              data                        Any Data from BO
-     * @apiParam {string}               data.booking_id             Booking Id
-     * @apiParam {string}               data.project_key            Project Key Ex: (ovago, hop2)
-     * @apiParam {string}               data.reprotection_quote_gid            Project Key Ex: (ovago, hop2)
+     * @apiParam {string{30}=reprotection_update,flight_refund_update}           type                          Type of action on reprotection
+     * @apiParam {array[]}              data                          Any Data from BO
+     * @apiParam {string}               data.booking_id               Booking Id
+     * @apiParam {string}               [data.project_key]            Project Key Ex: (ovago, hop2)
+     * @apiParam {string}               data.reprotection_quote_gid   Reprotection quote gid
      *
-     * @apiParamExample {json} Request-Example:
+     * @apiParamExample {json} Request-Example Reprotection Update:
      *  {
-     *      "type": "reprotection-update",
+     *      "type": "reprotection_update",
      *      "data": {
      *          "booking_id": "C4RB44",
      *          "project_key": "ovago",
      *          "reprotection_quote_gid": "4569a42c916c811e2033142d8ae54179"
+     *      }
+     *  }
+     *
+     * @apiParamExample {json} Request-Example Flight Refund Update:
+     *  {
+     *      "type": "flight_refund_update",
+     *      "data": {
+     *          "booking_id": "C4RB44",
      *      }
      *  }
      *
