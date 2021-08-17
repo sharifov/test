@@ -360,10 +360,9 @@ class BackOffice
                 return false;
             }
 
-            // todo change to correct data property
-            if (!isset($response->data['data']['success'])) {
+            if (!isset($data['success']) || $data['success'] !== true) {
                 \Yii::error([
-                    'message' => 'BO reprotection customer decision response Data object error',
+                    'message' => 'BO reprotection customer decision is not success response',
                     'request' => $request,
                     'bookingId' => $bookingId,
                     'type' => $type,
