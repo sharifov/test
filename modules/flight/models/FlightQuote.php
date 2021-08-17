@@ -66,6 +66,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  * @property FlightQuoteFlight[] $flightQuoteFlights
+ * @property FlightQuoteFlight $flightQuoteFlight
  * @property FlightQuoteLabel[] $quoteLabel
  */
 class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
@@ -311,6 +312,10 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function getFlightQuoteFlights(): ActiveQuery
     {
         return $this->hasMany(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id'])->orderBy(['fqf_fq_id' => SORT_DESC]);
+    }
+    public function getFlightQuoteFlight(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id'])->orderBy(['fqf_fq_id' => SORT_DESC]);
     }
 
     public function getQuoteLabel(): ActiveQuery
