@@ -22,7 +22,7 @@ class m210817_064807_alter_abac_permissions_name extends Migration
 
         $this->insert('{{%abac_policy}}', [
             'ap_rule_type' => 'p',
-            'ap_subject' => '(is_owner == true) || ("admin" in env.user.roles) || ("superadmin" in env.user.roles)',
+            'ap_subject' => '(r.sub.is_owner == true) || ("admin" in r.sub.env.user.roles) || ("superadmin" in r.sub.env.user.roles)',
             'ap_subject_json' => '{"condition":"OR","rules":[{"id":"case/case/is_owner","field":"is_owner","type":"boolean","input":"radio","operator":"==","value":true},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"superadmin"}],"valid":true}',
             'ap_object' => 'case/case/act/reprotection_quote/send_email',
             'ap_action' => '(access)',
