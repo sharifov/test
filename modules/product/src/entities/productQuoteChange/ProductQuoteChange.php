@@ -92,6 +92,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::IN_PROGRESS;
     }
 
+    public function cancel(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::CANCELED;
+    }
+
     public function declined(): void
     {
         $this->pqc_status_id = ProductQuoteChangeStatus::DECLINED;

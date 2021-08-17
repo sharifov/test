@@ -84,7 +84,7 @@ class BoRequest
 
     private function successProcessing(ProductQuoteChange $productQuoteChange, int $orderRefundId, int $productQuoteRefundId, ?int $userId): void
     {
-        $this->markQuoteChangeToInProgress($productQuoteChange);
+        $this->markQuoteChangeToCancel($productQuoteChange);
         $this->markRefundsToProcessing($orderRefundId, $productQuoteRefundId);
         $case = $this->getCase($productQuoteChange);
         if ($case) {
@@ -142,9 +142,9 @@ class BoRequest
         $this->productQuoteRefundRepository->save($refund);
     }
 
-    private function markQuoteChangeToInProgress(ProductQuoteChange $productQuoteChange): void
+    private function markQuoteChangeToCancel(ProductQuoteChange $productQuoteChange): void
     {
-        $productQuoteChange->inProgress();
+        $productQuoteChange->cancel();
         $this->productQuoteChangeRepository->save($productQuoteChange);
     }
 
