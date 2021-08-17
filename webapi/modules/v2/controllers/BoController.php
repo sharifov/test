@@ -106,9 +106,9 @@ class BoController extends BaseController
      *      }
      *  }
      *
-     * @apiParamExample {json} Request-Example Flight Refund Update:
+     * @apiParamExample {json} Request-Example Flight Refund:
      *  {
-     *      "type": "flight_refund_update",
+     *      "type": "flight_refund",
      *      "data": {
      *          "booking_id": "C4RB44",
      *      }

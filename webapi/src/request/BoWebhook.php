@@ -16,7 +16,7 @@ class BoWebhook
 
     public const LIST_NAME = [
         self::TYPE_REPROTECTION_UPDATE => 'reprotection_update',
-        self::TYPE_FLIGHT_REFUND_UPDATE => 'flight_refund_update'
+        self::TYPE_FLIGHT_REFUND_UPDATE => 'flight_refund'
     ];
 
     public const FORM_LIST = [

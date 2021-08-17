@@ -8564,8 +8564,8 @@
           "type": "json"
         },
         {
-          "title": "Request-Example Flight Refund Update:",
-          "content": "{\n    \"type\": \"flight_refund_update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n    }\n}",
+          "title": "Request-Example Flight Refund:",
+          "content": "{\n    \"type\": \"flight_refund\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n    }\n}",
           "type": "json"
         }
       ]
