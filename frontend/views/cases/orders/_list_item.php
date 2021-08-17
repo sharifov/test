@@ -641,6 +641,39 @@ $('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotecti
         createNotify('Reprotection confirm', 'Server error', 'error');
     });
 });
+$('body').off('click', '.btn-reprotection-refund').on('click', '.btn-reprotection-refund', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    $.ajax({
+        type: 'POST',
+        data: {
+            quoteId: btn.data('reprotection-quote-id')
+        },
+        url: url     
+    })
+    .done(function (data) {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        if (data.error) {
+            createNotify('Reprotection refund', data.message, 'error');
+        } else {
+            createNotify('Reprotection refund', 'Success', 'success');
+        }
+    })
+    .fail(function () {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        createNotify('Reprotection refund', 'Server error', 'error');
+    });
+});
 JS;
 $this->registerJs($js);
 

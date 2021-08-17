@@ -181,7 +181,7 @@ if ($quote->productQuoteLastChange) {
                               <?php endif; ?>
                               <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS, Flight Reprotection refund*/ ?>
                               <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS)) : ?>
-                                    <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Refund', null, [
+                                    <?= Html::a('<i class="fa fa-check text-success" title="Refund"></i> Refund', null, [
                                       'class' => 'dropdown-item btn-reprotection-refund',
                                       'data-url' => Url::to(['/product/product-quote/flight-reprotection-refund']),
                                       'data-reprotection-quote-id' => $reprotectionQuote->pq_id
