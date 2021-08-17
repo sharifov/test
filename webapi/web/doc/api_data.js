@@ -8521,7 +8521,7 @@ define({ "api": [
             "size": "30",
             "allowedValues": [
               "reprotection_update",
-              "flight_refund_update"
+              "flight_refund"
             ],
             "optional": false,
             "field": "type",

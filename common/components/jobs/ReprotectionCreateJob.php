@@ -195,9 +195,11 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 try {
                     $hybridService = Yii::createObject(HybridService::class);
                     $data = [
-                        'booking_id' => $flightRequest->fr_booking_id,
-                        'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
-                        'case_gid' => $case->cs_gid,
+                        'data' => [
+                            'booking_id' => $flightRequest->fr_booking_id,
+                            'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
+                            'case_gid' => $case->cs_gid,
+                        ]
                     ];
                     if (!$result = $hybridService->whReprotection($flightRequest->fr_project_id, $data)) {
                         throw new CheckRestrictionException(
