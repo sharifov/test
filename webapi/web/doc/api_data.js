@@ -8485,7 +8485,7 @@ define({ "api": [
     "url": "/v2/bo/wh",
     "title": "BO Webhook",
     "version": "0.1.0",
-    "name": "ReProtection_Update",
+    "name": "BO_Webhook",
     "group": "Webhook",
     "permission": [
       {

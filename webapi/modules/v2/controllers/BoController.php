@@ -79,7 +79,7 @@ class BoController extends BaseController
     /**
      * @api {post} /v2/bo/wh BO Webhook
      * @apiVersion 0.1.0
-     * @apiName ReProtection Update
+     * @apiName BO Webhook
      * @apiGroup Webhook
      * @apiPermission Authorized User
      *
