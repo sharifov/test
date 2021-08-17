@@ -324,14 +324,14 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     public function fields(): array
     {
         $fields = [
-            'fqs_uid',
+            'uid' => 'fqs_uid',
             'departureTime' => function () {
                 return date('Y-m-d H:i', strtotime($this->fqs_departure_dt));
             },
             'arrivalTime' => function () {
                 return date('Y-m-d H:i', strtotime($this->fqs_arrival_dt));
             },
-            'fqs_stop',
+//            'fqs_stop',
             'flightNumber' => 'fqs_flight_number',
             'bookingClass' => 'fqs_booking_class',
             'duration' => 'fqs_duration',
@@ -346,8 +346,8 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             'cabin' => 'fqs_cabin_class',
             'meal' => 'fqs_meal',
             'fareCode' => 'fqs_fare_code',
-            'fqs_ticket_id',
-            'fqs_recheck_baggage',
+//            'fqs_ticket_id',
+//            'fqs_recheck_baggage',
             'mileage' => 'fqs_mileage',
         ];
         $fields['departureLocation'] = function () {
@@ -356,9 +356,9 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
         $fields['arrivalLocation'] = function () {
             return Airports::getCityByIata($this->fqs_arrival_airport_iata);
         };
-        $fields['cabin'] = function () {
-            return \common\components\SearchService::getCabin($this->fqs_cabin_class);
-        };
+//        $fields['cabin'] = function () {
+//            return \common\components\SearchService::getCabin($this->fqs_cabin_class);
+//        };
 //        $fields['operatingAirline'] = function () {
 //            $operatingAirline = '';
 //            if ($this->fqs_operating_airline) {

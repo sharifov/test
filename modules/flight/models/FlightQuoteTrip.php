@@ -143,9 +143,9 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
     public function fields(): array
     {
         return [
-            'fqt_id',
-            'fqt_uid',
-            'fqt_key',
+//            'id' => 'fqt_id',
+            'uid' => 'fqt_uid',
+            'key' => 'fqt_key',
             'duration' => 'fqt_duration',
         ];
     }

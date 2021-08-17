@@ -722,7 +722,7 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             return FlightQuote::getFareTypeNameById($this->fq_fare_type_id);
         };
         $fields['fareType'] = function () {
-            return FlightQuote::getFareTypeNameById($this->fq_fare_type_id);
+            return array_flip(self::FARE_TYPE_ID_LIST)[$this->fq_fare_type_id];
         };
         if ($this->fqFlight) {
             $fields['flight'] = function () {
