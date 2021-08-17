@@ -4,6 +4,7 @@ namespace common\components;
 
 use common\models\Project;
 use sales\helpers\setting\SettingHelper;
+use sales\model\project\entity\params\Webhook;
 use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;
@@ -140,20 +141,28 @@ class HybridService extends Component
         if (!$projectUrls['link']) {
             throw new \DomainException('Not found link on Project. Id: ' . $projectId);
         }
-        if (!$projectUrls['webHookEndpoint']) {
+        /** @var Webhook $webhook */
+        $webhook = $projectUrls['webhook'];
+        if (!$webhook->endpoint) {
             \Yii::warning('Not found webHookEndpoint on Project. Id: ' . $projectId, 'HybridService:wh:webHookEndpoint');
             return null;
         }
 
+        $headers = [];
+        if (!empty($webhook->username)) {
+            $authStr = base64_encode($webhook->username . ':' . $webhook->password);
+            $headers['Authorization'] = 'Basic ' . $authStr;
+        }
+
         $response = $this->sendRequest(
             $projectUrls['link'],
-            $projectUrls['webHookEndpoint'],
+            $webhook->endpoint,
             array_merge(
                 ['type' => $type],
                 $data
             ),
             'POST',
-            [],
+            $headers,
             []
         );
 
@@ -205,7 +214,7 @@ class HybridService extends Component
         }
         return [
             'link' => $project->link,
-            'webHookEndpoint' => $project->getParams()->webHookEndpoint,
+            'webhook' => $project->getParams()->webhook
         ];
     }
 }
