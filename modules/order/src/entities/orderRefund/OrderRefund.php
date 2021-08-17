@@ -55,6 +55,31 @@ class OrderRefund extends \yii\db\ActiveRecord
         $clientSellingPrice,
         $caseId
     ): self {
+        $refund = self::create(
+            $uuid,
+            $orderId,
+            $sellingPrice,
+            $clientCurrency,
+            $clientCurrencyRate,
+            $clientSellingPrice,
+            $caseId
+        );
+        $refund->orr_client_status_id = OrderRefundClientStatus::PROCESSING;
+        $refund->orr_status_id = OrderRefundStatus::PENDING;
+        $refund->orr_description = 'Schedule change refund request';
+        $refund->detachBehavior('user');
+        return $refund;
+    }
+
+    public static function create(
+        $uuid,
+        $orderId,
+        $sellingPrice,
+        $clientCurrency,
+        $clientCurrencyRate,
+        $clientSellingPrice,
+        $caseId
+    ): self {
         $refund = new self();
         $refund->orr_uid = $uuid;
         $refund->orr_order_id = $orderId;
@@ -63,16 +88,12 @@ class OrderRefund extends \yii\db\ActiveRecord
         $refund->orr_processing_fee_amount = 0;
         $refund->orr_charge_amount = 0;
         $refund->orr_refund_amount = $refund->orr_selling_price - $refund->orr_penalty_amount - $refund->orr_processing_fee_amount;
-        $refund->orr_client_status_id = OrderRefundClientStatus::PROCESSING;
-        $refund->orr_status_id = OrderRefundStatus::PENDING;
         $refund->orr_client_currency = $clientCurrency;
         $refund->orr_client_currency_rate = $clientCurrencyRate;
         $refund->orr_client_selling_price = $clientSellingPrice;
         $refund->orr_client_charge_amount = 0;
         $refund->orr_client_refund_amount = CurrencyHelper::roundUp($refund->orr_refund_amount * $refund->orr_client_currency_rate);
-        $refund->orr_description = 'Schedule change refund request';
         $refund->orr_case_id = $caseId;
-        $refund->detachBehavior('user');
         return $refund;
     }
 
@@ -232,5 +253,15 @@ class OrderRefund extends \yii\db\ActiveRecord
     public static function generateUid(): string
     {
         return uniqid('or');
+    }
+
+    public function done(): void
+    {
+        $this->orr_status_id = OrderRefundStatus::DONE;
+    }
+
+    public function clientDone(): void
+    {
+        $this->orr_client_status_id = OrderRefundClientStatus::DONE;
     }
 }

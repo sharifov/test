@@ -4,7 +4,9 @@ namespace webapi\src\request;
 
 use modules\product\src\services\ProductQuoteService;
 use sales\interfaces\BoWebhookService;
+use webapi\src\boWebhook\FlightRefundUpdateForm;
 use webapi\src\forms\boWebhook\ReprotectionUpdateForm;
+use webapi\src\services\flight\FlightManageApiService;
 use yii\base\Model;
 
 class BoWebhook
@@ -18,11 +20,13 @@ class BoWebhook
     ];
 
     public const FORM_LIST = [
-        self::TYPE_REPROTECTION_UPDATE => ReprotectionUpdateForm::class
+        self::TYPE_REPROTECTION_UPDATE => ReprotectionUpdateForm::class,
+        self::TYPE_FLIGHT_REFUND_UPDATE => FlightRefundUpdateForm::class
     ];
 
     public const SERVICE_LIST = [
-        self::TYPE_REPROTECTION_UPDATE => ProductQuoteService::class
+        self::TYPE_REPROTECTION_UPDATE => ProductQuoteService::class,
+        self::TYPE_FLIGHT_REFUND_UPDATE => FlightManageApiService::class
     ];
 
     public static function getTypeIdByName(string $name): ?int

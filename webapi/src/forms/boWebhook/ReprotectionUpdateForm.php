@@ -21,7 +21,7 @@ class ReprotectionUpdateForm extends Model
     public function rules(): array
     {
         return [
-            [['booking_id', 'project_key', 'reprotection_quote_gid'], 'required'],
+            [['booking_id'], 'required'],
             [['booking_id', 'reprotection_quote_gid'], 'string'],
             [['project_key'], 'string', 'max' => 50],
             ['project_key', 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['project_key' => 'project_key'], 'skipOnError' => true]
