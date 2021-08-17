@@ -229,14 +229,6 @@ class ReprotectionCreateService
         return null;
     }
 
-    public function getProductQuoteByBookingId(string $bookingId): ?ProductQuote
-    {
-        if ($flightQuoteFlight = FlightQuoteFlight::find()->where(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one()) {
-            return ArrayHelper::getValue($flightQuoteFlight, 'fqfFq.fqProductQuote');
-        }
-        return null;
-    }
-
     public function getFlightByBookingId(string $bookingId): ?Flight
     {
         if ($flightQuoteFlight = FlightQuoteFlight::find()->where(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one()) {

@@ -11,6 +11,7 @@ use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateSer
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -63,7 +64,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if ($order = $reProtectionCreateService->getOrderByBookingId($flightRequest->fr_booking_id)) {
                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Order found (' . $order->or_gid . ')');
-                if (!$oldProductQuote = $reProtectionCreateService->getProductQuoteByBookingId($flightRequest->fr_booking_id)) {
+                if (!$oldProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($flightRequest->fr_booking_id)) {
                     $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Origin ProductQuote not found');
                     $reProtectionCreateService->caseToManual($case, 'Flight quote not updated');
                     $reProtectionCreateService->flightRequestChangeStatus($flightRequest, FlightRequest::STATUS_PENDING, 'Original quote not declined');
