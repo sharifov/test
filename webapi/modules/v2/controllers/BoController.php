@@ -59,7 +59,7 @@ class BoController extends BaseController
         $behaviors = parent::behaviors();
         $behaviors['logger'] = [
             'class' => SimpleLoggerBehavior::class,
-            'except' => ['wh'],
+            'except' => [],
         ];
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
