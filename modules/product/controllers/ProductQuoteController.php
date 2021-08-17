@@ -335,9 +335,11 @@ class ProductQuoteController extends FController
                         try {
                             $hybridService = Yii::createObject(HybridService::class);
                             $data = [
-                                'booking_id' => $case->cs_order_uid,
-                                'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
-                                'case_gid' => $case->cs_gid,
+                                'data' => [
+                                    'booking_id' => $case->cs_order_uid,
+                                    'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
+                                    'case_gid' => $case->cs_gid,
+                                ]
                             ];
                             $hybridService->whReprotection($case->cs_project_id, $data);
                         } catch (\Throwable $throwable) {

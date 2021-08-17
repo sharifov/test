@@ -151,6 +151,7 @@ class HybridService extends Component
         $headers = [];
         if (!empty($webhook->username)) {
             $authStr = base64_encode($webhook->username . ':' . $webhook->password);
+            unset($this->request->headers['Authorization']);
             $headers['Authorization'] = 'Basic ' . $authStr;
         }
 
