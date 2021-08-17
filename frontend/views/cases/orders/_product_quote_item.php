@@ -134,14 +134,62 @@ if ($quote->productQuoteLastChange) {
               <tbody>
                 <?php foreach ($reprotectionQuotes as $nr => $reprotectionQuote) : ?>
                     <tr>
-                        <?= $this->render('_reprotection_quote_item', [
-                                'nr' => $nr,
-                                'quote' => $reprotectionQuote,
-                                'order' => $order,
-                                'isReprotection' => true,
-                                'caseId' => $caseId,
-                                'caseAbacDto' => $caseAbacDto
-                        ]) ?>
+                        <?php
+                        /*
+
+                        <td style="padding:5px;" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>">
+                            <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
+                            <?=Html::encode($quote->pqProduct->prType->pt_name)?>
+                            <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
+                        </td>
+                        <td style="padding:5px;"><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
+                        */ ?>
+                      <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>"><?=($nr + 1)?></td>
+                      <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
+                      <td><small><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></small></td>
+                      <td>
+                        <div class="btn-group">
+
+                          <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-bars"></i>
+                          </button>
+                          <div class="dropdown-menu">
+                              <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS, Reprotection Quote View Details */ ?>
+                              <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) : ?>
+                                    <?= Html::a('<i class="fas fa-info-circle" data-toggle="tooltip" title="Details"></i> View Details', null, [
+                                      'data-product-quote-gid' => $quote->pq_gid,
+                                      'class' => 'dropdown-item btn-show-product-quote-details',
+                                      'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id])
+                                  ]) ?>
+                              <?php endif; ?>
+                              <?php
+                              /** @abac new $caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS, Reprotection Quote send email */
+                                if (!$quote->isDeclined() && Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                                    echo Html::a('<i class="fa fa-envelope" title="Send Email"></i> Send Schedule Change Email', null, [
+                                      'class' => 'dropdown-item btn-send-reprotection-quote-email',
+                                      'data-url' => Url::to(['/product/product-quote/preview-reprotection-quote-email', 'reprotection-quote-id' => $quote->pq_id, 'case-id' => $caseId, 'order-id' => $order->or_id])
+                                    ]);
+                                }
+                                ?>
+                              <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS, Flight Reprotection confirm*/ ?>
+                              <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) : ?>
+                                    <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Confirm', null, [
+                                      'class' => 'dropdown-item btn-reprotection-confirm',
+                                      'data-url' => Url::to(['/product/product-quote/flight-reprotection-confirm']),
+                                      'data-reprotection-quote-id' => $quote->pq_id
+                                  ]); ?>
+                              <?php endif; ?>
+                              <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS, Flight Reprotection refund*/ ?>
+                              <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS)) : ?>
+                                    <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Refund', null, [
+                                      'class' => 'dropdown-item btn-reprotection-refund',
+                                      'data-url' => Url::to(['/product/product-quote/flight-reprotection-refund']),
+                                      'data-reprotection-quote-id' => $quote->pq_id
+                                  ]); ?>
+                              <?php endif; ?>
+                          </div>
+                        </div>
+                      </td>
                     </tr>
                 <?php endforeach; ?>
               </tbody>

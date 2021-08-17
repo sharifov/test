@@ -179,7 +179,7 @@ class ProductQuoteController extends FController
         }
 
         $caseAbacDto = new CasesAbacDto($case);
-        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 
@@ -259,13 +259,13 @@ class ProductQuoteController extends FController
             }
 
             $caseAbacDto = new CasesAbacDto($case);
-            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                 throw new ForbiddenHttpException('You do not have access to perform this action', 403);
             }
             if ($previewEmailForm->validate()) {
                 try {
                     $caseAbacDto = new CasesAbacDto($case);
-                    if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                    if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                         throw new ForbiddenHttpException('You do not have access to perform this action', 403);
                     }
 
