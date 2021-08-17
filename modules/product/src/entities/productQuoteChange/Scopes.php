@@ -16,6 +16,11 @@ class Scopes extends ActiveQuery
         return $this->andWhere(['pqc_pq_id' => $quoteId]);
     }
 
+    public function byCaseId(int $id): self
+    {
+        return $this->andWhere(['pqc_case_id' => $id]);
+    }
+
     /**
      * @param null $db
      * @return ProductQuoteChange[]|array

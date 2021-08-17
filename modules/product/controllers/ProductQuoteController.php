@@ -15,6 +15,7 @@ use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
@@ -323,7 +324,7 @@ class ProductQuoteController extends FController
                             throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
                         }
 
-                        $productQuoteChange = $originQuote->productQuoteLastChange;
+                        $productQuoteChange = ProductQuoteChange::find()->byProductQuote($originQuote->pq_id)->byCaseId($case->cs_id)->one();
                         if ($productQuoteChange) {
                             $productQuoteChange->decisionPending();
                             if (!$productQuoteChange->save()) {
