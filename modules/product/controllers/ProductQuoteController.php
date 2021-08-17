@@ -32,6 +32,7 @@ use frontend\controllers\FController;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -190,9 +191,19 @@ class ProductQuoteController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $quote = $this->productQuoteRepository->find($form->quoteId);
+                $originalQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($quote->pq_id);
+                if (!$originalQuote) {
+                    throw new \RuntimeException('Original quote not found');
+                }
                 $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
                 $emailData['reprotection_quote'] = $quote->serialize();
-                $emailData['order'] = $quote->pqOrder->serialize();
+                $emailData['original_quote'] = $originalQuote->serialize();
+                if (!empty($emailData['reprotection_quote']['data'])) {
+                    ArrayHelper::remove($emailData['reprotection_quote']['data'], 'fq_origin_search_data');
+                }
+                if (!empty($emailData['original_quote']['data'])) {
+                    ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
+                }
                 $emailFrom = Auth::user()->email;
                 $emailTemplateType = null;
                 $emailFromName = Auth::user()->nickname;
