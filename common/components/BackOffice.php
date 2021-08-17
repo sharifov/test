@@ -372,7 +372,7 @@ class BackOffice
                 return false;
             }
 
-            return (bool)($response->data['data']['success']);
+            return true;
         } catch (\Throwable $exception) {
             \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:reprotectionCustomerDecision');
             return false;
