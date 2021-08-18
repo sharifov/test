@@ -66,7 +66,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 $flightRequest->statusToError();
                 $reProtectionCreateService->flightRequestChangeStatus(
                     $flightRequest,
-                    FlightRequest::STATUS_PENDING,
+                    FlightRequest::STATUS_ERROR,
                     ''
                 );
                 return;
