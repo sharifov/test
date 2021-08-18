@@ -39,6 +39,10 @@ class CurrencyHelper
 
     public static function roundDown(float $price, int $precision = 2)
     {
+        if ((strlen($price) - strrpos($price, '.') - 1) <= $precision) {
+            return $price;
+        }
+
         return floor(($price) * (10 ** $precision)) / (10 ** $precision);
     }
 }
