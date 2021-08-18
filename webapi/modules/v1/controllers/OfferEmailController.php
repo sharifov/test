@@ -137,14 +137,14 @@ class OfferEmailController extends ApiBaseController
     public function actionSendQuote()
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
         $post = Yii::$app->request->post();
         $responseData = [];
         $sendQuoteApiForm = new SendQuoteApiForm();
         $errorsMessage = [];
 
         if (!$sendQuoteApiForm->load($post)) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR)
             ));
@@ -154,7 +154,7 @@ class OfferEmailController extends ApiBaseController
                 ErrorsToStringHelper::extractFromModel($sendQuoteApiForm),
                 'OfferEmailController:actionSendQuote:sendQuoteApiForm'
             );
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($sendQuoteApiForm->getErrors()),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
@@ -237,7 +237,7 @@ class OfferEmailController extends ApiBaseController
             $responseData['result'] = 'Email sending. Mail ID(' . $mail->e_id . ')';
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'OfferEmailController:actionSendQuote:Throwable');
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage()),
                 new ErrorsMessage($errorsMessage),
@@ -245,7 +245,7 @@ class OfferEmailController extends ApiBaseController
             ));
         }
 
-        return $this->endApiLog($apiLog, new SuccessResponse(
+        return $this->endApiLog(new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage('OK'),
             new DataMessage($responseData)
@@ -302,9 +302,9 @@ class OfferEmailController extends ApiBaseController
             ->scalar();
     }
 
-    private function endApiLog(ApiLog $apiLog, Response $response): Response
+    private function endApiLog(Response $response): Response
     {
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+        $this->apiLog->endApiLog(ArrayHelper::toArray($response));
         return $response;
     }
 }

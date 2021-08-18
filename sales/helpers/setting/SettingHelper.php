@@ -438,4 +438,9 @@ class SettingHelper
     {
         return (bool) (Yii::$app->params['settings']['enable_send_hook_to_ota_re_protection_create'] ?? true);
     }
+
+    public static function isClientChatApiLogEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['client_chat_api_log_enabled'] ?? true);
+    }
 }

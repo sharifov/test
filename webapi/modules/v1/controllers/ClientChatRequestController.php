@@ -9,6 +9,7 @@ use common\models\ApiLog;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\ClientChatTranslate;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
@@ -208,7 +209,9 @@ class ClientChatRequestController extends ApiBaseController
      */
     public function actionCreate()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
 
         if (!\Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -246,28 +249,28 @@ class ClientChatRequestController extends ApiBaseController
                     $requestEventCreate->handle($form);
                 }
             } catch (\RuntimeException | \DomainException | NotFoundException $e) {
-                return $this->endApiLog($apiLog, new ErrorResponse(
+                return $this->endApiLog(new ErrorResponse(
                     new StatusCodeMessage(400),
                     new MessageMessage($e->getMessage()),
                     new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
                 ));
             } catch (\Throwable $e) {
                 \Yii::error(AppHelper::throwableFormatter($e), 'Api::ClientChatRequestController::actionCreate::Throwable');
-                return $this->endApiLog($apiLog, new ErrorResponse(
+                return $this->endApiLog(new ErrorResponse(
                     new StatusCodeMessage(500),
                     new MessageMessage('Internal Server Error'),
                     new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
                 ));
             }
             $metrics->serviceCounter('client_chat_request', ['type' => 'success', 'action' => 'create']);
-            return $this->endApiLog($apiLog, new SuccessResponse(
+            return $this->endApiLog(new SuccessResponse(
                 new StatusCodeMessage(200),
                 new MessageMessage('Ok'),
             ));
         }
 
         $metrics->serviceCounter('client_chat_request', ['type' => 'error', 'action' => 'create']);
-        return $this->endApiLog($apiLog, new ErrorResponse(
+        return $this->endApiLog(new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('Some errors occurred while creating client chat request'),
             new ErrorsMessage($form->getErrorSummary(true)),
@@ -381,7 +384,9 @@ class ClientChatRequestController extends ApiBaseController
      */
     public function actionCreateMessage()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
 
         if (!\Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -419,7 +424,7 @@ class ClientChatRequestController extends ApiBaseController
                     $requestEventCreate->handle($form);
                 }
             } catch (\RuntimeException | \DomainException | NotFoundException $e) {
-                return $this->endApiLog($apiLog, new ErrorResponse(
+                return $this->endApiLog(new ErrorResponse(
                     new StatusCodeMessage(400),
                     new MessageMessage($e->getMessage()),
                     new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
@@ -427,7 +432,7 @@ class ClientChatRequestController extends ApiBaseController
             } catch (\Throwable $e) {
                 \Yii::error(VarDumper::dumpAsString($e), 'Api::ClientChatRequestController::actionCreateMessage::Throwable');
                 \Yii::error(VarDumper::dumpAsString($form->data), 'Api::ClientChatRequestController::actionCreateMessage::RequestData');
-                return $this->endApiLog($apiLog, new ErrorResponse(
+                return $this->endApiLog(new ErrorResponse(
                     new StatusCodeMessage(500),
                     new MessageMessage('Internal Server Error'),
                     new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
@@ -436,7 +441,7 @@ class ClientChatRequestController extends ApiBaseController
 
             $metrics->serviceCounter('client_chat_request', ['type' => 'success', 'action' => 'create_message']);
 
-            return $this->endApiLog($apiLog, new SuccessResponse(
+            return $this->endApiLog(new SuccessResponse(
                 new StatusCodeMessage(200),
                 new MessageMessage('Ok'),
             ));
@@ -444,7 +449,7 @@ class ClientChatRequestController extends ApiBaseController
 
         $metrics->serviceCounter('client_chat_request', ['type' => 'error', 'action' => 'create_message']);
 
-        return $this->endApiLog($apiLog, new ErrorResponse(
+        return $this->endApiLog(new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('Some errors occurred while creating client chat request'),
             new ErrorsMessage($form->getErrorSummary(true)),
@@ -741,7 +746,9 @@ class ClientChatRequestController extends ApiBaseController
      */
     public function actionFeedback()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
 
         if (!\Yii::$app->request->isPost) {
             return new ErrorResponse(
@@ -772,7 +779,7 @@ class ClientChatRequestController extends ApiBaseController
 
         $form = (new ClientChatRequestApiForm())->fillIn($event, $data);
         if (!$form->validate()) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage('Client Chat validate failed.'),
                 new ErrorsMessage($form->getErrorSummary(true)),
@@ -782,7 +789,7 @@ class ClientChatRequestController extends ApiBaseController
 
         $feedbackForm = (new ClientChatRequestFeedbackSubForm())->fillIn($data);
         if (!$feedbackForm->validate()) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage('Feedback validate failed.'),
                 new ErrorsMessage($feedbackForm->getErrorSummary(true)),
@@ -794,7 +801,7 @@ class ClientChatRequestController extends ApiBaseController
             $clientChatRequest = ClientChatRequest::createByApi($form);
             $this->clientChatRequestRepository->save($clientChatRequest);
         } catch (\Throwable $e) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage('Client Chat Request not saved.'),
                 new ErrorsMessage($e->getMessage()),
@@ -826,7 +833,7 @@ class ClientChatRequestController extends ApiBaseController
                 $resultMessage = 'Feedback saved (id: ' . $clientChatFeedback->ccf_id . ')';
             }
         } catch (\Throwable $e) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage('Client Chat Feedback not saved.'),
                 new ErrorsMessage($e->getMessage()),
@@ -834,7 +841,7 @@ class ClientChatRequestController extends ApiBaseController
             ));
         }
 
-        return $this->endApiLog($apiLog, new SuccessResponse(
+        return $this->endApiLog(new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage($resultMessage ?? 'Ok'),
         ));
@@ -927,7 +934,9 @@ class ClientChatRequestController extends ApiBaseController
      */
     public function actionChatForm()
     {
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
 
         if (!$this->request->isGet) {
             return new ErrorResponse(
@@ -947,7 +956,7 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         if (!$form->validate()) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage('Validate failed'),
                 new ErrorsMessage($form->getErrorSummary(true)),
@@ -977,7 +986,7 @@ class ClientChatRequestController extends ApiBaseController
                 $data['from_cache'] = true;
             }
         } catch (\Throwable $e) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage('Unexpected error'),
                 new ErrorsMessage($e->getMessage()),
@@ -985,7 +994,7 @@ class ClientChatRequestController extends ApiBaseController
             ));
         }
 
-        return $this->endApiLog($apiLog, new SuccessResponse(
+        return $this->endApiLog(new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage('OK'),
             new DataMessage($data),
@@ -997,9 +1006,11 @@ class ClientChatRequestController extends ApiBaseController
      * @param Response $response
      * @return Response
      */
-    private function endApiLog(ApiLog $apiLog, Response $response): Response
+    private function endApiLog(Response $response): Response
     {
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+        if ($this->apiLog) {
+            $this->apiLog->endApiLog(ArrayHelper::toArray($response));
+        }
         return $response;
     }
 }
