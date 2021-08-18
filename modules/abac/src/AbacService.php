@@ -197,11 +197,13 @@ class AbacService
                             break;
                         case AbacBaseModel::OP_CONTAINS:
                             $operator = '';
-
                             if (is_array($value)) {
-                                $last = end($value);
+                                $opList = [];
                                 foreach ($value as $val) {
-                                    $operator .= '"' . $val . '" in ' . $field . ($last != $val ? ' || ' : '');
+                                    $opList[] =  '"' . $val . '" in ' . $field;
+                                }
+                                if ($opList) {
+                                    $operator .= implode(' || ', $opList);
                                 }
                             }
                             break;
