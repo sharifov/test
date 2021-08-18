@@ -289,8 +289,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
                     $case->addEventLog(
                         CaseEventLog::RE_PROTECTION_CREATE,
-                        'FlightQuote created GID: ' . $flightQuote->fqProductQuote ? $flightQuote->fqProductQuote->pq_gid : '-',
-                        ['pq_gid' => $flightQuote->fqProductQuote ? $flightQuote->fqProductQuote->pq_gid : null]
+                        'FlightQuote created GID: ' . ($flightQuote->fqProductQuote->pq_gid ?? '-'),
+                        ['pq_gid' => $flightQuote->fqProductQuote->pq_gid ?? null]
                     );
 
                     if ($oldProductQuote) {
