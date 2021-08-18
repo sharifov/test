@@ -217,7 +217,7 @@ class FlightFromSaleService
                             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($segmentApiForm));
                         }
 
-                        $segment['duration'] = (int) $segmentApiForm->flightDuration + (int) $segmentApiForm->layoverDuration;
+                        $segment['duration'] = (int) $segmentApiForm->flightDuration;
                         $segment['departureAirportCode'] = $segmentApiForm->departureAirport;
                         $segment['arrivalAirportCode'] = $segmentApiForm->arrivalAirport;
                         $segment['operatingAirline'] = $segmentApiForm->airline;
