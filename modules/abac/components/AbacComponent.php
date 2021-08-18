@@ -93,7 +93,6 @@ class AbacComponent extends Component
         $user->id = $me->id;
         $user->username = $me->username;
         $user->roles =  $me->getRoles(true);
-        $user->multi_roles =  $me->getRoles(true);
         $user->projects = $me->access->getAllProjects('key'); //getProjects();
         $user->groups = $me->access->getAllGroups();
         $user->departments = $me->access->getAllDepartments();

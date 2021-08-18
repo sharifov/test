@@ -97,7 +97,7 @@ class AbacBaseModel
     protected const ATTR_USER_MULTI_ROLES = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_multi_roles',
-        'field' => 'env.user.multi_roles',
+        'field' => 'env.user.roles',
         'label' => 'User Multi Roles',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_SELECT,
