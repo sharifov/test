@@ -7,8 +7,9 @@ use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteLead\ProductQuoteLead;
-use modules\product\src\entities\productQuoteLead\ProductQuoteLeadQuery;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
@@ -97,9 +98,13 @@ use yii\db\ActiveRecord;
  * @property AttractionQuote| $attractionQuote
  * @property ProductQuote[]|null $relates
  * @property ProductQuote|null $relateParent
+ * @property ProductQuoteChange|null $productQuoteLastChange
+ * @property ProductQuoteRefund|null $productQuoteLastRefund
+ * @property ProductQuote|null $originProductQuote
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
+ * @property string|null $diffUrl
  */
 class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
@@ -108,6 +113,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     private $childQuote;
 
     private ?string $detailsPageUrl = null;
+    private ?string $diffUrl = null;
 
     private ?bool $isQuoteAlternative = null;
     private ?bool $isQuoteOrigin = null;
@@ -253,6 +259,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             ->viaTable('product_quote_relation', ['pqr_related_pq_id' => 'pq_id']);
     }
 
+    public function getProductQuoteLastChange(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->orderBy(['pqc_pq_id' => SORT_DESC]);
+    }
+
+    public function getProductQuoteLastRefund(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->orderBy(['pqr_id' => SORT_DESC]);
+    }
+
     /**
      * @return ActiveQuery
      */
@@ -366,6 +382,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteOptions(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id']);
+    }
+
+    public function getOriginProductQuote(): ActiveQuery
+    {
+        return $this->hasOne(self::class, ['pqr_parent_pq_id' => 'pq_id'])->innerJoin(ProductQuoteRelation::tableName(), 'pq_id = pqr_related_pq_id');
     }
 
     /**
@@ -524,6 +545,20 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $clone;
     }
 
+    public static function copy(ProductQuote $quote, ?int $ownerId, ?int $creatorId): self
+    {
+        $copy = new self();
+        $copy->attributes = $quote->attributes;
+        $copy->pq_id = null;
+        $copy->pq_gid = self::generateGid();
+        $copy->pq_product_id = $quote->pq_product_id;
+        $copy->pq_order_id = null;
+        $copy->pq_status_id = ProductQuoteStatus::NEW;
+        $copy->pq_owner_user_id = $ownerId;
+        $copy->pq_created_user_id = $creatorId;
+        return $copy;
+    }
+
     public static function replace(ProductQuote $quote): self
     {
         $clone = new self();
@@ -590,6 +625,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isDeclined(): bool
     {
         return $this->pq_status_id === ProductQuoteStatus::DECLINED;
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::CANCELED;
     }
 
     /**
@@ -897,5 +937,51 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getQuoteDetailsPageUrl'];
         $this->detailsPageUrl = $finder();
         return $this->detailsPageUrl;
+    }
+
+    public function getDiffUrlOriginReprotectionQuotes(): string
+    {
+        if ($this->diffUrl !== null) {
+            return $this->diffUrl;
+        }
+
+        $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getDiffUrlOriginReprotectionQuotes'];
+        $this->diffUrl = $finder();
+        return $this->diffUrl;
+    }
+
+    public function isEqual(ProductQuote $quote): bool
+    {
+        return $this->pq_id === $quote->pq_id;
+    }
+
+    public function fields(): array
+    {
+        $fields = [
+            'pq_gid',
+            'pq_name',
+            'pq_order_id',
+            'pq_description',
+            'pq_status_id',
+            'pq_price',
+            'pq_origin_price',
+            'pq_client_price',
+            'pq_service_fee_sum',
+            'pq_origin_currency',
+            'pq_client_currency',
+        ];
+        $fields['pq_status_name'] = function () {
+            return ProductQuoteStatus::getName($this->pq_status_id);
+        };
+        $fields['pq_files'] = function () {
+            return (new ProductQuoteFiles())->getList($this);
+        };
+        if ($quote = $this->getChildQuote()) {
+            $fields['data'] = static function () use ($quote) {
+                /** @var $quote ActiveRecord */
+                return $quote->toArray();
+            };
+        }
+        return $fields;
     }
 }

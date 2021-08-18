@@ -33,7 +33,7 @@ class ProductQuoteCreateDTO extends ProductQuoteDTO
         $this->serviceFeeSum = null;
         $this->originCurrency = $quote['currency'] ?? null;
         $this->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($flight->flProduct);
-        $this->originCurrencyRate = $quote['originRate'] ?? null;
+        $this->originCurrencyRate = $quote['originRate'] ?? 1;
         $this->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($flight->flProduct);
         $this->ownerUserId = $userId;
         $this->createdUserId = $userId;

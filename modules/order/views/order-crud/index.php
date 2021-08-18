@@ -56,6 +56,7 @@ $data = new OrderAbacDto(new Order());
             'or_uid',
             'or_fare_id',
             'or_name',
+            'bookingIds',
             /*[
                 'class' => LeadColumn::class,
                 'attribute' => 'or_lead_id',

@@ -12,7 +12,7 @@
   "dependencies": {
     "@vue/cli": "^4.5.10",
     "@vue/cli-service-global": "^4.5.10",
-    "node-sass": "^4.14.1"
+    "apidoc": "^0.29.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
@@ -22,9 +22,9 @@
     "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
     "gulp-minify": "^3.1.0",
-    "gulp-sass": "^4.1.0",
+    "gulp-sass": "^5.0.0",
     "gulp-uglify": "^3.0.2",
-    "node-sass": "^4.14.1"
+    "node-sass": "^6.0.1"
   },
   "jshintConfig": {
     "esversion": 6

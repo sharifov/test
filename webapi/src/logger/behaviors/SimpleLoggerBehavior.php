@@ -13,6 +13,7 @@ use yii\base\ActionEvent;
 use yii\base\Request;
 use yii\helpers\Json;
 use yii\rest\Controller;
+use yii\web\BadRequestHttpException;
 use yii\web\IdentityInterface;
 
 /**
@@ -63,6 +64,7 @@ class SimpleLoggerBehavior extends LoggerBehavior
                     'startMemory' => memory_get_usage(),
                 ])
             );
+        } catch (BadRequestHttpException $e) {
         } catch (\Throwable $throwable) {
             $log = AppHelper::throwableLog($throwable);
             $log['action'] = $action->uniqueId;
@@ -91,15 +93,17 @@ class SimpleLoggerBehavior extends LoggerBehavior
         }
 
         try {
-            $encodeResponse = Json::encode($result->getResponse());
-            $logger->end(
-                new EndDTO([
-                    'result' => $encodeResponse,
-                    'endTime' => microtime(true),
-                    'endMemory' => memory_get_usage(),
-                    'profiling' => Yii::getLogger()->getDbProfiling(),
-                ])
-            );
+            if ($logger->log) {
+                $encodeResponse = Json::encode($result->getResponse());
+                $logger->end(
+                    new EndDTO([
+                        'result' => $encodeResponse,
+                        'endTime' => microtime(true),
+                        'endMemory' => memory_get_usage(),
+                        'profiling' => Yii::getLogger()->getDbProfiling(),
+                    ])
+                );
+            }
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'SimpleLoggerBehavior:afterAction:logger');
         }

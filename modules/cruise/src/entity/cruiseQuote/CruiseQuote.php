@@ -139,4 +139,9 @@ class CruiseQuote extends \yii\db\ActiveRecord implements Quotable
     {
         return '/cruise/cruise-quote/ajax-quote-details';
     }
+
+    public function getDiffUrlOriginReprotectionQuotes(): string
+    {
+        return '';
+    }
 }

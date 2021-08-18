@@ -29,6 +29,7 @@ class FlightQuoteSegmentPaxBaggageChargeSerializer extends Serializer
             'qsbc_client_currency',
             'qsbc_max_weight',
             'qsbc_max_size',
+            'qsbc_flight_pax_code_id',
         ];
     }
 

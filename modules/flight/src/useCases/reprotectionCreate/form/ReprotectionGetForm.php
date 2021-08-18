@@ -10,7 +10,7 @@ namespace modules\flight\src\useCases\reprotectionCreate\form;
  */
 class ReprotectionGetForm extends \yii\base\Model
 {
-    public string $flight_product_quote_gid = '';
+    public $flight_product_quote_gid;
 
     public function rules(): array
     {

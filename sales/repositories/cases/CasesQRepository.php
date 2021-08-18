@@ -63,7 +63,105 @@ class CasesQRepository
      */
     public function getInboxQuery(Employee $user): ActiveQuery
     {
-        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_PENDING]);
+        $query = CasesQSearch::find()
+            ->andWhere(['cs_status' => CasesStatus::STATUS_PENDING])
+            ->andWhere(['<>', 'cs_is_automate', true]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->freeCase();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getErrorCount(Employee $user): int
+    {
+        return $this->getErrorQuery($user)->cache(self::CACHE_DURATION)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getErrorQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_ERROR]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->freeCase();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getAwaitingCount(Employee $user): int
+    {
+        return $this->getAwaitingQuery($user)->cache(self::CACHE_DURATION)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getAwaitingQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_AWAITING]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->freeCase();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getAutoProcessingCount(Employee $user): int
+    {
+        return $this->getAutoProcessingQuery($user)->cache(self::CACHE_DURATION)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getAutoProcessingQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_AUTO_PROCESSING]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -93,7 +191,8 @@ class CasesQRepository
     {
         $query = CasesQSearch::find()
             ->andWhere(['cs_need_action' => true])
-            ->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
+            ->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING])
+            ->andWhere(['<>', 'cs_is_automate', true]);
 
         $query->andWhere($this->createSubQueryForNeedAction($user->id, [], $checkDepPermission = true));
 
@@ -345,6 +444,7 @@ class CasesQRepository
         ])
         ->where(['not', ['nextFlight' => null]])
         ->andWhere('nextFlight <= ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
+        ->andWhere(['<>', 'cs_is_automate', true])
         ->orderBy(['nextFlight' => SORT_ASC]);
         $query->joinWith(['client']);
 
@@ -390,7 +490,7 @@ class CasesQRepository
         ])
             ->where(['not', ['nextFlight' => null]])
             ->andWhere('nextFlight > ADDDATE(CURDATE(), ' . SettingHelper::getCasePriorityDays() . ')')
-
+            ->andWhere(['<>', 'cs_is_automate', true])
             ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
         $query->joinWith(['client']);
 
@@ -424,6 +524,7 @@ class CasesQRepository
         ])
             ->where('last_out_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
             ->andWhere('last_in_date < SUBDATE(CURDATE(), ' . SettingHelper::getCasePastDepartureDate() . ')')
+            ->andWhere(['<>', 'cs_is_automate', true])
             ->orderBy(['cs_need_action' => SORT_DESC, 'nextFlight' => SORT_ASC]);
         $query->joinWith(['client']);
 

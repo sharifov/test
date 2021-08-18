@@ -2,9 +2,11 @@
 
 namespace modules\product\src\entities\productQuote;
 
+use modules\flight\models\FlightQuoteFlight;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 
 class ProductQuoteQuery
 {
@@ -16,6 +18,19 @@ class ProductQuoteQuery
                 new Expression(
                     'pq_id = pqr_parent_pq_id and pqr_related_pq_id = :quoteId and pqr_type_id = :typeId',
                     ['quoteId' => $alternativeQuoteId, 'typeId' => ProductQuoteRelation::TYPE_ALTERNATIVE]
+                )
+            );
+        return $query->one();
+    }
+
+    public static function getOriginProductQuoteByReprotection(int $reprotectionQuoteId): ?ProductQuote
+    {
+        $query = ProductQuote::find()
+            ->innerJoin(
+                ProductQuoteRelation::tableName(),
+                new Expression(
+                    'pq_id = pqr_parent_pq_id and pqr_related_pq_id = :quoteId and pqr_type_id = :typeId',
+                    ['quoteId' => $reprotectionQuoteId, 'typeId' => ProductQuoteRelation::TYPE_REPROTECTION]
                 )
             );
         return $query->one();
@@ -57,5 +72,26 @@ class ProductQuoteQuery
         );
         $query->innerJoin(OfferProduct::tableName(), 'op_offer_id = :offerId and op_product_quote_id = pq_id', ['offerId' => $offerId]);
         return $query->all();
+    }
+
+    public static function getProductQuoteByBookingId(string $bookingId): ?ProductQuote
+    {
+        if ($flightQuoteFlight = FlightQuoteFlight::find()->where(['fqf_booking_id' => $bookingId])->orderBy(['fqf_id' => SORT_DESC])->one()) {
+            return ArrayHelper::getValue($flightQuoteFlight, 'fqfFq.fqProductQuote');
+        }
+        return null;
+    }
+
+    /**
+     * @param int $id
+     * @return ProductQuote[]
+     */
+    public static function getReprotectionQuotesByOriginQuote(int $id): array
+    {
+        return ProductQuote::find()
+            ->where(['pq_id' => $id])
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_parent_id = pq_id and pqr_type_id = :typeId', [
+                'typeId' => ProductQuoteRelation::TYPE_REPROTECTION
+            ])->all();
     }
 }

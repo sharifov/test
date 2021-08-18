@@ -31,6 +31,8 @@ class FlightRequestSearch extends FlightRequest
             [['fr_created_dt', 'fr_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['fr_booking_id', 'safe'],
+
+            ['fr_project_id', 'integer'],
         ];
     }
 
@@ -57,14 +59,15 @@ class FlightRequestSearch extends FlightRequest
             'fr_created_api_user_id' => $this->fr_created_api_user_id,
             'fr_status_id' => $this->fr_status_id,
             'fr_job_id' => $this->fr_job_id,
-            'fr_created_dt' => $this->fr_created_dt,
-            'fr_updated_dt' => $this->fr_updated_dt,
+            'DATE(fr_created_dt)' => $this->fr_created_dt,
+            'DATE(fr_updated_dt)' => $this->fr_updated_dt,
             'fr_year' => $this->fr_year,
             'fr_month' => $this->fr_month,
+            'fr_project_id' => $this->fr_project_id,
         ]);
 
         $query->andFilterWhere(['like', 'fr_hash', $this->fr_hash])
-            ->andFilterWhere(['lake', 'fr_booking_id', $this->fr_booking_id])
+            ->andFilterWhere(['like', 'fr_booking_id', $this->fr_booking_id])
             ->andFilterWhere(['like', 'fr_data_json', $this->fr_data_json]);
 
         return $dataProvider;

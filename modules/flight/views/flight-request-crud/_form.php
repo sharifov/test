@@ -16,11 +16,15 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
+        <?= $form->field($model, 'fr_booking_id')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'fr_hash')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'fr_type_id')->dropDownList(FlightRequest::TYPE_LIST) ?>
 
         <?= $form->field($model, 'fr_status_id')->dropDownList(FlightRequest::STATUS_LIST) ?>
+
+        <?= $form->field($model, 'fr_project_id')->dropDownList(\common\models\Project::getList()) ?>
 
         <?= $form->field($model, 'fr_created_api_user_id')->textInput() ?>
 

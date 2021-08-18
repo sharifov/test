@@ -24,14 +24,26 @@ class OrderContactForm extends Model
     public function rules(): array
     {
         return [
+            ['email', 'required', 'when' => function () {
+                return empty($this->phone_number);
+            }],
             ['email', 'string', 'max' => 100],
             ['email', 'email', 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['first_name', 'string', 'max' => 50],
-            ['last_name', 'string', 'max' => 50],
-
+            ['phone_number', 'required', 'when' => function () {
+                return empty($this->email);
+            }],
             ['phone_number', 'string', 'max' => 20],
+            ['phone_number', 'filter', 'filter' => static function ($value) {
+                return $value === null ? null : str_replace(['-', ' '], '', trim($value));
+            }],
             ['phone_number', PhoneValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            [['first_name', 'last_name'], 'string', 'max' => 50],
+            [['first_name', 'last_name'], 'filter', 'filter' => static function ($value) {
+                return self::cleanName($value);
+            }],
+            ['first_name', 'default', 'value' => 'ClientName'],
         ];
     }
 
@@ -48,5 +60,14 @@ class OrderContactForm extends Model
         $form->first_name = ArrayHelper::getValue($saleData, 'customerInfo.firstName');
         $form->last_name = ArrayHelper::getValue($saleData, 'customerInfo.lastName');
         return $form;
+    }
+
+    public static function cleanName(?string $name): ?string
+    {
+        if ($name) {
+            $name = preg_replace('/[^a-z-\s]/ui', '', $name);
+            return preg_replace('|[\s]+|s', ' ', $name);
+        }
+        return $name;
     }
 }

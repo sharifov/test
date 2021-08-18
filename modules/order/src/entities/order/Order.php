@@ -31,6 +31,7 @@ use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\interfaces\ProductDataInterface;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
@@ -99,6 +100,7 @@ use modules\order\src\entities\orderData\OrderData;
  * @property CaseOrder[] $caseOrder
  * @property OrderStatusLog[] $orderStatusLogs
  * @property OrderData $orderData
+ * @property ProductQuote[] $nonReprotectionProductQuotes
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -363,6 +365,14 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id']);
+    }
+    /**
+     * @return ActiveQuery
+     */
+    public function getNonReprotectionProductQuotes(): ActiveQuery
+    {
+        $subQuery = ProductQuoteRelation::find()->distinct()->select('pqr_related_pq_id')->where(['pqr_type_id' => ProductQuoteRelation::TYPE_REPROTECTION]);
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])->where(['not', ['pq_id' => $subQuery]]);
     }
 
     public function getOrderTips(): ActiveQuery

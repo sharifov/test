@@ -3,10 +3,13 @@
 namespace modules\flight\models;
 
 use common\components\validators\CheckJsonValidator;
+use common\models\Project;
 use modules\flight\models\query\FlightRequestQuery;
 use sales\behaviors\StringToJsonBehavior;
+use common\models\ApiUser;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -25,6 +28,9 @@ use yii\helpers\ArrayHelper;
  * @property int $fr_year
  * @property int $fr_month
  * @property string $fr_booking_id
+ * @property int $fr_project_id
+ *
+ * @property Project $project
  */
 class FlightRequest extends \yii\db\ActiveRecord
 {
@@ -80,6 +86,10 @@ class FlightRequest extends \yii\db\ActiveRecord
 
             ['fr_year', 'required'],
             ['fr_year', 'integer'],
+
+            [['fr_project_id'], 'required'],
+            [['fr_project_id'], 'integer'],
+            [['fr_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['fr_project_id' => 'id']],
         ];
     }
 
@@ -117,6 +127,7 @@ class FlightRequest extends \yii\db\ActiveRecord
             'fr_updated_dt' => 'Updated Dt',
             'fr_year' => 'Year',
             'fr_month' => 'Month',
+            'fr_project_id' => 'Project',
         ];
     }
 
@@ -137,33 +148,48 @@ class FlightRequest extends \yii\db\ActiveRecord
 
     public function getStatusName(): ?string
     {
-        return self::TYPE_LIST[$this->fr_status_id] ?? null;
+        return self::STATUS_LIST[$this->fr_status_id] ?? null;
+    }
+
+    /**
+     * returns ApiUser full name
+     * @return string|null
+     */
+    public function getApiUsername(): ?string
+    {
+        return ApiUser::findOne($this->fr_created_api_user_id)->au_name ?? null;
+    }
+
+    public function getProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'fr_project_id']);
     }
 
     /**
      * @param string $booking_id
      * @param int $type_id
-     * @param int $status_id
      * @param array $data_json
+     * @param int $projectId
      * @param int|null $created_api_user_id
      * @return FlightRequest
      */
     public static function create(
         string $booking_id,
         int $type_id,
-        int $status_id,
         $data_json,
+        int $projectId,
         ?int $created_api_user_id
     ): FlightRequest {
+
         $model = new self();
         $model->fr_booking_id = $booking_id;
         $model->fr_type_id = $type_id;
-        $model->fr_status_id = $status_id;
+        $model->fr_status_id = self::STATUS_NEW;
         $model->fr_data_json = $data_json;
         $model->fr_created_api_user_id = $created_api_user_id;
+        $model->fr_project_id = $projectId;
 
         $model->fr_hash = self::generateHashFromDataJson($data_json);
-
         $model->fr_created_dt = date('Y-m-d H:i:s');
         $createdDt = strtotime($model->fr_created_dt);
         $model->fr_year = date('Y', $createdDt);
@@ -174,6 +200,43 @@ class FlightRequest extends \yii\db\ActiveRecord
 
     public static function generateHashFromDataJson(array $dataJson): string
     {
+        ksort($dataJson, SORT_STRING);
         return md5(serialize($dataJson));
+    }
+
+    public function statusToPending(): FlightRequest
+    {
+        $this->fr_status_id = self::STATUS_PENDING;
+        return $this;
+    }
+
+    public function statusToError(): FlightRequest
+    {
+        $this->fr_status_id = self::STATUS_ERROR;
+        return $this;
+    }
+
+    public function statusToDone(): FlightRequest
+    {
+        $this->fr_status_id = self::STATUS_DONE;
+        return $this;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFlightRequestLog()
+    {
+        return $this->hasMany(FlightRequestLog::class, ['flr_fr_id' => 'fr_id']);
+    }
+
+    public function getFlightQuoteData()
+    {
+        return ArrayHelper::getValue($this, 'fr_data_json.flight_quote');
+    }
+
+    public function getIsAutomateDataJson(): bool
+    {
+        return (bool) ArrayHelper::getValue($this, 'fr_data_json.flight_quote', false);
     }
 }
