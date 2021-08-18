@@ -4177,6 +4177,13 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "optional": true,
+            "field": "lead.department_key",
+            "description": "<p>Department Key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
             "size": "50",
             "optional": true,
             "field": "lead.project_key",
@@ -4385,7 +4392,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\",\n              \"chat_visitor_id\" : \"6b811a3e-41c4-4d49-a99a-afw3e4rtf3tfregf\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"project_key\": \"ovago\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"expire_at\": \"2020-01-20 12:12:12\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ],\n         \"lead_data\": [\n              {\n                 \"field_key\": \"example_key\",\n                 \"field_value\": \"example_value\"\n             }\n         ]\n      }\n}",
+          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\",\n              \"chat_visitor_id\" : \"6b811a3e-41c4-4d49-a99a-afw3e4rtf3tfregf\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"project_key\": \"ovago\",\n          \"department_key\": \"exchange\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"expire_at\": \"2020-01-20 12:12:12\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ],\n         \"lead_data\": [\n              {\n                 \"field_key\": \"example_key\",\n                 \"field_value\": \"example_value\"\n             }\n         ]\n      }\n}",
           "type": "json"
         }
       ]

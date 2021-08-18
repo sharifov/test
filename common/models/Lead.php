@@ -818,7 +818,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->hybrid_uid = $form->uid;
         $lead->status = $form->status;
         $lead->bo_flight_id = $form->flight_id;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $form->department_id;
         $lead->l_type_create = self::TYPE_CREATE_API;
         $lead->l_client_lang = $form->user_language;
         $lead->l_expiration_dt = $form->expire_at;
