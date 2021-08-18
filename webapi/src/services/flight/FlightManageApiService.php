@@ -55,7 +55,7 @@ use sales\model\caseOrder\entity\CaseOrderQuery;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\CurrencyHelper;
-use webapi\src\boWebhook\FlightRefundUpdateForm;
+use webapi\src\forms\boWebhook\FlightRefundUpdateForm;
 use webapi\src\forms\flight\FlightRequestApiForm;
 use webapi\src\forms\flight\flights\trips\SegmentApiForm;
 use yii\base\Model;
@@ -536,8 +536,11 @@ class FlightManageApiService implements BoWebhookService
 
             if ($reprotectionQuoteInProgress) {
                 $reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($productQuote->pq_id);
-                $case = null;
                 $productQuoteChange = $productQuote->productQuoteLastChange;
+                $case = null;
+                if ($productQuoteChange) {
+                    $case = $productQuoteChange->pqcCase;
+                }
 
                 $orderRefund = OrderRefund::create(
                     OrderRefund::generateUid(),
@@ -573,7 +576,6 @@ class FlightManageApiService implements BoWebhookService
 
                     if ($productQuoteChange) {
                         $productQuoteChange->declined();
-                        $case = $productQuoteChange->pqcCase;
                         $this->productQuoteChangeRepository->save($productQuoteChange);
                     }
 
