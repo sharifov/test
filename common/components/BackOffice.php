@@ -263,7 +263,7 @@ class BackOffice
                 }
             }
         } else {
-            \Yii::error('Not provided endpoint', 'BackOffice:orderUpdateWebhook');
+            \Yii::error('Not provided endpoint [settings][webhook_order_update_bo_endpoint]', 'BackOffice:orderUpdateWebhook');
         }
     }
 
