@@ -40,6 +40,7 @@ use frontend\themes\gentelella_v2\assets\groups\GentelellaGroupAsset;
 use frontend\themes\gentelella_v2\assets\SwitcheryAsset;
 use frontend\widgets\clientChat\ClientChatWidgetAsset;
 use frontend\widgets\cronExpression\CronExpressionAssets;
+use frontend\widgets\frontendWidgetList\userflow\assets\UserFlowWidgetAsset;
 use frontend\widgets\newWebPhone\NewWebPhoneGroupAsset;
 use frontend\widgets\notification\NotificationSocketAsset;
 use kartik\base\WidgetAsset;
@@ -182,7 +183,9 @@ return [
         CronExpressionAssets::class,
         HotelAsset::class,
 
-        SwitcheryAsset::class
+        SwitcheryAsset::class,
+
+        UserFlowWidgetAsset::class
 
 //        MomentAsset::class
     ],
@@ -797,6 +800,14 @@ return [
             'js' => 'hotel-asset.min.js',
             'css' => 'hotel-asset.min.css',
             'depends' => [ HotelAsset::class ],
+        ],
+        'UserFlowWidgetAsset' => [
+            'class' => UserFlowWidgetAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'userflow.min.js',
+            'css' => 'userflow.min.css',
+            'depends' => [ UserFlowWidgetAsset::class ],
         ]
     ],
 
