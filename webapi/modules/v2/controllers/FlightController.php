@@ -453,7 +453,15 @@ class FlightController extends BaseController
      */
     public function actionReprotectionCreate()
     {
-        $post = Yii::$app->request->post();
+        try {
+            $post = Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+            );
+        }
         $reprotectionCreateForm = new ReprotectionCreateForm();
 
         if (!$reprotectionCreateForm->load($post)) {
@@ -1254,7 +1262,15 @@ class FlightController extends BaseController
      */
     public function actionReprotectionDecision()
     {
-        $post = Yii::$app->request->post();
+        try {
+            $post = Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+            );
+        }
         $form = new reprotectionDecision\DecisionForm();
 
         if (!$form->load($post)) {

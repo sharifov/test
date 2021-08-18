@@ -140,7 +140,17 @@ class BoController extends BaseController
     {
         $form = new BoWebhookForm();
 
-        if (!$form->load(Yii::$app->request->post())) {
+        try {
+            $post = Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+            );
+        }
+
+        if (!$form->load($post)) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
