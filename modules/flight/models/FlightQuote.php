@@ -683,6 +683,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         return '/flight/flight-quote/ajax-quote-details';
     }
 
+    public function getDiffUrlOriginReprotectionQuotes(): string
+    {
+        return '/flight/flight-quote/ajax-origin-reprotection-quotes-diff';
+    }
+
     public function fields(): array
     {
         $fields = [

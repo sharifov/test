@@ -346,4 +346,9 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
     {
         return '/attraction/attraction-quote/ajax-quote-details';
     }
+
+    public function getDiffUrlOriginReprotectionQuotes(): string
+    {
+        return '';
+    }
 }

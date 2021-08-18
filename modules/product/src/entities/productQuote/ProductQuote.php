@@ -104,6 +104,7 @@ use yii\db\ActiveRecord;
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
+ * @property string|null $diffUrl
  */
 class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
@@ -112,6 +113,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     private $childQuote;
 
     private ?string $detailsPageUrl = null;
+    private ?string $diffUrl = null;
 
     private ?bool $isQuoteAlternative = null;
     private ?bool $isQuoteOrigin = null;
@@ -921,6 +923,17 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getQuoteDetailsPageUrl'];
         $this->detailsPageUrl = $finder();
         return $this->detailsPageUrl;
+    }
+
+    public function getDiffUrlOriginReprotectionQuotes(): string
+    {
+        if ($this->diffUrl !== null) {
+            return $this->diffUrl;
+        }
+
+        $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getDiffUrlOriginReprotectionQuotes'];
+        $this->diffUrl = $finder();
+        return $this->diffUrl;
     }
 
     public function isEqual(ProductQuote $quote): bool

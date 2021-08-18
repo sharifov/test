@@ -429,6 +429,34 @@ class FlightQuoteController extends FController
         ]);
     }
 
+    public function actionAjaxOriginReprotectionQuotesDiff()
+    {
+        $originQuoteId = Yii::$app->request->get('origin-quote-id', 0);
+        $reprotectionQuoteId = Yii::$app->request->get('reprotection-quote-id', 0);
+
+        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_VIEW_QUOTES_DIFF, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $originQuote = $this->productQuoteRepository->find($originQuoteId);
+        $reprotectionQuote = $this->productQuoteRepository->find($reprotectionQuoteId);
+
+        $originQuoteDetailsHtml = $this->renderPartial('partial/_quote_view_details', [
+            'productQuote' => $originQuote,
+            'flightQuote' => FlightQuote::findByProductQuoteId($originQuote)
+        ]);
+
+        $reprotectionQuoteDetailsHtml = $this->renderPartial('partial/_quote_view_details', [
+            'productQuote' => $reprotectionQuote,
+            'flightQuote' => FlightQuote::findByProductQuoteId($reprotectionQuote)
+        ]);
+
+        return $this->renderAjax('partial/_quote_diff', [
+            'originQuoteHtml' => $originQuoteDetailsHtml,
+            'reprotectionQuoteHtml' => $reprotectionQuoteDetailsHtml
+        ]);
+    }
+
     /**
      * @throws BadRequestHttpException
      * @throws \Throwable

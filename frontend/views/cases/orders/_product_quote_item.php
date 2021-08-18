@@ -171,6 +171,15 @@ if ($quote->productQuoteLastChange) {
                                     ]);
                                 }
                                 ?>
+                              <?php
+                              /** @abac new $caseAbacDto, CasesAbacObject::ACT_VIEW_QUOTES_DIFF, CasesAbacObject::ACTION_ACCESS, Reprotection Quote send email */
+                                if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_VIEW_QUOTES_DIFF, CasesAbacObject::ACTION_ACCESS)) {
+                                    echo Html::a('<i class="fas fa-columns" title="Origin And Reprotection Quotes Diff"></i> Origin And Reprotection Quotes Diff', null, [
+                                      'class' => 'dropdown-item btn-origin-reprotection-quote-diff',
+                                      'data-url' => Url::to([$quote->getDiffUrlOriginReprotectionQuotes(), 'reprotection-quote-id' => $reprotectionQuote->pq_id, 'origin-quote-id' => $quote->pq_id])
+                                    ]);
+                                }
+                                ?>
                               <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS, Flight Reprotection confirm*/ ?>
                               <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) : ?>
                                     <?= Html::a('<i class="fa fa-check text-success" title="Confirm"></i> Confirm', null, [
