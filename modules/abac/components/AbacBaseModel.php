@@ -381,7 +381,7 @@ class AbacBaseModel
         $ud = self::ATTR_USER_DEPARTMENTS;
 
         $ur['values'] = self::getUserRoleList();
-        $mur['values'] = self::getUserRoleList();
+        $mur['values'] = $ur['values'];
         $ug['values'] = self::getUserGroupList();
         $up['values'] = self::getProjectList();
         $ud['values'] = self::getDepartmentList();
