@@ -67,7 +67,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 $reProtectionCreateService->flightRequestChangeStatus(
                     $flightRequest,
                     FlightRequest::STATUS_ERROR,
-                    ''
+                    'Reason: Product Quote Change exist in status id: ' . implode(', ', ProductQuoteChangeStatus::PROCESSING_LIST)
                 );
                 return;
             }
