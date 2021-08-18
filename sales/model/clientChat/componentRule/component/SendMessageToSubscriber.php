@@ -14,7 +14,7 @@ class SendMessageToSubscriber implements RunnableComponentInterface
 {
     public function run(ComponentDTOInterface $dto): void
     {
-        Yii::info('SendMessageToSubscriber isNew: ' . $dto->getIsChatNew(), 'info\SendMessageToSubscriber');
+//        Yii::info('SendMessageToSubscriber isNew: ' . $dto->getIsChatNew(), 'info\SendMessageToSubscriber');
         if ($dto->getIsChatNew()) {
             $converter = new ConverterExtra(Converter::LINK_IN_PARAGRAPH);
 
@@ -27,7 +27,7 @@ class SendMessageToSubscriber implements RunnableComponentInterface
                 ],
             ];
             $headers = Yii::$app->rchat->getSystemAuthDataHeader();
-            Yii::info('SendMessageToSubscriber sent message with data: ' . VarDumper::dumpAsString($data), 'info\SendMessageToSubscriber');
+//            Yii::info('SendMessageToSubscriber sent message with data: ' . VarDumper::dumpAsString($data), 'info\SendMessageToSubscriber');
             $response = Yii::$app->chatBot->sendMessage($data, $headers);
 
             if ($response['error']) {

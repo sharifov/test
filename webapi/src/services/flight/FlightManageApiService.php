@@ -514,7 +514,7 @@ class FlightManageApiService implements BoWebhookService
                     $productQuoteRefund->done();
                     $this->productQuoteRefundRepository->save($productQuoteRefund);
                     if ($case) {
-                        $case->solved(null);
+                        $case->solved(null, 'Refund request approved');
                         $this->casesRepository->save($case);
                     }
                     $transaction->commit();
