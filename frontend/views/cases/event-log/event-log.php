@@ -48,13 +48,17 @@ use modules\cases\src\abac\dto\CasesAbacDto;
 //                        return CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id];
 //                    }
 //                ],
-                'cel_description',
+                [
+                    'attribute' => 'cel_description',
+                    'enableSorting' => false
+                ],
                 [
                     'attribute' => 'cel_created_dt',
                     'class' => \common\components\grid\DateTimeColumn::class,
                     'options' => [
                         'style' => 'width:180px'
                     ],
+                    'enableSorting' => false
                 ],
                 [
                     'class' => 'yii\grid\ActionColumn',
