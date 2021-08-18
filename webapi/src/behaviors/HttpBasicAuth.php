@@ -4,6 +4,7 @@ namespace webapi\src\behaviors;
 
 use Yii;
 use common\models\ApiUser;
+use yii\helpers\StringHelper;
 use yii\web\NotAcceptableHttpException;
 
 class HttpBasicAuth extends \yii\filters\auth\HttpBasicAuth
@@ -22,7 +23,7 @@ class HttpBasicAuth extends \yii\filters\auth\HttpBasicAuth
         }
 
         if (!$user->validatePassword($password)) {
-            Yii::warning(['message' => 'API: invalid password', 'endpoint' => Yii::$app->controller->action->uniqueId, 'username' => $username, 'password' => $password, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:HttpBasicAuth:ApiUser');
+            Yii::warning(['message' => 'API: invalid password', 'endpoint' => Yii::$app->controller->action->uniqueId, 'username' => $username, 'password' => StringHelper::truncate($password, 5), 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:HttpBasicAuth:ApiUser');
             return null;
         }
 
