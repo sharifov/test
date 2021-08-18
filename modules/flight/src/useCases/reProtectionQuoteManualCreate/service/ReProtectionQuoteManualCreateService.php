@@ -35,10 +35,11 @@ use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
-use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\auth\Auth;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\ErrorsToStringHelper;
@@ -53,7 +54,6 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteFlightRepository $flightQuoteFlightRepository
  * @property FlightQuoteBookingRepository $flightQuoteBookingRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
- * @property ProductQuoteCloneService $productQuoteCloneService
  * @property ProductQuoteRepository $productQuoteRepository
  * @property FlightQuoteRepository $flightQuoteRepository
  * @property FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
@@ -65,13 +65,13 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteRelationRepository $productQuoteRelationRepository
+ * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  */
 class ReProtectionQuoteManualCreateService
 {
     private FlightQuoteFlightRepository $flightQuoteFlightRepository;
     private FlightQuoteBookingRepository $flightQuoteBookingRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
-    private ProductQuoteCloneService $productQuoteCloneService;
     private ProductQuoteRepository $productQuoteRepository;
     private FlightQuoteRepository $flightQuoteRepository;
     private FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository;
@@ -82,12 +82,12 @@ class ReProtectionQuoteManualCreateService
     private FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository;
     private FlightQuoteManageService $flightQuoteManageService;
     private ProductQuoteRelationRepository $productQuoteRelationRepository;
+    private ProductQuoteOptionRepository $productQuoteOptionRepository;
 
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
         FlightQuoteBookingRepository $flightQuoteBookingRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        ProductQuoteCloneService $productQuoteCloneService,
         ProductQuoteRepository $productQuoteRepository,
         FlightQuoteRepository $flightQuoteRepository,
         FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository,
@@ -98,12 +98,12 @@ class ReProtectionQuoteManualCreateService
         FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository,
         FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository,
         FlightQuoteManageService $flightQuoteManageService,
-        ProductQuoteRelationRepository $productQuoteRelationRepository
+        ProductQuoteRelationRepository $productQuoteRelationRepository,
+        ProductQuoteOptionRepository $productQuoteOptionRepository
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
-        $this->productQuoteCloneService = $productQuoteCloneService;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->flightQuoteStatusLogRepository = $flightQuoteStatusLogRepository;
@@ -115,6 +115,7 @@ class ReProtectionQuoteManualCreateService
         $this->flightQuoteSegmentPaxBaggageChargeRepository = $flightQuoteSegmentPaxBaggageChargeRepository;
         $this->flightQuoteManageService = $flightQuoteManageService;
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
+        $this->productQuoteOptionRepository = $productQuoteOptionRepository;
     }
 
     public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form, ?int $userId): FlightQuote
@@ -130,14 +131,7 @@ class ReProtectionQuoteManualCreateService
         }
 
         $originFlightQuote = $originProductQuote->flightQuote;
-        $productQuote = $this->productQuoteCloneService->clone(
-            $originProductQuote->pq_id,
-            $originProductQuote->pqProduct->pr_id,
-            $form->quoteCreator,
-            $form->quoteCreator,
-            false
-        );
-        $this->productQuoteRepository->save($productQuote);
+        $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
 
         $quoteData = self::prepareFlightQuoteData($form);
         $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quoteData, $form->quoteCreator)));
@@ -233,6 +227,19 @@ class ReProtectionQuoteManualCreateService
         }
 
         return $flightQuote;
+    }
+
+    private function copyOriginalProductQuote(ProductQuote $originalQuote, ?int $ownerId, ?int $creatorId): ProductQuote
+    {
+        $productQuote = ProductQuote::copy($originalQuote, $ownerId, $creatorId);
+        $this->productQuoteRepository->save($productQuote);
+
+        foreach ($originalQuote->productQuoteOptions as $originalProductQuoteOption) {
+            $productQuoteOption = ProductQuoteOption::copy($originalProductQuoteOption, $productQuote->pq_id);
+            $this->productQuoteOptionRepository->save($productQuoteOption);
+        }
+
+        return $productQuote;
     }
 
     public static function getOriginQuoteByFlight(int $flightId): ?ProductQuote

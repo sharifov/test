@@ -46,6 +46,7 @@ use sales\repositories\NotFoundException;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\ReservationService;
 use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
+use sales\services\TransactionManager;
 use Yii;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\search\FlightQuoteSearch;
@@ -824,7 +825,10 @@ class FlightQuoteController extends FController
                 if (!$form->validate()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
                 }
-                $flightQuote = $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, Auth::id());
+                $userId = Auth::id();
+                $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId) {
+                    return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId);
+                });
 
                 $response['message'] = 'Success. FlightQuote ID( ' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;

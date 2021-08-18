@@ -545,6 +545,20 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $clone;
     }
 
+    public static function copy(ProductQuote $quote, ?int $ownerId, ?int $creatorId): self
+    {
+        $copy = new self();
+        $copy->attributes = $quote->attributes;
+        $copy->pq_id = null;
+        $copy->pq_gid = self::generateGid();
+        $copy->pq_product_id = $quote->pq_product_id;
+        $copy->pq_order_id = null;
+        $copy->pq_status_id = ProductQuoteStatus::NEW;
+        $copy->pq_owner_user_id = $ownerId;
+        $copy->pq_created_user_id = $creatorId;
+        return $copy;
+    }
+
     public static function replace(ProductQuote $quote): self
     {
         $clone = new self();
