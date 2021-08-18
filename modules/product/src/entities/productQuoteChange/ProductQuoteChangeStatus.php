@@ -37,6 +37,13 @@ class ProductQuoteChangeStatus
         self::DECIDED => 'info',
     ];
 
+    public const PROCESSING_LIST = [
+        self::DECIDED,
+        self::IN_PROGRESS,
+        self::NEW,
+        self::DECISION_PENDING
+    ];
+
     public static function getList(): array
     {
         return self::LIST;
