@@ -113,6 +113,7 @@ class ProductQuoteController extends FController
                     'reprotection-quote-send-email',
                     'flight-reprotection-confirm',
                     'flight-reprotection-refund',
+                    'origin-reprotection-quote-diff'
                 ]
             ]
         ];
@@ -443,6 +444,20 @@ class ProductQuoteController extends FController
                 'message' => $e->getMessage(),
             ]);
         }
+    }
+
+    public function actionOriginReprotectionQuoteDiff()
+    {
+        $originQuoteId = Yii::$app->request->get('origin-quote-id', 0);
+        $reprotectionQuoteId = Yii::$app->request->get('reprotection-quote-id', 0);
+
+        $originQuote = $this->productQuoteRepository->find($originQuoteId);
+        $reprotectionQuote = $this->productQuoteRepository->find($reprotectionQuoteId);
+
+        return $this->renderAjax('partial/_diff_quotes', [
+            'originQuote' => $originQuote,
+            'reprotectionQuote' => $reprotectionQuote
+        ]);
     }
 
     /**

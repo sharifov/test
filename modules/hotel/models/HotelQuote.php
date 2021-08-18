@@ -570,4 +570,9 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
     {
         return '/hotel/hotel-quote/ajax-quote-details';
     }
+
+    public function getDiffUrlOriginReprotectionQuotes(): string
+    {
+        return '';
+    }
 }
