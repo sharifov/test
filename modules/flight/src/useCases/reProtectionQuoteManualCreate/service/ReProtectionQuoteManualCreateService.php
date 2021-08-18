@@ -154,7 +154,7 @@ class ReProtectionQuoteManualCreateService
         }
 
         $flightQuoteFlight = $this->flightQuoteManageService->createFlightQuoteFlight($flightQuote, null);
-        $relation = ProductQuoteRelation::createReProtection($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
+        $relation = ProductQuoteRelation::createReProtection($originProductQuote->pq_id, $flightQuote->fq_product_quote_id, $userId);
         $this->productQuoteRelationRepository->save($relation);
 
         $flightTrip = FlightQuoteTrip::create($flightQuote, null);

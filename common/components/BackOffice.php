@@ -326,9 +326,6 @@ class BackOffice
                 \Yii::error([
                     'message' => 'BO reprotection customer decision server error',
                     'request' => $request,
-                    'bookingId' => $bookingId,
-                    'type' => $type,
-                    'flightQuote' => $quote,
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:reprotectionCustomerDecision:serverError');
                 return false;
@@ -340,9 +337,6 @@ class BackOffice
                 \Yii::error([
                     'message' => 'BO reprotection customer decision data is empty',
                     'request' => $request,
-                    'bookingId' => $bookingId,
-                    'type' => $type,
-                    'flightQuote' => $quote,
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:reprotectionCustomerDecision:dataIsEmpty');
                 return false;
@@ -352,9 +346,6 @@ class BackOffice
                 \Yii::error([
                     'message' => 'BO reprotection customer decision response Data type is invalid',
                     'request' => $request,
-                    'bookingId' => $bookingId,
-                    'type' => $type,
-                    'flightQuote' => $quote,
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:reprotectionCustomerDecision:dataIsInvalid');
                 return false;
@@ -364,9 +355,6 @@ class BackOffice
                 \Yii::error([
                     'message' => 'BO reprotection customer decision is not success response',
                     'request' => $request,
-                    'bookingId' => $bookingId,
-                    'type' => $type,
-                    'flightQuote' => $quote,
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:reprotectionCustomerDecision:dataObjectInvalid');
                 return false;
