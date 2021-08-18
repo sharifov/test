@@ -344,19 +344,25 @@ class ProductQuoteController extends FController
                             ];
                             $hybridService->whReprotection($case->cs_project_id, $data);
                         } catch (\Throwable $throwable) {
-                            Yii::warning('OTA site is not informed; Reason: ' . AppHelper::throwableFormatter($throwable), 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                            $errorData = [];
+                            $errorData['message'] = 'OTA site is not informed (hybridService->whReprotection)';
+                            $errorData['project_id'] = $case->cs_project_id;
+                            $errorData['case_id'] = $case->cs_id;
+                            $errorData['throwable'] = AppHelper::throwableLog($throwable);
+
+                            Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
                         }
 
                         return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success")</script>';
                     }
 
                     throw new \RuntimeException($mail->getErrorSummary(false)[0]);
-                } catch (\DomainException | \RuntimeException $e) {
-                    Yii::error($e->getMessage(), 'ProductQuoteController::actionReprotectionQuoteSendEmail::DomainException|RuntimeException');
-                    $previewEmailForm->addError('error', $e->getMessage());
-                } catch (\Throwable $e) {
+                } catch (\DomainException | \RuntimeException $throwable) {
+                    Yii::error(AppHelper::throwableLog($throwable), 'ProductQuoteController::actionReprotectionQuoteSendEmail::DomainException|RuntimeException');
+                    $previewEmailForm->addError('error', $throwable->getMessage());
+                } catch (\Throwable $throwable) {
                     $previewEmailForm->addError('error', 'Internal Server Error');
-                    Yii::error($e->getMessage(), 'ProductQuoteController::actionReprotectionQuoteSendEmail::Throwable');
+                    Yii::error(AppHelper::throwableLog($throwable), 'ProductQuoteController::actionReprotectionQuoteSendEmail::Throwable');
                 }
             }
         }
