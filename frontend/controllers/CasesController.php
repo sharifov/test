@@ -340,6 +340,7 @@ class CasesController extends FController
                         Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'CaseController:view:Email:sendMail');
                     } else {
                         //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                        $model->addEventLog(null, $mail->eTemplateType->etp_name . ' email sent. By: ' . Auth::user()->username);
 
 
                         if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
@@ -413,6 +414,7 @@ class CasesController extends FController
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>' . $sms->s_phone_to . '</strong>');
                         Yii::error('Error: SMS Message has not been sent to ' . $sms->s_phone_to . "\r\n " . $smsResponse['error'], 'CaseController:view:Sms:sendSms');
                     } else {
+                        $model->addEventLog(null, $sms->sTemplateType->stp_origin_name . ' sms sent. By: ' . Auth::user()->username);
                         if ($quoteList = @json_decode($previewSmsForm->s_quote_list)) {
                             if (is_array($quoteList)) {
                                 foreach ($quoteList as $quoteId) {

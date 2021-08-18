@@ -325,6 +325,8 @@ class ProductQuoteController extends FController
                             throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
                         }
 
+                        $case->addEventLog(null, $mail->eTemplateType->etp_name . ' email sent. By: ' . Auth::user()->username);
+
                         $productQuoteChange = ProductQuoteChange::find()->byProductQuote($originQuote->pq_id)->byCaseId($case->cs_id)->one();
                         if ($productQuoteChange) {
                             $productQuoteChange->decisionPending();
