@@ -151,7 +151,12 @@ class ReProtectionQuoteManualCreateService
         $relation = ProductQuoteRelation::createReProtection($originProductQuote->pq_id, $flightQuote->fq_product_quote_id, $userId);
         $this->productQuoteRelationRepository->save($relation);
 
-        $flightTrip = FlightQuoteTrip::create($flightQuote, null);
+        $duration = 0;
+        foreach ($form->itinerary as $itinerary) {
+            $duration += (int)$itinerary->duration;
+        }
+
+        $flightTrip = FlightQuoteTrip::create($flightQuote, $duration);
         $flightQuoteTripId = $this->flightQuoteTripRepository->save($flightTrip);
 
         $flightQuoteSegments = [];

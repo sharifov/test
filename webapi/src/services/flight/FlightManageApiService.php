@@ -364,7 +364,7 @@ class FlightManageApiService implements BoWebhookService
             }
 
             foreach ($flightApiForm->getTripSegments() as $tripKey => $tripSegments) {
-                $flightTrip = FlightQuoteTrip::create($newFlightQuote, 0, $flightQuoteFlightId);
+                $flightTrip = FlightQuoteTrip::create($newFlightQuote, 0);
                 $this->flightQuoteTripRepository->save($flightTrip);
 
                 foreach ($tripSegments as $segmentApiForm) {
