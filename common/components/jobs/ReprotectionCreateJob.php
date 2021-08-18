@@ -13,7 +13,9 @@ use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
 use sales\entities\cases\CaseEventLog;
@@ -59,6 +61,17 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 throw new DomainException('FlightRequest not found, ID (' . $this->flight_request_id . ')');
             }
 
+            $oldProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($flightRequest->fr_booking_id);
+            if ($oldProductQuote && ProductQuoteChangeQuery::existsByQuoteIdAndStatuses($oldProductQuote->pq_id, ProductQuoteChangeStatus::PROCESSING_LIST)) {
+                $flightRequest->statusToError();
+                $reProtectionCreateService->flightRequestChangeStatus(
+                    $flightRequest,
+                    FlightRequest::STATUS_PENDING,
+                    ''
+                );
+                return;
+            }
+
             $case = $reProtectionCreateService->createCase($flightRequest);
             $case->addEventLog(
                 CaseEventLog::CASE_CREATED,
@@ -72,7 +85,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     'Found Order GID: (' . $order->or_gid . ')',
                     ['order_gid' => $order->or_gid, 'order_id' => $order->or_id]
                 );
-                if (!$oldProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($flightRequest->fr_booking_id)) {
+                if (!$oldProductQuote) {
                     $case->addEventLog(
                         CaseEventLog::RE_PROTECTION_CREATE,
                         'Origin ProductQuote not found',
