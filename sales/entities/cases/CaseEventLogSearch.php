@@ -93,11 +93,11 @@ class CaseEventLogSearch extends CaseEventLog
             'query' => $query,
             'sort' => [
                 'defaultOrder' => [
-                    'cel_id' => SORT_DESC,
+                    'cel_id' => SORT_ASC,
                 ]
             ],
             'pagination' => [
-                'pageSize' => 5,
+                'pageSize' => 20,
             ],
         ]);
 
