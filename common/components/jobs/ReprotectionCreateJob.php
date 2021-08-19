@@ -18,7 +18,10 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
+use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CaseEventLog;
+use sales\entities\cases\Cases;
+use sales\entities\cases\CasesStatus;
 use sales\exception\BoResponseException;
 use sales\exception\CheckRestrictionException;
 use sales\exception\ValidationException;
@@ -61,8 +64,14 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 throw new DomainException('FlightRequest not found, ID (' . $this->flight_request_id . ')');
             }
 
+            $caseExist = Cases::find()->where(['cs_order_uid' => $flightRequest->fr_booking_id])
+                ->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH]])
+                ->innerJoin(CaseCategory::tableName(), 'cs_category_id = cc_id and cc_key = :categoryKey', [
+                    'categoryKey' => SettingHelper::getReProtectionCaseCategory()
+                ])->exists();
+
             $oldProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($flightRequest->fr_booking_id);
-            if ($oldProductQuote && ProductQuoteChangeQuery::existsByQuoteIdAndStatuses($oldProductQuote->pq_id, ProductQuoteChangeStatus::PROCESSING_LIST)) {
+            if ($caseExist || ($oldProductQuote && ProductQuoteChangeQuery::existsByQuoteIdAndStatuses($oldProductQuote->pq_id, ProductQuoteChangeStatus::PROCESSING_LIST))) {
                 $flightRequest->statusToError();
                 $reProtectionCreateService->flightRequestChangeStatus(
                     $flightRequest,
