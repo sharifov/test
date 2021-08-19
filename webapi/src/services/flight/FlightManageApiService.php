@@ -540,6 +540,7 @@ class FlightManageApiService implements BoWebhookService
 
             if ($reprotectionQuoteInProgress) {
                 $reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($productQuote->pq_id);
+                \Yii::info(VarDumper::dumpAsString($productQuote->pq_id), 'info\ProductQuoteId');
                 $productQuoteChange = $productQuote->productQuoteLastChange;
                 $case = null;
                 if ($productQuoteChange) {
@@ -572,6 +573,8 @@ class FlightManageApiService implements BoWebhookService
 
                 try {
                     $transaction->begin();
+
+                    \Yii::info(VarDumper::dumpAsString($reprotectionQuotes), 'info\reprotectionQuotes');
 
                     foreach ($reprotectionQuotes as $reprotectionQuote) {
                         $reprotectionQuote->cancelled();
