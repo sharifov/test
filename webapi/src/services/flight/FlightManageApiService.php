@@ -574,7 +574,7 @@ class FlightManageApiService implements BoWebhookService
                     $transaction->begin();
 
                     foreach ($reprotectionQuotes as $reprotectionQuote) {
-                        $reprotectionQuote->declined();
+                        $reprotectionQuote->cancelled();
                         $this->productQuoteRepository->save($reprotectionQuote);
                     }
 
