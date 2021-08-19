@@ -89,9 +89,9 @@ class ProductQuoteQuery
     public static function getReprotectionQuotesByOriginQuote(int $id): array
     {
         return ProductQuote::find()
-            ->where(['pq_id' => $id])
-            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_parent_pq_id = pq_id and pqr_type_id = :typeId', [
-                'typeId' => ProductQuoteRelation::TYPE_REPROTECTION
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
+                'typeId' => ProductQuoteRelation::TYPE_REPROTECTION,
+                'parentQuoteId' => $id
             ])->all();
     }
 }
