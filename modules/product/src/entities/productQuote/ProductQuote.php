@@ -136,6 +136,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             [['pq_gid'], 'string', 'max' => 32],
             [['pq_name'], 'string', 'max' => 40],
             [['pq_origin_currency', 'pq_client_currency'], 'string', 'max' => 3],
+            [['pq_origin_currency', 'pq_client_currency'], 'default', 'value' => null],
             [['pq_gid'], 'unique'],
             [['pq_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pq_client_currency' => 'cur_code']],
             [['pq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pq_created_user_id' => 'id']],
