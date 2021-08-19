@@ -49,6 +49,7 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\services\productQuote\ProductQuoteReplaceService;
+use sales\helpers\app\AppHelper;
 use sales\interfaces\BoWebhookService;
 use sales\model\caseOrder\entity\CaseOrder;
 use sales\model\caseOrder\entity\CaseOrderQuery;
@@ -595,7 +596,7 @@ class FlightManageApiService implements BoWebhookService
                     $transaction->commit();
                 } catch (\Throwable $e) {
                     $transaction->rollBack();
-
+                    \Yii::error(AppHelper::throwableLog($e, true), 'FlightManageApiService');
                     if ($case) {
                         $case->error(null, 'Create refund error.');
                         $this->casesRepository->save($case);
