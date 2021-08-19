@@ -62,6 +62,7 @@ use webapi\src\forms\flight\flights\trips\SegmentApiForm;
 use yii\base\Model;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class FlightManageApiService
@@ -518,9 +519,11 @@ class FlightManageApiService implements BoWebhookService
                         $case->solved(null, 'Refund request approved');
                         $this->casesRepository->save($case);
                     }
+                    \Yii::info(VarDumper::dumpAsString('success first logic'), 'info\FlightManageApiService');
                     $transaction->commit();
                 } catch (\Throwable $e) {
                     $transaction->rollBack();
+                    \Yii::error(AppHelper::throwableLog($e, true), 'FlightManageApiService:firstLogic');
                 }
                 return;
             }
@@ -593,10 +596,11 @@ class FlightManageApiService implements BoWebhookService
                         $this->casesRepository->save($case);
                     }
 
+                    \Yii::info(VarDumper::dumpAsString('success second logic'), 'info\FlightManageApiService');
                     $transaction->commit();
                 } catch (\Throwable $e) {
                     $transaction->rollBack();
-                    \Yii::error(AppHelper::throwableLog($e, true), 'FlightManageApiService');
+                    \Yii::error(AppHelper::throwableLog($e, true), 'FlightManageApiService:secondLogic');
                     if ($case) {
                         $case->error(null, 'Create refund error.');
                         $this->casesRepository->save($case);
