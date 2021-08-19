@@ -108,7 +108,7 @@ class ProductQuoteService implements BoWebhookService
             $case = $productQuote->relateParent->productQuoteLastChange->pqcCase;
             $case->cs_is_automate = false;
             $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, 'Case auto processing: disabled');
-            $this->casesManageService->solved($case, null, 'system: Bo Webhook');
+            $this->casesManageService->solved($case, null, 'Reprotection flight quote booked');
             $this->casesRepository->save($case);
         }
     }
