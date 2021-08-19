@@ -473,7 +473,9 @@ class ClientChatController extends ApiBaseController
      */
     public function actionLinkCases()
     {
-        $this->startApiLog($this->action->uniqueId);
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
 
         $form = new LinkCasesForm();
 
