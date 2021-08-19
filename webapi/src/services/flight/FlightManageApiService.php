@@ -519,11 +519,9 @@ class FlightManageApiService implements BoWebhookService
                         $case->solved(null, 'Refund request approved');
                         $this->casesRepository->save($case);
                     }
-                    \Yii::info(VarDumper::dumpAsString('success first logic'), 'info\FlightManageApiService');
                     $transaction->commit();
                 } catch (\Throwable $e) {
                     $transaction->rollBack();
-                    \Yii::error(AppHelper::throwableLog($e, true), 'FlightManageApiService:firstLogic');
                 }
                 return;
             }
@@ -540,7 +538,6 @@ class FlightManageApiService implements BoWebhookService
 
             if ($reprotectionQuoteInProgress) {
                 $reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($productQuote->pq_id);
-                \Yii::info(VarDumper::dumpAsString($productQuote->pq_id), 'info\ProductQuoteId');
                 $productQuoteChange = $productQuote->productQuoteLastChange;
                 $case = null;
                 if ($productQuoteChange) {
@@ -574,7 +571,6 @@ class FlightManageApiService implements BoWebhookService
                 try {
                     $transaction->begin();
 
-                    \Yii::info(VarDumper::dumpAsString($reprotectionQuotes), 'info\reprotectionQuotes');
 
                     foreach ($reprotectionQuotes as $reprotectionQuote) {
                         $reprotectionQuote->cancelled();
@@ -599,11 +595,9 @@ class FlightManageApiService implements BoWebhookService
                         $this->casesRepository->save($case);
                     }
 
-                    \Yii::info(VarDumper::dumpAsString('success second logic'), 'info\FlightManageApiService');
                     $transaction->commit();
                 } catch (\Throwable $e) {
                     $transaction->rollBack();
-                    \Yii::error(AppHelper::throwableLog($e, true), 'FlightManageApiService:secondLogic');
                     if ($case) {
                         $case->error(null, 'Create refund error.');
                         $this->casesRepository->save($case);
