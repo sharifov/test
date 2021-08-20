@@ -16,7 +16,7 @@ use modules\qaTask\src\abac\QaTaskAbacObject;
 <?= $this->render('actions/return', ['model' => $model]) ?>
 <?= $this->render('actions/decide', ['model' => $model]) ?>
 
-<?php /** @abac $leadAbacDto, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS, Assign Multiple Tasks To QA*/ ?>
+<?php /** @abac null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS, Assign Multiple Tasks To QA*/ ?>
 <?php if (Yii::$app->abac->can(null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS)) : ?>
     <?= $this->render('actions/user_assign', ['model' => $model]) ?>
 <?php endif; ?>
