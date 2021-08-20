@@ -57,7 +57,7 @@ if ($quote->productQuoteLastChange) {
 
     <!--                    <td>--><?php //=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
 
-    <td><?=Html::encode($quote->pq_name)?></td>
+    <td><?=Html::encode($quote->getBookingId())?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
     <?php if ($quote->productQuoteLastChange) : ?>
         <td <?= $changeTitle ? 'data-toggle="tooltip" data-original-title="' . $changeTitle . '"' : ''?>>

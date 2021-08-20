@@ -174,7 +174,6 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
         $model->fqf_main_airline = $mainAirline;
         $model->fqf_booking_id = $bookingId;
         $model->fqf_status_id = $statusId;
-        $model->fqf_booking_id = $bookingId;
         $model->fqf_pnr = $pnr;
         $model->fqf_validating_carrier = $validatingCarrier;
         $model->fqf_original_data_json = $originalDataJson;

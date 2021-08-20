@@ -985,4 +985,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         }
         return $fields;
     }
+
+    /**
+     * @return string
+     */
+    public function getBookingId(): string
+    {
+        $bookingId = '';
+        if ($this->isFlight()) {
+            $bookingId = $this->flightQuote->getBookingId();
+        }
+        return $bookingId;
+    }
 }
