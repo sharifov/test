@@ -29,6 +29,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\project\entity\projectRelation\ProjectRelationQuery;
 use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\services\metrics\MetricsService;
 use sales\services\parsingDump\BaggageService;
@@ -1025,6 +1026,14 @@ class QuoteController extends FController
                                 } else {
                                     $quote->base();
                                 }
+                            }
+
+                            $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
+                            if ($randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                                Yii::info(VarDumper::dumpAsString($projectRelationsIds), 'info\countProjectRelations');
+                                $projectRelationsCount = count($projectRelationsIds);
+                                $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
+                                $quote->provider_project_id = $projectRelationsIds[$randomProjectIndex] ?? null;
                             }
 
                             if ($quote->save(false)) {
