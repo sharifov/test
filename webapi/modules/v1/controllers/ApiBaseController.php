@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\models\ApiLog;
 use common\models\ApiUser;
 use common\models\Project;
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
 use webapi\src\behaviors\ApiUserProjectAccessBehavior;
 use Yii;
 use yii\filters\auth\CompositeAuth;
@@ -84,12 +85,19 @@ class ApiBaseController extends Controller
 
 
                 if (!$apiUser) {
-                    Yii::warning(['message' => 'API: not found username', 'username' => $username, 'endpoint' => $this->action->uniqueId, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:HttpBasicAuth:ApiUser');
+                    Yii::warning(['message' => 'API: not found username', 'username' => $username,
+                        'endpoint' => $this->action->uniqueId,
+                        'RemoteIP' => Yii::$app->request->getRemoteIP(),
+                        'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:HttpBasicAuth:ApiUser');
                     return null;
                 }
 
                 if (!$apiUser->validatePassword($password)) {
-                    Yii::warning(['message' => 'API: invalid password', 'username' => $username, 'endpoint' => $this->action->uniqueId, 'password' => $password, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:HttpBasicAuth:ApiUser');
+                    Yii::warning(['message' => 'API: invalid password', 'username' => $username,
+                        'endpoint' => $this->action->uniqueId,
+                        'password' => \yii\helpers\StringHelper::truncate($password, 4),
+                        'RemoteIP' => Yii::$app->request->getRemoteIP(),
+                        'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:HttpBasicAuth:ApiUser');
                     return null;
                 }
 
