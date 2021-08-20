@@ -777,9 +777,9 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         if ($this->flightQuoteFlight) {
             /** @var $flight FlightQuoteFlight */
             foreach ($this->flightQuoteFlight as $flight) {
-                if ($flight->fqf_booking_id) {
-                    $bookingData[] = $flight->fqf_booking_id;
-                }
+//                if ($flight->fqf_booking_id) {
+//                    $bookingData[] = $flight->fqf_booking_id;
+//                }
             }
         }
         return implode(', ', $bookingData);
