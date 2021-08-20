@@ -38,10 +38,12 @@ use sales\repositories\product\ProductQuoteRepository;
 
 /**
  * @property int $flight_request_id
+ * @property bool $flight_request_is_automate
  */
 class ReprotectionCreateJob extends BaseJob implements JobInterface
 {
     public $flight_request_id;
+    public $flight_request_is_automate;
 
     /**
      * @param Queue $queue
@@ -322,7 +324,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 }
             }
 
-            if ($flightRequest->getIsAutomateDataJson() === false && $case->isAutomate()) {
+            if (!$this->flight_request_is_automate && $case->isAutomate()) {
                 $reProtectionCreateService->caseToManual($case, 'Manual processing requested');
                 $reProtectionCreateService->flightRequestChangeStatus(
                     $flightRequest,

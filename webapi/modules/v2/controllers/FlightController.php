@@ -497,6 +497,7 @@ class FlightController extends BaseController
 
                 $job = new ReprotectionCreateJob();
                 $job->flight_request_id = $flightRequest->fr_id;
+                $job->flight_request_is_automate = $reprotectionCreateForm->is_automate;
                 $jobId = Yii::$app->queue_job->priority(100)->push($job);
 
                 $flightRequest->fr_job_id = $jobId;
