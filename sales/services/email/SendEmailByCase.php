@@ -66,6 +66,7 @@ class SendEmailByCase
                 $mail->e_type_id = Email::TYPE_OUTBOX;
                 $mail->e_status_id = Email::STATUS_PENDING;
                 $mail->e_email_subject = $mailPreview['data']['email_subject'];
+                $mail->body_html = $mailPreview['data']['email_body_html'];
                 $mail->e_email_from = $emailConfigs->emailFrom;
                 $mail->e_email_from_name = $emailConfigs->emailFromName;
                 $mail->e_email_to = $this->contact_email;
