@@ -25,6 +25,7 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\flight\src\entities\flightQuote\Scopes;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "flight_quote".
@@ -774,12 +775,12 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function getBookingId(): string
     {
         $bookingData = [];
-        if ($this->flightQuoteFlight) {
-            /** @var $flight FlightQuoteFlight */
-            foreach ($this->flightQuoteFlight as $flight) {
-//                if ($flight->fqf_booking_id) {
-//                    $bookingData[] = $flight->fqf_booking_id;
-//                }
+
+        if ($this->flightQuoteFlights) {
+            foreach ($this->flightQuoteFlights as $fqFlight) {
+                if ($fqFlight && $fqFlight->fqf_booking_id) {
+                    $bookingData[] = $fqFlight->fqf_booking_id;
+                }
             }
         }
         return implode(', ', $bookingData);

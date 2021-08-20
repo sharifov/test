@@ -28,6 +28,7 @@ if ($nr && $reprotectionQuotes = $quote->relates) {
     $hasReprotection = true;
 }
 
+
 $changeTitle = '';
 if ($quote->productQuoteLastChange) {
     $titleData = [];
@@ -118,11 +119,11 @@ if ($quote->productQuoteLastChange) {
     </td>
 
     <?php if ($reprotectionQuotes) : ?>
-      <tr>
-          <td></td>
-          <td colspan="7">
-          <p>Reprotection Quotes:</p>
-          <table class="table table-bordered table-striped">
+        <tr>
+            <td></td>
+            <td colspan="7">
+                <p><b>Reprotection Quotes:</b></p>
+                <table class="table table-bordered table-striped">
               <thead>
                 <tr>
                   <th style="width: 30px;">Nr</th>
@@ -202,8 +203,79 @@ if ($quote->productQuoteLastChange) {
                     </tr>
                 <?php endforeach; ?>
               </tbody>
-          </table>
-        </td>
-          <td></td>
-      </tr>
+            </table>
+            </td>
+            <td></td>
+        </tr>
+    <?php endif; ?>
+
+    <?php if ($quote->productQuoteChanges) : ?>
+        <tr>
+            <td></td>
+            <td colspan="7">
+                <p><b>Changes:</b></p>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th style="width: 30px;">Nr</th>
+                        <th>Status</th>
+                        <th style="width: 180px">Created</th>
+                        <th>Decision Type</th>
+                        <th style="width: 180px">Decision DateTime</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($quote->productQuoteChanges as $nr => $changeItem) : ?>
+                        <tr>
+                            <td data-toggle="tooltip" data-original-title="ProductQuoteChange ID: <?=Html::encode($changeItem->pqc_id)?>" title="ProductQuoteChangeID: <?=Html::encode($changeItem->pqc_id)?>">
+                                <?=($nr + 1)?>
+                            </td>
+                            <td><?= $changeItem->pqc_status_id ? ProductQuoteChangeStatus::asFormat($changeItem->pqc_status_id) : '-'?></td>
+                            <td><small><?=$changeItem->pqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_created_dt)) : '-'?></small></td>
+                            <td><?= $changeItem->pqc_decision_type_id ? ProductQuoteChangeDecisionType::asFormat($changeItem->pqc_decision_type_id) : '-'?></td>
+                            <td><small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </td>
+            <td></td>
+        </tr>
+    <?php endif; ?>
+
+
+    <?php if ($quote->productQuoteRefunds) : ?>
+        <tr>
+            <td></td>
+            <td colspan="7">
+                <p><b>Refund:</b></p>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th style="width: 30px;">Nr</th>
+                        <th>Status</th>
+                        <th>Selling price</th>
+                        <th>Refund amount</th>
+                        <th>Client currency</th>
+                        <th style="width: 180px">Created</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($quote->productQuoteRefunds as $nr => $refundItem) : ?>
+                        <tr>
+                            <td data-toggle="tooltip" data-original-title="ProductQuoteRefund ID: <?=Html::encode($refundItem->pqr_id)?>" title="ProductQuoteChangeID: <?=Html::encode($refundItem->pqr_id)?>">
+                                <?=($nr + 1)?>
+                            </td>
+                            <td><?= $refundItem->pqr_status_id ? ProductQuoteRefundStatus::asFormat($refundItem->pqr_status_id) : '-'?></td>
+                            <td><?= $refundItem->pqr_client_selling_price ? number_format($refundItem->pqr_client_selling_price, 2) : '-'?></td>
+                            <td><?= $refundItem->pqr_client_refund_amount ? number_format($refundItem->pqr_client_refund_amount, 2) : '-'?></td>
+                            <td><?= $refundItem->pqr_client_currency ? Html::encode($refundItem->pqr_client_currency) : '-'?></td>
+                            <td><small><?=$refundItem->pqr_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($refundItem->pqr_created_dt)) : '-'?></small></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </td>
+            <td></td>
+        </tr>
     <?php endif; ?>

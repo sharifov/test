@@ -99,7 +99,9 @@ use yii\db\ActiveRecord;
  * @property ProductQuote[]|null $relates
  * @property ProductQuote|null $relateParent
  * @property ProductQuoteChange|null $productQuoteLastChange
+ * @property ProductQuoteChange[] $productQuoteChanges
  * @property ProductQuoteRefund|null $productQuoteLastRefund
+ * @property ProductQuoteRefund[] $productQuoteRefunds
  * @property ProductQuote|null $originProductQuote
  *
  * @property Quotable|null $childQuote
@@ -265,9 +267,30 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->hasOne(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->orderBy(['pqc_pq_id' => SORT_DESC]);
     }
 
+    /**
+     * Gets query for [[ProductQuoteChanges]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteChanges(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id']);
+    }
+
     public function getProductQuoteLastRefund(): ActiveQuery
     {
-        return $this->hasOne(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->orderBy(['pqr_id' => SORT_DESC]);
+        return $this->hasOne(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])
+            ->orderBy(['pqr_id' => SORT_DESC]);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteRefunds]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteRefunds(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id']);
     }
 
     /**
