@@ -150,7 +150,7 @@ class CommunicationController extends ApiBaseController
     public function actionEmail(): array
     {
         $this->checkPost();
-        $this->startApiLog($this->action->uniqueId);
+//        $this->startApiLog($this->action->uniqueId);
 
         $type = Yii::$app->request->post('type');
         $last_id = Yii::$app->request->post('last_email_id', null);
@@ -170,7 +170,7 @@ class CommunicationController extends ApiBaseController
                 throw new BadRequestHttpException('Invalid Email type', 2);
         }
 
-        return $this->getResponseData($response);
+        return $this->getResponseData($response, false);
     }
 
 
@@ -2514,9 +2514,10 @@ class CommunicationController extends ApiBaseController
 
     /**
      * @param array $response
+     * @param bool $enabledLog
      * @return array
      */
-    private function getResponseData(array $response): array
+    private function getResponseData(array $response, bool $enabledLog = true): array
     {
         if (isset($response['error']) && $response['error']) {
             $responseData = [
@@ -2535,7 +2536,9 @@ class CommunicationController extends ApiBaseController
         }
 
         $responseData['data']['response'] = $response;
-        $responseData = $this->apiLog->endApiLog($responseData);
+        if ($enabledLog) {
+            $responseData = $this->apiLog->endApiLog($responseData);
+        }
 
         return $responseData;
     }
