@@ -77,11 +77,14 @@ class SendEmailByCase
                 $mail->e_email_to = $this->contact_email;
                 $mail->e_created_dt = date('Y-m-d H:i:s');
 
-                $mailResponse = $mail->sendMail();
-                if ($mailResponse['error'] !== false) {
-                    throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
+                if ($mail->save()) {
+                    $mailResponse = $mail->sendMail();
+                    if ($mailResponse['error'] !== false) {
+                        throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
+                    }
+                    return self::RESULT_SEND;
                 }
-                return self::RESULT_SEND;
+                return self::RESULT_NOT_ENABLE;
             }
             return self::RESULT_NOT_ENABLE;
         }
