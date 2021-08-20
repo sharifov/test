@@ -148,18 +148,46 @@ class CasesCommunicationService
     /**
      * @param Cases $case
      * @param Employee $user
-     * @param string $locale
+     * @param string|null $locale
      * @return array
      */
     public function getEmailData(Cases $case, Employee $user, ?string $locale = null): array
     {
         $project = $case->project;
-        $projectContactInfo = [];
         $upp = null;
 
         if ($project) {
             $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => $user->id])->withEmailList()->withPhoneList()->one();
-            if ($project && $project->contact_info) {
+        }
+
+        $content_data = $this->getEmailDataWithoutAgentData($case, $project, $locale);
+
+        $content_data['agent'] = [
+            'name'      => $user->full_name,
+            'username'  => $user->username,
+            'nickname'  => $user->nickname,
+//            'phone'     => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+            'phone'     => $upp && $upp->getPhone() ? $upp->getPhone() : '',
+//            'email'     => $upp && $upp->upp_email ? $upp->upp_email : '',
+            'email'     => $upp && $upp->getEmail() ? $upp->getEmail() : '',
+        ];
+
+        return $content_data;
+    }
+
+    /**
+     * @param Cases $case
+     * @param Project|null $project
+     * @param string|null $locale
+     * @return array
+     */
+    public function getEmailDataWithoutAgentData(Cases $case, ?Project $project = null, ?string $locale = null): array
+    {
+        $project = $project ?? $case->project;
+        $projectContactInfo = [];
+
+        if ($project) {
+            if ($project->contact_info) {
                 $projectContactInfo = @json_decode($project->contact_info, true);
             }
         }
@@ -179,8 +207,8 @@ class CasesCommunicationService
         }
 
         $content_data['project'] = [
-            'name'      => $project ? $project->name : '',
-            'url'       => $project ? $project->link : 'https://',
+            'name'      => $project->name ?? '',
+            'url'       => $project->link ?? 'https://',
             'address'   => $projectContactInfo['address'] ?? '',
             'phone'     => $projectContactInfo['phone'] ?? '',
             'email'     => $projectContactInfo['email'] ?? '',
@@ -188,20 +216,10 @@ class CasesCommunicationService
 
         $content_data['localeParams'] = $localeParams;
 
-        $content_data['agent'] = [
-            'name'      => $user->full_name,
-            'username'  => $user->username,
-            'nickname'  => $user->nickname,
-//            'phone'     => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
-            'phone'     => $upp && $upp->getPhone() ? $upp->getPhone() : '',
-//            'email'     => $upp && $upp->upp_email ? $upp->upp_email : '',
-            'email'     => $upp && $upp->getEmail() ? $upp->getEmail() : '',
-        ];
-
         $content_data['client'] = [
-            'fullName'     => $case->client ? $case->client->full_name : '',
-            'firstName'    => $case->client ? $case->client->first_name : '',
-            'lastName'     => $case->client ? $case->client->last_name : '',
+            'fullName'     => $case->client->full_name ?? '',
+            'firstName'    => $case->client->first_name ?? '',
+            'lastName'     => $case->client->last_name ?? '',
         ];
 
         return $content_data;

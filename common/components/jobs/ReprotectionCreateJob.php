@@ -28,6 +28,7 @@ use sales\exception\ValidationException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesSaleService;
 use sales\services\email\SendEmailByCase;
 use Yii;
@@ -56,6 +57,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         $productQuoteRelationRepository = Yii::createObject(ProductQuoteRelationRepository::class);
         $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
         $orderCreateFromSaleService = Yii::createObject(OrderCreateFromSaleService::class);
+        $casesCommunicationService = Yii::createObject(CasesCommunicationService::class);
 
         $client = null;
 
@@ -366,7 +368,14 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     if (!$clientEmail && !$clientEmail = ClientEmail::getGeneralEmail($clientId)) {
                         throw new CheckRestrictionException('ClientEmail not found');
                     }
-                    $resultStatus = (new SendEmailByCase($case->cs_id, $clientEmail))->getResultStatus();
+
+                    $emailData = $casesCommunicationService->getEmailDataWithoutAgentData($case);
+                    $emailData['reprotection_quote'] = $flightQuote->fqProductQuote->serialize();
+                    if ($oldProductQuote) {
+                        $emailData['original_quote'] = $oldProductQuote->serialize();
+                    }
+
+                    $resultStatus = (new SendEmailByCase($case->cs_id, $clientEmail, $emailData))->getResultStatus();
                     if ($resultStatus === SendEmailByCase::RESULT_NOT_ENABLE) {
                         throw new CheckRestrictionException('ClientEmail not send. EmailConfigs not enabled.');
                     }

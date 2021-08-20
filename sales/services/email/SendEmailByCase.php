@@ -18,6 +18,7 @@ use yii\helpers\VarDumper;
  * @property int $case_id
  * @property string $contact_email
  * @property int|null $resultStatus
+ * @property array $emailData
  */
 class SendEmailByCase
 {
@@ -27,18 +28,22 @@ class SendEmailByCase
     private int $case_id;
     private string $contact_email;
     private ?int $resultStatus = null;
+    private array $emailData = [];
 
     /**
      * SendEmailByCase constructor.
      * @param int $case_id
      * @param string $contact_email
+     * @param array $emailData
      */
     public function __construct(
         int $case_id,
-        string $contact_email
+        string $contact_email,
+        array $emailData = []
     ) {
         $this->case_id = $case_id;
         $this->contact_email = $contact_email;
+        $this->emailData = $emailData;
 
         $this->resultStatus = $this->handle();
     }
@@ -54,7 +59,7 @@ class SendEmailByCase
             if ($emailConfigs->enabled) {
                 $emailTemplate = $this->getEmailTemplate($emailConfigs->templateTypeKey);
 
-                $mailPreview = \Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplate->etp_key, $emailConfigs->emailFrom, $this->contact_email);
+                $mailPreview = \Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplate->etp_key, $emailConfigs->emailFrom, $this->contact_email, $this->emailData);
                 if ($mailPreview['error'] !== false) {
                     throw new \DomainException($mailPreview['error']);
                 }
