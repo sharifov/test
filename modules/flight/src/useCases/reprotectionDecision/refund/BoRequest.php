@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\reprotectionDecision\refund;
 
 use common\components\BackOffice;
 use modules\flight\models\FlightQuoteFlight;
+use modules\flight\src\useCases\reprotectionDecision\CustomerDecisionService;
 use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -23,6 +24,7 @@ use sales\services\TransactionManager;
  * @property TransactionManager $transactionManager
  * @property OrderRefundRepository $orderRefundRepository
  * @property ProductQuoteRefundRepository $productQuoteRefundRepository
+ * @property CustomerDecisionService $customerDecisionService
  */
 class BoRequest
 {
@@ -32,6 +34,7 @@ class BoRequest
     private TransactionManager $transactionManager;
     private OrderRefundRepository $orderRefundRepository;
     private ProductQuoteRefundRepository $productQuoteRefundRepository;
+    private CustomerDecisionService $customerDecisionService;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
@@ -39,7 +42,8 @@ class BoRequest
         ProductQuoteChangeRepository $productQuoteChangeRepository,
         TransactionManager $transactionManager,
         OrderRefundRepository $orderRefundRepository,
-        ProductQuoteRefundRepository $productQuoteRefundRepository
+        ProductQuoteRefundRepository $productQuoteRefundRepository,
+        CustomerDecisionService $customerDecisionService
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesRepository = $casesRepository;
@@ -47,6 +51,7 @@ class BoRequest
         $this->transactionManager = $transactionManager;
         $this->orderRefundRepository = $orderRefundRepository;
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
+        $this->customerDecisionService = $customerDecisionService;
     }
 
     public function refund(string $bookingId, int $orderRefundId, int $productQuoteRefundId, ?int $userId): void
@@ -65,7 +70,7 @@ class BoRequest
             throw new \DomainException('Product Quote Change status is invalid.');
         }
 
-        $responseBO = BackOffice::reprotectionCustomerDecisionRefund(
+        $responseBO = $this->customerDecisionService->reprotectionCustomerDecisionRefund(
             $productQuote->pqProduct->pr_project_id,
             $this->getBookingId($productQuote)
         );
