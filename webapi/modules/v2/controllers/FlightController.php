@@ -635,8 +635,8 @@ class FlightController extends BaseController
                                             "equipment": "",
                                             "elapsedTime": 120,
                                             "duration": 120,
-                                            "qss_departure_dt": "2021-09-09 00:00:00",
-                                            "arrivalDateTime": "2021-09-08 00:00:00"
+                                            "departureDateTime": "2021-09-09 00:00",
+                                            "arrivalDateTime": "2021-09-08 00:00"
                                         }
                                     ],
                                     "baggage": [
@@ -1434,8 +1434,8 @@ class FlightController extends BaseController
                                             "equipment": "",
                                             "elapsedTime": 120,
                                             "duration": 120,
-                                            "qss_departure_dt": "2021-09-09 00:00:00",
-                                            "arrivalDateTime": "2021-09-08 00:00:00"
+                                            "departureDateTime": "2021-09-09 00:00",
+                                            "arrivalDateTime": "2021-09-08 00:00"
                                         }
                                     ],
                                     "baggage": [
@@ -1815,8 +1815,8 @@ class FlightController extends BaseController
                                                 "equipment": null,
                                                 "elapsedTime": null,
                                                 "duration": 85,
-                                                "qss_departure_dt": "2021-09-11 15:20:00",
-                                                "arrivalDateTime": "2021-09-11 13:55:00"
+                                                "departureDateTime": "2021-09-11 15:20",
+                                                "arrivalDateTime": "2021-09-11 13:55"
                                             }
                                         ]
                                     }
