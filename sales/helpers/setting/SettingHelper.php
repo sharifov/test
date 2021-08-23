@@ -419,6 +419,7 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
 
+
     public static function getReProtectionCaseCategory(): ?string
     {
         return Yii::$app->params['settings']['reprotection_case_category'] ?? null;
@@ -442,5 +443,20 @@ class SettingHelper
     public static function isClientChatApiLogEnabled(): bool
     {
         return (bool)(Yii::$app->params['settings']['client_chat_api_log_enabled'] ?? true);
+
+    /**
+     * @return int
+     */
+    public static function getLeadAutoRedialDelay(): int
+    {
+        return (int)(Yii::$app->params['settings']['call_lead_auto_redial_delay'] ?? 0);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function getLeadAutoRedialEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['call_lead_auto_redial_enabled'] ?? false);
     }
 }
