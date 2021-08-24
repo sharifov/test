@@ -32,7 +32,10 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
 
                 $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
-                \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Reservation:parseDump:Throwable');
+                $logData = AppHelper::throwableLog($throwable);
+                $logData['row'] = $row;
+                $logData['rawData'] = $rawData ?? null;
+                \Yii::warning($logData, 'Sabre:Reservation:parseDump:Throwable');
             }
         }
         return $result;
@@ -128,6 +131,9 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $data['departure_am_pm'],
             $departureTimeZone
         );
+        if ($data['departure_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Departure DT ended in failure');
+        }
 
         if (isset($data['arrival_date_day'], $data['arrival_date_month'])) {
             $arrivalDateDay = $data['arrival_date_day'];
@@ -150,6 +156,9 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $data['arrival_am_pm'],
             $arrivalTimeZone
         );
+        if ($data['arrival_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Arrival DT ended in failure');
+        }
 
         return $data;
     }
