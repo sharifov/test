@@ -70,6 +70,11 @@ class QaTaskObjectType
         return $type === self::CASE;
     }
 
+    public static function isChat(int $type): bool
+    {
+        return $type === self::CHAT;
+    }
+
     public static function getObjectClass(int $type): string
     {
         if (!isset(self::MAP[$type])) {

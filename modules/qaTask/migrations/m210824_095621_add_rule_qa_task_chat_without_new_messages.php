@@ -27,7 +27,7 @@ class m210824_095621_add_rule_qa_task_chat_without_new_messages extends Migratio
                 'qa_task_category_key' => '',
                 'hours_passed' => 1,
             ]),
-            'tr_enabled' => false,
+            'tr_enabled' => true,
             'tr_created_dt' => date('Y-m-d H:i:s'),
             'tr_updated_dt' => date('Y-m-d H:i:s'),
         ]);

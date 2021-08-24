@@ -3,6 +3,7 @@
 namespace modules\qaTask\src\useCases\qaTask\create\chat\withoutNewMessages;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\entities\qaTask\QaTaskChangeStateInterface;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 
 /**
@@ -12,7 +13,7 @@ use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
  * @property QaTask $task
  * @property-read CreateDto $changeStateLog
  */
-class QaTaskCreateChatWithoutNewMessagesEvent
+class QaTaskCreateChatWithoutNewMessagesEvent implements QaTaskChangeStateInterface
 {
     public QaTask $task;
 
