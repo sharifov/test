@@ -371,8 +371,8 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
      */
     public function getNonReprotectionProductQuotes(): ActiveQuery
     {
-        $subQuery = ProductQuoteRelation::find()->distinct()->select('pqr_related_pq_id')->where(['pqr_type_id' => ProductQuoteRelation::TYPE_REPROTECTION]);
-        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])->where(['not', ['pq_id' => $subQuery]]);
+        $subQuery = ProductQuoteRelation::find()->distinct()->select('pqr_parent_pq_id')->where(['pqr_type_id' => ProductQuoteRelation::TYPE_REPROTECTION]);
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])->where(['IN', 'pq_id', $subQuery]);
     }
 
     public function getOrderTips(): ActiveQuery
