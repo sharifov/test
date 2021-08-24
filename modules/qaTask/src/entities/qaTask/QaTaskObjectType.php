@@ -4,26 +4,31 @@ namespace modules\qaTask\src\entities\qaTask;
 
 use common\models\Lead;
 use sales\entities\cases\Cases;
+use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 
 class QaTaskObjectType
 {
     public const LEAD = 1;
     public const CASE = 2;
+    public const CHAT = 3;
 
     private const LIST = [
         self::LEAD => 'Lead',
         self::CASE => 'Case',
+        self::CHAT => 'Client Chat'
     ];
 
     private const CLASS_LIST = [
         self::LEAD => 'info',
         self::CASE => 'warning',
+        self::CHAT => 'primary'
     ];
 
     private const MAP = [
         self::LEAD => Lead::class,
         self::CASE => Cases::class,
+        self::CHAT => ClientChat::class
     ];
 
     public static function getList(): array
@@ -63,6 +68,11 @@ class QaTaskObjectType
     public static function isCase(int $type): bool
     {
         return $type === self::CASE;
+    }
+
+    public static function isChat(int $type): bool
+    {
+        return $type === self::CHAT;
     }
 
     public static function getObjectClass(int $type): string

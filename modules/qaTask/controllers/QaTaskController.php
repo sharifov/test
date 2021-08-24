@@ -6,6 +6,7 @@ use modules\qaTask\src\entities\qaTask\search\object\QaTaskObjectSearch;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\guard\QaTaskGuard;
 use sales\access\QueryAccessService;
+use sales\model\clientChat\entity\ClientChat;
 use Yii;
 use common\models\Lead;
 use frontend\controllers\FController;
@@ -132,6 +133,14 @@ class QaTaskController extends FController
                 return $this->redirect(['/cases/view', 'gid' => $object->cs_gid]);
             }
             throw new BadRequestHttpException('Not found Case: ' . $id);
+        }
+
+        if (QaTaskObjectType::isChat($typeId)) {
+            if ($object = ClientChat::findOne($id)) {
+                QaTaskGuard::guard($object->cch_project_id, Auth::id());
+                return $this->redirect(['/client-chat/detail', 'id' => $object->cch_id]);
+            }
+            throw new BadRequestHttpException('Not found Chat: ' . $id);
         }
 
         throw new BadRequestHttpException('Undefined Object type');

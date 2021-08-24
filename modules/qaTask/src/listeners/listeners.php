@@ -15,6 +15,7 @@ use modules\qaTask\src\listeners\QaTaskReturnNotifierListener;
 use modules\qaTask\src\listeners\QaTaskTakeOverNotifierListener;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelEvent;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseEvent;
+use modules\qaTask\src\useCases\qaTask\create\chat\withoutNewMessages\QaTaskCreateChatWithoutNewMessagesEvent;
 use modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\QaTaskCreateLeadProcessingQualityEvent;
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\QaTaskCreateLeadTrashCheckEvent;
 use modules\qaTask\src\useCases\qaTask\create\manually\QaTaskCreateManuallyEvent;
@@ -74,6 +75,9 @@ return [
         QaTaskChangeStateEventListener::class,
     ],
     QaTaskCreateLeadTrashCheckEvent::class => [
+        QaTaskChangeStateEventListener::class,
+    ],
+    QaTaskCreateChatWithoutNewMessagesEvent::class => [
         QaTaskChangeStateEventListener::class,
     ]
 ];
