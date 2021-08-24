@@ -223,6 +223,7 @@ class CallLogSearch extends CallLog
             $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($date[0]));
             $dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($date[1]));
             $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
+            $query->andWhere(['IN', 'cl_year', range(date("Y", strtotime($dateTimeStart)), date("Y", strtotime($dateTimeEnd)))]);
         }
 
         if ($this->userID) {
