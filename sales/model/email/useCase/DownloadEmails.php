@@ -22,6 +22,7 @@ use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\services\CreateByApiDto;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\services\cases\CasesManageService;
@@ -197,6 +198,7 @@ class DownloadEmails
 
                         if ($case_id) {
                             $caseArray[$case_id] = $case_id;
+                            CaseEventLog::add($case_id, null, 'Email received from ' . $email->e_email_from_name);
                         }
 
                         if (!$email->save()) {
