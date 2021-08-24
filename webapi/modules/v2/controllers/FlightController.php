@@ -488,7 +488,7 @@ class FlightController extends BaseController
             $resultId = $this->transactionManager->wrap(function () use ($reprotectionCreateForm, $apiUserId, $post) {
                 $flightRequest = FlightRequest::create(
                     $reprotectionCreateForm->booking_id,
-                    FlightRequest::TYPE_REPRODUCTION_CREATE,
+                    FlightRequest::TYPE_RE_PROTECTION_CREATE,
                     $post,
                     $reprotectionCreateForm->getProject()->id,
                     $apiUserId

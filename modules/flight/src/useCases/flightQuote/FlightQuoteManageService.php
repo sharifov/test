@@ -586,6 +586,9 @@ class FlightQuoteManageService implements ProductQuoteService
             $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
             $flightQuote->setTypeReProtection();
             $flightQuote->setServiceFeePercent(0);
+            if (!empty($quote['itineraryDump'])) {
+                $flightQuote->fq_reservation_dump = $this->itineraryDumpToSting($quote['itineraryDump']);
+            }
             $this->flightQuoteRepository->save($flightQuote);
 
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
@@ -648,5 +651,16 @@ class FlightQuoteManageService implements ProductQuoteService
         FlightQuoteLabelService::processingQuoteLabel($quote, $flightQuote->fq_id);
 
         return $productQuote;
+    }
+
+    private function itineraryDumpToSting(array $itineraryDump): string
+    {
+        $result = '';
+        foreach ($itineraryDump as $key => $value) {
+            $str = $key + 1 . ' ' . $value . "\n";
+            $str = str_replace(' ', '&nbsp; ', $str);
+            $result .= $str;
+        }
+        return $result;
     }
 }

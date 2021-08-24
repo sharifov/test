@@ -34,10 +34,10 @@ use yii\helpers\ArrayHelper;
  */
 class FlightRequest extends \yii\db\ActiveRecord
 {
-    public const TYPE_REPRODUCTION_CREATE = 1;
+    public const TYPE_RE_PROTECTION_CREATE = 1;
 
     public const TYPE_LIST = [
-        self::TYPE_REPRODUCTION_CREATE => 'reprotection/create',
+        self::TYPE_RE_PROTECTION_CREATE => 'reprotection/create',
     ];
 
     public const STATUS_NEW = 1;
