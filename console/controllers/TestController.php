@@ -77,6 +77,24 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+    public function actionQ()
+    {
+        echo \Yii::$app->communication->makeCallClientNotification(
+            '+14157693509',
+            '+37369305726',
+            'Hello world',
+            'woman',
+            null,
+            null,
+            [
+                'project_id' => 2,
+                'client_id' => 472969,
+                'case_id' => 135981,
+                'phone_list_id' => 1468,
+            ]
+        );
+    }
+
     public function actionX()
     {
 

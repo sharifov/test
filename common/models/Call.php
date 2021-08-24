@@ -223,6 +223,7 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_INTERNAL        = 10;
     public const SOURCE_LEAD        = 11;
     public const SOURCE_CASE        = 12;
+    public const SOURCE_CLIENT_NOTIFICATION = 13;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -237,6 +238,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
+        self::SOURCE_CLIENT_NOTIFICATION  => 'Client notification',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -252,6 +254,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
+        self::SOURCE_CLIENT_NOTIFICATION  => 'Client notification',
     ];
 
     public const TW_RECORDING_STATUS_PAUSED = 'paused';
@@ -2683,5 +2686,10 @@ class Call extends \yii\db\ActiveRecord
             }
         }
         return $data;
+    }
+
+    public function isClientNotification(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_CLIENT_NOTIFICATION;
     }
 }
