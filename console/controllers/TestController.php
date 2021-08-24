@@ -18,6 +18,7 @@ use modules\hotel\models\HotelQuote;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\lead\src\services\LeadFailBooking;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\jobs\OrderCanceledConfirmationJob;
 use modules\order\src\payment\services\PaymentService;
 use modules\order\src\processManager\phoneToBook\events\FlightQuoteBookedEvent;
@@ -31,6 +32,9 @@ use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
+use modules\product\src\entities\productQuoteObjectRefund\service\QuoteObjectRefundManageService;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
 use sales\model\cases\useCases\cases\api\create\Command;
@@ -496,5 +500,30 @@ class TestController extends Controller
         $command = new Command(null, null, 1, '', [], 1, '', '', '', '');
         $handler = \Yii::createObject(Handler::class);
         $handler->handle($command);
+    }
+
+    public function actionTestQuoteObjectRefund(int $orderId, int $productQuoteId, int $objectId)
+    {
+        $quoteObjectRefundService = \Yii::createObject(QuoteObjectRefundManageService::class);
+
+        $orderRefund = new OrderRefund();
+        $orderRefund->orr_uid = OrderRefund::generateUid();
+        $orderRefund->orr_order_id = $orderId;
+        $orderRefund->save();
+
+        $productQuoteRefund = new ProductQuoteRefund();
+        $productQuoteRefund->pqr_order_refund_id = $orderRefund->orr_id;
+        $productQuoteRefund->pqr_product_quote_id = $productQuoteId;
+        $productQuoteRefund->save();
+
+        $objectRefund = new ProductQuoteObjectRefund();
+        $objectRefund->pqor_product_quote_refund_id = $productQuoteRefund->pqr_id;
+        $objectRefund->pqor_quote_object_id = $objectId;
+        $structure = $quoteObjectRefundService->getQuoteObjectRefundStructure($productQuoteRefund->productQuote->pqProduct->pr_type_id, $objectId);
+        $objectRefund->pqor_title = $structure->getTitle();
+        $objectRefund->save();
+
+        print_r($structure);
+        die;
     }
 }

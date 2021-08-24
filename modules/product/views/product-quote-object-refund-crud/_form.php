@@ -19,6 +19,10 @@ use yii\widgets\ActiveForm;
 
       <?= $form->field($model, 'pqor_product_quote_refund_id')->input('number') ?>
 
+      <?= $form->field($model, 'pqor_quote_object_id')->input('number') ?>
+
+      <?= $form->field($model, 'pqor_title')->textInput(['maxlength' => true]) ?>
+
       <?= $form->field($model, 'pqor_selling_price')->input('number', ['step' => 'any']) ?>
 
       <?= $form->field($model, 'pqor_penalty_amount')->input('number', ['step' => 'any']) ?>

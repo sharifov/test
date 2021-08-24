@@ -74,7 +74,7 @@ class OrderRefundSearch extends OrderRefund
             'orr_client_selling_price' => $this->orr_client_selling_price,
             'orr_client_charge_amount' => $this->orr_client_charge_amount,
             'orr_client_refund_amount' => $this->orr_client_refund_amount,
-            'orr_expiration_dt' => $this->orr_expiration_dt,
+            'date(orr_expiration_dt)' => $this->orr_expiration_dt,
             'orr_created_user_id' => $this->orr_created_user_id,
             'orr_updated_user_id' => $this->orr_updated_user_id,
             'date(orr_created_dt)' => $this->orr_created_dt,

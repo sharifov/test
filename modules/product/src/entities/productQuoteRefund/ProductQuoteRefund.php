@@ -40,7 +40,7 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property OrderRefund $orderRefund
  * @property Employee $updatedUser
- * @property ProductQuote $pqrProductQuote
+ * @property ProductQuote $productQuote
  * @property ProductQuoteObjectRefund[] $productQuoteObjectRefunds
  * @property ProductQuoteOptionRefund[] $productQuoteOptionRefunds
  * @property Cases $case
@@ -241,7 +241,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getPqrProductQuote()
+    public function getProductQuote()
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqr_product_quote_id']);
     }
