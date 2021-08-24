@@ -2,6 +2,8 @@
 
 namespace modules\product\src\entities\productQuote;
 
+use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productType\ProductType;
 use modules\product\src\exceptions\ProductCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
@@ -50,5 +52,21 @@ class ProductQuoteRepository
             throw new \RuntimeException('Removing error', ProductCodeException::PRODUCT_QUOTE_REMOVE);
         }
         $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+    }
+
+    public function findByGidFlightProductQuote(string $gid): ProductQuote
+    {
+        $productQuote = ProductQuote::find()
+            ->where(['pq_gid' => $gid])
+            ->innerJoin(
+                Product::tableName(),
+                'pq_product_id = pr_id and pr_type_id = :flightProductTypeId',
+                ['flightProductTypeId' => ProductType::PRODUCT_FLIGHT]
+            )
+            ->one();
+        if ($productQuote) {
+            return $productQuote;
+        }
+        throw new NotFoundException('Product Quote not found');
     }
 }

@@ -15,7 +15,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property $saleId
  * @property $project
- * @property $booking_id
+ * @property $bookingId
  * @property $pnr
  * @property $price
  * @property $tripType
@@ -23,6 +23,8 @@ use yii\helpers\ArrayHelper;
  * @property $gds
  * @property $pcc
  * @property $fareType
+ * @property $phone
+ * @property $email
  *
  * @property $projectId
  * @property $tripTypeId
@@ -33,7 +35,7 @@ class OrderCreateFromSaleForm extends Model
 {
     public $saleId;
     public $project;
-    public $booking_id;
+    public $bookingId;
     public $pnr;
     public $price;
     public $tripType;
@@ -41,11 +43,13 @@ class OrderCreateFromSaleForm extends Model
     public $gds;
     public $pcc;
     public $fareType;
+    public $phone;
+    public $email;
 
     private ?int $projectId;
     private ?string $tripTypeId;
     private ?string $gdsId;
-    private ?string $currency;
+    private ?string $currency = null;
 
     public function rules(): array
     {
@@ -58,7 +62,7 @@ class OrderCreateFromSaleForm extends Model
             [['project'], 'string'],
             [['project'], 'detectProjectId'],
 
-            ['booking_id', 'string', 'max' => 50],
+            ['bookingId', 'string', 'max' => 50],
 
             [['pnr'], 'string', 'max' => 10],
 
@@ -76,6 +80,9 @@ class OrderCreateFromSaleForm extends Model
             [['pcc'], 'string', 'max' => 10],
 
             [['fareType'], 'string', 'max' => 255],
+
+            ['phone', 'string', 'skipOnEmpty' => true],
+            ['email', 'email', 'skipOnEmpty' => true],
         ];
     }
 

@@ -18,10 +18,10 @@ class CasesViewRenderHelper
         }
 
         if (Auth::can('cases/take', ['case' => $case])) {
-            return Html::a('Take', ['/cases/take', 'gid' => $case->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
+            return Html::a('<i class="fa fa-download"></i> Take', ['/cases/take', 'gid' => $case->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
         }
         if (Auth::can('cases/takeOver', ['case' => $case])) {
-            return Html::a('Take over', ['/cases/take-over', 'gid' => $case->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take over']);
+            return Html::a('<i class="fa fa-download"></i> Take over', ['/cases/take-over', 'gid' => $case->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take over']);
         }
 
         return '';
@@ -41,8 +41,8 @@ class CasesViewRenderHelper
     public static function renderCheckedButton(Cases $case): string
     {
         if ($case->isNeedAction()) {
-            return Html::a('Mark Checked', ['/cases/mark-checked', 'gid' => $case->cs_gid], ['class' => 'btn btn-info', 'title' => 'Mark as checked']);
+            return Html::a('<i class="fa fa-check"></i> Mark Checked', ['/cases/mark-checked', 'gid' => $case->cs_gid], ['class' => 'btn btn-info', 'title' => 'Mark as checked']);
         }
-        return Html::tag('span', 'Checked', ['class' => 'badge badge-warning', 'title' => 'Mark as checked', 'style' => 'padding:9px;background-color:#A9A9A9']);
+        return Html::tag('span', '<i class="fa fa-check-square-o"></i> Checked', ['class' => 'badge badge-success', 'title' => 'Mark as checked', 'style' => 'padding:9px']);
     }
 }

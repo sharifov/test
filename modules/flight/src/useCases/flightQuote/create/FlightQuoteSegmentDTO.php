@@ -9,7 +9,7 @@ use modules\flight\models\FlightQuoteTrip;
  * Class FlightQuoteSegmentDTO
  * @package modules\flight\src\useCases\flightQuote\create
  */
-class FlightQuoteSegmentDTO
+class FlightQuoteSegmentDTO implements FlightQuoteSegmentDTOInterface
 {
     public $flightQuoteId;
     public $flightQuoteTripId;

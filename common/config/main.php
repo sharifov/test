@@ -114,6 +114,7 @@ return [
             'class' => \common\components\HybridService::class,
             'username' => '',
             'password' => '',
+            'webHookEndpoint' => '',
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
@@ -252,6 +253,7 @@ return [
         \common\bootstrap\FileStorage::class,
         \common\bootstrap\PaymentSetup::class,
         \common\bootstrap\OrderProcessManagerQueue::class,
-        \modules\order\bootstrap\Logger::class
+        \modules\order\bootstrap\Logger::class,
+        \common\bootstrap\FlightQuoteReprotectionDecisionSetup::class,
     ],
 ];

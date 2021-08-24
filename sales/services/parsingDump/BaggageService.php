@@ -4,6 +4,8 @@ namespace sales\services\parsingDump;
 
 use common\models\Airports;
 use common\models\QuotePrice;
+use modules\flight\models\FlightPax;
+use modules\flight\models\FlightQuoteSegment;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\forms\segment\SegmentBaggageForm;
 
@@ -87,6 +89,43 @@ class BaggageService
             }
         }
         return $segments;
+    }
+
+    public static function generateBaggageFromFlightSegment(FlightQuoteSegment $flightQuoteSegment): array
+    {
+        $iataKey = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
+        $serialized = $flightQuoteSegment->serialize();
+        $result = [];
+
+        if (!empty($serialized['baggages'])) {
+            foreach ($serialized['baggages'] as $baggageSource) {
+                $segmentBaggageForm = new SegmentBaggageForm();
+                $segmentBaggageForm->segmentIata = $iataKey;
+                $segmentBaggageForm->type = self::TYPE_FREE;
+                $segmentBaggageForm->piece = $baggageSource['qsb_allow_pieces'];
+                $segmentBaggageForm->weight = $baggageSource['qsb_allow_max_weight'];
+                $segmentBaggageForm->height = $baggageSource['qsb_allow_max_size'];
+                $segmentBaggageForm->paxCode = FlightPax::getPaxTypeById($baggageSource['qsb_flight_pax_code_id']);
+
+                $result[] = $segmentBaggageForm;
+            }
+        }
+        if (!empty($serialized['baggage_charges'])) {
+            foreach ($serialized['baggage_charges'] as $baggageSource) {
+                $segmentBaggageForm = new SegmentBaggageForm();
+                $segmentBaggageForm->segmentIata = $iataKey;
+                $segmentBaggageForm->type = self::TYPE_PAID;
+                $segmentBaggageForm->piece = $baggageSource['qsbc_first_piece'];
+                $segmentBaggageForm->weight = $baggageSource['qsbc_max_weight'];
+                $segmentBaggageForm->height = $baggageSource['qsbc_max_size'];
+                $segmentBaggageForm->paxCode = FlightPax::getPaxTypeById($baggageSource['qsbc_flight_pax_code_id']);
+                $segmentBaggageForm->price = $baggageSource['qsbc_client_price'];
+                $segmentBaggageForm->currency = $baggageSource['qsbc_client_currency'];
+
+                $result[] = $segmentBaggageForm;
+            }
+        }
+        return $result;
     }
 
     /**

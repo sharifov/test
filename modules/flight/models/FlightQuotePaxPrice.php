@@ -223,4 +223,24 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         $paxPrice->qpp_updated_dt = date('Y-m-d H:i:s');
         return $paxPrice;
     }
+
+    public function fields(): array
+    {
+        $fields = [
+            'qpp_fare',
+            'qpp_tax',
+            'qpp_system_mark_up',
+            'qpp_agent_mark_up',
+            'qpp_origin_fare',
+            'qpp_origin_currency',
+            'qpp_origin_tax',
+            'qpp_client_currency',
+            'qpp_client_fare',
+            'qpp_client_tax',
+        ];
+        $fields['paxType'] = function () {
+            return FlightPax::getPaxTypeById($this->qpp_flight_pax_code_id);
+        };
+        return $fields;
+    }
 }

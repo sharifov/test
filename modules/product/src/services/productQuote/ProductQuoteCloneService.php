@@ -46,7 +46,7 @@ class ProductQuoteCloneService
         $this->flightQuoteCloneService = $flightQuoteCloneService;
     }
 
-    public function clone(int $productQuoteId, int $toProductId, ?int $ownerId, ?int $creatorId): ProductQuote
+    public function clone(int $productQuoteId, int $toProductId, ?int $ownerId, ?int $creatorId, bool $withChildProduct = true): ProductQuote
     {
         $originalQuote = $this->productQuoteRepository->find($productQuoteId);
         $toProduct = $this->productRepository->find($toProductId);
@@ -59,7 +59,7 @@ class ProductQuoteCloneService
             throw new \DomainException('Different product types.');
         }
 
-        $clone = $this->transactionManager->wrap(function () use ($originalQuote, $toProduct, $ownerId, $creatorId) {
+        $clone = $this->transactionManager->wrap(function () use ($originalQuote, $toProduct, $ownerId, $creatorId, $withChildProduct) {
 
             $productQuote = ProductQuote::clone($originalQuote, $toProduct->pr_id, $ownerId, $creatorId);
             $this->productQuoteRepository->save($productQuote);
@@ -72,7 +72,7 @@ class ProductQuoteCloneService
             $childQuote = $originalQuote->getChildQuote();
             $childProduct = $toProduct->getChildProduct();
 
-            if ($childQuote && $childProduct) {
+            if ($withChildProduct && $childQuote && $childProduct) {
                 if ($originalQuote->isHotel()) {
                     $this->hotelQuoteCloneService->clone($childQuote->getId(), $childProduct->getId(), $productQuote->pq_id);
                 } elseif ($originalQuote->isFlight()) {

@@ -29,6 +29,8 @@ use modules\flight\src\repositories\flightQuoteTicket\FlightQuoteTicketRepositor
 use modules\flight\src\repositories\flightQuoteTripRepository\FlightQuoteTripRepository;
 use modules\flight\src\services\flightQuote\FlightQuotePriceCalculator;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderRefund\OrderRefund;
+use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTips\OrderTipsRepository;
 use modules\order\src\services\OrderPriceUpdater;
@@ -36,17 +38,31 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productOption\ProductOptionRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\services\productQuote\ProductQuoteReplaceService;
+use sales\helpers\app\AppHelper;
+use sales\interfaces\BoWebhookService;
+use sales\model\caseOrder\entity\CaseOrder;
+use sales\model\caseOrder\entity\CaseOrderQuery;
+use sales\repositories\cases\CasesRepository;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\CurrencyHelper;
+use webapi\src\forms\boWebhook\FlightRefundUpdateForm;
 use webapi\src\forms\flight\FlightRequestApiForm;
 use webapi\src\forms\flight\flights\trips\SegmentApiForm;
+use yii\base\Model;
+use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class FlightManageApiService
@@ -71,8 +87,12 @@ use yii\helpers\ArrayHelper;
  * @property OrderRepository $orderRepository
  * @property OrderPriceUpdater $orderPriceUpdater
  * @property FlightQuoteOptionRepository $flightQuoteOptionRepository
+ * @property OrderRefundRepository $orderRefundRepository
+ * @property ProductQuoteRefundRepository $productQuoteRefundRepository
+ * @property CasesRepository $casesRepository
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  */
-class FlightManageApiService
+class FlightManageApiService implements BoWebhookService
 {
     private bool $processedStatus = false;
 
@@ -94,6 +114,9 @@ class FlightManageApiService
     private OrderRepository $orderRepository;
     private OrderPriceUpdater $orderPriceUpdater;
     private FlightQuoteOptionRepository $flightQuoteOptionRepository;
+    private ProductQuoteRefundRepository $productQuoteRefundRepository;
+    private CasesRepository $casesRepository;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     /**
      * @param FlightQuoteFlightRepository $flightQuoteFlightRepository
@@ -114,6 +137,10 @@ class FlightManageApiService
      * @param OrderRepository $orderRepository
      * @param OrderPriceUpdater $orderPriceUpdater
      * @param FlightQuoteOptionRepository $flightQuoteOptionRepository
+     * @param OrderRefundRepository $orderRefundRepository
+     * @param ProductQuoteRefundRepository $productQuoteRefundRepository
+     * @param CasesRepository $casesRepository
+     * @param ProductQuoteChangeRepository $productQuoteChangeRepository
      */
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
@@ -133,7 +160,11 @@ class FlightManageApiService
         ProductQuoteOptionRepository $productQuoteOptionRepository,
         OrderRepository $orderRepository,
         OrderPriceUpdater $orderPriceUpdater,
-        FlightQuoteOptionRepository $flightQuoteOptionRepository
+        FlightQuoteOptionRepository $flightQuoteOptionRepository,
+        OrderRefundRepository $orderRefundRepository,
+        ProductQuoteRefundRepository $productQuoteRefundRepository,
+        CasesRepository $casesRepository,
+        ProductQuoteChangeRepository $productQuoteChangeRepository
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
@@ -153,6 +184,10 @@ class FlightManageApiService
         $this->orderRepository = $orderRepository;
         $this->orderPriceUpdater = $orderPriceUpdater;
         $this->flightQuoteOptionRepository = $flightQuoteOptionRepository;
+        $this->orderRefundRepository = $orderRefundRepository;
+        $this->productQuoteRefundRepository = $productQuoteRefundRepository;
+        $this->casesRepository = $casesRepository;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
     public function ticketIssue(FlightRequestApiForm $flightRequestApiForm): void
@@ -331,7 +366,7 @@ class FlightManageApiService
             }
 
             foreach ($flightApiForm->getTripSegments() as $tripKey => $tripSegments) {
-                $flightTrip = FlightQuoteTrip::create($newFlightQuote, 0, $flightQuoteFlightId);
+                $flightTrip = FlightQuoteTrip::create($newFlightQuote, 0);
                 $this->flightQuoteTripRepository->save($flightTrip);
 
                 foreach ($tripSegments as $segmentApiForm) {
@@ -457,5 +492,118 @@ class FlightManageApiService
     public function setProcessedStatus(bool $processedStatus): void
     {
         $this->processedStatus = $processedStatus;
+    }
+
+    /**
+     * @param FlightRefundUpdateForm $form
+     */
+    public function processRequest(Model $form): void
+    {
+        $productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->booking_id);
+        $transaction = new Transaction(['db' => \Yii::$app->db]);
+        if ($productQuote) {
+            $productQuoteRefund = $productQuote->productQuoteLastRefund;
+            if ($productQuoteRefund && $productQuoteRefund->isInProcessing()) {
+                $orderRefund = $productQuoteRefund->orderRefund;
+                $case = $productQuoteRefund->case;
+
+                try {
+                    $transaction->begin();
+                    if ($orderRefund) {
+                        $orderRefund->done();
+                        $this->orderRefundRepository->save($orderRefund);
+                    }
+                    $productQuoteRefund->done();
+                    $this->productQuoteRefundRepository->save($productQuoteRefund);
+                    if ($case) {
+                        $case->solved(null, 'Refund request approved');
+                        $this->casesRepository->save($case);
+                    }
+                    $transaction->commit();
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                }
+                return;
+            }
+
+            $query = ProductQuoteRelation::find()
+                ->byParentQuoteId($productQuote->pq_id)
+                ->reprotection();
+
+            $reprotectionQuoteInProgress = $query
+                ->innerJoin(ProductQuote::tableName(), 'pq_id = pqr_related_pq_id and pq_status_id = :pqStatusId', [
+                    'pqStatusId' => ProductQuoteStatus::IN_PROGRESS
+                ])
+                ->one();
+
+            if ($reprotectionQuoteInProgress) {
+                $reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($productQuote->pq_id);
+                $productQuoteChange = $productQuote->productQuoteLastChange;
+                $case = null;
+                if ($productQuoteChange) {
+                    $case = $productQuoteChange->pqcCase;
+                }
+
+                $orderRefund = OrderRefund::create(
+                    OrderRefund::generateUid(),
+                    $productQuote->pq_order_id,
+                    $productQuote->pqOrder->or_app_total,
+                    $productQuote->pqOrder->or_client_currency,
+                    $productQuote->pqOrder->or_client_currency_rate,
+                    $productQuote->pqOrder->or_client_total,
+                    $case->cs_id ?? null
+                );
+                $orderRefund->done();
+                $orderRefund->clientDone();
+                $orderRefund->detachBehavior('user');
+
+                $productQuoteRefund = ProductQuoteRefund::create(
+                    null,
+                    $productQuote->pq_id,
+                    $productQuote->pq_price,
+                    $productQuote->pqOrder->or_client_currency,
+                    $productQuote->pqOrder->or_client_currency_rate,
+                    $case->cs_id ?? null
+                );
+                $productQuoteRefund->done();
+                $productQuoteRefund->detachBehavior('user');
+
+                try {
+                    $transaction->begin();
+
+
+                    foreach ($reprotectionQuotes as $reprotectionQuote) {
+                        $reprotectionQuote->cancelled();
+                        $this->productQuoteRepository->save($reprotectionQuote);
+                    }
+
+                    if ($productQuoteChange) {
+                        $productQuoteChange->declined();
+                        $this->productQuoteChangeRepository->save($productQuoteChange);
+                    }
+
+                    if (!$case && $caseOrderRelation = CaseOrderQuery::getRelationByOrderId($productQuote->pq_order_id)) {
+                        $case = $caseOrderRelation->cases;
+                    }
+
+                    $this->orderRefundRepository->save($orderRefund);
+                    $productQuoteRefund->pqr_order_refund_id = $orderRefund->orr_id;
+                    $this->productQuoteRefundRepository->save($productQuoteRefund);
+
+                    if ($case) {
+                        $case->solved(null, 'Refund request approved');
+                        $this->casesRepository->save($case);
+                    }
+
+                    $transaction->commit();
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                    if ($case) {
+                        $case->error(null, 'Create refund error.');
+                        $this->casesRepository->save($case);
+                    }
+                }
+            }
+        }
     }
 }

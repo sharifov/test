@@ -3,6 +3,8 @@
 namespace modules\order\controllers;
 
 use frontend\controllers\FController;
+use modules\order\src\abac\dto\OrderAbacDto;
+use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\OrderStatusAction;
 use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\order\src\services\OrderPdfService;
@@ -14,6 +16,7 @@ use sales\auth\Auth;
 use Yii;
 use modules\order\src\entities\order\Order;
 use yii\helpers\ArrayHelper;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -49,6 +52,13 @@ class OrderActionsController extends FController
 //                    'cancel' => ['POST'],
 //                ],
 //            ],
+            'access' => [
+                'allowActions' => [
+                    'cancel',
+                    'send-email-confirmation',
+                    'generate-files'
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -58,6 +68,11 @@ class OrderActionsController extends FController
         $orderId = (int)Yii::$app->request->get('orderId');
 
         $order = $this->findModel($orderId);
+
+        $orderAbacDto = new OrderAbacDto($order);
+        if (!Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_CANCEL_ORDER, OrderAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
 
         $model = new CancelForm($order->or_id);
 
@@ -128,6 +143,11 @@ class OrderActionsController extends FController
         $orderId = (int)Yii::$app->request->post('id');
         $order = $this->findModel($orderId);
 
+        $orderAbacDto = new OrderAbacDto($order);
+        if (!Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_SEND_EMAIL_CONFIRMATION, OrderAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         try {
             (new EmailConfirmationSender())->sendWithAnyAttachments($order);
             return [
@@ -153,6 +173,11 @@ class OrderActionsController extends FController
 
         $orderId = (int)Yii::$app->request->post('id');
         $order = $this->findModel($orderId);
+
+        $orderAbacDto = new OrderAbacDto($order);
+        if (!Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_GENERATE_PDF, OrderAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
 
         try {
             (new OrderPdfService($order))->processingFileWithoutEvent();

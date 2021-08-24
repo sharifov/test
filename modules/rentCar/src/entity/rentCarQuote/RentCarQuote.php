@@ -262,4 +262,9 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable, ProductData
     {
         return '/rent-car/rent-car-quote/ajax-quote-details';
     }
+
+    public function getDiffUrlOriginReprotectionQuotes(): string
+    {
+        return '';
+    }
 }

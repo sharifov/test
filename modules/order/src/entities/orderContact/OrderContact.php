@@ -5,6 +5,8 @@ namespace modules\order\src\entities\orderContact;
 use common\components\validators\PhoneValidator;
 use common\models\Client;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderContact\serializer\OrderContactSerializer;
+use sales\entities\serializer\Serializable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -28,7 +30,7 @@ use yii\helpers\Html;
  * @property Order $ocOrder
  * @property Client $client
  */
-class OrderContact extends \yii\db\ActiveRecord
+class OrderContact extends \yii\db\ActiveRecord implements Serializable
 {
     /**
      * @return array
@@ -130,5 +132,10 @@ class OrderContact extends \yii\db\ActiveRecord
         $self->oc_email = $email;
         $self->oc_phone_number = $phoneNumber;
         return $self;
+    }
+
+    public function serialize(): array
+    {
+        return (new OrderContactSerializer($this))->getData();
     }
 }

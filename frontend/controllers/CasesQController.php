@@ -36,6 +36,42 @@ class CasesQController extends FController
         ]);
     }
 
+    public function actionAwaiting()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchAwaiting(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('awaiting', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
+
+    public function actionAutoProcessing()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchAutoProcessing(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('auto-processing', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
+
+    public function actionError()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchError(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('error', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
+
     public function actionFollowUp()
     {
         $searchModel = new CasesQSearch();

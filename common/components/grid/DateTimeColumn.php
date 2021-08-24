@@ -22,7 +22,7 @@ class DateTimeColumn extends DataColumn
     {
         parent::init();
 
-        if ($this->filter === null && $this->grid->filterModel !== false) {
+        if ($this->filter === null && $this->grid->filterModel) {
             $this->filter = DatePicker::widget([
                 'model' => $this->grid->filterModel,
                 'attribute' => $this->attribute,
@@ -30,7 +30,7 @@ class DateTimeColumn extends DataColumn
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
                     'clearBtn' => true,
-                    'startDate' => date('Y-m-d', strtotime('2017-01-01')),
+                    'startDate' => date('Y-m-d', strtotime('2018-01-01')),
                     'endDate' => date('Y-m-d', time())
                 ],
                 'options' => [

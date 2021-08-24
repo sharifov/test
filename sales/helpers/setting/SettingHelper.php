@@ -418,4 +418,29 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
+
+    public static function getReProtectionCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['reprotection_case_category'] ?? null;
+    }
+
+    public static function getSchdCaseDeadlineHours(): int
+    {
+        return (int)(Yii::$app->params['settings']['schd_case_deadline_hours'] ?? 0);
+    }
+
+    public static function getYandexMetrika(): array
+    {
+        return Yii::$app->params['settings']['yandex_metrika'] ?? [];
+    }
+
+    public static function isEnableSendHookToOtaReProtectionCreate(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_send_hook_to_ota_re_protection_create'] ?? true);
+    }
+
+    public static function isClientChatApiLogEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['client_chat_api_log_enabled'] ?? true);
+    }
 }

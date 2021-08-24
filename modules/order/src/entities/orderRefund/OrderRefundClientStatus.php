@@ -8,6 +8,7 @@ class OrderRefundClientStatus
 {
     public const NEW = 1;
     public const PENDING = 2;
+    public const PROCESSING = 3;
     public const ACCEPTED = 4;
     public const DECLINED = 5;
     public const DONE = 7;
@@ -15,6 +16,7 @@ class OrderRefundClientStatus
     private const LIST = [
         self::NEW => 'New',
         self::PENDING => 'Pending',
+        self::PROCESSING => 'Processing',
         self::ACCEPTED => 'Accepted',
         self::DECLINED => 'Declined',
         self::DONE => 'Done',
@@ -23,6 +25,7 @@ class OrderRefundClientStatus
     private const CSS_CLASS_LIST = [
         self::NEW => 'info',
         self::PENDING => 'warning',
+        self::PROCESSING => 'info',
         self::ACCEPTED => 'success',
         self::DECLINED => 'secondary',
         self::DONE => 'success',

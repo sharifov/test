@@ -3,6 +3,7 @@
 namespace sales\entities\serializer;
 
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class ExtraData
@@ -34,6 +35,8 @@ abstract class Serializer
      */
     protected function toArray(): array
     {
-        return $this->model->toArray(static::fields());
+        return ArrayHelper::toArray($this->model, [
+            get_class($this->model) => static::fields()
+        ]);
     }
 }
