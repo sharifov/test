@@ -6,6 +6,7 @@
 use common\models\Employee;
 use frontend\widgets\frontendWidgetList\FrontendLauncherWidgetList;
 use frontend\widgets\frontendWidgetList\louassist\LouAssistWidget;
+use frontend\widgets\frontendWidgetList\userflow\UserFlowWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
