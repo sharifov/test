@@ -51,6 +51,8 @@ use sales\helpers\PhoneFormatter;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\client\notifications\client\ClientNotificationCommunicationType;
+use sales\model\client\notifications\client\ClientNotificationType;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\coupon\entity\coupon\CouponStatus;
 use sales\model\coupon\entity\coupon\CouponType;
@@ -912,5 +914,32 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return ProductQuoteChangeDecisionType::asFormat($value);
+    }
+
+    public function asClientNotificationType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\client\notifications\client\entity\NotificationType::asFormat($value);
+    }
+
+    public function asClientNotificationCommunicationType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\client\notifications\client\entity\CommunicationType::asFormat($value);
+    }
+
+    public function asClientNotificationPhoneListStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\client\notifications\phone\entity\Status::asFormat($value);
     }
 }
