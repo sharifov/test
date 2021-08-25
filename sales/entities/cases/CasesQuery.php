@@ -34,6 +34,25 @@ class CasesQuery extends ActiveQuery
         return $query;
     }
 
+    public function findActiveCases(string $phone, array $deps_params, int $trash_cases_active_days_limit_global, ?int $limit, ?int $projectId, ?int $departmentId): self
+    {
+        $query = $this->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED]]);
+        $query->leftJoin('client_phone', 'cs_client_id = client_phone.client_id');
+        $query->andWhere("client_phone.phone = '$phone'");
+
+        if ($trash_cases_active_days_limit_global > 0) {
+            $limit = (new \DateTimeImmutable())->modify('- ' . $trash_cases_active_days_limit_global . 'day');
+            $query->andWhere(['OR',
+                ['NOT IN', 'cs_status', [CasesStatus::STATUS_TRASH]],
+                ['>', 'cs_created_dt', $limit->format('Y-m-d H:i:s')],
+            ]);
+        } else {
+            $query->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_TRASH]]);
+        }
+
+        return $query;
+    }
+
     public function findLastClientCase(int $clientId, ?int $projectId): self
     {
         return $this
