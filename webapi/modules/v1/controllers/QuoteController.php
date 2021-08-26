@@ -1048,6 +1048,7 @@ class QuoteController extends ApiBaseController
 
             $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
             if ($randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                Yii::info(VarDumper::dumpAsString($projectRelationsIds), 'info\quote-create-dump');
                 $projectRelationsCount = count($projectRelationsIds);
                 $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
                 $quote->provider_project_id = $projectRelationsIds[$randomProjectIndex] ?? null;
