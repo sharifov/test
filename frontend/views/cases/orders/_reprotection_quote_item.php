@@ -3,6 +3,7 @@
 use modules\cases\src\abac\CasesAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
@@ -24,7 +25,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionTy
 $hasReprotection = false;
 $reprotectionQuotes = [];
 
-if ($nr && $reprotectionQuotes = $quote->relates) {
+if ($nr && $reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($quote->pq_id)) {
     $hasReprotection = true;
 }
 
@@ -128,6 +129,7 @@ if ($quote->productQuoteLastChange) {
                 <tr>
                   <th style="width: 30px;">Nr</th>
                   <th>Status</th>
+                  <th style="width: 20px">Recommended</th>
                   <th style="width: 180px">Created</th>
                   <th style="width: 10px;"></th>
                 </tr>
@@ -136,8 +138,8 @@ if ($quote->productQuoteLastChange) {
                 <?php foreach ($reprotectionQuotes as $nr => $reprotectionQuote) : ?>
                     <tr>
                         <?php
+                        $isRecommended = $reprotectionQuote->productQuoteDataRecommended->pqd_value ?? false;
                         /*
-
                         <td style="padding:5px;" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
                             <?=Html::encode($quote->pqProduct->prType->pt_name)?>
@@ -147,6 +149,7 @@ if ($quote->productQuoteLastChange) {
                         */ ?>
                       <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($reprotectionQuote->pq_id)?>, GID: <?=Html::encode($reprotectionQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($reprotectionQuote->pq_id)?>, GID: <?=Html::encode($reprotectionQuote->pq_gid)?>"><?=($nr + 1)?></td>
                       <td><?= ProductQuoteStatus::asFormat($reprotectionQuote->pq_status_id)?></td>
+                      <td><?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star yellow']) : '-' ?></td>
                       <td><small><?=$reprotectionQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($reprotectionQuote->pq_created_dt)) : '-'?></small></td>
                       <td>
                         <div class="btn-group">
@@ -194,9 +197,18 @@ if ($quote->productQuoteLastChange) {
                                     <?= Html::a('<i class="fa fa-check text-success" title="Refund"></i> Refund', null, [
                                       'class' => 'dropdown-item btn-reprotection-refund',
                                       'data-url' => Url::to(['/product/product-quote/flight-reprotection-refund']),
-                                      'data-reprotection-quote-id' => $reprotectionQuote->pq_id
+                                      'data-reprotection-quote-id' => $reprotectionQuote->pq_id,
+                                      'data-title' => 'Reprotection Refund'
                                   ]); ?>
                               <?php endif; ?>
+
+                              <?= Html::a('<i class="fas fa-star yellow yellow" title="Set Recommended"></i> Set Recommended', null, [
+                                  'class' => 'dropdown-item btn-reprotection-recommended',
+                                  'data-url' => Url::to(['/product/product-quote/set-recommended']),
+                                  'data-reprotection-quote-id' => $reprotectionQuote->pq_id,
+                                  'data-title' => 'Reprotection Set Recommended'
+                              ]); ?>
+
                           </div>
                         </div>
                       </td>

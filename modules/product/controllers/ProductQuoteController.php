@@ -17,6 +17,7 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
@@ -26,6 +27,7 @@ use sales\entities\cases\Cases;
 use sales\exception\CheckRestrictionException;
 use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
+use sales\repositories\NotFoundException;
 use sales\services\cases\CasesCommunicationService;
 use webapi\src\response\behaviors\RequestBehavior;
 use Yii;
@@ -114,7 +116,8 @@ class ProductQuoteController extends FController
                     'reprotection-quote-send-email',
                     'flight-reprotection-confirm',
                     'flight-reprotection-refund',
-                    'origin-reprotection-quote-diff'
+                    'origin-reprotection-quote-diff',
+                    'set-recommended'
                 ]
             ]
         ];
@@ -469,6 +472,48 @@ class ProductQuoteController extends FController
             'originQuote' => $originQuote,
             'reprotectionQuote' => $reprotectionQuote
         ]);
+    }
+
+    public function actionSetRecommended()
+    {
+        $reprotectionQuoteId = Yii::$app->request->post('quoteId', 0);
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $reprotectionQuote = $this->productQuoteRepository->find($reprotectionQuoteId);
+
+            if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id)) {
+                throw new NotFoundException('Origin Quote Not Found');
+            }
+
+            $reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originQuote->pq_id);
+
+            foreach ($reprotectionQuotes as $reprotectionQuoteRecommended) {
+                if ($reprotectionQuoteRecommended->productQuoteDataRecommended && !$reprotectionQuoteRecommended->productQuoteDataRecommended->delete()) {
+                    throw new \RuntimeException('Unable to remove recommended reprotection quote flag');
+                }
+            }
+
+            $recommendedQuote = ProductQuoteData::create($reprotectionQuote->pq_id);
+            $recommendedQuote->setRecommended();
+
+            if (!$recommendedQuote->save()) {
+                throw new \RuntimeException('Unable to set recommended reprotection quote flag: ' . $recommendedQuote->getErrorSummary(true)[0]);
+            }
+        } catch (NotFoundException | \RuntimeException | \DomainException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e, true), 'ProductQuoteController::actionSetRecommended::Throwable');
+            $result['error'] = true;
+            $result['message'] = 'Server Error';
+        }
+
+        return $this->asJson($result);
     }
 
     /**

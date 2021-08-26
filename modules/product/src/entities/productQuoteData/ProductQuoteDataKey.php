@@ -8,6 +8,10 @@ class ProductQuoteDataKey
 {
     public const RECOMMENDED = 1;
 
+    public const VALUES = [
+        self::RECOMMENDED => '1'
+    ];
+
     private const LIST_NAME = [
         self::RECOMMENDED => 'Recommended'
     ];
@@ -38,5 +42,13 @@ class ProductQuoteDataKey
     private static function getClassName(?int $value): string
     {
         return self::LIST_CLASS[$value] ?? 'secondary';
+    }
+
+    public static function getValueByKey(int $key): string
+    {
+        if (isset(self::VALUES[$key])) {
+            return self::VALUES[$key];
+        }
+        throw new \RuntimeException('Product Quote Data value is not found by key: ' . $key);
     }
 }

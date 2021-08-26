@@ -93,4 +93,17 @@ class ProductQuoteData extends \yii\db\ActiveRecord
     {
         return new Scopes(static::class);
     }
+
+    public static function create(int $productQuoteId): self
+    {
+        $self = new self();
+        $self->pqd_product_quote_id = $productQuoteId;
+        return $self;
+    }
+
+    public function setRecommended(): void
+    {
+        $this->pqd_key = ProductQuoteDataKey::RECOMMENDED;
+        $this->pqd_value = ProductQuoteDataKey::getValueByKey($this->pqd_key);
+    }
 }
