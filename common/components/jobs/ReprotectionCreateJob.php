@@ -166,7 +166,10 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $flightRequest->getFlightQuoteData(),
                         $order->getId(),
                         null,
-                        $case->cs_id
+                        $case->cs_id,
+                        null,
+                        null,
+                        $oldProductQuote ?? null
                     );
                     $case->addEventLog(
                         CaseEventLog::RE_PROTECTION_CREATE,
@@ -296,9 +299,11 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $flightRequest->getFlightQuoteData(),
                         $order->getId(),
                         null,
-                        $case->cs_id
+                        $case->cs_id,
+                        null,
+                        null,
+                        $oldProductQuote ?? null
                     );
-
 
                     $case->addEventLog(
                         CaseEventLog::RE_PROTECTION_CREATE,

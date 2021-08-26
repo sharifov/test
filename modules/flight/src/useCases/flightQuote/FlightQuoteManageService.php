@@ -576,9 +576,10 @@ class FlightQuoteManageService implements ProductQuoteService
         ?string $bookingId,
         int $caseId,
         ?int $userId = null,
-        ?float $productTypeServiceFee = null
+        ?float $productTypeServiceFee = null,
+        ?ProductQuote $originProductQuote = null
     ): FlightQuote {
-        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId) {
+        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId, $originProductQuote) {
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), $productTypeServiceFee);
             $productQuote->pq_order_id = $orderId;
             $this->productQuoteRepository->save($productQuote);
@@ -594,7 +595,20 @@ class FlightQuoteManageService implements ProductQuoteService
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
             $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
-            $this->createQuotePaxPrice($flightQuote, $productQuote, $quote);
+            if ($originProductQuote && $originProductQuote->isFlight()) {
+                if ($flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices ?? null) {
+                    foreach ($flightQuotePaxPrices as $originalPaxPrice) {
+                        $paxPrice = FlightQuotePaxPrice::clone($originalPaxPrice, $flightQuote->fq_id);
+                        $this->flightQuotePaxPriceRepository->save($paxPrice);
+                    }
+                }
+                if ($originProductQuote->productQuoteOptions) {
+                    foreach ($originProductQuote->productQuoteOptions as $originalProductQuoteOption) {
+                        $productQuoteOption = ProductQuoteOption::copy($originalProductQuoteOption, $productQuote->pq_id);
+                        $this->productQuoteOptionRepository->save($productQuoteOption);
+                    }
+                }
+            }
 
             $this->calcProductQuotePrice($productQuote, $flightQuote);
 
@@ -621,10 +635,12 @@ class FlightQuoteManageService implements ProductQuoteService
         });
     }
 
-    public function createReprotectionModify(Flight $flight, array $quote, int $orderId): ProductQuote
+    public function createReprotectionModify(ProductQuote $originProductQuote, array $quote, int $orderId): ProductQuote
     {
         $userId = null;
         $productTypeServiceFee = null;
+        $flight = $originProductQuote->flightQuote->fqFlight;
+
         $productType = ProductType::find()->select(['pt_service_fee_percent'])->byFlight()->asArray()->one();
         if ($productType && $productType['pt_service_fee_percent']) {
             $productTypeServiceFee = $productType['pt_service_fee_percent'];
@@ -640,7 +656,20 @@ class FlightQuoteManageService implements ProductQuoteService
         $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
         $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
-        $this->createQuotePaxPrice($flightQuote, $productQuote, $quote);
+        if ($originProductQuote && $originProductQuote->isFlight()) {
+            if ($flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices ?? null) {
+                foreach ($flightQuotePaxPrices as $originalPaxPrice) {
+                    $paxPrice = FlightQuotePaxPrice::clone($originalPaxPrice, $flightQuote->fq_id);
+                    $this->flightQuotePaxPriceRepository->save($paxPrice);
+                }
+            }
+            if ($originProductQuote->productQuoteOptions) {
+                foreach ($originProductQuote->productQuoteOptions as $originalProductQuoteOption) {
+                    $productQuoteOption = ProductQuoteOption::copy($originalProductQuoteOption, $productQuote->pq_id);
+                    $this->productQuoteOptionRepository->save($productQuoteOption);
+                }
+            }
+        }
 
         $this->calcProductQuotePrice($productQuote, $flightQuote);
 
