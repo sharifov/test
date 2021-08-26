@@ -221,7 +221,7 @@ class DownloadEmails
                                     $email->e_client_id = $this->emailService->detectClientId($email->e_email_from);
                                     $email->save(false);
                                     if ($process->caseId) {
-                                        CaseEventLog::add($case_id, null, 'Email received from ' . $email->e_email_from_name);
+                                        CaseEventLog::add($process->caseId, null, 'Email received from ' . $email->e_email_from_name);
                                     }
                                 } catch (\Throwable $e) {
                                     Yii::error($e->getMessage(), 'DownloadEmails:EmailIncomingService:create');
