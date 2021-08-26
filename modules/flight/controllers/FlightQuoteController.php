@@ -771,7 +771,7 @@ class FlightQuoteController extends FController
                 throw new \RuntimeException('OriginProductQuote not found');
             }
             if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
-                throw new \RuntimeException('Sorry, reProtection quota could not be created because originalQuota does not pricing');
+                throw new \RuntimeException('Sorry, reProtection quote could not be created because originalQuote does not pricing');
             }
 
             $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findByProductQuoteId($originProductQuote->pq_id);
@@ -815,7 +815,7 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException('OriginProductQuote not found');
                 }
                 if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
-                    throw new \RuntimeException('Sorry, reProtection quota could not be created because originalQuota does not pricing');
+                    throw new \RuntimeException('Sorry, reProtection quote could not be created because originalQuote does not pricing');
                 }
 
                 $form = new ReProtectionQuoteCreateForm(Auth::id());

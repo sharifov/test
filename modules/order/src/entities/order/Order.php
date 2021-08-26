@@ -304,7 +304,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
      */
     public function getOrderContacts(): ActiveQuery
     {
-        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id']);
+        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id'])->orderBy(['oc_id' => SORT_DESC]);
     }
 
     public function getOrderData()
