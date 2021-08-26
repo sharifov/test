@@ -1022,4 +1022,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->hasOne(ProductQuoteData::class, ['pqd_product_quote_id' => 'pq_id'])->andWhere(['pqd_key' => ProductQuoteDataKey::RECOMMENDED]);
     }
+
+    public function isRecommended(): bool
+    {
+        return $this->productQuoteDataRecommended ? $this->productQuoteDataRecommended->isRecommended() : false;
+    }
 }

@@ -138,7 +138,7 @@ if ($quote->productQuoteLastChange) {
                 <?php foreach ($reprotectionQuotes as $nr => $reprotectionQuote) : ?>
                     <tr>
                         <?php
-                        $isRecommended = $reprotectionQuote->productQuoteDataRecommended->pqd_value ?? false;
+                        $isRecommended = $reprotectionQuote->isRecommended();
                         /*
                         <td style="padding:5px;" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
@@ -202,12 +202,14 @@ if ($quote->productQuoteLastChange) {
                                   ]); ?>
                               <?php endif; ?>
 
-                              <?= Html::a('<i class="fas fa-star yellow yellow" title="Set Recommended"></i> Set Recommended', null, [
-                                  'class' => 'dropdown-item btn-reprotection-recommended',
-                                  'data-url' => Url::to(['/product/product-quote/set-recommended']),
-                                  'data-reprotection-quote-id' => $reprotectionQuote->pq_id,
-                                  'data-title' => 'Reprotection Set Recommended'
-                              ]); ?>
+                              <?php if (!$isRecommended && Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE, CasesAbacObject::ACTION_ACCESS)) : ?>
+                                    <?= Html::a('<i class="fas fa-star yellow yellow" title="Set Recommended"></i> Set Recommended', null, [
+                                    'class' => 'dropdown-item btn-reprotection-recommended',
+                                    'data-url' => Url::to(['/product/product-quote/set-recommended']),
+                                    'data-reprotection-quote-id' => $reprotectionQuote->pq_id,
+                                    'data-title' => 'Reprotection Set Recommended'
+                                ]); ?>
+                              <?php endif; ?>
 
                           </div>
                         </div>

@@ -484,6 +484,10 @@ class ProductQuoteController extends FController
         ];
 
         try {
+            if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE, CasesAbacObject::ACTION_ACCESS)) {
+                throw new \DomainException('You do not have access to perform this action');
+            }
+
             $reprotectionQuote = $this->productQuoteRepository->find($reprotectionQuoteId);
 
             if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id)) {

@@ -106,4 +106,9 @@ class ProductQuoteData extends \yii\db\ActiveRecord
         $this->pqd_key = ProductQuoteDataKey::RECOMMENDED;
         $this->pqd_value = ProductQuoteDataKey::getValueByKey($this->pqd_key);
     }
+
+    public function isRecommended(): bool
+    {
+        return $this->pqd_value === ProductQuoteDataKey::getValueByKey(ProductQuoteDataKey::RECOMMENDED);
+    }
 }
