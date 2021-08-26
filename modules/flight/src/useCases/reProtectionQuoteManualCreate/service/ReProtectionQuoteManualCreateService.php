@@ -120,15 +120,15 @@ class ReProtectionQuoteManualCreateService
 
     public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form, ?int $userId): FlightQuote
     {
-        if ($flight->flightQuotes) {
-            foreach ($flight->flightQuotes as $flightQuote) {
-                $oldProductQuote = $flightQuote->fqProductQuote;
-                if (!$oldProductQuote->isCanceled() || $oldProductQuote->isDeclined()) {
-                    $oldProductQuote->cancelled($userId, 'Create ReProtection Quote');
-                    $this->productQuoteRepository->save($oldProductQuote);
-                }
-            }
-        }
+//        if ($flight->flightQuotes) {
+//            foreach ($flight->flightQuotes as $flightQuote) {
+//                $oldProductQuote = $flightQuote->fqProductQuote;
+//                if (!$oldProductQuote->isCanceled() || $oldProductQuote->isDeclined()) {
+//                    $oldProductQuote->cancelled($userId, 'Create ReProtection Quote');
+//                    $this->productQuoteRepository->save($oldProductQuote);
+//                }
+//            }
+//        }
 
         $originFlightQuote = $originProductQuote->flightQuote;
         $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
