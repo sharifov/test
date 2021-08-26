@@ -942,4 +942,13 @@ class Formatter extends \yii\i18n\Formatter
 
         return \sales\model\client\notifications\phone\entity\Status::asFormat($value);
     }
+
+    public function asClientNotificationSmsListStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\client\notifications\sms\entity\Status::asFormat($value);
+    }
 }

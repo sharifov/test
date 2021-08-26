@@ -10,7 +10,8 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\model\client\notifications\client\entity\NotificationType;
 use sales\model\client\notifications\ClientNotificationCreator;
-use sales\model\client\notifications\phone\entity\Data;
+use sales\model\client\notifications\phone\entity\Data as PhoneData;
+use sales\model\client\notifications\sms\entity\Data as SmsData;
 use sales\model\client\notifications\settings\ClientNotificationProjectSettings;
 use sales\model\phoneList\entity\PhoneList;
 use sales\services\client\ClientManageService;
@@ -59,6 +60,10 @@ class ClientNotificationListener
             if ($client->phoneId && $this->projectSettings->isSendPhoneNotificationEnabled($projectId, $notificationType->getType())) {
                 $this->phoneNotificationProcessing($event, $projectId, $notificationType, $client);
             }
+
+            if ($client->phoneId && $this->projectSettings->isSendSmsNotificationEnabled($projectId, $notificationType->getType())) {
+                $this->smsNotificationProcessing($event, $projectId, $notificationType, $client);
+            }
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),
@@ -85,7 +90,7 @@ class ClientNotificationListener
                 'productQuoteId' => $event->productQuoteId,
                 'caseId' => $event->caseId,
                 'phone' => $settings->phoneFrom,
-            ], 'ProductQuoteChangeClientNotificationListener');
+            ], 'ProductQuoteChangeClientNotificationListener:phoneNotificationProcessing');
             return;
         }
 
@@ -99,12 +104,62 @@ class ClientNotificationListener
                 $time->end,
                 $settings->messageSay,
                 $settings->fileUrl,
-                Data::createFromArray([
+                PhoneData::createFromArray([
                     'clientId' => $client->id,
                     'caseId' => $event->caseId,
                     'projectId' => $projectId,
                     'sayVoice' => $settings->messageSayVoice,
                     'sayLanguage' => $settings->messageSayLanguage,
+                ]),
+                new \DateTimeImmutable(),
+                $client->id,
+                $notificationType,
+                $event->productQuoteId
+            );
+        });
+    }
+
+    private function smsNotificationProcessing(ProductQuoteChangeCreatedEvent $event, int $projectId, NotificationType $notificationType, Client $client): void
+    {
+        $settings = $this->projectSettings->getSmsNotificationSettings($projectId, $notificationType->getType());
+
+        if (!$settings->message) {
+            \Yii::error([
+                'message' => 'Sms client notification Message setting is empty. Sms notification not created.',
+                'productQuoteChangeId' => $event->getId(),
+                'productQuoteId' => $event->productQuoteId,
+                'caseId' => $event->caseId,
+                'phone' => $settings->phoneFrom,
+            ], 'ProductQuoteChangeClientNotificationListener:smsNotificationProcessing');
+            return;
+        }
+
+        $phoneFromId = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $settings->phoneFrom])->scalar();
+        if (!$phoneFromId) {
+            \Yii::error([
+                'message' => 'Not found Phone List',
+                'productQuoteChangeId' => $event->getId(),
+                'productQuoteId' => $event->productQuoteId,
+                'caseId' => $event->caseId,
+                'phone' => $settings->phoneFrom,
+            ], 'ProductQuoteChangeClientNotificationListener:smsNotificationProcessing');
+            return;
+        }
+
+        $time = $this->getTime();
+
+        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $projectId) {
+            $this->clientNotificationCreator->createSmsNotification(
+                $phoneFromId,
+                $settings->nameFrom,
+                $client->phoneId,
+                $time->start,
+                $time->end,
+                $settings->message,
+                SmsData::createFromArray([
+                    'clientId' => $client->id,
+                    'caseId' => $event->caseId,
+                    'projectId' => $projectId,
                 ]),
                 new \DateTimeImmutable(),
                 $client->id,

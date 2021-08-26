@@ -5,7 +5,7 @@ use yii\bootstrap4\Html;
 /* @var $this yii\web\View */
 /* @var $model sales\model\client\notifications\phone\entity\ClientNotificationPhoneList */
 
-$this->title = 'Create Client Notification Phone List';
+$this->title = 'Create Client Notification Phone';
 $this->params['breadcrumbs'][] = ['label' => 'Client Notification Phone Lists', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

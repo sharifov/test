@@ -2,6 +2,7 @@
 
 namespace sales\model\client\notifications\client\entity\search;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use sales\model\client\notifications\client\entity\ClientNotification;
 
@@ -21,10 +22,12 @@ class ClientNotificationSearch extends ClientNotification
             ['cn_notification_type_id', 'integer'],
 
             ['cn_object_id', 'integer'],
+
+            ['cn_created_dt', 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
-    public function search($params): ActiveDataProvider
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find();
 
@@ -37,6 +40,10 @@ class ClientNotificationSearch extends ClientNotification
         if (!$this->validate()) {
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->cn_created_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cn_created_dt', $this->cn_created_dt, $user->timezone);
         }
 
         $query->andFilterWhere([

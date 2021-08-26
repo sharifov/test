@@ -79,6 +79,46 @@ class m210824_203930_add_client_notification_tables extends Migration
             'CASCADE',
             'CASCADE'
         );
+
+        $this->createTable('{{%client_notification_sms_list}}', [
+            'cnsl_id' => $this->primaryKey(),
+            'cnsl_status_id' => $this->tinyInteger(),
+            'cnsl_from_phone_id' => $this->integer(),
+            'cnsl_name_from' => $this->string(),
+            'cnsl_to_client_phone_id' => $this->integer(),
+            'cnsl_start' => $this->dateTime(),
+            'cnsl_end' => $this->dateTime(),
+            'cnsl_message' => $this->text(),
+            'cnsl_data_json' => $this->json(),
+            'cnsl_sms_sid' => $this->string(34),
+            'cnsl_created_dt' => $this->dateTime(),
+            'cnsl_updated_dt' => $this->dateTime(),
+        ]);
+
+        $this->createIndex('IND-client_notification_sms_list-status', '{{%client_notification_sms_list}}', ['cnsl_status_id']);
+        $this->createIndex('IND-client_notification_sms_list-start', '{{%client_notification_sms_list}}', ['cnsl_start']);
+        $this->createIndex('IND-client_notification_sms_list-end', '{{%client_notification_sms_list}}', ['cnsl_end']);
+        $this->createIndex('IND-client_notification_sms_list-sms_sid', '{{%client_notification_sms_list}}', ['cnsl_sms_sid']);
+
+        $this->addForeignKey(
+            'FK-client_notification_sms_list-from_phone',
+            '{{%client_notification_sms_list}}',
+            ['cnsl_from_phone_id'],
+            '{{%phone_list}}',
+            ['pl_id'],
+            'CASCADE',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'FK-client_notification_sms_list-to_phone',
+            '{{%client_notification_sms_list}}',
+            ['cnsl_to_client_phone_id'],
+            '{{%client_phone}}',
+            ['id'],
+            'CASCADE',
+            'CASCADE'
+        );
     }
 
     /**
@@ -86,6 +126,7 @@ class m210824_203930_add_client_notification_tables extends Migration
      */
     public function safeDown()
     {
+        $this->dropTable('{{%client_notification_sms_list}}');
         $this->dropTable('{{%client_notification_phone_list}}');
         $this->dropTable('{{%client_notification}}');
     }

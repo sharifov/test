@@ -2,6 +2,7 @@
 
 namespace sales\model\client\notifications\phone\entity\search;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 
@@ -10,31 +11,31 @@ class ClientNotificationPhoneListSearch extends ClientNotificationPhoneList
     public function rules(): array
     {
         return [
-            ['cnfl_call_sid', 'safe'],
+            ['cnfl_call_sid', 'string'],
 
-            ['cnfl_created_dt', 'safe'],
+            ['cnfl_created_dt', 'date', 'format' => 'php:Y-m-d'],
 
-            ['cnfl_end', 'safe'],
+            ['cnfl_end', 'date', 'format' => 'php:Y-m-d'],
 
-            ['cnfl_file_url', 'safe'],
+            ['cnfl_file_url', 'string'],
 
             ['cnfl_from_phone_id', 'integer'],
 
             ['cnfl_id', 'integer'],
 
-            ['cnfl_message', 'safe'],
+            ['cnfl_message', 'string'],
 
-            ['cnfl_start', 'safe'],
+            ['cnfl_start', 'date', 'format' => 'php:Y-m-d'],
 
             ['cnfl_status_id', 'integer'],
 
             ['cnfl_to_client_phone_id', 'integer'],
 
-            ['cnfl_updated_dt', 'safe'],
+            ['cnfl_updated_dt', 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
-    public function search($params): ActiveDataProvider
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find();
 
@@ -49,15 +50,27 @@ class ClientNotificationPhoneListSearch extends ClientNotificationPhoneList
             return $dataProvider;
         }
 
+        if ($this->cnfl_start) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cnfl_start', $this->cnfl_start, $user->timezone);
+        }
+
+        if ($this->cnfl_end) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cnfl_end', $this->cnfl_end, $user->timezone);
+        }
+
+        if ($this->cnfl_created_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cnfl_created_dt', $this->cnfl_created_dt, $user->timezone);
+        }
+
+        if ($this->cnfl_updated_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cnfl_updated_dt', $this->cnfl_updated_dt, $user->timezone);
+        }
+
         $query->andFilterWhere([
             'cnfl_id' => $this->cnfl_id,
             'cnfl_status_id' => $this->cnfl_status_id,
             'cnfl_from_phone_id' => $this->cnfl_from_phone_id,
             'cnfl_to_client_phone_id' => $this->cnfl_to_client_phone_id,
-            'cnfl_start' => $this->cnfl_start,
-            'cnfl_end' => $this->cnfl_end,
-            'cnfl_created_dt' => $this->cnfl_created_dt,
-            'cnfl_updated_dt' => $this->cnfl_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'cnfl_message', $this->cnfl_message])

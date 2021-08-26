@@ -9,4 +9,5 @@ interface ClientNotificationProjectSettings
     public function isSendSmsNotificationEnabled(int $projectId, string $type): bool;
     public function isSendEmailNotificationEnabled(int $projectId, string $type): bool;
     public function getPhoneNotificationSettings(int $projectId, string $type): PhoneNotificationSettings;
+    public function getSmsNotificationSettings(int $projectId, string $type): SmsNotificationSettings;
 }

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 use sales\model\client\notifications\phone\entity\search\ClientNotificationPhoneListSearch;
@@ -35,7 +36,7 @@ class ClientNotificationPhoneListController extends Controller
     public function actionIndex(): string
     {
         $searchModel = new ClientNotificationPhoneListSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,

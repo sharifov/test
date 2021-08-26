@@ -37,7 +37,7 @@ class m210825_183238_add_client_notification_project_settings extends Migration
                         'enabled' => false,
                         'phoneFrom' => null,
                         'nameFrom' => null,
-                        'messageSay' => 'You have a schedule change for your flight. Please check your email for more details.',
+                        'message' => 'You have a schedule change for your flight. Please check your email for more details.',
                         'messageTemplateKey' => null,
                     ],
                 ];

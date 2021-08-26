@@ -4,15 +4,16 @@ namespace frontend\controllers;
 
 use sales\auth\Auth;
 use Yii;
-use sales\model\client\notifications\client\entity\ClientNotification;
-use sales\model\client\notifications\client\entity\search\ClientNotificationSearch;
+use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
+use sales\model\client\notifications\sms\entity\search\ClientNotificationSmsListSearch;
+use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class ClientNotificationController extends Controller
+class ClientNotificationSmsListController extends Controller
 {
     /**
      * @return array
@@ -34,7 +35,7 @@ class ClientNotificationController extends Controller
      */
     public function actionIndex(): string
     {
-        $searchModel = new ClientNotificationSearch();
+        $searchModel = new ClientNotificationSmsListSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
@@ -60,11 +61,24 @@ class ClientNotificationController extends Controller
      */
     public function actionCreate()
     {
-        $model = new ClientNotification();
-        $model->cn_created_dt = date('Y-m-d H:i:s');
+        $model = new ClientNotificationSmsList();
+        $model->cnsl_created_dt = date('Y-m-d H:i:s');
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cn_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            try {
+                $model->cnsl_data_json = Json::decode($model->cnsl_data_json);
+            } catch (\Throwable $e) {
+                Yii::$app->session->addFlash('error', 'DataJson: ' . $e->getMessage());
+                $model->cnsl_data_json = [];
+            }
+
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->cnsl_id]);
+            }
+        }
+
+        if (!$model->cnsl_data_json) {
+            $model->cnsl_data_json = [];
         }
 
         return $this->render('create', [
@@ -80,10 +94,25 @@ class ClientNotificationController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $model->cn_updated_dt = date("Y-m-d H:i:s");
+        $originalParams = $model->cnsl_data_json;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cn_id]);
+        $model->cnsl_updated_dt = date('Y-m-d H:i:s');
+
+        if ($model->load(Yii::$app->request->post())) {
+            try {
+                $model->cnsl_data_json = Json::decode($model->cnsl_data_json);
+            } catch (\Throwable $e) {
+                Yii::$app->session->addFlash('error', 'DataJson: ' . $e->getMessage());
+                $model->cnsl_data_json = $originalParams;
+            }
+
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->cnsl_id]);
+            }
+        }
+
+        if (!$model->cnsl_data_json) {
+            $model->cnsl_data_json = [];
         }
 
         return $this->render('update', [
@@ -107,12 +136,12 @@ class ClientNotificationController extends Controller
 
     /**
      * @param integer $id
-     * @return ClientNotification
+     * @return ClientNotificationSmsList
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): ClientNotification
+    protected function findModel($id): ClientNotificationSmsList
     {
-        if (($model = ClientNotification::findOne($id)) !== null) {
+        if (($model = ClientNotificationSmsList::findOne($id)) !== null) {
             return $model;
         }
 
