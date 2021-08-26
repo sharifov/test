@@ -34,8 +34,6 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?php // echo $form->field($model, 'cnfl_file_url') ?>
 
-    <?php // echo $form->field($model, 'cnfl_data') ?>
-
     <?php // echo $form->field($model, 'cnfl_call_sid') ?>
 
     <?php // echo $form->field($model, 'cnfl_created_dt') ?>

@@ -27,14 +27,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
             'cn_id',
             'cn_client_id',
             ['class' => \common\components\grid\clientNotification\ClientNotificationTypeColumn::class],
             'cn_object_id',
             ['class' => \common\components\grid\clientNotification\ClientNotificationCommunicationTypeColumn::class],
-            //'cn_communication_object_id',
+            'cn_communication_object_id',
             [
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'cn_created_dt',

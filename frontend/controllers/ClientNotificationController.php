@@ -60,10 +60,7 @@ class ClientNotificationController extends Controller
     public function actionCreate()
     {
         $model = new ClientNotification();
-
-        $now = date('Y-m-d H:i:s');
-        $model->cn_created_dt = $now;
-        $model->cn_updated_dt = $now;
+        $model->cn_created_dt = date('Y-m-d H:i:s');
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->cn_id]);
@@ -82,7 +79,6 @@ class ClientNotificationController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
         $model->cn_updated_dt = date("Y-m-d H:i:s");
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {

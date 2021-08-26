@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -26,17 +27,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
             'cnfl_id',
             ['class' => \common\components\grid\clientNotification\ClientNotificationPhoneListStatusColumn::class],
             'cnfl_from_phone_id',
             'cnfl_to_client_phone_id',
-            'cnfl_start',
-            //'cnfl_end',
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'cnfl_start',
+            ],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'cnfl_end',
+            ],
             //'cnfl_message:ntext',
             //'cnfl_file_url:url',
-            //'cnfl_data',
             //'cnfl_call_sid',
             //'cnfl_created_dt',
             //'cnfl_updated_dt',

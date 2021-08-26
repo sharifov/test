@@ -14,8 +14,6 @@ class ClientNotificationPhoneListSearch extends ClientNotificationPhoneList
 
             ['cnfl_created_dt', 'safe'],
 
-            ['cnfl_data', 'safe'],
-
             ['cnfl_end', 'safe'],
 
             ['cnfl_file_url', 'safe'],
@@ -64,7 +62,6 @@ class ClientNotificationPhoneListSearch extends ClientNotificationPhoneList
 
         $query->andFilterWhere(['like', 'cnfl_message', $this->cnfl_message])
             ->andFilterWhere(['like', 'cnfl_file_url', $this->cnfl_file_url])
-            ->andFilterWhere(['like', 'cnfl_data', $this->cnfl_data])
             ->andFilterWhere(['like', 'cnfl_call_sid', $this->cnfl_call_sid]);
 
         return $dataProvider;

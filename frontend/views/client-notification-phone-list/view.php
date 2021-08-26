@@ -1,15 +1,18 @@
 <?php
 
+use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 use yii\bootstrap4\Html;
+use yii\helpers\Json;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\client\notifications\phone\entity\ClientNotificationPhoneList */
+/* @var $model ClientNotificationPhoneList */
 
 $this->title = $model->cnfl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Notification Phone Lists', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
+
 ?>
 <div class="client-notification-phone-list-view">
 
@@ -39,7 +42,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cnfl_end:byUserDatetime',
                 'cnfl_message:ntext',
                 'cnfl_file_url:url',
-                'cnfl_data',
+                [
+                    'attribute' => 'cnfl_data_json',
+                    'value' => static function (ClientNotificationPhoneList $model) {
+                        return $model->cnfl_data_json ? Json::encode($model->cnfl_data_json) : null;
+                    },
+                ],
                 'cnfl_call_sid',
                 'cnfl_created_dt:byUserDatetime',
                 'cnfl_updated_dt:byUserDatetime',

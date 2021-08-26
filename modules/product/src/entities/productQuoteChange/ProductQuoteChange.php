@@ -2,9 +2,11 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
+use sales\entities\EventTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -28,6 +30,8 @@ use yii\helpers\ArrayHelper;
  */
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public function behaviors(): array
     {
         $behaviors = [
@@ -196,6 +200,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $model->pqc_pq_id = $productQuoteId;
         $model->pqc_case_id = $caseId;
         $model->pqc_status_id = ProductQuoteChangeStatus::NEW;
+        $model->recordEvent(new ProductQuoteChangeCreatedEvent($model, $model->pqc_pq_id, $model->pqc_case_id));
         return $model;
     }
 }

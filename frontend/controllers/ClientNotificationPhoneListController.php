@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 use sales\model\client\notifications\phone\entity\search\ClientNotificationPhoneListSearch;
+use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -60,13 +61,23 @@ class ClientNotificationPhoneListController extends Controller
     public function actionCreate()
     {
         $model = new ClientNotificationPhoneList();
+        $model->cnfl_created_dt = date('Y-m-d H:i:s');
 
-        $now = date('Y-m-d H:i:s');
-        $model->cnfl_created_dt = $now;
-        $model->cnfl_updated_dt = $now;
+        if ($model->load(Yii::$app->request->post())) {
+            try {
+                $model->cnfl_data_json = Json::decode($model->cnfl_data_json);
+            } catch (\Throwable $e) {
+                Yii::$app->session->addFlash('error', 'DataJson: ' . $e->getMessage());
+                $model->cnfl_data_json = [];
+            }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cnfl_id]);
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->cnfl_id]);
+            }
+        }
+
+        if (!$model->cnfl_data_json) {
+            $model->cnfl_data_json = [];
         }
 
         return $this->render('create', [
@@ -82,11 +93,25 @@ class ClientNotificationPhoneListController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $originalParams = $model->cnfl_data_json;
 
         $model->cnfl_updated_dt = date('Y-m-d H:i:s');
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cnfl_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            try {
+                $model->cnfl_data_json = Json::decode($model->cnfl_data_json);
+            } catch (\Throwable $e) {
+                Yii::$app->session->addFlash('error', 'DataJson: ' . $e->getMessage());
+                $model->cnfl_data_json = $originalParams;
+            }
+
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->cnfl_id]);
+            }
+        }
+
+        if (!$model->cnfl_data_json) {
+            $model->cnfl_data_json = [];
         }
 
         return $this->render('update', [

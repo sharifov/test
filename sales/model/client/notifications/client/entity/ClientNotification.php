@@ -20,6 +20,39 @@ use common\models\Client;
  */
 class ClientNotification extends \yii\db\ActiveRecord
 {
+    public static function create(
+        int $clientId,
+        NotificationType $type,
+        int $objectId,
+        int $communicationTypeId,
+        int $communicationObjectId,
+        \DateTimeImmutable $createdDt
+    ): self {
+        $notification = new self();
+        $notification->cn_client_id = $clientId;
+        $notification->cn_notification_type_id = $type->getValue();
+        $notification->cn_object_id = $objectId;
+        $notification->cn_communication_type_id = $communicationTypeId;
+        $notification->cn_communication_object_id = $communicationObjectId;
+        $notification->cn_created_dt = $createdDt->format('Y-m-d H:i:s');
+        return $notification;
+    }
+
+    public function isPhone(): bool
+    {
+        return $this->cn_communication_type_id === CommunicationType::PHONE;
+    }
+
+    public function isSms(): bool
+    {
+        return $this->cn_communication_type_id === CommunicationType::SMS;
+    }
+
+    public function isEmail(): bool
+    {
+        return $this->cn_communication_type_id === CommunicationType::EMAIL;
+    }
+
     public function rules(): array
     {
         return [

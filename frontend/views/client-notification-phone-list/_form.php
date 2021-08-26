@@ -1,5 +1,7 @@
 <?php
 
+use frontend\helpers\JsonHelper;
+use sales\helpers\app\AppHelper;
 use sales\model\client\notifications\phone\entity\Status;
 use sales\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
@@ -8,6 +10,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model sales\model\client\notifications\phone\entity\ClientNotificationPhoneList */
 /* @var $form ActiveForm */
+
 ?>
 
 <div class="client-notification-phone-list-form">
@@ -30,7 +33,27 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cnfl_file_url')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'cnfl_data')->textInput() ?>
+        <?php
+        $model->cnfl_data_json = JsonHelper::encode($model->cnfl_data_json);
+        try {
+            echo $form->field($model, 'cnfl_data_json')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form'],
+                        'mode' => $model->isNewRecord ? 'code' : 'form'
+                    ],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            try {
+                echo $form->field($model, 'cnfl_data_json')->textarea(['rows' => 8, 'class' => 'form-control']);
+            } catch (Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'ClientNotificationPhoneList:_form:notValidJson');
+            }
+        }
+        ?>
 
         <?= $form->field($model, 'cnfl_call_sid')->textInput(['maxlength' => true]) ?>
 

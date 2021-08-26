@@ -32,6 +32,8 @@ use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteObjectRefund\service\QuoteObjectRefundManageService;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
@@ -39,6 +41,7 @@ use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
 use sales\model\cases\useCases\cases\api\create\Command;
 use sales\model\cases\useCases\cases\api\create\Handler;
+use sales\model\client\notifications\ClientNotificationExecutor;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
@@ -77,6 +80,19 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+
+    public function actionA()
+    {
+        \Yii::createObject(ClientNotificationExecutor::class)->execute(2);
+        die;
+        $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
+        $change = ProductQuoteChange::createNew(
+            193,
+            135988
+        );
+        $repo->save($change);
+    }
+
     public function actionQ()
     {
         echo \Yii::$app->communication->makeCallClientNotification(
@@ -98,6 +114,30 @@ class TestController extends Controller
     public function actionX()
     {
 
+        $clientN = [
+            'clientNotification' => [
+                'productQuoteChange' => [
+                    'sendPhoneNotification' => [
+                        'enabled' => true,
+                        'phoneFrom' => 'phone from',
+                        'messageSay' => 'message say',
+                        'fileUrl' => 'url',
+                        'messageTemplateKey' => 'key tmpl',
+                    ],
+                    'sendSmsNotification' => [
+                        'enabled' => true,
+                        'phoneFrom' => 'phone from sms',
+                        'messageSay' => 'message say sms',
+                        'messageTemplateKey' => 'key tmpl sms',
+                    ],
+                ]
+            ]
+        ];
+
+        $params = \sales\model\project\entity\params\Params::fromArray($clientN);
+        VarDumper::dump($params);
+
+        die;
         $productQuote = ProductQuote::find()->andWhere(['pq_gid' => '1865ef55f3c6c01dca1f4f3128e82733'])->one();
         $r = ArrayHelper::toArray($productQuote);
         VarDumper::dump($r);

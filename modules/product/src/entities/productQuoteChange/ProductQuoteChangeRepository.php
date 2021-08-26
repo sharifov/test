@@ -3,10 +3,23 @@
 namespace modules\product\src\entities\productQuoteChange;
 
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
+/**
+ * Class ProductQuoteChangeRepository
+ *
+ * @property EventDispatcher $eventDispatcher
+ */
 class ProductQuoteChangeRepository
 {
+    private EventDispatcher $eventDispatcher;
+
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     public function findByProductQuoteId(int $id): ProductQuoteChange
     {
         if ($productQuote = ProductQuoteChange::find()->byProductQuote($id)->one()) {
@@ -29,5 +42,6 @@ class ProductQuoteChangeRepository
         if (!$change->save(false)) {
             throw new \RuntimeException('Saving error.');
         }
+        $this->eventDispatcher->dispatchAll($change->releaseEvents());
     }
 }

@@ -49,7 +49,7 @@ class m210824_203930_add_client_notification_tables extends Migration
             'cnfl_end' => $this->dateTime(),
             'cnfl_message' => $this->text(),
             'cnfl_file_url' => $this->string(500),
-            'cnfl_data' => $this->json(),
+            'cnfl_data_json' => $this->json(),
             'cnfl_call_sid' => $this->string(34),
             'cnfl_created_dt' => $this->dateTime(),
             'cnfl_updated_dt' => $this->dateTime(),
