@@ -21,6 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $pqc_created_dt
  * @property string|null $pqc_updated_dt
  * @property string|null $pqc_decision_dt
+ * @property bool $pqc_is_automate [tinyint(1)]
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
@@ -129,6 +130,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             [['pqc_pq_id'], 'required'],
             [['pqc_pq_id', 'pqc_case_id', 'pqc_decision_user', 'pqc_status_id', 'pqc_decision_type_id'], 'integer'],
             [['pqc_created_dt', 'pqc_updated_dt', 'pqc_decision_dt'], 'safe'],
+            [['pqc_is_automate'], 'boolean'],
             [['pqc_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['pqc_case_id' => 'cs_id']],
             [['pqc_decision_user'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqc_decision_user' => 'id']],
             [['pqc_pq_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqc_pq_id' => 'pq_id']],
@@ -152,6 +154,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_created_dt' => 'Created Dt',
             'pqc_updated_dt' => 'Updated Dt',
             'pqc_decision_dt' => 'Decision Dt',
+            'pqc_is_automate' => 'Is Automate'
         ];
     }
 

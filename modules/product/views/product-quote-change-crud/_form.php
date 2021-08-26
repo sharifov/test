@@ -29,7 +29,9 @@ use sales\widgets\DateTimePicker;
 
         <?= $form->field($model, 'pqc_status_id')->dropDownList(ProductQuoteChangeStatus::getList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'pqc_decision_type_id')->dropDownList(ProductQuoteChangeDecisionType::getList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'pqc_is_automate')->checkbox() ?>
+
+      <?= $form->field($model, 'pqc_decision_type_id')->dropDownList(ProductQuoteChangeDecisionType::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'pqc_created_dt')->widget(DateTimePicker::class, []) ?>
 

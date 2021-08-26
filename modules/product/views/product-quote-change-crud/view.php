@@ -50,6 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+            'pqc_is_automate:booleanByLabel',
             'pqc_created_dt:byUserDateTime',
             'pqc_updated_dt:byUserDateTime',
             'pqc_decision_dt:byUserDateTime',
