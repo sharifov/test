@@ -1336,12 +1336,12 @@ class FlightController extends BaseController
      *  }
      *
      * @apiParam {string{32}}           product_quote_gid            Product Quote gid
-     * @apiParam {string[]}             [with]                       Array ("reprotection")
+     * @apiParam {string[]}             [with]                       Array ("reprotection", "last_change")
      *
      * @apiParamExample {json} Request-Example:
      *   {
      *      "product_quote_gid": "2bd12377691f282e11af12937674e3d1",
-     *      "with": ["reprotection"],
+     *      "with": ["reprotection", "last_change"],
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -1854,7 +1854,19 @@ class FlightController extends BaseController
                         ]
                     }
                 }
-            ]
+            ],
+            "last_change": {
+                "pqc_id": 1,
+                "pqc_pq_id": 645,
+                "pqc_case_id": 135814,
+                "pqc_decision_user": 464,
+                "pqc_status_id": 6,
+                "pqc_decision_type_id": 1,
+                "pqc_created_dt": "2021-08-17 11:44:34",
+                "pqc_updated_dt": "2021-08-26 10:09:03",
+                "pqc_decision_dt": "2021-08-24 14:33:39",
+                "pqc_is_automate": 0
+            }
         }
      *
      * @apiErrorExample {json} Error-Response:
@@ -1910,6 +1922,12 @@ class FlightController extends BaseController
                 }
                 $response->addMessage(
                     new Message('reprotection_quote_list', $reprotectionQuoteList)
+                );
+            }
+
+            if ($form->withLastChange() && $lastQuoteChange = $productQuote->productQuoteLastChange) {
+                $response->addMessage(
+                    new Message('last_change', $lastQuoteChange->toArray())
                 );
             }
 
