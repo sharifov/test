@@ -7,6 +7,7 @@ use yii\helpers\Json;
 /**
  * Class Data
  *
+ * @property int|null $clientId
  * @property int|null $caseId
  * @property int|null $projectId
  * @property string|null $sayVoice
@@ -14,6 +15,7 @@ use yii\helpers\Json;
  */
 class Data
 {
+    public ?int $clientId;
     public ?int $caseId;
     public ?int $projectId;
     public ?string $sayVoice;
@@ -47,6 +49,7 @@ class Data
     public static function createFromArray(array $raw): self
     {
         $data = new self();
+        $data->clientId = !empty($raw['clientId']) ? (int)$raw['clientId'] : null;
         $data->caseId = !empty($raw['caseId']) ? (int)$raw['caseId'] : null;
         $data->projectId = !empty($raw['projectId']) ? (int)$raw['projectId'] : null;
         $data->sayVoice = !empty($raw['sayVoice']) ? (string)$raw['sayVoice'] : null;
@@ -62,6 +65,7 @@ class Data
     public function toArray(): array
     {
         return [
+            'clientId' => $this->clientId,
             'caseId' => $this->caseId,
             'projectId' => $this->projectId,
             'sayVoice' => $this->sayVoice,
@@ -71,6 +75,7 @@ class Data
 
     private function loadDefaultValue(): void
     {
+        $this->clientId = null;
         $this->caseId = null;
         $this->projectId = null;
         $this->sayVoice = null;

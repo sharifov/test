@@ -83,12 +83,19 @@ class TestController extends Controller
 
     public function actionA()
     {
-        \Yii::createObject(ClientNotificationExecutor::class)->execute(2);
-        die;
+//        \Yii::createObject(ClientNotificationExecutor::class)->execute(2);
+//        die;
         $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
         $change = ProductQuoteChange::createNew(
             193,
             135988
+        );
+        $repo->save($change);
+
+        $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
+        $change = ProductQuoteChange::createNew(
+            192,
+            135987
         );
         $repo->save($change);
     }

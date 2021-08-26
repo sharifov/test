@@ -1,20 +1,21 @@
 <?php
 
-namespace sales\model\client\notifications;
+namespace sales\model\client\notifications\phone;
 
 use common\models\ClientPhone;
 use sales\model\client\notifications\client\entity\ClientNotificationRepository;
+use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 use sales\model\client\notifications\phone\entity\ClientNotificationPhoneListRepository;
 use sales\model\client\notifications\phone\entity\Status;
 use sales\model\phoneList\entity\PhoneList;
 
 /**
- * Class ClientNotificationExecutor
+ * Class ClientNotificationPhoneExecutor
  *
  * @property ClientNotificationPhoneListRepository $clientNotificationPhoneListRepository
  * @property ClientNotificationRepository $clientNotificationRepository
  */
-class ClientNotificationExecutor
+class ClientNotificationPhoneExecutor
 {
     private ClientNotificationPhoneListRepository $clientNotificationPhoneListRepository;
     private ClientNotificationRepository $clientNotificationRepository;
@@ -27,31 +28,20 @@ class ClientNotificationExecutor
         $this->clientNotificationRepository = $clientNotificationRepository;
     }
 
-    public function execute(int $notificationId): void
+    public function execute(ClientNotificationPhoneList $notification): void
     {
-        $notification = $this->clientNotificationRepository->find($notificationId);
-
-        if ($notification->isPhone()) {
-            $this->cratedCall($notification->cn_communication_object_id);
-            return;
-        }
-    }
-
-    private function cratedCall(int $notificationId): void
-    {
-        $notification = $this->clientNotificationPhoneListRepository->find($notificationId);
         if (!$notification->isNew()) {
-            throw new \DomainException('Notification status invalid. Wait: "new", current: "' . Status::getName($notification->cnfl_status_id) . '" . ID: ' . $notificationId);
+            throw new \DomainException('Notification status invalid. Wait: "new", current: "' . Status::getName($notification->cnfl_status_id) . '" . ID: ' . $notification->cnfl_id);
         }
 
         $fromPhone = PhoneList::find()->select(['pl_phone_number'])->andWhere(['pl_id' => $notification->cnfl_from_phone_id])->scalar();
         if (!$fromPhone) {
-            throw new \DomainException('Not found Phone From. PhoneListId: ' . $notification->cnfl_from_phone_id . ' PhoneNotificationId: ' . $notificationId);
+            throw new \DomainException('Not found Phone From. PhoneListId: ' . $notification->cnfl_from_phone_id . ' PhoneNotificationId: ' . $notification->cnfl_id);
         }
 
         $toPhone = ClientPhone::find()->select(['phone'])->andWhere(['id' => $notification->cnfl_to_client_phone_id])->scalar();
         if (!$toPhone) {
-            throw new \DomainException('Not found Client Phone. ClientPhoneId: ' . $notification->cnfl_to_client_phone_id . ' PhoneNotificationId: ' . $notificationId);
+            throw new \DomainException('Not found Client Phone. ClientPhoneId: ' . $notification->cnfl_to_client_phone_id . ' PhoneNotificationId: ' . $notification->cnfl_id);
         }
 
         try {
@@ -63,8 +53,8 @@ class ClientNotificationExecutor
                 $notification->getData()->sayLanguage,
                 $notification->cnfl_file_url,
                 [
+                    'client_id' => $notification->getData()->clientId,
                     'project_id' => $notification->getData()->projectId,
-                    'client_id' => $notification->clientNotification->cn_client_id,
                     'case_id' => $notification->getData()->caseId,
                     'phone_list_id' => $notification->cnfl_from_phone_id,
                 ]
@@ -76,13 +66,5 @@ class ClientNotificationExecutor
             $this->clientNotificationPhoneListRepository->save($notification);
             throw $e;
         }
-    }
-
-    private function sendSms(): void
-    {
-    }
-
-    private function sendEmail(): void
-    {
     }
 }

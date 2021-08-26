@@ -7,6 +7,11 @@ namespace sales\model\client\notifications\phone\entity;
 */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function new(): self
+    {
+        return $this->andWhere(['cnfl_status_id' => Status::NEW]);
+    }
+
     /**
     * @return ClientNotificationPhoneList[]|array
     */

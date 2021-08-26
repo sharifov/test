@@ -100,6 +100,7 @@ class ClientNotificationListener
                 $settings->messageSay,
                 $settings->fileUrl,
                 Data::createFromArray([
+                    'clientId' => $client->id,
                     'caseId' => $event->caseId,
                     'projectId' => $projectId,
                     'sayVoice' => $settings->messageSayVoice,
