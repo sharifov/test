@@ -221,6 +221,7 @@ if ($quote->productQuoteLastChange) {
                         <th>Status</th>
                         <th style="width: 180px">Created</th>
                         <th>Decision Type</th>
+                        <th>Is Automate</th>
                         <th style="width: 180px">Decision DateTime</th>
                     </tr>
                     </thead>
@@ -233,6 +234,7 @@ if ($quote->productQuoteLastChange) {
                             <td><?= $changeItem->pqc_status_id ? ProductQuoteChangeStatus::asFormat($changeItem->pqc_status_id) : '-'?></td>
                             <td><small><?=$changeItem->pqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_created_dt)) : '-'?></small></td>
                             <td><?= $changeItem->pqc_decision_type_id ? ProductQuoteChangeDecisionType::asFormat($changeItem->pqc_decision_type_id) : '-'?></td>
+                            <td><?= Yii::$app->formatter->asBoolean($changeItem->pqc_is_automate) ?></td>
                             <td><small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small></td>
                         </tr>
                     <?php endforeach; ?>
