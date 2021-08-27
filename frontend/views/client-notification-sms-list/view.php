@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         return $model->cnsl_data_json ? Json::encode($model->cnsl_data_json) : null;
                     },
                 ],
-                'cnsl_sms_sid',
+                'cnsl_sms_id',
                 'cnsl_created_dt:byUserDatetime',
                 'cnsl_updated_dt:byUserDatetime',
             ],

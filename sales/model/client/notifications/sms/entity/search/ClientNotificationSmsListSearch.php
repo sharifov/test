@@ -11,7 +11,7 @@ class ClientNotificationSmsListSearch extends ClientNotificationSmsList
     public function rules(): array
     {
         return [
-            ['cnsl_sms_sid', 'string'],
+            ['cnsl_sms_id', 'string'],
 
             ['cnsl_created_dt', 'date', 'format' => 'php:Y-m-d'],
 
@@ -68,13 +68,13 @@ class ClientNotificationSmsListSearch extends ClientNotificationSmsList
 
         $query->andFilterWhere([
             'cnsl_id' => $this->cnsl_id,
+            'cnsl_sms_id' => $this->cnsl_sms_id,
             'cnsl_status_id' => $this->cnsl_status_id,
             'cnsl_from_phone_id' => $this->cnsl_from_phone_id,
             'cnsl_to_client_phone_id' => $this->cnsl_to_client_phone_id,
         ]);
 
-        $query->andFilterWhere(['like', 'cnsl_message', $this->cnsl_message])
-            ->andFilterWhere(['like', 'cnsl_sms_sid', $this->cnsl_sms_sid]);
+        $query->andFilterWhere(['like', 'cnsl_message', $this->cnsl_message]);
 
         return $dataProvider;
     }

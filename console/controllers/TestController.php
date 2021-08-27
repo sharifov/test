@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use sales\model\client\notifications\listeners\ClientNotificationCancelerListener;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
 use common\models\Employee;
@@ -32,6 +33,7 @@ use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
@@ -83,6 +85,9 @@ class TestController extends Controller
 
     public function actionA()
     {
+        \Yii::createObject(ClientNotificationCancelerListener::class)->handle(new ProductQuoteChangeDecisionModifyEvent(109, 192));
+        die;
+
 //        \Yii::createObject(ClientNotificationExecutor::class)->execute(2);
 //        die;
         $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
@@ -91,7 +96,6 @@ class TestController extends Controller
             135988
         );
         $repo->save($change);
-        die;
 
 
         $repo = \Yii::createObject(ProductQuoteChangeRepository::class);

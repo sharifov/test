@@ -115,7 +115,7 @@ class ClientNotificationListener
                 new \DateTimeImmutable(),
                 $client->id,
                 $notificationType,
-                $event->productQuoteId
+                $event->getId()
             );
         });
     }
@@ -184,7 +184,7 @@ class ClientNotificationListener
                 new \DateTimeImmutable(),
                 $client->id,
                 $notificationType,
-                $event->productQuoteId
+                $event->getId()
             );
         });
     }

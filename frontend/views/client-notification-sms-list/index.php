@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cnsl_end',
             ],
             //'cnsl_message:ntext',
-            'cnsl_sms_sid',
+            'cnsl_sms_id',
             [
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'cnsl_created_dt',

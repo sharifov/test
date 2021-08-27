@@ -1,5 +1,6 @@
 <?php
 
+use ClientNotificationCancelerListener\ClientNotificationCancelerListener;
 use modules\order\src\listeners\order\OrderPrepareListener;
 use modules\order\src\processManager;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
@@ -10,6 +11,10 @@ use modules\product\src\entities\productQuote\events\ProductQuoteExpiredEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChildrenProfitAmountEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionConfirmEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionRefundEvent;
 use modules\product\src\entities\productQuoteOption\events\ProductQuoteOptionCloneCreatedEvent;
 use modules\product\src\listeners\productQuote\ProductQuoteDeclinedEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteExpiredEventListener;
@@ -79,4 +84,20 @@ return [
     UserProfitCalculateByOrderUserProfitEvent::class => [UserProfitCalculateByOrderUserProfitEventListener::class],
     ProductMarketPriceChangedEvent::class => [],
     ProductClientBudgetChangedEvent::class => [],
+
+    ProductQuoteChangeCreatedEvent::class => [
+        \sales\model\client\notifications\listeners\productQuoteChange\ClientNotificationListener::class,
+    ],
+
+    ProductQuoteChangeDecisionConfirmEvent::class => [
+        ClientNotificationCancelerListener::class,
+    ],
+
+    ProductQuoteChangeDecisionRefundEvent::class => [
+        ClientNotificationCancelerListener::class,
+    ],
+
+    ProductQuoteChangeDecisionModifyEvent::class => [
+        ClientNotificationCancelerListener::class,
+    ],
 ];

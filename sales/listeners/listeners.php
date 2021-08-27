@@ -93,8 +93,4 @@ return [
     ],
 
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
-
-    ProductQuoteChangeCreatedEvent::class => [
-        \sales\model\client\notifications\listeners\productQuoteChange\ClientNotificationListener::class,
-    ],
 ];

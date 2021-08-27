@@ -55,7 +55,7 @@ use yii\widgets\ActiveForm;
         }
         ?>
 
-        <?= $form->field($model, 'cnsl_sms_sid')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'cnsl_sms_id')->textInput(['maxlength' => true]) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
