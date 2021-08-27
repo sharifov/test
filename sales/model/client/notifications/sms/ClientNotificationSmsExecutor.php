@@ -3,6 +3,8 @@
 namespace sales\model\client\notifications\sms;
 
 use common\models\ClientPhone;
+use common\models\Sms;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\client\notifications\client\entity\ClientNotificationRepository;
 use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
 use sales\model\client\notifications\sms\entity\ClientNotificationSmsListRepository;
@@ -44,27 +46,81 @@ class ClientNotificationSmsExecutor
             throw new \DomainException('Not found Client Phone. ClientPhoneId: ' . $notification->cnsl_to_client_phone_id . ' SmsNotificationId: ' . $notification->cnsl_id);
         }
 
-//        try {
-//            $callSid = \Yii::$app->communication->makeSmsClientNotification(
-//                $fromPhone,
-//                $toPhone,
-//                $notification->cnfl_message,
-//                $notification->getData()->sayVoice,
-//                $notification->getData()->sayLanguage,
-//                $notification->cnfl_file_url,
-//                [
-//                    'client_id' => $notification->getData()->clientId,
-//                    'project_id' => $notification->getData()->projectId,
-//                    'case_id' => $notification->getData()->caseId,
-//                    'phone_list_id' => $notification->cnfl_from_phone_id,
-//                ]
-//            );
-//            $notification->processing($callSid, new \DateTimeImmutable());
-//            $this->clientNotificationPhoneListRepository->save($notification);
-//        } catch (\Throwable $e) {
-//            $notification->error(new \DateTimeImmutable());
-//            $this->clientNotificationPhoneListRepository->save($notification);
-//            throw $e;
-//        }
+        try {
+            if ($notification->getData()->templateKey) {
+                $smsText = $this->getSmsText(
+                    $notification->cnsl_id,
+                    $notification->getData()->projectId,
+                    $notification->getData()->templateKey,
+                    $fromPhone,
+                    $toPhone,
+                    [
+                        'content' => $notification->cnsl_message,
+                        // todo other params
+                    ],
+                    'en-US' // todo
+                );
+            } else {
+                $smsText = $notification->cnsl_message;
+            }
+
+            $sms = new Sms();
+            $sms->s_project_id = $notification->getData()->projectId;
+            $sms->s_phone_from = $fromPhone;
+            $sms->s_phone_to = $toPhone;
+            $sms->s_sms_text = $smsText;
+            $sms->s_type_id = Sms::TYPE_OUTBOX;
+            $sms->s_template_type_id = $notification->getData()->templateId;
+            $sms->s_language_id = null; // todo
+            $sms->s_is_new = true;
+            $sms->s_status_id = Sms::STATUS_PENDING;
+            $sms->s_created_dt = date('Y-m-d H:i:s');
+            $sms->s_case_id = $notification->getData()->caseId;
+            $sms->s_client_id = $notification->getData()->clientId;
+            if (!$sms->save()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($sms));
+            }
+
+            $notification->processing($sms->s_id, new \DateTimeImmutable());
+            $this->clientNotificationSmsListRepository->save($notification);
+
+            $result = $sms->sendSms();
+
+            if ($result['error']) {
+                $notification->error(new \DateTimeImmutable());
+                $this->clientNotificationSmsListRepository->save($notification);
+                return;
+            }
+
+            $notification->done(new \DateTimeImmutable());
+            $this->clientNotificationSmsListRepository->save($notification);
+        } catch (\Throwable $e) {
+            $notification->error(new \DateTimeImmutable());
+            $this->clientNotificationSmsListRepository->save($notification);
+            throw $e;
+        }
+    }
+
+    private function getSmsText($notificationId, $projectId, $templateKey, $from, $to, $contentData, $languageId): string
+    {
+        $smsPreview = \Yii::$app->communication->smsPreview(
+            $projectId,
+            $templateKey,
+            $from,
+            $to,
+            $contentData,
+            $languageId
+        );
+
+        if ($smsPreview['error'] !== false) {
+            throw new \DomainException('Cant load preview SMS. NotificationId: ' . $notificationId);
+        }
+
+        $text = $smsPreview['data']['sms_text'] ?? null;
+        if ($text) {
+            return $text;
+        }
+
+        throw new \DomainException('Received SMS text is empty. NotificationId: ' . $notificationId);
     }
 }

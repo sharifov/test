@@ -19,7 +19,7 @@ use sales\model\phoneList\entity\PhoneList;
  * @property string|null $cnsl_end
  * @property string|null $cnsl_message
  * @property array|null $cnsl_data_json
- * @property string|null $cnsl_sms_sid
+ * @property string|null $cnsl_sms_id
  * @property string|null $cnsl_created_dt
  * @property string|null $cnsl_updated_dt
  *
@@ -76,10 +76,10 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
         return $this->cnsl_status_id === Status::NEW;
     }
 
-    public function processing(string $smsSid, \DateTimeImmutable $date): void
+    public function processing(int $smsId, \DateTimeImmutable $date): void
     {
+        $this->cnsl_sms_id = $smsId;
         $this->cnsl_status_id = Status::PROCESSING;
-        $this->cnsl_sms_sid = $smsSid;
         $this->cnsl_updated_dt = $date->format('Y-m-d H:i:s');
     }
 
@@ -104,8 +104,8 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            ['cnsl_sms_sid', 'default', 'value' => null],
-            ['cnsl_sms_sid', 'string', 'max' => 34],
+            ['cnsl_sms_id', 'default', 'value' => null],
+            ['cnsl_sms_id', 'string', 'max' => 34],
 
             ['cnsl_data_json', 'default', 'value' => null],
             ['cnsl_data_json', 'safe'],
@@ -162,7 +162,7 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
             'cnsl_end' => 'End',
             'cnsl_message' => 'Message',
             'cnsl_data_json' => 'DataJson',
-            'cnsl_sms_sid' => 'Sms Sid',
+            'cnsl_sms_id' => 'Sms Id',
             'cnsl_created_dt' => 'Created Dt',
             'cnsl_updated_dt' => 'Updated Dt',
         ];

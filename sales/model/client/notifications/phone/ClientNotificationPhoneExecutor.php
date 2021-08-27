@@ -45,6 +45,9 @@ class ClientNotificationPhoneExecutor
         }
 
         try {
+            $notification->processing(new \DateTimeImmutable());
+            $this->clientNotificationPhoneListRepository->save($notification);
+
             $callSid = \Yii::$app->communication->makeCallClientNotification(
                 $fromPhone,
                 $toPhone,
@@ -59,7 +62,8 @@ class ClientNotificationPhoneExecutor
                     'phone_list_id' => $notification->cnfl_from_phone_id,
                 ]
             );
-            $notification->processing($callSid, new \DateTimeImmutable());
+
+            $notification->done($callSid, new \DateTimeImmutable());
             $this->clientNotificationPhoneListRepository->save($notification);
         } catch (\Throwable $e) {
             $notification->error(new \DateTimeImmutable());

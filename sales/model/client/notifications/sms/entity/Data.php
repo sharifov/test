@@ -10,12 +10,16 @@ use yii\helpers\Json;
  * @property int|null $clientId
  * @property int|null $caseId
  * @property int|null $projectId
+ * @property int|null $templateId
+ * @property string|null $templateKey
  */
 class Data
 {
     public ?int $clientId;
     public ?int $caseId;
     public ?int $projectId;
+    public ?int $templateId;
+    public ?string $templateKey;
 
     private function __construct()
     {
@@ -48,6 +52,8 @@ class Data
         $data->clientId = !empty($raw['clientId']) ? (int)$raw['clientId'] : null;
         $data->caseId = !empty($raw['caseId']) ? (int)$raw['caseId'] : null;
         $data->projectId = !empty($raw['projectId']) ? (int)$raw['projectId'] : null;
+        $data->templateId = !empty($raw['templateId']) ? (int)$raw['templateId'] : null;
+        $data->templateKey = !empty($raw['templateKey']) ? (string)$raw['templateKey'] : null;
         return $data;
     }
 
@@ -62,6 +68,8 @@ class Data
             'clientId' => $this->clientId,
             'caseId' => $this->caseId,
             'projectId' => $this->projectId,
+            'templateId' => $this->templateId,
+            'templateKey' => $this->templateKey,
         ];
     }
 
@@ -70,5 +78,7 @@ class Data
         $this->clientId = null;
         $this->caseId = null;
         $this->projectId = null;
+        $this->templateId = null;
+        $this->templateKey = null;
     }
 }

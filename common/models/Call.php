@@ -1403,18 +1403,6 @@ class Call extends \yii\db\ActiveRecord
         }
 
         $this->sendFrontendData();
-
-        if ($this->isTwFinishStatus() && $this->isClientNotification()) {
-            try {
-                Yii::createObject(ClientNotificationPhoneCompleted::class)->complete($this->c_call_sid);
-            } catch (\Throwable $e) {
-                Yii::error([
-                    'message' => 'Client phone notification completed error',
-                    'callSid' => $this->c_call_sid,
-                    'exception' => AppHelper::throwableLog($e, true),
-                ], 'CallAfterSave:ClientNotificationPhoneCompleted');
-            }
-        }
     }
 
     public static function getQueueName(Call $call): string

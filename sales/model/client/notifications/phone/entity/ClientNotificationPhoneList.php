@@ -76,15 +76,15 @@ class ClientNotificationPhoneList extends \yii\db\ActiveRecord
         return $this->cnfl_status_id === Status::NEW;
     }
 
-    public function processing(string $callSid, \DateTimeImmutable $date): void
+    public function processing(\DateTimeImmutable $date): void
     {
         $this->cnfl_status_id = Status::PROCESSING;
-        $this->cnfl_call_sid = $callSid;
         $this->cnfl_updated_dt = $date->format('Y-m-d H:i:s');
     }
 
-    public function done(\DateTimeImmutable $date): void
+    public function done(string $callSid, \DateTimeImmutable $date): void
     {
+        $this->cnfl_call_sid = $callSid;
         $this->cnfl_status_id = Status::DONE;
         $this->cnfl_updated_dt = $date->format('Y-m-d H:i:s');
     }

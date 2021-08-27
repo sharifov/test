@@ -3,6 +3,7 @@
 namespace sales\model\client\notifications\listeners\productQuoteChange;
 
 use common\models\ClientPhone;
+use common\models\SmsTemplateType;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -146,9 +147,26 @@ class ClientNotificationListener
             return;
         }
 
+        $templateId = null;
+        $templateKey = null;
+        if ($settings->messageTemplateKey) {
+            $templateId = SmsTemplateType::find()->select(['stp_id'])->andWhere(['stp_key' => $settings->messageTemplateKey])->scalar();
+            if (!$templateId) {
+                \Yii::error([
+                    'message' => 'Not found Sms template. Key: ' . $settings->messageTemplateKey,
+                    'productQuoteChangeId' => $event->getId(),
+                    'productQuoteId' => $event->productQuoteId,
+                    'caseId' => $event->caseId,
+                    'phone' => $settings->phoneFrom,
+                ], 'ProductQuoteChangeClientNotificationListener:smsNotificationProcessing');
+                return;
+            }
+            $templateKey = $settings->messageTemplateKey;
+        }
+
         $time = $this->getTime();
 
-        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $projectId) {
+        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $projectId, $templateId, $templateKey) {
             $this->clientNotificationCreator->createSmsNotification(
                 $phoneFromId,
                 $settings->nameFrom,
@@ -160,6 +178,8 @@ class ClientNotificationListener
                     'clientId' => $client->id,
                     'caseId' => $event->caseId,
                     'projectId' => $projectId,
+                    'templateId' => $templateId,
+                    'templateKey' => $templateKey,
                 ]),
                 new \DateTimeImmutable(),
                 $client->id,

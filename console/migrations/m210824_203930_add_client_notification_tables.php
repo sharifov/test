@@ -90,7 +90,7 @@ class m210824_203930_add_client_notification_tables extends Migration
             'cnsl_end' => $this->dateTime(),
             'cnsl_message' => $this->text(),
             'cnsl_data_json' => $this->json(),
-            'cnsl_sms_sid' => $this->string(34),
+            'cnsl_sms_id' => $this->integer(),
             'cnsl_created_dt' => $this->dateTime(),
             'cnsl_updated_dt' => $this->dateTime(),
         ]);
@@ -98,7 +98,7 @@ class m210824_203930_add_client_notification_tables extends Migration
         $this->createIndex('IND-client_notification_sms_list-status', '{{%client_notification_sms_list}}', ['cnsl_status_id']);
         $this->createIndex('IND-client_notification_sms_list-start', '{{%client_notification_sms_list}}', ['cnsl_start']);
         $this->createIndex('IND-client_notification_sms_list-end', '{{%client_notification_sms_list}}', ['cnsl_end']);
-        $this->createIndex('IND-client_notification_sms_list-sms_sid', '{{%client_notification_sms_list}}', ['cnsl_sms_sid']);
+        $this->createIndex('IND-client_notification_sms_list-sms_id', '{{%client_notification_sms_list}}', ['cnsl_sms_id']);
 
         $this->addForeignKey(
             'FK-client_notification_sms_list-from_phone',
@@ -117,6 +117,16 @@ class m210824_203930_add_client_notification_tables extends Migration
             '{{%client_phone}}',
             ['id'],
             'CASCADE',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'FK-client_notification_sms_list-sms_id',
+            '{{%client_notification_sms_list}}',
+            ['cnsl_sms_id'],
+            '{{%sms}}',
+            ['s_id'],
+            'SET NULL',
             'CASCADE'
         );
     }

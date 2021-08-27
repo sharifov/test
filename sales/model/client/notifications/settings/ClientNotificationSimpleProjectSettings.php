@@ -16,7 +16,7 @@ class ClientNotificationSimpleProjectSettings implements ClientNotificationProje
 
     public function isAnyTypeNotificationEnabled(int $projectId, string $type): bool
     {
-        return $this->isSendPhoneNotificationEnabled($projectId, $type);
+        return $this->isSendPhoneNotificationEnabled($projectId, $type) || $this->isSendSmsNotificationEnabled($projectId, $type);
     }
 
     public function isSendPhoneNotificationEnabled(int $projectId, string $type): bool
