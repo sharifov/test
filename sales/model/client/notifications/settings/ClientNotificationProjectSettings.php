@@ -2,12 +2,9 @@
 
 namespace sales\model\client\notifications\settings;
 
+use sales\model\project\entity\params\ClientNotificationObject;
+
 interface ClientNotificationProjectSettings
 {
-    public function isAnyTypeNotificationEnabled(int $projectId, string $type): bool;
-    public function isSendPhoneNotificationEnabled(int $projectId, string $type): bool;
-    public function isSendSmsNotificationEnabled(int $projectId, string $type): bool;
-    public function isSendEmailNotificationEnabled(int $projectId, string $type): bool;
-    public function getPhoneNotificationSettings(int $projectId, string $type): PhoneNotificationSettings;
-    public function getSmsNotificationSettings(int $projectId, string $type): SmsNotificationSettings;
+    public function getNotificationSettings(int $projectId, string $type): ?ClientNotificationObject;
 }

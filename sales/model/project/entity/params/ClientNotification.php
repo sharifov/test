@@ -12,7 +12,7 @@ use sales\model\client\notifications\client\entity\NotificationType;
 class ClientNotification
 {
     /**
-     * @see property name nust equal name of NotificationType::PRODUCT_QUOTE_CHANGE
+     * @see property name nust equal name of NotificationType::LIST[NotificationType::PRODUCT_QUOTE_CHANGE]
      */
     public ClientNotificationObject $productQuoteChange;
 

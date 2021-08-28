@@ -8,8 +8,8 @@ namespace sales\model\project\entity\params;
  * @property bool $enabled
  * @property string|null $phoneFrom
  * @property string|null $messageSay
- * @property string $messageSayVoice
- * @property string $messageSayLanguage
+ * @property string|null $messageSayVoice
+ * @property string|null $messageSayLanguage
  * @property string|null $fileUrl
  * @property string|null $messageTemplateKey
  */
@@ -18,8 +18,8 @@ class SendPhoneNotification
     public bool $enabled;
     public ?string $phoneFrom;
     public ?string $messageSay;
-    public string $messageSayVoice;
-    public string $messageSayLanguage;
+    public ?string $messageSayVoice;
+    public ?string $messageSayLanguage;
     public ?string $fileUrl;
     public ?string $messageTemplateKey;
 

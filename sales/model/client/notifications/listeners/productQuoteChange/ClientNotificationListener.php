@@ -15,6 +15,8 @@ use sales\model\client\notifications\phone\entity\Data as PhoneData;
 use sales\model\client\notifications\sms\entity\Data as SmsData;
 use sales\model\client\notifications\settings\ClientNotificationProjectSettings;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\project\entity\params\SendPhoneNotification;
+use sales\model\project\entity\params\SendSmsNotification;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
 
@@ -49,21 +51,24 @@ class ClientNotificationListener
     {
         try {
             $projectId = $event->productQuoteChange->pqcPq->pqProduct->pr_project_id;
-
             $notificationType = NotificationType::productQuoteChange();
 
-            if (!$this->projectSettings->isAnyTypeNotificationEnabled($projectId, $notificationType->getType())) {
+            $notificationSettings = $this->projectSettings->getNotificationSettings($projectId, $notificationType->getType());
+            if (!$notificationSettings) {
+                return;
+            }
+            if (!$notificationSettings->isAnyEnabled()) {
                 return;
             }
 
             $client = $this->getClient($event->productQuoteChange);
 
-            if ($client->phoneId && $this->projectSettings->isSendPhoneNotificationEnabled($projectId, $notificationType->getType())) {
-                $this->phoneNotificationProcessing($event, $projectId, $notificationType, $client);
+            if ($client->phoneId && $notificationSettings->sendPhoneNotification->enabled) {
+                $this->phoneNotificationProcessing($event, $projectId, $notificationType, $client, $notificationSettings->sendPhoneNotification);
             }
 
-            if ($client->phoneId && $this->projectSettings->isSendSmsNotificationEnabled($projectId, $notificationType->getType())) {
-                $this->smsNotificationProcessing($event, $projectId, $notificationType, $client);
+            if ($client->phoneId && $notificationSettings->sendSmsNotification->enabled) {
+                $this->smsNotificationProcessing($event, $projectId, $notificationType, $client, $notificationSettings->sendSmsNotification);
             }
         } catch (\Throwable $e) {
             \Yii::error([
@@ -79,10 +84,8 @@ class ClientNotificationListener
         }
     }
 
-    private function phoneNotificationProcessing(ProductQuoteChangeCreatedEvent $event, int $projectId, NotificationType $notificationType, Client $client): void
+    private function phoneNotificationProcessing(ProductQuoteChangeCreatedEvent $event, int $projectId, NotificationType $notificationType, Client $client, SendPhoneNotification $settings): void
     {
-        $settings = $this->projectSettings->getPhoneNotificationSettings($projectId, $notificationType->getType());
-
         $phoneFromId = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $settings->phoneFrom])->scalar();
         if (!$phoneFromId) {
             \Yii::error([
@@ -120,10 +123,8 @@ class ClientNotificationListener
         });
     }
 
-    private function smsNotificationProcessing(ProductQuoteChangeCreatedEvent $event, int $projectId, NotificationType $notificationType, Client $client): void
+    private function smsNotificationProcessing(ProductQuoteChangeCreatedEvent $event, int $projectId, NotificationType $notificationType, Client $client, SendSmsNotification $settings): void
     {
-        $settings = $this->projectSettings->getSmsNotificationSettings($projectId, $notificationType->getType());
-
         if (!$settings->message) {
             \Yii::error([
                 'message' => 'Sms client notification Message setting is empty. Sms notification not created.',

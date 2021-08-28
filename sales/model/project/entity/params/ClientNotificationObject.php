@@ -27,4 +27,9 @@ class ClientNotificationObject
             $this->sendSmsNotification = new SendSmsNotification([]);
         }
     }
+
+    public function isAnyEnabled(): bool
+    {
+        return $this->sendPhoneNotification->enabled || $this->sendSmsNotification->enabled;
+    }
 }
