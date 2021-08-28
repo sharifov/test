@@ -6,6 +6,7 @@ use sales\auth\Auth;
 use Yii;
 use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 use sales\model\client\notifications\phone\entity\search\ClientNotificationPhoneListSearch;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -13,14 +14,14 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class ClientNotificationPhoneListController extends Controller
+class ClientNotificationPhoneListController extends FController
 {
     /**
      * @return array
      */
     public function behaviors(): array
     {
-        return [
+        $behaviors =  [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -28,6 +29,7 @@ class ClientNotificationPhoneListController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

@@ -6,21 +6,21 @@ use sales\auth\Auth;
 use Yii;
 use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
 use sales\model\client\notifications\sms\entity\search\ClientNotificationSmsListSearch;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class ClientNotificationSmsListController extends Controller
+class ClientNotificationSmsListController extends FController
 {
     /**
      * @return array
      */
     public function behaviors(): array
     {
-        return [
+        $behaviors =  [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -28,6 +28,7 @@ class ClientNotificationSmsListController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

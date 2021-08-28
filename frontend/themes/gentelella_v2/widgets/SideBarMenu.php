@@ -374,6 +374,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Client Account Social', 'url' => ['/client-account-social-crud/index'], 'icon' => 'odnoklassniki'],
                 ['label' => 'Client Visitor', 'url' => ['/client-visitor-crud/index'], 'icon' => 'comments'],
                 ['label' => 'Visitor Subscription', 'url' => ['/visitor-subscription-crud/index'], 'icon' => 'bell'],
+                [
+                    'label' => 'Notifications',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Notifications', 'url' => ['/client-notification/index']],
+                        ['label' => 'Phone', 'url' => ['/client-notification-phone-list/index']],
+                        ['label' => 'Sms', 'url' => ['/client-notification-sms-list/index']],
+                    ]
+                ]
             ]
         ];
 
