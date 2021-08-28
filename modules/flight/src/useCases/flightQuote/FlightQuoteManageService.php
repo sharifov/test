@@ -65,10 +65,14 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
+use modules\product\src\repositories\ProductQuoteRelationRepository;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
+use sales\entities\cases\CaseEventLog;
+use sales\entities\cases\Cases;
 use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -99,6 +103,7 @@ use yii\helpers\VarDumper;
  * @property FlightQuoteBookingRepository $flightQuoteBookingRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  * @property ProductQuoteCloneService $productQuoteCloneService
+ * @property ProductQuoteRelationRepository $productQuoteRelationRepository
  */
 class FlightQuoteManageService implements ProductQuoteService
 {
@@ -171,6 +176,7 @@ class FlightQuoteManageService implements ProductQuoteService
     private FlightQuoteBookingRepository $flightQuoteBookingRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
     private ProductQuoteCloneService $productQuoteCloneService;
+    private ProductQuoteRelationRepository $productQuoteRelationRepository;
 
     public function __construct(
         FlightQuoteRepository $flightQuoteRepository,
@@ -191,7 +197,8 @@ class FlightQuoteManageService implements ProductQuoteService
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
         FlightQuoteBookingRepository $flightQuoteBookingRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        ProductQuoteCloneService $productQuoteCloneService
+        ProductQuoteCloneService $productQuoteCloneService,
+        ProductQuoteRelationRepository $productQuoteRelationRepository
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -212,6 +219,7 @@ class FlightQuoteManageService implements ProductQuoteService
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->productQuoteCloneService = $productQuoteCloneService;
+        $this->productQuoteRelationRepository = $productQuoteRelationRepository;
     }
 
     /**
@@ -574,11 +582,12 @@ class FlightQuoteManageService implements ProductQuoteService
         array $quote,
         int $orderId,
         ?string $bookingId,
-        int $caseId,
+        Cases $case,
         ?int $userId = null,
-        ?float $productTypeServiceFee = null
+        ?float $productTypeServiceFee = null,
+        ?ProductQuote $originProductQuote = null
     ): FlightQuote {
-        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId) {
+        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId, $case, $originProductQuote) {
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), $productTypeServiceFee);
             $productQuote->pq_order_id = $orderId;
             $this->productQuoteRepository->save($productQuote);
@@ -594,7 +603,25 @@ class FlightQuoteManageService implements ProductQuoteService
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
             $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
-            $this->createQuotePaxPrice($flightQuote, $productQuote, $quote);
+            if ($originProductQuote && $originProductQuote->isFlight()) {
+                if ($flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices ?? null) {
+                    foreach ($flightQuotePaxPrices as $originalPaxPrice) {
+                        $paxPrice = FlightQuotePaxPrice::clone($originalPaxPrice, $flightQuote->fq_id);
+                        $this->flightQuotePaxPriceRepository->save($paxPrice);
+                    }
+                }
+                if ($originProductQuote->productQuoteOptions) {
+                    foreach ($originProductQuote->productQuoteOptions as $originalProductQuoteOption) {
+                        $productQuoteOption = ProductQuoteOption::copy($originalProductQuoteOption, $productQuote->pq_id);
+                        $this->productQuoteOptionRepository->save($productQuoteOption);
+                    }
+                }
+                $relation = ProductQuoteRelation::createReProtection(
+                    $originProductQuote->pq_id,
+                    $flightQuote->fq_product_quote_id
+                );
+                $this->productQuoteRelationRepository->save($relation);
+            }
 
             $this->calcProductQuotePrice($productQuote, $flightQuote);
 
@@ -617,14 +644,22 @@ class FlightQuoteManageService implements ProductQuoteService
 
             FlightQuoteLabelService::processingQuoteLabel($quote, $flightQuote->fq_id);
 
+            $case->addEventLog(
+                CaseEventLog::RE_PROTECTION_CREATE,
+                'FlightQuote created GID: ' . ($productQuote->pq_gid ?? '-'),
+                ['pq_gid' => $productQuote->pq_gid ?? null]
+            );
+
             return $flightQuote;
         });
     }
 
-    public function createReprotectionModify(Flight $flight, array $quote, int $orderId): ProductQuote
+    public function createReprotectionModify(ProductQuote $originProductQuote, array $quote, int $orderId): ProductQuote
     {
         $userId = null;
         $productTypeServiceFee = null;
+        $flight = $originProductQuote->flightQuote->fqFlight;
+
         $productType = ProductType::find()->select(['pt_service_fee_percent'])->byFlight()->asArray()->one();
         if ($productType && $productType['pt_service_fee_percent']) {
             $productTypeServiceFee = $productType['pt_service_fee_percent'];
@@ -640,7 +675,20 @@ class FlightQuoteManageService implements ProductQuoteService
         $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
         $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
-        $this->createQuotePaxPrice($flightQuote, $productQuote, $quote);
+        if ($originProductQuote && $originProductQuote->isFlight()) {
+            if ($flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices ?? null) {
+                foreach ($flightQuotePaxPrices as $originalPaxPrice) {
+                    $paxPrice = FlightQuotePaxPrice::clone($originalPaxPrice, $flightQuote->fq_id);
+                    $this->flightQuotePaxPriceRepository->save($paxPrice);
+                }
+            }
+            if ($originProductQuote->productQuoteOptions) {
+                foreach ($originProductQuote->productQuoteOptions as $originalProductQuoteOption) {
+                    $productQuoteOption = ProductQuoteOption::copy($originalProductQuoteOption, $productQuote->pq_id);
+                    $this->productQuoteOptionRepository->save($productQuoteOption);
+                }
+            }
+        }
 
         $this->calcProductQuotePrice($productQuote, $flightQuote);
 

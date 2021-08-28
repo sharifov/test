@@ -304,7 +304,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
      */
     public function getOrderContacts(): ActiveQuery
     {
-        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id']);
+        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id'])->orderBy(['oc_id' => SORT_DESC]);
     }
 
     public function getOrderData()
@@ -371,8 +371,9 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
      */
     public function getNonReprotectionProductQuotes(): ActiveQuery
     {
-        $subQuery = ProductQuoteRelation::find()->distinct()->select('pqr_parent_pq_id')->where(['pqr_type_id' => ProductQuoteRelation::TYPE_REPROTECTION]);
-        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])->where(['IN', 'pq_id', $subQuery]);
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])->innerJoin(ProductQuoteRelation::tableName(), 'pqr_parent_pq_id = pq_id and pqr_type_id = :typeId', [
+            'typeId' => ProductQuoteRelation::TYPE_REPROTECTION
+        ]);
     }
 
     public function getOrderTips(): ActiveQuery

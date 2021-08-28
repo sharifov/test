@@ -8,6 +8,7 @@ use frontend\themes\gentelella_v2\assets\groups\GentelellaAsset;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\frontendWidgetList\FrontendLauncherWidgetList;
 use frontend\widgets\frontendWidgetList\louassist\LouAssistWidget;
+use frontend\widgets\frontendWidgetList\userflow\UserFlowWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
@@ -170,7 +171,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
                             <?= frontend\widgets\OnlineConnection::widget() ?>
                             <?= frontend\widgets\UserMonitor::widget() ?>
 
-                            <?php echo (new FrontendLauncherWidgetList())->getContent() ?>
+                            <?php echo (new FrontendLauncherWidgetList())->getContent(); ?>
 
                             <?php //= frontend\widgets\Notifications::widget()?>
                             <?php

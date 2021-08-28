@@ -41,4 +41,14 @@ class ProductQuoteRelationQuery
         $query->andWhere(['pqr_type_id' => ProductQuoteRelation::TYPE_ALTERNATIVE]);
         return $query->all();
     }
+
+    public static function getReProtectionQuotesIds(int $originQuoteId): array
+    {
+        return ProductQuoteRelation::find()
+            ->select('pqr_related_pq_id')
+            ->byParentQuoteId($originQuoteId)
+            ->reprotection()
+            ->asArray()
+            ->column();
+    }
 }

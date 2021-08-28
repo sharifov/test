@@ -40,8 +40,8 @@ class ProductQuoteChangeStatus
     public const PROCESSING_LIST = [
         self::DECIDED,
         self::IN_PROGRESS,
-        self::NEW,
-        self::DECISION_PENDING
+        //self::NEW,
+        //self::DECISION_PENDING
     ];
 
     public static function getList(): array
@@ -66,5 +66,14 @@ class ProductQuoteChangeStatus
     private static function getClassName(?int $value): string
     {
         return self::CLASS_LIST[$value] ?? 'secondary';
+    }
+
+    public static function getNames(array $statusIds): array
+    {
+        $result = [];
+        foreach ($statusIds as $value) {
+            $result[] = self::getName($value);
+        }
+        return $result;
     }
 }

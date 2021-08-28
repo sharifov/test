@@ -113,7 +113,7 @@ class Modify
 
     private function createNewReprotectionQuote(ProductQuote $originalProductQuote, array $quote, ?int $userId): ProductQuote
     {
-        $newQuote = $this->flightQuoteManageService->createReprotectionModify($originalProductQuote->flightQuote->fqFlight, $quote, $originalProductQuote->pq_order_id);
+        $newQuote = $this->flightQuoteManageService->createReprotectionModify($originalProductQuote, $quote, $originalProductQuote->pq_order_id);
         $relation = ProductQuoteRelation::createReProtection($originalProductQuote->pq_id, $newQuote->pq_id, $userId);
         $this->productQuoteRelationRepository->save($relation);
         return $newQuote;

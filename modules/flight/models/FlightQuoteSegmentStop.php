@@ -144,8 +144,15 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
             'equipment' => 'qss_equipment',
             'elapsedTime' => 'qss_elapsed_time',
             'duration' => 'qss_duration',
-            'qss_departure_dt',
-            'arrivalDateTime' => 'qss_arrival_dt',
+//            'qss_departure_dt' =>  function () {
+//                return date('Y-m-d H:i', strtotime($this->qss_departure_dt));
+//            },
+            'departureDateTime' => function () {
+                return date('Y-m-d H:i', strtotime($this->qss_departure_dt));
+            },
+            'arrivalDateTime' => function () {
+                return date('Y-m-d H:i', strtotime($this->qss_arrival_dt));
+            },
         ];
     }
 }

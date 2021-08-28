@@ -13,6 +13,7 @@ class LeadUserConversionDictionary
     public const DESCRIPTION_CLIENT_CHAT_MANUAL = 'Client Chat Manual';
     public const DESCRIPTION_TAKE_OVER = 'Take over';
     public const DESCRIPTION_CLONE = 'Clone';
+    public const DESCRIPTION_ASSIGN = 'Assign';
 
     public const DESCRIPTION_LIST = [
         self::DESCRIPTION_MANUAL => self::DESCRIPTION_MANUAL,
@@ -21,5 +22,6 @@ class LeadUserConversionDictionary
         self::DESCRIPTION_CLIENT_CHAT_MANUAL => self::DESCRIPTION_CLIENT_CHAT_MANUAL,
         self::DESCRIPTION_TAKE_OVER => self::DESCRIPTION_TAKE_OVER,
         self::DESCRIPTION_CLONE => self::DESCRIPTION_CLONE,
+        self::DESCRIPTION_ASSIGN => self::DESCRIPTION_ASSIGN,
     ];
 }

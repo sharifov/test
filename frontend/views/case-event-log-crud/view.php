@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cel_type_id',
                 'value' => static function (CaseEventLog $model) {
-                    return CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id];
+                    return $model->cel_type_id ? CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id] : null;
                 }
             ],
             'cel_description',

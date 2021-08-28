@@ -1,0 +1,85 @@
+<?php
+
+namespace modules\flight\src\useCases\reprotectionCreate\service;
+
+use common\models\ClientEmail;
+use modules\order\src\entities\order\Order;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use sales\entities\cases\CaseEventLog;
+use sales\entities\cases\Cases;
+use sales\exception\CheckRestrictionException;
+use sales\services\cases\CasesCommunicationService;
+use sales\services\email\SendEmailByCase;
+use Yii;
+
+/**
+ * Class SendEmailReProtectionService
+ *
+ * @property CasesCommunicationService $casesCommunicationService
+ *
+ * @property int|null $sendResultStatus
+ */
+class SendEmailReProtectionService
+{
+    private CasesCommunicationService $casesCommunicationService;
+
+    private ?int $sendResultStatus = null;
+
+    /**
+     * @param CasesCommunicationService $casesCommunicationService
+     */
+    public function __construct(CasesCommunicationService $casesCommunicationService)
+    {
+        $this->casesCommunicationService = $casesCommunicationService;
+    }
+
+    public function processing(
+        Cases $case,
+        ?Order $order,
+        ProductQuote $reProtectionQuote,
+        ?ProductQuote $originProductQuote,
+        ProductQuoteChange $productQuoteChange
+    ): ?int {
+        $clientEmail = self::detectEmail($case, $order);
+
+        $emailData = $this->casesCommunicationService->getEmailDataWithoutAgentData($case);
+        $emailData['reprotection_quote'] = $reProtectionQuote->serialize();
+        if ($originProductQuote) {
+            $emailData['original_quote'] = $originProductQuote->serialize();
+        }
+
+        $this->sendResultStatus = (new SendEmailByCase($case->cs_id, $clientEmail, $emailData))->getResultStatus();
+        if ($this->sendResultStatus === SendEmailByCase::RESULT_NOT_ENABLE) {
+            throw new CheckRestrictionException('ClientEmail not send. EmailConfigs not enabled.');
+        }
+        if ($this->sendResultStatus !== SendEmailByCase::RESULT_SEND) {
+            throw new CheckRestrictionException('ClientEmail not send');
+        }
+
+        if ($originProductQuote && isset($productQuoteChange)) {
+            $productQuoteChange->decisionPending();
+            (new ProductQuoteChangeRepository())->save($productQuoteChange);
+        }
+        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Email sent successfully');
+
+        return $this->sendResultStatus;
+    }
+
+    public static function detectEmail(Cases $case, ?Order $order, bool $findFromCaseClient = false): string
+    {
+        if ($order && $order->orderContacts) {
+            $emailValidator = new yii\validators\EmailValidator();
+            foreach ($order->orderContacts as $orderContact) {
+                if (!empty($orderContact->oc_email) && $emailValidator->validate($orderContact->oc_email)) {
+                    return $orderContact->oc_email;
+                }
+            }
+        }
+        if ($findFromCaseClient && $clientEmail = ClientEmail::getGeneralEmail($case->cs_client_id)) {
+            return $clientEmail;
+        }
+        throw new CheckRestrictionException('ClientEmail not found');
+    }
+}
