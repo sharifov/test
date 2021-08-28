@@ -2,7 +2,8 @@
 
 namespace console\controllers;
 
-use sales\model\client\notifications\listeners\ClientNotificationCancelerListener;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use sales\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
 use common\models\Employee;
@@ -22,8 +23,6 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\jobs\OrderCanceledConfirmationJob;
 use modules\order\src\payment\services\PaymentService;
-use modules\order\src\processManager\phoneToBook\events\FlightQuoteBookedEvent;
-use modules\order\src\processManager\phoneToBook\events\QuoteBookedEvent;
 use modules\order\src\processManager\jobs\BookingFlightJob;
 use modules\order\src\processManager\jobs\BookingHotelJob;
 use modules\order\src\processManager\phoneToBook\jobs\StartBookingJob;
@@ -43,7 +42,6 @@ use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
 use sales\model\cases\useCases\cases\api\create\Command;
 use sales\model\cases\useCases\cases\api\create\Handler;
-use sales\model\client\notifications\ClientNotificationExecutor;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
@@ -85,8 +83,9 @@ class TestController extends Controller
 
     public function actionA()
     {
-        \Yii::createObject(ClientNotificationCancelerListener::class)->handle(new ProductQuoteChangeDecisionModifyEvent(109, 192));
-        die;
+
+//        \Yii::createObject(\sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class)->handle(new ProductQuoteChangeDecisionModifyEvent(113, 192));
+//        die;
 
 //        \Yii::createObject(ClientNotificationExecutor::class)->execute(2);
 //        die;

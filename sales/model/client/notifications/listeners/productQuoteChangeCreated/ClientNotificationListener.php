@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\client\notifications\listeners\productQuoteChange;
+namespace sales\model\client\notifications\listeners\productQuoteChangeCreated;
 
 use common\models\ClientPhone;
 use common\models\SmsTemplateType;
@@ -51,7 +51,7 @@ class ClientNotificationListener
     {
         try {
             $projectId = $event->productQuoteChange->pqcPq->pqProduct->pr_project_id;
-            $notificationType = NotificationType::productQuoteChange();
+            $notificationType = NotificationType::fromEvent($event);
 
             $notificationSettings = $this->projectSettings->getNotificationSettings($projectId, $notificationType->getType());
             if (!$notificationSettings) {
@@ -80,7 +80,7 @@ class ClientNotificationListener
                     'caseId' => $event->caseId,
                 ],
                 'exception' => AppHelper::throwableLog($e, true),
-            ], 'ProductQuoteChangeClientNotificationListener');
+            ], 'ProductQuoteChangeCreatedClientNotificationListener:handle');
         }
     }
 
@@ -94,7 +94,7 @@ class ClientNotificationListener
                 'productQuoteId' => $event->productQuoteId,
                 'caseId' => $event->caseId,
                 'phone' => $settings->phoneFrom,
-            ], 'ProductQuoteChangeClientNotificationListener:phoneNotificationProcessing');
+            ], 'ProductQuoteChangeCreatedClientNotificationListener:phoneNotificationProcessing');
             return;
         }
 
@@ -132,7 +132,7 @@ class ClientNotificationListener
                 'productQuoteId' => $event->productQuoteId,
                 'caseId' => $event->caseId,
                 'phone' => $settings->phoneFrom,
-            ], 'ProductQuoteChangeClientNotificationListener:smsNotificationProcessing');
+            ], 'ProductQuoteChangeCreatedClientNotificationListener:smsNotificationProcessing');
             return;
         }
 
@@ -144,7 +144,7 @@ class ClientNotificationListener
                 'productQuoteId' => $event->productQuoteId,
                 'caseId' => $event->caseId,
                 'phone' => $settings->phoneFrom,
-            ], 'ProductQuoteChangeClientNotificationListener:smsNotificationProcessing');
+            ], 'ProductQuoteChangeCreatedClientNotificationListener:smsNotificationProcessing');
             return;
         }
 
@@ -159,7 +159,7 @@ class ClientNotificationListener
                     'productQuoteId' => $event->productQuoteId,
                     'caseId' => $event->caseId,
                     'phone' => $settings->phoneFrom,
-                ], 'ProductQuoteChangeClientNotificationListener:smsNotificationProcessing');
+                ], 'ProductQuoteChangeCreatedClientNotificationListener:smsNotificationProcessing');
                 return;
             }
             $templateKey = $settings->messageTemplateKey;
@@ -211,7 +211,7 @@ class ClientNotificationListener
             \Yii::error([
                 'message' => 'Not found Contact Client Phone',
                 'productQuoteChangeId' => $productQuoteChange->pqc_id,
-            ], 'ProductQuoteChangeClientNotificationListener');
+            ], 'ProductQuoteChangeCreatedClientNotificationListener:getClient');
             $clientPhoneId = $this->addClientPhone($contact['oc_client_id'], $contact['oc_phone_number']);
         }
 
@@ -236,13 +236,13 @@ class ClientNotificationListener
             \Yii::error([
                 'message' => 'Client phone not created. Undefined reason.',
                 'clientId' => $clientId,
-            ], 'ProductQuoteChangeClientNotificationListener');
+            ], 'ProductQuoteChangeCreatedClientNotificationListener:addClientPhone');
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Client phone not created',
                 'clientId' => $clientId,
                 'exception' => AppHelper::throwableLog($e, true),
-            ], 'ProductQuoteChangeClientNotificationListener');
+            ], 'ProductQuoteChangeCreatedClientNotificationListener:addClientPhone');
         }
         return null;
     }

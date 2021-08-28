@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\client\notifications\listeners\productQuoteChange;
+namespace sales\model\client\notifications\listeners\productQuoteChangeCreated;
 
 /**
  * Class Client

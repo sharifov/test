@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\client\notifications\listeners;
+namespace sales\model\client\notifications\listeners\productQuoteChangeDecided;
 
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionable;
 use sales\helpers\app\AppHelper;
@@ -32,7 +32,7 @@ class ClientNotificationCancelerListener
         $notifications = ClientNotification::find()
             ->select(['cn_communication_object_id as id', 'cn_communication_type_id as type'])
             ->andWhere([
-                'cn_notification_type_id' => NotificationType::PRODUCT_QUOTE_CHANGE,
+                'cn_notification_type_id' => NotificationType::PRODUCT_QUOTE_CHANGE_CREATED_EVENT,
                 'cn_object_id' => $event->getId(),
             ])
             ->asArray()
@@ -68,7 +68,7 @@ class ClientNotificationCancelerListener
                 'message' => 'Client phone notification cancel error',
                 'notificationId' => $notificationId,
                 'exception' => AppHelper::throwableLog($e),
-            ], 'ClientNotificationCancelerListener:cancelPhoneNotification');
+            ], 'productQuoteChangeDecided:ClientNotificationCancelerListener');
         }
     }
 
@@ -86,7 +86,7 @@ class ClientNotificationCancelerListener
                 'message' => 'Client sms notification cancel error',
                 'notificationId' => $notificationId,
                 'exception' => AppHelper::throwableLog($e),
-            ], 'ClientNotificationCancelerListener:cancelSmsNotification');
+            ], 'productQuoteChangeDecided:ClientNotificationCancelerListener');
         }
     }
 }

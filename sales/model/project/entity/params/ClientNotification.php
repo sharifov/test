@@ -7,21 +7,21 @@ use sales\model\client\notifications\client\entity\NotificationType;
 /**
  * Class ClientNotification
  *
- * @property ClientNotificationObject $productQuoteChange
+ * @property ClientNotificationObject $productQuoteChangeCreatedEvent
  */
 class ClientNotification
 {
     /**
-     * @see property name nust equal name of NotificationType::LIST[NotificationType::PRODUCT_QUOTE_CHANGE]
+     * @see property name nust equal name of NotificationType::LIST[NotificationType::PRODUCT_QUOTE_CHANGE_CREATED_EVENT]
      */
-    public ClientNotificationObject $productQuoteChange;
+    public ClientNotificationObject $productQuoteChangeCreatedEvent;
 
     public function __construct(array $params)
     {
-        if (array_key_exists('productQuoteChange', $params) && is_array($params['productQuoteChange'])) {
-            $this->productQuoteChange = new ClientNotificationObject($params['productQuoteChange']);
+        if (array_key_exists('productQuoteChangeCreatedEvent', $params) && is_array($params['productQuoteChangeCreatedEvent'])) {
+            $this->productQuoteChangeCreatedEvent = new ClientNotificationObject($params['productQuoteChangeCreatedEvent']);
         } else {
-            $this->productQuoteChange = new ClientNotificationObject([]);
+            $this->productQuoteChangeCreatedEvent = new ClientNotificationObject([]);
         }
     }
 

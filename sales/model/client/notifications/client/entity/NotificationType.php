@@ -12,14 +12,17 @@ use yii\bootstrap4\Html;
  */
 class NotificationType
 {
-    public const PRODUCT_QUOTE_CHANGE = 1;
+    public const PRODUCT_QUOTE_CHANGE_CREATED_EVENT = 1;
 
+    /**
+     * @see \sales\model\project\entity\params\ClientNotification property name must equal of this list
+     */
     private const LIST = [
-        self::PRODUCT_QUOTE_CHANGE => 'productQuoteChange',
+        self::PRODUCT_QUOTE_CHANGE_CREATED_EVENT => 'productQuoteChangeCreatedEvent',
     ];
 
     private const CSS_CLASS_LIST = [
-        self::PRODUCT_QUOTE_CHANGE => 'info',
+        self::PRODUCT_QUOTE_CHANGE_CREATED_EVENT => 'info',
     ];
 
     private int $value;
@@ -31,9 +34,23 @@ class NotificationType
         $this->type = $type;
     }
 
-    public static function productQuoteChange(): self
+    public static function fromEvent(object $event): self
     {
-        return new self(self::PRODUCT_QUOTE_CHANGE, self::LIST[self::PRODUCT_QUOTE_CHANGE]);
+        $class = get_class($event);
+        $className = lcfirst(self::getClassName($class));
+        $list = array_flip(self::LIST);
+        if (isset($list[$className])) {
+            return new self($list[$className], $className);
+        }
+        throw new \InvalidArgumentException('Invalid notification type.');
+    }
+
+    private static function getClassName($classname): string
+    {
+        if ($pos = strrpos($classname, '\\')) {
+            return substr($classname, $pos + 1);
+        }
+        return $pos;
     }
 
     public function getValue(): int

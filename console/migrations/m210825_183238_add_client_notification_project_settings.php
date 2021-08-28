@@ -22,8 +22,8 @@ class m210825_183238_add_client_notification_project_settings extends Migration
         foreach ($projects as $project) {
             $settings = JsonHelper::decode($project['p_params_json']);
 
-            if (!isset($settings['clientNotification']['productQuoteChange'])) {
-                $settings['clientNotification']['productQuoteChange'] = [
+            if (!isset($settings['clientNotification']['productQuoteChangeCreatedEvent'])) {
+                $settings['clientNotification']['productQuoteChangeCreatedEvent'] = [
                     'sendPhoneNotification' => [
                         'enabled' => false,
                         'phoneFrom' => null,
@@ -61,8 +61,8 @@ class m210825_183238_add_client_notification_project_settings extends Migration
         foreach ($projects as $project) {
             $settings = JsonHelper::decode($project['p_params_json']);
 
-            if (isset($settings['clientNotification']['productQuoteChange'])) {
-                unset($settings['clientNotification']['productQuoteChange']);
+            if (isset($settings['clientNotification']['productQuoteChangeCreatedEvent'])) {
+                unset($settings['clientNotification']['productQuoteChangeCreatedEvent']);
             }
 
             $this->update('projects', ['p_params_json' => $settings], ['id' => $project['id']]);

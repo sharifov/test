@@ -1,6 +1,5 @@
 <?php
 
-use ClientNotificationCancelerListener\ClientNotificationCancelerListener;
 use modules\order\src\listeners\order\OrderPrepareListener;
 use modules\order\src\processManager;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
@@ -86,18 +85,18 @@ return [
     ProductClientBudgetChangedEvent::class => [],
 
     ProductQuoteChangeCreatedEvent::class => [
-        \sales\model\client\notifications\listeners\productQuoteChange\ClientNotificationListener::class,
+        \sales\model\client\notifications\listeners\productQuoteChangeCreated\ClientNotificationListener::class,
     ],
 
     ProductQuoteChangeDecisionConfirmEvent::class => [
-        ClientNotificationCancelerListener::class,
+        \sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
     ],
 
     ProductQuoteChangeDecisionRefundEvent::class => [
-        ClientNotificationCancelerListener::class,
+        \sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
     ],
 
     ProductQuoteChangeDecisionModifyEvent::class => [
-        ClientNotificationCancelerListener::class,
+        \sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
     ],
 ];
