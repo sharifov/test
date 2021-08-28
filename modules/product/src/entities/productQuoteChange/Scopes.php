@@ -21,6 +21,11 @@ class Scopes extends ActiveQuery
         return $this->andWhere(['pqc_case_id' => $id]);
     }
 
+    public function isNotDecided(): self
+    {
+        return $this->andWhere(['IS', 'pqc_decision_type_id', null]);
+    }
+
     /**
      * @param null $db
      * @return ProductQuoteChange[]|array

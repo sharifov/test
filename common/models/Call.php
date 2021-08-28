@@ -6,6 +6,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
@@ -31,7 +32,7 @@ use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
-use sales\model\client\notifications\phone\ClientNotificationPhoneCompleted;
+use sales\model\client\notifications\ClientNotificationCanceler;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -1399,6 +1400,16 @@ class Call extends \yii\db\ActiveRecord
                 $job->callSids = [$this->c_call_sid];
                 $job->delayJob = $delayJob;
                 Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
+            }
+
+            if ($this->c_case_id) {
+                $productQuoteChanges = ProductQuoteChange::find()->select(['pqc_id'])->byCaseId($this->c_case_id)->isNotDecided()->column();
+                if ($productQuoteChanges) {
+                    $clientNotificationCanceler = Yii::createObject(ClientNotificationCanceler::class);
+                    foreach ($productQuoteChanges as $productQuoteChangeId) {
+                        $clientNotificationCanceler->cancel(\sales\model\client\notifications\client\entity\NotificationType::PRODUCT_QUOTE_CHANGE_CREATED_EVENT, $productQuoteChangeId);
+                    }
+                }
             }
         }
 
