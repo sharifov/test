@@ -19,24 +19,24 @@
                 <path>webapi</path>
             </source>
             <ignore hidden="true" symlinks="true">
-                <path>common/config/*</path>
-                <path>console/config/*</path>
-                <path>console/migrations/*</path>
-                <path>console/config/*</path>
-                <path>frontend/web/*</path>
-                <path>frontend/themes/*</path>
-                <path>frontend/views/*</path>
+                <path>common/config/**/*</path>
+                <path>console/config/**/*</path>
+                <path>console/migrations/**/*</path>
+                <path>console/config/**/*</path>
+                <path>frontend/web/**/*</path>
+                <path>frontend/themes/**/*</path>
+                <path>frontend/views/**/*</path>
 
-                <path>webapi/config/*</path>
+                <path>webapi/config/**/*</path>
 
-                <path>common/tests/*</path>
-                <path>frontend/tests/*</path>
-                <path>webapi/tests/*</path>
-                <path>console/tests/*</path>
+                <path>common/tests/**/*</path>
+                <path>frontend/tests/**/*</path>
+                <path>webapi/tests/**/*</path>
+                <path>console/tests/**/*</path>
 
-                <path>frontend/runtime/*</path>
-                <path>webapi/runtime/*</path>
-                <path>console/runtime/*</path>
+                <path>frontend/runtime/**/*</path>
+                <path>webapi/runtime/**/*</path>
+                <path>console/runtime/**/*</path>
 
                 <path>frontend/controllers/LocalTestController.php</path>
 
