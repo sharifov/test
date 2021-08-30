@@ -101,6 +101,13 @@ class ProductQuoteData extends \yii\db\ActiveRecord
         return $self;
     }
 
+    public static function createRecommended(int $productQuoteId): self
+    {
+        $self = self::create($productQuoteId);
+        $self->setRecommended();
+        return $self;
+    }
+
     public function setRecommended(): void
     {
         $this->pqd_key = ProductQuoteDataKey::RECOMMENDED;

@@ -502,9 +502,7 @@ class ProductQuoteController extends FController
                 }
             }
 
-            $recommendedQuote = ProductQuoteData::create($reprotectionQuote->pq_id);
-            $recommendedQuote->setRecommended();
-
+            $recommendedQuote = ProductQuoteData::createRecommended($reprotectionQuote->pq_id);
             if (!$recommendedQuote->save()) {
                 throw new \RuntimeException('Unable to set recommended reprotection quote flag: ' . $recommendedQuote->getErrorSummary(true)[0]);
             }

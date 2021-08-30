@@ -51,4 +51,9 @@ class ProductQuoteRelationQuery
             ->asArray()
             ->column();
     }
+
+    public static function countReprotectionQuotesByOrigin(int $originQuoteId): int
+    {
+        return (int)ProductQuoteRelation::find()->byParentQuoteId($originQuoteId)->reprotection()->count();
+    }
 }
