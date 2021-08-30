@@ -8,6 +8,8 @@ use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\api\productQuoteGet\ProductQuoteGetForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\helpers\app\AppHelper;
 use sales\repositories\NotFoundException;
@@ -1916,7 +1918,12 @@ class FlightController extends BaseController
 
             if ($form->withReprotection()) {
                 $reprotectionQuoteList = [];
-                $reprotectionRelationQuotes = ProductQuoteRelation::find()->byParentQuoteId($productQuote->pq_id)->reprotection()->all();
+                $reprotectionRelationQuotes = ProductQuoteRelation::find()
+                    ->leftJoinRecommended()
+                    ->byParentQuoteId($productQuote->pq_id)
+                    ->reprotection()
+                    ->orderByRecommendedDesc()
+                    ->all();
                 foreach ($reprotectionRelationQuotes as $relationQuote) {
                     $reprotectionQuoteList[] = $relationQuote->pqrRelatedPq->toArray();
                 }
