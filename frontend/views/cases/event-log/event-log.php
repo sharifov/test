@@ -28,6 +28,7 @@ use modules\cases\src\abac\dto\CasesAbacDto;
         <?php Pjax::begin([
             'id' => 'case-event-grid-pjax',
             'enablePushState' => false,
+            'timeout' => 4000,
             'clientOptions' => ['method' => 'GET']
         ]) ?>
         <?php echo GridView::widget([

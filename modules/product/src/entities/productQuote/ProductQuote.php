@@ -8,6 +8,8 @@ use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use modules\product\src\entities\productQuoteLead\ProductQuoteLead;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
@@ -102,7 +104,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteChange[] $productQuoteChanges
  * @property ProductQuoteRefund|null $productQuoteLastRefund
  * @property ProductQuoteRefund[] $productQuoteRefunds
- * @property ProductQuote|null $originProductQuote
+ * @property ProductQuoteData|null $productQuoteDataRecommended
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
@@ -406,11 +408,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteOptions(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id']);
-    }
-
-    public function getOriginProductQuote(): ActiveQuery
-    {
-        return $this->hasOne(self::class, ['pqr_parent_pq_id' => 'pq_id'])->innerJoin(ProductQuoteRelation::tableName(), 'pq_id = pqr_related_pq_id');
     }
 
     /**
@@ -1019,5 +1016,15 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             $bookingId = $this->flightQuote->getBookingId();
         }
         return $bookingId;
+    }
+
+    public function getProductQuoteDataRecommended(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteData::class, ['pqd_product_quote_id' => 'pq_id'])->andWhere(['pqd_key' => ProductQuoteDataKey::RECOMMENDED]);
+    }
+
+    public function isRecommended(): bool
+    {
+        return $this->productQuoteDataRecommended ? $this->productQuoteDataRecommended->isRecommended() : false;
     }
 }

@@ -24,6 +24,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_PRODUCT_QUOTE_VIEW_DETAILS = self::NS . 'act/product_quote/view_details';
     public const ACT_REPROTECTION_QUOTE_SEND_EMAIL = self::NS . 'act/reprotection_quote/send_email';
     public const ACT_VIEW_QUOTES_DIFF = self::NS . 'act/reprotection_quote/original_quote_diff';
+    public const ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/set_recommended';
 
     /** UI PERMISSION */
     public const UI_BLOCK_EVENT_LOG_LIST  = self::NS . 'ui/block/event-log-list';
@@ -40,6 +41,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_FLIGHT_REPROTECTION_REFUND => self::ACT_FLIGHT_REPROTECTION_REFUND,
         self::ACT_FLIGHT_REPROTECTION_QUOTE => self::ACT_FLIGHT_REPROTECTION_QUOTE,
         self::ACT_VIEW_QUOTES_DIFF => self::ACT_VIEW_QUOTES_DIFF,
+        self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE => self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -61,6 +63,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ACTION_ACCESS],
         self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ACTION_CREATE],
         self::ACT_VIEW_QUOTES_DIFF => [self::ACTION_ACCESS],
+        self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
