@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ProductQuoteChangeDecisionType::getList(),
                 'format' => 'raw'
             ],
+            'pqc_is_automate:boolean',
             [
                 'attribute' => 'pqc_created_dt',
                 'class' => DateTimeColumn::class
