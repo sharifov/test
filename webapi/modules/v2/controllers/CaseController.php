@@ -293,37 +293,7 @@ class CaseController extends BaseController
 
             $query
 //                ->addSelect(new Expression(' IF ( cs_created_dt < NOW() - INTERVAL ' . $limit . ' DAY, true, false) AS is_active,'))
-                ->addSelect(new Expression('
-                    DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'))
-                ->leftJoin([
-                    'sale_out' => CaseSale::find()
-                        ->select([
-                            'css_cs_id',
-                            new Expression('
-                    MIN(css_out_date) AS last_out_date'),
-                        ])
-                        ->innerJoin(
-                            Cases::tableName() . ' AS cases',
-                            'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
-                        )
-                        ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
-                        ->groupBy('css_cs_id')
-                ], 'cases.cs_id = sale_out.css_cs_id')
-                ->leftJoin([
-                    'sale_in' => CaseSale::find()
-                        ->select([
-                            'css_cs_id',
-                            new Expression('
-                    MIN(css_in_date) AS last_in_date'),
-                        ])
-                        ->innerJoin(
-                            Cases::tableName() . ' AS cases',
-                            'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
-                        )
-                        ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
-                        ->groupBy('css_cs_id')
-                ], 'cases.cs_id = sale_in.css_cs_id')
-                ->andWhere('cs_status != ' . CasesStatus::STATUS_SOLVED)
+                ->andWhere('cs_status != ' . CasesStatus::STATUS_SOLVED);
 
             $cases = $query->all();
 
