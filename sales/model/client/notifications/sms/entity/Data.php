@@ -12,6 +12,8 @@ use yii\helpers\Json;
  * @property int|null $projectId
  * @property string|null $projectKey
  * @property string|null $templateKey
+ * @property string|null $bookingId
+ * @property string|null $bookingHashCode
  */
 class Data
 {
@@ -20,6 +22,8 @@ class Data
     public ?int $projectId;
     public ?string $projectKey;
     public ?string $templateKey;
+    public ?string $bookingId;
+    public ?string $bookingHashCode;
 
     private function __construct()
     {
@@ -54,6 +58,8 @@ class Data
         $data->projectId = !empty($raw['projectId']) ? (int)$raw['projectId'] : null;
         $data->projectKey = !empty($raw['projectKey']) ? (string)$raw['projectKey'] : null;
         $data->templateKey = !empty($raw['templateKey']) ? (string)$raw['templateKey'] : null;
+        $data->bookingId = !empty($raw['bookingId']) ? (string)$raw['bookingId'] : null;
+        $data->bookingHashCode = !empty($raw['bookingHashCode']) ? (string)$raw['bookingHashCode'] : null;
         return $data;
     }
 
@@ -70,6 +76,8 @@ class Data
             'projectId' => $this->projectId,
             'projectKey' => $this->projectKey,
             'templateKey' => $this->templateKey,
+            'bookingId' => $this->bookingId,
+            'bookingHashCode' => $this->bookingHashCode,
         ];
     }
 
@@ -80,5 +88,7 @@ class Data
         $this->projectId = null;
         $this->projectKey = null;
         $this->templateKey = null;
+        $this->bookingId = null;
+        $this->bookingHashCode = null;
     }
 }

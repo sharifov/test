@@ -4,11 +4,13 @@ namespace sales\model\client\notifications\listeners\productQuoteChangeCreated;
 
 use common\models\ClientPhone;
 use common\models\SmsTemplateType;
+use modules\flight\models\FlightQuoteFlight;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\ProjectHashGenerator;
 use sales\model\client\notifications\client\entity\NotificationType;
 use sales\model\client\notifications\ClientNotificationCreator;
 use sales\model\client\notifications\phone\entity\Data as PhoneData;
@@ -155,9 +157,32 @@ class ClientNotificationListener
             return;
         }
 
+        $bookingId = $this->getBookingId($event->productQuoteChange);
+        if (!$bookingId) {
+            \Yii::error([
+                'message' => 'Not found bookingId',
+                'productQuoteChangeId' => $event->productQuoteChange->pqc_id,
+                'productQuoteId' => $event->productQuoteChange->pqc_pq_id,
+            ], 'ProductQuoteChangeCreatedClientNotificationListener:smsNotificationProcessing');
+            return;
+        }
+
+        $bookingHashCode = ProjectHashGenerator::getHashByProjectId($project->id, $bookingId);
+
         $time = $this->getTime();
 
-        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $project, $templateKey) {
+        $this->transactionManager->wrap(function () use (
+            $phoneFromId,
+            $client,
+            $time,
+            $settings,
+            $event,
+            $notificationType,
+            $project,
+            $templateKey,
+            $bookingId,
+            $bookingHashCode
+        ) {
             $this->clientNotificationCreator->createSmsNotification(
                 $phoneFromId,
                 $settings->nameFrom,
@@ -170,6 +195,8 @@ class ClientNotificationListener
                     'projectId' => $project->id,
                     'projectKey' => $project->key,
                     'templateKey' => $templateKey,
+                    'bookingId' => $bookingId,
+                    'bookingHashCode' => $bookingHashCode,
                 ]),
                 new \DateTimeImmutable(),
                 $client->id,
@@ -240,5 +267,16 @@ class ClientNotificationListener
     {
         // todo
         return new Time(null, null);
+    }
+
+    private function getBookingId(ProductQuoteChange $change): ?string
+    {
+        if ($change->pqcPq->isFlight()) {
+            $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $change->pqcPq->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+            if ($lastFlightQuoteFlightBookingId) {
+                return $lastFlightQuoteFlightBookingId;
+            }
+        }
+        return null;
     }
 }
