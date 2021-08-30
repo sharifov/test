@@ -221,7 +221,7 @@ $orderAbacDto = new OrderAbacDto($order);
                     $ordOptionTotalPrice += $quote->optionAmountSum;
                     ?>
                       <tr>
-                          <?= $this->render('_product_quote_item', [
+                          <?= $this->render('_reprotection_quote_item', [
                               'quote' => $quote,
                               'nr' => $nr++,
                               'order' => $order,
@@ -665,13 +665,14 @@ $('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotecti
         createNotify('Reprotection confirm', 'Server error', 'error');
     });
 });
-$('body').off('click', '.btn-reprotection-refund').on('click', '.btn-reprotection-refund', function (e) {
+$('body').off('click', '.btn-reprotection-refund, .btn-reprotection-recommended').on('click', '.btn-reprotection-refund, .btn-reprotection-recommended', function (e) {
     e.preventDefault();
     
     let btn = $(this);
     let btnIconHtml = btn.find('i')[0];
     let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
     let url = btn.data('url');
+    let title = btn.data('title');
     
     btn.find('i').replaceWith(iconSpinner);
     btn.addClass('disabled');
@@ -687,15 +688,16 @@ $('body').off('click', '.btn-reprotection-refund').on('click', '.btn-reprotectio
         btn.find('i').replaceWith(btnIconHtml);
         btn.removeClass('disabled');
         if (data.error) {
-            createNotify('Reprotection refund', data.message, 'error');
+            createNotify(title, data.message, 'error');
         } else {
-            createNotify('Reprotection refund', 'Success', 'success');
+            $.pjax.reload({container: '#pjax-case-orders', push: false, replace: false, timeout: 10000, async: false});
+            createNotify(title, 'Success', 'success');
         }
     })
-    .fail(function () {
+    .fail(function (xhr) {
         btn.find('i').replaceWith(btnIconHtml);
         btn.removeClass('disabled');
-        createNotify('Reprotection refund', 'Server error', 'error');
+        createNotify(title, xhr.responseText, 'error');
     });
 });
 JS;

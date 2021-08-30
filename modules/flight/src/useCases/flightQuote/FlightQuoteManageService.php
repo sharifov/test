@@ -63,9 +63,12 @@ use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\ProductQuoteDataRepository;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
@@ -104,6 +107,7 @@ use yii\helpers\VarDumper;
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  * @property ProductQuoteCloneService $productQuoteCloneService
  * @property ProductQuoteRelationRepository $productQuoteRelationRepository
+ * @property ProductQuoteDataRepository $productQuoteDataRepository
  */
 class FlightQuoteManageService implements ProductQuoteService
 {
@@ -177,6 +181,7 @@ class FlightQuoteManageService implements ProductQuoteService
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
     private ProductQuoteCloneService $productQuoteCloneService;
     private ProductQuoteRelationRepository $productQuoteRelationRepository;
+    private ProductQuoteDataRepository $productQuoteDataRepository;
 
     public function __construct(
         FlightQuoteRepository $flightQuoteRepository,
@@ -198,7 +203,8 @@ class FlightQuoteManageService implements ProductQuoteService
         FlightQuoteBookingRepository $flightQuoteBookingRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
         ProductQuoteCloneService $productQuoteCloneService,
-        ProductQuoteRelationRepository $productQuoteRelationRepository
+        ProductQuoteRelationRepository $productQuoteRelationRepository,
+        ProductQuoteDataRepository $productQuoteDataRepository
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -220,6 +226,7 @@ class FlightQuoteManageService implements ProductQuoteService
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->productQuoteCloneService = $productQuoteCloneService;
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
+        $this->productQuoteDataRepository = $productQuoteDataRepository;
     }
 
     /**
@@ -621,6 +628,10 @@ class FlightQuoteManageService implements ProductQuoteService
                     $flightQuote->fq_product_quote_id
                 );
                 $this->productQuoteRelationRepository->save($relation);
+                if (ProductQuoteRelationQuery::countReprotectionQuotesByOrigin($originProductQuote->pq_id) === 1) {
+                    $reprotectionQuoteData = ProductQuoteData::createRecommended($flightQuote->fq_product_quote_id);
+                    $this->productQuoteDataRepository->save($reprotectionQuoteData);
+                }
             }
 
             $this->calcProductQuotePrice($productQuote, $flightQuote);

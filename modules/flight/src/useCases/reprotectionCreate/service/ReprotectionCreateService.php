@@ -228,10 +228,10 @@ class ReprotectionCreateService
         throw new DomainException('Flight by OriginQuote not found');
     }
 
-    public function declineReProtectionQuotes(ProductQuote $originProductQuote, Cases $case, ?int $userId = null): array
+    public function declineReProtectionQuotes(int $originProductQuoteId, string $originProductQuoteGid, Cases $case, ?int $userId = null): array
     {
         $declinedIds = [];
-        if ($reProtectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originProductQuote->pq_id)) {
+        if ($reProtectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originProductQuoteId)) {
             foreach ($reProtectionQuotes as $reProtectionQuote) {
                 if (!$reProtectionQuote->isDeclined() && self::isReProtectionQuote($reProtectionQuote)) {
                     $reProtectionQuote->declined($userId, 'Declined from reProtection');
@@ -243,7 +243,7 @@ class ReprotectionCreateService
                 $case->addEventLog(
                     CaseEventLog::RE_PROTECTION_CREATE,
                     'Old ReProtectionQuotes declined',
-                    ['originProductQuoteGid' => $originProductQuote->pq_gid]
+                    ['originProductQuoteGid' => $originProductQuoteGid]
                 );
             }
         }

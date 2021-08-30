@@ -138,7 +138,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 throw new DomainException('OriginProductQuote not declined');
             }
 
-            $reProtectionCreateService->declineReProtectionQuotes($originProductQuote, $case);
+            $reProtectionCreateService->declineReProtectionQuotes($originProductQuote->pq_id, $originProductQuote->pq_gid, $case);
 
             if (empty($flightRequest->getFlightQuoteData())) {
                 $caseReProtectionService->caseToManual('New schedule change happened, no quote provided');
