@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor
+        configVersion="3"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="https://www.phpdoc.org"
+>
+    <title>CRM Sales - phpDocumentor</title>
+    <paths>
+        <output>webapi/web/phpdoc</output>
+    </paths>
+    <version number="3.30.0">
+        <api>
+            <source dsn=".">
+                <path>common</path>
+                <path>console</path>
+                <path>frontend</path>
+                <path>sales</path>
+                <path>modules</path>
+                <path>webapi</path>
+            </source>
+            <ignore hidden="true" symlinks="true">
+                <path>common/config/*</path>
+                <path>console/config/*</path>
+                <path>console/migrations/*</path>
+                <path>console/config/*</path>
+                <path>frontend/web/*</path>
+                <path>frontend/themes/*</path>
+                <path>frontend/views/*</path>
+
+                <path>webapi/config/*</path>
+
+                <path>common/tests/*</path>
+                <path>frontend/tests/*</path>
+                <path>webapi/tests/*</path>
+                <path>console/tests/*</path>
+
+                <path>frontend/runtime/*</path>
+                <path>webapi/runtime/*</path>
+                <path>console/runtime/*</path>
+
+                <path>frontend/controllers/LocalTestController.php</path>
+
+            </ignore>
+            <extensions>
+                <extension>php</extension>
+            </extensions>
+            <markers>
+                <marker>TODO</marker>
+                <marker>FIXME</marker>
+            </markers>
+        </api>
+    </version>
+
+</phpdocumentor>
