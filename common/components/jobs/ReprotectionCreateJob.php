@@ -114,7 +114,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $boRequestReProtectionService->getOrderCreateFromSaleForm(),
                         $saleData,
                         $order,
-                        $case
+                        $case,
+                        $this->flight_request_is_automate
                     );
                     $caseReProtectionService->setCaseDeadline($originProductQuote->flightQuote);
                 } catch (Throwable $throwable) {
@@ -243,7 +244,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
 
             if (!$originProductQuote->productQuoteLastChange || !$originProductQuote->productQuoteLastChange->isStatusNew()) {
-                $productQuoteChange = ProductQuoteChange::createNew($originProductQuote->pq_id, $case->cs_id);
+                $productQuoteChange = ProductQuoteChange::createNew($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
                 $productQuoteChangeRepository->save($productQuoteChange);
             }
 
