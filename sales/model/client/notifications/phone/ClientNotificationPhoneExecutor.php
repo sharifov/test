@@ -44,6 +44,11 @@ class ClientNotificationPhoneExecutor
             throw new \DomainException('Not found Client Phone. ClientPhoneId: ' . $notification->cnfl_to_client_phone_id . ' PhoneNotificationId: ' . $notification->cnfl_id);
         }
 
+        // todo change when will work message template on communication
+        if (!$notification->cnfl_message && !$notification->cnfl_file_url) {
+            throw new \DomainException('Notification message and File url is empty. PhoneNotificationId: ' . $notification->cnfl_id);
+        }
+
         try {
             $notification->processing(new \DateTimeImmutable());
             $this->clientNotificationPhoneListRepository->save($notification);

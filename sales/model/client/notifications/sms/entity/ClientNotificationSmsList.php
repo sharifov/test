@@ -17,7 +17,6 @@ use sales\model\phoneList\entity\PhoneList;
  * @property int|null $cnsl_to_client_phone_id
  * @property string|null $cnsl_start
  * @property string|null $cnsl_end
- * @property string|null $cnsl_message
  * @property array|null $cnsl_data_json
  * @property string|null $cnsl_sms_id
  * @property string|null $cnsl_created_dt
@@ -39,7 +38,6 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
         int $toClientPhoneId,
         ?\DateTimeImmutable $startDt,
         ?\DateTimeImmutable $endDt,
-        string $message,
         Data $data,
         \DateTimeImmutable $createdDt
     ): self {
@@ -50,7 +48,6 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
         $notification->cnsl_to_client_phone_id = $toClientPhoneId;
         $notification->cnsl_start = $startDt ? $startDt->format('Y-m-f H:i:s') : null;
         $notification->cnsl_end = $endDt ? $endDt->format('Y-m-f H:i:s') : null;
-        $notification->cnsl_message = $message;
         $notification->setData($data);
         $notification->cnsl_created_dt = $createdDt->format('Y-m-d H:i:s');
         return $notification;
@@ -122,9 +119,6 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
 
             ['cnsl_name_from', 'string'],
 
-            ['cnsl_message', 'default', 'value' => null],
-            ['cnsl_message', 'string'],
-
             ['cnsl_status_id', 'required'],
             ['cnsl_status_id', 'integer'],
             ['cnsl_status_id', 'in', 'range' => array_keys(Status::getList())],
@@ -160,7 +154,6 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
             'cnsl_to_client_phone_id' => 'To Client Phone ID',
             'cnsl_start' => 'Start',
             'cnsl_end' => 'End',
-            'cnsl_message' => 'Message',
             'cnsl_data_json' => 'DataJson',
             'cnsl_sms_id' => 'Sms Id',
             'cnsl_created_dt' => 'Created Dt',

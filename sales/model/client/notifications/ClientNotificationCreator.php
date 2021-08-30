@@ -78,7 +78,6 @@ class ClientNotificationCreator
         int $toClientPhoneId,
         ?\DateTimeImmutable $startDt,
         ?\DateTimeImmutable $endDt,
-        string $message,
         SmsData $data,
         \DateTimeImmutable $createdDt,
         int $clientId,
@@ -91,7 +90,6 @@ class ClientNotificationCreator
             $toClientPhoneId,
             $startDt,
             $endDt,
-            $message,
             $data,
             $createdDt
         );

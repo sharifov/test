@@ -41,7 +41,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cnsl_to_client_phone_id',
                 'cnsl_start:byUserDatetime',
                 'cnsl_end:byUserDatetime',
-                'cnsl_message:ntext',
                 [
                     'attribute' => 'cnsl_data_json',
                     'value' => static function (ClientNotificationSmsList $model) {

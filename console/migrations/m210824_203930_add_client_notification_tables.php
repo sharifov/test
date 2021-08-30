@@ -88,7 +88,6 @@ class m210824_203930_add_client_notification_tables extends Migration
             'cnsl_to_client_phone_id' => $this->integer(),
             'cnsl_start' => $this->dateTime(),
             'cnsl_end' => $this->dateTime(),
-            'cnsl_message' => $this->text(),
             'cnsl_data_json' => $this->json(),
             'cnsl_sms_id' => $this->integer(),
             'cnsl_created_dt' => $this->dateTime(),

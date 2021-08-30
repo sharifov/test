@@ -31,8 +31,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cnsl_end')->widget(DateTimePicker::class) ?>
 
-        <?= $form->field($model, 'cnsl_message')->textarea(['rows' => 6]) ?>
-
         <?php
         $model->cnsl_data_json = JsonHelper::encode($model->cnsl_data_json);
         try {

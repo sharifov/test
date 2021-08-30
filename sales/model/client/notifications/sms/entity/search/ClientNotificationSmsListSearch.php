@@ -23,8 +23,6 @@ class ClientNotificationSmsListSearch extends ClientNotificationSmsList
 
             ['cnsl_id', 'integer'],
 
-            ['cnsl_message', 'string'],
-
             ['cnsl_start', 'date', 'format' => 'php:Y-m-d'],
 
             ['cnsl_status_id', 'integer'],
@@ -73,8 +71,6 @@ class ClientNotificationSmsListSearch extends ClientNotificationSmsList
             'cnsl_from_phone_id' => $this->cnsl_from_phone_id,
             'cnsl_to_client_phone_id' => $this->cnsl_to_client_phone_id,
         ]);
-
-        $query->andFilterWhere(['like', 'cnsl_message', $this->cnsl_message]);
 
         return $dataProvider;
     }

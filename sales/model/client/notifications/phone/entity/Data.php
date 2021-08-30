@@ -10,6 +10,7 @@ use yii\helpers\Json;
  * @property int|null $clientId
  * @property int|null $caseId
  * @property int|null $projectId
+ * @property string|null $projectKey
  * @property string|null $sayVoice
  * @property string|null $sayLanguage
  */
@@ -18,6 +19,7 @@ class Data
     public ?int $clientId;
     public ?int $caseId;
     public ?int $projectId;
+    public ?string $projectKey;
     public ?string $sayVoice;
     public ?string $sayLanguage;
 
@@ -52,6 +54,7 @@ class Data
         $data->clientId = !empty($raw['clientId']) ? (int)$raw['clientId'] : null;
         $data->caseId = !empty($raw['caseId']) ? (int)$raw['caseId'] : null;
         $data->projectId = !empty($raw['projectId']) ? (int)$raw['projectId'] : null;
+        $data->projectKey = !empty($raw['projectKey']) ? (string)$raw['projectKey'] : null;
         $data->sayVoice = !empty($raw['sayVoice']) ? (string)$raw['sayVoice'] : null;
         $data->sayLanguage = !empty($raw['sayLanguage']) ? (string)$raw['sayLanguage'] : null;
         return $data;
@@ -68,6 +71,7 @@ class Data
             'clientId' => $this->clientId,
             'caseId' => $this->caseId,
             'projectId' => $this->projectId,
+            'projectKey' => $this->projectKey,
             'sayVoice' => $this->sayVoice,
             'sayLanguage' => $this->sayLanguage,
         ];
@@ -78,6 +82,7 @@ class Data
         $this->clientId = null;
         $this->caseId = null;
         $this->projectId = null;
+        $this->projectKey = null;
         $this->sayVoice = null;
         $this->sayLanguage = null;
     }

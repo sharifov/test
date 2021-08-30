@@ -32,8 +32,6 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?php // echo $form->field($model, 'cnsl_end') ?>
 
-    <?php // echo $form->field($model, 'cnsl_message') ?>
-
     <?php // echo $form->field($model, 'cnsl_created_dt') ?>
 
     <?php // echo $form->field($model, 'cnsl_updated_dt') ?>

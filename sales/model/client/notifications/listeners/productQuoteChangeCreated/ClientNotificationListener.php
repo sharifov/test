@@ -50,10 +50,13 @@ class ClientNotificationListener
     public function handle(ProductQuoteChangeCreatedEvent $event): void
     {
         try {
-            $projectId = $event->productQuoteChange->pqcPq->pqProduct->pr_project_id;
+            $project = new Project(
+                $event->productQuoteChange->pqcPq->pqProduct->project->id,
+                $event->productQuoteChange->pqcPq->pqProduct->project->project_key
+            );
             $notificationType = NotificationType::fromEvent($event);
 
-            $notificationSettings = $this->projectSettings->getNotificationSettings($projectId, $notificationType->getType());
+            $notificationSettings = $this->projectSettings->getNotificationSettings($project->id, $notificationType->getType());
             if (!$notificationSettings) {
                 return;
             }
@@ -64,11 +67,11 @@ class ClientNotificationListener
             $client = $this->getClient($event->productQuoteChange);
 
             if ($client->phoneId && $notificationSettings->sendPhoneNotification->enabled) {
-                $this->phoneNotificationProcessing($event, $projectId, $notificationType, $client, $notificationSettings->sendPhoneNotification);
+                $this->phoneNotificationProcessing($event, $project, $notificationType, $client, $notificationSettings->sendPhoneNotification);
             }
 
             if ($client->phoneId && $notificationSettings->sendSmsNotification->enabled) {
-                $this->smsNotificationProcessing($event, $projectId, $notificationType, $client, $notificationSettings->sendSmsNotification);
+                $this->smsNotificationProcessing($event, $project, $notificationType, $client, $notificationSettings->sendSmsNotification);
             }
         } catch (\Throwable $e) {
             \Yii::error([
@@ -84,7 +87,7 @@ class ClientNotificationListener
         }
     }
 
-    private function phoneNotificationProcessing(ProductQuoteChangeCreatedEvent $event, int $projectId, NotificationType $notificationType, Client $client, SendPhoneNotification $settings): void
+    private function phoneNotificationProcessing(ProductQuoteChangeCreatedEvent $event, Project $project, NotificationType $notificationType, Client $client, SendPhoneNotification $settings): void
     {
         $phoneFromId = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $settings->phoneFrom])->scalar();
         if (!$phoneFromId) {
@@ -100,7 +103,7 @@ class ClientNotificationListener
 
         $time = $this->getTime();
 
-        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $projectId) {
+        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $project) {
             $this->clientNotificationCreator->createPhoneNotification(
                 $phoneFromId,
                 $client->phoneId,
@@ -111,7 +114,8 @@ class ClientNotificationListener
                 PhoneData::createFromArray([
                     'clientId' => $client->id,
                     'caseId' => $event->caseId,
-                    'projectId' => $projectId,
+                    'projectId' => $project->id,
+                    'projectKey' => $project->key,
                     'sayVoice' => $settings->messageSayVoice,
                     'sayLanguage' => $settings->messageSayLanguage,
                 ]),
@@ -123,11 +127,13 @@ class ClientNotificationListener
         });
     }
 
-    private function smsNotificationProcessing(ProductQuoteChangeCreatedEvent $event, int $projectId, NotificationType $notificationType, Client $client, SendSmsNotification $settings): void
+    private function smsNotificationProcessing(ProductQuoteChangeCreatedEvent $event, Project $project, NotificationType $notificationType, Client $client, SendSmsNotification $settings): void
     {
-        if (!$settings->message) {
+        if (!$settings->messageTemplateKey) {
             \Yii::error([
-                'message' => 'Sms client notification Message setting is empty. Sms notification not created.',
+                'message' => 'Sms template Key is empty',
+                'projectId' => $project->id,
+                'notificationType' => $notificationType->getType(),
                 'productQuoteChangeId' => $event->getId(),
                 'productQuoteId' => $event->productQuoteId,
                 'caseId' => $event->caseId,
@@ -135,6 +141,7 @@ class ClientNotificationListener
             ], 'ProductQuoteChangeCreatedClientNotificationListener:smsNotificationProcessing');
             return;
         }
+        $templateKey = $settings->messageTemplateKey;
 
         $phoneFromId = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $settings->phoneFrom])->scalar();
         if (!$phoneFromId) {
@@ -148,38 +155,20 @@ class ClientNotificationListener
             return;
         }
 
-        $templateId = null;
-        $templateKey = null;
-        if ($settings->messageTemplateKey) {
-            $templateId = SmsTemplateType::find()->select(['stp_id'])->andWhere(['stp_key' => $settings->messageTemplateKey])->scalar();
-            if (!$templateId) {
-                \Yii::error([
-                    'message' => 'Not found Sms template. Key: ' . $settings->messageTemplateKey,
-                    'productQuoteChangeId' => $event->getId(),
-                    'productQuoteId' => $event->productQuoteId,
-                    'caseId' => $event->caseId,
-                    'phone' => $settings->phoneFrom,
-                ], 'ProductQuoteChangeCreatedClientNotificationListener:smsNotificationProcessing');
-                return;
-            }
-            $templateKey = $settings->messageTemplateKey;
-        }
-
         $time = $this->getTime();
 
-        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $projectId, $templateId, $templateKey) {
+        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $project, $templateKey) {
             $this->clientNotificationCreator->createSmsNotification(
                 $phoneFromId,
                 $settings->nameFrom,
                 $client->phoneId,
                 $time->start,
                 $time->end,
-                $settings->message,
                 SmsData::createFromArray([
                     'clientId' => $client->id,
                     'caseId' => $event->caseId,
-                    'projectId' => $projectId,
-                    'templateId' => $templateId,
+                    'projectId' => $project->id,
+                    'projectKey' => $project->key,
                     'templateKey' => $templateKey,
                 ]),
                 new \DateTimeImmutable(),

@@ -46,23 +46,24 @@ class ClientNotificationSmsExecutor
             throw new \DomainException('Not found Client Phone. ClientPhoneId: ' . $notification->cnsl_to_client_phone_id . ' SmsNotificationId: ' . $notification->cnsl_id);
         }
 
+        if (!$notification->getData()->templateKey) {
+            throw new \DomainException('Template Key is empty. SmsNotificationId: ' . $notification->cnsl_id);
+        }
+
+        // todo
+        $languageId = 'en-US';
+
         try {
-            if ($notification->getData()->templateKey) {
-                $smsText = $this->getSmsText(
-                    $notification->cnsl_id,
-                    $notification->getData()->projectId,
-                    $notification->getData()->templateKey,
-                    $fromPhone,
-                    $toPhone,
-                    [
-                        'content' => $notification->cnsl_message,
-                        // todo other params
-                    ],
-                    'en-US' // todo
-                );
-            } else {
-                $smsText = $notification->cnsl_message;
-            }
+            $smsText = $this->getSmsContent(
+                $notification->cnsl_id,
+                $notification->getData()->templateKey,
+                [
+                    'project_key' => $notification->getData()->projectKey,
+                    'from_phone' => $fromPhone,
+                    'to_phone' => $toPhone,
+                ],
+                $languageId
+            );
 
             $sms = new Sms();
             $sms->s_project_id = $notification->getData()->projectId;
@@ -70,8 +71,7 @@ class ClientNotificationSmsExecutor
             $sms->s_phone_to = $toPhone;
             $sms->s_sms_text = $smsText;
             $sms->s_type_id = Sms::TYPE_OUTBOX;
-            $sms->s_template_type_id = $notification->getData()->templateId;
-            $sms->s_language_id = null; // todo
+            $sms->s_language_id = $languageId;
             $sms->s_is_new = true;
             $sms->s_status_id = Sms::STATUS_PENDING;
             $sms->s_created_dt = date('Y-m-d H:i:s');
@@ -101,26 +101,23 @@ class ClientNotificationSmsExecutor
         }
     }
 
-    private function getSmsText($notificationId, $projectId, $templateKey, $from, $to, $contentData, $languageId): string
+    private function getSmsContent(int $notificationId, string $templateKey, array $contentData, string $languageId): string
     {
-        $smsPreview = \Yii::$app->communication->smsPreview(
-            $projectId,
+        $result = \Yii::$app->communication->getContent(
             $templateKey,
-            $from,
-            $to,
             $contentData,
-            $languageId
+            $languageId,
         );
 
-        if ($smsPreview['error'] !== false) {
-            throw new \DomainException('Cant load preview SMS. NotificationId: ' . $notificationId);
+        if ($result['error'] !== false) {
+            throw new \DomainException('Cant load SMS content. NotificationId: ' . $notificationId);
         }
 
-        $text = $smsPreview['data']['sms_text'] ?? null;
-        if ($text) {
-            return $text;
+        $content = $result['content'] ?? null;
+        if ($content) {
+            return $content;
         }
 
-        throw new \DomainException('Received SMS text is empty. NotificationId: ' . $notificationId);
+        throw new \DomainException('Received SMS content is empty. NotificationId: ' . $notificationId);
     }
 }
