@@ -34,5 +34,4 @@ class CaseApiResponse extends Cases
 //    {
 //        return $this->status_name;
 //    }
-
 }

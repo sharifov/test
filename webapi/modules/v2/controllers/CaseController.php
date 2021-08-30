@@ -237,44 +237,46 @@ class CaseController extends BaseController
             $where['cs_dep_id'] = $form->case_department_id;
         }
 
+        $query = CaseApiResponse::find()
+            ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_order_uid, projects.name')
+            ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
+            ->leftJoin('projects', 'cs_project_id = projects.id')
+            ->addSelect(new Expression('
+                        DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'))
+            ->leftJoin([
+                'sale_out' => CaseSale::find()
+                    ->select([
+                        'css_cs_id',
+                        new Expression('
+                        MIN(css_out_date) AS last_out_date'),
+                    ])
+                    ->innerJoin(
+                        Cases::tableName() . ' AS cases',
+                        'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    )
+                    ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                    ->groupBy('css_cs_id')
+            ], 'cases.cs_id = sale_out.css_cs_id')
+            ->leftJoin([
+                'sale_in' => CaseSale::find()
+                    ->select([
+                        'css_cs_id',
+                        new Expression('
+                        MIN(css_in_date) AS last_in_date'),
+                    ])
+                    ->innerJoin(
+                        Cases::tableName() . ' AS cases',
+                        'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    )
+                    ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+                    ->groupBy('css_cs_id')
+            ], 'cases.cs_id = sale_in.css_cs_id')
+            ->andWhere($where)
+            ->orderBy('cs_created_dt ASC')
+            ->limit($form->limit);
+
         if ($form->active_only != true) {
-            $cases = CaseApiResponse::find()
-                ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_order_uid, projects.name')
-                ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
-                ->leftJoin('projects', 'cs_project_id = projects.id')
-                ->addSelect(new Expression('
-                    DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'))
-                ->leftJoin([
-                    'sale_out' => CaseSale::find()
-                        ->select([
-                            'css_cs_id',
-                            new Expression('
-                    MIN(css_out_date) AS last_out_date'),
-                        ])
-                        ->innerJoin(
-                            Cases::tableName() . ' AS cases',
-                            'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
-                        )
-                        ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
-                        ->groupBy('css_cs_id')
-                ], 'cases.cs_id = sale_out.css_cs_id')
-                ->leftJoin([
-                    'sale_in' => CaseSale::find()
-                        ->select([
-                            'css_cs_id',
-                            new Expression('
-                    MIN(css_in_date) AS last_in_date'),
-                        ])
-                        ->innerJoin(
-                            Cases::tableName() . ' AS cases',
-                            'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
-                        )
-                        ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
-                        ->groupBy('css_cs_id')
-                ], 'cases.cs_id = sale_in.css_cs_id')
-                ->andWhere($where)
-                ->orderBy('cs_created_dt ASC')
-                ->limit($form->limit)->all();
+            $cases = $query->all();
             //                ->createCommand()->getRawSql()
 
             return new SuccessResponse(
@@ -288,10 +290,8 @@ class CaseController extends BaseController
             foreach ($deps as $dep) {
                 $deps_params[$dep->dep_id] = $dep->getParams()->object->case->trashActiveDaysLimit;
             }
-            $cases = CaseApiResponse::find()
-                ->addSelect('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_order_uid, projects.name')
-                ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
-                ->leftJoin('projects', 'cs_project_id = projects.id')
+
+            $query
 //                ->addSelect(new Expression(' IF ( cs_created_dt < NOW() - INTERVAL ' . $limit . ' DAY, true, false) AS is_active,'))
                 ->addSelect(new Expression('
                     DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'))
@@ -323,22 +323,16 @@ class CaseController extends BaseController
                         ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
                         ->groupBy('css_cs_id')
                 ], 'cases.cs_id = sale_in.css_cs_id')
-                ->andWhere($where)
                 ->andWhere('cs_status != ' . CasesStatus::STATUS_SOLVED)
-                ->orderBy('cs_created_dt ASC')
-                ->limit($form->limit)->all();
-//            ->createCommand()->getRawSql();
+
+            $cases = $query->all();
 
             $trashCasesActiveDaysLimitGlobal = Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0;
             $result = [];
             if (is_countable($cases)) {
                 foreach ($cases as $case) {
                     $case->status_name = CasesStatus::getName($case->cs_status);
-                    if (isset($deps_params[$case->cs_dep_id])) {
-                        $days_limit = $deps_params[$case->cs_dep_id];
-                    } else {
-                        $days_limit = $trashCasesActiveDaysLimitGlobal;
-                    }
+                    $days_limit = $deps_params[$case->cs_dep_id] ?? $trashCasesActiveDaysLimitGlobal;
                     $limit_dt = (new \DateTimeImmutable($case->cs_created_dt))->modify('+' . $days_limit . 'day');
                     if (
                         $case->cs_status == CasesStatus::STATUS_TRASH && (strtotime($limit_dt->format('Y-m-d H:i:s')) > time())
