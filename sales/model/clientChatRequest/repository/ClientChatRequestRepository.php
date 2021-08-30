@@ -3,6 +3,7 @@
 namespace sales\model\clientChatRequest\repository;
 
 use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\repositories\NotFoundException;
 
 class ClientChatRequestRepository
 {
@@ -19,6 +20,14 @@ class ClientChatRequestRepository
                 }
                 $this->save($model, ++$attempts);
             }
+        }
+        return $model;
+    }
+
+    public function find(int $id): ClientChatRequest
+    {
+        if (!$model = ClientChatRequest::findOne($id)) {
+            throw new NotFoundException('Client Chat Request not found by ID: ' . $id);
         }
         return $model;
     }

@@ -4,6 +4,7 @@ namespace sales\model\clientChat\componentEvent\component;
 
 use frontend\helpers\JsonHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\helpers\Json;
 
 /**
@@ -16,10 +17,13 @@ use yii\helpers\Json;
  * @property-read string|null $visitorId
  * @property-read bool $isChatNew
  * @property-read array $runnableComponentConfig
+ * @property-read ClientChatRequest|null $clientChatRequest
  */
 class ComponentDTO implements ComponentDTOInterface
 {
     private ClientChat $chat;
+
+    private ?ClientChatRequest $clientChatRequestId;
 
     private int $channelId;
 
@@ -95,5 +99,16 @@ class ComponentDTO implements ComponentDTOInterface
     public function getRunnableComponentConfig(): array
     {
         return $this->runnableComponentConfig;
+    }
+
+    public function setClientChatRequest(ClientChatRequest $request): self
+    {
+        $this->clientChatRequest = $request;
+        return $this;
+    }
+
+    public function getClientChatRequest(): ?ClientChatRequest
+    {
+        return $this->clientChatRequestId;
     }
 }
