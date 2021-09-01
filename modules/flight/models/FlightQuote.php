@@ -715,11 +715,7 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             return explode("\n", str_replace('&nbsp;', ' ', $this->fq_reservation_dump));
         };
         $fields['booking_id'] = function () {
-            $lastFlightQuoteFlight = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $this->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
-            if ($lastFlightQuoteFlight) {
-                return $lastFlightQuoteFlight;
-            }
-            return null;
+            return $this->getLastBookingId();
         };
         $fields['fq_type_name'] = function () {
             return FlightQuote::getTypeName($this->fq_type_id);
@@ -784,5 +780,14 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             }
         }
         return implode(', ', $bookingData);
+    }
+
+    public function getLastBookingId(): ?string
+    {
+        $bookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $this->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+        if ($bookingId) {
+            return $bookingId;
+        }
+        return null;
     }
 }

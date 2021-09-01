@@ -3,12 +3,8 @@
 namespace console\controllers;
 
 use sales\helpers\app\AppHelper;
-use sales\model\client\notifications\client\entity\ClientNotification;
-use sales\model\client\notifications\client\entity\CommunicationType;
 use sales\model\client\notifications\phone\ClientNotificationPhoneExecutor;
 use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
-use sales\model\client\notifications\phone\entity\Status as PhoneStatus;
-use sales\model\client\notifications\sms\entity\Status as SmsStatus;
 use sales\model\client\notifications\sms\ClientNotificationSmsExecutor;
 use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
 use sales\services\TransactionManager;
@@ -24,7 +20,7 @@ use yii\helpers\Console;
  * @property ClientNotificationSmsExecutor $clientNotificationSmsExecutor
  * @property TransactionManager $transactionManager
  */
-class ClientNotificationController extends Controller
+class ClientNotificationsController extends Controller
 {
     private ClientNotificationPhoneExecutor $clientNotificationPhoneExecutor;
     private ClientNotificationSmsExecutor $clientNotificationSmsExecutor;
@@ -42,37 +38,6 @@ class ClientNotificationController extends Controller
         $this->clientNotificationPhoneExecutor = $clientNotificationPhoneExecutor;
         $this->clientNotificationSmsExecutor = $clientNotificationSmsExecutor;
         $this->transactionManager = $transactionManager;
-    }
-
-    public function actionClear()
-    {
-        $date = (new \DateTimeImmutable('-30 day'))->format('Y-m-d H:i:s');
-
-        $smsNotifications = ClientNotificationSmsList::find()
-            ->select(['cnsl_id'])
-            ->andWhere(['<>', 'cnsl_status_id', SmsStatus::NEW])
-            ->andWhere(['<', 'cnsl_created_dt', $date])
-            ->column();
-        foreach ($smsNotifications as $notificationId) {
-            $this->transactionManager->wrap(function () use ($notificationId) {
-                ClientNotificationSmsList::deleteAll(['cnsl_id' => $notificationId]);
-                ClientNotification::deleteAll(['cn_communication_object_id' => $notificationId, 'cn_communication_type_id' => CommunicationType::SMS]);
-            });
-        }
-
-        $phoneNotifications = ClientNotificationPhoneList::find()
-            ->select(['cnfl_id'])
-            ->andWhere(['<>', 'cnfl_status_id', PhoneStatus::NEW])
-            ->andWhere(['<', 'cnfl_created_dt', $date])
-            ->column();
-        foreach ($phoneNotifications as $notificationId) {
-            $this->transactionManager->wrap(function () use ($notificationId) {
-                ClientNotificationPhoneList::deleteAll(['cnfl_id' => $notificationId]);
-                ClientNotification::deleteAll(['cn_communication_object_id' => $notificationId, 'cn_communication_type_id' => CommunicationType::PHONE]);
-            });
-        }
-
-        return ExitCode::OK;
     }
 
     public function actionNotify()
@@ -115,7 +80,7 @@ class ClientNotificationController extends Controller
                     'message' => 'Client Phone Notification processing error',
                     'phoneNotificationId' => $notification->cnfl_id,
                     'exception' => AppHelper::throwableLog($e),
-                ], 'ClientNotificationController:callNotify');
+                ], 'ClientNotificationsController:callNotify');
                 $rows[] = [
                     $notification->cnfl_id,
                     sprintf("%s", $this->ansiFormat("error", Console::BG_RED)),
@@ -172,7 +137,7 @@ class ClientNotificationController extends Controller
                     'message' => 'Client Sms Notification processing error',
                     'phoneNotificationId' => $notification->cnsl_id,
                     'exception' => AppHelper::throwableLog($e),
-                ], 'ClientNotificationController:smsNotify');
+                ], 'ClientNotificationsController:smsNotify');
                 $rows[] = [
                     $notification->cnsl_id,
                     sprintf("%s", $this->ansiFormat("error", Console::BG_RED)),

@@ -4,7 +4,9 @@ namespace sales\model\client\notifications\sms;
 
 use common\models\ClientPhone;
 use common\models\Sms;
+use modules\product\src\entities\productQuote\ProductQuote;
 use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\ProjectHashGenerator;
 use sales\model\client\notifications\client\entity\ClientNotificationRepository;
 use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
 use sales\model\client\notifications\sms\entity\ClientNotificationSmsListRepository;
@@ -50,6 +52,18 @@ class ClientNotificationSmsExecutor
             throw new \DomainException('Template Key is empty. SmsNotificationId: ' . $notification->cnsl_id);
         }
 
+        $quote = ProductQuote::find()->byId($notification->getData()->productQuoteId)->one();
+        if (!$quote) {
+            throw new \DomainException('Not found Product Quote. Product Quote Id: ' . $notification->getData()->productQuoteId . ' SmsNotificationId: ' . $notification->cnsl_id);
+        }
+
+        $bookingId = $quote->getLastBookingId();
+        if (!$bookingId) {
+            throw new \DomainException('Not found BookingId. Product Quote Id: ' . $notification->getData()->productQuoteId . ' SmsNotificationId: ' . $notification->cnsl_id);
+        }
+
+        $bookingHashCode = ProjectHashGenerator::getHashByProjectId($notification->getData()->projectId, $bookingId);
+
         // todo
         $languageId = 'en-US';
 
@@ -61,8 +75,9 @@ class ClientNotificationSmsExecutor
                     'project_key' => $notification->getData()->projectKey,
                     'from_phone' => $fromPhone,
                     'to_phone' => $toPhone,
-                    'booking_id' => $notification->getData()->bookingId,
-                    'booking_hash_code' => $notification->getData()->bookingHashCode,
+                    'booking_id' => $bookingId,
+                    'booking_hash_code' => $bookingHashCode,
+                    'quote' => $quote->toArray(),
                 ],
                 $languageId
             );

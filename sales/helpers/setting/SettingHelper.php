@@ -381,6 +381,11 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['notifications_history_days'] ?? 30);
     }
 
+    public static function getClientNotificationsHistoryDays(): int
+    {
+        return (int)(Yii::$app->params['settings']['client_notifications_history_days'] ?? 30);
+    }
+
     public static function getCallDistributionSort(): array
     {
         $sort = [

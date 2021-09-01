@@ -1020,4 +1020,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         }
         return $bookingId;
     }
+
+    public function getLastBookingId(): ?string
+    {
+        if ($this->isFlight()) {
+            return $this->flightQuote->getLastBookingId();
+        }
+        return null;
+    }
 }

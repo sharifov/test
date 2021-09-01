@@ -5,6 +5,12 @@ namespace console\controllers;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\client\notifications\client\entity\ClientNotification;
+use sales\model\client\notifications\client\entity\CommunicationType;
+use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
+use sales\model\client\notifications\phone\entity\Status as PhoneStatus;
+use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
+use sales\model\client\notifications\sms\entity\Status as SmsStatus;
 use sales\services\cleaner\cleaners\ApiLogCleaner;
 use sales\services\cleaner\cleaners\CallCleaner;
 use sales\services\cleaner\cleaners\ClientChatUserAccessCleaner;
@@ -15,6 +21,7 @@ use sales\services\cleaner\cleaners\UserMonitorCleaner;
 use sales\services\cleaner\cleaners\UserSiteActivityCleaner;
 use sales\services\cleaner\DbCleanerService;
 use sales\services\cleaner\form\DbCleanerParamsForm;
+use sales\services\TransactionManager;
 use Yii;
 use yii\base\Exception;
 use yii\console\Controller;
@@ -123,6 +130,11 @@ class CleanController extends Controller
             \Yii::$app->runAction('clean/notifications', $paramsNotifications);
         } catch (\Throwable $throwable) {
             self::throwableHandler($throwable, 'actionOnceDay:Notifications');
+        }
+        try {
+            \Yii::$app->runAction('clean/client-notifications');
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:ClientNotifications');
         }
 
         $timeEnd = microtime(true);
@@ -415,6 +427,50 @@ class CleanController extends Controller
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
         self::outputResult($processed, $time, 'actionNotifications:result');
+        return ExitCode::OK;
+    }
+
+    public function actionClientNotifications()
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $timeStart = microtime(true);
+        $defaultDays = SettingHelper::getClientNotificationsHistoryDays();
+        $date = (new \DateTimeImmutable('-' . $defaultDays . ' day'))->format('Y-m-d H:i:s');
+        $transactionManager = Yii::createObject(TransactionManager::class);
+
+        $processed = 0;
+
+        $smsNotifications = ClientNotificationSmsList::find()
+            ->select(['cnsl_id'])
+            ->andWhere(['<>', 'cnsl_status_id', SmsStatus::NEW])
+            ->andWhere(['<', 'cnsl_created_dt', $date])
+            ->column();
+        foreach ($smsNotifications as $notificationId) {
+            $processed++;
+            $transactionManager->wrap(function () use ($notificationId) {
+                ClientNotificationSmsList::deleteAll(['cnsl_id' => $notificationId]);
+                ClientNotification::deleteAll(['cn_communication_object_id' => $notificationId, 'cn_communication_type_id' => CommunicationType::SMS]);
+            });
+        }
+
+        $phoneNotifications = ClientNotificationPhoneList::find()
+            ->select(['cnfl_id'])
+            ->andWhere(['<>', 'cnfl_status_id', PhoneStatus::NEW])
+            ->andWhere(['<', 'cnfl_created_dt', $date])
+            ->column();
+        foreach ($phoneNotifications as $notificationId) {
+            $processed++;
+            $transactionManager->wrap(function () use ($notificationId) {
+                ClientNotificationPhoneList::deleteAll(['cnfl_id' => $notificationId]);
+                ClientNotification::deleteAll(['cn_communication_object_id' => $notificationId, 'cn_communication_type_id' => CommunicationType::PHONE]);
+            });
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        self::outputResult($processed, $time, 'actionClientNotifications:result');
         return ExitCode::OK;
     }
 
