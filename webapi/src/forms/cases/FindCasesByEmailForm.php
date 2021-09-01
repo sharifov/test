@@ -2,6 +2,7 @@
 
 namespace webapi\src\forms\cases;
 
+use common\models\ClientEmail;
 use yii\base\Model;
 
 /**
@@ -25,6 +26,7 @@ class FindCasesByEmailForm extends Model
         return [
             ['contact_email', 'required'],
             ['contact_email', 'email'],
+            ['contact_email', 'exist', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['contact_email' => 'email'], 'message' => 'Client Email not found in DB.'],
             ['active_only', 'boolean'],
             ['case_project_id', 'integer'],
             ['case_department_id', 'integer'],
