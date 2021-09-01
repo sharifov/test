@@ -37,9 +37,9 @@ class CasesQuery extends ActiveQuery
     }
 
     public const QUERY_GET_CASES = 'cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name';
-    public const QUERY_GET_CASES_GID = 'cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name';
+    public const QUERY_GET_CASES_GID = 'cs_gid';
 
-    public function findCasesByPhone(?string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public function findCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
                 ->select(CasesQuery::QUERY_GET_CASES)
@@ -48,13 +48,40 @@ class CasesQuery extends ActiveQuery
         return CasesQuery::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
     }
 
-    public function findCasesByEmail(?string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public function findCasesByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
             ->select(CasesQuery::QUERY_GET_CASES)
             ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
             ->andWhere(['client_email.email' => $email]);
         return CasesQuery::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
+    }
+
+    public function findCaseByCaseGid(string $caseGid): array
+    {
+        $query = Cases::find()
+            ->select(CasesQuery::QUERY_GET_CASES)
+            ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
+            ->andWhere(['cs_gid' => $caseGid]);
+        return CasesQuery::findCasesPartial($query, false, null, null, null);
+    }
+
+    public function findCasesGidByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    {
+        $query = Cases::find()
+            ->select(CasesQuery::QUERY_GET_CASES_GID)
+            ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
+            ->andWhere(['client_phone.phone' => $phone]);
+        return array_column(CasesQuery::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId), 'cs_gid');
+    }
+
+    public function findCasesGidByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    {
+        $query = Cases::find()
+            ->select(CasesQuery::QUERY_GET_CASES)
+            ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
+            ->andWhere(['client_email.email' => $email]);
+        return array_column(CasesQuery::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId), 'cs_gid');
     }
 
     public function findCasesPartial(CasesQuery $query, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
@@ -68,7 +95,6 @@ class CasesQuery extends ActiveQuery
         }
 
         $query
-                ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
                 ->leftJoin('projects', 'cs_project_id = projects.id')
                 ->addSelect(new Expression('
                         DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS nextFlight'))
@@ -150,7 +176,7 @@ class CasesQuery extends ActiveQuery
                 return $cases;
             }
         }
-        return [$query];
+        return [];
     }
 
     public function findLastClientCase(int $clientId, ?int $projectId): self

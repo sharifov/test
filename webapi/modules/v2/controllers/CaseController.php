@@ -20,6 +20,7 @@ use webapi\behaviors\HttpBasicAuthHealthCheck;
 use webapi\src\ApiCodeException;
 use webapi\src\forms\cases\FindCasesByPhoneForm;
 use webapi\src\forms\cases\FindCasesByEmailForm;
+use webapi\src\forms\cases\FindCaseByCaseGidForm;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
@@ -63,6 +64,7 @@ class CaseController extends BaseController
         $verbs = parent::verbs();
         $verbs['get-list-by-phone'] = ['GET'];
         $verbs['get-list-by-email'] = ['GET'];
+        $verbs['get'] = ['GET'];
         return $verbs;
     }
 
@@ -205,7 +207,12 @@ class CaseController extends BaseController
     public function actionGetListByPhone(): Response
     {
         $form = new FindCasesByPhoneForm();
-        self::findCasesValidation($form);
+        if (!$form->load(Yii::$app->request->get())) {
+            return self::findCasesLoadDataErrorResponse();
+        }
+        if (!$form->validate()) {
+            return self::findCasesValidationErrorResponse($form);
+        }
 
         return self::findCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
     }
@@ -213,29 +220,72 @@ class CaseController extends BaseController
     public function actionGetListByEmail(): Response
     {
         $form = new FindCasesByEmailForm();
-        self::findCasesValidation($form);
+        if (!$form->load(Yii::$app->request->get())) {
+            return self::findCasesLoadDataErrorResponse();
+        }
+        if (!$form->validate()) {
+            return self::findCasesValidationErrorResponse($form);
+        }
 
         return self::findCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
     }
 
-    public function findCasesValidation(Model $form)
+    public function actionGet(): Response
     {
+        $form = new FindCaseByCaseGidForm();
         if (!$form->load(Yii::$app->request->get())) {
-            return new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage(Messages::LOAD_DATA_ERROR),
-                new ErrorsMessage('Not found GET request params'),
-                new CodeMessage(CaseCodeException::API_GET_CASES_NOT_FOUND_DATA_ON_REQUEST)
-            );
+            return self::findCasesLoadDataErrorResponse();
+        }
+        if (!$form->validate()) {
+            return self::findCasesValidationErrorResponse($form);
         }
 
-        if (!$form->validate()) {
-            return new ErrorResponse(
-                new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($form->getErrors()),
-                new CodeMessage(CaseCodeException::API_GET_CASES_VALIDATE)
-            );
+        return self::findCasesResult(CasesQuery::findCaseByCaseGid($form->case_gid));
+    }
+
+    public function actionFindListByPhone(): Response
+    {
+        $form = new FindCasesByPhoneForm();
+        if (!$form->load(Yii::$app->request->get())) {
+            return self::findCasesLoadDataErrorResponse();
         }
+        if (!$form->validate()) {
+            return self::findCasesValidationErrorResponse($form);
+        }
+
+        return self::findCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+    }
+
+    public function actionFindListByEmail(): Response
+    {
+        $form = new FindCasesByEmailForm();
+        if (!$form->load(Yii::$app->request->get())) {
+            return self::findCasesLoadDataErrorResponse();
+        }
+        if (!$form->validate()) {
+            return self::findCasesValidationErrorResponse($form);
+        }
+
+        return self::findCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+    }
+
+    public function findCasesLoadDataErrorResponse(): ErrorResponse
+    {
+        return new ErrorResponse(
+            new StatusCodeMessage(400),
+            new MessageMessage(Messages::LOAD_DATA_ERROR),
+            new ErrorsMessage('Not found GET request params'),
+            new CodeMessage(CaseCodeException::API_GET_CASES_NOT_FOUND_DATA_ON_REQUEST)
+        );
+    }
+
+    public function findCasesValidationErrorResponse(Model $form): ErrorResponse
+    {
+        return new ErrorResponse(
+            new MessageMessage(Messages::VALIDATION_ERROR),
+            new ErrorsMessage($form->getErrors()),
+            new CodeMessage(CaseCodeException::API_GET_CASES_VALIDATE)
+        );
     }
 
     public function findCasesResult(array $cases)
@@ -243,7 +293,7 @@ class CaseController extends BaseController
         try {
             return new SuccessResponse(
                 new DataMessage(
-                    new Message('cases_array', $cases),  // array_column($cases, 'cs_gid')
+                    new Message('cases_array', $cases),
                 )
             );
         } catch (\Throwable $e) {
