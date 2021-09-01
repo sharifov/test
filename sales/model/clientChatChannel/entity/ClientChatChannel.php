@@ -371,4 +371,12 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         }
         return false;
     }
+
+    public function isSearchAndCacheFlightQuotesEnabled(): bool
+    {
+        if (isset($this->settings['system']['searchAndCacheFlightQuotesOnAcceptChat'])) {
+            return (bool)$this->settings['system']['searchAndCacheFlightQuotesOnAcceptChat'];
+        }
+        return false;
+    }
 }
