@@ -67,7 +67,7 @@ class ChatDataRequestSearchFlightQuotesJob extends BaseJob implements JobInterfa
             $quotes = SearchService::getOnlineQuotes($dto);
             \Yii::info(VarDumper::dumpAsString($quotes), 'info\ChatDataRequestSearchFlightQuotesJob::searchResult');
             if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
-                \Yii::$app->cacheFile->set($this->cacheKey, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                \Yii::$app->cacheFile->set($this->getCacheKey(), $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
                 \Yii::info(VarDumper::dumpAsString($quotes), 'info\ChatDataRequestSearchFlightQuotesJob::quotesResult');
             }
         } catch (\Throwable $e) {
