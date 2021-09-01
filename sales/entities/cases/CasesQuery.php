@@ -2,8 +2,10 @@
 
 namespace sales\entities\cases;
 
+use common\models\CaseSale;
 use common\models\Department;
 use yii\db\ActiveQuery;
+use yii\db\Expression;
 
 class CasesQuery extends ActiveQuery
 {
@@ -34,23 +36,121 @@ class CasesQuery extends ActiveQuery
         return $query;
     }
 
-    public function findActiveCases(string $phone, array $deps_params, int $trashСasesActiveDaysLimitGlobal, ?int $limit, ?int $projectId, ?int $departmentId): self
-    {
-        $query = $this->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED]]);
-        $query->leftJoin('client_phone', 'cs_client_id = client_phone.client_id');
-        $query->andWhere("client_phone.phone = '$phone'");
+    public const QUERY_GET_CASES = 'cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name';
+    public const QUERY_GET_CASES_GID = 'cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name';
 
-        if ($trashСasesActiveDaysLimitGlobal > 0) {
-            $limit = (new \DateTimeImmutable())->modify('- ' . $trashСasesActiveDaysLimitGlobal . 'day');
-            $query->andWhere(['OR',
-                ['NOT IN', 'cs_status', [CasesStatus::STATUS_TRASH]],
-                ['>', 'cs_created_dt', $limit->format('Y-m-d H:i:s')],
-            ]);
-        } else {
-            $query->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_TRASH]]);
+    public function findCasesByPhone(?string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    {
+        $query = Cases::find()
+                ->select(CasesQuery::QUERY_GET_CASES)
+                ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
+                ->andWhere(['client_phone.phone' => $phone]);
+        return CasesQuery::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
+    }
+
+    public function findCasesByEmail(?string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    {
+        $query = Cases::find()
+            ->select(CasesQuery::QUERY_GET_CASES)
+            ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
+            ->andWhere(['client_email.email' => $email]);
+        return CasesQuery::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
+    }
+
+    public function findCasesPartial(CasesQuery $query, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    {
+        $where = [];
+        if ($projectId) {
+            $where['cs_project_id'] = $projectId;
+        }
+        if ($departmentId) {
+            $where['cs_dep_id'] = $departmentId;
         }
 
-        return $query;
+        $query
+                ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
+                ->leftJoin('projects', 'cs_project_id = projects.id')
+                ->addSelect(new Expression('
+                        DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS nextFlight'))
+                ->leftJoin([
+                    'sale_out' => CaseSale::find()
+                        ->select([
+                            'css_cs_id',
+                            new Expression('
+                        MIN(css_out_date) AS last_out_date'),
+                        ])
+                        ->innerJoin(
+                            Cases::tableName() . ' AS cases',
+                            'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                        )
+                        ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                        ->groupBy('css_cs_id')
+                ], 'cases.cs_id = sale_out.css_cs_id')
+                ->leftJoin([
+                    'sale_in' => CaseSale::find()
+                        ->select([
+                            'css_cs_id',
+                            new Expression('
+                        MIN(css_in_date) AS last_in_date'),
+                        ])
+                        ->innerJoin(
+                            Cases::tableName() . ' AS cases',
+                            'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                        )
+                        ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+                        ->groupBy('css_cs_id')
+                ], 'cases.cs_id = sale_in.css_cs_id')
+                ->andWhere($where)
+                ->orderBy('cs_created_dt ASC')
+                ->asArray();
+//            ->createCommand()->getRawSql();
+
+        if ($activeOnly) {
+            $deps_params = [];
+            $deps = Department::find()->all();
+            foreach ($deps as $dep) {
+                $deps_params[$dep->dep_id] = $dep->getParams()->object->case->trashActiveDaysLimit;
+            }
+
+            $query->andWhere('cs_status != ' . CasesStatus::STATUS_SOLVED);
+            $cases = $query->all();
+
+            $trashCasesActiveDaysLimitGlobal = \Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0;
+            if (!empty($cases)) {
+                $result_cases_cnt = 0;
+                foreach ($cases as $key => $case) {
+                    $cases[$key]['status_name'] = CasesStatus::getName($case['cs_status']);
+                    $cases[$key]['result_cases_cnt'] = $result_cases_cnt;
+                    $days_limit = $deps_params[$case['cs_dep_id']] ?? $trashCasesActiveDaysLimitGlobal;
+                    $limit_dt = (new \DateTimeImmutable($case['cs_created_dt']))->modify('+' . $days_limit . 'day');
+                    if (
+                        ($case['cs_status'] == CasesStatus::STATUS_TRASH && (strtotime($limit_dt->format('Y-m-d H:i:s')) < time()))
+                        || ($results_limit && $result_cases_cnt >= $results_limit)
+                    ) {
+                        unset($cases[$key]);
+                    } else {
+                        $result_cases_cnt++;
+                    }
+                }
+                return $cases;
+            }
+        } else {
+            $cases = $query->all();
+
+            if (!empty($cases)) {
+                $result_cases_cnt = 0;
+                foreach ($cases as $key => $case) {
+                    $cases[$key]['status_name'] = CasesStatus::getName($case['cs_status']);
+                    if ($results_limit && $result_cases_cnt >= $results_limit) {
+                        unset($cases[$key]);
+                    } else {
+                        $result_cases_cnt++;
+                    }
+                }
+                return $cases;
+            }
+        }
+        return [$query];
     }
 
     public function findLastClientCase(int $clientId, ?int $projectId): self
