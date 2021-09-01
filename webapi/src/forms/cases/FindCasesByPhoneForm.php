@@ -3,49 +3,43 @@
 namespace webapi\src\forms\cases;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\ClientPhone;
+use sales\model\phoneList\entity\PhoneList;
 use sales\services\client\InternalPhoneValidator;
 use webapi\src\request\BoWebhook;
 use yii\base\Model;
 use common\components\validators\IsArrayValidator;
 
 /**
- * Class BoWebhookForm
+ * Class CaseRequestApiForm
  * @package webapi\src\boWebhook
  *
  * @property string $contact_phone
  * @property int|null $typeId
  * @property array $data
  */
-class CaseRequestApiForm extends Model
+class FindCasesByPhoneForm extends Model
 {
     public string $contact_phone = '';
-    public string $active_only = '';
+    public bool $active_only = false;
     public ?int $case_project_id = null;
     public ?int $case_department_id = null;
-    public ?int $limit = null;
+    public ?int $results_limit = null;
 
     public function rules(): array
     {
         return [
             ['contact_phone', 'required'],
             ['contact_phone', 'string', 'max' => 20],
-            ['active_only', 'string', 'max' => 5],
+            ['contact_phone', 'trim'],
+            ['contact_phone', PhoneInputValidator::class],
+            ['contact_phone', 'exist', 'targetClass' => ClientPhone::class, 'targetAttribute' => ['contact_phone' => 'phone'], 'message' => 'Client Phone number not found in DB.'],
+            ['active_only', 'boolean'],
             ['case_project_id', 'integer'],
             ['case_department_id', 'integer'],
-            ['contact_phone', PhoneInputValidator::class],
-            ['contact_phone', 'filter', 'filter' => static function ($value) {
-                return str_replace(['-', ' '], '', trim($value));
-            }, 'skipOnEmpty' => true, 'skipOnError' => true],
-            ['contact_phone', InternalPhoneValidator::class,
-                'skipOnError' => true, 'skipOnEmpty' => true,
-                'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']],
-            ['limit', 'integer'],
+            ['results_limit', 'integer'],
         ];
     }
-
-//    public function afterValidate(): void
-//    {
-//    }
 
     public function formName(): string
     {
