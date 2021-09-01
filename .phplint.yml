@@ -16,4 +16,5 @@ exclude:
   - webapi/tests
   - webapi/web
   - vagrant
+  - console/migrations
 warning: false

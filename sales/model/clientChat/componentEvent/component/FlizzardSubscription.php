@@ -27,12 +27,6 @@ class FlizzardSubscription implements ComponentEventInterface
 
     public function run(ComponentDTOInterface $dto): string
     {
-        \Yii::info(VarDumper::dumpAsString([
-            'chatId' => $dto->getClientChatEntity()->cch_id,
-            'channelId' => $dto->getChannelId(),
-            'componentEventConfig' => $dto->getComponentEventConfig()
-        ]), 'info\CheckFlizzardSubscription');
-
         if ($subscription = VisitorSubscription::find()->byUid((string)$dto->getVisitorId())->enabled()->byType(VisitorSubscription::SUBSCRIPTION_FLIZZARD)->one()) {
             return 'true';
         }

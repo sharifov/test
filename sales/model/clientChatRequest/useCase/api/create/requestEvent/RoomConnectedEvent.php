@@ -2,17 +2,12 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create\requestEvent;
 
-use common\models\Lead;
 use common\models\Notifications;
-use mysql_xdevapi\Warning;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
 use sales\model\clientChat\componentEvent\component\ComponentDTO;
 use sales\model\clientChat\componentEvent\service\ComponentEventsTypeService;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatCase\service\ClientChatCaseManageService;
-use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\service\ClientChatLeadMangeService;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
@@ -21,7 +16,6 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\redis\Connection;
 
@@ -127,7 +121,7 @@ class RoomConnectedEvent implements ChatRequestEvent
         try {
             $clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_CLIENT);
 
-            $clientChatCreated = $clientChat->cch_id ? false : true;
+            $chatAlreadyCreated = $clientChat->cch_id ? true : false;
 
             $client = null;
             if (!$clientChat->cch_client_id) {
@@ -139,11 +133,12 @@ class RoomConnectedEvent implements ChatRequestEvent
                 );
             }
 
-            if ($clientChatCreated) {
+            if (!$chatAlreadyCreated) {
                 $dto = (new ComponentDTO())
                     ->setChannelId($clientChatRequest->getChannelIdFromData())
                     ->setClientChatEntity($clientChat)
                     ->setVisitorId($clientChatRequest->getClientRcId())
+                    ->setClientChatRequest($clientChatRequest)
                     ->setIsChatNew(true);
                 $this->componentEventsTypeService->beforeChatCreation($dto);
             }
@@ -190,7 +185,7 @@ class RoomConnectedEvent implements ChatRequestEvent
                 ]);
             }
 
-            if ($clientChatCreated) {
+            if (!$chatAlreadyCreated) {
                 $this->clientChatMessageService->assignMessagesToChat($clientChat);
                 \Yii::$app->snowplow->trackAction('chat', 'create', $clientChat->toArray());
 

@@ -3,6 +3,7 @@
 namespace sales\model\clientChat\componentEvent\component;
 
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 
 interface ComponentDTOInterface
 {
@@ -29,4 +30,8 @@ interface ComponentDTOInterface
     public function setRunnableComponentConfig(string $config): self;
 
     public function getRunnableComponentConfig(): array;
+
+    public function setClientChatRequest(ClientChatRequest $request): self;
+
+    public function getClientChatRequest(): ?ClientChatRequest;
 }
