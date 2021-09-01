@@ -1,6 +1,8 @@
 <?php
 
+use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -31,7 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'ccdr_id',
             'ccdr_chat_id',
-            'ccdr_data_json:ntext',
+            [
+                'attribute' => 'ccf_dataform_json',
+                'value' => static function (ClientChatDataRequest $model) {
+                    return '<pre>' . VarDumper::dumpAsString($model->ccdr_data_json, 10, true) . '</pre>';
+                },
+                'format' => 'raw',
+            ],
             'ccdr_created_dt:byUserDateTime',
         ],
     ]) ?>

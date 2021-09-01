@@ -2,6 +2,8 @@
 
 namespace sales\model\clientChatDataRequest\entity;
 
+use common\components\validators\CheckJsonValidator;
+use sales\behaviors\StringToJsonBehavior;
 use sales\model\clientChat\entity\ClientChat;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -29,6 +31,10 @@ class ClientChatDataRequest extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s')
             ],
+            'stringToJson' => [
+                'class' => StringToJsonBehavior::class,
+                'jsonColumn' => 'ccdr_data_json',
+            ],
         ];
     }
 
@@ -49,6 +55,8 @@ class ClientChatDataRequest extends \yii\db\ActiveRecord
             [['ccdr_chat_id'], 'required'],
             [['ccdr_chat_id'], 'integer'],
             [['ccdr_data_json', 'ccdr_created_dt'], 'safe'],
+            [['ccdr_data_json'], 'trim'],
+            ['ccdr_data_json', CheckJsonValidator::class],
             [['ccdr_chat_id'], 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['ccdr_chat_id' => 'cch_id']],
         ];
     }
@@ -83,5 +91,13 @@ class ClientChatDataRequest extends \yii\db\ActiveRecord
     public static function find()
     {
         return new Scopes(get_called_class());
+    }
+
+    public static function create(int $chatId, array $jsonData): self
+    {
+        $self = new static();
+        $self->ccdr_chat_id = $chatId;
+        $self->ccdr_data_json = $jsonData;
+        return $self;
     }
 }

@@ -23,7 +23,7 @@ class ComponentDTO implements ComponentDTOInterface
 {
     private ClientChat $chat;
 
-    private ?ClientChatRequest $clientChatRequestId;
+    private ?ClientChatRequest $clientChatRequest;
 
     private int $channelId;
 
@@ -109,6 +109,6 @@ class ComponentDTO implements ComponentDTOInterface
 
     public function getClientChatRequest(): ?ClientChatRequest
     {
-        return $this->clientChatRequestId;
+        return $this->clientChatRequest;
     }
 }

@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ccdr_data_json',
                 'value' => static function (ClientChatDataRequest $model) {
-                    $content = '<p>' . StringHelper::truncate($model->ccdr_data_json, 216, '...', null, true) . '</p>';
+                    $content = '<p>' . StringHelper::truncate(JsonHelper::encode($model->ccdr_data_json), 216, '...', null, true) . '</p>';
                     $content .= Html::a(
                         '<i class="fas fa-eye"></i> details</a>',
                         null,
