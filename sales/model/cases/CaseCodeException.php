@@ -12,4 +12,7 @@ class CaseCodeException
 
     public const API_CASE_CREATE_NOT_FOUND_DATA_ON_REQUEST = Module::CASES . 300;
     public const API_CASE_CREATE_VALIDATE = Module::CASES . 301;
+
+    public const API_GET_CASES_NOT_FOUND_DATA_ON_REQUEST = Module::CASES . 300;
+    public const API_GET_CASES_VALIDATE = Module::CASES . 301;
 }
