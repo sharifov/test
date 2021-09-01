@@ -35,12 +35,10 @@ class ChatDistributionLogicComponent implements RunnableComponentInterface
 
     public function run(ComponentDTOInterface $dto): void
     {
-//        Yii::info('ChatDistributionLogicComponent isNew: ' . $dto->getIsChatNew(), 'info\ChatDistributionLogicComponent');
-        if ($dto->getIsChatNew()) {
-//            Yii::info('ChatDistributionLogic started', 'info\ChatDistributionLogicComponent');
-            $dto->getClientChatEntity()->pending(null, ClientChatStatusLog::ACTION_PENDING_BY_DISTRIBUTION_LOGIC);
-            $this->clientChatRepository->save($dto->getClientChatEntity());
-            $this->clientChatService->sendRequestToUsers($dto->getClientChatEntity());
+        if ($dto->getIsChatNew() && $clientChat = $dto->getClientChatEntity()) {
+            $clientChat->pending(null, ClientChatStatusLog::ACTION_PENDING_BY_DISTRIBUTION_LOGIC);
+            $this->clientChatRepository->save($clientChat);
+            $this->clientChatService->sendRequestToUsers($clientChat);
         }
     }
 

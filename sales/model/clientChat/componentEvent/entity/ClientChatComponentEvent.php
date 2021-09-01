@@ -4,6 +4,7 @@ namespace sales\model\clientChat\componentEvent\entity;
 
 use common\models\Employee;
 use frontend\helpers\JsonHelper;
+use sales\model\clientChat\componentEvent\component\FlightQuoteSearchData;
 use sales\model\clientChat\componentEvent\component\FlizzardSubscription;
 use sales\model\clientChat\componentEvent\component\ComponentEventInterface;
 use sales\model\clientChat\componentRule\entity\ClientChatComponentRule;
@@ -38,17 +39,21 @@ use yii\helpers\ArrayHelper;
 class ClientChatComponentEvent extends \yii\db\ActiveRecord
 {
     private const COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION = 1;
+    private const COMPONENT_FLIGHT_QUOTE_SEARCH_DATA = 2;
 
     private const COMPONENT_EVENT_LIST = [
-        self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => 'Check Flizzard Subscription'
+        self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => 'Check Flizzard Subscription',
+        self::COMPONENT_FLIGHT_QUOTE_SEARCH_DATA => 'Check Flight Quote Search Data'
     ];
 
     private const COMPONENT_LIST = [
-        self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => 'CheckFlizzardSubscriptionComponent'
+        self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => 'CheckFlizzardSubscriptionComponent',
+        self::COMPONENT_FLIGHT_QUOTE_SEARCH_DATA => 'CheckFlightQuoteSearchData'
     ];
 
     private const COMPONENT_CLASS_LIST = [
         self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => FlizzardSubscription::class,
+        self::COMPONENT_FLIGHT_QUOTE_SEARCH_DATA => FlightQuoteSearchData::class,
     ];
 
     public const COMPONENT_EVENT_TYPE_BEFORE_CHAT_CREATION = 1;
