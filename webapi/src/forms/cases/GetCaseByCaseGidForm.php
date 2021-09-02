@@ -13,7 +13,7 @@ use yii\base\Model;
  * @property int|null $typeId
  * @property array $data
  */
-class FindCaseByCaseGidForm extends Model
+class GetCaseByCaseGidForm extends Model
 {
     public string $case_gid = '';
 

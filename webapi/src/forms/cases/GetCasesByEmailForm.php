@@ -13,7 +13,7 @@ use yii\base\Model;
  * @property int|null $typeId
  * @property array $data
  */
-class FindCasesByEmailForm extends Model
+class GetCasesByEmailForm extends Model
 {
     public string $contact_email = '';
     public bool $active_only = false;

@@ -18,7 +18,7 @@ use common\components\validators\IsArrayValidator;
  * @property int|null $typeId
  * @property array $data
  */
-class FindCasesByPhoneForm extends Model
+class GetCasesByPhoneForm extends Model
 {
     public string $contact_phone = '';
     public bool $active_only = false;
