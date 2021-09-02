@@ -377,6 +377,7 @@ class CallLogTransferService
             }
             $log->cl_group_id = $this->map('cl_group_id', 'c_group_id');
             $log->cl_status_id = $this->map('cl_status_id', 'c_status_id');
+            $log->cl_stir_status = $this->map('cl_stir_status', 'c_stir_status');
 
             /*
             if ($this->call['c_from'] && $this->call['c_call_type_id'] == Call::CALL_TYPE_OUT) {

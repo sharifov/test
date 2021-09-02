@@ -139,6 +139,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->queue->clq_access_count;
                 }
             ],
+            [
+                'attribute' => 'cl_stir_status',
+                'filter' => \common\models\Call::STIR_STATUS_LIST
+            ],
 
             [
                 'class' => 'yii\grid\ActionColumn',
