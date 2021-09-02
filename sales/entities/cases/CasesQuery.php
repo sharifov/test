@@ -10,7 +10,7 @@ use yii\db\Expression;
 class CasesQuery extends ActiveQuery
 {
     public const QUERY_GET_CASES = 'cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name';
-    public const QUERY_GET_CASES_GID = 'cs_gid';
+    public const QUERY_GET_CASES_GID = 'cs_gid, cs_status, cs_created_dt, cs_project_id, cs_dep_id';
 
     public function findLastActiveClientCaseByDepartment(int $departmentId, int $clientId, ?int $projectId, int $trashActiveDaysLimit): self
     {
@@ -39,7 +39,7 @@ class CasesQuery extends ActiveQuery
         return $query;
     }
 
-    public static function getCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
                 ->select(CasesQuery::QUERY_GET_CASES)
@@ -48,7 +48,7 @@ class CasesQuery extends ActiveQuery
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
     }
 
-    public static function getCasesByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
             ->select(CasesQuery::QUERY_GET_CASES)
@@ -57,7 +57,7 @@ class CasesQuery extends ActiveQuery
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
     }
 
-    public static function getCaseByCaseGid(string $caseGid): array
+    public static function findCaseByCaseGid(string $caseGid): array
     {
         $query = Cases::find()
             ->select(CasesQuery::QUERY_GET_CASES)
@@ -132,22 +132,21 @@ class CasesQuery extends ActiveQuery
 //            ->createCommand()->getRawSql();
 
         if ($activeOnly) {
+            $trashCasesActiveDaysLimitGlobal = \Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0;
             $deps_params = [];
             $deps = Department::find()->all();
             foreach ($deps as $dep) {
-                $deps_params[$dep->dep_id] = $dep->getParams()->object->case->trashActiveDaysLimit;
+                $deps_params[$dep->dep_id] = $dep->getParams()->object->case->trashActiveDaysLimit ?? $trashCasesActiveDaysLimitGlobal;
             }
 
             $query->andWhere('cs_status != ' . CasesStatus::STATUS_SOLVED);
             $cases = $query->all();
 
-            $trashCasesActiveDaysLimitGlobal = \Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0;
             if (!empty($cases)) {
                 $result_cases_cnt = 0;
                 foreach ($cases as $key => $case) {
                     $cases[$key]['status_name'] = CasesStatus::getName($case['cs_status']);
-                    $cases[$key]['result_cases_cnt'] = $result_cases_cnt;
-                    $days_limit = $deps_params[$case['cs_dep_id']] ?? $trashCasesActiveDaysLimitGlobal;
+                    $days_limit = $deps_params[$case['cs_dep_id']];
                     $limit_dt = (new \DateTimeImmutable($case['cs_created_dt']))->modify('+' . $days_limit . 'day');
                     if (
                         ($case['cs_status'] == CasesStatus::STATUS_TRASH && (strtotime($limit_dt->format('Y-m-d H:i:s')) < time()))

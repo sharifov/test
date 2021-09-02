@@ -2,22 +2,10 @@
 
 namespace webapi\modules\v2\controllers;
 
-use common\components\jobs\CreateSaleFromBOJob;
-use common\components\jobs\SendEmailOnCaseCreationBOJob;
-use common\models\CaseSale;
-use common\models\Department;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesQuery;
-use sales\helpers\app\AppHelper;
 use sales\model\cases\CaseCodeException;
-use sales\model\cases\useCases\cases\api\create\CreateForm;
-use sales\model\cases\useCases\cases\api\create\Handler;
-use sales\services\cases\CasesSaleService;
-use webapi\src\response\behaviors\RequestBehavior;
-use webapi\src\response\behaviors\ResponseStatusCodeBehavior;
-use webapi\behaviors\HttpBasicAuthHealthCheck;
-use webapi\src\ApiCodeException;
+//use sales\model\cases\useCases\cases\api\create\Handler;
+//use sales\services\cases\CasesSaleService;
 use webapi\src\forms\cases\GetCasesByPhoneForm;
 use webapi\src\forms\cases\GetCasesByEmailForm;
 use webapi\src\forms\cases\GetCaseByCaseGidForm;
@@ -31,10 +19,9 @@ use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
-use Yii;
 use webapi\src\response\Response;
+use Yii;
 use yii\base\Model;
-use yii\db\Expression;
 use yii\helpers\VarDumper;
 
 /**
@@ -216,7 +203,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::getCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
     public function actionGetListByEmail(): Response
@@ -229,7 +216,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::getCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
     public function actionGet(): Response
@@ -242,7 +229,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::getCaseByCaseGid($form->case_gid));
+        return $this->getCasesResult(CasesQuery::findCaseByCaseGid($form->case_gid));
     }
 
     public function actionFindListByPhone(): Response
@@ -255,7 +242,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
     public function actionFindListByEmail(): Response
@@ -268,7 +255,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
     private function getCasesLoadDataErrorResponse(): ErrorResponse

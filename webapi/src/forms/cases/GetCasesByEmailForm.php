@@ -17,8 +17,8 @@ class GetCasesByEmailForm extends Model
 {
     public string $contact_email = '';
     public bool $active_only = false;
-    public ?int $case_project_id = null;
-    public ?int $case_department_id = null;
+    public ?int $cases_project_id = null;
+    public ?int $cases_department_id = null;
     public ?int $results_limit = null;
 
     public function rules(): array
@@ -28,8 +28,8 @@ class GetCasesByEmailForm extends Model
             ['contact_email', 'email'],
             ['contact_email', 'exist', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['contact_email' => 'email'], 'message' => 'Client Email not found in DB.'],
             ['active_only', 'boolean'],
-            ['case_project_id', 'integer'],
-            ['case_department_id', 'integer'],
+            ['cases_project_id', 'integer'],
+            ['cases_department_id', 'integer'],
             ['results_limit', 'integer'],
         ];
     }
