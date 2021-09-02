@@ -39,7 +39,7 @@ class CasesQuery extends ActiveQuery
         return $query;
     }
 
-    public static function findCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function getCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
                 ->select(CasesQuery::QUERY_GET_CASES)
@@ -48,7 +48,7 @@ class CasesQuery extends ActiveQuery
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
     }
 
-    public static function findCasesByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function getCasesByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
             ->select(CasesQuery::QUERY_GET_CASES)
@@ -57,7 +57,7 @@ class CasesQuery extends ActiveQuery
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
     }
 
-    public static function findCaseByCaseGid(string $caseGid): array
+    public static function getCaseByCaseGid(string $caseGid): array
     {
         $query = Cases::find()
             ->select(CasesQuery::QUERY_GET_CASES)
