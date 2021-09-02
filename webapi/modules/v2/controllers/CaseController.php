@@ -172,6 +172,9 @@ class CaseController extends BaseController
      *       },
      *       "request":  []
      * }
+     *
+     * @return \webapi\src\response\Response
+     * @throws \Throwable
      */
     public function actionGetListByPhone(): Response
     {
@@ -322,6 +325,9 @@ class CaseController extends BaseController
      *       },
      *       "request":  []
      * }
+     *
+     * @return \webapi\src\response\Response
+     * @throws \Throwable
      */
     public function actionGetListByEmail(): Response
     {
@@ -428,6 +434,9 @@ class CaseController extends BaseController
      *       },
      *       "request":  []
      * }
+     *
+     * @return \webapi\src\response\Response
+     * @throws \Throwable
      */
     public function actionGet(): Response
     {
@@ -550,6 +559,9 @@ class CaseController extends BaseController
      *       },
      *       "request":  []
      * }
+     *
+     * @return \webapi\src\response\Response
+     * @throws \Throwable
      */
     public function actionFindListByPhone(): Response
     {
@@ -673,6 +685,9 @@ class CaseController extends BaseController
      *       },
      *       "request":  []
      * }
+     *
+     * @return \webapi\src\response\Response
+     * @throws \Throwable
      */
     public function actionFindListByEmail(): Response
     {
