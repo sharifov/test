@@ -102,6 +102,7 @@ use Locale;
  * @property int|null $c_conference_id
  * @property string $c_is_conference
  * @property string|null $c_language_id
+ * @property string|null $c_stir_status
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
@@ -273,6 +274,16 @@ class Call extends \yii\db\ActiveRecord
 
     public const DEFAULT_PRIORITY_VALUE = 0;
 
+    public const STIR_STATUS_FULL = 'A';
+    public const STIR_STATUS_PARTIAL = 'B';
+    public const STIR_STATUS_GATEWAY = 'C';
+
+    public const STIR_STATUS_LIST = [
+        self::STIR_STATUS_FULL => 'Full Attestation (A)',
+        self::STIR_STATUS_PARTIAL => 'Partial Attestation (B)',
+        self::STIR_STATUS_GATEWAY => 'Gateway Attestation (C)',
+    ];
+
     private ?Data $data = null;
 
     //public $c_recording_url = '';
@@ -343,6 +354,10 @@ class Call extends \yii\db\ActiveRecord
 
             ['c_recording_disabled', 'default', 'value' => false],
             ['c_recording_disabled', 'boolean'],
+
+            ['c_stir_status', 'string', 'max' => 1],
+            ['c_stir_status', 'trim', 'skipOnEmpty' => true],
+            ['c_stir_status', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
         ];
     }
 
@@ -391,6 +406,7 @@ class Call extends \yii\db\ActiveRecord
             'c_language_id' => 'Language ID',
             'c_data_json' => 'Data',
             'c_recording_disabled' => 'Recording disabled',
+            'c_stir_status' => 'Stir Status'
         ];
     }
 
@@ -449,7 +465,8 @@ class Call extends \yii\db\ActiveRecord
         $fromCountry,
         $fromState,
         $fromCity,
-        $createdUserId
+        $createdUserId,
+        $stirStatus
     ): self {
         $call = self::create();
         $call->c_call_sid = $callSid;
@@ -465,6 +482,7 @@ class Call extends \yii\db\ActiveRecord
         $call->c_is_new = true;
         $call->c_created_dt = $createdDt;
         $call->c_updated_dt = date('Y-m-d H:i:s');
+        $call->c_stir_status = $stirStatus;
         $call->declined();
         return $call;
     }
@@ -487,6 +505,7 @@ class Call extends \yii\db\ActiveRecord
         $call->c_project_id = $projectId;
         $call->c_dep_id = $depId;
         $call->c_client_id = $clientId;
+        $call->c_stir_status = ArrayHelper::getValue($requestDataDTO, 'callData.StirStatus');
         $call->setStatusIvr();
         return $call;
     }

@@ -144,9 +144,6 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
         if ($arrivalAirport = Airports::findByIata($data['arrival_airport_iata'])) {
             $arrivalTimeZone = new \DateTimeZone($arrivalAirport->timezone);
         }
-        if ($data['arrival_date_time'] === false) {
-            throw new \RuntimeException('Parsing and generating Arrival DT ended in failure');
-        }
 
         $data['arrival_date_time'] = $this->getArrivalDateTime(
             $data['departure_date_time'],
@@ -155,6 +152,10 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $data['arrival_offset'],
             $arrivalTimeZone
         );
+        if ($data['arrival_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Arrival DT ended in failure');
+        }
+
         return $data;
     }
 

@@ -25,7 +25,7 @@ return [
                     "Past Month" => ["moment().subtract(1, 'month').startOf('month')", "moment().subtract(1, 'month').endOf('month')"],
                     "Last 3 Months" => ["moment().subtract(3, 'month').startOf('day')", "moment().endOf('day')"],
                     // "Past 3 Months (or Previous/Past 3 Completed Month )" => ["moment().subtract(3, 'month').startOf('month')", "moment().subtract(1, 'month').endOf('month')"],
-                    "All time" => ["moment('2000-01-01')", "moment().endOf('day')"],
+                    "All time" => ["moment('2019-02-01')", "moment().endOf('day')"],
             ]
         ]
     ]

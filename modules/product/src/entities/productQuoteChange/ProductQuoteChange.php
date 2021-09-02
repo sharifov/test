@@ -208,12 +208,13 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return new Scopes(static::class);
     }
 
-    public static function createNew(int $productQuoteId, ?int $caseId): ProductQuoteChange
+    public static function createNew(int $productQuoteId, ?int $caseId, bool $isAutomate): ProductQuoteChange
     {
         $model = new self();
         $model->pqc_pq_id = $productQuoteId;
         $model->pqc_case_id = $caseId;
         $model->pqc_status_id = ProductQuoteChangeStatus::NEW;
+        $model->pqc_is_automate = $isAutomate;
         $model->recordEvent(new ProductQuoteChangeCreatedEvent($model, $model->pqc_pq_id, $model->pqc_case_id));
         return $model;
     }

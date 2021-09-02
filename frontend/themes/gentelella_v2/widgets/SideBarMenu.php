@@ -267,6 +267,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Client Chat Component Event', 'url' => ['/client-chat-component-event/index']],
                         ['label' => 'Client Chat Component Event CRUD', 'url' => ['/client-chat-component-event-crud/index']],
                         ['label' => 'Client Chat Component Rule CRUD', 'url' => ['/client-chat-component-rule-crud/index']],
+                        ['label' => 'Client Chat Data Request CRUD', 'url' => ['/client-chat-data-request-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
@@ -410,6 +411,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Product Quote Option Refund', 'url' => ['/product/product-quote-option-refund-crud/index']],
                     ['label' => 'Product Quote Object Refund', 'url' => ['/product/product-quote-object-refund-crud/index']],
                     ['label' => 'Product Quote Change', 'url' => ['/product/product-quote-change-crud/index']],
+                    ['label' => 'Product Quote Data', 'url' => ['/product/product-quote-data-crud/index']],
                 ], 'hasChild' => true],
 
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
