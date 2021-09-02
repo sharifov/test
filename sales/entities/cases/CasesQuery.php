@@ -10,7 +10,7 @@ use yii\db\Expression;
 class CasesQuery extends ActiveQuery
 {
     public const QUERY_GET_CASES = 'cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name';
-    public const QUERY_GET_CASES_GID = 'cs_gid';
+    public const QUERY_GET_CASES_GID = 'cs_gid, cs_status, cs_created_dt, cs_project_id, cs_dep_id';
 
     public function findLastActiveClientCaseByDepartment(int $departmentId, int $clientId, ?int $projectId, int $trashActiveDaysLimit): self
     {
@@ -39,7 +39,7 @@ class CasesQuery extends ActiveQuery
         return $query;
     }
 
-    public static function getCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
                 ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
@@ -48,7 +48,7 @@ class CasesQuery extends ActiveQuery
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
     }
 
-    public static function getCasesByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
             ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
@@ -57,7 +57,7 @@ class CasesQuery extends ActiveQuery
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
     }
 
-    public static function getCaseByCaseGid(string $caseGid): array
+    public static function findCaseByCaseGid(string $caseGid): array
     {
         $query = Cases::find()
             ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
