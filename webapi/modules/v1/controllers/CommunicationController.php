@@ -1151,6 +1151,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from_country = Call::getDisplayRegion($calData['FromCountry'] ?? '');
             $call->c_from_state = $calData['FromState'] ?? null;
             $call->c_from_city = $calData['FromCity'] ?? null;
+            $call->c_stir_status = $calData['StirStatus'] ?? null;
 
             if ($parentCall) {
                 $call->c_parent_id = $parentCall->c_id;
@@ -1417,6 +1418,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $callData['From'];
             $call->c_to = $callData['To']; //Called
             $call->c_created_user_id = null;
+            $call->c_stir_status = $callData['StirStatus'] ?? null;
 
             self::copyDataFromCustomParams($call, $customParameters);
 
