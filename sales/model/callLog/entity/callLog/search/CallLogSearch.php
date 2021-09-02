@@ -24,6 +24,7 @@ use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\VarDumper;
+use sales\helpers\query\QueryHelper;
 
 /**
  * Class CallLogSearch
@@ -136,23 +137,6 @@ class CallLogSearch extends CallLog
         ];
     }*/
 
-    private function getPartitionsByYears($from, $to)
-    {
-        $yFrom = date('y', strtotime($from));
-        $yTo = date('y', strtotime($to));
-        $partitions = 'y';
-        if ($yFrom == $yTo) {
-            $nextYear = (int)$yFrom + 1;
-            $partitions = 'y' . $nextYear;
-        } else {
-            $nextYearFrom = (int)$yFrom + 1;
-            $nextYearTo = (int)$yTo + 1;
-            $partitions = 'y' . $nextYearFrom . ',' . 'y' . $nextYearTo;
-        }
-
-        return $partitions;
-    }
-
     public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find()
@@ -195,11 +179,11 @@ class CallLogSearch extends CallLog
         }
 
         if ($this->cl_call_created_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
         }
 
         if ($this->cl_call_finished_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_finished_dt', $this->cl_call_finished_dt, $user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 'cl_call_finished_dt', $this->cl_call_finished_dt, $user->timezone);
         }
 
         if ($this->clq_queue_time || $this->clq_queue_time === 0) {
@@ -223,7 +207,8 @@ class CallLogSearch extends CallLog
             $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($date[0]));
             $dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($date[1]));
             $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
-            $query->andWhere(['IN', 'cl_year', range(date("Y", strtotime($dateTimeStart)), date("Y", strtotime($dateTimeEnd)))]);
+            //$query->andWhere(['IN', 'cl_year', range(date("Y", strtotime($dateTimeStart)), date("Y", strtotime($dateTimeEnd)))]);
+            $query->from([new Expression(static::tableName() . ' PARTITION(' . QueryHelper::getPartitionsByYears($date[0], $date[1]) . ') ')])->alias('cl');
         }
 
         if ($this->userID) {
@@ -547,7 +532,7 @@ class CallLogSearch extends CallLog
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)) as redialCallsCompleteTalkTime           
         ']);
 
-        $query->from([new \yii\db\Expression(static::tableName() . ' PARTITION(' . $this->getPartitionsByYears($date_from, $date_to) . ') ')]);
+        $query->from([new Expression(static::tableName() . ' PARTITION(' . QueryHelper::getPartitionsByYears($date_from, $date_to) . ') ')]);
         $query->where('cl_call_created_dt ' . $between_condition);
         $query->andWhere('cl_user_id IS NOT NULL');
         $query->andWhere('TIME(CONVERT_TZ(DATE_SUB(cl_call_created_dt, INTERVAL ' . $timeSub . ' HOUR), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '")');
@@ -641,7 +626,7 @@ class CallLogSearch extends CallLog
                SUM(IF(cl_status_id= ' . CallLogStatus::CANCELED . ', 1, 0)) AS callsCanceled,
                SUM(IF(cl_status_id= ' . CallLogStatus::DECLINED . ', 1, 0)) AS callsDeclined
         ']);
-        //$query->from([new \yii\db\Expression(static::tableName() . ' PARTITION(' . $this->getPartitionsByYears($date_from, $date_to) . ') ')]);
+
         $query->from(static::tableName());
         $query->where('cl_status_id IS NOT NULL');
         $query->andWhere(['cl_user_id' => $user_id]);
