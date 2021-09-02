@@ -9,6 +9,7 @@
 
 namespace common\components;
 
+use common\models\Call;
 use common\models\Project;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\conference\create\CreateCallForm;
@@ -1357,5 +1358,38 @@ class CommunicationService extends Component implements CommunicationServiceInte
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::lookup');
         }
         return $out;
+    }
+
+    public function makeCallClientNotification($from, $to, $say, $sayVoice, $sayLanguage, $play, array $callCustomParameters): string
+    {
+        $data = [
+            'from' => $from,
+            'to' => $to,
+            'say' => $say,
+            'say_voice' => $sayVoice,
+            'say_language' => $sayLanguage,
+            'play' => $play,
+            'call_custom_parameters' =>  array_merge(
+                [
+                    'type_id' => Call::CALL_TYPE_OUT,
+                    'voip_api_username' => $this->voipApiUsername,
+                    'source_type_id' => Call::SOURCE_CLIENT_NOTIFICATION,
+                ],
+                $callCustomParameters
+            ),
+        ];
+
+        $response = $this->sendRequest('twilio/make-call-client-notification', $data);
+
+        if ($response->isOk) {
+            if (isset($response->data['data']['result']['callSid'])) {
+                return $response->data['data']['result']['callSid'];
+            }
+        }
+
+        $out['error'] = $response->content;
+        \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::makeCallClientNotification');
+
+        throw new \DomainException('Make Call Client Notification error.');
     }
 }

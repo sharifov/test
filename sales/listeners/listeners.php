@@ -1,5 +1,6 @@
 <?php
 
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\events\quote\QuoteSendEvent;
 use sales\listeners\quote\QuoteSendEventListener;
 use sales\model\client\entity\events\ClientChangeIpEvent;
@@ -89,7 +90,7 @@ return [
 
     VisitorSubscriptionEnabled::class => [
         FindChatsAndRunDistributionLogic::class
-    ]
+    ],
 
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
 ];

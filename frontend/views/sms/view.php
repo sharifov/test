@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             's_id',
             's_reply_id',
             's_lead_id',
+            's_case_id',
             's_project_id',
             //'s_phone_from',
             [

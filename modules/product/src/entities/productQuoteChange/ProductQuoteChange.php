@@ -2,9 +2,14 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionConfirmEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionRefundEvent;
 use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
+use sales\entities\EventTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -29,6 +34,8 @@ use yii\helpers\ArrayHelper;
  */
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public function behaviors(): array
     {
         $behaviors = [
@@ -50,6 +57,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
         $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::CONFIRM;
         $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+        $this->recordEvent(new ProductQuoteChangeDecisionConfirmEvent($this->pqc_id, $this->pqc_pq_id));
     }
 
     public function customerDecisionRefund(?int $userId, \DateTimeImmutable $date): void
@@ -58,6 +66,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
         $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::REFUND;
         $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+        $this->recordEvent(new ProductQuoteChangeDecisionRefundEvent($this->pqc_id, $this->pqc_pq_id));
     }
 
     public function customerDecisionModify(?int $userId, \DateTimeImmutable $date): void
@@ -66,6 +75,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
         $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::MODIFY;
         $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
+        $this->recordEvent(new ProductQuoteChangeDecisionModifyEvent($this->pqc_id, $this->pqc_pq_id));
     }
 
     public function isCustomerDecisionConfirm(): bool
@@ -205,6 +215,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $model->pqc_case_id = $caseId;
         $model->pqc_status_id = ProductQuoteChangeStatus::NEW;
         $model->pqc_is_automate = $isAutomate;
+        $model->recordEvent(new ProductQuoteChangeCreatedEvent($model, $model->pqc_pq_id, $model->pqc_case_id));
         return $model;
     }
 }

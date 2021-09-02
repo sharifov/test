@@ -1338,6 +1338,10 @@ class CommunicationController extends ApiBaseController
         if ($customParameters->dep_id) {
             $call->c_dep_id = $customParameters->dep_id;
         }
+
+        if ($customParameters->client_id) {
+            $call->c_client_id = $customParameters->client_id;
+        }
     }
 
     private static function copyUpdatedData(Call $from, Call $to): void

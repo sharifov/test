@@ -381,6 +381,11 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['notifications_history_days'] ?? 30);
     }
 
+    public static function getClientNotificationsHistoryDays(): int
+    {
+        return (int)(Yii::$app->params['settings']['client_notifications_history_days'] ?? 30);
+    }
+
     public static function getCallDistributionSort(): array
     {
         $sort = [
@@ -459,5 +464,17 @@ class SettingHelper
     public static function getLeadAutoRedialEnabled(): bool
     {
         return (bool)(Yii::$app->params['settings']['call_lead_auto_redial_enabled'] ?? false);
+    }
+
+    /**
+     * @return array [days, hours]
+     */
+    public static function getClientNotificationStartInterval(): array
+    {
+        $settings = Yii::$app->params['settings']['client_notification_start_interval'] ?? null;
+        if ($settings) {
+            return JsonHelper::decode($settings);
+        }
+        return ['days' => 0, 'hours' => 0];
     }
 }

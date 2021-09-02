@@ -6,6 +6,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
@@ -31,6 +32,7 @@ use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\client\notifications\ClientNotificationCanceler;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -224,6 +226,7 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_INTERNAL        = 10;
     public const SOURCE_LEAD        = 11;
     public const SOURCE_CASE        = 12;
+    public const SOURCE_CLIENT_NOTIFICATION = 13;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -238,6 +241,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
+        self::SOURCE_CLIENT_NOTIFICATION  => 'Client notification',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -253,6 +257,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
+        self::SOURCE_CLIENT_NOTIFICATION  => 'Client notification',
     ];
 
     public const TW_RECORDING_STATUS_PAUSED = 'paused';
@@ -1414,6 +1419,16 @@ class Call extends \yii\db\ActiveRecord
                 $job->callSids = [$this->c_call_sid];
                 $job->delayJob = $delayJob;
                 Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
+            }
+
+            if ($this->c_case_id) {
+                $productQuoteChanges = ProductQuoteChange::find()->select(['pqc_id'])->byCaseId($this->c_case_id)->isNotDecided()->column();
+                if ($productQuoteChanges) {
+                    $clientNotificationCanceler = Yii::createObject(ClientNotificationCanceler::class);
+                    foreach ($productQuoteChanges as $productQuoteChangeId) {
+                        $clientNotificationCanceler->cancel(\sales\model\client\notifications\client\entity\NotificationType::PRODUCT_QUOTE_CHANGE_CREATED_EVENT, $productQuoteChangeId);
+                    }
+                }
             }
         }
 
@@ -2702,5 +2717,10 @@ class Call extends \yii\db\ActiveRecord
             }
         }
         return $data;
+    }
+
+    public function isClientNotification(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_CLIENT_NOTIFICATION;
     }
 }

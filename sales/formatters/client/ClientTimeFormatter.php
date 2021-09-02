@@ -3,7 +3,7 @@
 namespace sales\formatters\client;
 
 use Yii;
-use sales\services\lead\qcall\DayTimeHours;
+use sales\helpers\DayTimeHours;
 use yii\helpers\Html;
 
 class ClientTimeFormatter

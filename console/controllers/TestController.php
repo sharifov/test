@@ -2,6 +2,9 @@
 
 namespace console\controllers;
 
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use sales\helpers\setting\SettingHelper;
+use sales\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
 use common\models\Employee;
@@ -21,8 +24,6 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\jobs\OrderCanceledConfirmationJob;
 use modules\order\src\payment\services\PaymentService;
-use modules\order\src\processManager\phoneToBook\events\FlightQuoteBookedEvent;
-use modules\order\src\processManager\phoneToBook\events\QuoteBookedEvent;
 use modules\order\src\processManager\jobs\BookingFlightJob;
 use modules\order\src\processManager\jobs\BookingHotelJob;
 use modules\order\src\processManager\phoneToBook\jobs\StartBookingJob;
@@ -32,6 +33,9 @@ use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteObjectRefund\service\QuoteObjectRefundManageService;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
@@ -77,9 +81,77 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+
+    public function actionA()
+    {
+
+//        \Yii::createObject(\sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class)->handle(new ProductQuoteChangeDecisionModifyEvent(113, 192));
+//        die;
+
+//        \Yii::createObject(ClientNotificationExecutor::class)->execute(2);
+//        die;
+        $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
+        $change = ProductQuoteChange::createNew(
+            193,
+            135988
+        );
+        $repo->save($change);
+
+
+//        $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
+//        $change = ProductQuoteChange::createNew(
+//            192,
+//            135987
+//        );
+//        $repo->save($change);
+    }
+
+    public function actionQ()
+    {
+        echo \Yii::$app->communication->makeCallClientNotification(
+            '+14157693509',
+            '+37369305726',
+            'Hello world',
+            'woman',
+            null,
+            null,
+            [
+                'project_id' => 2,
+                'client_id' => 472969,
+                'case_id' => 135981,
+                'phone_list_id' => 1468,
+            ]
+        );
+    }
+
     public function actionX()
     {
 
+
+        $clientN = [
+            'clientNotification' => [
+                'productQuoteChange' => [
+                    'sendPhoneNotification' => [
+                        'enabled' => true,
+                        'phoneFrom' => 'phone from',
+                        'messageSay' => 'message say',
+                        'fileUrl' => 'url',
+                        'messageTemplateKey' => 'key tmpl',
+                    ],
+                    'sendSmsNotification' => [
+                        'enabled' => true,
+                        'phoneFrom' => 'phone from sms',
+                        'messageSay' => 'message say sms',
+                        'messageTemplateKey' => 'key tmpl sms',
+                    ],
+                ]
+            ]
+        ];
+
+        $params = \sales\model\project\entity\params\Params::fromArray($clientN);
+        VarDumper::dump($params);
+
+        die;
         $productQuote = ProductQuote::find()->andWhere(['pq_gid' => '1865ef55f3c6c01dca1f4f3128e82733'])->one();
         $r = ArrayHelper::toArray($productQuote);
         VarDumper::dump($r);

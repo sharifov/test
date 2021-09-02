@@ -5,7 +5,7 @@ namespace common\models\search;
 use common\models\UserOnline;
 use common\models\UserProfile;
 use sales\helpers\query\QueryHelper;
-use sales\services\lead\qcall\DayTimeHours;
+use sales\helpers\DayTimeHours;
 use Yii;
 use common\models\Call;
 use common\models\ClientPhone;

@@ -1018,6 +1018,14 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $bookingId;
     }
 
+    public function getLastBookingId(): ?string
+    {
+        if ($this->isFlight()) {
+            return $this->flightQuote->getLastBookingId();
+        }
+        return null;
+    }
+
     public function getProductQuoteDataRecommended(): ActiveQuery
     {
         return $this->hasOne(ProductQuoteData::class, ['pqd_product_quote_id' => 'pq_id'])->andWhere(['pqd_key' => ProductQuoteDataKey::RECOMMENDED]);

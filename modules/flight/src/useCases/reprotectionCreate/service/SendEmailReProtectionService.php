@@ -18,21 +18,21 @@ use Yii;
  * Class SendEmailReProtectionService
  *
  * @property CasesCommunicationService $casesCommunicationService
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  *
  * @property int|null $sendResultStatus
  */
 class SendEmailReProtectionService
 {
-    private CasesCommunicationService $casesCommunicationService;
-
     private ?int $sendResultStatus = null;
 
-    /**
-     * @param CasesCommunicationService $casesCommunicationService
-     */
-    public function __construct(CasesCommunicationService $casesCommunicationService)
+    private CasesCommunicationService $casesCommunicationService;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
+
+    public function __construct(CasesCommunicationService $casesCommunicationService, ProductQuoteChangeRepository $productQuoteChangeRepository)
     {
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
     public function processing(
@@ -60,7 +60,7 @@ class SendEmailReProtectionService
 
         if ($originProductQuote && isset($productQuoteChange)) {
             $productQuoteChange->decisionPending();
-            (new ProductQuoteChangeRepository())->save($productQuoteChange);
+            $this->productQuoteChangeRepository->save($productQuoteChange);
         }
         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Email sent successfully');
 

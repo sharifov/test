@@ -9,10 +9,10 @@ use yii\grid\DataColumn;
  * Class DateTimeColumn
  *
  * Ex.
- * [
- * 'class' => \common\components\grid\DateTimeColumn::class,
- * 'attribute' => 'pbl_updated_dt',
- * ],
+  [
+    'class' => \common\components\grid\DateTimeColumn::class,
+    'attribute' => 'pbl_updated_dt',
+  ],
  */
 class DateTimeColumn extends DataColumn
 {
