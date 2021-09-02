@@ -22,8 +22,8 @@ class GetCasesByPhoneForm extends Model
 {
     public string $contact_phone = '';
     public bool $active_only = false;
-    public ?int $case_project_id = null;
-    public ?int $case_department_id = null;
+    public ?int $cases_project_id = null;
+    public ?int $cases_department_id = null;
     public ?int $results_limit = null;
 
     public function rules(): array
@@ -35,8 +35,8 @@ class GetCasesByPhoneForm extends Model
             ['contact_phone', PhoneInputValidator::class],
             ['contact_phone', 'exist', 'targetClass' => ClientPhone::class, 'targetAttribute' => ['contact_phone' => 'phone'], 'message' => 'Client Phone number not found in DB.'],
             ['active_only', 'boolean'],
-            ['case_project_id', 'integer'],
-            ['case_department_id', 'integer'],
+            ['cases_project_id', 'integer'],
+            ['cases_department_id', 'integer'],
             ['results_limit', 'integer'],
         ];
     }
