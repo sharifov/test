@@ -425,6 +425,533 @@ define({ "api": [
     "groupTitle": "Cases"
   },
   {
+    "type": "get",
+    "url": "/v2/case/find-list-by-email",
+    "title": "Get Cases GID list by Client Email",
+    "version": "0.2.0",
+    "name": "findCasesListByEmail",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "contact_email",
+            "description": "<p>Client Email required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": false,
+            "field": "active_only",
+            "description": "<p>1 for only active cases (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "cases_department_id",
+            "description": "<p>Department ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "cases_project_id",
+            "description": "<p>Project ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "results_limit",
+            "description": "<p>Limits number of cases in results list</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": true,\n      \"case_department_id\": 2,\n      \"case_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            \"24f12d06267aaa8e8ff86c5059efdf86\",\n            \"20e1c76c70f86063ded79b6d389f490d\",\n            \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/find-list-by-email\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"contact_email\": [\n            \"Contact Email is not a valid email address.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/find-list-by-email\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_email\": [\n              \"Client Email not found in DB.\"\n          ]\n      },\n      \"code\": 21303,\n      \"technical\": {\n          ...\n      },\n      \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/find-list-by-phone",
+    "title": "Get Cases GID list by Client Phone number",
+    "version": "0.2.0",
+    "name": "findCasesListByPhone",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "contact_phone",
+            "description": "<p>Client Phone required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": false,
+            "field": "active_only",
+            "description": "<p>1 for only active cases (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "cases_department_id",
+            "description": "<p>Department ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "cases_project_id",
+            "description": "<p>Project ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "results_limit",
+            "description": "<p>Limits number of cases in results list</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": true,\n      \"case_department_id\": 2,\n      \"case_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            \"24f12d06267aaa8e8ff86c5059efdf86\",\n            \"20e1c76c70f86063ded79b6d389f490d\",\n            \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/find-list-by-phone\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"contact_phone\": [\n            \"The format of Contact Phone is invalid.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/find-list-by-phone\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_phone\": [\n              \"Client Phone number not found in DB.\"\n          ]\n      },\n      \"code\": 21303,\n      \"technical\": {\n          ...\n      },\n      \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/get",
+    "title": "Get data Case by Case GID",
+    "version": "0.2.0",
+    "name": "getCaseDataByCaseGid",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "case_gid",
+            "description": "<p>Client Email required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"case_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": {\n                \"cs_id\": \"88473\",\n                \"cs_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-02-26 15:26:25\",\n                \"cs_updated_dt\": \"2020-02-26 17:07:18\",\n                \"cs_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"cs_category_id\": null,\n                \"cs_project_id\": \"7\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": null,\n                \"name\": \"ARANGRANT\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n    },\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"case_gid\": [\n            \"Case Gid should contain at most 50 characters.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/get-list-by-email",
+    "title": "Get Cases list by Client Email",
+    "version": "0.2.0",
+    "name": "getCasesListByEmail",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "contact_email",
+            "description": "<p>Client Email required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": false,
+            "field": "active_only",
+            "description": "<p>1 for only active cases (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "cases_department_id",
+            "description": "<p>Department ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "cases_project_id",
+            "description": "<p>Project ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "results_limit",
+            "description": "<p>Limits number of cases in results list</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": true,\n      \"case_department_id\": 2,\n      \"case_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"cs_id\": \"88473\",\n                \"cs_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-02-26 15:26:25\",\n                \"cs_updated_dt\": \"2020-02-26 17:07:18\",\n                \"cs_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"cs_category_id\": null,\n                \"cs_project_id\": \"7\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": null,\n                \"name\": \"ARANGRANT\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n            },\n            {\n                \"cs_id\": \"130705\",\n                \"cs_gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-03-24 09:14:28\",\n                \"cs_updated_dt\": \"2020-03-24 11:00:34\",\n                \"cs_last_action_dt\": \"2020-03-24 11:00:34\",\n                \"cs_category_id\": \"16\",\n                \"cs_project_id\": \"6\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": \"W9053AF\",\n                \"name\": \"WOWFARE\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-email\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"contact_email\": [\n            \"Contact Email is not a valid email address.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-email\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_email\": [\n              \"Client Email not found in DB.\"\n          ]\n      },\n      \"code\": 21303,\n      \"technical\": {\n          ...\n      },\n      \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/get-list-by-phone",
+    "title": "Get Cases list by Client Phone number",
+    "version": "0.2.0",
+    "name": "getCasesListByPhone",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "contact_phone",
+            "description": "<p>Client Phone required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": false,
+            "field": "active_only",
+            "description": "<p>1 for only active cases (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "cases_department_id",
+            "description": "<p>Department ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "cases_project_id",
+            "description": "<p>Project ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "results_limit",
+            "description": "<p>Limits number of cases in results list</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": true,\n      \"case_department_id\": 2,\n      \"case_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"cs_id\": \"88473\",\n                \"cs_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-02-26 15:26:25\",\n                \"cs_updated_dt\": \"2020-02-26 17:07:18\",\n                \"cs_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"cs_category_id\": null,\n                \"cs_project_id\": \"7\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": null,\n                \"name\": \"ARANGRANT\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n            },\n            {\n                \"cs_id\": \"130705\",\n                \"cs_gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-03-24 09:14:28\",\n                \"cs_updated_dt\": \"2020-03-24 11:00:34\",\n                \"cs_last_action_dt\": \"2020-03-24 11:00:34\",\n                \"cs_category_id\": \"16\",\n                \"cs_project_id\": \"6\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": \"W9053AF\",\n                \"name\": \"WOWFARE\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-phone\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"contact_phone\": [\n            \"The format of Contact Phone is invalid.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-phone\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_phone\": [\n              \"Client Phone number not found in DB.\"\n          ]\n      },\n      \"code\": 21303,\n      \"technical\": {\n          ...\n      },\n      \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
     "type": "post",
     "url": "/v2/client-account/create",
     "title": "Create Client Account",
