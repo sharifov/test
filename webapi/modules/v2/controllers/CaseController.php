@@ -73,9 +73,8 @@ class CaseController extends BaseController
      * {
      *     "status": 200,
      *     "message": "OK",
-     *     "data": {
-     *         "cases_list": {
-     *             "1": {
+     *     "data": [
+     *             {
      *                 "cs_id": "88473",
      *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
      *                 "cs_status": "2",
@@ -90,7 +89,7 @@ class CaseController extends BaseController
      *                 "nextFlight": null,
      *                 "status_name": "Processing"
      *             },
-     *             "2": {
+     *             {
      *                 "cs_id": "130705",
      *                 "cs_gid": "37129b222479f0468d6355fcf4bd0235",
      *                 "cs_status": "2",
@@ -105,8 +104,7 @@ class CaseController extends BaseController
      *                 "nextFlight": null,
      *                 "status_name": "Processing"
      *             }
-     *         }
-     * },
+     *     ],
      *     "technical": {
      *         "action": "v2/case/get-list-by-phone",
      *         "response_id": 753,
@@ -185,7 +183,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id), false);
     }
 
 
@@ -225,9 +223,8 @@ class CaseController extends BaseController
      * {
      *     "status": 200,
      *     "message": "OK",
-     *     "data": {
-     *         "cases_list": {
-     *             "1": {
+     *     "data": [
+     *             {
      *                 "cs_id": "88473",
      *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
      *                 "cs_status": "2",
@@ -242,7 +239,7 @@ class CaseController extends BaseController
      *                 "nextFlight": null,
      *                 "status_name": "Processing"
      *             },
-     *             "2": {
+     *             {
      *                 "cs_id": "130705",
      *                 "cs_gid": "37129b222479f0468d6355fcf4bd0235",
      *                 "cs_status": "2",
@@ -257,8 +254,7 @@ class CaseController extends BaseController
      *                 "nextFlight": null,
      *                 "status_name": "Processing"
      *             }
-     *         }
-     * },
+     *     ],
      *     "technical": {
      *         "action": "v2/case/get-list-by-email",
      *         "response_id": 753,
@@ -337,7 +333,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id), false);
     }
 
     /**
@@ -369,8 +365,6 @@ class CaseController extends BaseController
      *     "status": 200,
      *     "message": "OK",
      *     "data": {
-     *         "cases_array": [
-     *             {
      *                 "cs_id": "88473",
      *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
      *                 "cs_status": "2",
@@ -384,10 +378,7 @@ class CaseController extends BaseController
      *                 "name": "ARANGRANT",
      *                 "nextFlight": null,
      *                 "status_name": "Processing"
-     *             }
-     *         }
-     *      ]
-     * },
+     *     },
      *     "technical": {
      *         "action": "v2/case/get",
      *         "response_id": 753,
@@ -448,7 +439,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCaseByCaseGid($form->case_gid));
+        return $this->getCasesResult(CasesQuery::findCaseByCaseGid($form->case_gid), true);
     }
 
     /**
@@ -487,13 +478,11 @@ class CaseController extends BaseController
      * {
      *     "status": 200,
      *     "message": "OK",
-     *     "data": {
-     *         "cases_list": [
+     *     "data": [
      *             "24f12d06267aaa8e8ff86c5059efdf86",
      *             "20e1c76c70f86063ded79b6d389f490d",
      *             "c5f3f405ea489bd6e6a1f3886086c9d9",
-     *         ]
-     * },
+     *     ],
      *     "technical": {
      *         "action": "v2/case/find-list-by-phone",
      *         "response_id": 753,
@@ -572,7 +561,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id), false);
     }
 
 
@@ -612,13 +601,11 @@ class CaseController extends BaseController
      * {
      *     "status": 200,
      *     "message": "OK",
-     *     "data": {
-     *         "cases_list": [
+     *     "data": [
      *             "24f12d06267aaa8e8ff86c5059efdf86",
      *             "20e1c76c70f86063ded79b6d389f490d",
      *             "c5f3f405ea489bd6e6a1f3886086c9d9",
-     *         ]
-     * },
+     *     ],
      *     "technical": {
      *         "action": "v2/case/find-list-by-email",
      *         "response_id": 753,
@@ -697,7 +684,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id), false);
     }
 
     private function getCasesLoadDataErrorResponse(): ErrorResponse
@@ -719,12 +706,12 @@ class CaseController extends BaseController
         );
     }
 
-    private function getCasesResult(array $cases)
+    private function getCasesResult(array $cases, ?bool $isSingleCase)
     {
         try {
             return new SuccessResponse(
                 new DataMessage(
-                    new Message('cases_list', $cases),
+                    $isSingleCase ? $cases[0] : $cases
                 )
             );
         } catch (\Throwable $e) {

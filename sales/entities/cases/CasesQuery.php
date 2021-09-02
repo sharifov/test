@@ -154,7 +154,7 @@ class CasesQuery extends ActiveQuery
                         $result_cases_cnt++;
                     }
                 }
-                return $cases;
+                return array_values($cases);
             }
         } else {
             $cases = $query->all();
