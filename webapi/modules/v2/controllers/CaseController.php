@@ -4,12 +4,9 @@ namespace webapi\modules\v2\controllers;
 
 use sales\entities\cases\CasesQuery;
 use sales\model\cases\CaseCodeException;
-//use sales\model\cases\useCases\cases\api\create\Handler;
-//use sales\services\cases\CasesSaleService;
 use webapi\src\forms\cases\GetCasesByPhoneForm;
 use webapi\src\forms\cases\GetCasesByEmailForm;
 use webapi\src\forms\cases\GetCaseByCaseGidForm;
-use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
@@ -22,29 +19,12 @@ use webapi\src\response\SuccessResponse;
 use webapi\src\response\Response;
 use Yii;
 use yii\base\Model;
-use yii\helpers\VarDumper;
 
 /**
  * Class CaseController
- *
- * @property Handler $createHandler
- * @property CasesSaleService $casesSaleService
  */
 class CaseController extends BaseController
 {
-//    private $createHandler;
-//    private $caseService;
-
-//    public function __construct(
-//        $id,
-//        $module,
-//        ApiLogger $logger,
-//        Handler $createHandler,
-//        $config = []
-//    ) {
-//        parent::__construct($id, $module, $logger, $config);
-//        $this->createHandler = $createHandler;
-//    }
 
     protected function verbs(): array
     {
@@ -58,9 +38,9 @@ class CaseController extends BaseController
     }
 
     /**
-     * @api {get} /v2/case/actionGetListByPhone Get Case
+     * @api {get} /v2/case/get-list-by-phone Get Cases list by Client Phone number
      * @apiVersion 0.2.0
-     * @apiName getCases
+     * @apiName getCasesListByPhone
      * @apiGroup Cases
      * @apiPermission Authorized User
      *
@@ -71,108 +51,112 @@ class CaseController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{160}}          contact_email                    Client Email required if contact phone or chat_visitor_id or order_uid are not set
-     * @apiParam {string{20}}           contact_phone                    Client Phone required if contact email or chat_visitor_id or order_uid are not set
-     * @apiParam {string{20}}           [contact_name]                   Client Name
-     * @apiParam {string{50}}           chat_visitor_id                  Client chat_visitor_id required if contact phone or email or order_uid are not set
-     * @apiParam {int}                  category_id                      Case category id
-     * @apiParam {string{5..7}}         order_uid                        Order uid (symbols and numbers only) required if contact phone or email or chat_visitor_id are not set
-     * @apiParam {string{100}}          [project_key]                    Project Key (if not exist project assign API User)
-     * @apiParam {string{255}}          [subject]                        Subject
-     * @apiParam {string{65000}}        [description]                    Description
-     * @apiParam {array[]}              [order_info]                     Order Info (key => value, key: string, value: string)
+     * @apiParam {string{20}}           contact_phone                    Client Phone required
+     * @apiParam {bool}                 active_only                      1 for only active cases (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {int}                  [cases_department_id]            Department ID
+     * @apiParam {int}                  [cases_project_id]               Project ID
+     * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
      *
      * @apiParamExample {json} Request-Example:
      * {
-     *       "contact_email": "test@test.com",
-     *       "contact_phone": "+37369636690",
-     *       "category_id": 12,
-     *       "order_uid": "12WS09W",
-     *       "subject": "Subject text",
-     *       "description": "Description text",
-     *       "project_key": "project_key",
-     *       "order_info": {
-     *           "Departure Date":"2020-03-07",
-     *           "Departure Airport":"LON"
-     *       }
+     *       "contact_phone": "+18888888888",
+     *       "active_only": true,
+     *       "case_department_id": 2,
+     *       "case_project_id": 6,
+     *       "results_limit": 10
      *   }
      *
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK
-     *   {
-     *       "status": 200,
-     *       "message": "OK",
-     *       "data": {
-     *           "case_id": 2354356,
-     *           "case_gid": "708ddf3e44ec477f8807d8b5f748bb6c",
-     *           "client_uuid": "5d0cd25a-7f22-4b18-9547-e19a3e7d0c9a"
-     *       },
-     *       "technical": {
-     *           "action": "v2/cases/create",
-     *           "response_id": 11934216,
-     *           "request_dt": "2020-03-17 08:31:30",
-     *           "response_dt": "2020-03-17 08:31:30",
-     *           "execution_time": 0.156,
-     *           "memory_usage": 979248
-     *       },
-     *       "request": {
-     *           "contact_email": "test@test.com",
-     *           "contact_phone": "+37369636690",
-     *           "category_id": 12,
-     *           "order_uid": "12WS09W",
-     *           "subject": "Subject text",
-     *           "description": "Description text",
-     *           "project_key": "project_key",
-     *           "order_info": {
-     *               "Departure Date": "2020-03-07",
-     *               "Departure Airport": "LON"
-     *           }
-     *       }
-     *   }
+
+     * {
+     *     "status": 200,
+     *     "message": "OK",
+     *     "data": {
+     *         "cases_list": {
+     *             "1": {
+     *                 "cs_id": "88473",
+     *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "cs_status": "2",
+     *                 "cs_created_dt": "2020-02-26 15:26:25",
+     *                 "cs_updated_dt": "2020-02-26 17:07:18",
+     *                 "cs_last_action_dt": "2020-02-27 15:08:39",
+     *                 "cs_category_id": null,
+     *                 "cs_project_id": "7",
+     *                 "cs_dep_id": "2",
+     *                 "cs_order_uid": null,
+     *                 "name": "ARANGRANT",
+     *                 "nextFlight": null,
+     *                 "status_name": "Processing"
+     *             },
+     *             "2": {
+     *                 "cs_id": "130705",
+     *                 "cs_gid": "37129b222479f0468d6355fcf4bd0235",
+     *                 "cs_status": "2",
+     *                 "cs_created_dt": "2020-03-24 09:14:28",
+     *                 "cs_updated_dt": "2020-03-24 11:00:34",
+     *                 "cs_last_action_dt": "2020-03-24 11:00:34",
+     *                 "cs_category_id": "16",
+     *                 "cs_project_id": "6",
+     *                 "cs_dep_id": "2",
+     *                 "cs_order_uid": "W9053AF",
+     *                 "name": "WOWFARE",
+     *                 "nextFlight": null,
+     *                 "status_name": "Processing"
+     *             }
+     *         }
+     * },
+     *     "technical": {
+     *         "action": "v2/case/get-list-by-phone",
+     *         "response_id": 753,
+     *         "request_dt": "2021-09-02 13:52:53",
+     *         "response_dt": "2021-09-02 13:52:53",
+     *         "execution_time": 0.029,
+     *         "memory_usage": 568056
+     *     },
+     *     "request": []
+     * }
      *
      * @apiErrorExample {json} Error-Response(Validation error) (422):
      *
      * HTTP/1.1 422 Unprocessable entity
-     *   {
-     *       "status": 422,
-     *       "message": "Validation error",
-     *       "errors": {
-     *           "contact_email": [
-     *               "Contact Email cannot be blank."
-     *           ],
-     *           "contact_phone": [
-     *               "The format of Contact Phone is invalid."
-     *           ],
-     *           "order_uid": [
-     *               "Order Uid should contain at most 7 characters."
-     *           ]
-     *       },
-     *       "code": "21301",
-     *       "technical": {
-     *          ...
-     *       },
-     *       "request": {
-     *          ...
-     *       }
-     *   }
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *         "contact_phone": [
+     *             "The format of Contact Phone is invalid."
+     *         ]
+     *     },
+     *     "code": "21303",
+     *     "technical": {
+     *         "action": "v2/case/get-list-by-phone",
+     *         "response_id": 754,
+     *         "request_dt": "2021-09-02 14:01:22",
+     *         "response_dt": "2021-09-02 14:01:22",
+     *         "execution_time": 0.028,
+     *         "memory_usage": 306800
+     *     },
+     *     "request": []
+     * }
      *
      * @apiErrorExample {json} Error-Response (422):
      *
      * HTTP/1.1 422 Unprocessable entity
      * {
      *       "status": 422,
-     *       "message": "Saving error",
-     *       "errors": [
-     *           "Saving error"
-     *       ],
-     *       "code": 21101,
+     *       "message": "Validation error",
+     *       "errors": {
+     *           "contact_phone": [
+     *               "Client Phone number not found in DB."
+     *           ]
+     *       },
+     *       "code": 21303,
      *       "technical": {
      *           ...
      *       },
-     *       "request": {
-     *           ...
-     *       }
+     *       "request": []
      * }
      *
      * @apiErrorExample {json} Error-Response(Load data error) (400):
@@ -182,15 +166,13 @@ class CaseController extends BaseController
      *       "status": 400,
      *       "message": "Load data error",
      *       "errors": [
-     *           "Not found Case data on POST request"
+     *           "Not found  GET request params"
      *       ],
-     *       "code": 21300,
+     *       "code": 21302,
      *       "technical": {
      *           ...
      *       },
-     *       "request": {
-     *           ...
-     *       }
+     *       "request":  []
      * }
      */
     public function actionGetListByPhone(): Response
@@ -206,6 +188,145 @@ class CaseController extends BaseController
         return $this->getCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
+
+    /**
+     * @api {get} /v2/case/get-list-by-email Get Cases list by Client Email
+     * @apiVersion 0.2.0
+     * @apiName getCasesListByEmail
+     * @apiGroup Cases
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{20}}           contact_email                    Client Email required
+     * @apiParam {bool}                 active_only                      1 for only active cases (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {int}                  [cases_department_id]            Department ID
+     * @apiParam {int}                  [cases_project_id]               Project ID
+     * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *       "contact_email": "test@test.test",
+     *       "active_only": true,
+     *       "case_department_id": 2,
+     *       "case_project_id": 6,
+     *       "results_limit": 10
+     *   }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+
+     * {
+     *     "status": 200,
+     *     "message": "OK",
+     *     "data": {
+     *         "cases_list": {
+     *             "1": {
+     *                 "cs_id": "88473",
+     *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "cs_status": "2",
+     *                 "cs_created_dt": "2020-02-26 15:26:25",
+     *                 "cs_updated_dt": "2020-02-26 17:07:18",
+     *                 "cs_last_action_dt": "2020-02-27 15:08:39",
+     *                 "cs_category_id": null,
+     *                 "cs_project_id": "7",
+     *                 "cs_dep_id": "2",
+     *                 "cs_order_uid": null,
+     *                 "name": "ARANGRANT",
+     *                 "nextFlight": null,
+     *                 "status_name": "Processing"
+     *             },
+     *             "2": {
+     *                 "cs_id": "130705",
+     *                 "cs_gid": "37129b222479f0468d6355fcf4bd0235",
+     *                 "cs_status": "2",
+     *                 "cs_created_dt": "2020-03-24 09:14:28",
+     *                 "cs_updated_dt": "2020-03-24 11:00:34",
+     *                 "cs_last_action_dt": "2020-03-24 11:00:34",
+     *                 "cs_category_id": "16",
+     *                 "cs_project_id": "6",
+     *                 "cs_dep_id": "2",
+     *                 "cs_order_uid": "W9053AF",
+     *                 "name": "WOWFARE",
+     *                 "nextFlight": null,
+     *                 "status_name": "Processing"
+     *             }
+     *         }
+     * },
+     *     "technical": {
+     *         "action": "v2/case/get-list-by-email",
+     *         "response_id": 753,
+     *         "request_dt": "2021-09-02 13:52:53",
+     *         "response_dt": "2021-09-02 13:52:53",
+     *         "execution_time": 0.029,
+     *         "memory_usage": 568056
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Validation error) (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *         "contact_email": [
+     *             "Contact Email is not a valid email address."
+     *         ]
+     *     },
+     *     "code": "21303",
+     *     "technical": {
+     *         "action": "v2/case/get-list-by-email",
+     *         "response_id": 754,
+     *         "request_dt": "2021-09-02 14:01:22",
+     *         "response_dt": "2021-09-02 14:01:22",
+     *         "execution_time": 0.028,
+     *         "memory_usage": 306800
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *       "status": 422,
+     *       "message": "Validation error",
+     *       "errors": {
+     *           "contact_email": [
+     *               "Client Email not found in DB."
+     *           ]
+     *       },
+     *       "code": 21303,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Load data error) (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *       "status": 400,
+     *       "message": "Load data error",
+     *       "errors": [
+     *           "Not found  GET request params"
+     *       ],
+     *       "code": 21302,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request":  []
+     * }
+     */
     public function actionGetListByEmail(): Response
     {
         $form = new GetCasesByEmailForm();
@@ -219,6 +340,104 @@ class CaseController extends BaseController
         return $this->getCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
+    /**
+     * @api {get} /v2/case/get Get data Case by Case GID
+     * @apiVersion 0.2.0
+     * @apiName getCaseDataByCaseGid
+     * @apiGroup Cases
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{50}}           case_gid                         Client Email required
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *       "case_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+
+     * {
+     *     "status": 200,
+     *     "message": "OK",
+     *     "data": {
+     *         "cases_array": [
+     *             {
+     *                 "cs_id": "88473",
+     *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "cs_status": "2",
+     *                 "cs_created_dt": "2020-02-26 15:26:25",
+     *                 "cs_updated_dt": "2020-02-26 17:07:18",
+     *                 "cs_last_action_dt": "2020-02-27 15:08:39",
+     *                 "cs_category_id": null,
+     *                 "cs_project_id": "7",
+     *                 "cs_dep_id": "2",
+     *                 "cs_order_uid": null,
+     *                 "name": "ARANGRANT",
+     *                 "nextFlight": null,
+     *                 "status_name": "Processing"
+     *             }
+     *         }
+     *      ]
+     * },
+     *     "technical": {
+     *         "action": "v2/case/get",
+     *         "response_id": 753,
+     *         "request_dt": "2021-09-02 13:52:53",
+     *         "response_dt": "2021-09-02 13:52:53",
+     *         "execution_time": 0.029,
+     *         "memory_usage": 568056
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Validation error) (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *         "case_gid": [
+     *             "Case Gid should contain at most 50 characters."
+     *         ]
+     *     },
+     *     "code": "21303",
+     *     "technical": {
+     *         "action": "v2/case/get",
+     *         "response_id": 754,
+     *         "request_dt": "2021-09-02 14:01:22",
+     *         "response_dt": "2021-09-02 14:01:22",
+     *         "execution_time": 0.028,
+     *         "memory_usage": 306800
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Load data error) (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *       "status": 400,
+     *       "message": "Load data error",
+     *       "errors": [
+     *           "Not found  GET request params"
+     *       ],
+     *       "code": 21302,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request":  []
+     * }
+     */
     public function actionGet(): Response
     {
         $form = new GetCaseByCaseGidForm();
@@ -232,6 +451,117 @@ class CaseController extends BaseController
         return $this->getCasesResult(CasesQuery::findCaseByCaseGid($form->case_gid));
     }
 
+    /**
+     * @api {get} /v2/case/find-list-by-phone Get Cases GID list by Client Phone number
+     * @apiVersion 0.2.0
+     * @apiName findCasesListByPhone
+     * @apiGroup Cases
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{20}}           contact_phone                    Client Phone required
+     * @apiParam {bool}                 active_only                      1 for only active cases (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {int}                  [cases_department_id]            Department ID
+     * @apiParam {int}                  [cases_project_id]               Project ID
+     * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *       "contact_phone": "+18888888888",
+     *       "active_only": true,
+     *       "case_department_id": 2,
+     *       "case_project_id": 6,
+     *       "results_limit": 10
+     *   }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+
+     * {
+     *     "status": 200,
+     *     "message": "OK",
+     *     "data": {
+     *         "cases_list": [
+     *             "24f12d06267aaa8e8ff86c5059efdf86",
+     *             "20e1c76c70f86063ded79b6d389f490d",
+     *             "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *         ]
+     * },
+     *     "technical": {
+     *         "action": "v2/case/find-list-by-phone",
+     *         "response_id": 753,
+     *         "request_dt": "2021-09-02 13:52:53",
+     *         "response_dt": "2021-09-02 13:52:53",
+     *         "execution_time": 0.029,
+     *         "memory_usage": 568056
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Validation error) (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *         "contact_phone": [
+     *             "The format of Contact Phone is invalid."
+     *         ]
+     *     },
+     *     "code": "21303",
+     *     "technical": {
+     *         "action": "v2/case/find-list-by-phone",
+     *         "response_id": 754,
+     *         "request_dt": "2021-09-02 14:01:22",
+     *         "response_dt": "2021-09-02 14:01:22",
+     *         "execution_time": 0.028,
+     *         "memory_usage": 306800
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *       "status": 422,
+     *       "message": "Validation error",
+     *       "errors": {
+     *           "contact_phone": [
+     *               "Client Phone number not found in DB."
+     *           ]
+     *       },
+     *       "code": 21303,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Load data error) (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *       "status": 400,
+     *       "message": "Load data error",
+     *       "errors": [
+     *           "Not found  GET request params"
+     *       ],
+     *       "code": 21302,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request":  []
+     * }
+     */
     public function actionFindListByPhone(): Response
     {
         $form = new GetCasesByPhoneForm();
@@ -245,6 +575,118 @@ class CaseController extends BaseController
         return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
+
+    /**
+     * @api {get} /v2/case/find-list-by-email Get Cases GID list by Client Email
+     * @apiVersion 0.2.0
+     * @apiName findCasesListByEmail
+     * @apiGroup Cases
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{20}}           contact_email                    Client Email required
+     * @apiParam {bool}                 active_only                      1 for only active cases (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {int}                  [cases_department_id]            Department ID
+     * @apiParam {int}                  [cases_project_id]               Project ID
+     * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *       "contact_email": "test@test.test",
+     *       "active_only": true,
+     *       "case_department_id": 2,
+     *       "case_project_id": 6,
+     *       "results_limit": 10
+     *   }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+
+     * {
+     *     "status": 200,
+     *     "message": "OK",
+     *     "data": {
+     *         "cases_list": [
+     *             "24f12d06267aaa8e8ff86c5059efdf86",
+     *             "20e1c76c70f86063ded79b6d389f490d",
+     *             "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *         ]
+     * },
+     *     "technical": {
+     *         "action": "v2/case/find-list-by-email",
+     *         "response_id": 753,
+     *         "request_dt": "2021-09-02 13:52:53",
+     *         "response_dt": "2021-09-02 13:52:53",
+     *         "execution_time": 0.029,
+     *         "memory_usage": 568056
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Validation error) (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *         "contact_email": [
+     *             "Contact Email is not a valid email address."
+     *         ]
+     *     },
+     *     "code": "21303",
+     *     "technical": {
+     *         "action": "v2/case/find-list-by-email",
+     *         "response_id": 754,
+     *         "request_dt": "2021-09-02 14:01:22",
+     *         "response_dt": "2021-09-02 14:01:22",
+     *         "execution_time": 0.028,
+     *         "memory_usage": 306800
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *       "status": 422,
+     *       "message": "Validation error",
+     *       "errors": {
+     *           "contact_email": [
+     *               "Client Email not found in DB."
+     *           ]
+     *       },
+     *       "code": 21303,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Load data error) (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *       "status": 400,
+     *       "message": "Load data error",
+     *       "errors": [
+     *           "Not found  GET request params"
+     *       ],
+     *       "code": 21302,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request":  []
+     * }
+     */
     public function actionFindListByEmail(): Response
     {
         $form = new GetCasesByEmailForm();
@@ -282,7 +724,7 @@ class CaseController extends BaseController
         try {
             return new SuccessResponse(
                 new DataMessage(
-                    new Message('cases_array', $cases),
+                    new Message('cases_list', $cases),
                 )
             );
         } catch (\Throwable $e) {

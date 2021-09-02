@@ -9,9 +9,6 @@ use yii\db\Expression;
 
 class CasesQuery extends ActiveQuery
 {
-    public const QUERY_GET_CASES = 'cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name';
-    public const QUERY_GET_CASES_GID = 'cs_gid, cs_status, cs_created_dt, cs_project_id, cs_dep_id';
-
     public function findLastActiveClientCaseByDepartment(int $departmentId, int $clientId, ?int $projectId, int $trashActiveDaysLimit): self
     {
         return $this->findLastActiveClientCase($clientId, $projectId, $trashActiveDaysLimit)->byDepartment($departmentId);
@@ -42,7 +39,7 @@ class CasesQuery extends ActiveQuery
     public static function findCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
-                ->select(self::QUERY_GET_CASES)
+                ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
                 ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
                 ->andWhere(['client_phone.phone' => $phone]);
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
@@ -51,7 +48,7 @@ class CasesQuery extends ActiveQuery
     public static function findCasesByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
-            ->select(self::QUERY_GET_CASES)
+            ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
             ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
             ->andWhere(['client_email.email' => $email]);
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
@@ -60,7 +57,7 @@ class CasesQuery extends ActiveQuery
     public static function findCaseByCaseGid(string $caseGid): array
     {
         $query = Cases::find()
-            ->select(self::QUERY_GET_CASES)
+            ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
             ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
             ->andWhere(['cs_gid' => $caseGid]);
         return self::findCasesPartial($query, false, null, null, null);
@@ -69,7 +66,7 @@ class CasesQuery extends ActiveQuery
     public static function findCasesGidByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
-            ->select(self::QUERY_GET_CASES_GID)
+            ->select('cs_gid, cs_status, cs_created_dt, cs_project_id, cs_dep_id')
             ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
             ->andWhere(['client_phone.phone' => $phone]);
         return array_column(self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId), 'cs_gid');
@@ -78,7 +75,7 @@ class CasesQuery extends ActiveQuery
     public static function findCasesGidByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
-            ->select(self::QUERY_GET_CASES)
+            ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
             ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
             ->andWhere(['client_email.email' => $email]);
         return array_column(self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId), 'cs_gid');
