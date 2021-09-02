@@ -355,7 +355,7 @@ class Call extends \yii\db\ActiveRecord
             ['c_recording_disabled', 'default', 'value' => false],
             ['c_recording_disabled', 'boolean'],
 
-            ['c_stir_status', 'string', 'max' => 1],
+            ['c_stir_status', 'string'],
             ['c_stir_status', 'trim', 'skipOnEmpty' => true],
             ['c_stir_status', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
             ['c_stir_status', 'stirStatusProcessing'],
