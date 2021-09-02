@@ -63,7 +63,9 @@ class CaseController extends BaseController
     {
         $verbs = parent::verbs();
         $verbs['get-list-by-phone'] = ['GET'];
+        $verbs['find-list-by-phone'] = ['GET'];
         $verbs['get-list-by-email'] = ['GET'];
+        $verbs['find-list-by-email'] = ['GET'];
         $verbs['get'] = ['GET'];
         return $verbs;
     }
@@ -208,65 +210,65 @@ class CaseController extends BaseController
     {
         $form = new FindCasesByPhoneForm();
         if (!$form->load(Yii::$app->request->get())) {
-            return self::findCasesLoadDataErrorResponse();
+            return $this->findCasesLoadDataErrorResponse();
         }
         if (!$form->validate()) {
-            return self::findCasesValidationErrorResponse($form);
+            return $this->findCasesValidationErrorResponse($form);
         }
 
-        return self::findCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+        return $this->findCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
     }
 
     public function actionGetListByEmail(): Response
     {
         $form = new FindCasesByEmailForm();
         if (!$form->load(Yii::$app->request->get())) {
-            return self::findCasesLoadDataErrorResponse();
+            return $this->findCasesLoadDataErrorResponse();
         }
         if (!$form->validate()) {
-            return self::findCasesValidationErrorResponse($form);
+            return $this->findCasesValidationErrorResponse($form);
         }
 
-        return self::findCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+        return $this->findCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
     }
 
     public function actionGet(): Response
     {
         $form = new FindCaseByCaseGidForm();
         if (!$form->load(Yii::$app->request->get())) {
-            return self::findCasesLoadDataErrorResponse();
+            return $this->findCasesLoadDataErrorResponse();
         }
         if (!$form->validate()) {
-            return self::findCasesValidationErrorResponse($form);
+            return $this->findCasesValidationErrorResponse($form);
         }
 
-        return self::findCasesResult(CasesQuery::findCaseByCaseGid($form->case_gid));
+        return $this->findCasesResult(CasesQuery::findCaseByCaseGid($form->case_gid));
     }
 
     public function actionFindListByPhone(): Response
     {
         $form = new FindCasesByPhoneForm();
         if (!$form->load(Yii::$app->request->get())) {
-            return self::findCasesLoadDataErrorResponse();
+            return $this->findCasesLoadDataErrorResponse();
         }
         if (!$form->validate()) {
-            return self::findCasesValidationErrorResponse($form);
+            return $this->findCasesValidationErrorResponse($form);
         }
 
-        return self::findCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+        return $this->findCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
     }
 
     public function actionFindListByEmail(): Response
     {
         $form = new FindCasesByEmailForm();
         if (!$form->load(Yii::$app->request->get())) {
-            return self::findCasesLoadDataErrorResponse();
+            return $this->findCasesLoadDataErrorResponse();
         }
         if (!$form->validate()) {
-            return self::findCasesValidationErrorResponse($form);
+            return $this->findCasesValidationErrorResponse($form);
         }
 
-        return self::findCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
+        return $this->findCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->case_project_id, $form->case_department_id));
     }
 
     public function findCasesLoadDataErrorResponse(): ErrorResponse
