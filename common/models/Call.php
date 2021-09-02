@@ -358,6 +358,7 @@ class Call extends \yii\db\ActiveRecord
             ['c_stir_status', 'string', 'max' => 1],
             ['c_stir_status', 'trim', 'skipOnEmpty' => true],
             ['c_stir_status', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
+            ['c_stir_status', 'stirStatusProcessing'],
         ];
     }
 
@@ -430,6 +431,16 @@ class Call extends \yii\db\ActiveRecord
         ];
     }
 
+    public function stirStatusProcessing()
+    {
+        if (!empty($this->c_stir_status)) {
+            if (!ArrayHelper::isIn($this->c_stir_status, array_keys(self::STIR_STATUS_LIST), true)) {
+                $this->c_stir_status = null;
+                \Yii::warning('Unregistered Stir Status (' . $this->c_stir_status . ')', 'Call:stirStatusProcessing');
+            }
+        }
+    }
+
     /**
      * @return static
      */
@@ -452,6 +463,7 @@ class Call extends \yii\db\ActiveRecord
      * @param $fromState
      * @param $fromCity
      * @param $createdUserId
+     * @param $stirStatus
      * @return static
      */
     public static function createDeclined(
