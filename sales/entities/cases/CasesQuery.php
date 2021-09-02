@@ -9,6 +9,9 @@ use yii\db\Expression;
 
 class CasesQuery extends ActiveQuery
 {
+    public const QUERY_GET_CASES = 'cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name';
+    public const QUERY_GET_CASES_GID = 'cs_gid';
+
     public function findLastActiveClientCaseByDepartment(int $departmentId, int $clientId, ?int $projectId, int $trashActiveDaysLimit): self
     {
         return $this->findLastActiveClientCase($clientId, $projectId, $trashActiveDaysLimit)->byDepartment($departmentId);
