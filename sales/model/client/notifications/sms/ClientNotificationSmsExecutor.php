@@ -74,6 +74,7 @@ class ClientNotificationSmsExecutor
                 [
                     'project_key' => $notification->getData()->projectKey,
                     'from_phone' => $fromPhone,
+                    'name_from' => $notification->cnsl_name_from,
                     'to_phone' => $toPhone,
                     'booking_id' => $bookingId,
                     'booking_hash_code' => $bookingHashCode,

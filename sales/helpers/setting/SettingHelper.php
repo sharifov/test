@@ -465,4 +465,16 @@ class SettingHelper
     {
         return (bool)(Yii::$app->params['settings']['call_lead_auto_redial_enabled'] ?? false);
     }
+
+    /**
+     * @return array [days, hours]
+     */
+    public static function getClientNotificationStartInterval(): array
+    {
+        $settings = Yii::$app->params['settings']['client_notification_start_interval'] ?? null;
+        if ($settings) {
+            return JsonHelper::decode($settings);
+        }
+        return ['days' => 0, 'hours' => 0];
+    }
 }

@@ -15,8 +15,8 @@ use sales\model\phoneList\entity\PhoneList;
  * @property int|null $cnsl_from_phone_id
  * @property int|null $cnsl_name_from
  * @property int|null $cnsl_to_client_phone_id
- * @property string|null $cnsl_start
- * @property string|null $cnsl_end
+ * @property string $cnsl_start
+ * @property string $cnsl_end
  * @property array|null $cnsl_data_json
  * @property string|null $cnsl_sms_id
  * @property string|null $cnsl_created_dt
@@ -36,8 +36,8 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
         int $fromPhoneId,
         string $nameFrom,
         int $toClientPhoneId,
-        ?\DateTimeImmutable $startDt,
-        ?\DateTimeImmutable $endDt,
+        \DateTimeImmutable $startDt,
+        \DateTimeImmutable $endDt,
         Data $data,
         \DateTimeImmutable $createdDt
     ): self {
@@ -46,8 +46,8 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
         $notification->cnsl_from_phone_id = $fromPhoneId;
         $notification->cnsl_name_from = $nameFrom;
         $notification->cnsl_to_client_phone_id = $toClientPhoneId;
-        $notification->cnsl_start = $startDt ? $startDt->format('Y-m-f H:i:s') : null;
-        $notification->cnsl_end = $endDt ? $endDt->format('Y-m-f H:i:s') : null;
+        $notification->cnsl_start = $startDt->format('Y-m-d H:i:s');
+        $notification->cnsl_end = $endDt->format('Y-m-d H:i:s');
         $notification->setData($data);
         $notification->cnsl_created_dt = $createdDt->format('Y-m-d H:i:s');
         return $notification;
@@ -107,10 +107,10 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
             ['cnsl_data_json', 'default', 'value' => null],
             ['cnsl_data_json', 'safe'],
 
-            ['cnsl_start', 'default', 'value' => null],
+            ['cnsl_start', 'required'],
             ['cnsl_start', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
-            ['cnsl_end', 'default', 'value' => null],
+            ['cnsl_end', 'required'],
             ['cnsl_end', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['cnsl_from_phone_id', 'required'],

@@ -14,8 +14,10 @@ use sales\model\phoneList\entity\PhoneList;
  * @property int|null $cnfl_status_id
  * @property int|null $cnfl_from_phone_id
  * @property int|null $cnfl_to_client_phone_id
- * @property string|null $cnfl_start
- * @property string|null $cnfl_end
+ * @property string $cnfl_start
+ * @property string $cnfl_end
+ * @property int $cnfl_from_hours
+ * @property int $cnfl_to_hours
  * @property string|null $cnfl_message
  * @property string|null $cnfl_file_url
  * @property array|null $cnfl_data_json
@@ -36,8 +38,10 @@ class ClientNotificationPhoneList extends \yii\db\ActiveRecord
     public static function create(
         int $fromPhoneId,
         int $toClientPhoneId,
-        ?\DateTimeImmutable $startDt,
-        ?\DateTimeImmutable $endDt,
+        \DateTimeImmutable $startDt,
+        \DateTimeImmutable $endDt,
+        int $fromHours,
+        int $toHours,
         ?string $message,
         ?string $fileUrl,
         Data $data,
@@ -47,8 +51,10 @@ class ClientNotificationPhoneList extends \yii\db\ActiveRecord
         $notification->cnfl_status_id = Status::NEW;
         $notification->cnfl_from_phone_id = $fromPhoneId;
         $notification->cnfl_to_client_phone_id = $toClientPhoneId;
-        $notification->cnfl_start = $startDt ? $startDt->format('Y-m-f H:i:s') : null;
-        $notification->cnfl_end = $endDt ? $endDt->format('Y-m-f H:i:s') : null;
+        $notification->cnfl_start = $startDt->format('Y-m-d H:i:s');
+        $notification->cnfl_end = $endDt->format('Y-m-d H:i:s');
+        $notification->cnfl_from_hours = $fromHours;
+        $notification->cnfl_to_hours = $toHours;
         $notification->cnfl_message = $message;
         $notification->cnfl_file_url = $fileUrl;
         $notification->setData($data);
@@ -110,10 +116,10 @@ class ClientNotificationPhoneList extends \yii\db\ActiveRecord
             ['cnfl_data_json', 'default', 'value' => null],
             ['cnfl_data_json', 'safe'],
 
-            ['cnfl_start', 'default', 'value' => null],
+            ['cnfl_start', 'required'],
             ['cnfl_start', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
-            ['cnfl_end', 'default', 'value' => null],
+            ['cnfl_end', 'required'],
             ['cnfl_end', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['cnfl_file_url', 'default', 'value' => null],
@@ -133,6 +139,12 @@ class ClientNotificationPhoneList extends \yii\db\ActiveRecord
             ['cnfl_to_client_phone_id', 'required'],
             ['cnfl_to_client_phone_id', 'integer'],
             ['cnfl_to_client_phone_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientPhone::class, 'targetAttribute' => ['cnfl_to_client_phone_id' => 'id']],
+
+            ['cnfl_to_hours', 'required'],
+            ['cnfl_to_hours', 'integer', 'min' => 0, 'max' => 23],
+
+            ['cnfl_from_hours', 'required'],
+            ['cnfl_from_hours', 'integer', 'min' => 0, 'max' => 23],
         ];
     }
 
@@ -160,6 +172,8 @@ class ClientNotificationPhoneList extends \yii\db\ActiveRecord
             'cnfl_to_client_phone_id' => 'To Client Phone ID',
             'cnfl_start' => 'Start',
             'cnfl_end' => 'End',
+            'cnfl_from_hours' => 'From hours',
+            'cnfl_to_hours' => 'To hours',
             'cnfl_message' => 'Message',
             'cnfl_file_url' => 'File Url',
             'cnfl_data_json' => 'DataJson',

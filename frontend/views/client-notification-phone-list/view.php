@@ -40,6 +40,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cnfl_to_client_phone_id',
                 'cnfl_start:byUserDatetime',
                 'cnfl_end:byUserDatetime',
+                'cnfl_from_hours',
+                'cnfl_to_hours',
                 'cnfl_message:ntext',
                 'cnfl_file_url:url',
                 [

@@ -51,10 +51,32 @@ class ClientNotificationsController extends Controller
     {
         print("Call Notify\n");
 
+        $now = new \DateTimeImmutable();
+        $nowDate = $now->format('Y-m-d H:i:s');
+        $nowHour = (int)$now->format('H');
+
         $notifications = ClientNotificationPhoneList::find()
             ->new()
-//            ->andWhere(['cnfl_start']) todo
-//            ->andWhere(['cnfl_end']) todo
+            ->andWhere(['<=', 'cnfl_start', $nowDate])
+            ->andWhere(['>=', 'cnfl_end', $nowDate])
+            ->andWhere([
+                'OR',
+                [
+                    'AND',
+                    'cnfl_from_hours > cnfl_to_hours',
+                    [
+                        'OR',
+                        ['<=', 'cnfl_from_hours', $nowHour],
+                        ['>', 'cnfl_to_hours', $nowHour],
+                    ],
+                ],
+                [
+                    'AND',
+                    'cnfl_from_hours < cnfl_to_hours',
+                    ['<=', 'cnfl_from_hours', $nowHour],
+                    ['>', 'cnfl_to_hours', $nowHour],
+                ],
+            ])
             ->limit(100)
             ->all();
 
@@ -108,10 +130,19 @@ class ClientNotificationsController extends Controller
     {
         print("Sms Notify\n");
 
+        $now = date('Y-m-d H:i:s');
         $notifications = ClientNotificationSmsList::find()
             ->new()
-//            ->andWhere(['cnfl_start']) todo
-//            ->andWhere(['cnfl_end']) todo
+            ->andWhere([
+                'OR',
+                ['IS', 'cnfl_start', null],
+                ['<=', 'cnsl_start', $now]
+            ])
+            ->andWhere([
+                'OR',
+                ['IS', 'cnsl_end', null],
+                ['>=', 'cnsl_end', $now]
+            ])
             ->limit(100)
             ->all();
 

@@ -2,12 +2,17 @@
 
 namespace sales\model\client\notifications\listeners\productQuoteChangeCreated;
 
+use common\models\Airports;
 use common\models\ClientPhone;
+use modules\flight\models\FlightQuote;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\DayTimeHours;
+use sales\helpers\setting\SettingHelper;
 use sales\model\client\notifications\client\entity\NotificationType;
 use sales\model\client\notifications\ClientNotificationCreator;
 use sales\model\client\notifications\phone\entity\Data as PhoneData;
@@ -100,7 +105,7 @@ class ClientNotificationListener
             return;
         }
 
-        $time = $this->getTime();
+        $time = $this->getTime($event->productQuoteId);
 
         $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $project) {
             $this->clientNotificationCreator->createPhoneNotification(
@@ -108,6 +113,8 @@ class ClientNotificationListener
                 $client->phoneId,
                 $time->start,
                 $time->end,
+                $time->fromHours,
+                $time->toHours,
                 $settings->messageSay,
                 $settings->fileUrl,
                 PhoneData::createFromArray([
@@ -154,7 +161,7 @@ class ClientNotificationListener
             return;
         }
 
-        $time = $this->getTime();
+        $time = $this->getTime($event->productQuoteId);
 
         $this->transactionManager->wrap(function () use (
             $phoneFromId,
@@ -245,9 +252,44 @@ class ClientNotificationListener
         return null;
     }
 
-    private function getTime(): Time
+    private function getTime(int $productQuoteId): Time
     {
-        // todo
-        return new Time(null, null);
+        $productQuoteRelation = ProductQuoteRelation::find()->byParentQuoteId($productQuoteId)->reprotection()->with(['pqrRelatedPq'])->one();
+        if (!$productQuoteRelation) {
+            throw new \DomainException('Not found Related Reprotection Quote. ProductQuoteId: ' . $productQuoteId);
+        }
+        $reprotectionQuote = $productQuoteRelation->pqrRelatedPq;
+        // todo make method getTime for any product
+        if (!$reprotectionQuote->isFlight()) {
+            throw new \DomainException('Reprotection Quote is not Flight Quote. ProductQuoteId: ' . $productQuoteId . ' ProductQuoteRelationId: ' . $productQuoteRelation->pqr_related_pq_id);
+        }
+
+        /** @var FlightQuote $flightQuote */
+        $flightQuote = $reprotectionQuote->childQuote;
+        $firstDepartureSegment = $flightQuote->flightQuoteTrips[0]->flightQuoteSegments[0] ?? null;
+        if (!$firstDepartureSegment) {
+            throw new \DomainException('Not found first flight segment. ProductQuoteId: ' . $productQuoteId . ' ProductQuoteRelationId: ' . $productQuoteRelation->pqr_related_pq_id);
+        }
+        $departureAirportTimeZone = Airports::find()->select(['timezone'])->andWhere(['iata' => $firstDepartureSegment->fqs_departure_airport_iata])->scalar();
+        if (!$departureAirportTimeZone) {
+            throw new \DomainException('Not found Airport time zone. IATA: ' . $firstDepartureSegment->fqs_departure_airport_iata . '  ProductQuoteId: ' . $productQuoteId . ' ProductQuoteRelationId: ' . $productQuoteRelation->pqr_related_pq_id);
+        }
+
+        $startInterval = SettingHelper::getClientNotificationStartInterval();
+        $startDate = (new \DateTimeImmutable())
+            ->modify('+ ' . $startInterval['days'] . ' days + ' . $startInterval['hours'] . ' hours');
+        $endDate = new \DateTimeImmutable($firstDepartureSegment->fqs_departure_dt);
+
+        if ($startDate >= $endDate) {
+            throw new \DomainException('"End"(' . $endDate->format('Y-m-d H:i:s') . ') time must less then "start"(' . $startDate->format('Y-m-d H:i:s') . ') time.');
+        }
+
+        $callTimeHoursSettings = new DayTimeHours(\Yii::$app->params['settings']['qcall_day_time_hours']);
+
+        $targetDateTime = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone($departureAirportTimeZone));
+        $fromHours = $targetDateTime->setTime($callTimeHoursSettings->startHour, 0)->setTimezone(new \DateTimeZone('UTC'));
+        $toHours = $targetDateTime->setTime($callTimeHoursSettings->endHour, 0)->setTimezone(new \DateTimeZone('UTC'));
+
+        return new Time($startDate, $endDate, (int)$fromHours->format('H'), (int)$toHours->format('H'));
     }
 }

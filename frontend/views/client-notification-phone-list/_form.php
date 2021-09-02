@@ -29,6 +29,10 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cnfl_end')->widget(DateTimePicker::class) ?>
 
+        <?= $form->field($model, 'cnfl_from_hours')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'cnfl_to_hours')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'cnfl_message')->textarea(['rows' => 6]) ?>
 
         <?= $form->field($model, 'cnfl_file_url')->textInput(['maxlength' => true]) ?>

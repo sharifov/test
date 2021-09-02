@@ -24,7 +24,7 @@ class CalculateDateService
             );
         }
 
-        $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+        $dayTimeHours = new \sales\helpers\DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
 
         if ($dayTimeHours->isEmpty()) {
             Yii::error('qcall_day_time_hours is empty');

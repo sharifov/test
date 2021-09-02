@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use sales\helpers\setting\SettingHelper;
 use sales\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
@@ -97,12 +98,12 @@ class TestController extends Controller
         $repo->save($change);
 
 
-        $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
-        $change = ProductQuoteChange::createNew(
-            192,
-            135987
-        );
-        $repo->save($change);
+//        $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
+//        $change = ProductQuoteChange::createNew(
+//            192,
+//            135987
+//        );
+//        $repo->save($change);
     }
 
     public function actionQ()
@@ -125,6 +126,7 @@ class TestController extends Controller
 
     public function actionX()
     {
+
 
         $clientN = [
             'clientNotification' => [

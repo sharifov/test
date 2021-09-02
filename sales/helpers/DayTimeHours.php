@@ -1,10 +1,8 @@
 <?php
 
-namespace sales\services\lead\qcall;
+namespace sales\helpers;
 
 /**
- * @deprecated
- *
  * Class DayTimeHours
  *
  * @property $startHour
