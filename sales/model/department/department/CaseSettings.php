@@ -2,6 +2,8 @@
 
 namespace sales\model\department\department;
 
+use sales\helpers\setting\SettingHelper;
+
 /**
  * Class CaseSettings
  *
@@ -32,7 +34,7 @@ class CaseSettings
         $this->createOnCall = (bool)($params['createOnCall'] ?? false);
         $this->createOnSms = (bool)($params['createOnSms'] ?? false);
         $this->createOnEmail = (bool)($params['createOnEmail'] ?? false);
-        $this->trashActiveDaysLimit = (int)($params['trashActiveDaysLimit'] ?? 0);
+        $this->trashActiveDaysLimit = (int)($params['trashActiveDaysLimit'] ?? SettingHelper::getTrashActiveDaysLimitGlobal());
         $this->sendFeedback = (bool)($params['sendFeedback'] ?? false);
         $this->feedbackTemplateTypeKey = (string)($params['feedbackTemplateTypeKey'] ?? '');
         $this->feedbackEmailFrom = (string)($params['feedbackEmailFrom'] ?? '');
