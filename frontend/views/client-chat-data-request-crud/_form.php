@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -22,6 +23,7 @@ use yii\widgets\ActiveForm;
       <div class="col-md-6">
           <?php
             try {
+                $model->ccdr_data_json = JsonHelper::encode($model->ccdr_data_json);
                 echo $form->field($model, 'ccdr_data_json')->widget(
                     \kdn\yii2\JsonEditor::class,
                     [

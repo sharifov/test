@@ -6,6 +6,8 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use sales\forms\CompositeForm;
 use sales\helpers\lead\LeadHelper;
+use sales\model\clientChatDataRequest\form\FlightSearchDataRequestForm;
+use yii\helpers\ArrayHelper;
 
 /**
  * @property integer $leadId
@@ -40,7 +42,6 @@ class ItineraryEditForm extends CompositeForm
      */
     public function __construct(Lead $lead, int $countSegmentForms = null, $config = [])
     {
-
         $this->leadId = $lead->id;
         $this->cabin = $lead->cabin;
         $this->adults = $lead->adults;
@@ -154,5 +155,30 @@ class ItineraryEditForm extends CompositeForm
             return $segmentForms;
         }
         return $lead->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->limit($countSegmentForms)->all();
+    }
+
+    public function fillInByChatDataRequestForm(FlightSearchDataRequestForm $form): void
+    {
+        $this->cabin = $form->getCabinCode();
+        $this->adults = $form->adults;
+        $this->children = $form->children;
+        $this->infants = $form->infants;
+        $this->tripType = mb_strtoupper($form->tripType);
+
+        if ($this->segments[0] && $departureDate = date('d-M-Y', strtotime($form->departureDate))) {
+            $this->segments[0]->load(['SegmentEditForm' => [
+                'origin' => $form->originIata,
+                'destination' => $form->destinationIata,
+                'departure' => $departureDate
+            ]]);
+        }
+
+        if ($form->isRoundTrip() && $this->segments[1] && $returnDate = date('d-M-Y', strtotime($form->returnDate))) {
+            $this->segments[1]->load(['SegmentEditForm' => [
+                'origin' => $form->destinationIata,
+                'destination' => $form->originIata,
+                'departure' => $returnDate
+            ]]);
+        }
     }
 }
