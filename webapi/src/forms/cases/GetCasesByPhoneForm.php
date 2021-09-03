@@ -29,16 +29,10 @@ class GetCasesByPhoneForm extends Model
     public function rules(): array
     {
         return [
-            ['contact_phone', 'required'],
+            [['contact_phone', 'active_only'], 'required'],
             ['contact_phone', 'string', 'max' => 20],
-            ['contact_phone', 'trim'],
-            ['contact_phone', PhoneInputValidator::class],
-            ['contact_phone', 'exist', 'targetClass' => ClientPhone::class, 'targetAttribute' => ['contact_phone' => 'phone'], 'message' => 'Client Phone number not found in DB.'],
-            ['active_only', 'required'],
             ['active_only', 'boolean'],
-            ['cases_project_id', 'integer'],
-            ['cases_department_id', 'integer'],
-            ['results_limit', 'integer'],
+            [['cases_project_id', 'cases_department_id', 'results_limit'], 'integer']
         ];
     }
 

@@ -24,14 +24,11 @@ class GetCasesByEmailForm extends Model
     public function rules(): array
     {
         return [
-            ['contact_email', 'required'],
+            [['contact_email', 'active_only'], 'required'],
             ['contact_email', 'email'],
             ['contact_email', 'exist', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['contact_email' => 'email'], 'message' => 'Client Email not found in DB.'],
-            ['active_only', 'required'],
             ['active_only', 'boolean'],
-            ['cases_project_id', 'integer'],
-            ['cases_department_id', 'integer'],
-            ['results_limit', 'integer'],
+            [['cases_project_id', 'cases_department_id', 'results_limit'], 'integer'],
         ];
     }
 

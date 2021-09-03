@@ -129,11 +129,10 @@ class CasesQuery extends ActiveQuery
 //            ->createCommand()->getRawSql();
 
         if ($activeOnly) {
-            $trashCasesActiveDaysLimitGlobal = \Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0;
             $deps_params = [];
             $deps = Department::find()->all();
             foreach ($deps as $dep) {
-                $deps_params[$dep->dep_id] = $dep->getParams()->object->case->trashActiveDaysLimit ?? $trashCasesActiveDaysLimitGlobal;
+                $deps_params[$dep->dep_id] = $dep->getParams()->object->case->trashActiveDaysLimit;
             }
 
             $query->andWhere('cs_status != ' . CasesStatus::STATUS_SOLVED);
@@ -143,8 +142,7 @@ class CasesQuery extends ActiveQuery
                 $result_cases_cnt = 0;
                 foreach ($cases as $key => $case) {
                     $cases[$key]['status_name'] = CasesStatus::getName($case['cs_status']);
-                    $days_limit = $deps_params[$case['cs_dep_id']];
-                    $limit_dt = (new \DateTimeImmutable($case['cs_created_dt']))->modify('+' . $days_limit . 'day');
+                    $limit_dt = (new \DateTimeImmutable($case['cs_created_dt']))->modify('+' . $deps_params[$case['cs_dep_id']] . 'day');
                     if (
                         ($case['cs_status'] == CasesStatus::STATUS_TRASH && (strtotime($limit_dt->format('Y-m-d H:i:s')) < time()))
                         || ($results_limit && $result_cases_cnt >= $results_limit)

@@ -477,4 +477,13 @@ class SettingHelper
         }
         return ['days' => 0, 'hours' => 0];
     }
+
+    /**
+     * @return int
+     */
+    public static function getTrashActiveDaysLimitGlobal(): int
+    {
+        return (int)(Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0);
+    }
+
 }

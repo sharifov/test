@@ -52,7 +52,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      1 for only active cases (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -204,8 +204,8 @@ class CaseController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{20}}           contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      1 for only active cases (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {string{320}}           contact_email                    Client Email required
+     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -466,7 +466,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      1 for only active cases (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -591,8 +591,8 @@ class CaseController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{20}}           contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      1 for only active cases (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {string{320}}           contact_email                    Client Email required
+     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
