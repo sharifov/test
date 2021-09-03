@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'cnfl_end',
+                'limitEndDay' => false,
             ],
             //'cnfl_message:ntext',
             //'cnfl_file_url:url',

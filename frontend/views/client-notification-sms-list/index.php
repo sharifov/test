@@ -37,6 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'cnsl_end',
+                'limitEndDay' => false,
             ],
             'cnsl_sms_id',
             [
