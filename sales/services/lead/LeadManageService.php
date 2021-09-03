@@ -311,13 +311,13 @@ class LeadManageService
     }
 
     /**
-     * @param $id
+     * @param Lead $lead
      * @param ItineraryEditForm $form
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function editItinerary(int $id, ItineraryEditForm $form): void
+    public function editItinerary(Lead $lead, ItineraryEditForm $form): void
     {
-        $lead = $this->leadRepository->find($id);
+//        $lead = $this->leadRepository->find($id);
 
         $lead->editItinerary(
             $form->cabin,
