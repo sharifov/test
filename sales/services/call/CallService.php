@@ -89,7 +89,8 @@ class CallService
                 Call::getDisplayRegion($data['FromCountry'] ?? ''),
                 $data['FromState'] ?? null,
                 $data['FromCity'] ?? null,
-                null
+                null,
+                $data['StirStatus'] ?? null
             );
             $call->setDataCreatedParams($data);
         }

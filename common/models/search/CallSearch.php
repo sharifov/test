@@ -108,6 +108,8 @@ class CallSearch extends Call
             ['phoneList', 'safe'],
 
             ['cp_type_id', 'integer'],
+
+            ['c_stir_status', 'string'],
         ];
     }
 
@@ -225,8 +227,7 @@ class CallSearch extends Call
             'c_status_id' => $this->c_status_id,
             'c_is_transfer' => $this->c_is_transfer,
             'c_group_id' => $this->c_group_id,
-
-
+            'c_stir_status' => $this->c_stir_status,
         ]);
 
         $query
@@ -312,7 +313,8 @@ class CallSearch extends Call
             'c_call_status' => $this->c_call_status,
             'c_client_id' => $this->c_client_id,
             'c_status_id' => $this->c_status_id,
-            'c_sequence_number' => $this->c_sequence_number
+            'c_sequence_number' => $this->c_sequence_number,
+            'c_stir_status' => $this->c_stir_status,
         ]);
 
         $query

@@ -146,6 +146,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'c_language_id',
                 'c_recording_disabled:booleanByLabel',
+                'c_stir_status',
             ],
         ]) ?>
 
