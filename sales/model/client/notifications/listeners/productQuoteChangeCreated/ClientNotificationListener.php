@@ -202,9 +202,13 @@ class ClientNotificationListener
             throw new \DomainException('Not found Order.');
         }
 
-        $contact = OrderContact::find()->select(['oc_client_id', 'oc_phone_number'])->andWhere(['oc_order_id' => $orderId])->orderBy(['oc_id' => SORT_DESC])->asArray()->one();
+        $contact = OrderContact::find()->select(['oc_id', 'oc_client_id', 'oc_phone_number'])->andWhere(['oc_order_id' => $orderId])->orderBy(['oc_id' => SORT_DESC])->asArray()->one();
         if (!$contact) {
             throw new \DomainException('Not found Contact.');
+        }
+
+        if (!$contact['oc_client_id']) {
+            throw new \DomainException('Not found Client Id. Order contact Id: ' . $contact['oc_id']);
         }
 
         if (!$contact['oc_phone_number']) {
