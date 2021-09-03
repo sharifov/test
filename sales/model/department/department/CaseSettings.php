@@ -1,6 +1,7 @@
 <?php
 
 namespace sales\model\department\department;
+
 use sales\helpers\setting\SettingHelper;
 
 /**

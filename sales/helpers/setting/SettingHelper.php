@@ -485,5 +485,4 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0);
     }
-
 }
