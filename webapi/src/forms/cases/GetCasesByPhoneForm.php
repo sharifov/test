@@ -34,6 +34,7 @@ class GetCasesByPhoneForm extends Model
             ['contact_phone', 'trim'],
             ['contact_phone', PhoneInputValidator::class],
             ['contact_phone', 'exist', 'targetClass' => ClientPhone::class, 'targetAttribute' => ['contact_phone' => 'phone'], 'message' => 'Client Phone number not found in DB.'],
+            ['active_only', 'required'],
             ['active_only', 'boolean'],
             ['cases_project_id', 'integer'],
             ['cases_department_id', 'integer'],

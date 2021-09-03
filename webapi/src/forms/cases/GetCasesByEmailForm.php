@@ -27,6 +27,7 @@ class GetCasesByEmailForm extends Model
             ['contact_email', 'required'],
             ['contact_email', 'email'],
             ['contact_email', 'exist', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['contact_email' => 'email'], 'message' => 'Client Email not found in DB.'],
+            ['active_only', 'required'],
             ['active_only', 'boolean'],
             ['cases_project_id', 'integer'],
             ['cases_department_id', 'integer'],
