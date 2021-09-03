@@ -135,7 +135,7 @@ class ClientNotificationsController extends Controller
             ->new()
             ->andWhere([
                 'OR',
-                ['IS', 'cnfl_start', null],
+                ['IS', 'cnsl_start', null],
                 ['<=', 'cnsl_start', $now]
             ])
             ->andWhere([
