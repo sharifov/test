@@ -20,18 +20,18 @@ use common\components\validators\IsArrayValidator;
  */
 class GetCasesByPhoneForm extends Model
 {
-    public string $contact_phone = '';
-    public bool $active_only = false;
-    public ?int $cases_project_id = null;
-    public ?int $cases_department_id = null;
-    public ?int $results_limit = null;
+    public $contact_phone;
+    public $active_only;
+    public $cases_project_id;
+    public $cases_department_id;
+    public $results_limit;
 
     public function rules(): array
     {
         return [
             [['contact_phone', 'active_only'], 'required'],
             ['contact_phone', 'string', 'max' => 20],
-            ['active_only', 'boolean'],
+            ['active_only', 'boolean', 'skipOnEmpty' => false, 'strict' => true],
             [['cases_project_id', 'cases_department_id', 'results_limit'], 'integer']
         ];
     }
