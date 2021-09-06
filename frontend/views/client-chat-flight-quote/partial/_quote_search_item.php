@@ -3,6 +3,7 @@
 use common\components\SearchService;
 use common\models\Lead;
 use frontend\helpers\QuoteHelper;
+use modules\flight\src\helpers\FlightQuoteHelper;
 use sales\auth\Auth;
 use sales\helpers\quote\ImageHelper;
 use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
@@ -14,9 +15,9 @@ use yii\helpers\ArrayHelper;
  * @var $result []
  * @var $airlines []
  * @var $locations []
- * @var $flightQuotes array
  * @var $keyCache string
  * @var Lead $lead
+ * @var int $chatId
  */
 
 $user = Yii::$app->user->identity;
@@ -443,6 +444,19 @@ $isQuoteAssignedToFlight = false;
                 'data-title' => implode(', ', $tripsInfo),
                 'data-target' => '#search_result_item_' . $resultKey,
             ]) ?>
+
+            <?php if (!$isQuoteAssignedToFlight) : ?>
+                <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add And Send Quote</span>', [
+                    'class' => 'btn btn-success search_create_quote__btn',
+                    'data-title' => implode(', ', $tripsInfo),
+                    'data-key' => $result['key'],
+                    'data-gds' => $result['gds'],
+                    'data-key-cache' => $keyCache,
+                    'data-result' => 'search-result__quote-' . $resultKey,
+                    'data-project' => $lead->project_id,
+                    'data-chat-id' => $chatId
+                ]) ?>
+            <?php endif; ?>
         </div>
     </div>
 </div>
