@@ -36,7 +36,7 @@ class CasesQuery extends ActiveQuery
         return $query;
     }
 
-    public static function findCasesByPhone(string $phone, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesByPhone(string $phone, bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
                 ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
@@ -81,7 +81,7 @@ class CasesQuery extends ActiveQuery
         return array_column(self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId), 'cs_gid');
     }
 
-    public static function findCasesPartial(CasesQuery $query, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesPartial(CasesQuery $query, bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $where = [];
         if ($projectId) {

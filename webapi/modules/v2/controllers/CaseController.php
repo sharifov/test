@@ -52,7 +52,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -60,7 +60,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
-     *       "active_only": true,
+     *       "active_only": 1,
      *       "case_department_id": 2,
      *       "case_project_id": 6,
      *       "results_limit": 10
@@ -205,7 +205,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{320}}           contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -213,7 +213,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
-     *       "active_only": true,
+     *       "active_only": 1,
      *       "case_department_id": 2,
      *       "case_project_id": 6,
      *       "results_limit": 10
@@ -466,7 +466,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -474,7 +474,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
-     *       "active_only": true,
+     *       "active_only": 1,
      *       "case_department_id": 2,
      *       "case_project_id": 6,
      *       "results_limit": 10
@@ -592,7 +592,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{320}}           contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -600,7 +600,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
-     *       "active_only": true,
+     *       "active_only": 1,
      *       "case_department_id": 2,
      *       "case_project_id": 6,
      *       "results_limit": 10
