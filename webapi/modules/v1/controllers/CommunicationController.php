@@ -1172,7 +1172,12 @@ class CommunicationController extends ApiBaseController
 //                        }
 //                    }
 //                }
-                    //$call->c_u_id = $parentCall->c_dep_id;
+                //$call->c_u_id = $parentCall->c_dep_id;
+
+                if (!empty($call->c_stir_status) && empty($parentCall->c_stir_status)) {
+                    $parentCall->c_stir_status = $call->c_stir_status;
+                    $parentCall->save();
+                }
             }
 
             if ($call_project_id) {
