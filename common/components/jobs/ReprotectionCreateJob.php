@@ -122,11 +122,18 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     if (isset($case)) {
                         $caseReProtectionService->caseToManual('Order not created');
                     }
+                    if (isset($case, $flightRequest) && $client === null) {
+                        $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
+                        $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
+                    }
                     $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
                     $reProtectionCreateService::writeLog($throwable);
                     return;
                 }
-            } elseif (!$case = $originProductQuote->productQuoteLastChange->pqcCase ?? null) {
+            }
+
+            $case = $originProductQuote->productQuoteLastChange->pqcCase ?? null;
+            if (!$case || !$case instanceof Cases) {
                 throw new DomainException('Case not found from productQuoteChange');
             }
 
