@@ -20,6 +20,14 @@ class ProductQuoteChangeRepository
         $this->eventDispatcher = $eventDispatcher;
     }
 
+    public function find(int $id): ProductQuoteChange
+    {
+        if ($productQuote = ProductQuoteChange::find()->byId($id)->one()) {
+            return $productQuote;
+        }
+        throw new NotFoundException('Product Quote Change is not found.');
+    }
+
     public function findByProductQuoteId(int $id): ProductQuoteChange
     {
         if ($productQuote = ProductQuoteChange::find()->byProductQuote($id)->one()) {

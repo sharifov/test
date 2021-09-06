@@ -1,13 +1,14 @@
 <?php
 
-namespace sales\model\client\notifications\listeners\productQuoteChangeCreated;
+namespace sales\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending;
 
 use common\models\Airports;
 use common\models\ClientPhone;
 use modules\flight\models\FlightQuote;
 use modules\order\src\entities\orderContact\OrderContact;
-use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeAutoDecisionPendingEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
@@ -31,6 +32,7 @@ use sales\services\TransactionManager;
  * @property ClientNotificationCreator $clientNotificationCreator
  * @property TransactionManager $transactionManager
  * @property ClientManageService $clientManageService
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  */
 class ClientNotificationListener
 {
@@ -38,25 +40,30 @@ class ClientNotificationListener
     private ClientNotificationCreator $clientNotificationCreator;
     private TransactionManager $transactionManager;
     private ClientManageService $clientManageService;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     public function __construct(
         ClientNotificationProjectSettings $projectSettings,
         ClientNotificationCreator $clientNotificationCreator,
         TransactionManager $transactionManager,
-        ClientManageService $clientManageService
+        ClientManageService $clientManageService,
+        ProductQuoteChangeRepository $productQuoteChangeRepository
     ) {
         $this->projectSettings = $projectSettings;
         $this->clientNotificationCreator = $clientNotificationCreator;
         $this->transactionManager = $transactionManager;
         $this->clientManageService = $clientManageService;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
-    public function handle(ProductQuoteChangeCreatedEvent $event): void
+    public function handle(ProductQuoteChangeAutoDecisionPendingEvent $event): void
     {
         try {
+            $productQuoteChange = $this->productQuoteChangeRepository->find($event->productQuoteChangeId);
+
             $project = new Project(
-                $event->productQuoteChange->pqcPq->pqProduct->project->id,
-                $event->productQuoteChange->pqcPq->pqProduct->project->project_key
+                $productQuoteChange->pqcPq->pqProduct->project->id,
+                $productQuoteChange->pqcPq->pqProduct->project->project_key
             );
             $notificationType = NotificationType::fromEvent($event);
 
@@ -68,46 +75,47 @@ class ClientNotificationListener
                 return;
             }
 
-            $client = $this->getClient($event->productQuoteChange);
+            $client = $this->getClient($productQuoteChange);
 
             if ($client->phoneId && $notificationSettings->sendPhoneNotification->enabled) {
-                $this->phoneNotificationProcessing($event, $project, $notificationType, $client, $notificationSettings->sendPhoneNotification);
+                $this->phoneNotificationProcessing($project, $notificationType, $client, $notificationSettings->sendPhoneNotification, $productQuoteChange);
             }
 
             if ($client->phoneId && $notificationSettings->sendSmsNotification->enabled) {
-                $this->smsNotificationProcessing($event, $project, $notificationType, $client, $notificationSettings->sendSmsNotification);
+                $this->smsNotificationProcessing($project, $notificationType, $client, $notificationSettings->sendSmsNotification, $productQuoteChange);
             }
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),
                 'event' => [
-                    'name' => ProductQuoteChangeCreatedEvent::class,
-                    'productQuoteChangeId' => $event->getId(),
-                    'productQuoteId' => $event->productQuoteId,
-                    'caseId' => $event->caseId,
+                    'name' => ProductQuoteChangeAutoDecisionPendingEvent::class,
+                    'productQuoteChangeId' => $event->productQuoteChangeId,
                 ],
                 'exception' => AppHelper::throwableLog($e, true),
-            ], 'ProductQuoteChangeCreatedClientNotificationListener:handle');
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:handle');
         }
     }
 
-    private function phoneNotificationProcessing(ProductQuoteChangeCreatedEvent $event, Project $project, NotificationType $notificationType, Client $client, SendPhoneNotification $settings): void
-    {
+    private function phoneNotificationProcessing(
+        Project $project,
+        NotificationType $notificationType,
+        Client $client,
+        SendPhoneNotification $settings,
+        ProductQuoteChange $productQuoteChange
+    ): void {
         $phoneFromId = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $settings->phoneFrom])->scalar();
         if (!$phoneFromId) {
             \Yii::error([
                 'message' => 'Not found Phone List',
-                'productQuoteChangeId' => $event->getId(),
-                'productQuoteId' => $event->productQuoteId,
-                'caseId' => $event->caseId,
+                'productQuoteChangeId' => $productQuoteChange->pqc_id,
                 'phone' => $settings->phoneFrom,
-            ], 'ProductQuoteChangeCreatedClientNotificationListener:phoneNotificationProcessing');
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:phoneNotificationProcessing');
             return;
         }
 
-        $time = $this->getTime($event->productQuoteId);
+        $time = $this->getTime($productQuoteChange->pqc_pq_id);
 
-        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $event, $notificationType, $project) {
+        $this->transactionManager->wrap(function () use ($phoneFromId, $client, $time, $settings, $notificationType, $project, $productQuoteChange) {
             $this->clientNotificationCreator->createPhoneNotification(
                 $phoneFromId,
                 $client->phoneId,
@@ -119,7 +127,7 @@ class ClientNotificationListener
                 $settings->fileUrl,
                 PhoneData::createFromArray([
                     'clientId' => $client->id,
-                    'caseId' => $event->caseId,
+                    'caseId' => $productQuoteChange->pqc_case_id,
                     'projectId' => $project->id,
                     'projectKey' => $project->key,
                     'sayVoice' => $settings->messageSayVoice,
@@ -128,23 +136,28 @@ class ClientNotificationListener
                 new \DateTimeImmutable(),
                 $client->id,
                 $notificationType,
-                $event->getId()
+                $productQuoteChange->pqc_id
             );
         });
     }
 
-    private function smsNotificationProcessing(ProductQuoteChangeCreatedEvent $event, Project $project, NotificationType $notificationType, Client $client, SendSmsNotification $settings): void
-    {
+    private function smsNotificationProcessing(
+        Project $project,
+        NotificationType $notificationType,
+        Client $client,
+        SendSmsNotification $settings,
+        ProductQuoteChange $productQuoteChange
+    ): void {
         if (!$settings->messageTemplateKey) {
             \Yii::error([
                 'message' => 'Sms template Key is empty',
                 'projectId' => $project->id,
                 'notificationType' => $notificationType->getType(),
-                'productQuoteChangeId' => $event->getId(),
-                'productQuoteId' => $event->productQuoteId,
-                'caseId' => $event->caseId,
+                'productQuoteChangeId' => $productQuoteChange->pqc_id,
+                'productQuoteId' => $productQuoteChange->pqc_pq_id,
+                'caseId' => $productQuoteChange->pqc_case_id,
                 'phone' => $settings->phoneFrom,
-            ], 'ProductQuoteChangeCreatedClientNotificationListener:smsNotificationProcessing');
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:smsNotificationProcessing');
             return;
         }
         $templateKey = $settings->messageTemplateKey;
@@ -153,25 +166,25 @@ class ClientNotificationListener
         if (!$phoneFromId) {
             \Yii::error([
                 'message' => 'Not found Phone List',
-                'productQuoteChangeId' => $event->getId(),
-                'productQuoteId' => $event->productQuoteId,
-                'caseId' => $event->caseId,
+                'productQuoteChangeId' => $productQuoteChange->pqc_id,
+                'productQuoteId' => $productQuoteChange->pqc_pq_id,
+                'caseId' => $productQuoteChange->pqc_case_id,
                 'phone' => $settings->phoneFrom,
-            ], 'ProductQuoteChangeCreatedClientNotificationListener:smsNotificationProcessing');
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:smsNotificationProcessing');
             return;
         }
 
-        $time = $this->getTime($event->productQuoteId);
+        $time = $this->getTime($productQuoteChange->pqc_pq_id);
 
         $this->transactionManager->wrap(function () use (
             $phoneFromId,
             $client,
             $time,
             $settings,
-            $event,
             $notificationType,
             $project,
-            $templateKey
+            $templateKey,
+            $productQuoteChange
         ) {
             $this->clientNotificationCreator->createSmsNotification(
                 $phoneFromId,
@@ -181,16 +194,16 @@ class ClientNotificationListener
                 $time->end,
                 SmsData::createFromArray([
                     'clientId' => $client->id,
-                    'caseId' => $event->caseId,
+                    'caseId' => $productQuoteChange->pqc_case_id,
                     'projectId' => $project->id,
                     'projectKey' => $project->key,
                     'templateKey' => $templateKey,
-                    'productQuoteId' => (int)$event->productQuoteChange->pqc_pq_id,
+                    'productQuoteId' => (int)$productQuoteChange->pqc_pq_id,
                 ]),
                 new \DateTimeImmutable(),
                 $client->id,
                 $notificationType,
-                $event->getId()
+                $productQuoteChange->pqc_id
             );
         });
     }
@@ -220,7 +233,7 @@ class ClientNotificationListener
             \Yii::error([
                 'message' => 'Not found Contact Client Phone',
                 'productQuoteChangeId' => $productQuoteChange->pqc_id,
-            ], 'ProductQuoteChangeCreatedClientNotificationListener:getClient');
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:getClient');
             $clientPhoneId = $this->addClientPhone($contact['oc_client_id'], $contact['oc_phone_number']);
         }
 
@@ -245,13 +258,13 @@ class ClientNotificationListener
             \Yii::error([
                 'message' => 'Client phone not created. Undefined reason.',
                 'clientId' => $clientId,
-            ], 'ProductQuoteChangeCreatedClientNotificationListener:addClientPhone');
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:addClientPhone');
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Client phone not created',
                 'clientId' => $clientId,
                 'exception' => AppHelper::throwableLog($e, true),
-            ], 'ProductQuoteChangeCreatedClientNotificationListener:addClientPhone');
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:addClientPhone');
         }
         return null;
     }
