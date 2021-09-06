@@ -15,4 +15,5 @@ class CaseCodeException
 
     public const API_GET_CASES_NOT_FOUND_DATA_ON_REQUEST = Module::CASES . 302;
     public const API_GET_CASES_VALIDATE = Module::CASES . 303;
+    public const API_GET_CASE_BY_GID_NOT_FOUND = Module::CASES . 304;
 }
