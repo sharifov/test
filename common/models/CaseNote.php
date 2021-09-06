@@ -108,4 +108,13 @@ class CaseNote extends \yii\db\ActiveRecord
     {
         return new CaseNoteQuery(static::class);
     }
+
+    public static function create(int $caseId, string $text, ?int $userId): CaseNote
+    {
+        $model = new self();
+        $model->cn_cs_id = $caseId;
+        $model->cn_text = $text;
+        $model->cn_user_id = $userId;
+        return $model;
+    }
 }

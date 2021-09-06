@@ -11,6 +11,7 @@ use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCasesCounterBehavior;
 use sales\behaviors\metric\MetricLeadCounterBehavior;
 use sales\entities\cases\events\CasesAssignLeadEvent;
@@ -73,6 +74,7 @@ use Yii;
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  * @property CaseSale[] $caseSale
  * @property CaseEventLog[] $caseEventLogs
+ * @property ProductQuoteChange|null $productQuoteChange
  */
 class Cases extends ActiveRecord implements Objectable
 {
@@ -645,6 +647,11 @@ class Cases extends ActiveRecord implements Objectable
     public function getCaseEventLogs()
     {
         return $this->hasMany(CaseEventLog::class, ['cel_case_id' => 'cs_id']);
+    }
+
+    public function getProductQuoteChange(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteChange::class, ['pqc_case_id' => 'cs_id']);
     }
 
     /*
