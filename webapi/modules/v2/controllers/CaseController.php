@@ -52,7 +52,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -60,7 +60,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
-     *       "active_only": true,
+     *       "active_only": 1,
      *       "case_department_id": 2,
      *       "case_project_id": 6,
      *       "results_limit": 10
@@ -84,9 +84,9 @@ class CaseController extends BaseController
      *                 "cs_category_id": null,
      *                 "cs_project_id": "7",
      *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": null,
+     *                 "cs_order_uid": "P6QWNH",
      *                 "name": "ARANGRANT",
-     *                 "nextFlight": null,
+     *                 "nextFlight": "2022-05-22",
      *                 "status_name": "Processing"
      *             },
      *             {
@@ -99,7 +99,7 @@ class CaseController extends BaseController
      *                 "cs_category_id": "16",
      *                 "cs_project_id": "6",
      *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": "W9053AF",
+     *                 "cs_order_uid": null,
      *                 "name": "WOWFARE",
      *                 "nextFlight": null,
      *                 "status_name": "Processing"
@@ -186,7 +186,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id), false);
+        return $this->getCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
 
@@ -205,7 +205,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{320}}           contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -213,7 +213,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
-     *       "active_only": true,
+     *       "active_only": 1,
      *       "case_department_id": 2,
      *       "case_project_id": 6,
      *       "results_limit": 10
@@ -237,9 +237,9 @@ class CaseController extends BaseController
      *                 "cs_category_id": null,
      *                 "cs_project_id": "7",
      *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": null,
+     *                 "cs_order_uid": "P6QWNH",
      *                 "name": "ARANGRANT",
-     *                 "nextFlight": null,
+     *                 "nextFlight": "2022-05-22",
      *                 "status_name": "Processing"
      *             },
      *             {
@@ -252,7 +252,7 @@ class CaseController extends BaseController
      *                 "cs_category_id": "16",
      *                 "cs_project_id": "6",
      *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": "W9053AF",
+     *                 "cs_order_uid": null,
      *                 "name": "WOWFARE",
      *                 "nextFlight": null,
      *                 "status_name": "Processing"
@@ -339,7 +339,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id), false);
+        return $this->getCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
     /**
@@ -402,6 +402,27 @@ class CaseController extends BaseController
      * {
      *     "status": 422,
      *     "message": "Validation error",
+     *     "errors": [
+     *             "Case with this case_gid not found."
+     *     ],
+     *     "code": "21304",
+     *     "technical": {
+     *         "action": "v2/case/get",
+     *         "response_id": 754,
+     *         "request_dt": "2021-09-02 14:01:22",
+     *         "response_dt": "2021-09-02 14:01:22",
+     *         "execution_time": 0.028,
+     *         "memory_usage": 306800
+     *     },
+     *     "request": []
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Validation error) (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
      *     "errors": {
      *         "case_gid": [
      *             "Case Gid should contain at most 50 characters."
@@ -448,7 +469,29 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCaseByCaseGid($form->case_gid), true);
+        $case = CasesQuery::findCaseByCaseGid($form->case_gid);
+
+        try {
+            if (empty($case)) {
+                return new ErrorResponse(
+                    new MessageMessage(Messages::VALIDATION_ERROR),
+                    new ErrorsMessage("Case with this case_gid not found."),
+                    new CodeMessage(CaseCodeException::API_GET_CASE_BY_GID_NOT_FOUND)
+                );
+            } else {
+                return new SuccessResponse(
+                    new DataMessage(
+                        $case
+                    )
+                );
+            }
+        } catch (\Throwable $e) {
+            return new ErrorResponse(
+                new MessageMessage($e->getMessage()),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        }
     }
 
     /**
@@ -466,7 +509,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -474,7 +517,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
-     *       "active_only": true,
+     *       "active_only": 1,
      *       "case_department_id": 2,
      *       "case_project_id": 6,
      *       "results_limit": 10
@@ -573,7 +616,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id), false);
+        return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
 
@@ -592,7 +635,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{320}}           contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      True for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)
+     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -600,7 +643,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
-     *       "active_only": true,
+     *       "active_only": 1,
      *       "case_department_id": 2,
      *       "case_project_id": 6,
      *       "results_limit": 10
@@ -699,7 +742,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id), false);
+        return $this->getCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
     }
 
     private function getCasesLoadDataErrorResponse(): ErrorResponse
@@ -721,12 +764,12 @@ class CaseController extends BaseController
         );
     }
 
-    private function getCasesResult(array $cases, ?bool $isSingleCase)
+    private function getCasesResult(array $cases)
     {
         try {
             return new SuccessResponse(
                 new DataMessage(
-                    $isSingleCase ? $cases[0] : $cases
+                    $cases
                 )
             );
         } catch (\Throwable $e) {

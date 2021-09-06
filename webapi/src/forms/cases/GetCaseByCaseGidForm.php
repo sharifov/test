@@ -15,7 +15,7 @@ use yii\base\Model;
  */
 class GetCaseByCaseGidForm extends Model
 {
-    public string $case_gid = '';
+    public $case_gid;
 
     public function rules(): array
     {
