@@ -1386,9 +1386,8 @@ class CommunicationController extends ApiBaseController
     {
         $call = null;
         $parentCall = null;
-
         $callSid = $callData['CallSid'] ?? '';
-        $stirStatus = $callData['c_com_call_id'] ?? null;
+        $stirStatus = $callData['StirStatus'] ?? null;
 
         if ($callSid) {
             $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
