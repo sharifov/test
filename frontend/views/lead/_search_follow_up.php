@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
     <?php
 
     $form = ActiveForm::begin([
-        // 'action' => ['index'],
+        'id' => 'lead-search-follow-up-form',
         'method' => 'get',
         'options' => [
             'data-pjax' => 1,
@@ -22,7 +22,6 @@ use yii\widgets\ActiveForm;
     ]);
 
     $statusList = \common\models\Lead::getProcessingStatuses();
-
 
     ?>
 
