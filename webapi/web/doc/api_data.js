@@ -462,7 +462,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "20",
+            "size": "320",
             "optional": false,
             "field": "contact_email",
             "description": "<p>Client Email required</p>"
@@ -472,7 +472,7 @@ define({ "api": [
             "type": "bool",
             "optional": false,
             "field": "active_only",
-            "description": "<p>1 for only active cases (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)</p>"
+            "description": "<p>&quot;true&quot; for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or &quot;false&quot; for all cases</p>"
           },
           {
             "group": "Parameter",
@@ -500,7 +500,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": true,\n      \"case_department_id\": 2,\n      \"case_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": \"true\",\n      \"cases_department_id\": 2,\n      \"cases_project_id\": 6,\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -584,7 +584,7 @@ define({ "api": [
             "type": "bool",
             "optional": false,
             "field": "active_only",
-            "description": "<p>1 for only active cases (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)</p>"
+            "description": "<p>&quot;true&quot; for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or &quot;false&quot; for all cases</p>"
           },
           {
             "group": "Parameter",
@@ -612,7 +612,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": true,\n      \"case_department_id\": 2,\n      \"case_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": \"true\",\n      \"cases_department_id\": 2,\n      \"cases_project_id\": 6,\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -705,13 +705,18 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": {\n                \"cs_id\": \"88473\",\n                \"cs_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-02-26 15:26:25\",\n                \"cs_updated_dt\": \"2020-02-26 17:07:18\",\n                \"cs_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"cs_category_id\": null,\n                \"cs_project_id\": \"7\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": null,\n                \"name\": \"ARANGRANT\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n    },\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": {\n                \"case_id\": \"88473\",\n                \"case_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"case_created_dt\": \"2020-02-26 15:26:25\",\n                \"case_updated_dt\": \"2020-02-26 17:07:18\",\n                \"case_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": \"P6QWNH\",\n                \"case_project_name\": \"ARANGRANT\",\n                \"case_next_flight\": \"2022-05-22\",\n                \"case_status_name\": \"Processing\"\n    },\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
           "type": "json"
         }
       ]
     },
     "error": {
       "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": [\n            \"Case with this case_gid not found.\"\n    ],\n    \"code\": \"21304\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
         {
           "title": "Error-Response(Validation error) (422):",
           "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"case_gid\": [\n            \"Case Gid should contain at most 50 characters.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
@@ -765,7 +770,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "20",
+            "size": "320",
             "optional": false,
             "field": "contact_email",
             "description": "<p>Client Email required</p>"
@@ -775,7 +780,7 @@ define({ "api": [
             "type": "bool",
             "optional": false,
             "field": "active_only",
-            "description": "<p>1 for only active cases (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)</p>"
+            "description": "<p>&quot;true&quot; for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or &quot;false&quot; for all cases</p>"
           },
           {
             "group": "Parameter",
@@ -803,7 +808,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": true,\n      \"case_department_id\": 2,\n      \"case_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": \"true\",\n      \"cases_department_id\": 2,\n      \"cases_project_id\": 6,\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -812,7 +817,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"cs_id\": \"88473\",\n                \"cs_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-02-26 15:26:25\",\n                \"cs_updated_dt\": \"2020-02-26 17:07:18\",\n                \"cs_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"cs_category_id\": null,\n                \"cs_project_id\": \"7\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": null,\n                \"name\": \"ARANGRANT\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n            },\n            {\n                \"cs_id\": \"130705\",\n                \"cs_gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-03-24 09:14:28\",\n                \"cs_updated_dt\": \"2020-03-24 11:00:34\",\n                \"cs_last_action_dt\": \"2020-03-24 11:00:34\",\n                \"cs_category_id\": \"16\",\n                \"cs_project_id\": \"6\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": \"W9053AF\",\n                \"name\": \"WOWFARE\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-email\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"case_id\": \"88473\",\n                \"case_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"case_created_dt\": \"2020-02-26 15:26:25\",\n                \"case_updated_dt\": \"2020-02-26 17:07:18\",\n                \"case_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": \"P6QWNH\",\n                \"case_project_name\": \"ARANGRANT\",\n                \"case_next_flight\": \"2022-05-22\",\n                \"case_status_name\": \"Processing\"\n            },\n            {\n                \"case_id\": \"130705\",\n                \"case_gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"case_created_dt\": \"2020-03-24 09:14:28\",\n                \"case_updated_dt\": \"2020-03-24 11:00:34\",\n                \"case_last_action_dt\": \"2020-03-24 11:00:34\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": null,\n                \"case_project_name\": \"WOWFARE\",\n                \"case_next_flight\": null,\n                \"case_status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-email\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
           "type": "json"
         }
       ]
@@ -887,7 +892,7 @@ define({ "api": [
             "type": "bool",
             "optional": false,
             "field": "active_only",
-            "description": "<p>1 for only active cases (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting)</p>"
+            "description": "<p>&quot;true&quot; for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or &quot;false&quot; for all cases</p>"
           },
           {
             "group": "Parameter",
@@ -915,7 +920,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": true,\n      \"case_department_id\": 2,\n      \"case_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": \"true\",\n      \"cases_department_id\": 2,\n      \"cases_project_id\": 6,\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -924,7 +929,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"cs_id\": \"88473\",\n                \"cs_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-02-26 15:26:25\",\n                \"cs_updated_dt\": \"2020-02-26 17:07:18\",\n                \"cs_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"cs_category_id\": null,\n                \"cs_project_id\": \"7\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": null,\n                \"name\": \"ARANGRANT\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n            },\n            {\n                \"cs_id\": \"130705\",\n                \"cs_gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"cs_status\": \"2\",\n                \"cs_created_dt\": \"2020-03-24 09:14:28\",\n                \"cs_updated_dt\": \"2020-03-24 11:00:34\",\n                \"cs_last_action_dt\": \"2020-03-24 11:00:34\",\n                \"cs_category_id\": \"16\",\n                \"cs_project_id\": \"6\",\n                \"cs_dep_id\": \"2\",\n                \"cs_order_uid\": \"W9053AF\",\n                \"name\": \"WOWFARE\",\n                \"nextFlight\": null,\n                \"status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-phone\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"case_id\": \"88473\",\n                \"case_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"case_created_dt\": \"2020-02-26 15:26:25\",\n                \"case_updated_dt\": \"2020-02-26 17:07:18\",\n                \"case_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": \"P6QWNH\",\n                \"case_project_name\": \"ARANGRANT\",\n                \"case_next_flight\": \"2022-05-22\",\n                \"case_status_name\": \"Processing\"\n            },\n            {\n                \"case_id\": \"130705\",\n                \"case_gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"case_created_dt\": \"2020-03-24 09:14:28\",\n                \"case_updated_dt\": \"2020-03-24 11:00:34\",\n                \"case_last_action_dt\": \"2020-03-24 11:00:34\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": null,\n                \"case_project_name\": \"WOWFARE\",\n                \"case_next_flight\": null,\n                \"case_status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-phone\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
           "type": "json"
         }
       ]
