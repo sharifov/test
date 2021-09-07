@@ -1214,6 +1214,7 @@ class CallController extends FController
         $response = [
             'error' => false,
             'message' => '',
+            'isRedialCall' => false,
         ];
         $userId = Auth::id();
 
@@ -1260,9 +1261,16 @@ class CallController extends FController
             }
 
             if (!$isReserved) {
-                Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
-                $response['error'] = true;
-                $response['message'] = 'Phone line queue is empty.';
+                $leadRedialQueue = Yii::createObject(\sales\model\leadRedial\services\LeadRedialQueue::class);
+                $redialCall = $leadRedialQueue->getCall(Auth::id());
+                if ($redialCall) {
+                    $response['isRedialCall'] = true;
+                    $response['redialCall'] = $redialCall->toArray();
+                } else {
+                    Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
+                    $response['error'] = true;
+                    $response['message'] = 'Phone line queue is empty.';
+                }
             }
         } catch (\RuntimeException | NotFoundException $e) {
             $response['error'] = true;
