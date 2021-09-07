@@ -286,7 +286,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ],
 
-
             [
                 'attribute' => 'cabin',
                 'value' => static function (\common\models\Lead $model) {
@@ -294,7 +293,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => \common\models\Lead::CABIN_LIST
             ],
-
 
             /*[
                 'header' => 'Client time',
@@ -307,7 +305,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ],*/
 
-
             [
                 'header' => 'Client time',
                 'format' => 'raw',
@@ -317,7 +314,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'options' => ['style' => 'width:80px'],
                 //'filter' => \common\models\Employee::getList()
             ],
-
 
             [
                 'header' => 'Project',
@@ -377,7 +373,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
         <?php
         echo '<div class="table-responsive">' . GridView::widget([
-
+                'id' => 'lead-failed-bookings-gv',
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
                 'columns' => $gridColumns,
@@ -396,6 +392,15 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php Pjax::end(); ?>
     </div>
 
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#lead-failed-bookings-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>
 
 <?php
 $js = '

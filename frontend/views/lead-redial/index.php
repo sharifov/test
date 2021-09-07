@@ -235,6 +235,10 @@ function leadRedialLastCallsReload() {
     })
 }
 
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#lead-redial-pjax').position().top }, 400);
+    })
+
 JS;
 
 $this->registerJs($js, $this::POS_END);
