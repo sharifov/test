@@ -97,7 +97,7 @@ if ($viewModel->lead) {
                 }
             },
             error: function (error) {
-                console.log('Error: ' + error);
+                createNotify('Error', error.responseJSON.message, 'error');
             },
             complete: function () {
               $('#'+searchResId).removeClass('loading');

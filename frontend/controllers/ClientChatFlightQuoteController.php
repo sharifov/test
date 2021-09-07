@@ -19,6 +19,7 @@ use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\ItineraryEditForm;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\entity\abac\ClientChatAbacObject;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
@@ -98,6 +99,10 @@ class ClientChatFlightQuoteController extends FController
         $chatId = Yii::$app->request->get('chat_id', 0);
         $leadId = Yii::$app->request->get('lead_id', 0);
         $flightRequestFormMode = (string)Yii::$app->request->get('mode', 'view');
+        /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
 
         $chat = ClientChat::findOne(['cch_id' => $chatId]);
         $viewModel = new ViewModelSearchQuotes();
@@ -218,7 +223,7 @@ class ClientChatFlightQuoteController extends FController
             }
 
             $viewModel->lead = $lead;
-        } catch (\RuntimeException | \DomainException | NotFoundException $e) {
+        } catch (\RuntimeException | \DomainException | NotFoundException | ForbiddenHttpException $e) {
             Yii::$app->getSession()->addFlash('warning', $e->getMessage());
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e, true), 'QuoteController::actionAjaxSearchQuotesByChat::Throwable');
@@ -240,6 +245,11 @@ class ClientChatFlightQuoteController extends FController
         $chatId = Yii::$app->request->get('chat_id');
         $mode = Yii::$app->request->get('mode');
 
+        /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
         $lead = $this->findLead($id);
 
         if (!Yii::$app->user->can('updateLead', ['lead' => $lead])) {
@@ -259,8 +269,9 @@ class ClientChatFlightQuoteController extends FController
         $chatId = Yii::$app->request->post('chat_id');
         $lead = $this->findLead($id);
 
-        if (!Yii::$app->user->can('updateLead', ['lead' => $lead])) {
-            throw new ForbiddenHttpException();
+        /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
         }
 
         if (!$chat = ClientChat::findOne((int)$chatId)) {
@@ -299,8 +310,9 @@ class ClientChatFlightQuoteController extends FController
         $id = Yii::$app->request->post('id');
         $lead = $this->findLead($id);
 
-        if (!Yii::$app->user->can('updateLead', ['lead' => $lead])) {
-            throw new ForbiddenHttpException();
+        /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
         }
 
         $data = CompositeFormHelper::prepareDataForMultiInput(
@@ -325,6 +337,11 @@ class ClientChatFlightQuoteController extends FController
             'error' => '',
             'status' => false
         ];
+
+        /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
 
         $chatId = Yii::$app->request->post('chatId');
 

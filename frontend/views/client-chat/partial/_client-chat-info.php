@@ -9,6 +9,7 @@ use sales\entities\cases\CasesStatus;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\client\query\ClientChatCounter;
 use sales\model\client\query\ClientLeadCaseCounter;
+use sales\model\clientChat\entity\abac\ClientChatAbacObject;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatHold\service\ClientChatHoldService;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
@@ -350,7 +351,8 @@ $leads = $clientChat->leads;
                           <i class="fa fa-bars warning"></i> <span class="text-warning">Actions</span>
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLead">
-                            <?php if (!$leads) : ?>
+                            <?php /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/ ?>
+                            <?php if (!$leads && Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) : ?>
                                 <?php echo Html::a('<i class="fas fa-search"> </i> Search Quotes', null, [
                                     'class' => 'dropdown-item search_quotes',
                                     'title' => 'Search Quotes',
@@ -395,11 +397,14 @@ $leads = $clientChat->leads;
                                       <i class="fa fa-bars warning"></i>
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLead">
-                                      <?php echo Html::a('<i class="fas fa-search"> </i> Search Quotes', null, [
-                                          'class' => 'dropdown-item search_quotes',
-                                          'title' => 'Search Quotes',
-                                          'data-link' => Url::to(['/client-chat-flight-quote/ajax-search-quotes-by-chat', 'chat_id' => $clientChat->cch_id, 'lead_id' => $lead->id]),
-                                      ]) ?>
+                                      <?php /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/ ?>
+                                      <?php if (Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) : ?>
+                                            <?php echo Html::a('<i class="fas fa-search"> </i> Search Quotes', null, [
+                                            'class' => 'dropdown-item search_quotes',
+                                            'title' => 'Search Quotes',
+                                            'data-link' => Url::to(['/client-chat-flight-quote/ajax-search-quotes-by-chat', 'chat_id' => $clientChat->cch_id, 'lead_id' => $lead->id]),
+                                        ]) ?>
+                                      <?php endif; ?>
                                       <span data-cc-lead-info-quote="<?= $lead->id?>">
                                       <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>
                                             <?= Html::a(
