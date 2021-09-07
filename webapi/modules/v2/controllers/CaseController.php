@@ -52,7 +52,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
+     * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -60,7 +60,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
-     *       "active_only": 1,
+     *       "active_only": "true",
      *       "cases_department_id": 2,
      *       "cases_project_id": 6,
      *       "results_limit": 10
@@ -75,34 +75,28 @@ class CaseController extends BaseController
      *     "message": "OK",
      *     "data": [
      *             {
-     *                 "cs_id": "88473",
-     *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
-     *                 "cs_status": "2",
-     *                 "cs_created_dt": "2020-02-26 15:26:25",
-     *                 "cs_updated_dt": "2020-02-26 17:07:18",
-     *                 "cs_last_action_dt": "2020-02-27 15:08:39",
-     *                 "cs_category_id": null,
-     *                 "cs_project_id": "7",
-     *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": "P6QWNH",
-     *                 "name": "ARANGRANT",
-     *                 "nextFlight": "2022-05-22",
-     *                 "status_name": "Processing"
+     *                 "case_id": "88473",
+     *                 "case_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "case_created_dt": "2020-02-26 15:26:25",
+     *                 "case_updated_dt": "2020-02-26 17:07:18",
+     *                 "case_last_action_dt": "2020-02-27 15:08:39",
+     *                 "case_category_id": "16",
+     *                 "case_order_uid": "P6QWNH",
+     *                 "case_project_name": "ARANGRANT",
+     *                 "case_next_flight": "2022-05-22",
+     *                 "case_status_name": "Processing"
      *             },
      *             {
-     *                 "cs_id": "130705",
-     *                 "cs_gid": "37129b222479f0468d6355fcf4bd0235",
-     *                 "cs_status": "2",
-     *                 "cs_created_dt": "2020-03-24 09:14:28",
-     *                 "cs_updated_dt": "2020-03-24 11:00:34",
-     *                 "cs_last_action_dt": "2020-03-24 11:00:34",
-     *                 "cs_category_id": "16",
-     *                 "cs_project_id": "6",
-     *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": null,
-     *                 "name": "WOWFARE",
-     *                 "nextFlight": null,
-     *                 "status_name": "Processing"
+     *                 "case_id": "130705",
+     *                 "case_gid": "37129b222479f0468d6355fcf4bd0235",
+     *                 "case_created_dt": "2020-03-24 09:14:28",
+     *                 "case_updated_dt": "2020-03-24 11:00:34",
+     *                 "case_last_action_dt": "2020-03-24 11:00:34",
+     *                 "case_category_id": "16",
+     *                 "case_order_uid": null,
+     *                 "case_project_name": "WOWFARE",
+     *                 "case_next_flight": null,
+     *                 "case_status_name": "Processing"
      *             }
      *     ],
      *     "technical": {
@@ -205,7 +199,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{320}}           contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
+     * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -213,7 +207,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
-     *       "active_only": 1,
+     *       "active_only": "true",
      *       "cases_department_id": 2,
      *       "cases_project_id": 6,
      *       "results_limit": 10
@@ -228,34 +222,28 @@ class CaseController extends BaseController
      *     "message": "OK",
      *     "data": [
      *             {
-     *                 "cs_id": "88473",
-     *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
-     *                 "cs_status": "2",
-     *                 "cs_created_dt": "2020-02-26 15:26:25",
-     *                 "cs_updated_dt": "2020-02-26 17:07:18",
-     *                 "cs_last_action_dt": "2020-02-27 15:08:39",
-     *                 "cs_category_id": null,
-     *                 "cs_project_id": "7",
-     *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": "P6QWNH",
-     *                 "name": "ARANGRANT",
-     *                 "nextFlight": "2022-05-22",
-     *                 "status_name": "Processing"
+     *                 "case_id": "88473",
+     *                 "case_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "case_created_dt": "2020-02-26 15:26:25",
+     *                 "case_updated_dt": "2020-02-26 17:07:18",
+     *                 "case_last_action_dt": "2020-02-27 15:08:39",
+     *                 "case_category_id": "16",
+     *                 "case_order_uid": "P6QWNH",
+     *                 "case_project_name": "ARANGRANT",
+     *                 "case_next_flight": "2022-05-22",
+     *                 "case_status_name": "Processing"
      *             },
      *             {
-     *                 "cs_id": "130705",
-     *                 "cs_gid": "37129b222479f0468d6355fcf4bd0235",
-     *                 "cs_status": "2",
-     *                 "cs_created_dt": "2020-03-24 09:14:28",
-     *                 "cs_updated_dt": "2020-03-24 11:00:34",
-     *                 "cs_last_action_dt": "2020-03-24 11:00:34",
-     *                 "cs_category_id": "16",
-     *                 "cs_project_id": "6",
-     *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": null,
-     *                 "name": "WOWFARE",
-     *                 "nextFlight": null,
-     *                 "status_name": "Processing"
+     *                 "case_id": "130705",
+     *                 "case_gid": "37129b222479f0468d6355fcf4bd0235",
+     *                 "case_created_dt": "2020-03-24 09:14:28",
+     *                 "case_updated_dt": "2020-03-24 11:00:34",
+     *                 "case_last_action_dt": "2020-03-24 11:00:34",
+     *                 "case_category_id": "16",
+     *                 "case_order_uid": null,
+     *                 "case_project_name": "WOWFARE",
+     *                 "case_next_flight": null,
+     *                 "case_status_name": "Processing"
      *             }
      *     ],
      *     "technical": {
@@ -371,19 +359,16 @@ class CaseController extends BaseController
      *     "status": 200,
      *     "message": "OK",
      *     "data": {
-     *                 "cs_id": "88473",
-     *                 "cs_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
-     *                 "cs_status": "2",
-     *                 "cs_created_dt": "2020-02-26 15:26:25",
-     *                 "cs_updated_dt": "2020-02-26 17:07:18",
-     *                 "cs_last_action_dt": "2020-02-27 15:08:39",
-     *                 "cs_category_id": null,
-     *                 "cs_project_id": "7",
-     *                 "cs_dep_id": "2",
-     *                 "cs_order_uid": null,
-     *                 "name": "ARANGRANT",
-     *                 "nextFlight": null,
-     *                 "status_name": "Processing"
+     *                 "case_id": "88473",
+     *                 "case_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "case_created_dt": "2020-02-26 15:26:25",
+     *                 "case_updated_dt": "2020-02-26 17:07:18",
+     *                 "case_last_action_dt": "2020-02-27 15:08:39",
+     *                 "case_category_id": "16",
+     *                 "case_order_uid": "P6QWNH",
+     *                 "case_project_name": "ARANGRANT",
+     *                 "case_next_flight": "2022-05-22",
+     *                 "case_status_name": "Processing"
      *     },
      *     "technical": {
      *         "action": "v2/case/get",
@@ -509,7 +494,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
+     * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -517,7 +502,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
-     *       "active_only": 1,
+     *       "active_only": "true",
      *       "cases_department_id": 2,
      *       "cases_project_id": 6,
      *       "results_limit": 10
@@ -635,7 +620,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{320}}           contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or 0 for all cases
+     * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
      * @apiParam {int}                  [cases_department_id]            Department ID
      * @apiParam {int}                  [cases_project_id]               Project ID
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -643,7 +628,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
-     *       "active_only": 1,
+     *       "active_only": "true",
      *       "cases_department_id": 2,
      *       "cases_project_id": 6,
      *       "results_limit": 10
