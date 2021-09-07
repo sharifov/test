@@ -13,7 +13,6 @@ use yii\base\Model;
  *
  * @property integer $source
  * @property integer $projectId
- * @property int|null $userId
  * @property ClientChat $chat
  */
 class LeadCreateByChatForm extends Model
@@ -21,7 +20,6 @@ class LeadCreateByChatForm extends Model
     public $source;
     public $projectId;
 
-    private $userId;
     private $chat;
 
     /**
@@ -29,9 +27,8 @@ class LeadCreateByChatForm extends Model
      * @param ClientChat $chat
      * @param array $config
      */
-    public function __construct(int $userId, ClientChat $chat, $config = [])
+    public function __construct(ClientChat $chat, $config = [])
     {
-        $this->userId = $userId;
         $this->chat = $chat;
         $this->setProjectId();
         $this->setSource();
