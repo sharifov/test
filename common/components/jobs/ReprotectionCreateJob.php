@@ -89,48 +89,54 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 return;
             }
 
-            try {
-                if (!$case = $caseReProtectionService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
-                    $case = $caseReProtectionService->createCase($flightRequest);
-                }
-                $caseReProtectionService->setCase($case);
+            if (!$originProductQuote) {
+                try {
+                    if (!$case = $caseReProtectionService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
+                        $case = $caseReProtectionService->createCase($flightRequest);
+                    }
+                    $caseReProtectionService->setCase($case);
 
-                $saleData = $boRequestReProtectionService->getSaleData($flightRequest->fr_booking_id, $case);
+                    $saleData = $boRequestReProtectionService->getSaleData($flightRequest->fr_booking_id, $case);
 
-                $client = $reProtectionCreateService->getOrCreateClient(
-                    $flightRequest->fr_project_id,
-                    $boRequestReProtectionService->getOrderContactForm()
-                );
+                    $client = $reProtectionCreateService->getOrCreateClient(
+                        $flightRequest->fr_project_id,
+                        $boRequestReProtectionService->getOrderContactForm()
+                    );
 
-                $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
-                $reProtectionCreateService->createCaseSale($saleData, $case);
-
-                $order = $reProtectionCreateService->createOrder(
-                    $boRequestReProtectionService->getOrderCreateFromSaleForm(),
-                    $boRequestReProtectionService->getOrderContactForm(),
-                    $case,
-                    $flightRequest->fr_project_id
-                );
-
-                $originProductQuote = $reProtectionCreateService->createOriginProductQuoteInfrastructure(
-                    $boRequestReProtectionService->getOrderCreateFromSaleForm(),
-                    $saleData,
-                    $order,
-                    $case,
-                    $this->flight_request_is_automate
-                );
-                $caseReProtectionService->setCaseDeadline($originProductQuote->flightQuote);
-            } catch (Throwable $throwable) {
-                if (isset($case)) {
-                    $caseReProtectionService->caseToManual('Order not created');
-                }
-                if (isset($case, $flightRequest) && $client === null) {
-                    $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
                     $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
+                    $reProtectionCreateService->createCaseSale($saleData, $case);
+
+                    $order = $reProtectionCreateService->createOrder(
+                        $boRequestReProtectionService->getOrderCreateFromSaleForm(),
+                        $boRequestReProtectionService->getOrderContactForm(),
+                        $case,
+                        $flightRequest->fr_project_id
+                    );
+
+                    $originProductQuote = $reProtectionCreateService->createOriginProductQuoteInfrastructure(
+                        $boRequestReProtectionService->getOrderCreateFromSaleForm(),
+                        $saleData,
+                        $order,
+                        $case,
+                        $this->flight_request_is_automate
+                    );
+                    $caseReProtectionService->setCaseDeadline($originProductQuote->flightQuote);
+                } catch (Throwable $throwable) {
+                    if (isset($case)) {
+                        $caseReProtectionService->caseToManual('Order not created');
+                    }
+                    if (isset($case, $flightRequest) && $client === null) {
+                        $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
+                        $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
+                    }
+                    $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
+                    $reProtectionCreateService::writeLog($throwable);
+                    return;
                 }
-                $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
-                $reProtectionCreateService::writeLog($throwable);
-                return;
+            }
+
+            if (!isset($case) && !$case = $caseReProtectionService::findCase($flightRequest->fr_booking_id, $originProductQuote)) {
+                throw new DomainException('Case not found');
             }
 
             $caseReProtectionService->setCase($case);
