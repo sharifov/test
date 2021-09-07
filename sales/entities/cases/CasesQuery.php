@@ -36,19 +36,19 @@ class CasesQuery extends ActiveQuery
         return $query;
     }
 
-    public static function findCasesByPhone(string $phone, bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesByPhone(string $phone, string $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
-                ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
+                ->select('cs_dep_id, cs_status, cs_id AS case_id, cs_gid AS case_gid, cs_created_dt AS case_created_dt, cs_updated_dt AS case_updated_dt, cs_last_action_dt AS case_last_action_dt, cs_category_id AS case_category_id, cs_order_uid AS case_order_uid, projects.name AS case_project_name')
                 ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
                 ->andWhere(['client_phone.phone' => $phone]);
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
     }
 
-    public static function findCasesByEmail(string $email, bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesByEmail(string $email, string $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
-            ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
+            ->select('cs_dep_id, cs_status, cs_id AS case_id, cs_gid AS case_gid, cs_created_dt AS case_created_dt, cs_updated_dt AS case_updated_dt, cs_last_action_dt AS case_last_action_dt, cs_category_id AS case_category_id, cs_order_uid AS case_order_uid, projects.name AS case_project_name')
             ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
             ->andWhere(['client_email.email' => $email]);
         return self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId);
@@ -57,11 +57,11 @@ class CasesQuery extends ActiveQuery
     public static function findCaseByCaseGid(string $caseGid): array
     {
         $case = Cases::find()
-            ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_order_uid, projects.name')
+            ->select('cs_status, cs_id AS case_id, cs_gid AS case_gid, cs_created_dt AS case_created_dt, cs_updated_dt AS case_updated_dt, cs_last_action_dt AS case_last_action_dt, cs_category_id AS case_category_id, cs_order_uid AS case_order_uid, projects.name AS case_project_name')
             ->leftJoin('projects', 'cs_project_id = projects.id')
                 // Similar part of SQL query, as in findCasesPartial, can be optimized
             ->addSelect(new Expression('
-                        DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS nextFlight'))
+                        DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS case_next_flight'))
             ->leftJoin([
                 'sale_out' => CaseSale::find()
                     ->select([
@@ -94,46 +94,48 @@ class CasesQuery extends ActiveQuery
             ->andWhere(['cs_gid' => $caseGid])
             ->asArray()->one();
         if ($case) {
-            $case['status_name'] = CasesStatus::getName($case['cs_status']);
+            $case['case_status_name'] = CasesStatus::getName($case['cs_status']);
+            unset($case['cs_status']);
         } else {
             $case = [];
         }
         return $case;
     }
 
-    public static function findCasesGidByPhone(string $phone, bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesGidByPhone(string $phone, string $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
-            ->select('cs_gid, cs_status, cs_created_dt, cs_project_id, cs_dep_id')
+            ->select('cs_gid, cs_status, cs_dep_id, cs_created_dt AS case_created_dt')
             ->leftJoin('client_phone', 'cs_client_id = client_phone.client_id')
             ->andWhere(['client_phone.phone' => $phone]);
         return array_column(self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId), 'cs_gid');
     }
 
-    public static function findCasesGidByEmail(string $email, ?bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesGidByEmail(string $email, string $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
     {
         $query = Cases::find()
-            ->select('cs_id, cs_gid, cs_status, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_project_id, cs_dep_id, cs_order_uid, projects.name')
+            ->select('cs_gid, cs_status, cs_dep_id, cs_created_dt AS case_created_dt')
             ->leftJoin('client_email', 'cs_client_id = client_email.client_id')
             ->andWhere(['client_email.email' => $email]);
         return array_column(self::findCasesPartial($query, $activeOnly, $results_limit, $projectId, $departmentId), 'cs_gid');
     }
 
-    public static function findCasesPartial(CasesQuery $query, bool $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array
+    public static function findCasesPartial(CasesQuery $query, string $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId, bool $gid_only = false): array
     {
         $where = [];
-        if ($projectId) {
+        if (isset($projectId) && $projectId) {
             $where['cs_project_id'] = $projectId;
         }
-        if ($departmentId) {
+        if (isset($departmentId) && $departmentId) {
             $where['cs_dep_id'] = $departmentId;
         }
 
-        $query
+        if (!$gid_only) {
+            $query
                 ->leftJoin('projects', 'cs_project_id = projects.id')
-                    // Similar part of SQL query, as in findCaseByCaseGid, can be optimized
+                // Similar part of SQL query, as in findCaseByCaseGid, can be optimized
                 ->addSelect(new Expression('
-                        DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS nextFlight'))
+                        DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS case_next_flight'))
                 ->leftJoin([
                     'sale_out' => CaseSale::find()
                         ->select([
@@ -161,14 +163,16 @@ class CasesQuery extends ActiveQuery
                         )
                         ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
                         ->groupBy('css_cs_id')
-                ], 'cases.cs_id = sale_in.css_cs_id')
-                    // End of similar part of SQL query, as in findCaseByCaseGid
+                ], 'cases.cs_id = sale_in.css_cs_id');
+                // End of similar part of SQL query, as in findCaseByCaseGid
+        }
+        $query
                 ->andWhere($where)
                 ->orderBy('cs_created_dt ASC')
                 ->asArray();
 //            ->createCommand()->getRawSql();
 
-        if ($activeOnly) {
+        if ($activeOnly == 'true') {
             $deps_params = [];
             $deps = Department::find()->all();
             foreach ($deps as $dep) {
@@ -181,11 +185,15 @@ class CasesQuery extends ActiveQuery
             if (!empty($cases)) {
                 $result_cases_cnt = 0;
                 foreach ($cases as $key => $case) {
-                    $cases[$key]['status_name'] = CasesStatus::getName($case['cs_status']);
-                    $limit_dt = (new \DateTimeImmutable($case['cs_created_dt']))->modify('+' . $deps_params[$case['cs_dep_id']] . 'day');
+                    if (!$gid_only) {
+                        $cases[$key]['case_status_name'] = CasesStatus::getName($case['cs_status'] ?? null);
+                    }
+                    unset($cases[$key]['cs_status']);
+                    $limit_dt = (new \DateTimeImmutable($case['case_created_dt']))->modify('+' . $deps_params[$case['cs_dep_id']] . 'day');
+                    unset($cases[$key]['cs_dep_id']);
                     if (
                         ($case['cs_status'] == CasesStatus::STATUS_TRASH && (strtotime($limit_dt->format('Y-m-d H:i:s')) < time()))
-                        || ($results_limit && $result_cases_cnt >= $results_limit)
+                        || (isset($results_limit) && $result_cases_cnt >= $results_limit)
                     ) {
                         unset($cases[$key]);
                     } else {
@@ -200,11 +208,15 @@ class CasesQuery extends ActiveQuery
             if (!empty($cases)) {
                 $result_cases_cnt = 0;
                 foreach ($cases as $key => $case) {
-                    $cases[$key]['status_name'] = CasesStatus::getName($case['cs_status']);
-                    if ($results_limit && $result_cases_cnt >= $results_limit) {
+                    if (!$gid_only) {
+                        $cases[$key]['case_status_name'] = CasesStatus::getName($case['cs_status']);
+                    }
+                    if (isset($results_limit) && $result_cases_cnt >= $results_limit) {
                         unset($cases[$key]);
                     } else {
                         $result_cases_cnt++;
+                        unset($cases[$key]['cs_status']);
+                        unset($cases[$key]['cs_dep_id']);
                     }
                 }
                 return $cases;
