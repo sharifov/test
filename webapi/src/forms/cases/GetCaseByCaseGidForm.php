@@ -2,16 +2,13 @@
 
 namespace webapi\src\forms\cases;
 
-use common\models\ClientEmail;
 use yii\base\Model;
 
 /**
- * Class CaseRequestApiForm
- * @package webapi\src\boWebhook
+ * Class GetCaseByCaseGidForm
+ * @package webapi\src\forms\cases
  *
- * @property string $contact_phone
- * @property int|null $typeId
- * @property array $data
+ * @property int $case_gid
  */
 class GetCaseByCaseGidForm extends Model
 {
