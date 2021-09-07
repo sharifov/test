@@ -7,11 +7,13 @@ use yii\base\Model;
 
 /**
  * Class CaseRequestApiForm
- * @package webapi\src\boWebhook
+ * @package webapi\src\forms\cases
  *
- * @property string $contact_phone
- * @property int|null $typeId
- * @property array $data
+ * @property string $contact_email
+ * @property boolean $active_only
+ * @property int|null $cases_project_id
+ * @property int|null $cases_department_id
+ * @property int|null $results_limit
  */
 class GetCasesByEmailForm extends Model
 {
@@ -27,7 +29,8 @@ class GetCasesByEmailForm extends Model
             [['contact_email', 'active_only'], 'required'],
             ['contact_email', 'email'],
             ['contact_email', 'exist', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['contact_email' => 'email'], 'message' => 'Client Email not found in DB.'],
-            ['active_only', 'boolean', 'skipOnEmpty' => false, 'strict' => true],
+            ['active_only', 'filter', 'filter' => 'strtolower'],
+            ['active_only', 'boolean', 'trueValue' => 'true', 'falseValue' => 'false', 'strict' => true],
             [['cases_project_id', 'cases_department_id', 'results_limit'], 'integer'],
         ];
     }

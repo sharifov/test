@@ -61,8 +61,8 @@ class CaseController extends BaseController
      * {
      *       "contact_phone": "+18888888888",
      *       "active_only": 1,
-     *       "case_department_id": 2,
-     *       "case_project_id": 6,
+     *       "cases_department_id": 2,
+     *       "cases_project_id": 6,
      *       "results_limit": 10
      *   }
      *
@@ -214,8 +214,8 @@ class CaseController extends BaseController
      * {
      *       "contact_email": "test@test.test",
      *       "active_only": 1,
-     *       "case_department_id": 2,
-     *       "case_project_id": 6,
+     *       "cases_department_id": 2,
+     *       "cases_project_id": 6,
      *       "results_limit": 10
      *   }
      *
@@ -518,8 +518,8 @@ class CaseController extends BaseController
      * {
      *       "contact_phone": "+18888888888",
      *       "active_only": 1,
-     *       "case_department_id": 2,
-     *       "case_project_id": 6,
+     *       "cases_department_id": 2,
+     *       "cases_project_id": 6,
      *       "results_limit": 10
      *   }
      *
@@ -644,8 +644,8 @@ class CaseController extends BaseController
      * {
      *       "contact_email": "test@test.test",
      *       "active_only": 1,
-     *       "case_department_id": 2,
-     *       "case_project_id": 6,
+     *       "cases_department_id": 2,
+     *       "cases_project_id": 6,
      *       "results_limit": 10
      *   }
      *

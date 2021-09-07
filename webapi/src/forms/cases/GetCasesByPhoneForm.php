@@ -3,21 +3,18 @@
 namespace webapi\src\forms\cases;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use common\models\ClientEmail;
 use common\models\ClientPhone;
-use sales\model\phoneList\entity\PhoneList;
-use sales\services\client\InternalPhoneValidator;
-use webapi\src\request\BoWebhook;
 use yii\base\Model;
-use common\components\validators\IsArrayValidator;
 
 /**
- * Class CaseRequestApiForm
- * @package webapi\src\boWebhook
+ * Class GetCasesByPhoneForm
+ * @package webapi\src\forms\cases
  *
  * @property string $contact_phone
- * @property int|null $typeId
- * @property array $data
+ * @property boolean $active_only
+ * @property int|null $cases_project_id
+ * @property int|null $cases_department_id
+ * @property int|null $results_limit
  */
 class GetCasesByPhoneForm extends Model
 {
@@ -35,7 +32,8 @@ class GetCasesByPhoneForm extends Model
             ['contact_phone', 'trim'],
             ['contact_phone', PhoneInputValidator::class],
             ['contact_phone', 'exist', 'targetClass' => ClientPhone::class, 'targetAttribute' => ['contact_phone' => 'phone'], 'message' => 'Client Phone number not found in DB.'],
-            ['active_only', 'boolean', 'skipOnEmpty' => false, 'strict' => true],
+            ['active_only', 'filter', 'filter' => 'strtolower'],
+            ['active_only', 'boolean', 'trueValue' => 'true', 'falseValue' => 'false', 'strict' => true],
             [['cases_project_id', 'cases_department_id', 'results_limit'], 'integer']
         ];
     }
