@@ -7,6 +7,7 @@ use frontend\helpers\JsonHelper;
 use sales\model\clientChat\componentEvent\component\FlightQuoteSearchData;
 use sales\model\clientChat\componentEvent\component\FlizzardSubscription;
 use sales\model\clientChat\componentEvent\component\ComponentEventInterface;
+use sales\model\clientChat\componentEvent\component\RunnableAlways;
 use sales\model\clientChat\componentRule\entity\ClientChatComponentRule;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
@@ -40,20 +41,23 @@ class ClientChatComponentEvent extends \yii\db\ActiveRecord
 {
     private const COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION = 1;
     private const COMPONENT_FLIGHT_QUOTE_SEARCH_DATA = 2;
+    private const COMPONENT_RUNNABLE_ALWAYS = 3;
 
     private const COMPONENT_EVENT_LIST = [
         self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => 'Check Flizzard Subscription',
-        self::COMPONENT_FLIGHT_QUOTE_SEARCH_DATA => 'Check Flight Quote Search Data'
+        self::COMPONENT_FLIGHT_QUOTE_SEARCH_DATA => 'Check Flight Quote Search Data',
+        self::COMPONENT_RUNNABLE_ALWAYS => 'Always Runnable'
     ];
 
     private const COMPONENT_LIST = [
         self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => 'CheckFlizzardSubscriptionComponent',
-        self::COMPONENT_FLIGHT_QUOTE_SEARCH_DATA => 'CheckFlightQuoteSearchData'
+        self::COMPONENT_FLIGHT_QUOTE_SEARCH_DATA => 'CheckFlightQuoteSearchData',
     ];
 
     private const COMPONENT_CLASS_LIST = [
         self::COMPONENT_CHECK_FLIZZARD_SUBSCRIPTION => FlizzardSubscription::class,
         self::COMPONENT_FLIGHT_QUOTE_SEARCH_DATA => FlightQuoteSearchData::class,
+        self::COMPONENT_RUNNABLE_ALWAYS => RunnableAlways::class
     ];
 
     public const COMPONENT_EVENT_TYPE_BEFORE_CHAT_CREATION = 1;

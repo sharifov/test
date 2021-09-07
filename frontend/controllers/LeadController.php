@@ -2196,7 +2196,7 @@ class LeadController extends FController
         }
 
         $userId = Auth::id();
-        $form = new LeadCreateByChatForm($userId, $chat);
+        $form = new LeadCreateByChatForm($chat);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             if (empty($form->source)) {

@@ -119,7 +119,7 @@ class ClientChatFlightQuoteController extends FController
             $lead = Lead::findOne($leadId);
             if (!$lead) {
                 $userId = Auth::id();
-                $createLeadByChatForm = new LeadCreateByChatForm($userId, $chat);
+                $createLeadByChatForm = new LeadCreateByChatForm($chat);
 
                 if ($createLeadByChatForm->validate()) {
                     $lead = $this->createLeadAndLinkWithChat($createLeadByChatForm, $chat, $userId);
