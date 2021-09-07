@@ -69,7 +69,7 @@ if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
 JS;
     $this->registerJs($js);
 
-    $flightQuotes = ArrayHelper::getColumn($lead->quotes, 'fq_hash_key');
+//    $flightQuotes = ArrayHelper::getColumn($lead->quotes, 'fq_hash_key');
     ?>
     <script>
         pjaxOffFormSubmit('#pjax-search-quote-filter');
@@ -101,7 +101,7 @@ JS;
         <?= ListView::widget([
             'dataProvider' => $dataProvider,
             'emptyText' => '<div class="text-center">Not found quotes</div><br>',
-            'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes, $keyCache, $lead) {
+            'itemView' => function ($resultItem, $key) use ($locations, $airlines, $keyCache, $lead, $viewModel) {
                 return $this->render(
                     '_quote_search_item',
                     [
@@ -109,9 +109,9 @@ JS;
                         'result' => $resultItem,
                         'locations' => $locations,
                         'airlines' => $airlines,
-                        'flightQuotes' => $flightQuotes,
                         'keyCache' => $keyCache,
                         'lead' => $lead,
+                        'chatId' => $viewModel->chatId
                     ]
                 );
             },
