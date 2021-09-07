@@ -612,7 +612,7 @@ class FlightQuoteManageService implements ProductQuoteService
                     }
                 }
 
-                //$this->cloneFlightQuoteBaggage($originProductQuote->flightQuote, $flightQuote); /* TODO::  */
+                $this->cloneFlightQuoteBaggage($originProductQuote->flightQuote, $flightQuote);
             }
 
             $flightQuoteFlight = $this->createFlightQuoteFlight($flightQuote, $bookingId);
@@ -660,10 +660,11 @@ class FlightQuoteManageService implements ProductQuoteService
                 } elseif (!empty($originBaggageData[$key]['default'])) {
                     $originSegmentBaggageData = $originBaggageData[$key]['default'];
                 }
+
                 if ($originSegmentBaggageData) {
                     foreach ($originSegmentBaggageData as $originBaggage) {
                         $flightQuoteSegmentPaxBaggage = new FlightQuoteSegmentPaxBaggage();
-                        $flightQuoteSegmentPaxBaggage->load($originBaggage->toArray());
+                        $flightQuoteSegmentPaxBaggage->load($originBaggage->toArray(), '');
                         $flightQuoteSegmentPaxBaggage->qsb_flight_quote_segment_id = $segment->fqs_id;
                         if ($flightQuoteSegmentPaxBaggage->validate()) {
                             $this->flightQuoteSegmentPaxBaggageRepository->save($flightQuoteSegmentPaxBaggage);
