@@ -225,6 +225,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                                 (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $case))->send();
                             } catch (\Throwable $throwable) {
                                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
+                                $caseReProtectionService->caseToManual('OTA site is not informed');
                                 $flightRequestService->pending('OTA site is not informed');
                             }
                         }
@@ -263,6 +264,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $case))->send();
                 } catch (\Throwable $throwable) {
                     $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
+                    $caseReProtectionService->caseToManual('OTA site is not informed');
                     $flightRequestService->pending('OTA site is not informed');
                 }
             }
