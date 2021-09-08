@@ -42,7 +42,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <?= Html::button('Refresh <i class="fa fa-clock-o"></i><span id="count-down">00:00</span>', ['id' => 'auto-refresh-btn','class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'auto-refresh']); ?>
+    <?php Pjax::begin(['id' => 'auto-refresh', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>

@@ -6,6 +6,7 @@ use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatNote\entity\ClientChatNoteSearch */
@@ -21,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Create Client Chat Note', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -53,6 +54,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => ActionColumn::class],
         ],
     ]); ?>
-
+    <?php Pjax::end(); ?>
 
 </div>

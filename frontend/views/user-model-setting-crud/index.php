@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create User Model Setting', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-user-model-setting']); ?>
+    <?php Pjax::begin(['id' => 'pjax-user-model-setting', 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

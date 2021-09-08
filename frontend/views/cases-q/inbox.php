@@ -17,9 +17,12 @@ use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use common\models\Language;
 
-/* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesQSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/**
+ * @var $this yii\web\View
+ * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $isAgent bool
+ */
 
 $this->title = 'Inbox Queue';
 $this->params['breadcrumbs'][] = $this->title;
@@ -36,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
+        'id' => 'inbox-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'rowOptions' => function (CasesQSearch $model) {
@@ -230,3 +234,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end() ?>
 
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#inbox-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

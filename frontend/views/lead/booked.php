@@ -65,7 +65,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
-
         [
             'attribute' => 'bo_flight_id',
             'label' => 'BO ID',
@@ -122,8 +121,6 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
-
-
 
         [
             'label' => 'PNR',
@@ -402,7 +399,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 $diffTime = time() - $createdTS;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
-
                 $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
 
@@ -456,6 +452,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
 
     echo \yii\grid\GridView::widget([
+        'id' => 'lead-booked-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => $gridColumns,
@@ -470,3 +467,13 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#lead-booked-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

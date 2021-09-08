@@ -45,6 +45,7 @@ $pjaxListId = 'pjax-call-index';
 
     <?php Pjax::begin(['id' => $pjaxListId, 'timeout' => 10000]); ?>
     <?= GridView::widget([
+        'id' => 'call-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
@@ -370,3 +371,13 @@ $pjaxListId = 'pjax-call-index';
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#call-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

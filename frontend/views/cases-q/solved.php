@@ -15,9 +15,11 @@ use sales\entities\cases\CasesQSearch;
 use yii\widgets\Pjax;
 use common\models\Language;
 
-/* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesQSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/**
+ * @var $this yii\web\View
+ * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ */
 
 $this->title = 'Solved Queue';
 $this->params['breadcrumbs'][] = $this->title;
@@ -43,6 +45,7 @@ $lists = new ListsAccess($user->id);
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
     <?= GridView::widget([
+        'id' => 'solved-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
@@ -192,3 +195,13 @@ $lists = new ListsAccess($user->id);
     <?php Pjax::end() ?>
 
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#solved-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

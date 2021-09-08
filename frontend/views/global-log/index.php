@@ -32,7 +32,7 @@ $pjaxListId = 'pjax-global-log';
         ]); ?>
     <?php endif ?>
 
-    <?php Pjax::begin(['id' => $pjaxListId]); ?>
+    <?php Pjax::begin(['id' => $pjaxListId, 'timeout' => 8000, 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
