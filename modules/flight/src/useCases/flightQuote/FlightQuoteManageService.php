@@ -76,10 +76,12 @@ use modules\product\src\repositories\ProductQuoteRelationRepository;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 use webapi\src\services\flight\FlightManageApiService;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
