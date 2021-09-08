@@ -610,6 +610,10 @@ class FlightQuoteManageService implements ProductQuoteService
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
             $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
+            $this->calcProductQuotePrice($productQuote, $flightQuote);
+
+            $this->createFlightTrip($flightQuote, $quote);
+
             if ($originProductQuote && $originProductQuote->isFlight()) {
                 if ($flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices ?? null) {
                     foreach ($flightQuotePaxPrices as $originalPaxPrice) {
@@ -632,11 +636,9 @@ class FlightQuoteManageService implements ProductQuoteService
                     $reprotectionQuoteData = ProductQuoteData::createRecommended($flightQuote->fq_product_quote_id);
                     $this->productQuoteDataRepository->save($reprotectionQuoteData);
                 }
+
+                $this->cloneFlightQuoteBaggage($originProductQuote->flightQuote, $flightQuote);
             }
-
-            $this->calcProductQuotePrice($productQuote, $flightQuote);
-
-            $this->createFlightTrip($flightQuote, $quote);
 
             $flightQuoteFlight = $this->createFlightQuoteFlight($flightQuote, $bookingId);
 
@@ -686,6 +688,10 @@ class FlightQuoteManageService implements ProductQuoteService
         $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
         $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
+        $this->calcProductQuotePrice($productQuote, $flightQuote);
+
+        $this->createFlightTrip($flightQuote, $quote);
+
         if ($originProductQuote && $originProductQuote->isFlight()) {
             if ($flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices ?? null) {
                 foreach ($flightQuotePaxPrices as $originalPaxPrice) {
@@ -699,17 +705,61 @@ class FlightQuoteManageService implements ProductQuoteService
                     $this->productQuoteOptionRepository->save($productQuoteOption);
                 }
             }
+            $this->cloneFlightQuoteBaggage($originProductQuote->flightQuote, $flightQuote);
         }
-
-        $this->calcProductQuotePrice($productQuote, $flightQuote);
-
-        $this->createFlightTrip($flightQuote, $quote);
 
         $this->createFlightQuoteFlight($flightQuote);
 
         FlightQuoteLabelService::processingQuoteLabel($quote, $flightQuote->fq_id);
 
         return $productQuote;
+    }
+
+    public function cloneFlightQuoteBaggage(FlightQuote $originFlightQuote, FlightQuote $reProtectionFlightQuote): void
+    {
+        $originBaggageData = [];
+        foreach ($originFlightQuote->flightQuoteTrips as $originKey => $originTrip) {
+            foreach ($originTrip->flightQuoteSegments as $originSegment) {
+                $iataKey = $originSegment->fqs_departure_airport_iata . '-' . $originSegment->fqs_arrival_airport_iata;
+                if ($originSegment->flightQuoteSegmentPaxBaggages) {
+                    $originBaggageData[$originKey][$iataKey] = $originSegment->flightQuoteSegmentPaxBaggages;
+                    if (empty($originBaggageData[$originKey]['default'])) {
+                        $originBaggageData[$originKey]['default'] = $originSegment->flightQuoteSegmentPaxBaggages;
+                    }
+                }
+            }
+        }
+
+        foreach ($reProtectionFlightQuote->flightQuoteTrips as $key => $trip) {
+            foreach ($trip->flightQuoteSegments as $segment) {
+                $iataKey = $segment->fqs_departure_airport_iata . '-' . $segment->fqs_arrival_airport_iata;
+                $originSegmentBaggageData = null;
+                if (!empty($originBaggageData[$key][$iataKey])) {
+                    $originSegmentBaggageData = $originBaggageData[$key][$iataKey];
+                } elseif (!empty($originBaggageData[$key]['default'])) {
+                    $originSegmentBaggageData = $originBaggageData[$key]['default'];
+                }
+
+                if ($originSegmentBaggageData) {
+                    foreach ($originSegmentBaggageData as $originBaggage) {
+                        $flightQuoteSegmentPaxBaggage = new FlightQuoteSegmentPaxBaggage();
+                        $flightQuoteSegmentPaxBaggage->load($originBaggage->toArray(), '');
+                        $flightQuoteSegmentPaxBaggage->qsb_flight_quote_segment_id = $segment->fqs_id;
+                        if ($flightQuoteSegmentPaxBaggage->validate()) {
+                            $this->flightQuoteSegmentPaxBaggageRepository->save($flightQuoteSegmentPaxBaggage);
+                        } else {
+                            \Yii::warning(
+                                [
+                                    'errors' => $flightQuoteSegmentPaxBaggage->getErrors(),
+                                    'data' => $originBaggage,
+                                ],
+                                'FlightQuoteManageService:flightQuoteSegmentPaxBaggage:save'
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private function itineraryDumpToSting(array $itineraryDump): string
