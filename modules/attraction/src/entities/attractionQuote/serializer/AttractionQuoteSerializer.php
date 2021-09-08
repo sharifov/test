@@ -21,7 +21,7 @@ class AttractionQuoteSerializer extends Serializer
     {
         return [
             'atnq_booking_id',
-            'atnq_type',
+            'atnq_type_name',
             'atnq_json_response',
             'atnq_product_details_json',
             'atnq_availability_date'

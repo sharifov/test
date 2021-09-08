@@ -79,6 +79,8 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'cl_price')->input('number', ['min' => 0, 'max' => 999999, 'step' => 0.00001]) ?>
 
+            <?= $form->field($model, 'cl_stir_status')->dropDownList(Call::STIR_STATUS_LIST, ['prompt' => '---']) ?>
+
             <div class="form-group">
                 <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
             </div>

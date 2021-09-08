@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Lead;
 use common\models\Quote;
+use sales\helpers\app\AppHelper;
 use sales\repositories\lead\LeadRepository;
 use yii\console\Controller;
 use Yii;
@@ -19,7 +20,6 @@ use yii\helpers\VarDumper;
  */
 class MonitorFlowController extends Controller
 {
-
     private $leadRepository;
 
     public function __construct($id, $module, LeadRepository $leadRepository, $config = [])
@@ -35,62 +35,84 @@ class MonitorFlowController extends Controller
      */
     public function actionWatchDogDeclineQuote($test = false): void
     {
-
         printf("\n --- Start [" . date('Y-m-d H:i:s') . "] %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
         $time_start = microtime(true);
 
-        $query = new Query();
-        $subQuery = $query->select(['COUNT(*)'])->from('quotes AS q')->where(['q.status' => Quote::STATUS_APPLIED])->andWhere('quotes.lead_id = q.lead_id')->createCommand()->getRawSql();
+        $resultQuery = Yii::$app->db->createCommand(
+            'SELECT 
+                    `quotes`.`id`,
+                    `quotes`.`uid`,
+                    `quotes`.`lead_id`,
+                    `quotes`.`created`
+                FROM
+                    `quotes`
+                INNER JOIN
+                    `leads` ON `quotes`.`lead_id` = `leads`.`id` AND `leads`.`status` NOT IN (:statusLeadBooked, :statusLeadSold, :statusLeadPending)
+                
+                LEFT JOIN (
+                        SELECT 
+                            `quote_applied`.`lead_id`
+                        FROM
+                            `quotes` AS `quote_applied`
+                        WHERE 
+                            `quote_applied`.`status` = :statusAppliedQuote
+                        GROUP BY 
+                            `quote_applied`.`lead_id`
+                
+                ) AS `lead_quote_applied`
+                ON 
+                    `lead_quote_applied`.`lead_id` = `quotes`.`lead_id`
+                WHERE
+                        `quotes`.`status` IN (:statusQuoteCreated, :statusQuoteSend, :statusQuoteOpen)
+                    AND 
+                        `quotes`.`created` <= :createdQuote
+                    AND 
+                       `lead_quote_applied`.`lead_id` IS NULL
+                
+                ORDER BY `quotes`.`id` DESC',
+            [
+                ':statusLeadBooked' => Lead::STATUS_BOOKED,
+                ':statusLeadSold' => Lead::STATUS_SOLD,
+                ':statusLeadPending' => Lead::STATUS_PENDING,
+                ':statusAppliedQuote' => Quote::STATUS_APPLIED,
+                ':statusQuoteCreated' => Quote::STATUS_CREATED,
+                ':statusQuoteSend' => Quote::STATUS_SEND,
+                ':statusQuoteOpen' => Quote::STATUS_OPENED,
+                ':createdQuote' => date('Y-m-d H:i:s', strtotime('-1 day'))
+            ]
+        )
+        ->queryAll();
 
-        $quotes = Quote::find()->select(['quotes.id', 'quotes.uid', 'quotes.lead_id', 'quotes.created'])
-            ->joinWith('lead')
-            ->where(['quotes.status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
-            ->andWhere(['<=', 'quotes.created', date('Y-m-d H:i:s', strtotime('-1 day'))])
-            ->andWhere(['NOT IN', 'leads.status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD, Lead::STATUS_PENDING]])
-            //->andWhere('(SELECT COUNT(*) FROM quotes AS q WHERE quotes.lead_id = q.lead_id AND q.status = 2) < 1')
-            ->andWhere(['<', new Expression('(' . $subQuery . ')'), 1])
-            ->orderBy(['quotes.id' => SORT_DESC])
-            //->limit(500)
-            ->all();
-
-
-        //echo $quotes->createCommand()->getRawSql(); exit;
-
-        if ($quotes) {
-            foreach ($quotes as $quote) {
-                /* $existQuote = Quote::find()->where(['lead_id' => $quote->lead_id, 'status' => Quote::STATUS_APPLIED])->exists();
-                if ($existQuote) {
-                    if ($test) {
-                        echo 'Exist alternative applied quote Lead ' . $quote->lead_id . "\r\n";
-                    }
-                    continue;
-                }*/
-
-
-                $quote->status = Quote::STATUS_DECLINED;
-
-                if ($quote->update(false)) {
-                    if ($test) {
-                        echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->lead_id, $quote->created) . PHP_EOL;
-                    }
-                } else {
-                    Yii::error('Quote: ' . $quote->id . ', ' . VarDumper::dumpAsString($quote->errors), 'console:MonitorFlowController:actionWatchDogDeclineQuote:Quote:save');
-                    if ($test) {
-                        echo 'Quote: ' . $quote->id . ' ' . VarDumper::dumpAsString($quote->errors) . "\r\n";
-                    }
+        foreach ($resultQuery as $quoteData) {
+            try {
+                if (!Quote::updateAll(['status' => Quote::STATUS_DECLINED], ['id' => $quoteData['id']])) {
+                    throw new \RuntimeException('Quote (' . $quoteData['id'] . ') not saved, status not changed to declined.');
                 }
+                if ($test) {
+                    echo sprintf(
+                        'Decline quote: %s. FR: %d, Created: %s',
+                        $quoteData['uid'],
+                        $quoteData['lead_id'],
+                        $quoteData['created']
+                    ) . PHP_EOL;
+                }
+            } catch (\Throwable $throwable) {
+                $message['throwable'] = AppHelper::throwableLog($throwable);
+                $message['data'] = $quoteData;
+                Yii::error($message, 'console:MonitorFlowController:actionWatchDogDeclineQuote:Quote:save');
+                echo 'Quote: ' . $quoteData['id'] . ' ' . VarDumper::dumpAsString($throwable->getMessage()) . PHP_EOL;
             }
         }
 
         if ($test) {
-            echo sprintf('Count: %s', count($quotes)); // . PHP_EOL;
+            echo sprintf('Count: %s', count($resultQuery)); // . PHP_EOL;
         }
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
 
-        Yii::info('Execute Time: ' . $time . ', count leads: ' . count($quotes), 'Console:MonitorFlowController/watch-dog-decline-quote');
-        printf("\nExecute Time: %s, count leads: " . count($quotes), $this->ansiFormat($time . ' s', Console::FG_RED));
+        Yii::info('Execute Time: ' . $time . ', count quotes: ' . count($resultQuery), 'Console:MonitorFlowController/watch-dog-decline-quote');
+        printf("\nExecute Time: %s, count quotes: " . count($resultQuery), $this->ansiFormat($time . ' s', Console::FG_RED));
         printf("\n --- End [" . date('Y-m-d H:i:s') . "] %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
     }
 

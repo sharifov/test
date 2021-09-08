@@ -76,10 +76,11 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         self::CABIN_CLASS_FIRST => self::CABIN_FIRST,
     ];
 
-    public static function create(int $productId): self
+    public static function create(int $productId, ?int $tripTypeId = null): self
     {
         $flight = new static();
         $flight->fl_product_id = $productId;
+        $flight->fl_trip_type_id = $tripTypeId;
         return $flight;
     }
 
@@ -399,5 +400,24 @@ class Flight extends \yii\db\ActiveRecord implements Productable
     public function getProductName(): string
     {
         return "Flight";
+    }
+
+    public function fields(): array
+    {
+        $fields = [
+            'fl_product_id',
+            'fl_trip_type_id',
+            'fl_cabin_class',
+            'fl_adults',
+            'fl_children',
+            'fl_infants'
+        ];
+        $fields['fl_trip_type_name'] = function () {
+            return $this->getTripTypeName();
+        };
+        $fields['fl_cabin_class_name'] = function () {
+            return $this->getCabinClassName();
+        };
+        return $fields;
     }
 }

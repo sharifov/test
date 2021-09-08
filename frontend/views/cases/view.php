@@ -10,6 +10,7 @@ use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
+use modules\cases\src\widgets\CaseEventLogWidget;
 
 /**
  * @var $this yii\web\View
@@ -54,9 +55,9 @@ $bundle = \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
-
-/** @abac new CasesAbacDto($model), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK, Disable mask client data on Case view*/
-$disableMasking = Yii::$app->abac->can(new CasesAbacDto($model), CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK);
+$caseAbacDto = new CasesAbacDto($model);
+/** @abac $caseAbacDto, CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK, Disable mask client data on Case view*/
+$disableMasking = Yii::$app->abac->can($caseAbacDto, CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK);
 
 $clientProjectInfo = $model->client->clientProjects;
 $unsubscribe = false;
@@ -148,11 +149,11 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
         <div class="col-md-6">
             <?= $this->render('coupons/view', ['model' => $model, 'coupons' => $coupons, 'sendCouponsForm' => $sendCouponsForm]) ?>
 
-            <?php if ($dataProviderOrders->totalCount) : ?>
-                <?= $this->render('orders/case_orders', [
-                    'dataProviderOrders' => $dataProviderOrders,
-                ]) ?>
-            <?php endif; ?>
+            <?= $this->render('orders/case_orders', [
+                'dataProviderOrders' => $dataProviderOrders,
+                'case' => $model,
+                'caseAbacDto' => $caseAbacDto
+            ]) ?>
         </div>
 
         <div class="col-md-6">
@@ -178,12 +179,16 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
 
 
     </div>
-
-    <?php if (FileStorageSettings::isEnabled() && Auth::can('case-view/files/view', ['case' => $model])) : ?>
-        <div class="row">
-            <div class="col-md-6">
-            </div>
-            <div class="col-md-6">
+    <div class="row">
+        <div class="col-md-6">
+            <?= $this->render('notes/agent_notes', [
+                'caseModel' => $model,
+                'dataProviderNotes'  => $dataProviderNotes,
+                'modelNote'  => $modelNote,
+            ]); ?>
+        </div>
+        <div class="col-md-6">
+            <?php if (FileStorageSettings::isEnabled() && Auth::can('case-view/files/view', ['case' => $model])) : ?>
                 <?= FileStorageListWidget::byCase(
                     $model->cs_id,
                     (
@@ -192,22 +197,17 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                         && Auth::can('cases/update', ['case' => $model])
                     )
                 ) ?>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <div class="row">
-        <div class="col-md-6">
-
-            <?= $this->render('notes/agent_notes', [
-                'caseModel' => $model,
-                'dataProviderNotes'  => $dataProviderNotes,
-                'modelNote'  => $modelNote,
-            ]); ?>
-
-
+            <?php endif; ?>
         </div>
     </div>
+    <?php /** @abac $caseAbacDto, CasesAbacObject::UI_BLOCK_EVENT_LOG_LIST, CasesAbacObject::ACTION_Access, Access To Case Event Log List*/ ?>
+    <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::UI_BLOCK_EVENT_LOG_LIST, CasesAbacObject::ACTION_ACCESS)) : ?>
+    <div class="row">
+        <div class="col-md-6">
+            <?php echo CaseEventLogWidget::initByCase($model->cs_id) ?>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <div class="row">
         <div class="col-md-12">

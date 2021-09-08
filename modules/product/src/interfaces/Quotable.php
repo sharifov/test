@@ -11,4 +11,5 @@ interface Quotable
     public function getSystemMarkUp(): float;
     public function getAgentMarkUp(): float;
     public function getQuoteDetailsPageUrl(): string;
+    public function getDiffUrlOriginReprotectionQuotes(): string;
 }

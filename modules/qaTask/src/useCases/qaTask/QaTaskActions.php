@@ -16,6 +16,7 @@ class QaTaskActions
     public const CREATE = 8;
     public const CREATE_LEAD_PROCESSING_QUALITY = 9;
     public const CREATE_LEAD_TRASH_CHECK = 10;
+    public const USER_ASSIGN = 11;
 
     private const LIST = [
         self::TAKE => 'Take',
@@ -28,6 +29,7 @@ class QaTaskActions
         self::CREATE => 'Create',
         self::CREATE_LEAD_PROCESSING_QUALITY => 'Rule: Lead Processing Quality',
         self::CREATE_LEAD_TRASH_CHECK => 'Rule: Lead Trash Check',
+        self::USER_ASSIGN => 'User Assign',
     ];
 
     public static function getList(): array

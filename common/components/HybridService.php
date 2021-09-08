@@ -4,6 +4,7 @@ namespace common\components;
 
 use common\models\Project;
 use sales\helpers\setting\SettingHelper;
+use sales\model\project\entity\params\Webhook;
 use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;
@@ -49,17 +50,12 @@ class HybridService extends Component
         return false;
     }
 
-    protected function sendRequest(int $projectId, string $action, array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
+    protected function sendRequest(string $host, string $action, array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
-        $project = Project::find()->select(['link'])->andWhere(['id' => $projectId])->asArray()->one();
-        if (!$project) {
-            throw new \DomainException('Not found Project. Id: ' . $projectId);
+        $url = rtrim($host, '/');
+        if ($action) {
+            $url .= '/' . ltrim($action, '/');
         }
-        if (!$project['link']) {
-            throw new \DomainException('Not found link on Project. Id: ' . $projectId);
-        }
-
-        $url = $project['link'] . $action;
 
         $this->request->setMethod($method)
             ->setUrl($url)
@@ -100,7 +96,17 @@ class HybridService extends Component
         ];
 
         if (SettingHelper::isWebhookOrderUpdateHybridEnabled()) {
-            $response = $this->sendRequest($projectId, SettingHelper::getWebhookOrderUpdateHybridEndpoint(), $data);
+            $projectUrls = $this->getProjectUrls($projectId);
+            if (!$projectUrls['link']) {
+                throw new \DomainException('Not found link on Project. Id: ' . $projectId);
+            }
+
+            $webHookOrderHybridEndpoint = SettingHelper::getWebhookOrderUpdateHybridEndpoint();
+            if (!$webHookOrderHybridEndpoint) {
+                throw new \DomainException('Not webhook order update hybrid endpoint.');
+            }
+
+            $response = $this->sendRequest($projectUrls['link'], $webHookOrderHybridEndpoint, $data);
 
             if ($response->isOk) {
                 if (array_key_exists('status', $response->data)) {
@@ -123,5 +129,93 @@ class HybridService extends Component
             ], 'Component:HybridService::updateStatus');
             throw new \DomainException($response->content);
         }
+    }
+
+    public function wh(int $projectId, string $type, array $data): ?array
+    {
+        if (!$type) {
+            throw new \DomainException('Type is empty.');
+        }
+
+        $projectUrls = $this->getProjectUrls($projectId);
+        if (!$projectUrls['link']) {
+            throw new \DomainException('Not found link on Project. Id: ' . $projectId);
+        }
+        /** @var Webhook $webhook */
+        $webhook = $projectUrls['webhook'];
+        if (!$webhook->endpoint) {
+            \Yii::warning('Not found webHookEndpoint on Project. Id: ' . $projectId, 'HybridService:wh:webHookEndpoint');
+            return null;
+        }
+
+        $headers = [];
+        if (!empty($webhook->username)) {
+            $authStr = base64_encode($webhook->username . ':' . $webhook->password);
+            unset($this->request->headers['Authorization']);
+            $headers['Authorization'] = 'Basic ' . $authStr;
+        }
+
+        $response = $this->sendRequest(
+            $projectUrls['link'],
+            $webhook->endpoint,
+            array_merge(
+                ['type' => $type],
+                $data
+            ),
+            'POST',
+            $headers,
+            []
+        );
+
+        if (!$response->isOk) {
+            \Yii::error([
+                'message' => 'Hybrid Webhook server error',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'Hybrid:wh');
+            throw new \DomainException('Hybrid Webhook server error.');
+        }
+
+        $data = $response->data;
+
+        if (!$data) {
+            \Yii::error([
+                'message' => 'Hybrid response Data is empty',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'Hybrid:wh');
+            throw new \DomainException('Hybrid response Data is empty.');
+        }
+
+        if (!is_array($data)) {
+            \Yii::error([
+                'message' => 'Hybrid response Data type is invalid',
+                'type' => $type,
+                'data' => $data,
+                'content' => VarDumper::dumpAsString($response->content),
+            ], 'Hybrid:wh');
+            throw new \DomainException('Hybrid response Data type is invalid.');
+        }
+
+        return $data;
+    }
+
+    public function whReprotection(int $projectId, array $data): ?array
+    {
+        return $this->wh($projectId, 'flight/schedule-change', $data);
+    }
+
+    private function getProjectUrls(int $projectId): array
+    {
+        $project = Project::find()->andWhere(['id' => $projectId])->one();
+        if (!$project) {
+            throw new \DomainException('Not found Project. Id: ' . $projectId);
+        }
+        return [
+            'link' => $project->link,
+            'webhook' => $project->getParams()->webhook
+        ];
     }
 }

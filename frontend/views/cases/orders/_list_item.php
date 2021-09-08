@@ -3,10 +3,14 @@
 /* @var $this yii\web\View */
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
+/* @var $caseId integer */
+/* @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto */
 
 use common\models\Currency;
 use common\models\Payment;
 use modules\invoice\src\entities\invoice\InvoiceStatus;
+use modules\order\src\abac\dto\OrderAbacDto;
+use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
@@ -21,21 +25,42 @@ use yii\widgets\Pjax;
 
 $process = OrderProcessManager::findOne($order->or_id);
 $formatter = new \common\components\i18n\Formatter();
+
+$orderAbacDto = new OrderAbacDto($order);
 ?>
 
 <div class="x_panel">
     <div class="x_title">
-
-        <small><span class="badge badge-white">OR<?=($order->or_id)?></span></small>
-        (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
+        <small data-toggle="tooltip" data-original-title="Order UID: <?=\yii\helpers\Html::encode($order->or_uid)?>, Order GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"
+               title="Order UID: <?=\yii\helpers\Html::encode($order->or_uid)?>, Order GID: <?=\yii\helpers\Html::encode($order->or_gid)?>">
+            <span class="badge badge-white">
+                <?php echo 'OR ' . $order->or_id ?>
+                <?php /* if (Auth::can('/order/order/view')) : ?>
+                    <?php
+                        echo Html::a('OR ' . $order->or_id . ' <span class="glyphicon glyphicon-eye-open"></span>', ['/order/order/view', 'gid' => $order->or_gid], [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                        ])
+                    ?>
+                <?php else : ?>
+                    <?php echo 'OR ' . $order->or_id ?>
+                <?php endif*/ ?>
+            </span>
+        </small>
+        <?php /*(<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)*/ ?>
+        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
+        <?php if ($order->or_name) : ?>
+        "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
+        <?php endif; ?>
+        -
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
-        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
-        "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
 
-        <?php if ($order->or_profit_amount > 0) : ?>
+
+
+        <?php /* if ($order->or_profit_amount > 0) : ?>
             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
-        <?php endif; ?>
+        <?php endif; */ ?>
         <?php if ($process) : ?>
             &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= Status::LIST[$process->opm_status] ?? 'undefined'?>)
         <?php endif; ?>
@@ -43,6 +68,7 @@ $formatter = new \common\components\i18n\Formatter();
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
             <!--            </li>-->
+          <?php /*
             <li>
                 <?= Html::a('<i class="fas fa-dollar-sign text-success"></i> Split Profit', null, [
                     'class' => 'text-success btn-split',
@@ -62,6 +88,7 @@ $formatter = new \common\components\i18n\Formatter();
                     ]) ?>
                 </li>
             <?php endif; ?>
+ */ ?>
 
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle text-warning" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars"></i> Actions</a>
@@ -70,10 +97,19 @@ $formatter = new \common\components\i18n\Formatter();
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_DETAIL_VIEW, OrderAbacObject::ACTION_ACCESS)) : ?>
+                        <?php
+                        echo Html::a('<i class="glyphicon glyphicon-eye-open"></i> View Details', ['/order/order/view', 'gid' => $order->or_gid], [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                            'class' => 'dropdown-item'
+                        ])
+                        ?>
+                    <?php endif; ?>
 
                     <?php if ($process) : ?>
                         <?php if ($process->isRunning()) : ?>
-                            <?php if (Auth::can('/order/order-process-actions/cancel-process')) : ?>
+                            <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_CANCEL_AUTO_PROCESSING, OrderAbacObject::ACTION_ACCESS)) : ?>
                                 <?= Html::a('Cancel Auto Process', null, [
                                     'data-url' => \yii\helpers\Url::to(['/order/order-process-actions/cancel-process']),
                                     'class' => 'dropdown-item btn-cancel-process',
@@ -82,8 +118,8 @@ $formatter = new \common\components\i18n\Formatter();
                             <?php endif;?>
                         <?php endif;?>
                     <?php else : ?>
-                        <?php if (Auth::can('/order/order-process-actions/start-process')) : ?>
-                            <?= Html::a('Start Auto Processing', null, [
+                        <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_START_AUTO_PROCESSING, OrderAbacObject::ACTION_ACCESS)) : ?>
+                            <?= Html::a('<i class="fa fa-play-circle-o"></i> Start Auto Processing', null, [
                                 'data-url' => \yii\helpers\Url::to(['/order/order-process-actions/start-process']),
                                 'class' => 'dropdown-item btn-start-process',
                                 'data-order-id' => $order->or_id,
@@ -91,29 +127,24 @@ $formatter = new \common\components\i18n\Formatter();
                         <?php endif;?>
                     <?php endif;?>
 
-                    <?php if (Auth::can('/order/order-actions/cancel') && !$order->isCanceled()) : ?>
-                        <?= Html::a('Cancel Order', null, [
-                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/cancel', 'orderId' => $order->or_id]),
-                            'class' => 'dropdown-item btn-cancel-order'
-                        ])?>
-                    <?php endif ?>
 
-                    <?php if (Auth::can('/order/order-actions/complete') && !$order->isComplete()) : ?>
+
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_COMPLETE, OrderAbacObject::ACTION_ACCESS)) : ?>
                         <?= Html::a('Complete Order', null, [
                             'data-url' => \yii\helpers\Url::to(['/order/order-actions/complete', 'orderId' => $order->or_id]),
                             'class' => 'dropdown-item btn-complete-order'
                         ])?>
                     <?php endif ?>
 
-                    <?php if (Auth::can('/order/order-actions/send-email-confirmation')) : ?>
-                        <?= Html::a('Send Email Confirmation', null, [
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_SEND_EMAIL_CONFIRMATION, OrderAbacObject::ACTION_ACCESS)) : ?>
+                        <?= Html::a('<i class="fa fa-envelope-o"></i> Send Email Confirmation', null, [
                             'data-url' => \yii\helpers\Url::to(['/order/order-actions/send-email-confirmation']),
                             'data-id' => $order->or_id,
                             'class' => 'dropdown-item btn-order-send-email-confirmation'
                         ])?>
                     <?php endif ?>
 
-                    <?php if (Auth::can('/order/order-actions/generate-files')) : ?>
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_GENERATE_PDF, OrderAbacObject::ACTION_ACCESS)) : ?>
                         <?= Html::a('<i class="fa fa-file-pdf-o"></i> Generate PDF', null, [
                             'data-url' => \yii\helpers\Url::to(['/order/order-actions/generate-files']),
                             'data-id' => $order->or_id,
@@ -121,23 +152,36 @@ $formatter = new \common\components\i18n\Formatter();
                         ])?>
                     <?php endif ?>
 
-                    <?= Html::a('<i class="fa fa-edit"></i> Update order', null, [
-                        'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
-                        'class' => 'dropdown-item text-warning btn-update-order'
-                    ])?>
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_UPDATE, OrderAbacObject::ACTION_ACCESS)) : ?>
+                        <?= Html::a('<i class="fa fa-edit"></i> Update order', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
+                            'class' => 'dropdown-item text-warning btn-update-order'
+                        ])?>
+                    <?php endif ?>
 
-                    <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
-                        'class' => 'dropdown-item btn-order-status-log',
-                        'data-url' => \yii\helpers\Url::to(['/order/order-status-log/show', 'gid' => $order->or_gid]),
-                        'data-gid' => $order->or_gid,
-                    ]) ?>
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_STATUS_LOG, OrderAbacObject::ACTION_ACCESS)) : ?>
+                        <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                            'class' => 'dropdown-item btn-order-status-log',
+                            'data-url' => \yii\helpers\Url::to(['/order/order-status-log/show', 'gid' => $order->or_gid]),
+                            'data-gid' => $order->or_gid,
+                        ]) ?>
+                    <?php endif; ?>
 
                     <div class="dropdown-divider"></div>
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
-                        'class' => 'dropdown-item text-danger btn-delete-order',
-                        'data-order-id' => $order->or_id,
-                        'data-url' => \yii\helpers\Url::to(['/order/order/delete-ajax']),
-                    ]) ?>
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_CANCEL_ORDER, OrderAbacObject::ACTION_ACCESS)) : ?>
+                        <?= Html::a('<i class="fa fa-remove"></i> Cancel Order', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/cancel', 'orderId' => $order->or_id]),
+                            'class' => 'dropdown-item btn-cancel-order text-danger'
+                        ])?>
+                    <?php endif ?>
+
+                    <?php if (Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_DELETE, OrderAbacObject::ACTION_ACCESS)) : ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
+                            'class' => 'dropdown-item text-danger btn-delete-order',
+                            'data-order-id' => $order->or_id,
+                            'data-url' => \yii\helpers\Url::to(['/order/order/delete-ajax']),
+                        ]) ?>
+                    <?php endif; ?>
                 </div>
             </li>
         </ul>
@@ -161,54 +205,31 @@ $formatter = new \common\components\i18n\Formatter();
                 <tr>
                     <th>Nr</th>
                     <th>Product</th>
-                    <th>Name</th>
+                    <th>Booking ID</th>
                     <th>Status</th>
+                    <th>Change Status / Decision</th>
+                    <th>Refund Status</th>
                     <th>Created</th>
-                    <th title="Options, USD">Options, USD</th>
-                    <th title="Service FEE">FEE</th>
-                    <th title="Origin Price, USD">Price, USD</th>
                     <th>Client Price</th>
                     <th></th>
                 </tr>
-                <?php foreach ($order->productQuotes as $productQuote) :
+                <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
                     $quote = $productQuote;
                     $ordTotalPrice += $quote->pq_price;
                     $ordTotalFee += $quote->pq_service_fee_sum;
                     $ordClientTotalPrice += $quote->pq_client_price;
                     $ordOptionTotalPrice += $quote->optionAmountSum;
                     ?>
-                    <tr>
-                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?></td>
-                        <td title="<?=Html::encode($quote->pq_product_id)?>">
-                            <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
-                            <?=Html::encode($quote->pqProduct->prType->pt_name)?>
-                            <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
-                        </td>
-
-                        <!--                    <td>--><?php //=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
-
-                        <td><?=Html::encode($quote->pq_name)?></td>
-                        <td><?=ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-                        <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
-                        <td class="text-right"><?=number_format($quote->optionAmountSum, 2)?></td>
-                        <td class="text-right"><?=number_format($quote->pq_service_fee_sum, 2)?></td>
-                        <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
-                        <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
-                        <td>
-                            <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
-                                'data-order-id' => $order->or_id,
-                                'data-product-quote-id' => $quote->pq_id,
-                                'class' => 'btn-delete-quote-from-order',
-                                'data-url' => \yii\helpers\Url::to(['/order/order-product/delete-ajax'])
-                            ])
-                            ?>
-                            <?= Html::a('<i class="fas fa-info-circle" data-toggle="tooltip" title="Details"></i>', null, [
-                                'data-product-quote-gid' => $productQuote->pq_gid,
-                                'class' => 'btn-show-product-quote-details',
-                                'data-url' => Url::to([$productQuote->getQuoteDetailsPageUrl(), 'id' => $productQuote->pq_id])
-                            ]); ?>
-                        </td>
-                    </tr>
+                      <tr>
+                          <?= $this->render('_product_quote_item', [
+                              'quote' => $quote,
+                              'nr' => $nr++,
+                              'order' => $order,
+                              'isReprotection' => false,
+                              'caseId' => $caseId,
+                              'caseAbacDto' => $caseAbacDto
+                          ]) ?>
+                      </tr>
                 <?php endforeach; ?>
                 <?php
                     $ordTotalPrice = round($ordTotalPrice, 2);
@@ -223,8 +244,9 @@ $formatter = new \common\components\i18n\Formatter();
                     $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
 
                 ?>
+                <?php /*
                 <tr>
-                    <th class="text-right" colspan="5">Order Amount: </th>
+                    <th class="text-right" colspan="2">Order Amount: </th>
                     <th class="text-right"><?=number_format($ordOptionTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($ordTotalFee, 2)?></th>
                     <th class="text-right"><?=number_format($ordTotalPrice, 2)?></th>
@@ -232,36 +254,31 @@ $formatter = new \common\components\i18n\Formatter();
                     <th></th>
                 </tr>
                 <tr>
-                    <th class="text-right" colspan="5">Tips: </th>
+                    <th class="text-right" colspan="2">Tips: </th>
                     <td class="text-center" colspan="2">(DB)</td>
                     <th class="text-right"><?=number_format($orderTipsAmount, 2)?></th>
                     <th class="text-right"><?=number_format($orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
+ */ ?>
                 <tr>
-                    <th class="text-right" colspan="5">Calc Total: </th>
-                    <td class="text-center" colspan="2">(price + opt + tips)</td>
-                    <th class="text-right"><?=number_format($calcTotalPrice, 2)?></th>
+                    <th class="text-right" colspan="7">Total (price + opt + tips): </th>
                     <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <th class="text-right" colspan="5">Total: </th>
-                    <td class="text-center" colspan="2">(DB + Tips)</td>
-                    <th class="text-right"><?=number_format($order->or_app_total + $orderTipsAmount, 2)?></th>
-                    <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
-                    <th></th>
+                    <td></td>
                 </tr>
             <?php endif; ?>
         </table>
 
+        <?php if ($order->or_created_user_id && $order->orCreatedUser) : ?>
         <i class="fa fa-user"></i> <?=$order->orCreatedUser ? Html::encode($order->orCreatedUser->username) : '-'?>,
+        <?php endif; ?>
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($order->or_created_dt)) ?>,
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($order->or_client_currency)?> <span title="Rate: <?=$order->or_client_currency_rate?>">(<?=round($order->or_client_currency_rate, 3)?>)</span>
 
+      <?php /*
         <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum  + $orderTipsAmount, 2)?> USD, Total: <?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></h4></div>
-
-        <hr>
+ */ ?>
+        <?php /*
         <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-invoice-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
             <h4><i class="fas fa-file-invoice-dollar"></i> Invoice List</h4>
             <?php
@@ -426,8 +443,8 @@ $formatter = new \common\components\i18n\Formatter();
                             <td><?= Payment::getStatusName($payment->pay_status_id) ?></td>
                             <td>
                                 <?php if ($payment->pay_method_id) {
-                                        echo $payment->payMethod->pm_name;
-                                } ?>
+                            echo $payment->payMethod->pm_name;
+                        } ?>
                             </td>
                             <td class="text-right <?=$payment->pay_amount > 0 ? 'text-success' : 'text-danger' ?>"><?=number_format($payment->pay_amount, 2)?></td>
                             <td>
@@ -549,7 +566,144 @@ $formatter = new \common\components\i18n\Formatter();
             <?php Pjax::end() ?>
         <?php endif ?>
 
+      */ ?>
+
     </div>
 
 
 </div>
+
+<?php
+
+$js = <<<JS
+$('body').off('click', '.has_reprotection_quotes').on('click', '.has_reprotection_quotes', function (e) {
+    e.preventDefault();
+    
+    let tr = $(this).closest('tr');
+    
+    tr.next(1).toggleClass('hidden');
+});
+$('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-send-reprotection-quote-email', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-md');
+    $('#modal-md-label').html('Send Flight Schedule Change Email');
+    modal.find('.modal-body').html('');
+    let id = $(this).attr('data-id');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+    });
+});
+$('body').off('click', '.btn-origin-reprotection-quote-diff').on('click', '.btn-origin-reprotection-quote-diff', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-lg');
+    $('#modal-lg-label').html('Origin And Reprotection Quotes Difference');
+    modal.find('.modal-body').html('');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+    });
+});
+$('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotection-confirm', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    $.ajax({
+        type: 'POST',
+        data: {
+            quoteId: btn.data('reprotection-quote-id')
+        },
+        url: url     
+    })
+    .done(function (data) {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        if (data.error) {
+            createNotify('Reprotection confirm', data.message, 'error');
+        } else {
+            createNotify('Reprotection confirm', 'Success', 'success');
+        }
+    })
+    .fail(function () {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        createNotify('Reprotection confirm', 'Server error', 'error');
+    });
+});
+$('body').off('click', '.btn-reprotection-refund').on('click', '.btn-reprotection-refund', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    $.ajax({
+        type: 'POST',
+        data: {
+            quoteId: btn.data('reprotection-quote-id')
+        },
+        url: url     
+    })
+    .done(function (data) {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        if (data.error) {
+            createNotify('Reprotection refund', data.message, 'error');
+        } else {
+            createNotify('Reprotection refund', 'Success', 'success');
+        }
+    })
+    .fail(function () {
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+        createNotify('Reprotection refund', 'Server error', 'error');
+    });
+});
+JS;
+$this->registerJs($js);
+
+$css = <<<CSS
+.has_reprotection_quotes, .has_reprotection_quotes:focus {
+    text-decoration: underline;
+}
+CSS;
+$this->registerCss($css);

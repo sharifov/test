@@ -16,6 +16,7 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Payment;
 use common\models\Quote;
 use common\models\search\CaseSaleSearch;
 use common\models\search\LeadSearch;
@@ -31,8 +32,18 @@ use frontend\models\CasePreviewSmsForm;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\flight\src\useCases\sale\FlightFromSaleService;
+use modules\flight\src\useCases\sale\form\OrderContactForm;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\order\src\payment\helpers\PaymentHelper;
+use modules\order\src\payment\PaymentRepository;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use sales\auth\Auth;
+use sales\entities\cases\CaseEventLog;
+use sales\entities\cases\CaseEventLogSearch;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CaseStatusLogSearch;
@@ -46,8 +57,10 @@ use sales\forms\cases\CasesLinkChatForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\caseOrder\entity\CaseOrder;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
@@ -113,6 +126,10 @@ use yii\widgets\ActiveForm;
  * @property TransactionManager $transaction
  * @property ClientChatActionPermission $chatActionPermission
  * @property UrlGenerator $fileStorageUrlGenerator
+ * @property OrderRepository $orderRepository
+ * @property PaymentRepository $paymentRepository
+ * @property OrderCreateFromSaleService $orderCreateFromSaleService
+ * @property FlightFromSaleService $flightFromSaleService
  */
 class CasesController extends FController
 {
@@ -131,6 +148,10 @@ class CasesController extends FController
     private $transaction;
     private $chatActionPermission;
     private UrlGenerator $fileStorageUrlGenerator;
+    private OrderRepository $orderRepository;
+    private PaymentRepository $paymentRepository;
+    private OrderCreateFromSaleService $orderCreateFromSaleService;
+    private FlightFromSaleService $flightFromSaleService;
 
     public function __construct(
         $id,
@@ -150,6 +171,10 @@ class CasesController extends FController
         TransactionManager $transaction,
         ClientChatActionPermission $chatActionPermission,
         UrlGenerator $fileStorageUrlGenerator,
+        OrderRepository $orderRepository,
+        PaymentRepository $paymentRepository,
+        OrderCreateFromSaleService $orderCreateFromSaleService,
+        FlightFromSaleService $flightFromSaleService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -168,6 +193,10 @@ class CasesController extends FController
         $this->transaction = $transaction;
         $this->chatActionPermission = $chatActionPermission;
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
+        $this->orderRepository = $orderRepository;
+        $this->paymentRepository = $paymentRepository;
+        $this->orderCreateFromSaleService = $orderCreateFromSaleService;
+        $this->flightFromSaleService = $flightFromSaleService;
     }
 
     public function behaviors(): array
@@ -935,8 +964,47 @@ class CasesController extends FController
             $transaction->rollBack();
             $out['error'] = $exception->getMessage();
             \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
+            return $out;
         }
 
+        if (SettingHelper::isEnableOrderFromSale()) {
+            $transactionOrder = new Transaction(['db' => Yii::$app->db]);
+            try {
+                if (empty($out['error']) && !empty($saleData)) {
+                    if (!$order = Order::findOne(['or_sale_id' => $saleId])) {
+                        $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
+                        if (!$orderCreateFromSaleForm->load($saleData)) {
+                            throw new \RuntimeException('OrderCreateFromSaleForm not loaded');
+                        }
+                        if (!$orderCreateFromSaleForm->validate()) {
+                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
+                        }
+                        $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm);
+
+                        $transactionOrder->begin();
+                        $orderId = $this->orderRepository->save($order);
+
+                        $this->orderCreateFromSaleService->caseOrderRelation($orderId, $model->cs_id);
+                        $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($saleData));
+
+                        $currency = $orderCreateFromSaleForm->currency;
+                        $this->flightFromSaleService->createHandler($order, $orderCreateFromSaleForm, $saleData);
+
+                        if ($authList = ArrayHelper::getValue($saleData, 'authList')) {
+                            $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);
+                        }
+                        $transactionOrder->commit();
+                    } else {
+                        $this->orderCreateFromSaleService->caseOrderRelation($order->getId(), $model->cs_id);
+                    }
+                }
+            } catch (\Throwable $throwable) {
+                $transactionOrder->rollBack();
+                $message['throwable'] = AppHelper::throwableLog($throwable, true);
+                $message['saleData'] = $saleData;
+                Yii::error($message, 'CasesController:actionAddSale:Order');
+            }
+        }
         return $out;
     }
 
@@ -1030,6 +1098,7 @@ class CasesController extends FController
             try {
                 /** @var Cases $case */
                 $case = $this->casesCreateService->createByWeb($form, $user->id);
+                $case->addEventLog(CaseEventLog::CASE_CREATED, CasesStatus::STATUS_LIST[$case->cs_status] . ' Case created for category: ' . $case->category->cc_name . ' and by source: ' . CasesSourceType::getList()[$case->cs_source_type_id]);
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
@@ -1287,22 +1356,31 @@ class CasesController extends FController
 
                 switch ((int)$statusForm->statusId) {
                     case CasesStatus::STATUS_FOLLOW_UP:
-                        $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message, $statusForm->getConvertedDeadline());
+                        $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message, $statusForm->getConvertedDeadline(), $user->username);
                         break;
                     case CasesStatus::STATUS_TRASH:
-                        $this->casesManageService->trash($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->trash($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     case CasesStatus::STATUS_SOLVED:
-                        $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message, $user->username);
                         if ($statusForm->isSendFeedback()) {
                             $this->sendFeedbackEmailProcess($case, $statusForm, Auth::user());
                         }
                         break;
                     case CasesStatus::STATUS_PENDING:
-                        $this->casesManageService->pending($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->pending($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     case CasesStatus::STATUS_PROCESSING:
                         $this->casesManageService->processing($case->cs_id, $statusForm->userId, $user->id, $statusForm->message);
+                        break;
+                    case CasesStatus::STATUS_AWAITING:
+                        $this->casesManageService->awaiting($case->cs_id, $user->id, $statusForm->message, $user->username);
+                        break;
+                    case CasesStatus::STATUS_AUTO_PROCESSING:
+                        $this->casesManageService->autoProcessing($case->cs_id, $user->id, $statusForm->message, $user->username);
+                        break;
+                    case CasesStatus::STATUS_ERROR:
+                        $this->casesManageService->error($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     default:
                         Yii::$app->session->setFlash('error', 'Undefined status');
@@ -1637,7 +1715,8 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
-            ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name')
+            ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name'),
+            Auth::user()->username
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
@@ -1895,5 +1974,16 @@ class CasesController extends FController
         }
 
         return $this->redirect(['/cases/view', 'gid' => $model->cs_gid]);
+    }
+
+    public function actionAjaxCaseEventLog()
+    {
+        $searchModel = new CaseEventLogSearch();
+        $dataProvider = $searchModel->searchByCase(Yii::$app->request->queryParams);
+
+        return $this->renderAjax('event-log/event-log', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 }

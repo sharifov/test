@@ -110,7 +110,9 @@ class CallLogSearch extends CallLog
             [['projectIds', 'statusIds', 'typesIds', 'categoryIds', 'departmentIds', 'userGroupIds'], 'each', 'rule' => ['integer']],
             [['reportTimezone', 'timeFrom', 'timeTo'], 'string'],
             [['callDepId', 'userGroupId', 'minTalkTime', 'maxTalkTime', 'userID'], 'integer'],
-            [['reportCreateTimeRange', 'createTimeStart', 'createTimeEnd'], 'safe']
+            [['reportCreateTimeRange', 'createTimeStart', 'createTimeEnd'], 'safe'],
+
+            ['cl_stir_status', 'string'],
         ];
     }
 
@@ -268,6 +270,7 @@ class CallLogSearch extends CallLog
             'cl_price' => $this->cl_price,
             'cll_lead_id' => $this->lead_id,
             'clc_case_id' => $this->case_id,
+            'cl_stir_status' => $this->cl_stir_status,
         ]);
 
         $query->andFilterWhere(['like', 'cl_call_sid', $this->cl_call_sid])
@@ -460,7 +463,8 @@ class CallLogSearch extends CallLog
             'cl_category_id' => $this->cl_category_id,
             'cl_status_id' => $this->cl_status_id,
             'cl_client_id' => $this->cl_client_id,
-            'DATE(cl_call_created_dt)' => $this->cl_call_created_dt
+            'DATE(cl_call_created_dt)' => $this->cl_call_created_dt,
+            'cl_stir_status' => $this->cl_stir_status,
         ]);
 
         $query->andFilterWhere(['like', 'cl_phone_from', $this->cl_phone_from])

@@ -1283,7 +1283,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
             return false;
         }  
         
-        let obj = $(this),            
+        let obj = $(this),
             caseSaleId = obj.attr('data-case-sale-id'),
             caseId = obj.attr('data-case-id');
                 
@@ -1311,7 +1311,10 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                         text: 'Successfully deleted',
                         hide: true
                     }); 
-                    $.pjax.reload({container: '#pjax-sale-list', push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
+                    $.pjax.reload({container: '#pjax-sale-list', push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false});
+                    if ($('#pjax-case-orders').length) {
+                        $.pjax.reload({container: '#pjax-case-orders', push: false, replace: false, timeout: 10000, async: false});
+                    }
                 }
             },
             error: function (text) {

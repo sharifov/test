@@ -11,6 +11,8 @@ use yii\data\ActiveDataProvider;
  */
 class QaTaskSearchSearch extends QaTaskSearch
 {
+    public $objectOwner;
+
     public function rules(): array
     {
         return [
@@ -55,6 +57,8 @@ class QaTaskSearchSearch extends QaTaskSearch
 
             ['t_assigned_user_id', 'integer'],
             ['t_assigned_user_id', 'in', 'range' => array_keys($this->getUserList())],
+
+            [['objectOwner'], 'integer'],
         ];
     }
 
@@ -67,7 +71,7 @@ class QaTaskSearchSearch extends QaTaskSearch
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
-                'defaultOrder' => ['t_id' => SORT_DESC]
+                'defaultOrder' => ['t_id' => SORT_DESC],
             ],
         ]);
 
@@ -77,6 +81,10 @@ class QaTaskSearchSearch extends QaTaskSearch
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->objectOwner) {
+            QueryHelper::getQaTasksByOwner($query, $this->objectOwner);
         }
 
         if ($this->t_created_dt) {
@@ -111,5 +119,52 @@ class QaTaskSearchSearch extends QaTaskSearch
             ->andFilterWhere(['like', 't_description', $this->t_description]);
 
         return $dataProvider;
+    }
+
+    public function searchAsJson($params)
+    {
+        $query = static::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
+        $query->select(['t_gid']);
+
+        $this->queryAccessService->processProject($this->user->getAccess(), $query);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return [];
+        }
+
+        if ($this->t_created_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $this->user->timezone);
+        }
+
+        if ($this->t_updated_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $this->user->timezone);
+        }
+
+        if ($this->t_deadline_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $this->user->timezone);
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            't_id' => $this->t_id,
+            't_project_id' => $this->t_project_id,
+            't_object_type_id' => $this->t_object_type_id,
+            't_object_id' => $this->t_object_id,
+            't_category_id' => $this->t_category_id,
+            't_status_id' => $this->t_status_id,
+            't_rating' => $this->t_rating,
+            't_create_type_id' => $this->t_create_type_id,
+            't_department_id' => $this->t_department_id,
+            't_assigned_user_id' => $this->t_assigned_user_id,
+            't_created_user_id' => $this->t_created_user_id,
+            't_updated_user_id' => $this->t_updated_user_id,
+        ]);
+
+        $query->andFilterWhere(['like', 't_gid', $this->t_gid])
+            ->andFilterWhere(['like', 't_description', $this->t_description]);
+
+        return $query->asArray()->indexBy('t_gid')->column();
     }
 }

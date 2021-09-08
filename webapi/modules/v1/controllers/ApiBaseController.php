@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\models\ApiLog;
 use common\models\ApiUser;
 use common\models\Project;
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
 use webapi\src\behaviors\ApiUserProjectAccessBehavior;
 use Yii;
 use yii\filters\auth\CompositeAuth;
@@ -12,6 +13,7 @@ use yii\filters\auth\HttpBasicAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
+use yii\helpers\ArrayHelper;
 use yii\rest\Controller;
 use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
@@ -25,6 +27,7 @@ use yii\web\Response;
  * @property bool $debug
  * @property Project $apiProject
  * @property ApiUser $apiUser
+ * @property ApiLog|null $apiLog
  *
  */
 class ApiBaseController extends Controller
@@ -32,6 +35,8 @@ class ApiBaseController extends Controller
     public $apiUser;
     public $apiProject;
     public $debug = false;
+
+    protected $apiLog;
 
     /**
      *
@@ -80,12 +85,19 @@ class ApiBaseController extends Controller
 
 
                 if (!$apiUser) {
-                    Yii::warning(['message' => 'API: not found username', 'username' => $username, 'endpoint' => $this->action->uniqueId, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:HttpBasicAuth:ApiUser');
+                    Yii::warning(['message' => 'API: not found username', 'username' => $username,
+                        'endpoint' => $this->action->uniqueId,
+                        'RemoteIP' => Yii::$app->request->getRemoteIP(),
+                        'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:HttpBasicAuth:ApiUser');
                     return null;
                 }
 
                 if (!$apiUser->validatePassword($password)) {
-                    Yii::warning(['message' => 'API: invalid password', 'username' => $username, 'endpoint' => $this->action->uniqueId, 'password' => $password, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:HttpBasicAuth:ApiUser');
+                    Yii::warning(['message' => 'API: invalid password', 'username' => $username,
+                        'endpoint' => $this->action->uniqueId,
+                        'password' => \yii\helpers\StringHelper::truncate($password, 4),
+                        'RemoteIP' => Yii::$app->request->getRemoteIP(),
+                        'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:HttpBasicAuth:ApiUser');
                     return null;
                 }
 
@@ -152,9 +164,9 @@ class ApiBaseController extends Controller
 
     /**
      * @param string $action
-     * @return ApiLog
+     * @return void
      */
-    public function startApiLog(string $action = ''): ApiLog
+    public function startApiLog(string $action = ''): void
     {
         $data = Yii::$app->request->post();
         $data['received_microtime'] = microtime(true);
@@ -176,7 +188,6 @@ class ApiBaseController extends Controller
         if (!$apiLog->save()) {
             Yii::error(print_r($apiLog->errors, true), 'ApiBaseControl:startApiLog:ApiLog:save');
         }
-
-        return $apiLog;
+        $this->apiLog = $apiLog;
     }
 }

@@ -166,7 +166,8 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         ?string $middleName = null,
         ?string $dob = null,
         ?string $gender = null,
-        ?string $nationality = null
+        ?string $nationality = null,
+        ?string $email = null
     ): FlightPax {
         $flightPax = new self();
         $flightPax->fp_flight_id = $flightId;
@@ -177,6 +178,7 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         $flightPax->fp_dob = $dob;
         $flightPax->fp_gender = $gender;
         $flightPax->fp_nationality = $nationality;
+        $flightPax->fp_email = $email;
         return $flightPax;
     }
 
@@ -244,5 +246,18 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         $this->fp_email = $email;
         $this->fp_language = $language;
         $this->fp_citizenship = $citizenship;
+    }
+
+    public function fields(): array
+    {
+        return [
+            'fp_uid',
+            'fp_pax_id',
+            'fp_pax_type',
+            'fp_first_name',
+            'fp_last_name',
+            'fp_middle_name',
+            'fp_dob'
+        ];
     }
 }

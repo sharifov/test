@@ -3,6 +3,8 @@
 /**
  * @var $this View
  * @var $dataProviderOrders \yii\data\ActiveDataProvider
+ * @var $case \sales\entities\cases\Cases
+ * @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto
  */
 
 use yii\web\View;
@@ -13,10 +15,11 @@ use yii\web\View;
 </style>
 
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-case-orders', 'enablePushState' => false, 'timeout' => 10000]) ?>
+<?php if ($dataProviderOrders->totalCount) : ?>
     <div class="x_panel x_panel_orders">
         <div class="x_title">
 
-            <h2><i class="fas fa-money-check-alt"></i> Orders (<?=$dataProviderOrders->totalCount?>)</h2>
+            <h2><i class="fas fa-money-check-alt"></i> Order List (<?=$dataProviderOrders->totalCount?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <!--
                 <li>
@@ -42,8 +45,8 @@ use yii\web\View;
                 ],*/
                 'emptyText' => '<div class="text-center">Not found orders</div>',
                 //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
-                'itemView' => function ($model, $key, $index, $widget) {
-                    return $this->render('_list_item', ['order' => $model, 'index' => $index]);
+                'itemView' => function ($model, $key, $index, $widget) use ($case, $caseAbacDto) {
+                    return $this->render('_list_item', ['order' => $model, 'index' => $index, 'caseId' => $case->cs_id, 'caseAbacDto' => $caseAbacDto]);
                 },
 
                 'itemOptions' => [
@@ -54,6 +57,7 @@ use yii\web\View;
 
         </div>
     </div>
+<?php endif; ?>
 <?php yii\widgets\Pjax::end() ?>
 
 
@@ -423,6 +427,29 @@ $js = <<<JS
         modal.find('.modal-title').html('Product Quote [' + gid + '] Details');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             if (status == 'error') {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
+    
+    $(document).on('click', '.btn_create_from_dump', function(e) {
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let modal = $('#modal-lg');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Create from dump');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error' && xhr.status !== 403) {
                 createNotify('Error', xhr.responseText, 'error');
             } else {
                 modal.modal({

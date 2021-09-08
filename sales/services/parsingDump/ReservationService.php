@@ -13,13 +13,18 @@ use yii\helpers\VarDumper;
 
 /**
  * Class ReservationService
+ *
+ * @property string $gds
+ * @property array $parseResult
+ * @property array $itinerary
+ * @property bool $parseStatus
  */
 class ReservationService
 {
     public string $gds;
     public array $parseResult = [];
     public array $itinerary = [];
-    public bool $parseStatus;
+    public ?bool $parseStatus;
 
     /**
      * @param string $gds

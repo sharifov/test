@@ -65,6 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'orUpdatedUser:userName',
                 'or_created_dt:byUserDateTime',
                 'or_updated_dt:byUserDateTime',
+                'or_sale_id',
             ],
         ]) ?>
       </div>

@@ -230,6 +230,11 @@ class MultipleUpdateForm extends Model
         return $this->authUser->isAdmin();
     }
 
+    public function authUserIsSupervisor(): bool
+    {
+        return $this->authUser->isSupervision();
+    }
+
     public function authUserId(): int
     {
         return $this->authUser->id;

@@ -38,7 +38,8 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['qsb_flight_pax_code_id', 'qsb_flight_quote_segment_id'], 'required'],
+            [['qsb_flight_pax_code_id'], 'required', 'message' => 'FlightQuoteSegmentPaxBaggage - Flight Pax Code ID cannot be blank'],
+            [['qsb_flight_quote_segment_id'], 'required'],
             [['qsb_flight_pax_code_id', 'qsb_flight_quote_segment_id', 'qsb_allow_pieces', 'qsb_allow_weight'], 'integer'],
             [['qsb_airline_code'], 'string', 'max' => 3],
             [['qsb_allow_unit'], 'string', 'max' => 4],
@@ -55,15 +56,15 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'qsb_id' => 'Qsb ID',
-            'qsb_flight_pax_code_id' => 'Qsb Flight Pax Code ID',
-            'qsb_flight_quote_segment_id' => 'Qsb Flight Quote Segment ID',
-            'qsb_airline_code' => 'Qsb Airline Code',
-            'qsb_allow_pieces' => 'Qsb Allow Pieces',
-            'qsb_allow_weight' => 'Qsb Allow Weight',
-            'qsb_allow_unit' => 'Qsb Allow Unit',
-            'qsb_allow_max_weight' => 'Qsb Allow Max Weight',
-            'qsb_allow_max_size' => 'Qsb Allow Max Size',
+            'qsb_id' => 'ID',
+            'qsb_flight_pax_code_id' => 'Flight Pax Code ID',
+            'qsb_flight_quote_segment_id' => 'Flight Quote Segment ID',
+            'qsb_airline_code' => 'Airline Code',
+            'qsb_allow_pieces' => 'Allow Pieces',
+            'qsb_allow_weight' => 'Allow Weight',
+            'qsb_allow_unit' => 'Allow Unit',
+            'qsb_allow_max_weight' => 'Allow Max Weight',
+            'qsb_allow_max_size' => 'Allow Max Size',
             'qsb_carry_one' => 'Carry one',
         ];
     }
@@ -145,5 +146,20 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
         $baggage->qsb_allow_max_weight = $allowMaxWeight;
         $baggage->qsb_allow_max_size = $allowMaxSize;
         return $baggage;
+    }
+
+    public function fields(): array
+    {
+        return [
+            'qsb_flight_pax_code_id',
+            'qsb_flight_quote_segment_id',
+            'qsb_airline_code',
+            'qsb_carry_one',
+            'qsb_allow_pieces',
+            'qsb_allow_weight',
+            'qsb_allow_unit',
+            'qsb_allow_max_weight',
+            'qsb_allow_max_size',
+        ];
     }
 }

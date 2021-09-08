@@ -1507,16 +1507,24 @@ class Quote extends \yii\db\ActiveRecord
     }
 
 
-    public function sendUpdateBO()
+    /**
+     * @return bool
+     */
+    public function sendUpdateBO(): bool
     {
         $quote = self::findOne($this->id);
-        $data = $quote->getQuoteInformationForExpert(true);
-
-        // Yii::info(VarDumper::dumpAsString($data), 'info\Quote:sendUpdateBO');
-
-        return BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+        if ($quote) {
+            $data = $quote->getQuoteInformationForExpert(true);
+            BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+            return true;
+        }
+        Yii::error('Not found Quote ID: ' . $this->id, 'Quote::sendUpdateBO');
+        return false;
     }
 
+    /**
+     * @return string
+     */
     public function getStatusLabel()
     {
         $label = '';
@@ -2622,7 +2630,9 @@ class Quote extends \yii\db\ActiveRecord
 
     public function setStatusSend(): void
     {
-        $this->status = self::STATUS_SEND;
+        if (!($this->status === self::STATUS_APPLIED || $this->status === self::STATUS_OPENED)) {
+            $this->status = self::STATUS_SEND;
+        }
 
         if ($this->lead->isReadyForGa()) {
             $this->recordEvent(new QuoteSendEvent($this), QuoteSendEvent::class);

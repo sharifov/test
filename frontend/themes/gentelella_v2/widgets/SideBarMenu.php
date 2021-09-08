@@ -121,7 +121,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuCases[] = ['label' => 'Case Pass Departure <span id="cases-q-pass-departure" data-type="pass-departure" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pass-departure'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
         $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-follow-up" data-type="follow-up" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/follow-up'], 'icon' => 'recycle'];
+        $menuCases[] = ['label' => 'Case Awaiting <span id="cases-q-awaiting" data-type="awaiting" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/awaiting'], 'icon' => 'hourglass text-success'];
+        $menuCases[] = ['label' => 'Case Auto Processing <span id="cases-q-auto-processing" data-type="auto-processing" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/auto-processing'], 'icon' => 'spinner text-success'];
         $menuCases[] = ['label' => 'Case Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
+        $menuCases[] = ['label' => 'Case Error <span id="cases-q-error" data-type="error" class="label-danger label pull-right cases-q-info"></span>', 'url' => ['/cases-q/error'], 'icon' => 'times text-danger'];
         $menuCases[] = ['label' => 'Case Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
 
         if ($isAdmin) {
@@ -334,6 +337,14 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
                 [
+                    'label' => 'Cases',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Case Event Log', 'url' => ['/case-event-log-crud/index']]
+                    ]
+                ],
+                [
                     'label' => 'Contact Phone numbers',
                     'url' => 'javascript:',
                     'icon' => 'list',
@@ -371,19 +382,25 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
-                ['label' => 'Currency List', 'url' => ['/currency/index']],
-                ['label' => 'Currency History', 'url' => ['/currency-history/index']],
-                ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
-                ['label' => 'Product Type Payment Method', 'url' => ['/product/product-type-payment-method/index']],
-                ['label' => 'Products', 'url' => ['/product/product-crud/index']],
-                ['label' => 'Product Holder', 'url' => ['/product/product-holder-crud/index']],
-                ['label' => 'Product Options', 'url' => ['/product/product-option-crud/index']],
-                ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
-                ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
-                ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
-                ['label' => 'Product Quote Relation', 'url' => ['/product/product-quote-relation-crud/index']],
-                ['label' => 'Product Quote Lead', 'url' => ['/product/product-quote-lead/index']],
-                ['label' => 'Product Quote Origin', 'url' => ['/product/product-quote-origin/index']],
+                ['label' => 'Products', 'url' => 'javascript:', 'items' => [
+                    ['label' => 'Currency List', 'url' => ['/currency/index']],
+                    ['label' => 'Currency History', 'url' => ['/currency-history/index']],
+                    ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
+                    ['label' => 'Product Type Payment Method', 'url' => ['/product/product-type-payment-method/index']],
+                    ['label' => 'Products', 'url' => ['/product/product-crud/index']],
+                    ['label' => 'Product Holder', 'url' => ['/product/product-holder-crud/index']],
+                    ['label' => 'Product Options', 'url' => ['/product/product-option-crud/index']],
+                    ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
+                    ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
+                    ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
+                    ['label' => 'Product Quote Relation', 'url' => ['/product/product-quote-relation-crud/index']],
+                    ['label' => 'Product Quote Lead', 'url' => ['/product/product-quote-lead/index']],
+                    ['label' => 'Product Quote Origin', 'url' => ['/product/product-quote-origin/index']],
+                    ['label' => 'Product Quote Refund', 'url' => ['/product/product-quote-refund-crud/index']],
+                    ['label' => 'Product Quote Option Refund', 'url' => ['/product/product-quote-option-refund-crud/index']],
+                    ['label' => 'Product Quote Object Refund', 'url' => ['/product/product-quote-object-refund-crud/index']],
+                    ['label' => 'Product Quote Change', 'url' => ['/product/product-quote-change-crud/index']],
+                ], 'hasChild' => true],
 
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
                     ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
@@ -399,6 +416,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Lead Product Relation', 'url' => ['/lead-product-crud/index']],
                     ['label' => 'Order Contact', 'url' => ['/order/order-contact-crud/index']],
                     ['label' => 'Order Email', 'url' => ['/order/order-email-crud/index']],
+                    ['label' => 'Order Refund', 'url' => ['/order/order-refund-crud/index']],
                 ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],

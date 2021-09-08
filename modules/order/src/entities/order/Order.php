@@ -31,6 +31,7 @@ use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\interfaces\ProductDataInterface;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
@@ -74,6 +75,7 @@ use modules\order\src\entities\orderData\OrderData;
  * @property int $or_request_id [int]
  * @property int $or_project_id [int]
  * @property int $or_type_id [tinyint(1)]
+ * @property int $or_sale_id
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -98,6 +100,7 @@ use modules\order\src\entities\orderData\OrderData;
  * @property CaseOrder[] $caseOrder
  * @property OrderStatusLog[] $orderStatusLogs
  * @property OrderData $orderData
+ * @property ProductQuote[] $nonReprotectionProductQuotes
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -139,6 +142,9 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             [['or_type_id'], 'in', 'range' => array_keys(OrderSourceType::LIST), 'skipOnEmpty' => true],
 
             ['or_request_data', 'safe'],
+
+            [['or_sale_id'], 'integer'],
+            [['or_sale_id'], 'unique'],
         ];
     }
 
@@ -169,7 +175,8 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             'or_request_data' => 'Request Data',
             'or_project_id' => 'Project',
             'or_fare_id' => 'Fare Id',
-            'or_type_id' => 'Source Type'
+            'or_type_id' => 'Source Type',
+            'or_sale_id' => 'Sale Id',
         ];
     }
 
@@ -218,6 +225,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         $this->or_request_id = $dto->requestId;
         $this->or_project_id = $dto->projectId;
         $this->or_type_id = $dto->creationTypeId;
+        $this->or_sale_id = $dto->saleId;
 
         return $this;
     }
@@ -357,6 +365,14 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id']);
+    }
+    /**
+     * @return ActiveQuery
+     */
+    public function getNonReprotectionProductQuotes(): ActiveQuery
+    {
+        $subQuery = ProductQuoteRelation::find()->distinct()->select('pqr_parent_pq_id')->where(['pqr_type_id' => ProductQuoteRelation::TYPE_REPROTECTION]);
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])->where(['IN', 'pq_id', $subQuery]);
     }
 
     public function getOrderTips(): ActiveQuery

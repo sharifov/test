@@ -1,53 +1,51 @@
 <?php
 
 use common\models\CreditCard;
-use frontend\models\form\CreditCardForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model CreditCardForm */
+/* @var $model common\models\CreditCard */
+/* @var $modelCc frontend\models\form\CreditCardForm */
 /* @var $form yii\widgets\ActiveForm */
-/* @var $isAjax bool */
 
 \frontend\assets\CreditCardAsset::register($this);
 
-$isAjax = isset($isAjax);
-$colMd = $isAjax ? 'col-md-12' : 'col-md-4';
 $pjaxId = 'pjax-create-credit-card'
 ?>
 
 <script>pjaxOffFormSubmit('#<?= $pjaxId ?>');</script>
 <div class="credit-card-form">
 
-
-    <div class="<?= $colMd ?>">
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card-wrapper"></div>
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card-wrapper"></div>
+            </div>
         </div>
-    </div>
 
-    <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+        <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
 
-    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'credit-card-create-form']); ?>
+        <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'credit-card-create-form']); ?>
 
-    <?php echo $form->errorSummary($model); ?>
+        <?php echo $form->errorSummary($model); ?>
 
 
         <div class="clearfix"></div>
 
         <div class="row">
             <div class="col-md-12">
-                <?= $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]) ?>
+                <?php if (!empty($modelCc) && $modelCc->isNewRecord) {
+                    echo $form->field($model, 'cc_number')->textInput(['id' => 'cc_number', 'maxlength' => true]);
+                } else {
+                    echo $form->field($model, 'cc_number')->hiddenInput(['id' => 'cc_number'])->label(false);
+                }
+                ?>
             </div>
         </div>
 
         <?php //= $form->field($model, 'cc_display_number')->textInput(['maxlength' => true]) ?>
-
-
 
         <div class="row">
             <div class="col-md-5">
@@ -66,22 +64,17 @@ $pjaxId = 'pjax-create-credit-card'
                 <?= $form->field($model, 'cc_cvv')->passwordInput(['id' => 'cc_cvv', 'maxlength' => 4, 'autocomplete' => 'new-password']) ?>
             </div>
         </div>
-
         <?= $form->field($model, 'cc_holder_name')->textInput(['id' => 'cc_holder_name', 'maxlength' => true]) ?>
 
         <div class="row">
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_type_id')->dropDownList(CreditCard::getTypeList(), ['prompt' => '---']) ?>
             </div>
-            <?php if (!$isAjax) : ?>
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_status_id')->dropDownList(CreditCard::getStatusList(), ['prompt' => '---']) ?>
             </div>
-            <?php endif; ?>
         </div>
-        <?php if (!$isAjax) : ?>
             <?= $form->field($model, 'cc_is_expired')->checkbox() ?>
-        <?php endif; ?>
 
         <!--    --><?php //= $form->field($model, 'cc_created_user_id')->textInput() ?>
     <!---->

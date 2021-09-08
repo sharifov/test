@@ -5,10 +5,13 @@ namespace modules\order\controllers;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
+use modules\order\src\abac\dto\OrderAbacDto;
+use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\order\search\OrderCrudSearch;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\order\src\entities\orderData\OrderData;
 use modules\order\src\entities\orderData\OrderDataActions;
 use modules\order\src\forms\OrderForm;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
@@ -24,6 +27,7 @@ use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -60,6 +64,13 @@ class OrderController extends FController
                     'delete-ajax' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'view',
+                    'update-ajax',
+                    'delete'
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -140,11 +151,16 @@ class OrderController extends FController
             return $throwable->getMessage();
         }
 
+        $orderAbacDto = new OrderAbacDto($modelOrder);
+        if (!Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_UPDATE, OrderAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $model = new OrderForm();
         $model->or_lead_id = $modelOrder->or_lead_id;
         $model->or_id = $modelOrder->or_id;
-        $model->od_language_id = $modelOrder->orderData->od_language_id;
-        $model->od_market_country = $modelOrder->orderData->od_market_country;
+        $model->od_language_id = $modelOrder->orderData->od_language_id ?? null;
+        $model->od_market_country = $modelOrder->orderData->od_market_country ?? null;
 
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
@@ -157,9 +173,17 @@ class OrderController extends FController
                 $modelOrder->or_app_total = $model->or_app_total;
                 $modelOrder->or_agent_markup = $model->or_agent_markup;
                 $modelOrder->or_app_markup = $model->or_app_markup;
-                $orderData = $modelOrder->orderData;
-                $orderData->od_language_id = $model->od_language_id;
-                $orderData->od_market_country = $model->od_market_country;
+
+                if ($modelOrder->orderData) {
+                    $orderData = $modelOrder->orderData;
+                    $orderData->od_language_id = $model->od_language_id;
+                    $orderData->od_market_country = $model->od_market_country;
+                } else {
+                    $orderData = new OrderData();
+                    $orderData->od_order_id = $modelOrder->or_id;
+                    $orderData->od_language_id = $model->od_language_id;
+                    $orderData->od_market_country = $model->od_market_country;
+                }
 
                 $modelOrder->updateOrderTotalByCurrency();
 
@@ -207,6 +231,10 @@ class OrderController extends FController
 
         try {
             $model = $this->findModel($id);
+            $orderAbacDto = new OrderAbacDto($model);
+            if (!Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_DELETE, OrderAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('Access denied');
+            }
             if (!$model->delete()) {
                 throw new Exception('Order (' . $id . ') not deleted', 2);
             }
@@ -276,6 +304,11 @@ class OrderController extends FController
     {
         if (!$order = Order::findOne(['or_gid' => $gid])) {
             throw new NotFoundHttpException('Order not found by GID(' . $gid . ')');
+        }
+
+        $orderAbacDto = new OrderAbacDto($order);
+        if (!Yii::$app->abac->can($orderAbacDto, OrderAbacObject::ACT_DETAIL_VIEW, OrderAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
         }
 
         return $this->render('view', [

@@ -1,5 +1,6 @@
 <?php
 
+use kdn\yii2\JsonEditor;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -84,13 +85,65 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
     <div class="col-md-6">
     <h2>Request (<?=$model->al_request_dt?>):</h2>
-        <pre><small><?php \yii\helpers\VarDumper::dump(@json_decode($model->al_request_data, true), 10, true); ?></small></pre>
+
+           <?php
+            try {
+                echo JsonEditor::widget(
+                    [
+                       // JSON editor options
+                       'clientOptions' => [
+                           'modes' => ['code', 'preview', 'view'], // all available modes
+                           'mode' => 'view', // default mode
+                       ],
+                       'collapseAll' => ['view'], // collapse all fields in "view" mode
+                       //'containerOptions' => ['class' => 'container'], // HTML options for JSON editor container tag
+                       'expandAll' => ['view', 'form'], // expand all fields in "tree" and "form" modes
+                       'name' => 'editor', // hidden input name
+                       //'options' => ['id' => 'data'], // HTML options for hidden input
+                       'value' => $model->al_request_data, // JSON which should be shown in editor
+                    ]
+                );
+            } catch (Throwable $throwable) {
+                echo 'Error: ' . $throwable->getMessage();
+                echo '<pre><small>' . \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_request_data, true), 10, true) . '</small></pre>';
+            }
+            ?>
+
+        <h2>Request JSON</h2>
+        <pre><small><?= Html::encode($model->al_request_data) ?></small></pre>
+
     </div>
 
 
     <div class="col-md-6">
     <h2>Response (<?=$model->al_response_dt?>):</h2>
-        <pre><small><?php \yii\helpers\VarDumper::dump(@json_decode($model->al_response_data, true), 10, true); ?></small></pre>
+
+
+        <?php
+        try {
+            echo JsonEditor::widget(
+                [
+                    // JSON editor options
+                    'clientOptions' => [
+                        'modes' => ['code', 'preview', 'view'], // all available modes
+                        'mode' => 'view', // default mode
+                    ],
+                    'collapseAll' => ['view'], // collapse all fields in "view" mode
+                    //'containerOptions' => ['class' => 'container'], // HTML options for JSON editor container tag
+                    'expandAll' => ['view', 'form'], // expand all fields in "tree" and "form" modes
+                    'name' => 'editor', // hidden input name
+                    //'options' => ['id' => 'data'], // HTML options for hidden input
+                    'value' => $model->al_response_data, // JSON which should be shown in editor
+                ]
+            );
+        } catch (Throwable $throwable) {
+            echo 'Error: ' . $throwable->getMessage();
+            echo '<pre><small>' . \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true), 10, true) . '</small></pre>';
+        }
+        ?>
+
+        <h2>Response JSON</h2>
+        <pre><small><?= Html::encode($model->al_response_data) ?></small></pre>
     </div>
     </div>
 

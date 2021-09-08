@@ -126,6 +126,7 @@ use sales\entities\cases\CaseCategory;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
+use sales\helpers\setting\SettingHelper;
 use sales\model\airportLang\service\AirportLangService;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatForm\entity\ClientChatForm;
@@ -249,6 +250,7 @@ class TestController extends FController
     private $dispatcher;
     private $transactionManager;
     private $clientManageService;
+    private $casesSaleService;
 
     public function __construct(
         $id,
@@ -256,11 +258,13 @@ class TestController extends FController
         ClientManageService $clientManageService,
         DeferredEventDispatcher $dispatcher,
         TransactionManager $transactionManager,
+        CasesSaleService $casesSaleService,
         $config = []
     ) {
         $this->clientManageService = $clientManageService;
         $this->dispatcher = $dispatcher;
         $this->transactionManager = $transactionManager;
+        $this->casesSaleService = $casesSaleService;
         parent::__construct($id, $module, $config);
     }
 
@@ -1949,7 +1953,7 @@ class TestController extends FController
             $casesCommunicationService = \Yii::createObject(CasesCommunicationService::class);
             $content_data = $casesCommunicationService->getEmailData($model, Auth::user(), $locale);
         }
-        \yii\helpers\VarDumper::dump($content_data, 10, true);
+        VarDumper::dump($content_data, 10, true);
         exit();
     }
 
@@ -1982,7 +1986,7 @@ class TestController extends FController
             $adapter::setDefaultOptions(Yii::$app->prometheus->redisOptions);
             $adapter->wipeStorage();
         } catch (\Throwable $throwable) {
-            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            VarDumper::dump($throwable->getMessage(), 10, true);
         }
         exit('Done');
     }
@@ -2042,7 +2046,7 @@ class TestController extends FController
         if ($json) {
             return $this->asJson($data);
         }
-        \yii\helpers\VarDumper::dump($data, 20, true);
+        VarDumper::dump($data, 20, true);
         exit();
     }
 
@@ -2057,14 +2061,14 @@ class TestController extends FController
             if ($json === 1) {
                 return $this->asJson($pdfService->getCommunicationData());
             }
-            \yii\helpers\VarDumper::dump($pdfService->getCommunicationData(), 20, true);
+            VarDumper::dump($pdfService->getCommunicationData(), 20, true);
             exit();
         }
         try {
             $pdfService->processingFile();
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'Test:actionHotelQuoteFile');
-            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            VarDumper::dump($throwable->getMessage(), 10, true);
             exit();
         }
         return $pdfService->generateForBrowserOutput();
@@ -2162,7 +2166,14 @@ class TestController extends FController
 
     public function actionZ()
     {
-        return $this->render('z');
+        $casesSaleService = Yii::createObject(CasesSaleService::class);
+
+        $saleId = Yii::$app->request->get('sale_id', 0);
+        $saleData = $casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
+
+        VarDumper::dump($saleData, 20, true);
+        exit();
+        //return $this->render('z');
     }
 
     /**

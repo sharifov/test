@@ -6,7 +6,10 @@ use common\models\Employee;
 use common\models\Lead;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
+use sales\entities\cases\CasesSourceType;
+use sales\entities\cases\CasesStatus;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -114,9 +117,9 @@ class CasesManageService
         $case = $this->finder->caseFind($caseId);
         $user = $this->finder->userFind($userId);
 
-        if (!($case->isPending() || $case->isFollowUp() || $case->isTrash())) {
+        /*if (!($case->isPending() || $case->isFollowUp() || $case->isTrash())) {
             throw new \DomainException('Case could not be taken now.');
-        }
+        }*/
 
         $this->processing($case, $user, $creatorId, $description);
     }
@@ -168,6 +171,7 @@ class CasesManageService
         $this->guardAccessUserToCase($case, $user);
         $case->processing($user->id, $creatorId, $description);
         $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($user->username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
     }
 
     /**
@@ -175,11 +179,51 @@ class CasesManageService
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function pending($case, ?int $creatorId, ?string $description = ''): void
+    public function pending($case, ?int $creatorId, ?string $description = '', ?string $username = null): void
     {
         $case = $this->finder->caseFind($case);
         $case->pending($creatorId, $description);
         $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
+    }
+
+    /**
+     * @param int|Cases $case
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function awaiting($case, ?int $creatorId, ?string $description = '', ?string $username = null): void
+    {
+        $case = $this->finder->caseFind($case);
+        $case->awaiting($creatorId, $description);
+        $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
+    }
+
+    /**
+     * @param int|Cases $case
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function autoProcessing($case, ?int $creatorId, ?string $description = '', ?string $username = null): void
+    {
+        $case = $this->finder->caseFind($case);
+        $case->autoProcessing($creatorId, $description);
+        $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
+    }
+
+    /**
+     * @param int|Cases $case
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function error($case, ?int $creatorId, ?string $description = '', ?string $username = null): void
+    {
+        $case = $this->finder->caseFind($case);
+        $case->error($creatorId, $description);
+        $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
     }
 
     /**
@@ -188,7 +232,7 @@ class CasesManageService
      * @param string|null $description
      * @param string|null $deadline
      */
-    public function followUp($case, ?int $creatorId, ?string $description, ?string $deadline): void
+    public function followUp($case, ?int $creatorId, ?string $description, ?string $deadline, ?string $username = null): void
     {
         $case = $this->finder->caseFind($case);
         $case->followUp($creatorId, $description);
@@ -196,6 +240,7 @@ class CasesManageService
             $case->setDeadline($deadline);
         }
         $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
     }
 
     /**
@@ -203,11 +248,12 @@ class CasesManageService
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function solved($case, ?int $creatorId, ?string $description = ''): void
+    public function solved($case, ?int $creatorId, ?string $description = '', ?string $username = null): void
     {
         $case = $this->finder->caseFind($case);
         $case->solved($creatorId, $description);
         $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
     }
 
     /**
@@ -215,11 +261,12 @@ class CasesManageService
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function trash($case, ?int $creatorId, ?string $description = ''): void
+    public function trash($case, ?int $creatorId, ?string $description = '', ?string $username = null): void
     {
         $case = $this->finder->caseFind($case);
         $case->trash($creatorId, $description);
         $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
     }
 
     /**

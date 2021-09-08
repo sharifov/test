@@ -36,6 +36,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_recording_disabled')->checkbox() ?>
 
+    <?= $form->field($model, 'c_stir_status')->dropDownList(\common\models\Call::STIR_STATUS_LIST, ['prompt' => '---']) ?>
+
     </div>
     <div class="col-md-6">
 

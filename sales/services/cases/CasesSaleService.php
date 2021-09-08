@@ -9,6 +9,7 @@ use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
+use sales\exception\BoResponseException;
 use sales\forms\caseSale\CaseSaleRequestBoForm;
 use sales\helpers\app\AppHelper;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
@@ -17,8 +18,12 @@ use Yii;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use yii\web\NotFoundHttpException;
 
+/**
+ * Class CasesSaleService
+ *
+ * CasesSaleRepository $casesSaleRepository
+ */
 class CasesSaleService
 {
     private const FORMAT_PASSENGERS_DATA = [
@@ -480,11 +485,11 @@ class CasesSaleService
                 if (is_array($result) && array_key_exists('bookingId', $result)) {
                     return $result;
                 }
-                throw new \RuntimeException('BO request Error. Broken data. : ' . VarDumper::dumpAsString($response));
+                throw new BoResponseException('BO request Error. Broken data. : ' . VarDumper::dumpAsString($response));
             }
-            throw new \RuntimeException('BO request Error. Not isOk. : ' . VarDumper::dumpAsString($response->content));
+            throw new BoResponseException('BO request Error. Not isOk. : ' . VarDumper::dumpAsString($response->content));
         } catch (\Throwable $exception) {
-            throw new BadRequestHttpException($exception->getMessage());
+            throw new BoResponseException($exception->getMessage());
         }
     }
 
@@ -610,6 +615,27 @@ class CasesSaleService
             AppHelper::throwableLogger($throwable, 'CasesSaleService:createSale:Throwable');
         }
         return null;
+    }
+
+    public function createSaleByData(int $caseId, array $saleData): ?CaseSale
+    {
+        if ($this->isExistCaseSale($caseId, $saleData['saleId'])) {
+            throw new \RuntimeException('CaseSale already exist. Case(' . $caseId . ') Sale(' . $saleData['saleId'] . ')');
+        }
+
+        $cs = new CaseSale();
+        $cs->css_cs_id = $caseId;
+        $cs->css_sale_id = $saleData['saleId'];
+        $cs->css_sale_data = $saleData;
+        $cs->css_sale_pnr = $saleData['pnr'] ?? null;
+        $cs->css_sale_created_dt = $saleData['created'] ?? null;
+        $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
+        $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
+        $cs->css_sale_data_updated = $cs->css_sale_data;
+
+        $cs = $this->prepareAdditionalData($cs, $saleData);
+
+        return $this->casesSaleRepository->save($cs);
     }
 
     /**

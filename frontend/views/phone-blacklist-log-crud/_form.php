@@ -14,7 +14,8 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'pbll_phone')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
+        <?= $form->field($model, 'pbll_phone')->textInput() ?>
+        <?php /*= $form->field($model, 'pbll_phone')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
             'jsOptions' => [
                 'nationalMode' => false,
                 'preferredCountries' => ['us'],
@@ -29,7 +30,7 @@ use yii\widgets\ActiveForm;
                                     $(this).val(value.replace(/[^0-9\+]+/g, ""));
                                 '
             ]
-        ]) ?>
+        ]) */ ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

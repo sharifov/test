@@ -65,57 +65,57 @@ class SettingHelper
 
     public static function processingFee(): float
     {
-        return (float) (\Yii::$app->params['settings']['processing_fee'] ?? 25.00);
+        return (float)(\Yii::$app->params['settings']['processing_fee'] ?? 25.00);
     }
 
     public static function quoteSearchProcessingFee(): float
     {
-        return (float) (Yii::$app->params['settings']['quote_search_processing_fee'] ?? 25.00);
+        return (float)(Yii::$app->params['settings']['quote_search_processing_fee'] ?? 25.00);
     }
 
     public static function userSiteActivityLogHistoryDays(): int
     {
-        return (int) (Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? 3);
+        return (int)(Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? 3);
     }
 
     public static function consoleLogCleanerEnable(): bool
     {
-        return (bool) (Yii::$app->params['settings']['console_log_cleaner_enable'] ?? false);
+        return (bool)(Yii::$app->params['settings']['console_log_cleaner_enable'] ?? false);
     }
 
     public static function consoleLogCleanerParamsDays(): int
     {
-        return (int) (Yii::$app->params['settings']['console_log_cleaner_params']['days'] ?? 90);
+        return (int)(Yii::$app->params['settings']['console_log_cleaner_params']['days'] ?? 90);
     }
 
     public static function metricsEnabled(): bool
     {
-        return (bool) (Yii::$app->params['settings']['metrics_enabled'] ?? false);
+        return (bool)(Yii::$app->params['settings']['metrics_enabled'] ?? false);
     }
 
     public static function cleanUserMonitorAfterDays(): int
     {
-        return (int) (Yii::$app->params['settings']['clean_user_monitor_after_days'] ?? 7);
+        return (int)(Yii::$app->params['settings']['clean_user_monitor_after_days'] ?? 7);
     }
 
     public static function cleanCallAfterDays(): int
     {
-        return (int) (Yii::$app->params['settings']['clean_call_after_days'] ?? 10);
+        return (int)(Yii::$app->params['settings']['clean_call_after_days'] ?? 10);
     }
 
     public static function isCallRecordingSecurityEnabled(): bool
     {
-        return (bool) (Yii::$app->params['settings']['call_recording_security'] ?? false);
+        return (bool)(Yii::$app->params['settings']['call_recording_security'] ?? false);
     }
 
     public static function isCallRecordingLogEnabled(): bool
     {
-        return (bool) (Yii::$app->params['settings']['enable_call_recording_log'] ?? false);
+        return (bool)(Yii::$app->params['settings']['enable_call_recording_log'] ?? false);
     }
 
     public static function getCallRecordingLogAdditionalCacheTimeout(): int
     {
-        return (int) (Yii::$app->params['settings']['call_recording_log_additional_cache_timeout'] ?? 60);
+        return (int)(Yii::$app->params['settings']['call_recording_log_additional_cache_timeout'] ?? 60);
     }
 
     public static function isGeneralLinePriorityEnable(): bool
@@ -175,7 +175,7 @@ class SettingHelper
 
     public static function clientChatUserAccessHistoryDays(): int
     {
-        return (int) (Yii::$app->params['settings']['client_chat_user_access_history_days'] ?? 5);
+        return (int)(Yii::$app->params['settings']['client_chat_user_access_history_days'] ?? 5);
     }
 
     public static function getTimeStartCallUserAccessGeneral(?Department $department, $phone): int
@@ -313,22 +313,22 @@ class SettingHelper
 
     public static function getLeadApiGoogleAllowCreate(): int
     {
-        return (bool) ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.allow_create', false);
+        return (bool)ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.allow_create', false);
     }
 
     public static function getLeadApiGoogleStatusId(): int
     {
-        return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.default_status_id', Lead::STATUS_PENDING);
+        return (int)ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.default_status_id', Lead::STATUS_PENDING);
     }
 
     public static function getLeadApiGoogleDepartmentId(): int
     {
-        return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.default_department_id', Department::DEPARTMENT_SALES);
+        return (int)ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.default_department_id', Department::DEPARTMENT_SALES);
     }
 
     public static function getMetricJobTimeExecution(): int
     {
-        return (int) ArrayHelper::getValue(Yii::$app->params['settings'], 'metric_job_time_execution', 60);
+        return (int)ArrayHelper::getValue(Yii::$app->params['settings'], 'metric_job_time_execution', 60);
     }
 
     public static function getFrontendWidgetList(): array
@@ -353,7 +353,7 @@ class SettingHelper
 
     public static function isEnableCheckPhoneByNeutrino(): bool
     {
-        return (bool) (Yii::$app->params['settings']['enable_check_phone_by_neutrino'] ?? false);
+        return (bool)(Yii::$app->params['settings']['enable_check_phone_by_neutrino'] ?? false);
     }
 
     public static function getCallTerminateBlackList(): ?array
@@ -371,6 +371,16 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['call_duration_seconds_gl_count'] ?? 20);
     }
 
+    public static function isEnableOrderFromSale(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['enable_order_from_sale'] ?? false);
+    }
+
+    public static function getNotificationsHistoryDays(): int
+    {
+        return (int)(Yii::$app->params['settings']['notifications_history_days'] ?? 30);
+    }
+
     public static function getCallDistributionSort(): array
     {
         $sort = [
@@ -384,8 +394,8 @@ class SettingHelper
         ];
 
         $callDistributionSort = Yii::$app->params['settings']['call_distribution_sort'] ?? [
-            'phone_ready_time' => $sort['ASC']
-        ];
+                'phone_ready_time' => $sort['ASC']
+            ];
 
         $finalSort = [];
 
@@ -407,5 +417,47 @@ class SettingHelper
     public static function getLimitUserConnection(): int
     {
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
+    }
+
+
+    public static function getReProtectionCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['reprotection_case_category'] ?? null;
+    }
+
+    public static function getSchdCaseDeadlineHours(): int
+    {
+        return (int)(Yii::$app->params['settings']['schd_case_deadline_hours'] ?? 0);
+    }
+
+    public static function getYandexMetrika(): array
+    {
+        return Yii::$app->params['settings']['yandex_metrika'] ?? [];
+    }
+
+    public static function isEnableSendHookToOtaReProtectionCreate(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['enable_send_hook_to_ota_re_protection_create'] ?? true);
+    }
+
+    public static function isClientChatApiLogEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['client_chat_api_log_enabled'] ?? true);
+    }
+
+    /**
+     * @return int
+     */
+    public static function getLeadAutoRedialDelay(): int
+    {
+        return (int)(Yii::$app->params['settings']['call_lead_auto_redial_delay'] ?? 0);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function getLeadAutoRedialEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['call_lead_auto_redial_enabled'] ?? false);
     }
 }

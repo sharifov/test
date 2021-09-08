@@ -1206,7 +1206,7 @@ class FlightQuoteHelper
     {
         $flightQuoteData = Json::decode($flightQuote->fq_origin_search_data);
 
-        if (self::generateHashQuoteKey($flightQuoteData['key']) === $flightQuote->fq_hash_key) {
+        if (isset($flightQuoteData['key']) && self::generateHashQuoteKey($flightQuoteData['key']) === $flightQuote->fq_hash_key) {
             return new QuoteNgsDataDto($flightQuoteData['ngsFeatures'] ?? []);
         }
 

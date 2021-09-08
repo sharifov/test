@@ -3037,6 +3037,553 @@ define({ "api": [
     "groupTitle": "Flight"
   },
   {
+    "type": "get",
+    "url": "/v2/flight/product-quote-get",
+    "title": "Get product quote",
+    "version": "0.1.0",
+    "name": "ProductQuoteGet",
+    "group": "Flight",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "product_quote_gid",
+            "description": "<p>Product Quote gid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string[]",
+            "optional": true,
+            "field": "with",
+            "description": "<p>Array (&quot;reprotection&quot;)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"product_quote_gid\": \"2bd12377691f282e11af12937674e3d1\",\n    \"with\": [\"reprotection\"],\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n        {\n            \"status\": 200,\n            \"message\": \"OK\",\n            \"product_quote\": {\n                \"pq_gid\": \"1865ef55f3c6c01dca1f4f3128e82733\",\n                \"pq_name\": \"test\",\n                \"pq_order_id\": 35,\n                \"pq_description\": null,\n                \"pq_status_id\": 10,\n                \"pq_price\": 430.46,\n                \"pq_origin_price\": 326.9,\n                \"pq_client_price\": 430.46,\n                \"pq_service_fee_sum\": 14.56,\n                \"pq_origin_currency\": \"USD\",\n                \"pq_client_currency\": \"USD\",\n                \"pq_status_name\": \"Declined\",\n                \"pq_files\": [],\n                \"data\": {\n                    \"fq_flight_id\": 2,\n                    \"fq_source_id\": null,\n                    \"fq_product_quote_id\": 184,\n                    \"gds\": \"T\",\n                    \"pcc\": \"E9V\",\n                    \"fq_gds_offer_id\": null,\n                    \"fq_type_id\": 0,\n                    \"fq_cabin_class\": \"E\",\n                    \"fq_trip_type_id\": 1,\n                    \"validatingCarrier\": \"AF\",\n                    \"fq_fare_type_id\": 1,\n                    \"fq_last_ticket_date\": \"2021-03-25\",\n                    \"fq_origin_search_data\": \"{\\\"key\\\":\\\"2_U0FMMTAxKlkxMDAwL0tJVkxPTjIwMjEtMDMtMjUqQUZ+I0FGNjYwMiNBRjE4ODkjQUYxMzgwfmxjOmVuX3Vz\\\",\\\"routingId\\\":2,\\\"prices\\\":{\\\"lastTicketDate\\\":\\\"2021-03-25\\\",\\\"totalPrice\\\":326.9,\\\"totalTax\\\":55.9,\\\"comm\\\":0,\\\"isCk\\\":false,\\\"markupId\\\":0,\\\"markupUid\\\":\\\"\\\",\\\"markup\\\":0},\\\"passengers\\\":{\\\"ADT\\\":{\\\"codeAs\\\":\\\"ADT\\\",\\\"cnt\\\":1,\\\"baseFare\\\":271,\\\"pubBaseFare\\\":271,\\\"baseTax\\\":55.9,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":326.9,\\\"tax\\\":55.9,\\\"oBaseFare\\\":{\\\"amount\\\":271,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":55.9,\\\"currency\\\":\\\"USD\\\"}}},\\\"penalties\\\":{\\\"exchange\\\":false,\\\"refund\\\":false,\\\"list\\\":[{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":false},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":false}]},\\\"trips\\\":[{\\\"tripId\\\":1,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2021-03-25 05:25\\\",\\\"arrivalTime\\\":\\\"2021-03-25 06:40\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"6602\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":75,\\\"departureAirportCode\\\":\\\"KIV\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"OTP\\\",\\\"arrivalAirportTerminal\\\":\\\"\\\",\\\"operatingAirline\\\":\\\"RO\\\",\\\"airEquipType\\\":\\\"AT7\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":215,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":2,\\\"departureTime\\\":\\\"2021-03-25 14:25\\\",\\\"arrivalTime\\\":\\\"2021-03-25 16:35\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"1889\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":190,\\\"departureAirportCode\\\":\\\"OTP\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":\\\"2E\\\",\\\"operatingAirline\\\":\\\"AF\\\",\\\"airEquipType\\\":\\\"319\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":1147,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":3,\\\"departureTime\\\":\\\"2021-03-25 21:20\\\",\\\"arrivalTime\\\":\\\"2021-03-25 21:45\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"1380\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":85,\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"departureAirportTerminal\\\":\\\"2E\\\",\\\"arrivalAirportCode\\\":\\\"LHR\\\",\\\"arrivalAirportTerminal\\\":\\\"2\\\",\\\"operatingAirline\\\":\\\"AF\\\",\\\"airEquipType\\\":\\\"318\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":214,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":1100}],\\\"maxSeats\\\":9,\\\"paxCnt\\\":1,\\\"validatingCarrier\\\":\\\"AF\\\",\\\"gds\\\":\\\"T\\\",\\\"pcc\\\":\\\"E9V\\\",\\\"cons\\\":\\\"GTT\\\",\\\"fareType\\\":\\\"PUB\\\",\\\"tripType\\\":\\\"OW\\\",\\\"cabin\\\":\\\"Y\\\",\\\"currency\\\":\\\"USD\\\",\\\"currencies\\\":[\\\"USD\\\"],\\\"currencyRates\\\":{\\\"USDUSD\\\":{\\\"from\\\":\\\"USD\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1}},\\\"keys\\\":{\\\"travelport\\\":{\\\"traceId\\\":\\\"661f0376-d209-4216-a0d1-97c8f7cf5746\\\",\\\"availabilitySources\\\":\\\"S,S,S\\\",\\\"type\\\":\\\"T\\\"},\\\"seatHoldSeg\\\":{\\\"trip\\\":0,\\\"segment\\\":0,\\\"seats\\\":9}},\\\"ngsFeatures\\\":{\\\"stars\\\":1,\\\"name\\\":\\\"Economy Standard\\\",\\\"list\\\":[]},\\\"meta\\\":{\\\"eip\\\":0,\\\"noavail\\\":false,\\\"searchId\\\":\\\"U0FMMTAxWTEwMDB8S0lWTE9OMjAyMS0wMy0yNQ==\\\",\\\"lang\\\":\\\"en\\\",\\\"rank\\\":5.9333334,\\\"cheapest\\\":false,\\\"fastest\\\":false,\\\"best\\\":false,\\\"bags\\\":1,\\\"country\\\":\\\"us\\\"},\\\"price\\\":326.9,\\\"originRate\\\":1,\\\"stops\\\":[2],\\\"time\\\":[{\\\"departure\\\":\\\"2021-03-25 05:25\\\",\\\"arrival\\\":\\\"2021-03-25 21:45\\\"}],\\\"bagFilter\\\":1,\\\"airportChange\\\":false,\\\"technicalStopCnt\\\":0,\\\"duration\\\":[1100],\\\"totalDuration\\\":1100,\\\"topCriteria\\\":\\\"\\\",\\\"rank\\\":5.9333334}\",\n                    \"fq_json_booking\": null,\n                    \"fq_ticket_json\": null,\n                    \"itineraryDump\": [\n                        \"1  AF6602E  25MAR  KIVOTP    525A    640A  TH OPERATED BY RO\",\n                        \"2  AF1889E  25MAR  OTPCDG    225P    435P  TH\",\n                        \"3  AF1380E  25MAR  CDGLHR    920P    945P  TH\"\n                    ],\n                    \"booking_id\": \"1\",\n                    \"fq_type_name\": \"Base\",\n                    \"fq_fare_type_name\": \"Public\",\n                    \"fareType\": \"PUB\",\n                    \"flight\": {\n                        \"fl_product_id\": 44,\n                        \"fl_trip_type_id\": 1,\n                        \"fl_cabin_class\": \"E\",\n                        \"fl_adults\": 1,\n                        \"fl_children\": 0,\n                        \"fl_infants\": 0,\n                        \"fl_trip_type_name\": \"One Way\",\n                        \"fl_cabin_class_name\": \"Economy\"\n                    },\n                    \"trips\": [\n                        {\n                            \"uid\": \"fqt6047ae8cde4af\",\n                            \"key\": null,\n                            \"duration\": 1100,\n                            \"segments\": [\n                                {\n                                    \"uid\": \"fqs6047ae8cdf8d9\",\n                                    \"departureTime\": \"2021-03-25 05:25\",\n                                    \"arrivalTime\": \"2021-03-25 06:40\",\n                                    \"flightNumber\": 6602,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 75,\n                                    \"departureAirportCode\": \"KIV\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"OTP\",\n                                    \"arrivalAirportTerminal\": \"\",\n                                    \"operatingAirline\": \"RO\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"AT7\",\n                                    \"marriageGroup\": \"I\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 215,\n                                    \"departureLocation\": \"Chisinau\",\n                                    \"arrivalLocation\": \"Bucharest\",\n                                    \"stop\": 1,\n                                    \"stops\": [\n                                        {\n                                            \"qss_quote_segment_id\": 9,\n                                            \"locationCode\": \"SCL\",\n                                            \"equipment\": \"\",\n                                            \"elapsedTime\": 120,\n                                            \"duration\": 120,\n                                            \"departureDateTime\": \"2021-09-09 00:00\",\n                                            \"arrivalDateTime\": \"2021-09-08 00:00\"\n                                        }\n                                    ],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 9,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"uid\": \"fqs6047ae8ce16d5\",\n                                    \"departureTime\": \"2021-03-25 14:25\",\n                                    \"arrivalTime\": \"2021-03-25 16:35\",\n                                    \"flightNumber\": 1889,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 190,\n                                    \"departureAirportCode\": \"OTP\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"CDG\",\n                                    \"arrivalAirportTerminal\": \"2E\",\n                                    \"operatingAirline\": \"AF\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"319\",\n                                    \"marriageGroup\": \"I\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 1147,\n                                    \"departureLocation\": \"Bucharest\",\n                                    \"arrivalLocation\": \"Paris\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 10,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"uid\": \"fqs6047ae8ce248c\",\n                                    \"departureTime\": \"2021-03-25 21:20\",\n                                    \"arrivalTime\": \"2021-03-25 21:45\",\n                                    \"flightNumber\": 1380,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 85,\n                                    \"departureAirportCode\": \"CDG\",\n                                    \"departureAirportTerminal\": \"2E\",\n                                    \"arrivalAirportCode\": \"LHR\",\n                                    \"arrivalAirportTerminal\": \"2\",\n                                    \"operatingAirline\": \"AF\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"318\",\n                                    \"marriageGroup\": \"O\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 214,\n                                    \"departureLocation\": \"Paris\",\n                                    \"arrivalLocation\": \"London\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 11,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ],\n                    \"pax_prices\": [\n                        {\n                            \"qpp_fare\": \"271.00\",\n                            \"qpp_tax\": \"55.90\",\n                            \"qpp_system_mark_up\": \"0.00\",\n                            \"qpp_agent_mark_up\": \"89.00\",\n                            \"qpp_origin_fare\": \"271.00\",\n                            \"qpp_origin_currency\": \"USD\",\n                            \"qpp_origin_tax\": \"55.90\",\n                            \"qpp_client_currency\": \"USD\",\n                            \"qpp_client_fare\": \"271.00\",\n                            \"qpp_client_tax\": \"55.90\",\n                            \"paxType\": \"ADT\"\n                        }\n                    ],\n                    \"paxes\": [\n                        {\n                            \"fp_uid\": \"fp604741cd064a1\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp6047ae79a875c\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp6047ae8cdbb37\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        }\n                    ]\n                }\n            },\n            \"reprotection_quote_list\": [\n                {\n                    \"pq_gid\": \"289ddd4b911e88d7bf1eb14be44754d7\",\n                    \"pq_name\": \"test\",\n                    \"pq_order_id\": 35,\n                    \"pq_description\": null,\n                    \"pq_status_id\": 1,\n                    \"pq_price\": 0,\n                    \"pq_origin_price\": 0,\n                    \"pq_client_price\": 0,\n                    \"pq_service_fee_sum\": 0,\n                    \"pq_origin_currency\": null,\n                    \"pq_client_currency\": \"USD\",\n                    \"pq_status_name\": \"New\",\n                    \"pq_files\": [],\n                    \"data\": {\n                        \"fq_flight_id\": 2,\n                        \"fq_source_id\": null,\n                        \"fq_product_quote_id\": 191,\n                        \"gds\": \"S\",\n                        \"pcc\": \"8KI0\",\n                        \"fq_gds_offer_id\": null,\n                        \"fq_type_id\": 3,\n                        \"fq_cabin_class\": \"E\",\n                        \"fq_trip_type_id\": 1,\n                        \"validatingCarrier\": \"PR\",\n                        \"fq_fare_type_id\": 2,\n                        \"fq_last_ticket_date\": null,\n                        \"fq_origin_search_data\": \"{\\\"gds\\\":\\\"S\\\",\\\"pcc\\\":\\\"8KI0\\\",\\\"trips\\\":[{\\\"duration\\\":848,\\\"segments\\\":[{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":600,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 07:30:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"8727\\\",\\\"departureTime\\\":\\\"2021-06-10 21:30:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"departureAirportCode\\\":\\\"ROB\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":160,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 12:55:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"8395\\\",\\\"departureTime\\\":\\\"2021-06-11 10:15:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"LAX\\\",\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":88,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 19:14:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"3580\\\",\\\"departureTime\\\":\\\"2021-06-11 17:46:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"SMF\\\",\\\"departureAirportCode\\\":\\\"LAX\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null}]},{\\\"duration\\\":1233,\\\"segments\\\":[{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":127,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-10 12:34\\\",\\\"airEquipType\\\":\\\"E7W\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"3864\\\",\\\"departureTime\\\":\\\"2021-09-10 10:27\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"SEA\\\",\\\"departureAirportCode\\\":\\\"SMF\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":201,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-10 13:34\\\",\\\"airEquipType\\\":\\\"739\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"759\\\",\\\"departureTime\\\":\\\"2021-09-10 08:13\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"MSP\\\",\\\"departureAirportCode\\\":\\\"SEA\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":510,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-11 08:15\\\",\\\"airEquipType\\\":\\\"333\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"42\\\",\\\"departureTime\\\":\\\"2021-09-10 16:45\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"departureAirportCode\\\":\\\"MSP\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":1,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[{\\\"duration\\\":85,\\\"equipment\\\":null,\\\"elapsedTime\\\":null,\\\"locationCode\\\":\\\"BKO\\\",\\\"arrivalDateTime\\\":\\\"2021-09-11 13:55\\\",\\\"departureDateTime\\\":\\\"2021-09-11 15:20\\\"}],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":395,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-11 16:50\\\",\\\"airEquipType\\\":\\\"359\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"7351\\\",\\\"departureTime\\\":\\\"2021-09-11 10:15\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"ROB\\\",\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null}]}],\\\"fareType\\\":\\\"SR\\\",\\\"itineraryDump\\\":[\\\"DL8727E 10JUN ROBCDG TK  930P  730A+ 11JUN TH\\/FR\\\",\\\"DL8395E 11JUN CDGLAX HK 1015A 1255P FR\\\",\\\"DL3580E 11JUN LAXSMF HK  546P  714P FR\\\",\\\"DL3864E 10SEP SMFSEA TK 1027A 1234P FR\\\",\\\"DL 759E 10SEP SEAMSP TK  813A  134P FR\\\",\\\"DL  42E 10SEP MSPCDG TK  445P  815A+ 11SEP FR\\/SA\\\",\\\"DL7351E 11SEP CDGROB HK 1015A  450P SA\\\",\\\"DL7351E 11SEP BKOROB HK  320P  450P SA\\\"],\\\"validatingCarrier\\\":\\\"PR\\\"}\",\n                        \"fq_json_booking\": null,\n                        \"fq_ticket_json\": null,\n                        \"itineraryDump\": [\n                            \"1  DL8727E  10JUN  ROBCDG    930P    730A+  11JUN  TH/FR\",\n                            \"2  DL8395E  11JUN  CDGLAX  1015A  1255P  FR\",\n                            \"3  DL3580E  11JUN  LAXSMF    546P    714P  FR\",\n                            \"4  DL3864E  10SEP  SMFSEA  1027A  1234P  FR\",\n                            \"5  DL  759E  10SEP  SEAMSP    813A    134P  FR\",\n                            \"6  DL    42E  10SEP  MSPCDG    445P    815A+  11SEP  FR/SA\",\n                            \"7  DL7351E  11SEP  CDGROB  1015A    450P  SA\"\n                        ],\n                        \"booking_id\": \"1\",\n                        \"fq_type_name\": \"ReProtection\",\n                        \"fq_fare_type_name\": \"Private\",\n                        \"fareType\": \"SR\",\n                        \"flight\": {\n                            \"fl_product_id\": 44,\n                            \"fl_trip_type_id\": 1,\n                            \"fl_cabin_class\": \"E\",\n                            \"fl_adults\": 1,\n                            \"fl_children\": 0,\n                            \"fl_infants\": 0,\n                            \"fl_trip_type_name\": \"One Way\",\n                            \"fl_cabin_class_name\": \"Economy\"\n                        },\n                        \"trips\": [\n                            {\n                                \"uid\": \"fqt6116010ce3d6b\",\n                                \"key\": null,\n                                \"duration\": 848,\n                                \"segments\": [\n                                    {\n                                        \"uid\": \"fqs6116010ce9306\",\n                                        \"departureTime\": \"2021-06-10 21:30\",\n                                        \"arrivalTime\": \"2021-06-11 07:30\",\n                                        \"flightNumber\": 8727,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 600,\n                                        \"departureAirportCode\": \"ROB\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"CDG\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Monrovia\",\n                                        \"arrivalLocation\": \"Paris\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ceb91e\",\n                                        \"departureTime\": \"2021-06-11 10:15\",\n                                        \"arrivalTime\": \"2021-06-11 12:55\",\n                                        \"flightNumber\": 8395,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 160,\n                                        \"departureAirportCode\": \"CDG\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"LAX\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Paris\",\n                                        \"arrivalLocation\": \"Los Angeles\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010cebd9a\",\n                                        \"departureTime\": \"2021-06-11 17:46\",\n                                        \"arrivalTime\": \"2021-06-11 19:14\",\n                                        \"flightNumber\": 3580,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 88,\n                                        \"departureAirportCode\": \"LAX\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"SMF\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Los Angeles\",\n                                        \"arrivalLocation\": \"Sacramento\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    }\n                                ]\n                            },\n                            {\n                                \"uid\": \"fqt6116010cec0cf\",\n                                \"key\": null,\n                                \"duration\": 1233,\n                                \"segments\": [\n                                    {\n                                        \"uid\": \"fqs6116010cec45b\",\n                                        \"departureTime\": \"2021-09-10 10:27\",\n                                        \"arrivalTime\": \"2021-09-10 12:34\",\n                                        \"flightNumber\": 3864,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 127,\n                                        \"departureAirportCode\": \"SMF\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"SEA\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"E7W\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Sacramento\",\n                                        \"arrivalLocation\": \"Seattle\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010cec885\",\n                                        \"departureTime\": \"2021-09-10 08:13\",\n                                        \"arrivalTime\": \"2021-09-10 13:34\",\n                                        \"flightNumber\": 759,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 201,\n                                        \"departureAirportCode\": \"SEA\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"MSP\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"739\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Seattle\",\n                                        \"arrivalLocation\": \"Minneapolis\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ceccdb\",\n                                        \"departureTime\": \"2021-09-10 16:45\",\n                                        \"arrivalTime\": \"2021-09-11 08:15\",\n                                        \"flightNumber\": 42,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 510,\n                                        \"departureAirportCode\": \"MSP\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"CDG\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"333\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Minneapolis\",\n                                        \"arrivalLocation\": \"Paris\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ced118\",\n                                        \"departureTime\": \"2021-09-11 10:15\",\n                                        \"arrivalTime\": \"2021-09-11 16:50\",\n                                        \"flightNumber\": 7351,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 395,\n                                        \"departureAirportCode\": \"CDG\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"ROB\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"359\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Paris\",\n                                        \"arrivalLocation\": \"Monrovia\",\n                                        \"stop\": 1,\n                                        \"stops\": [\n                                            {\n                                                \"qss_quote_segment_id\": 26,\n                                                \"locationCode\": \"BKO\",\n                                                \"equipment\": null,\n                                                \"elapsedTime\": null,\n                                                \"duration\": 85,\n                                                \"departureDateTime\": \"2021-09-11 15:20\",\n                                                \"arrivalDateTime\": \"2021-09-11 13:55\"\n                                            }\n                                        ]\n                                    }\n                                ]\n                            }\n                        ],\n                        \"paxes\": [\n                            {\n                                \"fp_uid\": \"fp604741cd064a1\",\n                                \"fp_pax_id\": null,\n                                \"fp_pax_type\": \"ADT\",\n                                \"fp_first_name\": null,\n                                \"fp_last_name\": null,\n                                \"fp_middle_name\": null,\n                                \"fp_dob\": null\n                            },\n                            {\n                                \"fp_uid\": \"fp6047ae79a875c\",\n                                \"fp_pax_id\": null,\n                                \"fp_pax_type\": \"ADT\",\n                                \"fp_first_name\": null,\n                                \"fp_last_name\": null,\n                                \"fp_middle_name\": null,\n                                \"fp_dob\": null\n                            },\n                            {\n                                \"fp_uid\": \"fp6047ae8cdbb37\",\n                                \"fp_pax_id\": null,\n                                \"fp_pax_type\": \"ADT\",\n                                \"fp_first_name\": null,\n                                \"fp_last_name\": null,\n                                \"fp_middle_name\": null,\n                                \"fp_dob\": null\n                            }\n                        ]\n                    }\n                }\n            ]\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 200 Ok\n{\n            \"status\": 422,\n            \"message\": \"Product Quote not found\",\n            \"errors\": [\n                \"Product Quote not found\"\n            ],\n        }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (500):",
+          "content": "HTTP/1.1 200 Ok\n{\n            \"status\": 500,\n            \"message\": \"Internal Server Error\",\n            \"errors\": []\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightController.php",
+    "groupTitle": "Flight"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight/reprotection-create",
+    "title": "Create flight reprotection from BO",
+    "version": "0.1.0",
+    "name": "ReProtection_Create",
+    "group": "Flight",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "project_key",
+            "description": "<p>Project key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "is_automate",
+            "description": "<p>Is automate (default false)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "flight_quote",
+            "description": "<p>Flight quote</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "flight_quote.gds",
+            "description": "<p>Gds</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "flight_quote.pcc",
+            "description": "<p>pcc</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "flight_quote.fareType",
+            "description": "<p>ValidatingCarrier</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "flight_quote.trips",
+            "description": "<p>Trips</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_quote.trips.duration",
+            "description": "<p>Trip Duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "flight_quote.trips.segments",
+            "description": "<p>Segments</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "flight_quote.trips.segments.departureTime",
+            "description": "<p>DepartureTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "flight_quote.trips.segments.arrivalTime",
+            "description": "<p>ArrivalTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "flight_quote.trips.segments.departureAirportCode",
+            "description": "<p>Departure Airport Code IATA</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "flight_quote.trips.segments.arrivalAirportCode",
+            "description": "<p>Arrival Airport Code IATA</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_quote.trips.segments.flightNumber",
+            "description": "<p>Flight Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "1",
+            "optional": true,
+            "field": "flight_quote.trips.segments.bookingClass",
+            "description": "<p>BookingClass</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_quote.trips.segments.duration",
+            "description": "<p>Segment duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_quote.trips.segments.departureAirportTerminal",
+            "description": "<p>Departure Airport Terminal Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_quote.trips.segments.arrivalAirportTerminal",
+            "description": "<p>Arrival Airport Terminal Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_quote.trips.segments.operatingAirline",
+            "description": "<p>Operating Airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_quote.trips.segments.marketingAirline",
+            "description": "<p>Marketing Airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "flight_quote.trips.segments.airEquipType",
+            "description": "<p>AirEquipType</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_quote.trips.segments.marriageGroup",
+            "description": "<p>MarriageGroup</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_quote.trips.segments.mileage",
+            "description": "<p>Mileage</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_quote.trips.segments.meal",
+            "description": "<p>Meal</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "flight_quote.trips.segments.fareCode",
+            "description": "<p>Fare Code</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"booking_id\": \"XXXYYYZ\",\n    \"is_automate\": false,\n    \"project_key\":\"ovago\",\n    \"flight_quote\":{\n               \"gds\": \"S\",\n               \"pcc\": \"8KI0\",\n               \"validatingCarrier\": \"PR\",\n               \"fareType\": \"SR\",\n               \"itineraryDump\":[\n                   \"DL8727E 10JUN ROBCDG TK  930P  730A+ 11JUN TH/FR\",\n                   \"DL8395E 11JUN CDGLAX HK 1015A 1255P FR\",\n                   \"DL3580E 11JUN LAXSMF HK  546P  714P FR\",\n                   \"DL3864E 10SEP SMFSEA TK 1027A 1234P FR\",\n                   \"DL 759E 10SEP SEAMSP TK  813A  134P FR\",\n                   \"DL  42E 10SEP MSPCDG TK  445P  815A+ 11SEP FR/SA\",\n                   \"DL7351E 11SEP CDGROB HK 1015A  450P SA\",\n                   \"DL7351E 11SEP BKOROB HK  320P  450P SA\"\n               ],\n               \"trips\":[\n                   {\n                       \"duration\":848,\n                       \"segments\":[\n                           {\n                               \"departureTime\":\"2021-06-10 21:30\",\n                               \"arrivalTime\":\"2021-06-11 07:30\",\n                               \"flightNumber\":\"8727\",\n                               \"bookingClass\":\"E\",\n                               \"stop\":0,\n                               \"stops\":[\n\n                               ],\n                               \"duration\":600,\n                               \"departureAirportCode\":\"ROB\",\n                               \"departureAirportTerminal\":null,\n                               \"arrivalAirportCode\":\"CDG\",\n                               \"arrivalAirportTerminal\":null,\n                               \"operatingAirline\":null,\n                               \"airEquipType\":null,\n                               \"marketingAirline\":\"DL\",\n                               \"marriageGroup\":\"\",\n                               \"mileage\":null,\n                               \"cabin\":\"Y\",\n                               \"meal\":null,\n                               \"fareCode\":null,\n                               \"baggage\":[\n\n                               ],\n                               \"brandId\":null\n                           },\n                           {\n                               \"departureTime\":\"2021-06-11 10:15\",\n                               \"arrivalTime\":\"2021-06-11 12:55\",\n                               \"flightNumber\":\"8395\",\n                               \"bookingClass\":\"E\",\n                               \"stop\":0,\n                               \"stops\":[\n\n                               ],\n                               \"duration\":160,\n                               \"departureAirportCode\":\"CDG\",\n                               \"departureAirportTerminal\":null,\n                               \"arrivalAirportCode\":\"LAX\",\n                               \"arrivalAirportTerminal\":null,\n                               \"operatingAirline\":null,\n                               \"airEquipType\":null,\n                               \"marketingAirline\":\"DL\",\n                               \"marriageGroup\":\"\",\n                               \"mileage\":null,\n                               \"cabin\":\"Y\",\n                               \"meal\":null,\n                               \"fareCode\":null,\n                               \"baggage\":[\n\n                               ],\n                               \"brandId\":null\n                           },\n                           {\n                               \"departureTime\":\"2021-06-11 17:46\",\n                               \"arrivalTime\":\"2021-06-11 19:14\",\n                               \"flightNumber\":\"3580\",\n                               \"bookingClass\":\"E\",\n                               \"stop\":0,\n                               \"stops\":[\n\n                               ],\n                               \"duration\":88,\n                               \"departureAirportCode\":\"LAX\",\n                               \"departureAirportTerminal\":null,\n                               \"arrivalAirportCode\":\"SMF\",\n                               \"arrivalAirportTerminal\":null,\n                               \"operatingAirline\":null,\n                               \"airEquipType\":null,\n                               \"marketingAirline\":\"DL\",\n                               \"marriageGroup\":\"\",\n                               \"mileage\":null,\n                               \"cabin\":\"Y\",\n                               \"meal\":null,\n                               \"fareCode\":null,\n                               \"baggage\":[\n\n                               ],\n                               \"brandId\":null\n                           }\n                       ]\n                   },\n                   {\n                       \"duration\":1233,\n                       \"segments\":[\n                           {\n                               \"departureTime\":\"2021-09-10 10:27\",\n                               \"arrivalTime\":\"2021-09-10 12:34\",\n                               \"flightNumber\":\"3864\",\n                               \"bookingClass\":\"E\",\n                               \"stop\":0,\n                               \"stops\":[\n\n                               ],\n                               \"duration\":127,\n                               \"departureAirportCode\":\"SMF\",\n                               \"departureAirportTerminal\":null,\n                               \"arrivalAirportCode\":\"SEA\",\n                               \"arrivalAirportTerminal\":null,\n                               \"operatingAirline\":null,\n                               \"airEquipType\":\"E7W\",\n                               \"marketingAirline\":\"DL\",\n                               \"marriageGroup\":\"\",\n                               \"mileage\":null,\n                               \"cabin\":\"Y\",\n                               \"meal\":null,\n                               \"fareCode\":null,\n                               \"baggage\":[\n\n                               ],\n                               \"brandId\":null\n                           },\n                           {\n                               \"departureTime\":\"2021-09-10 08:13\",\n                               \"arrivalTime\":\"2021-09-10 13:34\",\n                               \"flightNumber\":\"759\",\n                               \"bookingClass\":\"E\",\n                               \"stop\":0,\n                               \"stops\":[\n\n                               ],\n                               \"duration\":201,\n                               \"departureAirportCode\":\"SEA\",\n                               \"departureAirportTerminal\":null,\n                               \"arrivalAirportCode\":\"MSP\",\n                               \"arrivalAirportTerminal\":null,\n                               \"operatingAirline\":null,\n                               \"airEquipType\":\"739\",\n                               \"marketingAirline\":\"DL\",\n                               \"marriageGroup\":\"\",\n                               \"mileage\":null,\n                               \"cabin\":\"Y\",\n                               \"meal\":null,\n                               \"fareCode\":null,\n                               \"baggage\":[\n\n                               ],\n                               \"brandId\":null\n                           },\n                           {\n                               \"departureTime\":\"2021-09-10 16:45\",\n                               \"arrivalTime\":\"2021-09-11 08:15\",\n                               \"flightNumber\":\"42\",\n                               \"bookingClass\":\"E\",\n                               \"stop\":0,\n                               \"stops\":[\n\n                               ],\n                               \"duration\":510,\n                               \"departureAirportCode\":\"MSP\",\n                               \"departureAirportTerminal\":null,\n                               \"arrivalAirportCode\":\"CDG\",\n                               \"arrivalAirportTerminal\":null,\n                               \"operatingAirline\":null,\n                               \"airEquipType\":\"333\",\n                               \"marketingAirline\":\"DL\",\n                               \"marriageGroup\":\"\",\n                               \"mileage\":null,\n                               \"cabin\":\"Y\",\n                               \"meal\":null,\n                               \"fareCode\":null,\n                               \"baggage\":[\n\n                               ],\n                               \"brandId\":null\n                           },\n                           {\n                               \"departureTime\":\"2021-09-11 10:15\",\n                               \"arrivalTime\":\"2021-09-11 16:50\",\n                               \"flightNumber\":\"7351\",\n                               \"bookingClass\":\"E\",\n                               \"stop\":1,\n                               \"stops\":[\n                                   {\n                                       \"locationCode\":\"BKO\",\n                                       \"departureDateTime\":\"2021-09-11 15:20\",\n                                       \"arrivalDateTime\":\"2021-09-11 13:55\",\n                                       \"duration\":85,\n                                       \"elapsedTime\":null,\n                                       \"equipment\":null\n                                   }\n                               ],\n                               \"duration\":395,\n                               \"departureAirportCode\":\"CDG\",\n                               \"departureAirportTerminal\":null,\n                               \"arrivalAirportCode\":\"ROB\",\n                               \"arrivalAirportTerminal\":null,\n                               \"operatingAirline\":null,\n                               \"airEquipType\":\"359\",\n                               \"marketingAirline\":\"DL\",\n                               \"marriageGroup\":\"\",\n                               \"mileage\":null,\n                               \"cabin\":\"Y\",\n                               \"meal\":null,\n                               \"fareCode\":null,\n                               \"baggage\":[\n\n                               ],\n                               \"brandId\":null\n                           }\n                       ]\n                   }\n               ]\n           }\n         }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n           \"resultMessage\": \"FlightRequest created\",\n           \"id\" => 12345\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"FlightRequest save is failed.\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (500):",
+          "content": "HTTP/1.1 500 Internal Server Error\n{\n       \"status\": \"Failed\",\n       \"source\": {\n           \"type\": 1,\n           \"status\": 500\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": \"Failed\",\n       \"message\": \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\",\n       \"errors\": [\n             \"Curl error: #28 - Operation timed out after 30001 milliseconds with 0 bytes received\"\n       ],\n       \"code\": 0,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightController.php",
+    "groupTitle": "Flight"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight/reprotection-decision",
+    "title": "Reprotection decision",
+    "version": "0.2.0",
+    "name": "ReProtection_Decision",
+    "group": "Flight",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "allowedValues": [
+              "\"confirm\"",
+              "\"modify\"",
+              "\"refund\""
+            ],
+            "optional": false,
+            "field": "type",
+            "description": "<p>Re-protection Type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": true,
+            "field": "reprotection_quote_gid",
+            "description": "<p>Re-protection Product Quote GID (required for type = &quot;confirm&quot;, &quot;modify&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "flight_product_quote",
+            "description": "<p>Flight Quote Data (required for type = &quot;modify&quot;)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"booking_id\": \"W12RT56\",\n    \"type\": \"confirm\",\n    \"reprotection_quote_gid\": \"94f95e797313c99d85d955373e408788\",\n    \"flight_product_quote\": \"{}\" // todo\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n           \"success\" => true\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type\": [\n              \"Type cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightController.php",
+    "groupTitle": "Flight"
+  },
+  {
+    "type": "get",
+    "url": "/v2/flight/reprotection-get",
+    "title": "Get flight reprotection",
+    "version": "0.1.0",
+    "name": "ReProtection_Get",
+    "group": "Flight",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "flight_product_quote_gid",
+            "description": "<p>Flight Product Quote gid</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"flight_product_quote_gid\": \"2bd12377691f282e11af12937674e3d1\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n            \"status\": 200,\n            \"message\": \"OK\",\n            \"origin_product_quote\": {\n                \"pq_gid\": \"22c3c0c2982108117d1952f317f568a3\",\n                \"pq_name\": \"\",\n                \"pq_order_id\": null,\n                \"pq_description\": null,\n                \"pq_status_id\": 1,\n                \"pq_price\": 1554.4,\n                \"pq_origin_price\": 1414.4,\n                \"pq_client_price\": 1554.4,\n                \"pq_service_fee_sum\": 0,\n                \"pq_origin_currency\": \"USD\",\n                \"pq_client_currency\": \"USD\",\n                \"pq_status_name\": \"New\",\n                \"pq_files\": [],\n                \"data\": {\n                    \"fq_flight_id\": 344,\n                    \"fq_source_id\": null,\n                    \"fq_product_quote_id\": 775,\n                    \"gds\": \"T\",\n                    \"pcc\": \"E9V\",\n                    \"fq_gds_offer_id\": null,\n                    \"fq_type_id\": 0,\n                    \"fq_cabin_class\": \"E\",\n                    \"fq_trip_type_id\": 3,\n                    \"validatingCarrier\": \"OS\",\n                    \"fq_fare_type_id\": 1,\n                    \"fq_origin_search_data\": \"{\\\"key\\\":\\\"2_U0FMMTAxKlkyMTAwL0tJVkxPTjIwMjItMDEtMTIvTE9ORlJBMjAyMi0wMS0xNS9GUkFLSVYyMDIyLTAxLTI0Kk9TfiNPUzY1NiNPUzQ1NSNMSDkwNSNMSDE0NzR+bGM6ZW5fdXM=\\\",\\\"routingId\\\":1,\\\"prices\\\":{\\\"lastTicketDate\\\":\\\"2021-07-31\\\",\\\"totalPrice\\\":1414.4,\\\"totalTax\\\":872.4,\\\"comm\\\":0,\\\"isCk\\\":false,\\\"markupId\\\":0,\\\"markupUid\\\":\\\"\\\",\\\"markup\\\":0},\\\"passengers\\\":{\\\"ADT\\\":{\\\"codeAs\\\":\\\"ADT\\\",\\\"cnt\\\":2,\\\"baseFare\\\":197,\\\"pubBaseFare\\\":197,\\\"baseTax\\\":296.8,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":493.8,\\\"tax\\\":296.8,\\\"oBaseFare\\\":{\\\"amount\\\":197,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":296.8,\\\"currency\\\":\\\"USD\\\"}},\\\"CHD\\\":{\\\"codeAs\\\":\\\"CHD\\\",\\\"cnt\\\":1,\\\"baseFare\\\":148,\\\"pubBaseFare\\\":148,\\\"baseTax\\\":278.8,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":426.8,\\\"tax\\\":278.8,\\\"oBaseFare\\\":{\\\"amount\\\":148,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":278.8,\\\"currency\\\":\\\"USD\\\"}}},\\\"penalties\\\":{\\\"exchange\\\":true,\\\"refund\\\":false,\\\"list\\\":[{\\\"type\\\":\\\"ex\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":true,\\\"amount\\\":0},{\\\"type\\\":\\\"ex\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":true,\\\"amount\\\":0},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":false},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":false}]},\\\"trips\\\":[{\\\"tripId\\\":1,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2022-01-12 16:00\\\",\\\"arrivalTime\\\":\\\"2022-01-12 16:45\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"656\\\",\\\"bookingClass\\\":\\\"K\\\",\\\"duration\\\":105,\\\"departureAirportCode\\\":\\\"KIV\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"VIE\\\",\\\"arrivalAirportTerminal\\\":\\\"3\\\",\\\"operatingAirline\\\":\\\"OS\\\",\\\"airEquipType\\\":\\\"E95\\\",\\\"marketingAirline\\\":\\\"OS\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":583,\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"K03CLSE8\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":2,\\\"departureTime\\\":\\\"2022-01-12 17:15\\\",\\\"arrivalTime\\\":\\\"2022-01-12 18:40\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"455\\\",\\\"bookingClass\\\":\\\"K\\\",\\\"duration\\\":145,\\\"departureAirportCode\\\":\\\"VIE\\\",\\\"departureAirportTerminal\\\":\\\"3\\\",\\\"arrivalAirportCode\\\":\\\"LHR\\\",\\\"arrivalAirportTerminal\\\":\\\"2\\\",\\\"operatingAirline\\\":\\\"OS\\\",\\\"airEquipType\\\":\\\"321\\\",\\\"marketingAirline\\\":\\\"OS\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":774,\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"K03CLSE8\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":280},{\\\"tripId\\\":2,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2022-01-15 11:30\\\",\\\"arrivalTime\\\":\\\"2022-01-15 14:05\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"905\\\",\\\"bookingClass\\\":\\\"Q\\\",\\\"duration\\\":95,\\\"departureAirportCode\\\":\\\"LHR\\\",\\\"departureAirportTerminal\\\":\\\"2\\\",\\\"arrivalAirportCode\\\":\\\"FRA\\\",\\\"arrivalAirportTerminal\\\":\\\"1\\\",\\\"operatingAirline\\\":\\\"LH\\\",\\\"airEquipType\\\":\\\"32N\\\",\\\"marketingAirline\\\":\\\"LH\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":390,\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"Q03CLSE0\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":95},{\\\"tripId\\\":3,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2022-01-24 09:45\\\",\\\"arrivalTime\\\":\\\"2022-01-24 13:05\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"1474\\\",\\\"bookingClass\\\":\\\"Q\\\",\\\"duration\\\":140,\\\"departureAirportCode\\\":\\\"FRA\\\",\\\"departureAirportTerminal\\\":\\\"1\\\",\\\"arrivalAirportCode\\\":\\\"KIV\\\",\\\"arrivalAirportTerminal\\\":\\\"\\\",\\\"operatingAirline\\\":\\\"CL\\\",\\\"opName\\\":\\\"LUFTHANSA CITYLINE GMBH\\\",\\\"airEquipType\\\":\\\"E90\\\",\\\"marketingAirline\\\":\\\"LH\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":953,\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"Q03CLSE0\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":140}],\\\"maxSeats\\\":9,\\\"paxCnt\\\":3,\\\"validatingCarrier\\\":\\\"OS\\\",\\\"gds\\\":\\\"T\\\",\\\"pcc\\\":\\\"E9V\\\",\\\"cons\\\":\\\"GTT\\\",\\\"fareType\\\":\\\"PUB\\\",\\\"tripType\\\":\\\"MC\\\",\\\"cabin\\\":\\\"Y\\\",\\\"currency\\\":\\\"USD\\\",\\\"currencies\\\":[\\\"USD\\\"],\\\"currencyRates\\\":{\\\"USDUSD\\\":{\\\"from\\\":\\\"USD\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1}},\\\"keys\\\":{\\\"travelport\\\":{\\\"traceId\\\":\\\"23d8e32d-b8eb-4578-9928-4674761747d6\\\",\\\"availabilitySources\\\":\\\"Q,Q,S,S\\\",\\\"type\\\":\\\"T\\\"},\\\"seatHoldSeg\\\":{\\\"trip\\\":0,\\\"segment\\\":0,\\\"seats\\\":9}},\\\"ngsFeatures\\\":{\\\"stars\\\":1,\\\"name\\\":\\\"BASIC\\\",\\\"list\\\":[]},\\\"meta\\\":{\\\"eip\\\":0,\\\"noavail\\\":false,\\\"searchId\\\":\\\"U0FMMTAxWTIxMDB8S0lWTE9OMjAyMi0wMS0xMnxMT05GUkEyMDIyLTAxLTE1fEZSQUtJVjIwMjItMDEtMjQ=\\\",\\\"lang\\\":\\\"en\\\",\\\"rank\\\":10,\\\"cheapest\\\":true,\\\"fastest\\\":true,\\\"best\\\":true,\\\"bags\\\":1,\\\"country\\\":\\\"us\\\",\\\"prod_types\\\":[\\\"PUB\\\"]},\\\"price\\\":493.8,\\\"originRate\\\":1,\\\"stops\\\":[1,0,0],\\\"time\\\":[{\\\"departure\\\":\\\"2022-01-12 16:00\\\",\\\"arrival\\\":\\\"2022-01-12 18:40\\\"},{\\\"departure\\\":\\\"2022-01-15 11:30\\\",\\\"arrival\\\":\\\"2022-01-15 14:05\\\"},{\\\"departure\\\":\\\"2022-01-24 09:45\\\",\\\"arrival\\\":\\\"2022-01-24 13:05\\\"}],\\\"bagFilter\\\":1,\\\"airportChange\\\":false,\\\"technicalStopCnt\\\":0,\\\"duration\\\":[280,95,140],\\\"totalDuration\\\":515,\\\"topCriteria\\\":\\\"fastestbestcheapest\\\",\\\"rank\\\":10}\",\n                    \"fq_last_ticket_date\": \"2021-07-31\",\n                    \"fq_json_booking\": null,\n                    \"fq_ticket_json\": null,\n                    \"itineraryDump\": [\n                        \"1  AF6602E  25MAR  KIVOTP    525A    640A  TH OPERATED BY RO\",\n                        \"2  AF1889E  25MAR  OTPCDG    225P    435P  TH\",\n                        \"3  AF1380E  25MAR  CDGLHR    920P    945P  TH\"\n                    ],\n                    \"booking_id\": \"O230850\",\n                    \"fq_type_name\": \"Base\",\n                    \"fareType\": \"PUB\",\n                    \"flight\": {\n                        \"fl_product_id\": 688,\n                        \"fl_trip_type_id\": 3,\n                        \"fl_cabin_class\": \"E\",\n                        \"fl_adults\": 2,\n                        \"fl_children\": 1,\n                        \"fl_infants\": 0,\n                        \"fl_trip_type_name\": \"Multi destination\",\n                        \"fl_cabin_class_name\": \"Economy\"\n                    },\n                    \"trips\": [\n                        {\n                            \"uid\": \"fqt6103c94699a2e\",\n                            \"key\": null,\n                            \"duration\": 280,\n                            \"segments\": [\n                                {\n                                    \"uid\": \"fqs6103c9469c3c8\",\n                                    \"departureTime\": \"2022-01-12 16:00\",\n                                    \"arrivalTime\": \"2022-01-12 16:45\",\n                                    \"flightNumber\": 656,\n                                    \"bookingClass\": \"K\",\n                                    \"duration\": 105,\n                                    \"departureAirportCode\": \"KIV\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"VIE\",\n                                    \"arrivalAirportTerminal\": \"3\",\n                                    \"fqs_operating_airline\": \"RO\",\n                                    \"fqs_marketing_airline\": \"RO\",\n                                    \"airEquipType\": \"E95\",\n                                    \"marriageGroup\": \"I\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"K03CLSE8\",\n                                    \"mileage\": 583,\n                                    \"departureLocation\": \"Chisinau\",\n                                    \"arrivalLocation\": \"Vienna\",\n                                    \"cabin\": \"E\",\n                                    \"operatingAirline\": \"RO\",\n                                    \"marketingAirline\": \"RO\",\n                                    \"stop\": 1,\n                                    \"stops\": [\n                                        {\n                                            \"qss_quote_segment_id\": 9,\n                                            \"locationCode\": \"SCL\",\n                                            \"equipment\": \"\",\n                                            \"elapsedTime\": 120,\n                                            \"duration\": 120,\n                                            \"departureDateTime\": \"2021-09-09 00:00\",\n                                            \"arrivalDateTime\": \"2021-09-08 00:00\"\n                                        }\n                                    ],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 1076,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        },\n                                        {\n                                            \"qsb_flight_pax_code_id\": 2,\n                                            \"qsb_flight_quote_segment_id\": 1076,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"uid\": \"fqs6103c9469e37b\",\n                                    \"departureTime\": \"2022-01-12 17:15\",\n                                    \"arrivalTime\": \"2022-01-12 18:40\",\n                                    \"flightNumber\": 455,\n                                    \"bookingClass\": \"K\",\n                                    \"duration\": 145,\n                                    \"departureAirportCode\": \"VIE\",\n                                    \"departureAirportTerminal\": \"3\",\n                                    \"arrivalAirportCode\": \"LHR\",\n                                    \"arrivalAirportTerminal\": \"2\",\n                                    \"fqs_operating_airline\": \"OS\",\n                                    \"fqs_marketing_airline\": \"OS\",\n                                    \"airEquipType\": \"321\",\n                                    \"marriageGroup\": \"O\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"K03CLSE8\",\n                                    \"mileage\": 774,\n                                    \"departureLocation\": \"Vienna\",\n                                    \"arrivalLocation\": \"London\",\n                                    \"cabin\": \"E\",\n                                    \"operatingAirline\": \"OS\",\n                                    \"marketingAirline\": \"OS\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 1077,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        },\n                                        {\n                                            \"qsb_flight_pax_code_id\": 2,\n                                            \"qsb_flight_quote_segment_id\": 1077,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        }\n                                    ]\n                                }\n                            ]\n                        },\n                        {\n                            \"uid\": \"fqt6103c9469f378\",\n                            \"key\": null,\n                            \"duration\": 95,\n                            \"segments\": [\n                                {\n                                    \"uid\": \"fqs6103c9469fa85\",\n                                    \"departureTime\": \"2022-01-15 11:30\",\n                                    \"arrivalTime\": \"2022-01-15 14:05\",\n                                    \"flightNumber\": 905,\n                                    \"bookingClass\": \"Q\",\n                                    \"duration\": 95,\n                                    \"departureAirportCode\": \"LHR\",\n                                    \"departureAirportTerminal\": \"2\",\n                                    \"arrivalAirportCode\": \"FRA\",\n                                    \"arrivalAirportTerminal\": \"1\",\n                                    \"fqs_operating_airline\": \"LH\",\n                                    \"fqs_marketing_airline\": \"LH\",\n                                    \"airEquipType\": \"32N\",\n                                    \"marriageGroup\": \"O\",\n                                    \"cabin\": \"Y\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"Q03CLSE0\",\n                                    \"mileage\": 390,\n                                    \"departureLocation\": \"London\",\n                                    \"arrivalLocation\": \"Frankfurt am Main\",\n                                    \"operatingAirline\": \"LH\",\n                                    \"marketingAirline\": \"LH\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 1078,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        },\n                                        {\n                                            \"qsb_flight_pax_code_id\": 2,\n                                            \"qsb_flight_quote_segment_id\": 1078,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        }\n                                    ]\n                                }\n                            ]\n                        },\n                        {\n                            \"uid\": \"fqt6103c946a08d6\",\n                            \"key\": null,\n                            \"duration\": 140,\n                            \"segments\": [\n                                {\n                                    \"uid\": \"fqs6103c946a0d33\",\n                                    \"departureTime\": \"2022-01-24 09:45\",\n                                    \"arrivalTime\": \"2022-01-24 13:05\",\n                                    \"flightNumber\": 1474,\n                                    \"bookingClass\": \"Q\",\n                                    \"duration\": 140,\n                                    \"departureAirportCode\": \"FRA\",\n                                    \"departureAirportTerminal\": \"1\",\n                                    \"arrivalAirportCode\": \"KIV\",\n                                    \"arrivalAirportTerminal\": \"\",\n                                    \"fqs_operating_airline\": \"RO\",\n                                    \"fqs_marketing_airline\": \"RO\",\n                                    \"airEquipType\": \"E90\",\n                                    \"marriageGroup\": \"O\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"Q03CLSE0\",\n                                    \"mileage\": 953,\n                                    \"departureLocation\": \"Frankfurt am Main\",\n                                    \"arrivalLocation\": \"Chisinau\",\n                                    \"cabin\": \"E\",\n                                    \"operatingAirline\": \"LH\",\n                                    \"marketingAirline\": \"LH\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 1079,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        },\n                                        {\n                                            \"qsb_flight_pax_code_id\": 2,\n                                            \"qsb_flight_quote_segment_id\": 1079,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ],\n                    \"pax_prices\": [\n                        {\n                            \"qpp_fare\": \"197.00\",\n                            \"qpp_tax\": \"296.80\",\n                            \"qpp_system_mark_up\": \"0.00\",\n                            \"qpp_agent_mark_up\": \"70.00\",\n                            \"qpp_origin_fare\": \"197.00\",\n                            \"qpp_origin_currency\": \"USD\",\n                            \"qpp_origin_tax\": \"296.80\",\n                            \"qpp_client_currency\": \"USD\",\n                            \"qpp_client_fare\": \"197.00\",\n                            \"qpp_client_tax\": \"296.80\",\n                            \"paxType\": \"ADT\"\n                        },\n                        {\n                            \"qpp_fare\": \"148.00\",\n                            \"qpp_tax\": \"278.80\",\n                            \"qpp_system_mark_up\": \"0.00\",\n                            \"qpp_agent_mark_up\": \"0.00\",\n                            \"qpp_origin_fare\": \"148.00\",\n                            \"qpp_origin_currency\": \"USD\",\n                            \"qpp_origin_tax\": \"278.80\",\n                            \"qpp_client_currency\": \"USD\",\n                            \"qpp_client_fare\": \"148.00\",\n                            \"qpp_client_tax\": \"278.80\",\n                            \"paxType\": \"CHD\"\n                        }\n                    ],\n                    \"paxes\": [\n                        {\n                            \"fp_uid\": \"fp6103c94694091\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp6103c946948e9\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp6103c94695639\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"CHD\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        }\n                    ]\n                }\n            },\n            \"reprotection_product_quote\": {\n                \"pq_gid\": \"2bd12377691f282e11af12937674e3d1\",\n                \"pq_name\": \"\",\n                \"pq_order_id\": 544,\n                \"pq_description\": null,\n                \"pq_status_id\": 1,\n                \"pq_price\": 274.7,\n                \"pq_origin_price\": 259.86,\n                \"pq_client_price\": 274.7,\n                \"pq_service_fee_sum\": 0,\n                \"pq_origin_currency\": \"USD\",\n                \"pq_client_currency\": \"USD\",\n                \"pq_status_name\": \"New\",\n                \"pq_files\": [],\n                \"data\": {\n                    \"fq_flight_id\": 343,\n                    \"fq_source_id\": null,\n                    \"fq_product_quote_id\": 774,\n                    \"gds\": \"C\",\n                    \"pcc\": \"default\",\n                    \"fq_gds_offer_id\": null,\n                    \"fq_type_id\": 0,\n                    \"fq_cabin_class\": \"E\",\n                    \"fq_trip_type_id\": 1,\n                    \"validatingCarrier\": \"RO\",\n                    \"fq_fare_type_id\": 1,\n                    \"fq_origin_search_data\": \"{\\\"key\\\":\\\"2_U0FMMTAxKlkyMDAwL0tJVkxPTjIwMjEtMDctMjkqUk9+I1JPMjAyI1JPMzkxfmxjOmVuX3Vz\\\",\\\"routingId\\\":2,\\\"prices\\\":{\\\"lastTicketDate\\\":\\\"2021-07-28 23:59\\\",\\\"totalPrice\\\":302.9,\\\"totalTax\\\":81.5,\\\"comm\\\":0,\\\"isCk\\\":true,\\\"CkAmount\\\":14.84,\\\"markupId\\\":0,\\\"markupUid\\\":\\\"\\\",\\\"markup\\\":14.84},\\\"passengers\\\":{\\\"ADT\\\":{\\\"codeAs\\\":\\\"ADT\\\",\\\"cnt\\\":2,\\\"baseFare\\\":110.7,\\\"pubBaseFare\\\":110.7,\\\"baseTax\\\":33.33,\\\"markup\\\":7.42,\\\"comm\\\":0,\\\"CkAmount\\\":7.42,\\\"price\\\":151.45,\\\"tax\\\":40.75,\\\"oBaseFare\\\":{\\\"amount\\\":92,\\\"currency\\\":\\\"EUR\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":27.7,\\\"currency\\\":\\\"EUR\\\"},\\\"oCkAmount\\\":{\\\"amount\\\":6.17,\\\"currency\\\":\\\"EUR\\\"}}},\\\"trips\\\":[{\\\"tripId\\\":1,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2021-07-29 09:30\\\",\\\"arrivalTime\\\":\\\"2021-07-29 10:45\\\",\\\"stop\\\":0,\\\"stops\\\":null,\\\"flightNumber\\\":\\\"202\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":75,\\\"departureAirportCode\\\":\\\"KIV\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"OTP\\\",\\\"arrivalAirportTerminal\\\":\\\"\\\",\\\"operatingAirline\\\":\\\"RO\\\",\\\"airEquipType\\\":\\\"AT7\\\",\\\"marketingAirline\\\":\\\"RO\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"EOWSVRMD\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":2,\\\"departureTime\\\":\\\"2021-07-29 12:20\\\",\\\"arrivalTime\\\":\\\"2021-07-29 14:05\\\",\\\"stop\\\":0,\\\"stops\\\":null,\\\"flightNumber\\\":\\\"391\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":225,\\\"departureAirportCode\\\":\\\"OTP\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"LHR\\\",\\\"arrivalAirportTerminal\\\":\\\"\\\",\\\"operatingAirline\\\":\\\"RO\\\",\\\"airEquipType\\\":\\\"318\\\",\\\"marketingAirline\\\":\\\"RO\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"EOWSVRGB\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":395}],\\\"maxSeats\\\":3,\\\"paxCnt\\\":2,\\\"validatingCarrier\\\":\\\"RO\\\",\\\"gds\\\":\\\"C\\\",\\\"pcc\\\":\\\"default\\\",\\\"cons\\\":\\\"AER\\\",\\\"fareType\\\":\\\"PUB\\\",\\\"tripType\\\":\\\"OW\\\",\\\"cabin\\\":\\\"Y\\\",\\\"currency\\\":\\\"USD\\\",\\\"currencies\\\":[\\\"USD\\\",\\\"EUR\\\"],\\\"currencyRates\\\":{\\\"EURUSD\\\":{\\\"from\\\":\\\"EUR\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1.20328},\\\"USDUSD\\\":{\\\"from\\\":\\\"USD\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1}},\\\"keys\\\":{\\\"cockpit\\\":{\\\"itineraryIds\\\":[\\\"D3537439481d_ROUNDTRIP_0_0_0_0\\\"],\\\"fareIds\\\":[\\\"D3537439481d_ROUNDTRIP_0\\\"],\\\"webServiceLogId\\\":\\\"EM483101d9441a09d\\\",\\\"sessionId\\\":\\\"3af91858-e306-4b40-83af-108c593f2a36\\\",\\\"type\\\":\\\"C\\\"}},\\\"ngsFeatures\\\":{\\\"stars\\\":1,\\\"name\\\":\\\"BASIC\\\",\\\"list\\\":[]},\\\"meta\\\":{\\\"eip\\\":0,\\\"noavail\\\":false,\\\"searchId\\\":\\\"U0FMMTAxWTIwMDB8S0lWTE9OMjAyMS0wNy0yOQ==\\\",\\\"lang\\\":\\\"en\\\",\\\"rank\\\":8.987654,\\\"cheapest\\\":false,\\\"fastest\\\":false,\\\"best\\\":false,\\\"bags\\\":1,\\\"country\\\":\\\"us\\\",\\\"prod_types\\\":[\\\"PUB\\\"]},\\\"price\\\":151.45,\\\"originRate\\\":1,\\\"stops\\\":[1],\\\"time\\\":[{\\\"departure\\\":\\\"2021-07-29 09:30\\\",\\\"arrival\\\":\\\"2021-07-29 14:05\\\"}],\\\"bagFilter\\\":1,\\\"airportChange\\\":false,\\\"technicalStopCnt\\\":0,\\\"duration\\\":[395],\\\"totalDuration\\\":395,\\\"topCriteria\\\":\\\"\\\",\\\"rank\\\":8.987654}\",\n                    \"fq_last_ticket_date\": \"2021-07-28\",\n                    \"fq_json_booking\": null,\n                    \"fq_ticket_json\": null,\n                    \"itineraryDump\": [\n                        \"1  AF6602E  25MAR  KIVOTP    525A    640A  TH OPERATED BY RO\",\n                        \"2  AF1889E  25MAR  OTPCDG    225P    435P  TH\",\n                        \"3  AF1380E  25MAR  CDGLHR    920P    945P  TH\"\n                    ],\n                    \"booking_id\": \"O230851\",\n                    \"fq_type_name\": \"Base\",\n                    \"fareType\": \"PUB\",\n                    \"flight\": {\n                        \"fl_product_id\": 687,\n                        \"fl_trip_type_id\": 1,\n                        \"fl_cabin_class\": \"E\",\n                        \"fl_adults\": 2,\n                        \"fl_children\": 0,\n                        \"fl_infants\": 0,\n                        \"fl_trip_type_name\": \"One Way\",\n                        \"fl_cabin_class_name\": \"Economy\"\n                    },\n                    \"trips\": [\n                        {\n                            \"uid\": \"fqt61015f35534ec\",\n                            \"key\": null,\n                            \"duration\": 395,\n                            \"segments\": [\n                                {\n                                    \"uid\": \"fqs61015f3554892\",\n                                    \"departureTime\": \"2021-07-29 09:30\",\n                                    \"arrivalTime\": \"2021-07-29 10:45\",\n                                    \"flightNumber\": 202,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 75,\n                                    \"departureAirportCode\": \"KIV\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"OTP\",\n                                    \"arrivalAirportTerminal\": \"\",\n                                    \"fqs_operating_airline\": \"RO\",\n                                    \"fqs_marketing_airline\": \"RO\",\n                                    \"airEquipType\": \"AT7\",\n                                    \"marriageGroup\": \"\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"EOWSVRMD\",\n                                    \"mileage\": null,\n                                    \"departureLocation\": \"Chisinau\",\n                                    \"arrivalLocation\": \"Bucharest\",\n                                    \"cabin\": \"E\",\n                                    \"operatingAirline\": \"RO\",\n                                    \"marketingAirline\": \"RO\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 1074,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"uid\": \"fqs61015f35565ef\",\n                                    \"departureTime\": \"2021-07-29 12:20\",\n                                    \"arrivalTime\": \"2021-07-29 14:05\",\n                                    \"flightNumber\": 391,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 225,\n                                    \"departureAirportCode\": \"OTP\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"LHR\",\n                                    \"arrivalAirportTerminal\": \"\",\n                                    \"fqs_operating_airline\": \"RO\",\n                                    \"fqs_marketing_airline\": \"RO\",\n                                    \"airEquipType\": \"318\",\n                                    \"marriageGroup\": \"\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"EOWSVRGB\",\n                                    \"mileage\": null,\n                                    \"departureLocation\": \"Bucharest\",\n                                    \"arrivalLocation\": \"London\",\n                                    \"cabin\": \"E\",\n                                    \"operatingAirline\": \"RO\",\n                                    \"marketingAirline\": \"RO\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 1075,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null,\n                                            \"qsb_carry_one\": 1\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ],\n                    \"pax_prices\": [\n                        {\n                            \"qpp_fare\": \"99.86\",\n                            \"qpp_tax\": \"30.07\",\n                            \"qpp_system_mark_up\": \"7.42\",\n                            \"qpp_agent_mark_up\": \"0.00\",\n                            \"qpp_origin_fare\": \"110.70\",\n                            \"qpp_origin_currency\": \"USD\",\n                            \"qpp_origin_tax\": \"33.33\",\n                            \"qpp_client_currency\": \"USD\",\n                            \"qpp_client_fare\": \"99.86\",\n                            \"qpp_client_tax\": \"30.07\",\n                            \"paxType\": \"ADT\"\n                        }\n                    ],\n                    \"paxes\": [\n                        {\n                            \"fp_uid\": \"fp61015f33cccbd\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp61015f33cd1f4\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp61015f354f612\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp61015f354f948\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        }\n                    ]\n                }\n            },\n            \"order\": {\n                \"or_id\": 544,\n                \"or_gid\": \"3b78e38c2ae14e4ad282cf3abc652140\",\n                \"or_uid\": \"or61015f39e2d71\",\n                \"or_name\": \"Order 1\",\n                \"or_description\": null,\n                \"or_status_id\": 2,\n                \"or_pay_status_id\": 1,\n                \"or_app_total\": \"274.70\",\n                \"or_app_markup\": \"14.84\",\n                \"or_agent_markup\": \"0.00\",\n                \"or_client_total\": \"274.70\",\n                \"or_client_currency\": \"USD\",\n                \"or_client_currency_rate\": \"1.00000\",\n                \"or_status_name\": \"Pending\",\n                \"or_pay_status_name\": \"Not paid\",\n                \"or_client_currency_symbol\": \"USD\",\n                \"or_files\": [],\n                \"or_request_uid\": null,\n                \"billing_info\": []\n            },\n            \"order_contacts\": []\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 200 Ok\n{\n            \"status\": 422,\n            \"message\": \"Product Quote not found\",\n            \"errors\": [\n                \"Product Quote not found\"\n            ],\n            \"code\": 0\n        }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (500):",
+          "content": "HTTP/1.1 200 Ok\n{\n            \"status\": 500,\n            \"message\": \"Internal Server Error\",\n            \"code\": 8,\n            \"errors\": []\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightController.php",
+    "groupTitle": "Flight"
+  },
+  {
     "type": "post",
     "url": "/v1/lead/create",
     "title": "Create Lead",
@@ -3630,6 +4177,13 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "optional": true,
+            "field": "lead.department_key",
+            "description": "<p>Department Key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
             "size": "50",
             "optional": true,
             "field": "lead.project_key",
@@ -3838,7 +4392,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\",\n              \"chat_visitor_id\" : \"6b811a3e-41c4-4d49-a99a-afw3e4rtf3tfregf\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"project_key\": \"ovago\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"expire_at\": \"2020-01-20 12:12:12\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ],\n         \"lead_data\": [\n              {\n                 \"field_key\": \"example_key\",\n                 \"field_value\": \"example_value\"\n             }\n         ]\n      }\n}",
+          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\",\n              \"chat_visitor_id\" : \"6b811a3e-41c4-4d49-a99a-afw3e4rtf3tfregf\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"project_key\": \"ovago\",\n          \"department_key\": \"exchange\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"expire_at\": \"2020-01-20 12:12:12\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ],\n         \"lead_data\": [\n              {\n                 \"field_key\": \"example_key\",\n                 \"field_value\": \"example_value\"\n             }\n         ]\n      }\n}",
           "type": "json"
         }
       ]
@@ -7932,5 +8486,116 @@ define({ "api": [
     },
     "filename": "webapi/modules/v2/controllers/UserGroupController.php",
     "groupTitle": "UserGroup"
+  },
+  {
+    "type": "post",
+    "url": "/v2/bo/wh",
+    "title": "BO Webhook",
+    "version": "0.1.0",
+    "name": "BO_Webhook",
+    "group": "Webhook",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "allowedValues": [
+              "reprotection_update",
+              "flight_refund"
+            ],
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of action on reprotection</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": "<p>Any Data from BO</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "data.project_key",
+            "description": "<p>Project Key Ex: (ovago, hop2)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "data.reprotection_quote_gid",
+            "description": "<p>Reprotection quote gid</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example Reprotection Update:",
+          "content": "{\n    \"type\": \"reprotection_update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"reprotection_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n    }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Request-Example Flight Refund:",
+          "content": "{\n    \"type\": \"flight_refund\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n     \"data\": {\n         \"success\": true\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"errors\": [\n         \"Not found data on POST request\"\n      ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/BoController.php",
+    "groupTitle": "Webhook"
   }
 ] });

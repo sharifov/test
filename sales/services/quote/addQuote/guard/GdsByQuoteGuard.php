@@ -9,14 +9,10 @@ use sales\services\parsingDump\lib\ParsingDump;
  */
 class GdsByQuoteGuard
 {
-    /**
-     * @param string|null $gds
-     * @return string
-     */
-    public static function guard(?string $gds): ?string
+    public static function guard(?string $gdsParam): ?string
     {
-        if (!$gds = ParsingDump::getGdsByQuote($gds)) {
-            throw new \DomainException('This gds(' . $gds . ') cannot be processed');
+        if (!$gds = ParsingDump::getGdsByQuote($gdsParam)) {
+            throw new \DomainException('This gds(' . $gdsParam . ') cannot be processed');
         }
         return $gds;
     }

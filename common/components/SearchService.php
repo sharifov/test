@@ -85,6 +85,14 @@ class SearchService
         return self::GDS_LIST[$gds] ?? $gds;
     }
 
+    public static function getGDSKeyByName(string $name, bool $strict = false): ?string
+    {
+        if ($gdsSearch = array_search($name, self::GDS_LIST, $strict)) {
+            return $gdsSearch;
+        }
+        return null;
+    }
+
     /**
      * @param string|null $cabin
      * @param bool $isBasic
