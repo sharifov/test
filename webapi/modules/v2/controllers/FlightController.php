@@ -1587,6 +1587,7 @@ class FlightController extends BaseController
             },
             "reprotection_quote_list": [
                 {
+                    "recommended": true,
                     "pq_gid": "289ddd4b911e88d7bf1eb14be44754d7",
                     "pq_name": "test",
                     "pq_order_id": 35,
@@ -1933,7 +1934,9 @@ class FlightController extends BaseController
                     ->orderByRecommendedDesc()
                     ->all();
                 foreach ($reprotectionRelationQuotes as $relationQuote) {
-                    $reprotectionQuoteList[] = $relationQuote->pqrRelatedPq->toArray();
+                    $reProtectionProductQuote = $relationQuote->pqrRelatedPq;
+                    $data = ArrayHelper::merge(['recommended' => $reProtectionProductQuote->isRecommended()], $reProtectionProductQuote->toArray());
+                    $reprotectionQuoteList[] = $data;
                 }
                 $response->addMessage(
                     new Message('reprotection_quote_list', $reprotectionQuoteList)
