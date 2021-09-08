@@ -297,6 +297,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'phone',
                     'items' => [
+                        ['label' => 'Redial user access', 'url' => ['/call-redial-user-access/index']],
                         ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list']],
                         ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index']],
                         ['label' => 'QCall Config', 'url' => ['/qcall-config/index']],

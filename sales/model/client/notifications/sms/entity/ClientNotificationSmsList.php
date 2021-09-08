@@ -3,6 +3,7 @@
 namespace sales\model\client\notifications\sms\entity;
 
 use common\models\ClientPhone;
+use common\models\Sms;
 use sales\model\client\notifications\client\entity\ClientNotification;
 use sales\model\client\notifications\client\entity\CommunicationType;
 use sales\model\phoneList\entity\PhoneList;
@@ -18,7 +19,7 @@ use sales\model\phoneList\entity\PhoneList;
  * @property string $cnsl_start
  * @property string $cnsl_end
  * @property array|null $cnsl_data_json
- * @property string|null $cnsl_sms_id
+ * @property int|null $cnsl_sms_id
  * @property string|null $cnsl_created_dt
  * @property string|null $cnsl_updated_dt
  *
@@ -101,8 +102,8 @@ class ClientNotificationSmsList extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            ['cnsl_sms_id', 'default', 'value' => null],
-            ['cnsl_sms_id', 'string', 'max' => 34],
+            ['cnsl_sms_id', 'integer'],
+            ['cnsl_sms_id', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Sms::class, 'targetAttribute' => ['cnsl_sms_id' => 's_id']],
 
             ['cnsl_data_json', 'default', 'value' => null],
             ['cnsl_data_json', 'safe'],

@@ -5,6 +5,8 @@ namespace modules\flight\src\useCases\reprotectionCreate\service;
 use DomainException;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
@@ -13,6 +15,8 @@ use sales\exception\CheckRestrictionException;
 use sales\helpers\setting\SettingHelper;
 use sales\repositories\cases\CasesRepository;
 use Yii;
+
+use function Amp\Promise\rethrow;
 
 /**
  * Class CaseReProtectionService
@@ -131,6 +135,56 @@ class CaseReProtectionService
                 'categoryKey' => SettingHelper::getReProtectionCaseCategory()
             ])
             ->orderBy(['cs_id' => SORT_DESC])
+            ->one();
+    }
+
+    public static function findCase(string $bookingId, ?ProductQuote $originProductQuote): ?Cases
+    {
+        if ($originProductQuote && $case = self::getCaseByParentQuote($originProductQuote)) {
+            return $case;
+        }
+        if ($case = self::getLastCaseByBookingId($bookingId, SettingHelper::getReProtectionCaseCategory())) {
+            return $case;
+        }
+        if ($case = self::getLastCaseByBookingId($bookingId, null)) {
+            return $case;
+        }
+        return null;
+    }
+
+    public static function getLastCaseByBookingId(string $bookingId, ?string $categoryKey): ?Cases
+    {
+        $query = Cases::find()->where(['cs_order_uid' => $bookingId]);
+        if ($categoryKey) {
+            $query->innerJoin(CaseCategory::tableName(), 'cs_category_id = cc_id and cc_key = :categoryKey', [
+                'categoryKey' => $categoryKey
+            ]);
+        }
+        $query->orderBy(['cs_id' => SORT_DESC]);
+
+        return $query->one();
+    }
+
+    public static function getCaseByParentQuote(ProductQuote $originProductQuote): ?Cases
+    {
+        if (!$parentProductQuote = self::findParentReProtectionQuote($originProductQuote)) {
+            return null;
+        }
+        if (!$parentProductQuote->productQuoteLastChange) {
+            return null;
+        }
+        return $parentProductQuote->productQuoteLastChange->pqcCase;
+    }
+
+    public static function findParentReProtectionQuote(ProductQuote $originProductQuote): ?ProductQuote
+    {
+        return ProductQuote::find()
+            ->select(ProductQuote::tableName() . '.*')
+            ->innerJoin(
+                ProductQuoteRelation::tableName(),
+                'pqr_parent_pq_id = pq_id AND pqr_related_pq_id = :related_id AND pqr_type_id = :type_id',
+                ['related_id' => $originProductQuote->pq_id, 'type_id' => ProductQuoteRelation::TYPE_REPROTECTION]
+            )
             ->one();
     }
 

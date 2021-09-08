@@ -68,7 +68,12 @@ if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
 JS;
     $this->registerJs($js);
 
-    $flightQuotes = ArrayHelper::getColumn($lead->quotes, 'fq_hash_key');
+    $flightQuotes = [];
+    if (!empty($lead->quotes)) {
+        foreach ($lead->quotes as $item) {
+            $flightQuotes[] = json_decode($item->origin_search_data)->key;
+        }
+    }
     ?>
     <script>
         pjaxOffFormSubmit('#pjax-search-quote-filter');

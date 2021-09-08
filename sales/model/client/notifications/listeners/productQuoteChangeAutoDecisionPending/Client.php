@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\client\notifications\listeners\productQuoteChangeCreated;
+namespace sales\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending;
 
 /**
  * Class Client

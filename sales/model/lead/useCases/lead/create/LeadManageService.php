@@ -224,7 +224,7 @@ class LeadManageService
         $this->leadPreferencesRepository->save($preferences);
     }
 
-    public function createByClientChat(LeadCreateByChatForm $form, ClientChat $chat, int $userId): Lead
+    public function createByClientChat(LeadCreateByChatForm $form, ClientChat $chat, ?int $userId): Lead
     {
         $lead = $this->transactionManager->wrap(function () use ($form, $chat, $userId) {
             if (!$client = $chat->cchClient) {

@@ -412,9 +412,17 @@
                     if (data.error) {
                         createNotify('Accept Call', data.message, 'error');
                     }
+                    if (data.isRedialCall) {
+                        window.phoneWidget.notifier.notifiers.phone.reset();
+                        PhoneWidgetCall.panes.queue.hide();
+                        PhoneWidgetCall.openCallTab();
+                        PhoneWidgetCall.showCallingPanel();
+                        webCallLeadRedialPriority(data.redialCall);
+                    } else {
+                        PhoneWidgetCall.audio.incoming.on(key);
+                    }
                     PhoneWidgetCall.queues.priority.unAccept();
                     window.phoneWidget.notifier.on(key);
-                    PhoneWidgetCall.audio.incoming.on(key);
                 })
                 .fail(function () {
                     createNotify('Accept Call', 'Server error', 'error');

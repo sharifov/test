@@ -366,14 +366,31 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id']);
     }
-    /**
-     * @return ActiveQuery
-     */
+
     public function getNonReprotectionProductQuotes(): ActiveQuery
     {
-        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])->innerJoin(ProductQuoteRelation::tableName(), 'pqr_parent_pq_id = pq_id and pqr_type_id = :typeId', [
-            'typeId' => ProductQuoteRelation::TYPE_REPROTECTION
-        ]);
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])
+            ->leftJoin([
+                'quote_relation' => ProductQuoteRelation::find()
+                    ->select([
+                        'pqr_parent_pq_id AS parent_id'
+                    ])
+                    ->groupBy(['pqr_parent_pq_id'])
+            ], 'pq_id = quote_relation.parent_id')
+            ->leftJoin([
+                'quote_non_relation' => ProductQuoteRelation::find()
+                    ->select([
+                        'pqr_parent_pq_id AS parent_id',
+                        'pqr_related_pq_id AS related_id',
+                    ])
+                    ->groupBy(['pqr_parent_pq_id', 'pqr_related_pq_id'])
+            ], 'quote_non_relation.parent_id = pq_id OR quote_non_relation.related_id = pq_id')
+            ->andWhere([
+            'OR',
+                ['IS NOT', 'quote_relation.parent_id', null],
+                ['IS', 'quote_non_relation.parent_id', null]
+            ])
+        ;
     }
 
     public function getOrderTips(): ActiveQuery

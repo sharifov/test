@@ -103,6 +103,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return $this->pqc_status_id === ProductQuoteChangeStatus::NEW;
     }
 
+    public function statusToNew(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::NEW;
+    }
+
     public function inProgress(): void
     {
         $this->pqc_status_id = ProductQuoteChangeStatus::IN_PROGRESS;

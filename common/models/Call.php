@@ -1438,7 +1438,7 @@ class Call extends \yii\db\ActiveRecord
                 if ($productQuoteChanges) {
                     $clientNotificationCanceler = Yii::createObject(ClientNotificationCanceler::class);
                     foreach ($productQuoteChanges as $productQuoteChangeId) {
-                        $clientNotificationCanceler->cancel(\sales\model\client\notifications\client\entity\NotificationType::PRODUCT_QUOTE_CHANGE_CREATED_EVENT, $productQuoteChangeId);
+                        $clientNotificationCanceler->cancel(\sales\model\client\notifications\client\entity\NotificationType::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT, $productQuoteChangeId);
                     }
                 }
             }

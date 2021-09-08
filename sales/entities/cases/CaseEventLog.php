@@ -27,6 +27,7 @@ class CaseEventLog extends ActiveRecord
     public const CASE_AUTO_PROCESSING_MARK = 4;
     public const REPROTECTION_DECISION     = 5;
     public const RE_PROTECTION_CREATE      = 6;
+    public const RE_PROTECTION_EXCHANGE    = 7;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',
@@ -35,6 +36,7 @@ class CaseEventLog extends ActiveRecord
         self::CASE_AUTO_PROCESSING_MARK => 'Case auto processing mark has changed',
         self::REPROTECTION_DECISION => 'Reprotection Decision',
         self::RE_PROTECTION_CREATE => 'ReProtection Create',
+        self::RE_PROTECTION_EXCHANGE => 'ReProtection Exchange',
     ];
 
     /**

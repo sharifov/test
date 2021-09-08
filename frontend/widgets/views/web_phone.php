@@ -36,6 +36,7 @@ use yii\bootstrap4\Modal;
     $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
     $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
     $ajaxWarmTransferToUserUrl = Url::to(['/phone/ajax-warm-transfer-to-user']);
+    $redialSourceType = Call::SOURCE_REDIAL_CALL;
 
     $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -68,6 +69,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
     const ajaxCreateCallUrl = '<?= $ajaxCreateCallUrl ?>';
     const ajaxGetPhoneListIdUrl = '<?= $ajaxGetPhoneListIdUrl ?>';
     const callOutBackendSide = parseInt('<?= $callOutBackendSide ?>');
+    const redialSourceType = parseInt('<?= $redialSourceType ?>');
 
     const clientId = '<?=$clientId?>';
 
@@ -864,6 +866,29 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
             }
         }, 'json');
 
+    }
+
+    function webCallLeadRedialPriority(redialCallInfo) {
+        let params = {
+            'To': redialCallInfo.phoneTo,
+            'FromAgentPhone': redialCallInfo.phoneFrom,
+            'c_project_id': redialCallInfo.projectId,
+            'lead_id': redialCallInfo.leadId,
+            'c_type': 'web-call',
+            'c_user_id': userId,
+            'c_source_type_id': redialSourceType,
+            'is_conference_call': conferenceBase,
+            'user_identity': window.userIdentity,
+            'phone_list_id': redialCallInfo.phoneListId
+        };
+        webPhoneParams = params;
+
+        console.log(params);
+        if (device) {
+            console.log('Calling ' + params.To + '...');
+            connection = device.connect(params);
+            updateAgentStatus(connection, false, 0);
+        }
     }
 
 </script>

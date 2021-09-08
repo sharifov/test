@@ -1172,7 +1172,12 @@ class CommunicationController extends ApiBaseController
 //                        }
 //                    }
 //                }
-                    //$call->c_u_id = $parentCall->c_dep_id;
+                //$call->c_u_id = $parentCall->c_dep_id;
+
+                if (!empty($call->c_stir_status) && empty($parentCall->c_stir_status)) {
+                    $parentCall->c_stir_status = $call->c_stir_status;
+                    $parentCall->save();
+                }
             }
 
             if ($call_project_id) {
@@ -1381,8 +1386,8 @@ class CommunicationController extends ApiBaseController
     {
         $call = null;
         $parentCall = null;
-
         $callSid = $callData['CallSid'] ?? '';
+        $stirStatus = $callData['StirStatus'] ?? null;
 
         if ($callSid) {
             $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
@@ -1411,6 +1416,11 @@ class CommunicationController extends ApiBaseController
 
             if ($parentCall) {
                 self::copyDataFromParentCall($call, $parentCall);
+
+                if (!empty($stirStatus) && empty($parentCall->c_stir_status)) {
+                    $parentCall->c_stir_status = $call->c_stir_status;
+                    $parentCall->save();
+                }
             }
 
             $call->c_is_new = true;
@@ -1418,7 +1428,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $callData['From'];
             $call->c_to = $callData['To']; //Called
             $call->c_created_user_id = null;
-            $call->c_stir_status = $callData['StirStatus'] ?? null;
+            $call->c_stir_status = $stirStatus;
 
             self::copyDataFromCustomParams($call, $customParameters);
 

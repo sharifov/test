@@ -3,11 +3,14 @@
 namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\ReprotectionCreateJob;
+use DomainException;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\api\productQuoteGet\ProductQuoteGetForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
+use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeForm;
+use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchangeService;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -41,6 +44,7 @@ use yii\helpers\VarDumper;
  *
  * @property TransactionManager $transactionManager
  * @property-read ProductQuoteRepository $productQuoteRepository
+ * @property ReProtectionExchangeService $reProtectionExchangeService
  */
 class FlightController extends BaseController
 {
@@ -49,6 +53,7 @@ class FlightController extends BaseController
      * @var ProductQuoteRepository
      */
     private ProductQuoteRepository $productQuoteRepository;
+    private ReProtectionExchangeService $reProtectionExchangeService;
 
     /**
      * @param $id
@@ -56,6 +61,7 @@ class FlightController extends BaseController
      * @param ApiLogger $logger
      * @param TransactionManager $transactionManager
      * @param ProductQuoteRepository $productQuoteRepository
+     * @param ReProtectionExchangeService $reProtectionExchangeService
      * @param array $config
      */
     public function __construct(
@@ -64,10 +70,12 @@ class FlightController extends BaseController
         ApiLogger $logger,
         TransactionManager $transactionManager,
         ProductQuoteRepository $productQuoteRepository,
+        ReProtectionExchangeService $reProtectionExchangeService,
         $config = []
     ) {
         $this->transactionManager = $transactionManager;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->reProtectionExchangeService = $reProtectionExchangeService;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -117,7 +125,7 @@ class FlightController extends BaseController
     }
 
     /**
-     * @api {post} /v2/flight/reprotection-create Create flight reprotection from BO
+     * @api {post} /v2/flight/reprotection-create ReProtection Create
      * @apiVersion 0.1.0
      * @apiName ReProtection Create
      * @apiGroup Flight
@@ -460,7 +468,7 @@ class FlightController extends BaseController
         } catch (\Throwable $throwable) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
             );
         }
@@ -1270,7 +1278,7 @@ class FlightController extends BaseController
         } catch (\Throwable $throwable) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
             );
         }
@@ -1952,6 +1960,140 @@ class FlightController extends BaseController
                 new StatusCodeMessage(500),
                 new MessageMessage('Internal Server Error'),
                 new CodeMessage($e->getCode())
+            );
+        }
+    }
+
+    /**
+     * @api {post} /v2/flight/reprotection-exchange ReProtection exchange
+     * @apiVersion 0.2.0
+     * @apiName ReProtection Exchange
+     * @apiGroup Flight
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{7..10}}    booking_id          Booking ID
+     * @apiParam {string{100}}      [email]             Email
+     * @apiParam {string{20}}       [phone]             Phone
+     * @apiParam {string{200}}      [flight_request]    Flight Request
+     *
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *      "booking_id": "XXXYYYZ",
+     *      "email": "example@mail.com",
+     *      "phone": "+13736911111",
+     *      "flight_request": ""
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
+     *            "success" => true,
+     *            "warnings": []
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Load data error",
+     *        "errors": [
+     *           "Not found data on POST request"
+     *        ],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": 422,
+     *        "message": "Validation error",
+     *        "errors": [
+     *            "type": [
+     *               "Type cannot be blank."
+     *             ]
+     *        ],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionReprotectionExchange()
+    {
+        try {
+            $post = Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::POST_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+            );
+        }
+
+        $reProtectionExchangeForm = new ReProtectionExchangeForm();
+        if (!$reProtectionExchangeForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+        if (!$reProtectionExchangeForm->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($reProtectionExchangeForm->getErrors()),
+            );
+        }
+
+        try {
+            $this->reProtectionExchangeService->handle($reProtectionExchangeForm);
+
+            return new SuccessResponse(
+                new DataMessage([
+                    'success' => true,
+                    'warnings' => $reProtectionExchangeForm->getWarnings()
+                ])
+            );
+        } catch (\Throwable $throwable) {
+            $message = [
+                'message' => $throwable->getMessage(),
+                'request' => $post,
+                'throwable' => AppHelper::throwableLog($throwable),
+            ];
+            if ($throwable instanceof DomainException) {
+                Yii::warning($message, 'FlightController:actionReprotectionExchange:Warning');
+            } else {
+                Yii::error($message, 'FlightController:actionReprotectionExchange:Error');
+            }
+            return new ErrorResponse(
+                new DataMessage([
+                    'success' => false,
+                    'error' => $throwable->getMessage(),
+                ])
             );
         }
     }

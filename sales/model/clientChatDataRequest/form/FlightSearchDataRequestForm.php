@@ -3,6 +3,7 @@
 namespace sales\model\clientChatDataRequest\form;
 
 use common\components\SearchService;
+use common\models\Lead;
 use yii\validators\DateValidator;
 
 /**
@@ -24,13 +25,19 @@ class FlightSearchDataRequestForm extends \yii\base\Model
     private const ONE_WAY = 'ow';
     private const MULTI_CITY = 'mc';
 
+    private const TRIP_TYPE_LIST = [
+        self::ROUND_TRIP,
+        self::ONE_WAY,
+        self::MULTI_CITY
+    ];
+
     private const CABIN_CODE_LIST = [
-        'economy' => SearchService::CABIN_ECONOMY,
-        'business' => SearchService::CABIN_BUSINESS,
-        'first' => SearchService::CABIN_FIRST,
-        'premium-first' => SearchService::CABIN_PREMIUM_FIRST,
-        'premium-economy' => SearchService::CABIN_PREMIUM_ECONOMY,
-        'premium-business' => SearchService::CABIN_PREMIUM_BUSINESS
+        'economy' => Lead::CABIN_ECONOMY,
+        'business' => Lead::CABIN_BUSINESS,
+        'first' => Lead::CABIN_FIRST,
+        'premium-first' => Lead::CABIN_PREMIUM,
+        'premium-economy' => Lead::CABIN_PREMIUM,
+        'premium-business' => Lead::CABIN_PREMIUM
     ];
 
     public string $originIata = '';
@@ -66,6 +73,7 @@ class FlightSearchDataRequestForm extends \yii\base\Model
             [['departureDate', 'returnDate'], DateValidator::class, 'format' => 'Y-m-d'],
             [['adults', 'children', 'infants'], 'integer'],
             [['adults', 'children', 'infants'], 'default', 'value' => 0],
+            [['tripType'], 'in', 'range' => $this->getTripTypeList()]
 
         ];
     }
@@ -83,5 +91,10 @@ class FlightSearchDataRequestForm extends \yii\base\Model
     public function getCabinCode()
     {
         return self::CABIN_CODE_LIST[$this->cabin] ?? $this->cabin;
+    }
+
+    public function getTripTypeList(): array
+    {
+        return self::TRIP_TYPE_LIST;
     }
 }

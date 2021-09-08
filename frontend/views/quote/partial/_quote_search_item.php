@@ -31,8 +31,8 @@ $airportChange = $result['airportChange'];
 $technicalStopCnt = $result['technicalStopCnt'];
 $bagFilter = $result['bagFilter'];
 
-//$isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuotes, $result['key']);
-$isQuoteAssignedToFlight = false;
+$isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
+
 ?>
 <div
     class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>"
@@ -295,7 +295,7 @@ $isQuoteAssignedToFlight = false;
         </div>
     </div>
     <div class="quote__details" id="search_result_item_<?= $resultKey?>" style="display:none;">
-        <?php if (!$isQuoteAssignedToFlight) : ?>
+        <?php /* if (!$isQuoteAssignedToFlight) : ?>
         <div class="text-right">
             <?= Html::button('<i class="fa fa-check"></i>&nbsp; <span>Select</span>', [
                 'class' => 'btn btn-success search_create_quote__btn',
@@ -306,7 +306,7 @@ $isQuoteAssignedToFlight = false;
                 'data-result' => 'search-result__quote-' . $resultKey,
             ]) ?>
         </div>
-        <?php endif; ?>
+        <?php endif; */ ?>
         <div class="trip">
             <div class="trip__item">
                 <!-- Depart -->
@@ -455,45 +455,44 @@ $isQuoteAssignedToFlight = false;
                 'data-title' => implode(', ', $tripsInfo),
                 'data-target' => '#search_result_item_' . $resultKey,
             ]) ?>
-            <?php if (!$isQuoteAssignedToFlight) : ?>
-                <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
-                    'class' => 'btn btn-success search_create_quote__btn',
-                    'data-title' => implode(', ', $tripsInfo),
-                    'data-key' => $result['key'],
-                    'data-gds' => $result['gds'],
-                    'data-key-cache' => $keyCache,
-                    'data-result' => 'search-result__quote-' . $resultKey,
-                    'data-project' => $lead->project_id,
+            <?= Html::button($isQuoteAssignedToFlight ? 'Quote assigned' : '<i class="fa fa-plus"></i>&nbsp; <span>' . 'Add Quote' . '</span>', [
+                'disabled' => $isQuoteAssignedToFlight,
+                'class' => 'btn btn-success search_create_quote__btn',
+                'data-title' => implode(', ', $tripsInfo),
+                'data-key' => $result['key'],
+                'data-gds' => $result['gds'],
+                'data-key-cache' => $keyCache,
+                'data-result' => 'search-result__quote-' . $resultKey,
+                'data-project' => $lead->project_id,
 
-                ]) ?>
+            ]) ?>
 
-                <?php if (Auth::can('quote/addQuote/projectRelations') && $projectRelations = $lead->project->projectRelations) : ?>
-                    <div class="btn-group js-btn-box" style="margin-left: 7px; height: 32px;">
-                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-bars"></i>
-                        </button>
-                        <div class="dropdown-menu small " style="background: transparent;">
-                            <?php foreach ($projectRelations as $relatedProject) : ?>
-                                <?php echo
-                                    Html::button(
-                                        '<i class="fa fa-plus"></i>&nbsp; <span>Add Quote to ' . $relatedProject->prlRelatedProject->name . '</span>',
-                                        [
-                                            'class' => 'btn btn-success search_create_quote__btn',
-                                            'style' => 'width: 180px; margin-left: 0; margin-bottom: 2px; text-align: left;',
-                                            'data-title' => implode(', ', $tripsInfo),
-                                            'data-key' => $result['key'],
-                                            'data-gds' => $result['gds'],
-                                            'data-key-cache' => $keyCache,
-                                            'data-result' => 'search-result__quote-' . $resultKey,
-                                            'data-project' => $relatedProject->prl_related_project_id,
-                                        ]
-                                    )
-                                ?>
-                            <?php endforeach ?>
-                        </div>
+            <?php if (Auth::can('quote/addQuote/projectRelations') && $projectRelations = $lead->project->projectRelations) : ?>
+                <div class="btn-group js-btn-box" style="margin-left: 7px; height: 32px;">
+                    <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <div class="dropdown-menu small " style="background: transparent;">
+                        <?php foreach ($projectRelations as $relatedProject) : ?>
+                            <?php echo
+                                Html::button(
+                                    '<i class="fa fa-plus"></i>&nbsp; <span>Add Quote to ' . $relatedProject->prlRelatedProject->name . '</span>',
+                                    [
+                                        'class' => 'btn btn-success search_create_quote__btn',
+                                        'style' => 'width: 180px; margin-left: 0; margin-bottom: 2px; text-align: left;',
+                                        'data-title' => implode(', ', $tripsInfo),
+                                        'data-key' => $result['key'],
+                                        'data-gds' => $result['gds'],
+                                        'data-key-cache' => $keyCache,
+                                        'data-result' => 'search-result__quote-' . $resultKey,
+                                        'data-project' => $relatedProject->prl_related_project_id,
+                                    ]
+                                )
+                            ?>
+                        <?php endforeach ?>
                     </div>
-                <?php endif ?>
-            <?php endif; ?>
+                </div>
+            <?php endif ?>
         </div>
     </div>
 </div>

@@ -10,9 +10,11 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\exception\CheckRestrictionException;
+use sales\helpers\ProjectHashGenerator;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\email\SendEmailByCase;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class SendEmailReProtectionService
@@ -48,6 +50,8 @@ class SendEmailReProtectionService
         $emailData['reprotection_quote'] = $reProtectionQuote->serialize();
         if ($originProductQuote) {
             $emailData['original_quote'] = $originProductQuote->serialize();
+            $bookingId = ArrayHelper::getValue($emailData, 'original_quote.data.flights.0.fqf_booking_id', '');
+            $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
         }
 
         $this->sendResultStatus = (new SendEmailByCase($case->cs_id, $clientEmail, $emailData))->getResultStatus();

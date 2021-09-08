@@ -188,6 +188,12 @@ $this->registerJs($js);
             'filter' => $showFilter ? null : false,
         ],
         [
+            'class' => \common\components\grid\department\DepartmentColumn::class,
+            'label' => 'Department',
+            'attribute' => 'l_dep_id',
+            'relation' => 'lDep',
+        ],
+        [
             'attribute' => 'client_id',
             'value' => static function (Lead $model) {
                 return Yii::$app->formatter->asClient($model->client_id);

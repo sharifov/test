@@ -47,6 +47,11 @@ $agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Au
 $server = Yii::$app->rchat->host;
 $apiServer = Yii::$app->rchat->apiServer;
 $chatApiScriptUrl = Yii::$app->rchat->chatApiScriptUrl;
+
+$this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css', [
+    'depends' => [ClientChatAsset::class],
+]);
+$this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js', ['depends' => [ClientChatAsset::class]])
 ?>
 
 <?php if ($filter->isEmptyChannels()) : ?>

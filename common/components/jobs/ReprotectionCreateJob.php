@@ -19,12 +19,14 @@ use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeAutoDecisionPendingEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
+use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
@@ -70,6 +72,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         $sendEmailReProtectionService = Yii::createObject(SendEmailReProtectionService::class);
         $productQuoteChangeRepository = Yii::createObject(ProductQuoteChangeRepository::class);
         $flightRequestService = Yii::createObject(FlightRequestService::class);
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
 
         $client = null;
 
@@ -122,12 +125,18 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     if (isset($case)) {
                         $caseReProtectionService->caseToManual('Order not created');
                     }
+                    if (isset($case, $flightRequest) && $client === null) {
+                        $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
+                        $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
+                    }
                     $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
                     $reProtectionCreateService::writeLog($throwable);
                     return;
                 }
-            } elseif (!$case = $originProductQuote->productQuoteLastChange->pqcCase ?? null) {
-                throw new DomainException('Case not found from productQuoteChange');
+            }
+
+            if (!isset($case) && !$case = $caseReProtectionService::findCase($flightRequest->fr_booking_id, $originProductQuote)) {
+                throw new DomainException('Case not found');
             }
 
             $caseReProtectionService->setCase($case);
@@ -184,6 +193,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
                                 $caseReProtectionService->caseToManual('OTA site is not informed');
                                 $flightRequestService->pending('OTA site is not informed');
+                                return;
                             }
                         }
 
@@ -198,6 +208,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
                             $lastProductQuoteChange->decisionPending();
                             $productQuoteChangeRepository->save($lastProductQuoteChange);
+                            $eventDispatcher->dispatch(new ProductQuoteChangeAutoDecisionPendingEvent($lastProductQuoteChange->pqc_id));
                             $flightRequestService->done('Client Email send');
                         } catch (\Throwable $throwable) {
                             $caseReProtectionService->caseToManual('Auto SCHD Email not sent');
@@ -221,7 +232,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                                 (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $case))->send();
                             } catch (\Throwable $throwable) {
                                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
+                                $caseReProtectionService->caseToManual('OTA site is not informed');
                                 $flightRequestService->pending('OTA site is not informed');
+                                return;
                             }
                         }
 
@@ -259,7 +272,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $case))->send();
                 } catch (\Throwable $throwable) {
                     $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
+                    $caseReProtectionService->caseToManual('OTA site is not informed');
                     $flightRequestService->pending('OTA site is not informed');
+                    return;
                 }
             }
 
@@ -274,6 +289,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
                 $lastProductQuoteChange->decisionPending();
                 $productQuoteChangeRepository->save($lastProductQuoteChange);
+                $eventDispatcher->dispatch(new ProductQuoteChangeAutoDecisionPendingEvent($lastProductQuoteChange->pqc_id));
 
                 $caseReProtectionService->caseToAutoProcessing('Automatic processing requested');
                 $flightRequestService->done('Client Email send');

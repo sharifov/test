@@ -11,6 +11,11 @@ use yii\db\ActiveQuery;
  */
 class Scopes extends ActiveQuery
 {
+    public function byId(int $id): self
+    {
+        return $this->andWhere(['pqc_id' => $id]);
+    }
+
     public function byProductQuote(int $quoteId): self
     {
         return $this->andWhere(['pqc_pq_id' => $quoteId]);

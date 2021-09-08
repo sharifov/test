@@ -7,21 +7,21 @@ use sales\model\client\notifications\client\entity\NotificationType;
 /**
  * Class ClientNotification
  *
- * @property ClientNotificationObject $productQuoteChangeCreatedEvent
+ * @property ClientNotificationObject $productQuoteChangeAutoDecisionPendingEvent
  */
 class ClientNotification
 {
     /**
-     * @see property name nust equal name of NotificationType::LIST[NotificationType::PRODUCT_QUOTE_CHANGE_CREATED_EVENT]
+     * @see property name nust equal name of NotificationType::LIST[NotificationType::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT]
      */
-    public ClientNotificationObject $productQuoteChangeCreatedEvent;
+    public ClientNotificationObject $productQuoteChangeAutoDecisionPendingEvent;
 
     public function __construct(array $params)
     {
-        if (array_key_exists('productQuoteChangeCreatedEvent', $params) && is_array($params['productQuoteChangeCreatedEvent'])) {
-            $this->productQuoteChangeCreatedEvent = new ClientNotificationObject($params['productQuoteChangeCreatedEvent']);
+        if (array_key_exists('productQuoteChangeAutoDecisionPendingEvent', $params) && is_array($params['productQuoteChangeAutoDecisionPendingEvent'])) {
+            $this->productQuoteChangeAutoDecisionPendingEvent = new ClientNotificationObject($params['productQuoteChangeAutoDecisionPendingEvent']);
         } else {
-            $this->productQuoteChangeCreatedEvent = new ClientNotificationObject([]);
+            $this->productQuoteChangeAutoDecisionPendingEvent = new ClientNotificationObject([]);
         }
     }
 

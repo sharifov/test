@@ -22,6 +22,6 @@ class ClientNotificationCancelerListener
 
     public function handle(ProductQuoteChangeDecisionable $event): void
     {
-        $this->canceler->cancel(NotificationType::PRODUCT_QUOTE_CHANGE_CREATED_EVENT, $event->getId());
+        $this->canceler->cancel(NotificationType::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT, $event->getId());
     }
 }
