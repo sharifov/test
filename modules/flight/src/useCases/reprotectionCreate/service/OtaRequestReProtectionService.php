@@ -15,26 +15,31 @@ use Yii;
  *
  * @property FlightRequest $flightRequest
  * @property ProductQuote $reProtectionQuote
+ * @property ProductQuote $originProductQuote
  * @property Cases $case
  */
 class OtaRequestReProtectionService
 {
     private FlightRequest $flightRequest;
     private ProductQuote $reProtectionQuote;
+    private ProductQuote $originProductQuote;
     private Cases $case;
 
     /**
      * @param FlightRequest $flightRequest
      * @param ProductQuote $reProtectionQuote
+     * @param ProductQuote $originProductQuote
      * @param Cases $case
      */
     public function __construct(
         FlightRequest $flightRequest,
         ProductQuote $reProtectionQuote,
+        ProductQuote $originProductQuote,
         Cases $case
     ) {
         $this->flightRequest = $flightRequest;
         $this->reProtectionQuote = $reProtectionQuote;
+        $this->originProductQuote = $originProductQuote;
         $this->case = $case;
     }
 
@@ -46,6 +51,7 @@ class OtaRequestReProtectionService
                 'booking_id' => $this->flightRequest->fr_booking_id,
                 'reprotection_quote_gid' => $this->reProtectionQuote->pq_gid,
                 'case_gid' => $this->case->cs_gid,
+                'quote_gid' => $this->originProductQuote->pq_gid,
             ]
         ];
         if (!$result = $hybridService->whReprotection($this->flightRequest->fr_project_id, $data)) {

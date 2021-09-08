@@ -188,7 +188,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
                         if (SettingHelper::isEnableSendHookToOtaReProtectionCreate()) {
                             try {
-                                (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $case))->send();
+                                (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $originProductQuote, $case))->send();
                             } catch (\Throwable $throwable) {
                                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
                                 $caseReProtectionService->caseToManual('OTA site is not informed');
@@ -229,7 +229,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
                         if (SettingHelper::isEnableSendHookToOtaReProtectionCreate()) {
                             try {
-                                (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $case))->send();
+                                (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $originProductQuote, $case))->send();
                             } catch (\Throwable $throwable) {
                                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
                                 $caseReProtectionService->caseToManual('OTA site is not informed');
@@ -269,7 +269,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if (SettingHelper::isEnableSendHookToOtaReProtectionCreate()) {
                 try {
-                    (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $case))->send();
+                    (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $originProductQuote, $case))->send();
                 } catch (\Throwable $throwable) {
                     $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
                     $caseReProtectionService->caseToManual('OTA site is not informed');
