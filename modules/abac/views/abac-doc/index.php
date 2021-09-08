@@ -30,7 +30,7 @@ $formName = $searchModel->formName();
         <?= Html::a('<i class="fa fa-refresh"></i> ReScan', ['scan'], ['class' => 'btn btn-warning']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-abac-doc']); ?>
+    <?php Pjax::begin(['id' => 'pjax-abac-doc', 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

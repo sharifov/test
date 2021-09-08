@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php // echo Html::a('Create Flight Request', ['create'], ['class' => 'btn btn-success'])?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-flight-request']); ?>
+    <?php Pjax::begin(['id' => 'pjax-flight-request', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([

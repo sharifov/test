@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-project-relation']); ?>
+    <?php Pjax::begin(['id' => 'pjax-project-relation', 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

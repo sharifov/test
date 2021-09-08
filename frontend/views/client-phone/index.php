@@ -6,6 +6,7 @@ use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\DateTimeColumn;
 use sales\helpers\phone\MaskPhoneHelper;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClentPhoneSearch */
@@ -17,6 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="client-phone-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -117,5 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => ActionColumn::class],
         ],
     ]); ?>
+
+    <?php Pjax::end(); ?>
 
 </div>

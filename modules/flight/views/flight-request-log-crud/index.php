@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php Pjax::begin(['id' => 'pjax-flight-request-log']); ?>
+    <?php Pjax::begin(['id' => 'pjax-flight-request-log', 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

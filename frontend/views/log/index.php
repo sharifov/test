@@ -46,7 +46,7 @@ $pjaxListId = 'pjax-log';
         </div>
     <?php endif ?>
 
-    <?php \yii\widgets\Pjax::begin(['id' => $pjaxListId]); ?>
+    <?php \yii\widgets\Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
 
     <div class="row">
         <div class="col-md-12">

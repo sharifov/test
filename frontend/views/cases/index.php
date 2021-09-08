@@ -385,6 +385,11 @@ $js = <<<JS
 $('.close-icon').on('click', function(){    
     $('.multiple-update-summary').slideUp();
 })
+
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#' + '$gridId').position().top }, 400);
+    })
+
 JS;
 $this->registerJs($js);
 

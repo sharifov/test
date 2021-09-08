@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php Pjax::begin(['id' => 'pjax-file-storage']); ?>
+    <?php Pjax::begin(['id' => 'pjax-file-storage', 'scrollTo' => 0]); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

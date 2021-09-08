@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create File Product Quote', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-file-product-quote']); ?>
+    <?php Pjax::begin(['id' => 'pjax-file-product-quote', 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

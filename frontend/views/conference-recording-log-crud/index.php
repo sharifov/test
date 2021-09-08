@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Conference Recording Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-conference-recording-log']); ?>
+    <?php Pjax::begin(['id' => 'pjax-conference-recording-log', 'scrollTo' => 0]); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

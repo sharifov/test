@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-plus"></i> Create User Shift Schedule', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-user-shift-schedule']); ?>
+    <?php Pjax::begin(['id' => 'pjax-user-shift-schedule', 'scrollTo' => 0]); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

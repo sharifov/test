@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php Pjax::begin(['id' => 'client_chat_search_pjax', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'client_chat_search_pjax', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 600]); ?>
 
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 

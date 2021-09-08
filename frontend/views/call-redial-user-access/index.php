@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Call Redial User Access', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-call-redial-user-access']); ?>
+    <?php Pjax::begin(['id' => 'pjax-call-redial-user-access', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([

@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Client Notification Phone', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-client-notification-phone-list']); ?>
+    <?php Pjax::begin(['id' => 'pjax-client-notification-phone-list', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([

@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-plus"></i> Create Client Chat', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'client_chat_crud']); ?>
+    <?php Pjax::begin(['id' => 'client_chat_crud', 'scrollTo' => 650]); ?>
     <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
     <?php if (Auth::user()->isAdmin()) : ?>
     <p>

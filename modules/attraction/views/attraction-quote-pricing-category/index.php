@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\attraction\models\search\AttractionQuotePricingCategorySearch */
@@ -17,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Create Attraction Quote Pricing Category', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -43,6 +44,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
-
+    <?php Pjax::end(); ?>
 
 </div>

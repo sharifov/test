@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php Pjax::begin(['id' => 'pjax-user-stats', 'timeout' => 7000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'pjax-user-stats', 'timeout' => 7000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <div class="x_panel">
         <div class="x_title">

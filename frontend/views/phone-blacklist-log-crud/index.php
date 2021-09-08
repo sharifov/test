@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Phone Blacklist Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-phone-blacklist-log']); ?>
+    <?php Pjax::begin(['id' => 'pjax-phone-blacklist-log', 'scrollTo' => 0]); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
