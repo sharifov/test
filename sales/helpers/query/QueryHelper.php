@@ -113,6 +113,24 @@ class QueryHelper
         return $result;
     }
 
+    public static function getPartitionsByYears($from, $to)
+    {
+        $yFrom = date('y', strtotime($from));
+        $yTo = date('y', strtotime($to));
+
+        if ($yFrom == $yTo) {
+            $partitions = 'y' . ($yFrom + 1);
+        } else {
+            $formattedPartitions = array_map(function ($values) {
+                return 'y' . ($values + 1);
+            }, range($yFrom, $yTo));
+
+            $partitions = implode(', ', $formattedPartitions);
+        }
+
+        return $partitions;
+    }
+
     private static function resetProperties(Model $model): void
     {
         foreach (self::getFieldsFromRules($model->rules()) as $rule) {

@@ -9,20 +9,21 @@ use yii\grid\DataColumn;
  * Class DateTimeColumn
  *
  * Ex.
- * [
- * 'class' => \common\components\grid\DateTimeColumn::class,
- * 'attribute' => 'pbl_updated_dt',
- * ],
+  [
+    'class' => \common\components\grid\DateTimeColumn::class,
+    'attribute' => 'pbl_updated_dt',
+  ],
  */
 class DateTimeColumn extends DataColumn
 {
     public $format = 'byUserDateTime';
+    public $limitEndDay = true;
 
     public function init(): void
     {
         parent::init();
 
-        if ($this->filter === null && $this->grid->filterModel !== false) {
+        if ($this->filter === null && $this->grid->filterModel) {
             $this->filter = DatePicker::widget([
                 'model' => $this->grid->filterModel,
                 'attribute' => $this->attribute,
@@ -30,8 +31,8 @@ class DateTimeColumn extends DataColumn
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
                     'clearBtn' => true,
-                    'startDate' => date('Y-m-d', strtotime('2017-01-01')),
-                    'endDate' => date('Y-m-d', time())
+                    'startDate' => date('Y-m-d', strtotime('2018-01-01')),
+                    'endDate' => $this->limitEndDay ? date('Y-m-d', time()) : null,
                 ],
                 'options' => [
                     'autocomplete' => 'off',

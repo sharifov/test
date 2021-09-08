@@ -22,6 +22,7 @@ use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\services\CreateByApiDto;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\services\cases\CasesManageService;
@@ -197,6 +198,7 @@ class DownloadEmails
 
                         if ($case_id) {
                             $caseArray[$case_id] = $case_id;
+                            CaseEventLog::add($case_id, null, 'Email received from customer');
                         }
 
                         if (!$email->save()) {
@@ -218,6 +220,9 @@ class DownloadEmails
                                     $email->e_case_id = $process->caseId;
                                     $email->e_client_id = $this->emailService->detectClientId($email->e_email_from);
                                     $email->save(false);
+                                    if ($email->e_case_id) {
+                                        CaseEventLog::add($email->e_case_id, null, 'Email received from customer');
+                                    }
                                 } catch (\Throwable $e) {
                                     Yii::error($e->getMessage(), 'DownloadEmails:EmailIncomingService:create');
                                 }

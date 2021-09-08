@@ -9,6 +9,8 @@ use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
+use sales\entities\cases\Cases;
+use sales\services\CurrencyHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -32,17 +34,83 @@ use yii\db\ActiveRecord;
  * @property int|null $pqr_updated_user_id
  * @property string|null $pqr_created_dt
  * @property string|null $pqr_updated_dt
+ * @property int|null $pqr_case_id
  *
  * @property Currency $clientCurrency
  * @property Employee $createdUser
  * @property OrderRefund $orderRefund
  * @property Employee $updatedUser
- * @property ProductQuote $pqrProductQuote
+ * @property ProductQuote $productQuote
  * @property ProductQuoteObjectRefund[] $productQuoteObjectRefunds
  * @property ProductQuoteOptionRefund[] $productQuoteOptionRefunds
+ * @property Cases $case
  */
 class ProductQuoteRefund extends \yii\db\ActiveRecord
 {
+    public static function create(
+        $orderRefundId,
+        $productQuoteId,
+        $sellingPrice,
+        $clientCurrency,
+        $clientCurrencyRate,
+        $caseId
+    ): self {
+        $refund = new self();
+        $refund->pqr_order_refund_id = $orderRefundId;
+        $refund->pqr_product_quote_id = $productQuoteId;
+        $refund->pqr_selling_price = $sellingPrice;
+        $refund->pqr_penalty_amount = 0;
+        $refund->pqr_processing_fee_amount = 0;
+        $refund->pqr_refund_amount = $refund->pqr_selling_price - $refund->pqr_penalty_amount - $refund->pqr_processing_fee_amount;
+        $refund->pqr_client_currency = $clientCurrency;
+        $refund->pqr_client_currency_rate = $clientCurrencyRate;
+        $refund->pqr_client_selling_price = CurrencyHelper::roundUp($refund->pqr_selling_price * $refund->pqr_client_currency_rate);
+        $refund->pqr_client_refund_amount = CurrencyHelper::roundUp($refund->pqr_refund_amount * $refund->pqr_client_currency_rate);
+        $refund->pqr_case_id = $caseId;
+        return $refund;
+    }
+
+    public static function createByScheduleChange(
+        $orderRefundId,
+        $productQuoteId,
+        $sellingPrice,
+        $clientCurrency,
+        $clientCurrencyRate,
+        $caseId
+    ): self {
+        $refund = self::create(
+            $orderRefundId,
+            $productQuoteId,
+            $sellingPrice,
+            $clientCurrency,
+            $clientCurrencyRate,
+            $caseId
+        );
+        $refund->pqr_status_id = ProductQuoteRefundStatus::PENDING;
+        $refund->detachBehavior('user');
+        return $refund;
+    }
+
+    public function error(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::ERROR;
+    }
+
+    public function processing(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::PROCESSING;
+    }
+
+    public function isInProcessing(): bool
+    {
+        return $this->pqr_status_id === ProductQuoteRefundStatus::PROCESSING;
+    }
+
+    public function done(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::DONE;
+    }
+
     /**
      * @return array
      */
@@ -91,6 +159,9 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             [['pqr_order_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrderRefund::class, 'targetAttribute' => ['pqr_order_refund_id' => 'orr_id']],
             [['pqr_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqr_updated_user_id' => 'id']],
             [['pqr_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqr_product_quote_id' => 'pq_id']],
+
+            ['pqr_case_id', 'integer'],
+            ['pqr_case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['pqr_case_id' => 'cs_id']],
         ];
     }
 
@@ -116,6 +187,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             'pqr_updated_user_id' => 'Updated User ID',
             'pqr_created_dt' => 'Created Dt',
             'pqr_updated_dt' => 'Updated Dt',
+            'pqr_case_id' => 'Case ID',
         ];
     }
 
@@ -149,6 +221,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         return $this->hasOne(OrderRefund::class, ['orr_id' => 'pqr_order_refund_id']);
     }
 
+    public function getCase()
+    {
+        return $this->hasOne(Cases::class, ['cs_id' => 'pqr_case_id']);
+    }
+
     /**
      * Gets query for [[PqrUpdatedUser]].
      *
@@ -164,7 +241,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getPqrProductQuote()
+    public function getProductQuote()
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqr_product_quote_id']);
     }

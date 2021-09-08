@@ -72,6 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'orr_updated_user_id:username',
             'orr_created_dt:byUserDateTime',
             'orr_updated_dt:byUserDateTime',
+            'orr_case_id',
         ],
     ]) ?>
 

@@ -89,7 +89,7 @@ return [
 
     VisitorSubscriptionEnabled::class => [
         FindChatsAndRunDistributionLogic::class
-    ]
+    ],
 
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
 ];

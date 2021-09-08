@@ -81,7 +81,6 @@ use yii\queue\Queue;
  */
 class CommunicationController extends ApiBaseController
 {
-
     public const TYPE_VOIP_RECORD       = 'voip_record';
     public const TYPE_VOIP_INCOMING     = 'voip_incoming';
     public const TYPE_VOIP_GATHER       = 'voip_gather';
@@ -151,7 +150,7 @@ class CommunicationController extends ApiBaseController
     public function actionEmail(): array
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+//        $this->startApiLog($this->action->uniqueId);
 
         $type = Yii::$app->request->post('type');
         $last_id = Yii::$app->request->post('last_email_id', null);
@@ -171,8 +170,7 @@ class CommunicationController extends ApiBaseController
                 throw new BadRequestHttpException('Invalid Email type', 2);
         }
 
-        $responseData = $this->getResponseData($response, $apiLog);
-        return $responseData;
+        return $this->getResponseData($response, false);
     }
 
 
@@ -208,7 +206,7 @@ class CommunicationController extends ApiBaseController
     public function actionSms(): array
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
         $type = Yii::$app->request->post('type');
 
         if (!$type) {
@@ -229,8 +227,7 @@ class CommunicationController extends ApiBaseController
                 throw new BadRequestHttpException('Invalid type', 2);
         }
 
-        $responseData = $this->getResponseData($response, $apiLog);
-        return $responseData;
+        return $this->getResponseData($response);
     }
 
 
@@ -268,7 +265,7 @@ class CommunicationController extends ApiBaseController
         $this->checkPost();
         $type = Yii::$app->request->post('type');
 
-        $apiLog = $this->startApiLog($this->action->uniqueId . ($type ? '/' . $type : ''));
+        $this->startApiLog($this->action->uniqueId . ($type ? '/' . $type : ''));
         $post = Yii::$app->request->post();
 
         switch ($type) {
@@ -301,8 +298,7 @@ class CommunicationController extends ApiBaseController
                 $response = $this->voiceDefault($post);
         }
 
-        $responseData = $this->getResponseData($response, $apiLog);
-        return $responseData;
+        return $this->getResponseData($response);
     }
 
 
@@ -452,10 +448,10 @@ class CommunicationController extends ApiBaseController
                     } elseif ($upp->uppUser && $upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0])) {
                         $call_dep_id = $upp->uppUser->userDepartments[0]->ud_dep_id;
 
-                        /*foreach ($upp->uppUser->userDepartments as $userDepartment) {
-                            $call_dep_id = $userDepartment->ud_dep_id;
-                            break;
-                        }*/
+                    /*foreach ($upp->uppUser->userDepartments as $userDepartment) {
+                        $call_dep_id = $userDepartment->ud_dep_id;
+                        break;
+                    }*/
                     } else {
                         $call_dep_id = null;
                     }
@@ -476,7 +472,7 @@ class CommunicationController extends ApiBaseController
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
-                   // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
+                    // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
 
                     /** @var Employee $user */
                     $user = $upp->uppUser;
@@ -629,7 +625,7 @@ class CommunicationController extends ApiBaseController
                         if ($call->c_recording_sid) {
 //                            $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
 //                            if (!$conferenceBase || ($conferenceBase && !$call->c_conference_id)) {
-                                (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
+                            (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
 //                            }
                         }
                     }
@@ -1155,6 +1151,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from_country = Call::getDisplayRegion($calData['FromCountry'] ?? '');
             $call->c_from_state = $calData['FromState'] ?? null;
             $call->c_from_city = $calData['FromCity'] ?? null;
+            $call->c_stir_status = $calData['StirStatus'] ?? null;
 
             if ($parentCall) {
                 $call->c_parent_id = $parentCall->c_id;
@@ -1175,7 +1172,12 @@ class CommunicationController extends ApiBaseController
 //                        }
 //                    }
 //                }
-                    //$call->c_u_id = $parentCall->c_dep_id;
+                //$call->c_u_id = $parentCall->c_dep_id;
+
+                if (!empty($call->c_stir_status) && empty($parentCall->c_stir_status)) {
+                    $parentCall->c_stir_status = $call->c_stir_status;
+                    $parentCall->save();
+                }
             }
 
             if ($call_project_id) {
@@ -1342,6 +1344,10 @@ class CommunicationController extends ApiBaseController
         if ($customParameters->dep_id) {
             $call->c_dep_id = $customParameters->dep_id;
         }
+
+        if ($customParameters->client_id) {
+            $call->c_client_id = $customParameters->client_id;
+        }
     }
 
     private static function copyUpdatedData(Call $from, Call $to): void
@@ -1380,8 +1386,8 @@ class CommunicationController extends ApiBaseController
     {
         $call = null;
         $parentCall = null;
-
         $callSid = $callData['CallSid'] ?? '';
+        $stirStatus = $callData['StirStatus'] ?? null;
 
         if ($callSid) {
             $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
@@ -1410,6 +1416,11 @@ class CommunicationController extends ApiBaseController
 
             if ($parentCall) {
                 self::copyDataFromParentCall($call, $parentCall);
+
+                if (!empty($stirStatus) && empty($parentCall->c_stir_status)) {
+                    $parentCall->c_stir_status = $call->c_stir_status;
+                    $parentCall->save();
+                }
             }
 
             $call->c_is_new = true;
@@ -1417,6 +1428,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $callData['From'];
             $call->c_to = $callData['To']; //Called
             $call->c_created_user_id = null;
+            $call->c_stir_status = $stirStatus;
 
             self::copyDataFromCustomParams($call, $customParameters);
 
@@ -1530,7 +1542,7 @@ class CommunicationController extends ApiBaseController
             if ($callParams->url_music_play_hold) {
                 $responseTwml->play($callParams->url_music_play_hold, ['loop' => 0]);
             }
-        } else if ($callFromInternalPhone) {
+        } elseif ($callFromInternalPhone) {
 //          $dial = $responseTwml->dial('', [
 //              'answerOnBridge' => true,
 //              'recordingStatusCallbackMethod' => 'POST',
@@ -1677,7 +1689,6 @@ class CommunicationController extends ApiBaseController
         array $repeatParams,
         QueueLongTimeNotificationParams $queueLongTimeParams
     ): array {
-
         $selectedDepartment = null;
         $dParams = @json_decode($department->dpp_params, true);
         $overrideDepartment = $dParams['overrideDepartment'] ?? [];
@@ -2010,7 +2021,6 @@ class CommunicationController extends ApiBaseController
      */
     private function updateSmsStatus()
     {
-
         $response = [];
         /*
          * [
@@ -2411,9 +2421,9 @@ class CommunicationController extends ApiBaseController
         }
 
         try {
-                    $form = new SmsIncomingForm();
-                    $data['SmsIncomingForm'] = $smsItem;
-                    $form->load($data);
+            $form = new SmsIncomingForm();
+            $data['SmsIncomingForm'] = $smsItem;
+            $form->load($data);
             if ($form->validate()) {
                 $response = (Yii::createObject(SmsIncomingService::class))->create($form)->attributes;
             } else {
@@ -2520,10 +2530,10 @@ class CommunicationController extends ApiBaseController
 
     /**
      * @param array $response
-     * @param ApiLog $apiLog
+     * @param bool $enabledLog
      * @return array
      */
-    private function getResponseData(array $response, ApiLog $apiLog): array
+    private function getResponseData(array $response, bool $enabledLog = true): array
     {
         if (isset($response['error']) && $response['error']) {
             $responseData = [
@@ -2542,7 +2552,9 @@ class CommunicationController extends ApiBaseController
         }
 
         $responseData['data']['response'] = $response;
-        $responseData = $apiLog->endApiLog($responseData);
+        if ($enabledLog) {
+            $responseData = $this->apiLog->endApiLog($responseData);
+        }
 
         return $responseData;
     }
@@ -2821,7 +2833,6 @@ class CommunicationController extends ApiBaseController
 
     private function voiceConferenceCallback(array $post = []): array
     {
-
         $response = [];
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceConferenceCallback');
@@ -3061,7 +3072,6 @@ class CommunicationController extends ApiBaseController
 
     private function voiceConferenceRecordCallback(array $post = []): array
     {
-
         $response = [];
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceConferenceRecordCallback');

@@ -72,6 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'cl_status_id:callLogStatus',
                     'cl_client_id:client',
                     'cl_price',
+                    'cl_stir_status',
                 ],
             ]) ?>
         </div>

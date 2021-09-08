@@ -780,6 +780,7 @@ class MigrateCallsToCallLogsController extends Controller
             }
 
             $callLog->cl_status_id = $callData['cl_status_id'] ?? ($call['c_status_id'] ?: self::convertStatusFromTwStatus($call['c_call_status']));
+            $callLog->cl_stir_status = $callData['c_stir_status'] ?? null;
 
             if ($call['c_from'] && $call['c_call_type_id'] == Call::CALL_TYPE_OUT) {
                 if ($phoneList = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $call['c_from']])->asArray()->one()) {

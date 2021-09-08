@@ -134,14 +134,14 @@ class OfferSmsController extends ApiBaseController
     public function actionSendQuote()
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
         $post = Yii::$app->request->post();
         $responseData = [];
         $sendQuoteApiForm = new SendSmsQuoteApiForm();
         $errorsMessage = [];
 
         if (!$sendQuoteApiForm->load($post)) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR)
             ));
@@ -151,7 +151,7 @@ class OfferSmsController extends ApiBaseController
                 ErrorsToStringHelper::extractFromModel($sendQuoteApiForm),
                 'OfferSmsController:actionSendQuote:sendQuoteApiForm'
             );
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($sendQuoteApiForm->getErrors()),
@@ -261,7 +261,7 @@ class OfferSmsController extends ApiBaseController
             $responseData['result'] = 'Sms sending. Sms ID(' . $sms->s_id . ')';
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'OfferSmsController:actionSendQuote:Throwable');
-            return $this->endApiLog($apiLog, new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage()),
                 new ErrorsMessage($errorsMessage),
@@ -269,7 +269,7 @@ class OfferSmsController extends ApiBaseController
             ));
         }
 
-        return $this->endApiLog($apiLog, new SuccessResponse(
+        return $this->endApiLog(new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage('OK'),
             new DataMessage($responseData)
@@ -288,9 +288,9 @@ class OfferSmsController extends ApiBaseController
             ->scalar();
     }
 
-    private function endApiLog(ApiLog $apiLog, Response $response): Response
+    private function endApiLog(Response $response): Response
     {
-        $apiLog->endApiLog(ArrayHelper::toArray($response));
+        $this->apiLog->endApiLog(ArrayHelper::toArray($response));
         return $response;
     }
 }

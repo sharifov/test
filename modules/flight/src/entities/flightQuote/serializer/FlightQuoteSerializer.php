@@ -74,6 +74,13 @@ class FlightQuoteSerializer extends Serializer
             }
         }
 
+        if ($this->model->flightQuoteFlights) {
+            $data['flights'] = [];
+            foreach ($this->model->flightQuoteFlights as $flightQuoteFlight) {
+                $data['flights'][] = $flightQuoteFlight->serialize();
+            }
+        }
+
         return $data;
     }
 }

@@ -3,9 +3,18 @@
 namespace sales\repositories\lead;
 
 use common\models\LeadQcall;
+use sales\repositories\NotFoundException;
 
 class LeadQcallRepository
 {
+    public function find(int $leadId): LeadQcall
+    {
+        $leadQcall = LeadQcall::find()->byLeadId($leadId)->one();
+        if ($leadQcall) {
+            return $leadQcall;
+        }
+        throw new NotFoundException('LeadQcall not found. LeadId: ' . $leadId);
+    }
 
     /**
      * @param LeadQcall $qCall

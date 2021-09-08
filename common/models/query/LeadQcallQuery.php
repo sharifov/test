@@ -9,6 +9,11 @@ namespace common\models\query;
  */
 class LeadQcallQuery extends \yii\db\ActiveQuery
 {
+    public function byLeadId(int $leadId): self
+    {
+        return $this->andWhere(['lqc_lead_id' => $leadId]);
+    }
+
     /**
      * @param int $userId
      * @param int $leadId

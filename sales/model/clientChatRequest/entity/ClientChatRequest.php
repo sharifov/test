@@ -285,6 +285,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         return ClientChatPlatform::getPlatformIdByName($this->decodedData['visitor']['platform'] ?? '');
     }
 
+    public function getFlightSearchParameters(): array
+    {
+        return $this->decodedData['parameters'] ?? [];
+    }
+
     /**
      * @param string $rid
      * @return array|ActiveRecord|null

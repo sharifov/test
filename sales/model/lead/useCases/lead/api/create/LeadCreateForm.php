@@ -2,6 +2,7 @@
 
 namespace sales\model\lead\useCases\lead\api\create;
 
+use common\models\Department;
 use common\models\Language;
 use common\models\Lead;
 use common\models\Project;
@@ -16,6 +17,8 @@ use yii\base\Model;
  * @property string $source_code
  * @property int $source_id
  * @property string|null $project_key
+ * @property int $department_id
+ * @property string|null $department_key
  * @property int $project_id
  * @property int $status
  * @property string $uid
@@ -46,6 +49,8 @@ class LeadCreateForm extends Model
     public $source_code;
     public $source_id;
     public $project_key;
+    public $department_id = Department::DEPARTMENT_SALES;
+    public $department_key;
     public $project_id;
     public $status;
     public $uid;
@@ -140,7 +145,20 @@ class LeadCreateForm extends Model
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
             [['lead_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['department_key', 'string'],
+            ['department_key', 'validateDepartment', 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
+    }
+
+    public function validateDepartment(): void
+    {
+        $departmentId = Department::find()->select(['dep_id'])->andWhere(['dep_key' => $this->department_key])->scalar();
+        if (!$departmentId) {
+            $this->addError('department_key', 'Department Key is invalid.');
+            return;
+        }
+        $this->department_id = (int)$departmentId;
     }
 
     public function projectSourcesProcessing($attribute): void

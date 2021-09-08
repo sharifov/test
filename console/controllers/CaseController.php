@@ -6,10 +6,12 @@ use common\components\jobs\CreateSaleFromBOJob;
 use common\models\CaseSale;
 use common\models\Client;
 use common\models\ClientEmail;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -23,8 +25,20 @@ use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class CaseController
+ *
+ * @property CasesRepository $caseRepository
+ */
 class CaseController extends Controller
 {
+    private $caseRepository;
+
+    public function __construct($id, $module, CasesRepository $caseRepository, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->caseRepository = $caseRepository;
+    }
     /**
      * @param string $importZipName
      * @param string $importFileName
@@ -252,6 +266,36 @@ class CaseController extends Controller
                 }
 
                 echo $case->cs_id . "\r\n";
+            }
+        }
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionReprotectionClientActiveless()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $time_start = microtime(true);
+
+        $query = Cases::find()->where(['cs_status' => CasesStatus::STATUS_AUTO_PROCESSING])->joinWith(['category as c']);
+        $query->andWhere(['cs_is_automate' => true]);
+        $query->andWhere(['<', 'date_format(cs_deadline_dt, "%Y-%m-%d")',  date('Y-m-d')]);
+        $query->andWhere(['c.cc_key' => SettingHelper::getReProtectionCaseCategory()]);
+        $cases = $query->all();
+
+        if ($cases) {
+            foreach ($cases as $case) {
+                try {
+                    $case->pending(null, null, 'No reprotaction action from client');
+                    $case->cs_is_automate = false;
+                    $this->caseRepository->save($case);
+                    $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: System. Reason: Reprotection client activeless');
+                } catch (\Throwable $e) {
+                    Yii::error('Case: ' . $case->id . ', ' . VarDumper::dumpAsString($case->errors), 'console:CaseController:actionReprotectionClientActiveless:Case:save');
+                }
             }
         }
 

@@ -81,6 +81,11 @@ class CallLogConferenceTransferService
             $log->cl_status_id = $call->isEnded() ? $call->c_status_id : Call::STATUS_COMPLETED;
             $log->cl_type_id = $call->c_call_type_id;
             $log->cl_user_id = $call->c_created_user_id;
+            $log->cl_stir_status = $call->c_stir_status;
+
+            if (!$log->cl_stir_status && $childStirStatus = CallLogTransferService::getChildStirStatus((int) $log->cl_id)) {
+                $log->cl_stir_status = $childStirStatus;
+            }
 
             if (!$log->save()) {
                 Yii::error($log->getErrors());

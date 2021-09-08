@@ -114,6 +114,7 @@ return [
             'class' => \common\components\HybridService::class,
             'username' => '',
             'password' => '',
+            'webHookEndpoint' => '',
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
@@ -192,12 +193,6 @@ return [
             'port' => $commonParams['queue']['port'],
             'tube' => 'queue_virtual_cron',
         ],
-        'queue_flight_request' => [
-            'class' => \yii\queue\beanstalk\Queue::class,
-            'host' => $commonParams['queue']['host'],
-            'port' => $commonParams['queue']['port'],
-            'tube' => 'queue_flight_request', /* TODO:: ? */
-        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => '',
@@ -258,6 +253,8 @@ return [
         \common\bootstrap\FileStorage::class,
         \common\bootstrap\PaymentSetup::class,
         \common\bootstrap\OrderProcessManagerQueue::class,
-        \modules\order\bootstrap\Logger::class
+        \modules\order\bootstrap\Logger::class,
+        \common\bootstrap\FlightQuoteReprotectionDecisionSetup::class,
+        \common\bootstrap\LeadRedialSetUp::class,
     ],
 ];

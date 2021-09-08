@@ -1430,7 +1430,9 @@ var PhoneWidgetCall = function () {
         completeCall: completeCall,
         updateCurrentCalls: updateCurrentCalls,
         iconUpdate: iconUpdate,
-        audio: audio
+        audio: audio,
+        showCallingPanel: showCallingPanel,
+        openCallTab: openCallTab
     };
 }();
 

@@ -59,6 +59,16 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
         return $clone;
     }
 
+    public static function copy(ProductQuoteOption $option, int $productQuoteId): self
+    {
+        $clone = new self();
+        $clone->attributes = $option->attributes;
+        $clone->pqo_id = null;
+        $clone->pqo_product_quote_id = $productQuoteId;
+        $clone->pqo_status_id = ProductQuoteOptionStatus::PENDING;
+        return $clone;
+    }
+
     /**
      * @return string
      */

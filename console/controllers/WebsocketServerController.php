@@ -123,10 +123,49 @@ class WebsocketServerController extends Controller
                 try {
                     \Yii::$app->db->createCommand('SELECT 1')->execute();
                 } catch (\Throwable $e) {
-                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:workerStart:tick30000');
+                    \Yii::error(ArrayHelper::merge(
+                        ['msg' => 'Check isActive DB connection'],
+                        AppHelper::throwableLog($e, true)
+                    ), 'ws:workerStart:tick30000');
+                    if (strpos($e->getMessage(), 'server has gone away') !== false) {
+                        try {
+                            \Yii::$app->db->close();
+                            \Yii::$app->db->open();
+                            \Yii::$app->db->createCommand('SELECT 1')->execute();
+                            \Yii::info(['message' => 'DB connection reopened', 'connection' => 'DB'], 'info\ws:dbConnectionReopened');
+                        } catch (\Throwable $t) {
+                            \Yii::error(ArrayHelper::merge(
+                                ['msg' => 'Reopen DB connection'],
+                                AppHelper::throwableLog($e, true)
+                            ), 'ws:workerStart:tick30000:reopenConnection');
+                        }
+                    }
                 }
             });
 
+            $server->tick(60000, static function () use ($server) {
+                try {
+                    \Yii::$app->db_slave->createCommand('SELECT 1')->execute();
+                } catch (\Throwable $e) {
+                    \Yii::error(ArrayHelper::merge(
+                        ['msg' => 'Check isActive DB_SLAVE connection'],
+                        AppHelper::throwableLog($e, true)
+                    ), 'ws:workerStart:tick60000');
+                    if (strpos($e->getMessage(), 'server has gone away') !== false) {
+                        try {
+                            \Yii::$app->db_slave->close();
+                            \Yii::$app->db_slave->open();
+                            \Yii::$app->db_slave->createCommand('SELECT 1')->execute();
+                            \Yii::info(['message' => 'DB connection reopened', 'connection' => 'DB_SLAVE'], 'info\ws:dbConnectionReopened');
+                        } catch (\Throwable $t) {
+                            \Yii::error(ArrayHelper::merge(
+                                ['msg' => 'Reopen DB_SLAVE connection'],
+                                AppHelper::throwableLog($e, true)
+                            ), 'ws:workerStart:tick60000:reopenConnection');
+                        }
+                    }
+                }
+            });
 
             $client = new \swoole_redis();
 

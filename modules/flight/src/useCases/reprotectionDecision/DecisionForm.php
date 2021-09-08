@@ -2,61 +2,70 @@
 
 namespace modules\flight\src\useCases\reprotectionDecision;
 
+use common\components\validators\CheckJsonValidator;
+use common\components\validators\IsArrayValidator;
 use yii\base\Model;
 
 /**
  * Class DecisionForm
  *
- * @property int $reprotection_id
- * @property int $type_id
- * @property $flight_product_quote
+ * @property string $booking_id
+ * @property string $type
+ * @property string $reprotection_quote_gid
+ * @property array $flight_product_quote
  */
 class DecisionForm extends Model
 {
-    public const TYPE_CONFIRM = 1;
-    public const TYPE_MODIFY = 2;
-    public const TYPE_REFUND = 3;
+    public const TYPE_CONFIRM = 'confirm';
+    public const TYPE_MODIFY = 'modify';
+    public const TYPE_REFUND = 'refund';
 
     public const TYPES = [
-        self::TYPE_CONFIRM => 'confirm',
-        self::TYPE_MODIFY => 'modify',
-        self::TYPE_REFUND => 'refund',
+        self::TYPE_CONFIRM,
+        self::TYPE_MODIFY,
+        self::TYPE_REFUND,
     ];
 
-    public $reprotection_id;
-    public $type_id;
+    public $booking_id;
+    public $type;
+    public $reprotection_quote_gid;
     public $flight_product_quote;
 
     public function rules(): array
     {
         return [
-            ['reprotection_id', 'required'],
-            ['reprotection_id', 'integer'],
+            ['booking_id', 'required'],
+            ['booking_id', 'string', 'min' => 7, 'max' => 10],
 
-            ['type_id', 'required'],
-            ['type_id', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
-            ['type_id', 'in', 'range' => array_keys(self::TYPES)],
+            ['type', 'required'],
+            ['type', 'in', 'range' => self::TYPES],
+
+            ['reprotection_quote_gid', 'string', 'max' => 32],
+            ['reprotection_quote_gid', 'required', 'when' => function () {
+                return $this->isConfirm();
+            }],
 
             ['flight_product_quote', 'required', 'when' => function () {
                 return $this->isModify();
             }],
-            ['flight_product_quote', 'safe'], // todo
+            ['flight_product_quote', CheckJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['flight_product_quote', IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 
     public function isConfirm(): bool
     {
-        return $this->type_id === self::TYPE_CONFIRM;
+        return $this->type === self::TYPE_CONFIRM;
     }
 
     public function isModify(): bool
     {
-        return $this->type_id === self::TYPE_MODIFY;
+        return $this->type === self::TYPE_MODIFY;
     }
 
     public function isRefund(): bool
     {
-        return $this->type_id === self::TYPE_REFUND;
+        return $this->type === self::TYPE_REFUND;
     }
 
     public function formName(): string

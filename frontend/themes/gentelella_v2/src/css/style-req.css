@@ -1869,7 +1869,7 @@ input[disabled] + .radio-tab__text {
   font-weight: 600;
 }
 
-/* ----------------- LEAD STATUS CLASS -------------------------------- */
+/* ----------------- LEAD/CASE STATUS CLASS -------------------------------- */
 .ll-pending {
   background-color: #efc24a;
 }
@@ -1900,6 +1900,18 @@ input[disabled] + .radio-tab__text {
 
 .ll-snooze {
   background-color: #714E9C;
+}
+
+.ll-awaiting {
+  background-color: #6c7b28;
+}
+
+.ll-auto_processing {
+  background-color: #579f87;
+}
+
+.ll-error {
+  background-color: #d03535;
 }
 
 /* ----------------- QUOTE STATUS CLASS -------------------------------- */

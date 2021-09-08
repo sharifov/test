@@ -31,6 +31,7 @@ use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\interfaces\ProductDataInterface;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
@@ -99,6 +100,7 @@ use modules\order\src\entities\orderData\OrderData;
  * @property CaseOrder[] $caseOrder
  * @property OrderStatusLog[] $orderStatusLogs
  * @property OrderData $orderData
+ * @property ProductQuote[] $nonReprotectionProductQuotes
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -302,7 +304,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
      */
     public function getOrderContacts(): ActiveQuery
     {
-        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id']);
+        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id'])->orderBy(['oc_id' => SORT_DESC]);
     }
 
     public function getOrderData()
@@ -363,6 +365,32 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id']);
+    }
+
+    public function getNonReprotectionProductQuotes(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])
+            ->leftJoin([
+                'quote_relation' => ProductQuoteRelation::find()
+                    ->select([
+                        'pqr_parent_pq_id AS parent_id'
+                    ])
+                    ->groupBy(['pqr_parent_pq_id'])
+            ], 'pq_id = quote_relation.parent_id')
+            ->leftJoin([
+                'quote_non_relation' => ProductQuoteRelation::find()
+                    ->select([
+                        'pqr_parent_pq_id AS parent_id',
+                        'pqr_related_pq_id AS related_id',
+                    ])
+                    ->groupBy(['pqr_parent_pq_id', 'pqr_related_pq_id'])
+            ], 'quote_non_relation.parent_id = pq_id OR quote_non_relation.related_id = pq_id')
+            ->andWhere([
+            'OR',
+                ['IS NOT', 'quote_relation.parent_id', null],
+                ['IS', 'quote_non_relation.parent_id', null]
+            ])
+        ;
     }
 
     public function getOrderTips(): ActiveQuery

@@ -25,6 +25,7 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\flight\src\entities\flightQuote\Scopes;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "flight_quote".
@@ -66,6 +67,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  * @property FlightQuoteFlight[] $flightQuoteFlights
+ * @property FlightQuoteFlight $flightQuoteFlight
  * @property FlightQuoteLabel[] $quoteLabel
  */
 class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
@@ -148,11 +150,13 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public const TYPE_BASE = 0;
     public const TYPE_ORIGINAL = 1;
     public const TYPE_ALTERNATIVE = 2;
+    public const TYPE_REPROTECTION = 3;
 
     public const TYPE_LIST = [
         self::TYPE_BASE => 'Base',
         self::TYPE_ORIGINAL => 'Original',
         self::TYPE_ALTERNATIVE => 'Alternative',
+        self::TYPE_REPROTECTION => 'ReProtection',
     ];
 
     public const SERVICE_FEE = 0.035;
@@ -183,7 +187,7 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             [['fq_cabin_class'], 'string', 'max' => 1],
             [['fq_created_expert_name'], 'string', 'max' => 20],
             [['fq_uid'], 'string', 'max' => 50],
-            [['fq_hash_key'], 'unique', 'targetAttribute' => ['fq_flight_id', 'fq_hash_key'] , 'message' => 'Flight already have this quote;', 'skipOnEmpty' => true],
+            //[['fq_hash_key'], 'unique', 'targetAttribute' => ['fq_flight_id', 'fq_hash_key'] , 'message' => 'Flight already have this quote;', 'skipOnEmpty' => true],
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
@@ -308,7 +312,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 
     public function getFlightQuoteFlights(): ActiveQuery
     {
-        return $this->hasMany(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id']);
+        return $this->hasMany(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id'])->orderBy(['fqf_fq_id' => SORT_DESC]);
+    }
+    public function getFlightQuoteFlight(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id'])->orderBy(['fqf_fq_id' => SORT_DESC]);
     }
 
     public function getQuoteLabel(): ActiveQuery
@@ -519,6 +527,16 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         $this->fq_type_id = self::TYPE_ALTERNATIVE;
     }
 
+    public function isTypeReProtection(): bool
+    {
+        return $this->fq_type_id === self::TYPE_REPROTECTION;
+    }
+
+    public function setTypeReProtection(): void
+    {
+        $this->fq_type_id = self::TYPE_REPROTECTION;
+    }
+
     /**
      * @return bool
      */
@@ -664,5 +682,112 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function getQuoteDetailsPageUrl(): string
     {
         return '/flight/flight-quote/ajax-quote-details';
+    }
+
+    public function getDiffUrlOriginReprotectionQuotes(): string
+    {
+        return '/flight/flight-quote/ajax-origin-reprotection-quotes-diff';
+    }
+
+    public function fields(): array
+    {
+        $fields = [
+            'fq_flight_id',
+            'fq_source_id',
+            'fq_product_quote_id',
+            'gds' => 'fq_gds',
+            'pcc' => 'fq_gds_pcc',
+            'fq_gds_offer_id',
+            'fq_type_id',
+            'fq_cabin_class',
+            'fq_trip_type_id',
+            'validatingCarrier' => 'fq_main_airline',
+            'fq_fare_type_id',
+            'fq_last_ticket_date',
+            'fq_origin_search_data',
+            'fq_json_booking',
+            'fq_ticket_json',
+        ];
+        $fields['itineraryDump'] = function () {
+            if (!$this->fq_reservation_dump) {
+                return [];
+            }
+            return explode("\n", str_replace('&nbsp;', ' ', $this->fq_reservation_dump));
+        };
+        $fields['booking_id'] = function () {
+            return $this->getLastBookingId();
+        };
+        $fields['fq_type_name'] = function () {
+            return FlightQuote::getTypeName($this->fq_type_id);
+        };
+        $fields['fq_fare_type_name'] = function () {
+            return FlightQuote::getFareTypeNameById($this->fq_fare_type_id);
+        };
+        $fields['fareType'] = function () {
+            return array_flip(self::FARE_TYPE_ID_LIST)[$this->fq_fare_type_id] ?? null;
+        };
+        if ($this->fqFlight) {
+            $fields['flight'] = function () {
+                return $this->fqFlight->toArray();
+            };
+        }
+        if ($this->flightQuoteTrips) {
+            $fields['trips'] = function () {
+                $trips = [];
+                foreach ($this->flightQuoteTrips as $flightQuoteTrip) {
+                    $trip = $flightQuoteTrip->toArray();
+                    foreach ($flightQuoteTrip->flightQuoteSegments as $flightQuoteSegment) {
+                        $trip['segments'][] = $flightQuoteSegment->toArray();
+                    }
+                    $trips[] = $trip;
+                }
+                return $trips;
+            };
+        }
+        if ($this->flightQuotePaxPrices) {
+            $fields['pax_prices'] = function () {
+                $prices = [];
+                foreach ($this->flightQuotePaxPrices as $price) {
+                    $prices[] = $price->toArray();
+                }
+                return $prices;
+            };
+        }
+        if ($this->fqFlight->flightPaxes) {
+            $fields['paxes'] = function () {
+                $paxes = [];
+                foreach ($this->fqFlight->flightPaxes as $flightPax) {
+                    $paxes[] = $flightPax->toArray();
+                }
+                return $paxes;
+            };
+        }
+        return $fields;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBookingId(): string
+    {
+        $bookingData = [];
+
+        if ($this->flightQuoteFlights) {
+            foreach ($this->flightQuoteFlights as $fqFlight) {
+                if ($fqFlight && $fqFlight->fqf_booking_id) {
+                    $bookingData[] = $fqFlight->fqf_booking_id;
+                }
+            }
+        }
+        return implode(', ', $bookingData);
+    }
+
+    public function getLastBookingId(): ?string
+    {
+        $bookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $this->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+        if ($bookingId) {
+            return $bookingId;
+        }
+        return null;
     }
 }

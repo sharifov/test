@@ -34,6 +34,7 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use modules\qaTask\src\abac\QaTaskAbacObject;
 
 /**
  * Class QaTaskActionController
@@ -438,6 +439,11 @@ class QaTaskActionController extends FController
 
     public function actionUserAssign(): string
     {
+        /** @abac null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS, Action Assign Multiple Tasks To QA*/
+        if (!Yii::$app->abac->can(null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $form = new UserAssignForm();
 
         $form->gids = Yii::$app->request->get('gid', []);

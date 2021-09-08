@@ -139,7 +139,7 @@ use sales\helpers\phone\MaskPhoneHelper;
                             ],
                         ]) ?>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6" style="overflow-x: auto; height: 230px;">
                         <?= \yii\widgets\DetailView::widget([
                             'model' => $caseModel->client,
                             'attributes' => [

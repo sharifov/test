@@ -89,7 +89,7 @@ class LeadItineraryController extends FController
 
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                $this->service->editItinerary($id, $form);
+                $this->service->editItinerary($lead, $form);
                 Yii::$app->session->setFlash('success', 'Segments save.');
             } catch (\Exception $e) {
                 Yii::$app->errorHandler->logException($e);

@@ -71,6 +71,7 @@ class CasesQSearch extends Cases
             ['cs_lead_id', 'string'],
             ['cs_dep_id', 'integer'],
             ['cs_created_dt', 'string'],
+            ['cs_is_automate', 'boolean'],
             ['solved_date', 'string'],
             ['trash_date', 'string'],
             ['cs_need_action', 'boolean'],
@@ -272,6 +273,453 @@ class CasesQSearch extends Cases
             'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
             'cs_need_action' => $this->cs_need_action,
+            'css_penalty_type' => $this->css_penalty_type,
+        ]);
+
+        if ($this->cs_lead_id) {
+            $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
+        }
+
+        if ($this->cs_created_dt) {
+            $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
+        }
+
+        $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchError($params, Employee $user): ActiveDataProvider
+    {
+        $query = $this->casesQRepository->getErrorQuery($user);
+
+        $query->joinWith(['client']);
+        $query->joinWith('project', true, 'INNER JOIN');
+
+        $query->addSelect('*');
+        $query->addSelect(new Expression('
+            CASE 
+                WHEN (NOT ISNULL(sale_out.css_cs_id) OR NOT ISNULL(sale_in.css_cs_id))
+                THEN 1
+                ELSE 0
+            END AS saleExist'));
+        $query->addSelect(new Expression('
+             DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'));
+
+        $query->addSelect('css_penalty_type');
+
+        $query->leftJoin([
+            'penalty_departure' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_penalty_type) AS css_penalty_type'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = penalty_departure.css_cs_id');
+
+        $query->leftJoin([
+            'sale_out' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_out_date) AS last_out_date'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_out.css_cs_id');
+
+        $query->leftJoin([
+            'sale_in' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_in_date) AS last_in_date'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_in.css_cs_id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => [
+                'saleExist' => SORT_DESC,
+                'nextFlight' => SORT_ASC,
+                'sort_order' => SORT_DESC,
+                'cs_id' => SORT_ASC,
+            ],
+            ],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $sorting = $dataProvider->getSort();
+        $sorting->attributes = array_merge($sorting->attributes, [
+            'sort_order' => [
+                'asc' => ['sort_order' => SORT_ASC],
+                'desc' => ['sort_order' => SORT_DESC],
+            ],
+            'saleExist' => [
+                'asc' => ['saleExist' => SORT_ASC],
+                'desc' => ['saleExist' => SORT_DESC],
+                'default' => SORT_DESC,
+                'label' => 'Sale exist',
+            ],
+            'nextFlight' => [
+                'asc' => ['nextFlight' => SORT_ASC],
+                'desc' => ['nextFlight' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Next flight date',
+            ],
+            'css_penalty_type' => [
+                'asc' => ['css_penalty_type' => SORT_ASC],
+                'desc' => ['css_penalty_type' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Penalty Type',
+            ],
+
+            'client_locale' => [
+                'asc' => ['cl_locale' => SORT_ASC],
+                'desc' => ['cl_locale' => SORT_DESC],
+            ],
+        ]);
+        $dataProvider->setSort($sorting);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
+            'cs_project_id' => $this->cs_project_id,
+            'cs_category_id' => $this->cs_category_id,
+            'cs_dep_id' => $this->cs_dep_id,
+            'cs_need_action' => $this->cs_need_action,
+            'cs_is_automate' => $this->cs_is_automate,
+            'css_penalty_type' => $this->css_penalty_type,
+        ]);
+
+        if ($this->cs_lead_id) {
+            $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
+        }
+
+        if ($this->cs_created_dt) {
+            $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
+        }
+
+        $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchAwaiting($params, Employee $user): ActiveDataProvider
+    {
+        $query = $this->casesQRepository->getAwaitingQuery($user);
+
+        $query->joinWith(['client']);
+        $query->joinWith('project', true, 'INNER JOIN');
+
+        $query->addSelect('*');
+        $query->addSelect(new Expression('
+            CASE 
+                WHEN (NOT ISNULL(sale_out.css_cs_id) OR NOT ISNULL(sale_in.css_cs_id))
+                THEN 1
+                ELSE 0
+            END AS saleExist'));
+        $query->addSelect(new Expression('
+             DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'));
+
+        $query->addSelect('css_penalty_type');
+
+        $query->leftJoin([
+            'penalty_departure' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_penalty_type) AS css_penalty_type'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = penalty_departure.css_cs_id');
+
+        $query->leftJoin([
+            'sale_out' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_out_date) AS last_out_date'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_out.css_cs_id');
+
+        $query->leftJoin([
+            'sale_in' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_in_date) AS last_in_date'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_in.css_cs_id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => [
+                'saleExist' => SORT_DESC,
+                'nextFlight' => SORT_ASC,
+                'sort_order' => SORT_DESC,
+                'cs_id' => SORT_ASC,
+            ],
+            ],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $sorting = $dataProvider->getSort();
+        $sorting->attributes = array_merge($sorting->attributes, [
+            'sort_order' => [
+                'asc' => ['sort_order' => SORT_ASC],
+                'desc' => ['sort_order' => SORT_DESC],
+            ],
+            'saleExist' => [
+                'asc' => ['saleExist' => SORT_ASC],
+                'desc' => ['saleExist' => SORT_DESC],
+                'default' => SORT_DESC,
+                'label' => 'Sale exist',
+            ],
+            'nextFlight' => [
+                'asc' => ['nextFlight' => SORT_ASC],
+                'desc' => ['nextFlight' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Next flight date',
+            ],
+            'css_penalty_type' => [
+                'asc' => ['css_penalty_type' => SORT_ASC],
+                'desc' => ['css_penalty_type' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Penalty Type',
+            ],
+
+            'client_locale' => [
+                'asc' => ['cl_locale' => SORT_ASC],
+                'desc' => ['cl_locale' => SORT_DESC],
+            ],
+        ]);
+        $dataProvider->setSort($sorting);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
+            'cs_project_id' => $this->cs_project_id,
+            'cs_category_id' => $this->cs_category_id,
+            'cs_dep_id' => $this->cs_dep_id,
+            'cs_need_action' => $this->cs_need_action,
+            'cs_is_automate' => $this->cs_is_automate,
+            'css_penalty_type' => $this->css_penalty_type,
+        ]);
+
+        if ($this->cs_lead_id) {
+            $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
+        }
+
+        if ($this->cs_created_dt) {
+            $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
+        }
+
+        $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchAutoProcessing($params, Employee $user): ActiveDataProvider
+    {
+        $query = $this->casesQRepository->getAutoProcessingQuery($user);
+
+        $query->joinWith(['client']);
+        $query->joinWith('project', true, 'INNER JOIN');
+
+        $query->addSelect('*');
+        $query->addSelect(new Expression('
+            CASE 
+                WHEN (NOT ISNULL(sale_out.css_cs_id) OR NOT ISNULL(sale_in.css_cs_id))
+                THEN 1
+                ELSE 0
+            END AS saleExist'));
+        $query->addSelect(new Expression('
+             DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'));
+
+        $query->addSelect('css_penalty_type');
+
+        $query->leftJoin([
+            'penalty_departure' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_penalty_type) AS css_penalty_type'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = penalty_departure.css_cs_id');
+
+        $query->leftJoin([
+            'sale_out' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_out_date) AS last_out_date'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_out.css_cs_id');
+
+        $query->leftJoin([
+            'sale_in' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_in_date) AS last_in_date'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_in.css_cs_id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => [
+                'saleExist' => SORT_DESC,
+                'nextFlight' => SORT_ASC,
+                'sort_order' => SORT_DESC,
+                'cs_id' => SORT_ASC,
+            ],
+            ],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $sorting = $dataProvider->getSort();
+        $sorting->attributes = array_merge($sorting->attributes, [
+            'sort_order' => [
+                'asc' => ['sort_order' => SORT_ASC],
+                'desc' => ['sort_order' => SORT_DESC],
+            ],
+            'saleExist' => [
+                'asc' => ['saleExist' => SORT_ASC],
+                'desc' => ['saleExist' => SORT_DESC],
+                'default' => SORT_DESC,
+                'label' => 'Sale exist',
+            ],
+            'nextFlight' => [
+                'asc' => ['nextFlight' => SORT_ASC],
+                'desc' => ['nextFlight' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Next flight date',
+            ],
+            'css_penalty_type' => [
+                'asc' => ['css_penalty_type' => SORT_ASC],
+                'desc' => ['css_penalty_type' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Penalty Type',
+            ],
+
+            'client_locale' => [
+                'asc' => ['cl_locale' => SORT_ASC],
+                'desc' => ['cl_locale' => SORT_DESC],
+            ],
+        ]);
+        $dataProvider->setSort($sorting);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
+            'cs_project_id' => $this->cs_project_id,
+            'cs_category_id' => $this->cs_category_id,
+            'cs_dep_id' => $this->cs_dep_id,
+            'cs_need_action' => $this->cs_need_action,
+            'cs_is_automate' => $this->cs_is_automate,
             'css_penalty_type' => $this->css_penalty_type,
         ]);
 
@@ -977,6 +1425,7 @@ class CasesQSearch extends Cases
             'nextFlight' => 'Next Flight Date',
             'css_penalty_type' => 'Penalty Type',
             'css_departure_dt' => 'Departure DT',
+            'cs_is_automate' => 'Auto'
         ];
     }
 }

@@ -32,7 +32,10 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
 
                 $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
-                \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Reservation:parseDump:Throwable');
+                $logData = AppHelper::throwableLog($throwable);
+                $logData['row'] = $row;
+                $logData['rawData'] = $rawData ?? null;
+                \Yii::warning($logData, 'WorldSpan:Reservation:parseDump:Throwable');
             }
         }
         return $result;
@@ -133,6 +136,9 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $data['departure_time_mm'],
             $departureTimeZone
         );
+        if ($data['departure_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Departure DT ended in failure');
+        }
 
         $arrivalTimeZone = null;
         if ($arrivalAirport = Airports::findByIata($data['arrival_airport_iata'])) {
@@ -146,6 +152,10 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $data['arrival_offset'],
             $arrivalTimeZone
         );
+        if ($data['arrival_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Arrival DT ended in failure');
+        }
+
         return $data;
     }
 

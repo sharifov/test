@@ -20,6 +20,7 @@ class OrderRefundSearch extends OrderRefund
             [['orr_id', 'orr_order_id', 'orr_client_status_id', 'orr_status_id', 'orr_created_user_id', 'orr_updated_user_id'], 'integer'],
             [['orr_uid', 'orr_client_currency', 'orr_description', 'orr_expiration_dt', 'orr_created_dt', 'orr_updated_dt'], 'safe'],
             [['orr_selling_price', 'orr_penalty_amount', 'orr_processing_fee_amount', 'orr_charge_amount', 'orr_refund_amount', 'orr_client_currency_rate', 'orr_client_selling_price', 'orr_client_charge_amount', 'orr_client_refund_amount'], 'number'],
+            ['orr_case_id', 'integer'],
         ];
     }
 
@@ -61,6 +62,7 @@ class OrderRefundSearch extends OrderRefund
         $query->andFilterWhere([
             'orr_id' => $this->orr_id,
             'orr_order_id' => $this->orr_order_id,
+            'orr_case_id' => $this->orr_case_id,
             'orr_selling_price' => $this->orr_selling_price,
             'orr_penalty_amount' => $this->orr_penalty_amount,
             'orr_processing_fee_amount' => $this->orr_processing_fee_amount,
@@ -72,7 +74,7 @@ class OrderRefundSearch extends OrderRefund
             'orr_client_selling_price' => $this->orr_client_selling_price,
             'orr_client_charge_amount' => $this->orr_client_charge_amount,
             'orr_client_refund_amount' => $this->orr_client_refund_amount,
-            'orr_expiration_dt' => $this->orr_expiration_dt,
+            'date(orr_expiration_dt)' => $this->orr_expiration_dt,
             'orr_created_user_id' => $this->orr_created_user_id,
             'orr_updated_user_id' => $this->orr_updated_user_id,
             'date(orr_created_dt)' => $this->orr_created_dt,

@@ -260,8 +260,9 @@ class CallHelper
         return Html::tag('audio', $source, ArrayHelper::merge($defaultAudioOptions, $audioOptions));
     }
 
-    public static function displayAudioBtn(string $recordingUrl, string $dateFormat, int $duration): string
+    public static function displayAudioBtn(string $recordingUrl, string $dateFormat, $duration): string
     {
+        $duration = (int)$duration;
         return Html::button(
             gmdate($dateFormat, $duration) . ' <i class="fa fa-volume-up"></i>',
             [

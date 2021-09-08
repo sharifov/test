@@ -6,6 +6,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
@@ -31,6 +32,7 @@ use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\client\notifications\ClientNotificationCanceler;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -100,6 +102,7 @@ use Locale;
  * @property int|null $c_conference_id
  * @property string $c_is_conference
  * @property string|null $c_language_id
+ * @property string|null $c_stir_status
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
@@ -223,6 +226,7 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_INTERNAL        = 10;
     public const SOURCE_LEAD        = 11;
     public const SOURCE_CASE        = 12;
+    public const SOURCE_CLIENT_NOTIFICATION = 13;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -237,6 +241,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
+        self::SOURCE_CLIENT_NOTIFICATION  => 'Client notification',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -252,6 +257,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
+        self::SOURCE_CLIENT_NOTIFICATION  => 'Client notification',
     ];
 
     public const TW_RECORDING_STATUS_PAUSED = 'paused';
@@ -267,6 +273,16 @@ class Call extends \yii\db\ActiveRecord
     public const CHANNEL_USER_ONLINE = 'userOnlineChannel';
 
     public const DEFAULT_PRIORITY_VALUE = 0;
+
+    public const STIR_STATUS_FULL = 'A';
+    public const STIR_STATUS_PARTIAL = 'B';
+    public const STIR_STATUS_GATEWAY = 'C';
+
+    public const STIR_STATUS_LIST = [
+        self::STIR_STATUS_FULL => 'Full Attestation (A)',
+        self::STIR_STATUS_PARTIAL => 'Partial Attestation (B)',
+        self::STIR_STATUS_GATEWAY => 'Gateway Attestation (C)',
+    ];
 
     private ?Data $data = null;
 
@@ -338,6 +354,11 @@ class Call extends \yii\db\ActiveRecord
 
             ['c_recording_disabled', 'default', 'value' => false],
             ['c_recording_disabled', 'boolean'],
+
+            ['c_stir_status', 'string'],
+            ['c_stir_status', 'trim', 'skipOnEmpty' => true],
+            ['c_stir_status', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
+            ['c_stir_status', 'stirStatusProcessing'],
         ];
     }
 
@@ -386,6 +407,7 @@ class Call extends \yii\db\ActiveRecord
             'c_language_id' => 'Language ID',
             'c_data_json' => 'Data',
             'c_recording_disabled' => 'Recording disabled',
+            'c_stir_status' => 'Stir Status'
         ];
     }
 
@@ -407,6 +429,16 @@ class Call extends \yii\db\ActiveRecord
                 'class' => MetricCallCounterBehavior::class,
             ],
         ];
+    }
+
+    public function stirStatusProcessing()
+    {
+        if (!empty($this->c_stir_status)) {
+            if (!ArrayHelper::isIn($this->c_stir_status, array_keys(self::STIR_STATUS_LIST), true)) {
+                $this->c_stir_status = null;
+                \Yii::warning('Unregistered Stir Status (' . $this->c_stir_status . ')', 'Call:stirStatusProcessing');
+            }
+        }
     }
 
     /**
@@ -431,6 +463,7 @@ class Call extends \yii\db\ActiveRecord
      * @param $fromState
      * @param $fromCity
      * @param $createdUserId
+     * @param $stirStatus
      * @return static
      */
     public static function createDeclined(
@@ -444,7 +477,8 @@ class Call extends \yii\db\ActiveRecord
         $fromCountry,
         $fromState,
         $fromCity,
-        $createdUserId
+        $createdUserId,
+        $stirStatus
     ): self {
         $call = self::create();
         $call->c_call_sid = $callSid;
@@ -460,6 +494,7 @@ class Call extends \yii\db\ActiveRecord
         $call->c_is_new = true;
         $call->c_created_dt = $createdDt;
         $call->c_updated_dt = date('Y-m-d H:i:s');
+        $call->c_stir_status = $stirStatus;
         $call->declined();
         return $call;
     }
@@ -482,6 +517,7 @@ class Call extends \yii\db\ActiveRecord
         $call->c_project_id = $projectId;
         $call->c_dep_id = $depId;
         $call->c_client_id = $clientId;
+        $call->c_stir_status = ArrayHelper::getValue($requestDataDTO, 'callData.StirStatus');
         $call->setStatusIvr();
         return $call;
     }
@@ -1270,6 +1306,9 @@ class Call extends \yii\db\ActiveRecord
 
         if ($this->cCase) {
             $this->cCase->updateLastAction();
+            if ($this->c_parent_id && $this->isOut() && $this->isEnded() && $isChangedStatus) {
+                $this->cCase->addEventLog(null, $this->getCallTypeName() . ' call finished in status: ' . $this->getStatusName() . '. By: ' . $this->cCreatedUser->username);
+            }
         }
 
 
@@ -1392,6 +1431,16 @@ class Call extends \yii\db\ActiveRecord
                 $job->callSids = [$this->c_call_sid];
                 $job->delayJob = $delayJob;
                 Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
+            }
+
+            if ($this->c_case_id) {
+                $productQuoteChanges = ProductQuoteChange::find()->select(['pqc_id'])->byCaseId($this->c_case_id)->isNotDecided()->column();
+                if ($productQuoteChanges) {
+                    $clientNotificationCanceler = Yii::createObject(ClientNotificationCanceler::class);
+                    foreach ($productQuoteChanges as $productQuoteChangeId) {
+                        $clientNotificationCanceler->cancel(\sales\model\client\notifications\client\entity\NotificationType::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT, $productQuoteChangeId);
+                    }
+                }
             }
         }
 
@@ -2680,5 +2729,10 @@ class Call extends \yii\db\ActiveRecord
             }
         }
         return $data;
+    }
+
+    public function isClientNotification(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_CLIENT_NOTIFICATION;
     }
 }

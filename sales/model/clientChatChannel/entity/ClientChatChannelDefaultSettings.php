@@ -67,6 +67,7 @@ class ClientChatChannelDefaultSettings
                 ],
                 'autoCloseRoom' => false
             ],
+            'searchAndCacheFlightQuotesOnAcceptChat' => false
         ]
     ];
 

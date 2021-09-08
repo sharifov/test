@@ -24,6 +24,15 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_UPDATE  = self::NS . 'act/update';
     public const ACT_DELETE  = self::NS . 'act/delete';
 
+    public const ACT_DETAIL_VIEW = self::NS . 'act/detail_view';
+    public const ACT_START_AUTO_PROCESSING = self::NS . 'act/start_auto_processing';
+    public const ACT_CANCEL_AUTO_PROCESSING = self::NS . 'act/cancel_auto_processing';
+    public const ACT_CANCEL_ORDER = self::NS . 'act/cancel_order';
+    public const ACT_SEND_EMAIL_CONFIRMATION = self::NS . 'act/send_email_confirmation';
+    public const ACT_GENERATE_PDF = self::NS . 'act/generate_pdf';
+    public const ACT_STATUS_LOG = self::NS . 'act/status_log';
+    public const ACT_COMPLETE = self::NS . 'act/complete';
+
     /** UI PERMISSION */
     public const UI_ALL             = self::NS . 'ui/*';
     public const UI_BTN_CREATE      = self::NS . 'ui/btn/create';
@@ -54,6 +63,14 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_READ      => self::ACT_READ,
         self::ACT_UPDATE    => self::ACT_UPDATE,
         self::ACT_DELETE    => self::ACT_DELETE,
+        self::ACT_DETAIL_VIEW => self::ACT_DETAIL_VIEW,
+        self::ACT_START_AUTO_PROCESSING => self::ACT_START_AUTO_PROCESSING,
+        self::ACT_CANCEL_AUTO_PROCESSING => self::ACT_CANCEL_AUTO_PROCESSING,
+        self::ACT_CANCEL_ORDER => self::ACT_CANCEL_ORDER,
+        self::ACT_SEND_EMAIL_CONFIRMATION => self::ACT_SEND_EMAIL_CONFIRMATION,
+        self::ACT_GENERATE_PDF => self::ACT_GENERATE_PDF,
+        self::ACT_STATUS_LOG => self::ACT_STATUS_LOG,
+        self::ACT_COMPLETE => self::ACT_COMPLETE,
 
         self::UI_ALL            => self::UI_ALL,
         self::UI_BTN_CREATE     => self::UI_BTN_CREATE,
@@ -91,11 +108,19 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD      => [self::ACTION_ACCESS, self::ACTION_READ],
         self::OBJ_ORDER_ITEM    => [self::ACTION_CREATE, self::ACTION_READ, self::ACTION_UPDATE, self::ACTION_DELETE],
         self::UI_BLOCK_PAYMENTS      => [self::ACTION_ACCESS, self::ACTION_READ],
+        self::ACT_DETAIL_VIEW => [self::ACTION_ACCESS],
+        self::ACT_START_AUTO_PROCESSING => [self::ACTION_ACCESS],
+        self::ACT_CANCEL_AUTO_PROCESSING => [self::ACTION_ACCESS],
+        self::ACT_CANCEL_ORDER => [self::ACTION_ACCESS],
+        self::ACT_SEND_EMAIL_CONFIRMATION => [self::ACTION_ACCESS],
+        self::ACT_GENERATE_PDF => [self::ACTION_ACCESS],
+        self::ACT_STATUS_LOG => [self::ACTION_ACCESS],
+        self::ACT_COMPLETE => [self::ACTION_ACCESS],
     ];
 
 
     protected const ATTR_ORDER_STATUS = [
-        //'optgroup' => self::OPTGROUP_ENV_USER,
+        'optgroup' => 'Order',
         'id' => self::NS . 'status_id',
         'field' => 'status_id',
         'label' => 'Status',
@@ -164,6 +189,7 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::OBJ_ORDER_ITEM][] = $attrStatus;
+        $attributeList[self::ACT_COMPLETE][] = $attrStatus;
 
         //$attributeList[self::OBJ_ORDER_ITEM][] = self::ATTR_ORDER_PROFIT_AMOUNT;
 

@@ -15,6 +15,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+use modules\qaTask\src\abac\QaTaskAbacObject;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\qaTask\src\entities\qaTask\search\QaTaskCrudSearch */
@@ -35,18 +36,22 @@ $this->params['breadcrumbs'][] = $this->title;
         </button>
         <div class="dropdown-menu">
             <p>
-                <?php echo
+                <?php /** @abac null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS, Assign Multiple Tasks To QA*/ ?>
+                <?php if (Yii::$app->abac->can(null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS)) : ?>
+                    <?php echo
                     Html::a(
                         '<i class="fa fa-edit text-warning"></i> Assign user',
                         null,
-                        ['class' => 'dropdown-item btn-multiple-update',
+                        [
+                            'class' => 'dropdown-item btn-multiple-update',
                             'data' => [
                                 'url' => Url::to(['/qa-task/qa-task-action/user-assign']),
                                 'title' => 'Multiple update',
                             ],
                         ]
                     )
-                ?>
+                    ?>
+                <?php endif; ?>
             </p>
         </div>
     </div>
@@ -223,8 +228,13 @@ $(document).on('click', '.btn-multiple-update', function(e) {
             success: function (data) {
                 modal.find('.modal-body').html(data);
             },
-            error: function (xhr) {                  
-                modal.find('.modal-body').html('Error: ' + xhr.responseText);            
+            error: function (xhr) {
+                if (xhr.status != 403) {
+                    modal.find('.modal-body').html('Error: ' + xhr.responseText);
+                } else {
+                    modal.find('.modal-body').html('Access denied.');
+                }
+                            
             },
         });
     }

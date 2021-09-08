@@ -380,7 +380,7 @@ class QuoteController extends ApiBaseController
     public function actionGetInfo(): array
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
 
         $uid = Yii::$app->request->post('uid');
@@ -542,7 +542,7 @@ class QuoteController extends ApiBaseController
 //            $responseData['visitor_log'] = VisitorLog::getVisitorLogsByLead($model->lead_id);
             $responseData['visitor_log'] = VisitorLog::getVisitorLog($lead->l_visitor_log_id);
         }
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
@@ -567,7 +567,7 @@ class QuoteController extends ApiBaseController
     public function actionUpdate()
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         $quoteAttributes = Yii::$app->request->post((new Quote())->formName());
         if (empty($quoteAttributes)) {
@@ -787,7 +787,7 @@ class QuoteController extends ApiBaseController
         }
 
         $responseData = $response;
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
@@ -813,7 +813,7 @@ class QuoteController extends ApiBaseController
     public function actionSync(): array
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         $quoteAttributes = Yii::$app->request->post((new Quote())->formName());
 
@@ -855,8 +855,7 @@ class QuoteController extends ApiBaseController
             throw new NotFoundHttpException('Not found Lead Information, Quote UID: ' . $quoteUid, 5);
         }
 
-        $responseData = $response;
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($response);
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
@@ -999,7 +998,7 @@ class QuoteController extends ApiBaseController
     public function actionCreate()
     {
         $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         $quoteAttributes = Yii::$app->request->post((new Quote())->formName());
         if (empty($quoteAttributes)) {
@@ -1046,6 +1045,13 @@ class QuoteController extends ApiBaseController
 
             $type = $quoteAttributes['type_id'] ?? null;
             $this->setTypeQuoteInsert($type, $quote, $lead);
+
+            $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
+            if ($randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                $projectRelationsCount = count($projectRelationsIds);
+                $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
+                $quote->provider_project_id = $projectRelationsIds[$randomProjectIndex] ?? null;
+            }
 
             $quote->save();
             if ($quote->hasErrors()) {
@@ -1182,7 +1188,7 @@ class QuoteController extends ApiBaseController
             Yii::warning(VarDumper::dumpAsString($warnings), 'API:Quote:create:warnings');
         }
 
-        $responseData = $apiLog->endApiLog($responseData);
+        $responseData = $this->apiLog->endApiLog($responseData);
 
         return $responseData;
     }
@@ -1284,14 +1290,14 @@ class QuoteController extends ApiBaseController
             );
         }
 
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         if (!$form->validate()) {
             $response = new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($form->getErrors())
             );
-            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            $this->apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         }
 
@@ -1313,6 +1319,13 @@ class QuoteController extends ApiBaseController
                 $projectProviderId = $projectRelation->prl_related_project_id;
             }
 
+            $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
+            if (!$projectProviderId && $randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                $projectRelationsCount = count($projectRelationsIds);
+                $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
+                $projectProviderId = $projectRelationsIds[$randomProjectIndex] ?? null;
+            }
+
             $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [JsonHelper::decode($form->origin_search_data)]]);
             $quoteUid = $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
         } catch (\DomainException | \RuntimeException $e) {
@@ -1321,7 +1334,7 @@ class QuoteController extends ApiBaseController
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
-            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            $this->apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableLog($e, true), 'API:QuoteController:actionCreateData:Throwable');
@@ -1329,7 +1342,7 @@ class QuoteController extends ApiBaseController
                 new ErrorsMessage('An error occurred while creating a quote'),
                 new CodeMessage($e->getCode())
             );
-            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            $this->apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         }
 
@@ -1353,7 +1366,7 @@ class QuoteController extends ApiBaseController
             ArrayHelper::setValue($response, 'warnings', implode(',', $warnings));
         }
 
-        $apiLog->endApiLog($response);
+        $this->apiLog->endApiLog($response);
         return $response;
     }
 
@@ -1453,14 +1466,14 @@ class QuoteController extends ApiBaseController
             );
         }
 
-        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $this->startApiLog($this->action->uniqueId);
 
         if (!$form->validate()) {
             $response = new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($form->getErrors())
             );
-            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            $this->apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         }
 
@@ -1482,6 +1495,13 @@ class QuoteController extends ApiBaseController
                 $projectProviderId = $projectRelation->prl_related_project_id;
             }
 
+            $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
+            if (!$projectProviderId && $randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                $projectRelationsCount = count($projectRelationsIds);
+                $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
+                $projectProviderId = $projectRelationsIds[$randomProjectIndex] ?? null;
+            }
+
             $searchQuoteRequest = SearchService::getOnlineQuoteByKey($form->offer_search_key);
             if (empty($searchQuoteRequest['data'])) {
                 throw new \RuntimeException('Quote not found by key: ' . $form->offer_search_key);
@@ -1494,7 +1514,7 @@ class QuoteController extends ApiBaseController
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
-            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            $this->apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableLog($e, true), 'API:QuoteController:actionCreateKey:Throwable');
@@ -1502,7 +1522,7 @@ class QuoteController extends ApiBaseController
                 new ErrorsMessage('An error occurred while creating a quote'),
                 new CodeMessage($e->getCode())
             );
-            $apiLog->endApiLog(ArrayHelper::toArray($response));
+            $this->apiLog->endApiLog(ArrayHelper::toArray($response));
             return $response;
         }
 
@@ -1526,7 +1546,7 @@ class QuoteController extends ApiBaseController
             ArrayHelper::setValue($response, 'warnings', implode(',', $warnings));
         }
 
-        $apiLog->endApiLog($response);
+        $this->apiLog->endApiLog($response);
         return $response;
     }
 

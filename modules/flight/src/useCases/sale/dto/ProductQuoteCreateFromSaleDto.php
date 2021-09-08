@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\sale\dto;
 
+use common\models\Currency;
 use modules\flight\models\Flight;
 use sales\dto\product\ProductQuoteDTO;
 use sales\helpers\product\ProductQuoteHelper;
@@ -41,7 +42,7 @@ class ProductQuoteCreateFromSaleDto extends ProductQuoteDTO
         $this->serviceFeeSum = null;
         $this->originCurrency = $currency ?? ProductQuoteHelper::getClientCurrencyCode($flight->flProduct);
         $this->clientCurrency = $currency ?? ProductQuoteHelper::getClientCurrencyCode($flight->flProduct);
-        $this->originCurrencyRate = null;
+        $this->originCurrencyRate = Currency::getDefaultClientCurrencyRate();
         $this->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($flight->flProduct);
         $this->ownerUserId = $userId;
         $this->createdUserId = $userId;

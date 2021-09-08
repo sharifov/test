@@ -30,7 +30,7 @@ class OrderWebhookJob extends BaseJob implements RetryableJobInterface
      */
     public function execute($queue)
     {
-        \Yii::info('send bo webhook order id: ' . $this->orderId, 'info\OrderWebhookJob');
+        //\Yii::info('Send BO WebHook, OrderId: ' . $this->orderId, 'info\OrderWebhookJob');
 
         $order = Order::findOne(['or_id' => $this->orderId]);
 
@@ -40,7 +40,7 @@ class OrderWebhookJob extends BaseJob implements RetryableJobInterface
             ];
             BackOffice::orderUpdateWebhook($data);
         } else {
-            \Yii::error('Can not send webhook to BO: Order is not found', 'OrderWebhookJob::execute');
+            \Yii::warning('Can not send webhook to BO: Order is not found', 'OrderWebhookJob::execute');
         }
     }
 

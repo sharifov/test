@@ -5,6 +5,7 @@ namespace sales\repositories\cases;
 use common\models\CaseSale;
 use frontend\helpers\JsonHelper;
 use sales\entities\cases\Cases;
+use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\NotFoundException;
 
 class CasesSaleRepository
@@ -85,7 +86,7 @@ class CasesSaleRepository
     public function save(CaseSale $caseSale): CaseSale
     {
         if (!$caseSale->save()) {
-            throw new \RuntimeException('Saving error');
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($caseSale));
         }
         return $caseSale;
     }

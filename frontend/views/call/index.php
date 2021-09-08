@@ -361,6 +361,11 @@ $pjaxListId = 'pjax-call-index';
             //'c_updated_dt',
             //'c_error_message',
 
+            [
+                'attribute' => 'c_stir_status',
+                'filter' => \common\models\Call::STIR_STATUS_LIST
+            ],
+
         ],
     ]); ?>
     <?php Pjax::end(); ?>

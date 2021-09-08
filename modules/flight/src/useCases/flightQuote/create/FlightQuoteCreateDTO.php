@@ -50,10 +50,11 @@ class FlightQuoteCreateDTO
      */
     public function __construct(Flight $flight, ProductQuote $productQuote, array $quote, ?int $userId)
     {
+        $key = $quote['key'] ?? serialize($quote);
         $this->flightId = $flight->fl_id;
         $this->sourceId = null;
         $this->productQuoteId = $productQuote->pq_id;
-        $this->hashKey = FlightQuoteHelper::generateHashQuoteKey($quote['key']);
+        $this->hashKey = FlightQuoteHelper::generateHashQuoteKey($key);
 
         $paymentFee = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id);
         if ($paymentFee) {
@@ -68,14 +69,14 @@ class FlightQuoteCreateDTO
         }
 
         $this->recordLocator = $quote['recordLocator'] ?? null;
-        $this->gds = $quote['gds'];
-        $this->gdsPcc = $quote['pcc'];
+        $this->gds = $quote['gds'] ?? null;
+        $this->gdsPcc = $quote['pcc'] ?? null;
         $this->gdsOfferId = $quote['gdsOfferId'] ?? null;
         $this->typeId = $flight->originalQuoteExist() ? FlightQuote::TYPE_ALTERNATIVE : FlightQuote::TYPE_BASE;
         $this->cabinClass = $flight->fl_cabin_class;
         $this->tripTypeId = $flight->fl_trip_type_id;
-        $this->mainAirline = $quote['validatingCarrier'];
-        $this->fareType = FlightQuote::getFareTypeId($quote['fareType']);
+        $this->mainAirline = $quote['validatingCarrier'] ?? null;
+        $this->fareType = isset($quote['fareType']) ? FlightQuote::getFareTypeId($quote['fareType']) : null;
         $this->createdUserId = $userId;
         $this->createdExpertId = null;
         $this->createdExpertName = null;

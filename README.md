@@ -155,23 +155,23 @@ Cetrifugo Server
 
 https://centrifugal.github.io/centrifugo/server/install/
 
-
-In .. config/supervisor
-rename file centrifugo.conf.txt
+```
+# in .. config/supervisor rename file centrifugo.conf.txt
 sudo service supervisor restart
 ```
-
 END of installation. Now frontend and api must respond. 
-----------
 
 
 DOCUMENTATION
+----------
 
 Prod Kiv Host:
 -------------------
 - [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
 - [sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
 - [sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html) - API Documentation
+- [sales.api.travelinsides.com/phpdoc/index.html](https://sales.api.travelinsides.com/phpdoc/index.html) - PHP Documentation
+
 
 Prod GTT Host:
 -------------------
@@ -184,17 +184,20 @@ Stage Host:
 - [stage-sales.travel-dev.com](https://stage-sales.travel-dev.com) - Frontend
 - [stage-sales-api.travel-dev.com](https://stage-sales-api.travel-dev.com) - API
 - [stage-sales-api.travel-dev.com/doc/index.html](https://stage-sales-api.travel-dev.com/doc/index.html) - API Documentation
+- [stage-sales-api.travel-dev.com/phpdoc/index.html](https://stage-sales-api.travel-dev.com/phpdoc/index.html) - PHP Documentation
 
 Dev Host:
 -------------------
 - [sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
 - [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
 - [api-sales.dev.travelinsides.com/doc/index.html](https://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
+- [api-sales.dev.travelinsides.com/phpdoc/index.html](https://api-sales.dev.travelinsides.com/phpdoc/index.html) - PHP Documentation
 
 Health check API:
-https://sales.api.travelinsides.com/health-check - Prod
-https://stage-sales-api.travel-dev.com/health-check - Stage
-https://api-sales.dev.travelinsides.com/health-check - Dev
+-------------------
+- https://sales.api.travelinsides.com/health-check - Prod
+- https://stage-sales-api.travel-dev.com/health-check - Stage
+- https://api-sales.dev.travelinsides.com/health-check - Dev
 
 Success-Response (JSON format):
 HTTP/1.1 200 OK
@@ -378,6 +381,31 @@ Create a Cert
 # https://github.com/loganstellway/self-signed-ssl
 ./self-signed-tls.sh -c=MD -s=Chisinau -l=Chisinau -o=Kivork -u=Kivork -n=sales.zeit.test -e=alex.connor@techork.com
 ```
+
+PHPDoc (phpDocumentor)
+-------------------
+Installation PHIVE (https://phar.io/):
+```
+wget -O phive.phar https://phar.io/releases/phive.phar
+wget -O phive.phar.asc https://phar.io/releases/phive.phar.asc
+gpg --keyserver hkps://keys.openpgp.org --recv-keys 0x9D8A98B29B2D5D79
+gpg --verify phive.phar.asc phive.phar
+chmod +x phive.phar
+sudo mv phive.phar /usr/local/bin/phive
+```
+Install phpDocumentor (https://docs.phpdoc.org/3.0/guide/getting-started/installing.html):
+```
+phive install phpDocumentor
+chmod +x ~/.phive/phars/phpdocumentor-3.1.1.phar 
+sudo mv ~/.phive/phars/phpdocumentor-3.1.1.phar /usr/local/bin/phpDocumentor
+```
+
+Run DOC generate (config file `./phpdoc.xml`):
+```
+composer phpdoc
+```
+
+
 
 GeoIP Installation
 -------------------

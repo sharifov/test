@@ -94,6 +94,18 @@ class AbacBaseModel
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
+    protected const ATTR_USER_MULTI_ROLES = [
+        'optgroup' => self::OPTGROUP_ENV_USER,
+        'id' => 'env_user_multi_roles',
+        'field' => 'env.user.roles',
+        'label' => 'User Multi Roles',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' =>  [self::OP_CONTAINS]
+    ];
+
     protected const ATTR_USER_PROJECTS = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_user_projects',
@@ -363,16 +375,19 @@ class AbacBaseModel
         $attributeList = self::ATTRIBUTE_LIST;
 
         $ur = self::ATTR_USER_ROLES;
+        $mur = self::ATTR_USER_MULTI_ROLES;
         $ug = self::ATTR_USER_GROUPS;
         $up = self::ATTR_USER_PROJECTS;
         $ud = self::ATTR_USER_DEPARTMENTS;
 
         $ur['values'] = self::getUserRoleList();
+        $mur['values'] = $ur['values'];
         $ug['values'] = self::getUserGroupList();
         $up['values'] = self::getProjectList();
         $ud['values'] = self::getDepartmentList();
 
         $attributeList[] = $ur;
+        $attributeList[] = $mur;
         $attributeList[] = $ug;
         $attributeList[] = $up;
         $attributeList[] = $ud;
@@ -433,7 +448,7 @@ class AbacBaseModel
 
             self::OP_BEGINS_WITH,
             self::OP_NOT_BEGINS_WITH,
-            self::OP_CONTAINS,
+            //self::OP_CONTAINS,
             self::OP_NOT_CONTAINS,
 
             self::OP_ENDS_WITH,
@@ -455,6 +470,7 @@ class AbacBaseModel
         $operators[] = ['type' => self::OP_MATCH, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
         $operators[] = ['type' => self::OP_IN_ARRAY, 'optgroup' => 'Array', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
         $operators[] = ['type' => self::OP_NOT_IN_ARRAY, 'optgroup' => 'Array', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => self::OP_CONTAINS, 'optgroup' => 'Array', 'nb_inputs' => 1, 'multiple' => true, 'apply_to' => "['number', 'string']"];
 
         return $operators;
     }

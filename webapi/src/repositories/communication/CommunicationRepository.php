@@ -51,6 +51,10 @@ class CommunicationRepository
                         }
                     }
                 }
+                if (!empty($call->c_stir_status) && empty($parentCall->c_stir_status)) {
+                    $parentCall->c_stir_status = $call->c_stir_status;
+                    $parentCall->save();
+                }
             }
             $this->save($call);
         }

@@ -15,6 +15,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['pq_order_id' => $orderId]);
     }
 
+    public function byId(int $id): self
+    {
+        return $this->andWhere(['pq_id' => $id]);
+    }
+
     public function applied(): self
     {
         return $this->andWhere(['pq_status_id' => ProductQuoteStatus::APPLIED]);

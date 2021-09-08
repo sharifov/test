@@ -174,7 +174,6 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
         $model->fqf_main_airline = $mainAirline;
         $model->fqf_booking_id = $bookingId;
         $model->fqf_status_id = $statusId;
-        $model->fqf_booking_id = $bookingId;
         $model->fqf_pnr = $pnr;
         $model->fqf_validating_carrier = $validatingCarrier;
         $model->fqf_original_data_json = $originalDataJson;
@@ -212,5 +211,55 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
     public function serialize(bool $withBooking = true): array
     {
         return (new FlightQuoteFlightSerializer($this))->getData($withBooking);
+    }
+
+    public function fields(): array
+    {
+        $fields = [
+            'fqf_trip_type_id',
+            'fqf_main_airline',
+            'fqf_booking_id',
+            'fqf_pnr',
+            'fqf_validating_carrier',
+        ];
+        $fields['bookings'] = function () {
+            $bookings = [];
+            if ($this->flightQuoteBookings) {
+                foreach ($this->flightQuoteBookings as $keyBooking => $flightQuoteBooking) {
+                    $bookings[$keyBooking] = $flightQuoteBooking->toArray();
+                }
+            }
+            return $bookings;
+        };
+        $fields['flight_quote']['fq_type_name'] = function () {
+            return FlightQuote::getTypeName($this->fqfFq->fq_type_id);
+        };
+        $fields['flight_quote']['fq_fare_type_name'] = function () {
+            return FlightQuote::getFareTypeNameById($this->fqfFq->fq_fare_type_id);
+        };
+        $fields['flight'] = function () {
+            return $this->fqfFq->fqFlight ? $this->fqfFq->fqFlight->toArray() : [];
+        };
+        $fields['trips'] = function () {
+            $trips = [];
+            if ($this->flightQuoteTrips) {
+                foreach ($this->flightQuoteTrips as $keyTrip => $flightQuoteTrip) {
+                    $trips[$keyTrip] = $flightQuoteTrip->toArray();
+                    foreach ($flightQuoteTrip->flightQuoteSegments as $keySegment => $flightQuoteSegment) {
+                        $trips[$keyTrip]['segments'][$keySegment] = $flightQuoteSegment->toArray();
+                    }
+                }
+            }
+            return $trips;
+        };
+        return $fields;
+    }
+
+    public static function clone(FlightQuoteFlight $originFlightQuoteFlight, int $flightQuoteId): self
+    {
+        $clone = new self();
+        $clone->attributes = $originFlightQuoteFlight->attributes;
+        $clone->fqf_fq_id = $flightQuoteId;
+        return $clone;
     }
 }

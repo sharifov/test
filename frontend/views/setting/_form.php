@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <div class="col-md-3">
+    <div class="col-md-9">
 
         <?php //= $form->field($model, 's_key')->textInput(['maxlength' => true]) ?>
 
