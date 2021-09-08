@@ -3,8 +3,10 @@
 namespace sales\entities\cases;
 
 use common\models\CaseSale;
+use sales\entities\cases\CasesApiMapper;
 use common\models\Department;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\db\Expression;
 
 class CasesQuery extends ActiveQuery
@@ -56,12 +58,13 @@ class CasesQuery extends ActiveQuery
 
     public static function findCaseByCaseGid(string $caseGid): array
     {
-        $case = Cases::find()
-            ->select('cs_status, cs_id AS case_id, cs_gid AS case_gid, cs_created_dt AS case_created_dt, cs_updated_dt AS case_updated_dt, cs_last_action_dt AS case_last_action_dt, cs_category_id AS case_category_id, cs_order_uid AS case_order_uid, projects.name AS case_project_name')
+        $case = CasesApiMapper::find()
+            ->select('cs_status, cs_id, cs_gid, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_order_uid, projects.name, case_category.cc_key')
             ->leftJoin('projects', 'cs_project_id = projects.id')
+            ->leftJoin('case_category', 'cs_category_id = case_category.cc_id')
                 // Similar part of SQL query, as in findCasesPartial, can be optimized
             ->addSelect(new Expression('
-                        DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS case_next_flight'))
+                        DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS next_flight'))
             ->leftJoin([
                 'sale_out' => CaseSale::find()
                     ->select([
@@ -92,7 +95,9 @@ class CasesQuery extends ActiveQuery
             ], 'cases.cs_id = sale_in.css_cs_id')
                 // End of similar part of SQL query, as in findCasesPartial
             ->andWhere(['cs_gid' => $caseGid])
-            ->asArray()->one();
+            ->one()->toArray();
+//            ->asArray()->one();
+//            ->createCommand()->getRawSql();
         if ($case) {
             $case['case_status_name'] = CasesStatus::getName($case['cs_status']);
             unset($case['cs_status']);
