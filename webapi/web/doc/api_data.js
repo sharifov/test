@@ -3657,7 +3657,7 @@ define({ "api": [
   {
     "type": "post",
     "url": "/v2/flight/reprotection-create",
-    "title": "Create flight reprotection from BO",
+    "title": "ReProtection Create",
     "version": "0.1.0",
     "name": "ReProtection_Create",
     "group": "Flight",
@@ -4015,6 +4015,109 @@ define({ "api": [
         {
           "title": "Success-Response:",
           "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n           \"success\" => true\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type\": [\n              \"Type cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightController.php",
+    "groupTitle": "Flight"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight/reprotection-exchange",
+    "title": "ReProtection exchange",
+    "version": "0.2.0",
+    "name": "ReProtection_Exchange",
+    "group": "Flight",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "email",
+            "description": "<p>Email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": true,
+            "field": "phone",
+            "description": "<p>Phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "200",
+            "optional": true,
+            "field": "flight_request",
+            "description": "<p>Flight Request</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"booking_id\": \"XXXYYYZ\",\n    \"email\": \"example@mail.com\",\n    \"phone\": \"+13736911111\",\n    \"flight_request\": \"\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n           \"success\" => true,\n           \"warnings\": []\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
