@@ -719,7 +719,9 @@ $js = <<<JS
                 if(data.status == true){
                     $('#modal-lg').modal('hide');
                     
-                    createQuoteBtn.remove();
+                    // createQuoteBtn.remove();
+                    createQuoteBtn.attr('disabled', true).prop('disabled', true);
+                    createQuoteBtn.html('Quote assigned');
                     
                     let btnBox = $('#'+searchResId).find('.js-btn-box:first');
                     if (btnBox.find('.search_create_quote__btn').length === 0) {
