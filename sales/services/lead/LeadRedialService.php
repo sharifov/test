@@ -2,7 +2,7 @@
 
 namespace sales\services\lead;
 
-use sales\model\leadRedial\services\AgentPhone;
+use sales\model\leadRedial\queue\AgentPhone;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;

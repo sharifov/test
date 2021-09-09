@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\leadRedial\services;
+namespace sales\model\leadRedial\queue;
 
 use common\models\Lead;
 use common\models\PhoneBlacklist;

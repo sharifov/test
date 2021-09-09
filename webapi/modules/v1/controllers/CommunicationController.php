@@ -43,7 +43,7 @@ use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackF
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\emailList\entity\EmailList;
-use sales\model\leadRedial\services\AutoTakeJob;
+use sales\model\leadRedial\queue\AutoTakeJob;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\model\user\entity\userStatus\UserStatus;
