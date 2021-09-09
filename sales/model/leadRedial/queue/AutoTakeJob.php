@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\leadRedial\services;
+namespace sales\model\leadRedial\queue;
 
 use common\components\purifier\Purifier;
 use common\models\Call;
