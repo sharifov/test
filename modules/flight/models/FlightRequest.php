@@ -157,7 +157,7 @@ class FlightRequest extends \yii\db\ActiveRecord
      */
     public function getApiUserName(): ActiveQuery
     {
-        return $this->hasOne(ApiUser::class, ['au_id' => 'fr_created_api_user_id']) ?? null;
+        return $this->hasOne(ApiUser::class, ['au_id' => 'fr_created_api_user_id']);
     }
 
     public function getProject(): ActiveQuery
