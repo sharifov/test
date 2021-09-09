@@ -43,6 +43,7 @@ use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackF
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\emailList\entity\EmailList;
+use sales\model\leadRedial\services\AutoTakeJob;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\model\user\entity\userStatus\UserStatus;
@@ -1440,6 +1441,9 @@ class CommunicationController extends ApiBaseController
         if (!empty($callData['Command']) && $callData['Command'] === 'change_call_status') {
             if ($call->isStatusRinging()) {
                 $call->c_call_status = $callData['CallStatus'];
+            }
+            if (!empty($callData['IsRedialCall'])) {
+                Yii::$app->queue_job->delay(SettingHelper::getRedialAutoTakeSeconds())->push(new AutoTakeJob($call->c_id));
             }
         } else {
             $call->c_call_status = $callData['CallStatus'];

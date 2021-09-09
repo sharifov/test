@@ -5,6 +5,7 @@ namespace frontend\widgets\redial;
 use common\models\Call;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use sales\helpers\setting\SettingHelper;
 use sales\model\leadRedial\services\ClientPhones;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
@@ -88,16 +89,8 @@ class LeadRedialWidget extends Widget
             'script' => $this->script,
             'phonesTo' => $this->findPhonesTo(),
             'projectId' => $this->findProjectId(),
-            'redialAutoTakeSeconds' => $this->findRedialAutoTakeSeconds(),
+            'redialAutoTakeSeconds' => SettingHelper::getRedialAutoTakeSeconds()
         ]);
-    }
-
-    /**
-     * @return int
-     */
-    private function findRedialAutoTakeSeconds(): int
-    {
-        return Yii::$app->params['settings']['redial_auto_take_seconds'] ?? 10;
     }
 
     /**

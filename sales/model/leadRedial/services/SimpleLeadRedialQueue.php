@@ -3,11 +3,13 @@
 namespace sales\model\leadRedial\services;
 
 use common\models\Lead;
+use common\models\PhoneBlacklist;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\lead\LeadQcallRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\LeadRedialService;
 use sales\services\lead\qcall\QCallService;
+use sales\services\TransactionManager;
 
 /**
  * Class SimpleLeadRedialQueue
@@ -20,6 +22,7 @@ use sales\services\lead\qcall\QCallService;
  * @property LeadRepository $leadRepository
  * @property ClientPhones $clientPhones
  * @property AgentPhone $agentPhone
+ * @property TransactionManager $transactionManager
  */
 class SimpleLeadRedialQueue implements LeadRedialQueue
 {
@@ -31,6 +34,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
     private LeadRepository $leadRepository;
     private ClientPhones $clientPhones;
     private AgentPhone $agentPhone;
+    private TransactionManager $transactionManager;
 
     public function __construct(
         Leads $leads,
@@ -40,7 +44,8 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
         LeadQcallRepository $leadQcallRepository,
         LeadRepository $leadRepository,
         ClientPhones $clientPhones,
-        AgentPhone $agentPhone
+        AgentPhone $agentPhone,
+        TransactionManager $transactionManager
     ) {
         $this->leads = $leads;
         $this->reserver = $reserver;
@@ -50,6 +55,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
         $this->leadRepository = $leadRepository;
         $this->clientPhones = $clientPhones;
         $this->agentPhone = $agentPhone;
+        $this->transactionManager = $transactionManager;
     }
 
     public function getCall(int $userId): ?RedialCall
@@ -83,11 +89,11 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 continue;
             }
 
-            $lead->callPrepare();
-            $this->leadRepository->save($lead);
-
-            // todo ?
-//            $this->qCallService->resetReservation($leadQcall);
+            $this->transactionManager->wrap(function () use ($lead, $leadQcall) {
+                $lead->callPrepare();
+                $this->leadRepository->save($lead);
+                $this->qCallService->resetReservation($leadQcall);
+            });
 
             return new RedialCall(
                 $agentPhone,
@@ -97,6 +103,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 $lead->id
             );
         }
+
         return null;
     }
 
@@ -118,7 +125,16 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
     {
         $clientPhones = $this->clientPhones->getPhones($lead);
         if ($clientPhones) {
-            return $clientPhones[0]->phone;
+            $clientPhone = $clientPhones[0]->phone;
+            if (PhoneBlacklist::find()->isExists($clientPhone)) {
+                \Yii::error([
+                    'message' => 'Found blocked client phone',
+                    'phone' => $clientPhone,
+                    'leadId' => $lead->id,
+                ], 'SimpleLeadRedialQueue');
+                return null;
+            }
+            return $clientPhone;
         }
         \Yii::error([
             'message' => 'Not found client phone',

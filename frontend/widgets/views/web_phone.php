@@ -37,6 +37,7 @@ use yii\bootstrap4\Modal;
     $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
     $ajaxWarmTransferToUserUrl = Url::to(['/phone/ajax-warm-transfer-to-user']);
     $redialSourceType = Call::SOURCE_REDIAL_CALL;
+    $leadViewPageShortUrl = Url::to(['/lead/view'], true);
 
     $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -70,6 +71,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
     const ajaxGetPhoneListIdUrl = '<?= $ajaxGetPhoneListIdUrl ?>';
     const callOutBackendSide = parseInt('<?= $callOutBackendSide ?>');
     const redialSourceType = parseInt('<?= $redialSourceType ?>');
+    const leadViewPageShortUrl = '<?= $leadViewPageShortUrl ?>';
 
     const clientId = '<?=$clientId?>';
 
@@ -412,7 +414,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
     // let currentConnection;
 
-    var connectCallSid = null;
+    window.connectCallSid = null;
 
     function IncomingConnections() {
         this.connections = [];
@@ -518,7 +520,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                         PhoneWidgetCall.updateConnection(conn);
                     }
 
-                    connectCallSid = connection.parameters.CallSid;
+                    window.connectCallSid = connection.parameters.CallSid;
                     setActiveConnection(conn);
                     incomingSoundOff();
                     soundConnect();
@@ -536,7 +538,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     //console.warn(conn);
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
-                    if (connectCallSid === conn.parameters.CallSid) {
+                    if (window.connectCallSid === conn.parameters.CallSid) {
                         soundDisconnect();
                     }
 
@@ -879,7 +881,8 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
             'c_source_type_id': redialSourceType,
             'is_conference_call': conferenceBase,
             'user_identity': window.userIdentity,
-            'phone_list_id': redialCallInfo.phoneListId
+            'phone_list_id': redialCallInfo.phoneListId,
+            'is_redial_call': true
         };
         webPhoneParams = params;
 
