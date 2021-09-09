@@ -338,32 +338,32 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 );
             }
 
-            if (SettingHelper::isEnableSendHookToOtaReProtectionCreate()) {
-                try {
-                    $hybridService = Yii::createObject(HybridService::class);
-                    $data = [
-                        'data' => [
-                            'booking_id' => $flightRequest->fr_booking_id,
-                            'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
-                            'case_gid' => $case->cs_gid,
-                        ]
-                    ];
-                    if (!$hybridService->whReprotection($flightRequest->fr_project_id, $data)) {
-                        throw new CheckRestrictionException(
-                            'Not found webHookEndpoint in project (' . $flightRequest->fr_project_id . ')'
-                        );
-                    }
-                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService sent successfully');
-                } catch (\Throwable $throwable) {
-                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
-                    $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
-                    throw new CheckRestrictionException($throwable->getMessage());
-                }
-            }
-
             $reProtectionCreateService->setCaseDeadline($case, $flightQuote);
 
             if ($case->isAutomate()) {
+                if (SettingHelper::isEnableSendHookToOtaReProtectionCreate()) {
+                    try {
+                        $hybridService = Yii::createObject(HybridService::class);
+                        $data = [
+                            'data' => [
+                                'booking_id' => $flightRequest->fr_booking_id,
+                                'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
+                                'case_gid' => $case->cs_gid,
+                            ]
+                        ];
+                        if (!$hybridService->whReprotection($flightRequest->fr_project_id, $data)) {
+                            throw new CheckRestrictionException(
+                                'Not found webHookEndpoint in project (' . $flightRequest->fr_project_id . ')'
+                            );
+                        }
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService sent successfully');
+                    } catch (\Throwable $throwable) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
+                        $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
+                        throw new CheckRestrictionException($throwable->getMessage());
+                    }
+                }
+
                 try {
                     if (!$clientId = $case->cs_client_id) {
                         throw new CheckRestrictionException('Client not found in Case');
