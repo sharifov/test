@@ -2,8 +2,11 @@
 
 namespace sales\model\leadRedial\services;
 
+use common\components\purifier\Purifier;
 use common\models\Call;
+use common\models\Lead;
 use common\models\Notifications;
+use frontend\widgets\notification\NotificationMessage;
 use sales\helpers\app\AppHelper;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -11,7 +14,6 @@ use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\qcall\QCallService;
 use sales\services\TransactionManager;
-use yii\helpers\Url;
 use yii\queue\JobInterface;
 
 /**
@@ -77,22 +79,49 @@ class AutoTakeJob implements JobInterface
                 }
                 (new LeadUserConversionRepository())->save($leadUserConversion);
             });
-            Notifications::pub(
-                ['user-' . $userId],
-                'leadRedialAutoTake',
-                [
-                    'data' => [
-                        'callSid' => $call->c_call_sid,
-                        'leadId' => $lead->id,
-                        'leadGid' => $lead->gid,
-                    ],
-                ],
-            );
+            $this->sendAutoTakeCommand($userId, $call, $lead);
+            $this->sendAssignLeadNotification($lead);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),
                 'exception' => AppHelper::throwableLog($e),
             ], 'AutoTakeJob');
         }
+    }
+
+    private function sendAssignLeadNotification(Lead $lead): void
+    {
+        $body = \Yii::t(
+            'email',
+            "New lead (Id: {lead_id}) automatically assigned.",
+            [
+                'lead_id' => Purifier::createLeadShortLink($lead),
+            ]
+        );
+
+        if ($ntf = Notifications::create($lead->employee_id, 'Lead assign', $body, Notifications::TYPE_INFO, true)) {
+            $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+            Notifications::publish('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
+        } else {
+            \Yii::warning(
+                'Not created notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id,
+                'AutoTakeJob:sendAssignLeadNotification'
+            );
+        }
+    }
+
+    public function sendAutoTakeCommand(int $userId, Call $call, Lead $lead): void
+    {
+        Notifications::pub(
+            ['user-' . $userId],
+            'leadRedialAutoTake',
+            [
+                'data' => [
+                    'callSid' => $call->c_call_sid,
+                    'leadId' => $lead->id,
+                    'leadGid' => $lead->gid,
+                ],
+            ],
+        );
     }
 }
