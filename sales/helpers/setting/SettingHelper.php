@@ -485,4 +485,9 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0);
     }
+
+    public static function getRedialAutoTakeSeconds(): int
+    {
+        return Yii::$app->params['settings']['redial_auto_take_seconds'] ?? 10;
+    }
 }

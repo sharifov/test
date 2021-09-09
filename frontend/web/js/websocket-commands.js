@@ -519,6 +519,14 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     if (obj.cmd === 'quoteBooked') {
                         $('.btn-delete-product[data-product-id="' + obj.data.productId + '"]').hide();
                     }
+
+                    if (obj.cmd === 'leadRedialAutoTake') {
+                        if (obj.data.callSid === window.connectCallSid) {
+                            //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
+                            let windowObjectReference = window.open(leadViewPageShortUrl + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
+                            windowObjectReference.focus();
+                        }
+                    }
                 }
                 // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
             } catch (error) {
