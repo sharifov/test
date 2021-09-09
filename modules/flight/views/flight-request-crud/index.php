@@ -2,6 +2,8 @@
 
 use common\components\grid\DateTimeColumn;
 use modules\flight\models\FlightRequest;
+use common\components\grid\ApiUserColumn;
+use common\components\grid\project\ProjectColumn;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -49,13 +51,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => FlightRequest::STATUS_LIST
             ],
             [
-                'class' => \common\components\grid\project\ProjectColumn::class,
+                'class' => ProjectColumn::class,
                 'attribute' => 'fr_project_id',
                 'relation' => 'project',
             ],
             [
+                'class' => ApiUserColumn::class,
                 'attribute' => 'fr_created_api_user_id',
-                'class' => common\components\grid\ApiUserColumn::class,
+                'relation' => 'apiUserName',
             ],
             'fr_job_id',
             ['class' => DateTimeColumn::class, 'attribute' => 'fr_created_dt'],
