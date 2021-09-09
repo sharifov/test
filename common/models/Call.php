@@ -1432,7 +1432,9 @@ class Call extends \yii\db\ActiveRecord
                 $job->delayJob = $delayJob;
                 Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
             }
+        }
 
+        if ($isChangedStatus && $this->isStatusCompleted()) {
             if ($this->c_case_id) {
                 $productQuoteChanges = ProductQuoteChange::find()->select(['pqc_id'])->byCaseId($this->c_case_id)->isNotDecided()->column();
                 if ($productQuoteChanges) {
