@@ -1984,14 +1984,14 @@ class FlightController extends BaseController
      * @apiParam {string{7..10}}    booking_id          Booking ID
      * @apiParam {string{100}}      [email]             Email
      * @apiParam {string{20}}       [phone]             Phone
-     * @apiParam {string{200}}      [flight_request]    Flight Request
+     * @apiParam {object}           [flight_request]   Flight Request
      *
      * @apiParamExample {json} Request-Example:
      *  {
      *      "booking_id": "XXXYYYZ",
      *      "email": "example@mail.com",
      *      "phone": "+13736911111",
-     *      "flight_request": ""
+     *      "flight_request": {"exampleKey" : "exampleValue"}
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
