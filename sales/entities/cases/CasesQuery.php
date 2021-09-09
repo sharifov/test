@@ -8,6 +8,7 @@ use common\models\Department;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\helpers\VarDumper;
 
 class CasesQuery extends ActiveQuery
 {
@@ -58,11 +59,11 @@ class CasesQuery extends ActiveQuery
 
     public static function findCaseByCaseGid(string $caseGid): array
     {
-        $case = CasesApiMapper::find()
-            ->select('cs_status, cs_id, cs_gid, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_category_id, cs_order_uid, projects.name, case_category.cc_key')
+        $query = CasesApiMapper::find()
+            ->select('cs_status, cs_id, cs_gid, cs_created_dt, cs_updated_dt, cs_last_action_dt, cs_order_uid, cs_category_id, projects.name')
             ->leftJoin('projects', 'cs_project_id = projects.id')
-            ->leftJoin('case_category', 'cs_category_id = case_category.cc_id')
-                // Similar part of SQL query, as in findCasesPartial, can be optimized
+
+                // Similar part of SQL query, as in findCasesPartial, can be optimized, TODO : move this logic to PHP
             ->addSelect(new Expression('
                         DATE (IF (last_out_date IS NULL, last_in_date, IF (last_in_date is NULL, last_out_date, LEAST (last_in_date, last_out_date)))) AS next_flight'))
             ->leftJoin([
@@ -94,17 +95,12 @@ class CasesQuery extends ActiveQuery
                     ->groupBy('css_cs_id')
             ], 'cases.cs_id = sale_in.css_cs_id')
                 // End of similar part of SQL query, as in findCasesPartial
-            ->andWhere(['cs_gid' => $caseGid])
-            ->one()->toArray();
-//            ->asArray()->one();
-//            ->createCommand()->getRawSql();
-        if ($case) {
-            $case['case_status_name'] = CasesStatus::getName($case['cs_status']);
-            unset($case['cs_status']);
-        } else {
-            $case = [];
+            ->andWhere(['cs_gid' => $caseGid]);
+
+        if ($case = $query->one()) {
+            return $case->toArray();        //  ->asArray()->one();     ->createCommand()->getRawSql();
         }
-        return $case;
+        return [];
     }
 
     public static function findCasesGidByPhone(string $phone, string $activeOnly, ?int $results_limit, ?int $projectId, ?int $departmentId): array

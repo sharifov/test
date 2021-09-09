@@ -4,6 +4,9 @@ namespace sales\entities\cases;
 
 class CasesApiMapper extends Cases
 {
+
+    public $next_flight;
+
     public function fields(): array
     {
         return [
@@ -13,13 +16,14 @@ class CasesApiMapper extends Cases
             'updated_dt' => 'cs_updated_dt',
             'last_action_dt' => 'cs_last_action_dt',
             'order_uid' => 'cs_order_uid',
-//            'category_key' => 'cc_key',
-//            'next_flight' => function ($model) {
-//                return $model->next_flight;
-//            },
             'project_name' => 'name',
-            'cs_status',
-            'cs_category_id',
+            'status_name' => function ($model) {
+                return CasesStatus::getName($model->cs_status);
+            },
+            'category_key' => function ($model) {
+                return CaseCategory::getKey($model->cs_category_id) ?: '' ;
+            },
+            'next_flight'
         ];
     }
 }
