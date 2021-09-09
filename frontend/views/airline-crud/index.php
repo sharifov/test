@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         Synchronization from: <i><?php echo Html::encode(Yii::$app->travelServices->url . AirlineService::SERVICE_ENDPOINT); ?></i>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-airline']); ?>
+    <?php Pjax::begin(['id' => 'pjax-airline', 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

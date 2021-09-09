@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Product Quote Relation', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-product-quote-relation']); ?>
+    <?php Pjax::begin(['id' => 'pjax-product-quote-relation', 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

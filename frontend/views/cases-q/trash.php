@@ -44,6 +44,7 @@ $lists = new ListsAccess($user->id);
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
+        'id' => 'trash-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
@@ -195,3 +196,13 @@ $lists = new ListsAccess($user->id);
     <?php Pjax::end() ?>
 
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#trash-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

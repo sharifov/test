@@ -18,9 +18,12 @@ use sales\entities\cases\Cases;
 use yii\widgets\Pjax;
 use common\models\Language;
 
-/* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesQSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/**
+ * @var $this yii\web\View
+ * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $isAgent bool
+ */
 
 $this->title = 'Follow Up Queue';
 $this->params['breadcrumbs'][] = $this->title;
@@ -45,8 +48,8 @@ $lists = new ListsAccess($user->id);
 
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
-
     <?= GridView::widget([
+        'id' => 'follow-up-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
@@ -244,3 +247,13 @@ $lists = new ListsAccess($user->id);
     <?php Pjax::end() ?>
 
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#follow-up-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

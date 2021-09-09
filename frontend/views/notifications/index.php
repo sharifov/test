@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a(Yii::t('notifications', 'Create Notifications'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <div class="row">
         <?php $form = ActiveForm::begin([
             'action' => ['index'],

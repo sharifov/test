@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Order Data', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-order-data']); ?>
+    <?php Pjax::begin(['id' => 'pjax-order-data', 'scrollTo' => 0]); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

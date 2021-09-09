@@ -43,7 +43,7 @@ $data = new OrderAbacDto(new Order());
         <?php endif; ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['timeout' => 4000, 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([

@@ -39,7 +39,7 @@ $this->registerJs("$(function() {
             'action' => 'index'
         ]);
 
-        Pjax::begin(['id' => 'agent-activity']);
+        Pjax::begin(['id' => 'agent-activity', 'timeout' => 10000, 'scrollTo' => 0]);
         echo GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,

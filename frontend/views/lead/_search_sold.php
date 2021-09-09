@@ -24,7 +24,8 @@ use kartik\form\ActiveForm;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax || Yii::$app->request->get('CallSearch') || Yii::$app->request->get('createTimeRange')) ? 'block' : 'none'?>">
+
+        <div class="x_content" style="display: <?= ($model->createTimeRange) ? 'block' : 'none'?>">
             <?php $form = ActiveForm::begin([
                 'action' => ['sold'],
                 'method' => 'get',

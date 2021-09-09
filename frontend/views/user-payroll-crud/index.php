@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-plus"></i> Create User Payroll', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'payroll-index-pjax']); ?>
+    <?php Pjax::begin(['id' => 'payroll-index-pjax', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
