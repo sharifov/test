@@ -10,10 +10,12 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 use common\models\Lead;
 
-/* @var $this yii\web\View */
-/* @var $searchModel common\models\search\LeadSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-/** @var common\models\Employee $user */
+/**
+ * @var common\models\Employee $user
+ * @var $this yii\web\View
+ * @var $searchModel common\models\search\LeadSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ */
 
 $this->title = 'Trash Queue';
 
@@ -32,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(['timeout' => 6000]); ?>
 
     <?php $form = ActiveForm::begin([
             'action' => ['trash'],
@@ -385,6 +387,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
 
     echo \yii\grid\GridView::widget([
+        'id' => 'lead-trash-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => $gridColumns,
@@ -399,3 +402,13 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#lead-trash-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

@@ -29,7 +29,7 @@ $pjaxListId = 'pjax-site-activity';
         ]); ?>
     <?php endif ?>
 
-    <?php Pjax::begin(['id' => $pjaxListId]); ?>
+    <?php Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

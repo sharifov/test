@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\DateTimeColumn;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClientProjectSearch */
@@ -21,6 +22,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Create Client Project', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -72,5 +75,5 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 
-
+    <?php Pjax::end(); ?>
 </div>

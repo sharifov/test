@@ -8,11 +8,12 @@ use yii\helpers\Url;
 use dosamigos\datepicker\DatePicker;
 use yii\widgets\ActiveForm;
 
-/* @var $this yii\web\View */
-/* @var $searchModel common\models\search\ApiLogSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $isAgent bool */
-/** @var Employee $user */
+/** @var $this yii\web\View
+ * @var $searchModel common\models\search\KpiHistorySearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $isAgent bool
+ * @var Employee $user
+ */
 
 $user = Yii::$app->user->identity;
 
@@ -61,6 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif;?>
 
     <?= GridView::widget([
+        'id' => 'kpi-gv',
         'dataProvider' => $dataProvider,
         'rowOptions' => function (\common\models\KpiHistory $model) {
             if (!empty($model->kh_super_approved_dt) && !empty($model->kh_agent_approved_dt)) {
@@ -205,3 +207,13 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#kpi-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

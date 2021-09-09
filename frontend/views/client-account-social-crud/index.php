@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Client Account Social', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-client-account-social']); ?>
+    <?php Pjax::begin(['id' => 'pjax-client-account-social', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([

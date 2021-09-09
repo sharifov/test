@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\Department;
 use sales\entities\cases\CaseCategory;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CaseCategorySearch */
@@ -21,6 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Case Category', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -49,5 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => yii\grid\ActionColumn::class],
         ],
     ]); ?>
+
+    <?php Pjax::end(); ?>
 
 </div>

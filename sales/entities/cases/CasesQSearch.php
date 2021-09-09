@@ -324,7 +324,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_ERROR
                 )
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = penalty_departure.css_cs_id');
@@ -338,7 +338,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_ERROR
                 )
                 ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
@@ -353,7 +353,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_ERROR
                 )
                 ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
@@ -473,7 +473,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_AWAITING
                 )
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = penalty_departure.css_cs_id');
@@ -487,7 +487,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_AWAITING
                 )
                 ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
@@ -502,7 +502,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_AWAITING
                 )
                 ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
@@ -622,7 +622,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_AUTO_PROCESSING
                 )
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = penalty_departure.css_cs_id');
@@ -636,7 +636,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_AUTO_PROCESSING
                 )
                 ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
@@ -651,7 +651,7 @@ class CasesQSearch extends Cases
                 ])
                 ->innerJoin(
                     Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_AUTO_PROCESSING
                 )
                 ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')

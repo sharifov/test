@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Coupon Product', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-coupon-product']); ?>
+    <?php Pjax::begin(['id' => 'pjax-coupon-product', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([

@@ -44,7 +44,7 @@ JS;
     $this->registerJs($js);
     ?>
 
-    <?php Pjax::begin(['id' => 'order-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'order-pjax-list', 'timeout' => 7000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <div class="x_panel">
         <div class="x_title">

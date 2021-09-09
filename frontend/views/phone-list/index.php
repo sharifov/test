@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],]) ?>
     </p>
 
-    <?php Pjax::begin(['timeout' => 5000]); ?>
+    <?php Pjax::begin(['timeout' => 5000, 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

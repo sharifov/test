@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 <p>
@@ -364,6 +364,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
     <?php
     echo \yii\grid\GridView::widget([
+        'id' => 'lead-sold-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => $gridColumns,
@@ -399,5 +400,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::end(); ?>
 
-
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#lead-sold-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

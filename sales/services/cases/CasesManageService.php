@@ -117,9 +117,9 @@ class CasesManageService
         $case = $this->finder->caseFind($caseId);
         $user = $this->finder->userFind($userId);
 
-        if (!($case->isPending() || $case->isFollowUp() || $case->isTrash())) {
+        /*if (!($case->isPending() || $case->isFollowUp() || $case->isTrash())) {
             throw new \DomainException('Case could not be taken now.');
-        }
+        }*/
 
         $this->processing($case, $user, $creatorId, $description);
     }

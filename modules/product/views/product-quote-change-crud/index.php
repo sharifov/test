@@ -7,6 +7,7 @@ use common\components\grid\UserSelect2Column;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\product\src\entities\productQuoteChange\search\ProductQuoteChangeSearch */
@@ -22,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Create Product Quote Change', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -72,5 +73,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 
+    <?php Pjax::end(); ?>
 
 </div>

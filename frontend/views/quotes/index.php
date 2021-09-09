@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="quote-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['timeout' => 5000, 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
     <p>
         <?php //= Html::a('Create Quote', ['create'], ['class' => 'btn btn-success']) ?>

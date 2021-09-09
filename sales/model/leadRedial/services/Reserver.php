@@ -40,4 +40,9 @@ class Reserver
     {
         return $this->connection->exists($key->getValue());
     }
+
+    public function reset(Key $key): void
+    {
+        $this->connection->del($key->getValue());
+    }
 }

@@ -56,7 +56,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         'class' => 'btn-success btn',
     ]) ?>
 
-    <?php Pjax::begin(['id' => 'user-pjax-list', 'timeout' => 8000, 'enablePushState' => true, 'enableReplaceState' => false]); //['id' => 'user-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['id' => 'user-pjax-list', 'timeout' => 8000, 'enablePushState' => true, 'enableReplaceState' => false, 'scrollTo' => 0]); ?>
 
     <?php
 

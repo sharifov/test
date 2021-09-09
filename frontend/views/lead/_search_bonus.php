@@ -14,6 +14,7 @@ use yii\widgets\ActiveForm;
 
     $form = ActiveForm::begin([
         // 'action' => ['index'],
+        'id' => 'lead-search-bonus-form',
         'method' => 'get',
         'options' => [
             'data-pjax' => 1,

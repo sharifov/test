@@ -6,6 +6,7 @@ use yii\grid\GridView;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CaseStatusLog;
 use common\models\Employee;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CaseStatusLogSearch */
@@ -20,6 +21,7 @@ $userList = Employee::getList();
 <div class="case-status-log-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
 
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -128,5 +130,5 @@ $userList = Employee::getList();
         ],
     ]); ?>
 
-
+    <?php Pjax::end(); ?>
 </div>

@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create File Client', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-file-client']); ?>
+    <?php Pjax::begin(['id' => 'pjax-file-client', 'scrollTo' => 0]); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

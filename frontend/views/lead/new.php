@@ -22,12 +22,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="lead-new">
 
-
-
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
-
     $gridColumns = [
         [
             'attribute' => 'id',
@@ -233,9 +230,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => ['style' => 'width:90px'],
         ],
 
-
-
-
         [
             //'attribute' => 'Quotes',
             'label' => 'Calls',
@@ -251,7 +245,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'format' => 'raw'
         ],
-
 
         [
             'header' => 'Depart',
@@ -316,7 +309,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
-
         [
             'attribute' => 'cabin',
             'value' => static function (\common\models\Lead $model) {
@@ -324,7 +316,6 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'filter' => \common\models\Lead::CABIN_LIST
         ],
-
 
         [
             'attribute' => 'l_call_status_id',
@@ -433,7 +424,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 <?php
 echo GridView::widget([
-
+    'id' => 'lead-new-gv',
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,
@@ -443,3 +434,11 @@ echo GridView::widget([
 </div>
 
 <?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#lead-new-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>
