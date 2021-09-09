@@ -58,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => ApiUserColumn::class,
                 'attribute' => 'fr_created_api_user_id',
-                'relation' => 'apiUserName',
+                'relation' => 'apiUser',
             ],
             'fr_job_id',
             ['class' => DateTimeColumn::class, 'attribute' => 'fr_created_dt'],

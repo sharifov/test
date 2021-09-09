@@ -7,7 +7,6 @@ use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\ApiUserColumn;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -50,9 +49,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     ],
                     [
-                        'class' => ApiUserColumn::class,
                         'attribute' => 'fr_created_api_user_id',
-                        'relation' => 'apiUserName',
+                        'value' => static function (FlightRequest $model) {
+                            return $model->apiUser->au_name . ' (' . $model->fr_created_api_user_id . ')';
+                        }
                     ],
                     [
                         'attribute' => 'fr_status_id',
