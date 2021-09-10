@@ -54,6 +54,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \sorokinmedia\centrifugo\Client $centrifugo Centrifugo client component
  * @property \modules\abac\components\AbacComponent $abac ABAC component
  * @property \common\components\SnowplowService $snowplow Snowplow component
+ * @property \common\components\antispam\CallAntiSpamService $callAntiSpam CallAntiSpamService component
  *
  *
  *
