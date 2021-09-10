@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'luc_lead_id',
                 'luc_user_id:userName',
                 'luc_description',
+                'luc_created_user_id:userName',
                 'luc_created_dt:byUserDateTime',
             ],
         ]) ?>

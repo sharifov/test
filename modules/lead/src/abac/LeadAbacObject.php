@@ -101,7 +101,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE],
+        self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE, self::ACTION_CREATE],
         self::ACT_CLIENT_DETAILS => [self::ACTION_ACCESS],
         self::ACT_CLIENT_ADD_PHONE => [self::ACTION_ACCESS, self::ACTION_CREATE],
         self::ACT_CLIENT_EDIT_PHONE => [self::ACTION_ACCESS, self::ACTION_UPDATE],

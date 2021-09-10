@@ -17,9 +17,11 @@ use yii\helpers\ArrayHelper;
  * @property int $luc_user_id
  * @property string|null $luc_description
  * @property string|null $luc_created_dt
+ * @property int|null $luc_created_user_id
  *
  * @property Lead $lucLead
  * @property Employee $lucUser
+ * @property Employee|null $createdUser
  */
 class LeadUserConversion extends \yii\db\ActiveRecord
 {
@@ -39,6 +41,9 @@ class LeadUserConversion extends \yii\db\ActiveRecord
             ['luc_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['luc_user_id' => 'id']],
 
             ['luc_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['luc_created_user_id', 'integer'],
+            ['luc_created_user_id', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['luc_created_user_id' => 'id']],
         ];
     }
 
@@ -67,6 +72,11 @@ class LeadUserConversion extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'luc_user_id']);
     }
 
+    public function getCreatedUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'luc_created_user_id']);
+    }
+
     public function attributeLabels(): array
     {
         return [
@@ -74,6 +84,7 @@ class LeadUserConversion extends \yii\db\ActiveRecord
             'luc_user_id' => 'User',
             'luc_description' => 'Description',
             'luc_created_dt' => 'Created Dt',
+            'luc_created_user_id' => 'Created user',
         ];
     }
 
@@ -87,12 +98,17 @@ class LeadUserConversion extends \yii\db\ActiveRecord
         return 'lead_user_conversion';
     }
 
-    public static function create(int $leadId, int $userId, ?string $description = null): LeadUserConversion
-    {
+    public static function create(
+        int $leadId,
+        int $userId,
+        ?string $description = null,
+        ?int $createdUserId = null
+    ): LeadUserConversion {
         $model = new self();
         $model->luc_lead_id = $leadId;
         $model->luc_user_id = $userId;
         $model->luc_description = $description;
+        $model->luc_created_user_id = $createdUserId;
         return $model;
     }
 }

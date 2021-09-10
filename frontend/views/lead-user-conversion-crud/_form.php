@@ -17,9 +17,11 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'luc_lead_id')->textInput() ?>
 
-        <?= $form->field($model, 'luc_user_id')->textInput() ?>
+        <?= $form->field($model, 'luc_user_id')->dropDownList(\common\models\Employee::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'luc_description')->dropDownList(LeadUserConversionDictionary::DESCRIPTION_LIST) ?>
+
+        <?= $form->field($model, 'luc_created_user_id')->dropDownList(\common\models\Employee::getList(), ['prompt' => '---']) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

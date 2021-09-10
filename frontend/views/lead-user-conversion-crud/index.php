@@ -30,8 +30,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => SerialColumn::class],
-
             [
                 'attribute' => 'luc_lead_id',
                 'value' => static function (LeadUserConversion $model) {
@@ -46,11 +44,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'luc_description',
             [
+                'attribute' => 'luc_created_user_id',
+                'class' => UserColumn::class,
+                'relation' => 'createdUser',
+            ],
+            [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'luc_created_dt',
                 'format' => 'byUserDateTime'
             ],
-
             ['class' => ActionColumn::class],
         ],
     ]); ?>
