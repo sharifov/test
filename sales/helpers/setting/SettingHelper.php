@@ -490,4 +490,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['redial_auto_take_seconds'] ?? 10;
     }
+
+    public static function isEnableCallLogFilterGuard(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['is_call_log_filter_guard'] ?? false);
+    }
 }
