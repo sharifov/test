@@ -44,4 +44,18 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
     {
         return 'call_log_filter_guard';
     }
+
+    public static function create(
+        int $callId,
+        int $type,
+        ?float $sdRate,
+        ?int $trustPercent
+    ): CallLogFilterGuard {
+        $model = new self();
+        $model->clfg_call_id = $callId;
+        $model->clfg_type = $type;
+        $model->clfg_sd_rate = $sdRate;
+        $model->clfg_trust_percent = $trustPercent;
+        return $model;
+    }
 }
