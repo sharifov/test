@@ -64,7 +64,6 @@ class CasesStatus
             self::STATUS_AWAITING,
             self::STATUS_AUTO_PROCESSING,
             self::STATUS_ERROR,
-            self::STATUS_SOLVED,
         ],
         self::STATUS_PROCESSING => [
             self::STATUS_PROCESSING,
@@ -99,6 +98,7 @@ class CasesStatus
             self::STATUS_AWAITING,
             self::STATUS_AUTO_PROCESSING,
             self::STATUS_ERROR,
+            self::STATUS_PENDING,
         ],
         self::STATUS_AWAITING => [
             self::STATUS_PENDING,
