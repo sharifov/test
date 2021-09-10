@@ -221,5 +221,11 @@ return [
             'authUsername' => env('common.config.main.components.prometheus.authUsername'),
             'authPassword' => env('common.config.main.components.prometheus.authPassword'),
         ],
+        'callAntiSpam' => [
+            'class' => \common\components\antispam\CallAntiSpamService::class,
+            'host' => env('common.config.main.components.callAntiSpam.host'),
+            'port' => env('common.config.main.components.callAntiSpam.port'),
+            'timeout' => env('common.config.main.components.callAntiSpam.timeout', 'int'),
+        ],
     ],
 ];

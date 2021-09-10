@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\antispam\CallAntiSpamDto;
 use common\components\CommunicationService;
 use common\components\ga\GaHelper;
 use common\components\ga\GaLead;
@@ -2352,5 +2353,31 @@ class TestController extends FController
         echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678) . '<br>';
         echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01') . '<br>';
         echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()) . '<br>';
+    }
+
+    /**
+     * @throws \yii\httpclient\Exception
+     */
+    public function actionCallAntiSpam()
+    {
+        $dto = new CallAntiSpamDto();
+
+        echo '<h1>CallAntiSpam</h1>Data:<br>';
+        VarDumper::dump($dto->getData(), 10, true);
+
+        echo '<br><br>Response:<br>';
+
+        $response = Yii::$app->callAntiSpam->checkData($dto);
+        if (!empty($responce['error'])) {
+            try {
+                $errorData = json_decode($response['error'], true);
+                VarDumper::dump($errorData, 10, true);
+            } catch (\Throwable $throwable) {
+                VarDumper::dump($response['error'], 10, true);
+            }
+
+        } else {
+            VarDumper::dump($response['data'], 10, true);
+        }
     }
 }
