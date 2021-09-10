@@ -227,6 +227,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Queue', 'url' => ['/call-log-queue/index']],
                         ['label' => 'Record', 'url' => ['/call-log-record/index']],
                         ['label' => 'Twilio Recording Log', 'url' => ['/call-recording-log-crud/index']],
+                        ['label' => 'Call Log Filter Guard', 'url' => ['/call-log-filter-guard-crud/index']],
                     ],
                 ],
                 [
