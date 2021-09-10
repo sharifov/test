@@ -2375,7 +2375,6 @@ class TestController extends FController
             } catch (\Throwable $throwable) {
                 VarDumper::dump($response['error'], 10, true);
             }
-
         } else {
             VarDumper::dump($response['data'], 10, true);
         }
