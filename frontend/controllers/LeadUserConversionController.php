@@ -73,14 +73,18 @@ class LeadUserConversionController extends FController
         $form = new LeadUserConversionAddForm($leadId);
         if ($form->load(Yii::$app->request->post())) {
             if ($form->validate()) {
+                $leadUserConversionRepository = new LeadUserConversionRepository();
                 try {
+                    if ($leadUserConversionRepository->exist($form->leadId, $form->userId)) {
+                        return $this->asJson(['success' => true]);
+                    }
                     $leadUserConversion = LeadUserConversion::create(
                         $form->leadId,
                         $form->userId,
                         LeadUserConversionDictionary::DESCRIPTION_QA,
                         Auth::id()
                     );
-                    (new LeadUserConversionRepository())->save($leadUserConversion);
+                    $leadUserConversionRepository->save($leadUserConversion);
                     return $this->asJson(['success' => true]);
                 } catch (\DomainException $e) {
                     return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
