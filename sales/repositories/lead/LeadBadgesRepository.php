@@ -351,6 +351,7 @@ class LeadBadgesRepository
         /** @abac null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where user id owner*/
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere([Lead::tableName() . '.employee_id' => $user->id]);
+            $query->orWhere($this->inSplit($user->id));
             $displayFlag = true;
         }
         $lead = new Lead();
