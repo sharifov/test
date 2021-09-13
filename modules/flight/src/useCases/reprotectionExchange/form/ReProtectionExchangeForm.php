@@ -85,7 +85,7 @@ class ReProtectionExchangeForm extends \yii\base\Model
     {
         $result = '';
         foreach ($flightRequest as $key => $value) {
-            if (ArrayHelper::isAssociative($value)) {
+            if (is_array($value)) {
                 return $this->flightRequestToString($value);
             }
             $result .= $key . $delimiter . $value . $eol;
