@@ -37,6 +37,7 @@ use sales\exception\ValidationException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\caseOrder\entity\CaseOrderQuery;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesSaleService;
 use sales\services\email\SendEmailByCase;
@@ -137,6 +138,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if (!isset($case) && !$case = $caseReProtectionService::findCase($flightRequest->fr_booking_id, $originProductQuote)) {
                 throw new DomainException('Case not found');
+            }
+            if (!isset($order)) {
+                $order = CaseOrderQuery::getOrderByCase($case->cs_id);
             }
 
             $caseReProtectionService->setCase($case);
