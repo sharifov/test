@@ -320,7 +320,7 @@ class CommunicationController extends ApiBaseController
     {
         $response = [];
 
-        Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
+        // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
 
         $clientPhone = null;
 
@@ -416,15 +416,6 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
-                \Yii::info(
-                    [
-                        'call' => $callModel->c_id,
-                        'number' => $client_phone_number
-                    ],
-                    'info\Debug:' . self::class . ':' . __FUNCTION__
-                );
-                /* TODO: FOR DEBUG:: must by remove */
-
                 if (SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
                         $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
@@ -441,6 +432,15 @@ class CommunicationController extends ApiBaseController
                         if (!empty($dataJson = $twilioCallFilterGuard->getResponseData())) {
                             $dto = CallAntiSpamDto::fillFromCallTwilioResponse($dataJson, $callModel);
                             $response = Yii::$app->callAntiSpam->checkData($dto);
+
+                            \Yii::info(
+                                [
+                                    'point' => 'callAntiSpam',
+                                    'response' => $response
+                                ],
+                                'info\Debug:' . self::class . ':' . __FUNCTION__
+                            );
+                            /* TODO: FOR DEBUG:: must by remove */
 
                             if (!empty($responce['error'])) {
                                 throw new \RuntimeException(VarDumper::dumpAsString($responce['error']));
