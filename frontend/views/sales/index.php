@@ -13,6 +13,7 @@ use yii\web\View;
 /* @var yii\data\ActiveDataProvider $dataProvider */
 /* @var int $totalCount */
 /* @var float $sumGrossProfit */
+/* @var float $sumShare */
 /* @var int $qualifiedLeadsTakenCount */
 /* @var int $cacheDuration */
 /* @var yii\data\ActiveDataProvider $searchQualifiedLeads */
@@ -65,13 +66,17 @@ $tabs[] = [
 
     <div class="row" >
         <div class="tile_count" style="width: 100%;">
-            <div class="col-md-2 tile_stats_count dev-tile-adjust sales-stats-box">
+            <div class="col-md-4 tile_stats_count dev-tile-adjust sales-stats-box">
                 <span class="count_top"><i class="fa fa-money"></i> Gross Profit</span>
                 <div class="count"><?php echo round($sumGrossProfit, 2) ?></div>
             </div>
             <div class="col-md-2 tile_stats_count dev-tile-adjust sales-stats-box">
                 <span class="count_top"><i class="fa fa-line-chart"></i> Leads Sold</span>
                 <div class="count"><?php echo $totalCount ?></div>
+            </div>
+            <div class="col-md-4 tile_stats_count dev-tile-adjust sales-stats-box">
+                <span class="count_top"><i class="fa fa-share-alt-square"></i> Split Share</span>
+                <div class="count"><?php echo $sumShare ?></div>
             </div>
             <div class="col-md-2 tile_stats_count dev-tile-adjust sales-stats-box">
                 <span class="count_top"><i class="fa fa-tasks"></i> Qualified Leads</span>
