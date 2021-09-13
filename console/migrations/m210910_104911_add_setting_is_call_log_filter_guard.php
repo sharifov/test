@@ -25,7 +25,7 @@ class m210910_104911_add_setting_is_call_log_filter_guard extends Migration
                 's_value' => false,
                 's_updated_dt' => date('Y-m-d H:i:s'),
                 's_category_id' => $settingCategory->sc_id,
-                's_description' => '',
+                's_description' => 'Enable CallAntiSpam Service',
             ]
         );
 

@@ -9,6 +9,8 @@
 
 namespace common\components\antispam;
 
+use common\models\Call;
+
 /**
  * Class CallAntiSpamDto
  * @package common\components\antispam
@@ -65,5 +67,25 @@ class CallAntiSpamDto
             "message"               => $this->message,
         ];
         return $data;
+    }
+
+    public static function fillFromCallTwilioResponse(array $data, Call $call): CallAntiSpamDto
+    {
+        $model = new self();
+        $model->operatorName = $data['result']['result']['carrier']['name'] ?? 'nan';
+        $model->callType = $data['result']['result']['carrier']['type'] ?? 'nan';
+        $model->errorCode1 = $data['result']['result']['carrier']['error_code'] ?? 'nan';
+        $model->mobileCountryCode = $data['result']['result']['carrier']['mobile_country_code'] ?? 'nan';
+        $model->mobileNetworkCode = $data['result']['result']['carrier']['mobile_network_code'] ?? 'nan';
+        $model->errorCode2 = $data['result']['result']['callerName']['error_code'] ?? 'nan';
+        $model->callerName = $data['result']['result']['callerName']['caller_name'] ?? 'nan';
+        $model->callerType = $data['result']['result']['callerName']['caller_type'] ?? 'nan';
+        $model->countryCode = $data['result']['result']['countryCode'] ?? 'nan';
+        $model->message = $data['result']['message'] ?? 'nan';
+
+        $model->categoryId = $call->c_source_type_id ?? Call::SOURCE_GENERAL_LINE;
+        $model->departmentId = $call->c_dep_id;
+        $model->projectId = $call->c_project_id;
+        return $model;
     }
 }

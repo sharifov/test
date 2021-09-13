@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\components\antispam\CallAntiSpamDto;
 use common\components\jobs\CallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\ApiLog;
@@ -22,6 +23,7 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
@@ -37,10 +39,15 @@ use sales\model\call\services\QueueLongTimeNotificationJobCreator;
 use sales\model\call\services\RepeatMessageCallJobCreator;
 use sales\model\callLog\services\CallLogConferenceTransferService;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuardScopes;
+use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
 use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
+use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
@@ -367,6 +374,7 @@ class CommunicationController extends ApiBaseController
                 try {
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
+
                     if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
                         $callFilterGuardService->runRepression($postCall);
                     }
@@ -407,6 +415,39 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_priority,
                     $departmentPhone->dpp_phone_list_id
                 );
+
+                if (SettingHelper::isEnableCallLogFilterGuard()) {
+                    try {
+                        $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
+                        if (!empty($dataJson = $twilioCallFilterGuard->getResponseData())) {
+                            $dto = CallAntiSpamDto::fillFromCallTwilioResponse($dataJson, $callModel);
+                            $response = Yii::$app->callAntiSpam->checkData($dto);
+
+                            if (!empty($responce['error'])) {
+                                throw new \RuntimeException(VarDumper::dumpAsString($responce['error']));
+                            }
+
+                            $callLogFilterGuard = CallLogFilterGuard::create(
+                                $callModel->c_id,
+                                $responce['data']['Label'] ?? 0,
+                                $responce['data']['Score'] ?? null,
+                                $twilioCallFilterGuard->getTrustPercent()
+                            );
+                            (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
+
+                            $dataJson = JsonHelper::decode($callModel->c_data_json);
+                            $dataJson['callAntiSpamData'] = [
+                                'type' => $callLogFilterGuard->clfg_type,
+                                'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                'trustPercent' => $callLogFilterGuard->clfg_trust_percent,
+                            ];
+                            $callModel->c_data_json = JsonHelper::encode($dataJson);
+                            $callModel->save(false);
+                        }
+                    } catch (\Throwable $throwable) {
+                        Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:CallLogFilterGuard');
+                    }
+                }
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
