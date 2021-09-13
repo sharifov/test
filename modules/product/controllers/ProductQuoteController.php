@@ -348,7 +348,7 @@ class ProductQuoteController extends FController
                                     'booking_id' => $case->cs_order_uid,
                                     'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
                                     'case_gid' => $case->cs_gid,
-                                    'quote_gid' => $originQuote->pq_gid,
+                                    'product_quote_gid' => $originQuote->pq_gid,
                                 ]
                             ];
                             $hybridService->whReprotection($case->cs_project_id, $data);

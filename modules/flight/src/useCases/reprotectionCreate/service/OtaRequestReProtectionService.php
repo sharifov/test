@@ -51,7 +51,7 @@ class OtaRequestReProtectionService
                 'booking_id' => $this->flightRequest->fr_booking_id,
                 'reprotection_quote_gid' => $this->reProtectionQuote->pq_gid,
                 'case_gid' => $this->case->cs_gid,
-                'quote_gid' => $this->originProductQuote->pq_gid,
+                'product_quote_gid' => $this->originProductQuote->pq_gid,
             ]
         ];
         if (!$result = $hybridService->whReprotection($this->flightRequest->fr_project_id, $data)) {
