@@ -257,8 +257,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
 
             if (!$originProductQuote->productQuoteLastChange || !$originProductQuote->productQuoteLastChange->isStatusNew()) {
-                $productQuoteChange = ProductQuoteChange::createNew($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
-                $productQuoteChangeRepository->save($productQuoteChange);
+                $lastProductQuoteChange = ProductQuoteChange::createNew($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                $productQuoteChangeRepository->save($lastProductQuoteChange);
             }
 
             if ($this->flight_request_is_automate === false) {
