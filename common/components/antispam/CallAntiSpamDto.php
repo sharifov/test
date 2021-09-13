@@ -15,9 +15,9 @@ use common\models\Call;
  * Class CallAntiSpamDto
  * @package common\components\antispam
  *
- * @property int $categoryId
- * @property int $departmentId
- * @property int $projectId
+ * @property int|null $categoryId
+ * @property int|null $departmentId
+ * @property int|null $projectId
  * @property string $operatorName
  * @property string $callType
  * @property string $errorCode1
@@ -32,9 +32,9 @@ use common\models\Call;
 
 class CallAntiSpamDto
 {
-    public int $categoryId              = 1;
-    public int $departmentId            = 1;
-    public int $projectId               = 1;
+    public ?int $categoryId              = 1;
+    public ?int $departmentId            = 1;
+    public ?int $projectId               = 1;
     public string $operatorName         = "T-Mobile USA, Inc.";
     public string $callType             = "mobile";
     public string $errorCode1           = "nan";
