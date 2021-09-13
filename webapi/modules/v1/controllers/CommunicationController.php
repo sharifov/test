@@ -424,8 +424,8 @@ class CommunicationController extends ApiBaseController
                             [
                                 'data' => $twilioCallFilterGuard->getResponseData(),
                                 'number' => $client_phone_number
-                            ]
-                            ,'info\Debug:' . self::class . ':' . __FUNCTION__
+                            ],
+                            'info\Debug:' . self::class . ':' . __FUNCTION__
                         );
                         /* TODO: FOR DEBUG:: must by remove */
 
