@@ -85,8 +85,6 @@ class SearchAndAutoAddTopFlightQuotes extends BaseJob implements JobInterface
             }
 
             $quotes = SearchService::getOnlineQuotes($dto);
-            Yii::info(VarDumper::dumpAsString(Yii::$app->cacheFile), 'info\SearchAndAutoAddTopFlightQuotes');
-            Yii::info('Trying to find quotes in job cacheKey(' . $this->getCacheKey() . '): ' . VarDumper::dumpAsString($quotes), 'info\SearchAndAutoAddTopFlightQuotes');
             if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
                 Yii::$app->cacheFile->set($this->getCacheKey(), $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
 
