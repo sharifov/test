@@ -320,7 +320,7 @@ class CommunicationController extends ApiBaseController
     {
         $response = [];
 
-        // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
+        Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
 
         $clientPhone = null;
 
