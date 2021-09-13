@@ -15,6 +15,7 @@ use sales\services\cases\CasesCommunicationService;
 use sales\services\email\SendEmailByCase;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\validators\EmailValidator;
 
 /**
  * Class SendEmailReProtectionService
@@ -74,7 +75,7 @@ class SendEmailReProtectionService
     public static function detectEmail(Cases $case, ?Order $order, bool $findFromCaseClient = false): string
     {
         if ($order && $order->orderContacts) {
-            $emailValidator = new yii\validators\EmailValidator();
+            $emailValidator = new EmailValidator();
             foreach ($order->orderContacts as $orderContact) {
                 if (!empty($orderContact->oc_email) && $emailValidator->validate($orderContact->oc_email)) {
                     return $orderContact->oc_email;
