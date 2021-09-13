@@ -52,9 +52,9 @@ class CallAntiSpamDto
     public function getData(): array
     {
         $data = [
-            "cl_category_id"        => $this->categoryId,
+            /*"cl_category_id"        => $this->categoryId,
             "cl_department_id"      => $this->departmentId,
-            "cl_project_id"         => $this->projectId,
+            "cl_project_id"         => $this->projectId,*/
             "operator_name"         => $this->operatorName,
             "call_type"             => $this->callType,
             "error_code1"           => $this->errorCode1,
