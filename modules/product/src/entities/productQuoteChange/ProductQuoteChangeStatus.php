@@ -40,7 +40,7 @@ class ProductQuoteChangeStatus
     public const PROCESSING_LIST = [
         self::DECIDED,
         self::IN_PROGRESS,
-        //self::NEW,
+        self::COMPLETE,
         //self::DECISION_PENDING
     ];
 
