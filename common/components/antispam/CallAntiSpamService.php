@@ -130,12 +130,6 @@ class CallAntiSpamService extends Component
             CURLOPT_TIMEOUT => $this->timeout
         ]);
 
-        \Yii::info(
-            VarDumper::dumpAsString($response),
-            'info\Debug:' . self::class . ':' . __FUNCTION__
-        );
-        /* TODO: FOR DEBUG:: must by remove */
-
         if ($response->isOk) {
             if (isset($response->data['Label'], $response->data['Score'])) {
                 $out['data'] = $response->data;
