@@ -120,6 +120,9 @@ return [
             'identityClass' => 'common\models\Employee',
             'enableSession' => false
         ],*/
+        'urlManager' => [
+            'scriptUrl' => '/'
+        ],
 
     ],
     'modules' => [

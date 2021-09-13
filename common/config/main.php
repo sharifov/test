@@ -85,6 +85,7 @@ return [
             'class' => 'yii\caching\FileCache',
             'defaultDuration' => 10 * 60,
             'gcProbability' => 100,
+            'cachePath' => '@console/runtime/cache'
         ],
         'webApiCache' => [
             'class' => 'yii\caching\FileCache',
