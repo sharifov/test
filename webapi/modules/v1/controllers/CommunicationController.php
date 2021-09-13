@@ -416,6 +416,15 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
+                \Yii::info(
+                    [
+                        'call' => $callModel->c_id,
+                        'number' => $client_phone_number
+                    ],
+                    'info\Debug:' . self::class . ':' . __FUNCTION__
+                );
+                /* TODO: FOR DEBUG:: must by remove */
+
                 if (SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
                         $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
