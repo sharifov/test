@@ -46,7 +46,7 @@ use yii\widgets\Pjax;
             [
                 'attribute' => 'share',
                 'value' => static function ($data) {
-                     return $data['share'] ?? '-';
+                     return ($data['share'] * 100) . ' %' ;
                 },
                 'contentOptions' => [
                     'class' => 'text-center'

@@ -84,7 +84,7 @@ $tabs[] = [
             </div>
             <div class="col-md-2 tile_stats_count dev-tile-adjust sales-stats-box">
                 <span class="count_top"><i class="fa fa-pie-chart"></i> Conversion</span>
-                <div class="count"><?= ($qualifiedLeadsTakenCount > 0) ? round(($totalCount * 100) / $qualifiedLeadsTakenCount, 2) : 0 ?>%</div>
+                <div class="count"><?= ($qualifiedLeadsTakenCount > 0) ? round(($sumShare * 100) / $qualifiedLeadsTakenCount, 2) : 0 ?>%</div>
             </div>
         </div>
     </div>
