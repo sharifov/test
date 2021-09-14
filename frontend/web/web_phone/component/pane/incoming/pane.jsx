@@ -114,8 +114,7 @@ function IncomingActions(props) {
 function AntiSpamElement(props) {
     let call = props.call;
 
-
-    if (call.data.callAntiSpamData && call.data.callAntiSpamData.length) {
+    if ('type' in call.data.callAntiSpamData) {
         let typeTitle = 'Spam';
         let style = {
             color: '#ffffff',
@@ -125,12 +124,13 @@ function AntiSpamElement(props) {
             top: '-20px'
         };
         if (call.data.callAntiSpamData.type === 0) {
+            typeTitle = 'Trust';
             style.border = '1px solid #37ff00'
         }
 
         return (
             <div className="d-flex justify-content-center align-items-center">
-                <span style={style}>{typeTitle} Rate: {parseInt(call.data.callAntiSpamData.rate)} %</span>
+                <span style={style}>{typeTitle} Rate: {parseInt(call.data.callAntiSpamData.rate * 100)} %</span>
             </div>
         );
     }
