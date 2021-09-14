@@ -185,12 +185,17 @@ class SalesSearch extends Model
     {
         $this->load($params);
 
+        if ($this->dateFrom && $this->dateTo) {
+            $this->minDate = $this->dateFrom;
+            $this->maxDate =  $this->dateTo;
+        }
+
         $query = new Query();
         $query->select([
             Lead::tableName() . '.id',
             Lead::tableName() . '.gid',
             '(ROUND(if(sp.`owner_share` is null, 1, sp.`owner_share`) * (final_profit - agents_processing_fee), 2)) as gross_profit',
-            'ROUND(sp.owner_share, 2) as share',
+            'if(sp.`owner_share` is null, 1, ROUND(sp.owner_share, 2)) as share',
             'l_status_dt',
             'created'
         ]);
@@ -207,6 +212,10 @@ class SalesSearch extends Model
         $query->where(['status' => Lead::STATUS_SOLD]);
         $query->andWhere(['BETWEEN', 'l_status_dt', $this->minDate, $this->maxDate]);
         $query->andWhere(['employee_id' => $this->currentUser->getId()]);
+
+        if ($this->id) {
+            $query->andWhere(['=', Lead::tableName() . '.id', $this->id]);
+        }
 
         if ($this->final_profit) {
             $query->andWhere(['=', 'gross_profit', $this->final_profit]);
@@ -233,6 +242,11 @@ class SalesSearch extends Model
         $complementaryQuery->innerJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . $this->currentUser->getId());
         $complementaryQuery->where(['status' => Lead::STATUS_SOLD]);
         $complementaryQuery->andWhere(['BETWEEN', 'l_status_dt', $this->minDate, $this->maxDate]);
+
+        if ($this->id) {
+            $complementaryQuery->andWhere(['=', 'id', $this->id]);
+        }
+
         if ($this->final_profit) {
             $complementaryQuery->andWhere(['=', 'gross_profit', $this->final_profit]);
         }
