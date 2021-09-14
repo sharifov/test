@@ -47,6 +47,8 @@ class CreateLeadOnRoomConnected implements RunnableComponentInterface
             if ($createLeadByChatForm->validate()) {
                 $lead = $this->leadManageService->createByClientChat($createLeadByChatForm, $chat, null);
 
+                Yii::info(VarDumper::dumpAsString($dto->getRunnableComponentConfig()), 'info\app');
+
                 $addTopQuotesEnabled = (bool)($dto->getRunnableComponentConfig()['add_top_quotes']['enabled'] ?? $this->getDefaultConfig()['add_top_quotes']['enabled']);
                 $addTopQuotesCount = (int)($dto->getRunnableComponentConfig()['add_top_quotes']['count'] ?? $this->getDefaultConfig()['add_top_quotes']['count']);
 
