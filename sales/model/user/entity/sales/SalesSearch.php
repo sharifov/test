@@ -186,8 +186,11 @@ class SalesSearch extends Model
         $this->load($params);
 
         if ($this->dateFrom && $this->dateTo) {
-            $this->minDate = $this->dateFrom;
-            $this->maxDate =  $this->dateTo;
+            $from = $this->dateFrom;
+            $to = $this->dateTo;
+        } else {
+            $from = $this->minDate;
+            $to = $this->maxDate;
         }
 
         $query = new Query();
@@ -205,12 +208,12 @@ class SalesSearch extends Model
                 ->from(Lead::tableName())
                 ->innerJoin('profit_split', 'ps_lead_id = id')
                 ->where(['status' => Lead::STATUS_SOLD])
-                ->andWhere(['BETWEEN', 'l_status_dt', $this->minDate, $this->maxDate])
+                ->andWhere(['BETWEEN', 'l_status_dt', $from, $to])
                 ->andWhere(['employee_id' => $this->currentUser->getId()])
                 ->groupBy(['id'])
         ], 'sp.id = leads.id');
         $query->where(['status' => Lead::STATUS_SOLD]);
-        $query->andWhere(['BETWEEN', 'l_status_dt', $this->minDate, $this->maxDate]);
+        $query->andWhere(['BETWEEN', 'l_status_dt', $from, $to]);
         $query->andWhere(['employee_id' => $this->currentUser->getId()]);
 
         if ($this->id) {
@@ -241,7 +244,7 @@ class SalesSearch extends Model
         $complementaryQuery->from(Lead::tableName());
         $complementaryQuery->innerJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . $this->currentUser->getId());
         $complementaryQuery->where(['status' => Lead::STATUS_SOLD]);
-        $complementaryQuery->andWhere(['BETWEEN', 'l_status_dt', $this->minDate, $this->maxDate]);
+        $complementaryQuery->andWhere(['BETWEEN', 'l_status_dt', $from, $to]);
 
         if ($this->id) {
             $complementaryQuery->andWhere(['=', 'id', $this->id]);
@@ -261,7 +264,7 @@ class SalesSearch extends Model
 
         $query->union($complementaryQuery, true);
 
-        $query->cache($cacheDuration);
+        //$query->cache($cacheDuration);
 
         return $query->createCommand()->queryAll();
     }
