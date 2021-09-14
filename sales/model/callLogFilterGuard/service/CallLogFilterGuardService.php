@@ -4,6 +4,7 @@ namespace sales\model\callLogFilterGuard\service;
 
 use common\components\antispam\CallAntiSpamDto;
 use common\models\Call;
+use DomainException;
 use frontend\helpers\JsonHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
@@ -23,17 +24,17 @@ class CallLogFilterGuardService
         $twilioCallFilterGuard = (new TwilioCallFilterGuard($phoneNumber))->default();
 
         if (empty($dataJson = $twilioCallFilterGuard->getResponseData())) {
-            throw new \RuntimeException('TwilioCallFilterGuard Error: ResponseData is empty');
+            throw new DomainException('TwilioCallFilterGuard Error: ResponseData is empty');
         }
 
         $dto = CallAntiSpamDto::fillFromCallTwilioResponse($dataJson, $call);
         $response = Yii::$app->callAntiSpam->checkData($dto);
 
         if (!empty($response['error'])) {
-            throw new \RuntimeException(VarDumper::dumpAsString($response['error']));
+            throw new DomainException(VarDumper::dumpAsString($response['error']));
         }
         if (($label = $response['data']['Label'] ?? null) === null || ($score = $response['data']['Score'] ?? null) === null) {
-            throw new \RuntimeException('CallAntiSpamService Error: Label and Score is required in response');
+            throw new DomainException('CallAntiSpamService Error: Label and Score is required in response');
         }
 
         $contactPhoneList = ContactPhoneListService::getByPhone($phoneNumber);
@@ -46,7 +47,7 @@ class CallLogFilterGuardService
         );
 
         if (!$callLogFilterGuard->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($callLogFilterGuard));
+            throw new DomainException(ErrorsToStringHelper::extractFromModel($callLogFilterGuard));
         }
 
         (new CallLogFilterGuardRepository($callLogFilterGuard))->save();

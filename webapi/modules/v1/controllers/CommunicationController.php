@@ -23,6 +23,7 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use DomainException;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
@@ -422,10 +423,13 @@ class CommunicationController extends ApiBaseController
                     try {
                         (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                     } catch (\Throwable $throwable) {
-                        Yii::error(
-                            AppHelper::throwableLog($throwable),
-                            'CommunicationController:CallLogFilterGuard:generalLine'
-                        );
+                        $message = AppHelper::throwableLog($throwable);
+                        $category = 'CommunicationController:CallLogFilterGuard:generalLine';
+                        if ($throwable instanceof DomainException) {
+                            Yii::warning($message, $category);
+                        } else {
+                            Yii::error($message, $category);
+                        }
                     }
                 }
 
@@ -497,10 +501,13 @@ class CommunicationController extends ApiBaseController
                         try {
                             (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                         } catch (\Throwable $throwable) {
-                            Yii::error(
-                                AppHelper::throwableLog($throwable),
-                                'CommunicationController:CallLogFilterGuard:directCall'
-                            );
+                            $message = AppHelper::throwableLog($throwable);
+                            $category = 'CommunicationController:CallLogFilterGuard:directCall';
+                            if ($throwable instanceof DomainException) {
+                                Yii::warning($message, $category);
+                            } else {
+                                Yii::error($message, $category);
+                            }
                         }
                     }
 
