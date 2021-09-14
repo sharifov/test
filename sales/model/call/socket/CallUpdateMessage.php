@@ -149,6 +149,16 @@ class CallUpdateMessage
         $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $phone])->andWhere('pbl_expiration_date > now()')->exists();
         //var_dump($isPhoneInBlackList); die();
 
+        $callAntiSpam = [];
+        $callAntiSpamData = json_decode($call->c_data_json, true)['callAntiSpamData'] ?? [];
+        if ($callAntiSpamData) {
+            $callAntiSpam = [
+                'type' => $callAntiSpamData['type'] ?? null,
+                'rate' => $callAntiSpamData['rate'] ?? null,
+                'trustPercent' => $callAntiSpamData['trustPercent'] ?? null
+            ];
+        }
+
         return [
             'id' => $callId,
             'callSid' => $callSid,
@@ -188,7 +198,8 @@ class CallUpdateMessage
             'conference' => $conference !== null ? $conference->getData() : null,
             'isConferenceCreator' => $isConferenceCreator,
             'recordingDisabled' => $call->c_recording_disabled,
-            'blacklistBtnEnabled' => PhoneBlackListGuard::canAdd($userId)
+            'blacklistBtnEnabled' => PhoneBlackListGuard::canAdd($userId),
+            'callAntiSpamData' => $callAntiSpam
         ];
     }
 }

@@ -46,6 +46,7 @@ use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
@@ -427,12 +428,17 @@ class CommunicationController extends ApiBaseController
                             if (!empty($response['error'])) {
                                 throw new \RuntimeException(VarDumper::dumpAsString($response['error']));
                             }
+                            if (($label = $response['data']['Label'] ?? null) === null || ($score = $response['data']['Score'] ?? null) === null) {
+                                throw new \RuntimeException('CallAntiSpam Error: Label and Score is required in response');
+                            }
 
+                            $contactPhoneList = ContactPhoneListService::getByPhone($client_phone_number);
                             $callLogFilterGuard = CallLogFilterGuard::create(
                                 $callModel->c_id,
-                                $response['data']['Label'] ?? 0,
-                                $response['data']['Score'] ?? null,
-                                $twilioCallFilterGuard->getTrustPercent()
+                                $label,
+                                $score,
+                                $twilioCallFilterGuard->getTrustPercent(),
+                                $contactPhoneList->cpl_id ?? null
                             );
                             (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
 
