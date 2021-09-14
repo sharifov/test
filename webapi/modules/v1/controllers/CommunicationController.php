@@ -419,18 +419,19 @@ class CommunicationController extends ApiBaseController
                 if (SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
                         $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
+
                         if (!empty($dataJson = $twilioCallFilterGuard->getResponseData())) {
                             $dto = CallAntiSpamDto::fillFromCallTwilioResponse($dataJson, $callModel);
                             $response = Yii::$app->callAntiSpam->checkData($dto);
 
-                            if (!empty($responce['error'])) {
-                                throw new \RuntimeException(VarDumper::dumpAsString($responce['error']));
+                            if (!empty($response['error'])) {
+                                throw new \RuntimeException(VarDumper::dumpAsString($response['error']));
                             }
 
                             $callLogFilterGuard = CallLogFilterGuard::create(
                                 $callModel->c_id,
-                                $responce['data']['Label'] ?? 0,
-                                $responce['data']['Score'] ?? null,
+                                $response['data']['Label'] ?? 0,
+                                $response['data']['Score'] ?? null,
                                 $twilioCallFilterGuard->getTrustPercent()
                             );
                             (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
