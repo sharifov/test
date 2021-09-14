@@ -264,7 +264,7 @@ class SalesSearch extends Model
 
         $query->union($complementaryQuery, true);
 
-        //$query->cache($cacheDuration);
+        $query->cache($cacheDuration);
 
         return $query->createCommand()->queryAll();
     }
