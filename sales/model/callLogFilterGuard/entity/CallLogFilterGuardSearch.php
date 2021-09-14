@@ -17,6 +17,10 @@ class CallLogFilterGuardSearch extends CallLogFilterGuard
             ['clfg_trust_percent', 'integer'],
 
             ['clfg_type', 'integer'],
+
+            ['clfg_created_dt', 'date', 'format' => 'php:Y-m-d'],
+
+            [['clfg_cpl_id'], 'integer'],
         ];
     }
 
@@ -42,6 +46,8 @@ class CallLogFilterGuardSearch extends CallLogFilterGuard
             'clfg_type' => $this->clfg_type,
             'clfg_sd_rate' => $this->clfg_sd_rate,
             'clfg_trust_percent' => $this->clfg_trust_percent,
+            'clfg_cpl_id' => $this->clfg_cpl_id,
+            'DATE(clfg_created_dt)' => $this->clfg_created_dt,
         ]);
 
         return $dataProvider;

@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -29,9 +30,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
 
             'clfg_call_id',
+            'clfg_cpl_id',
             'clfg_type',
             'clfg_sd_rate',
             'clfg_trust_percent',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'clfg_created_dt',
+            ],
 
             ['class' => ActionColumn::class],
         ],
