@@ -149,14 +149,8 @@ class AddQuoteService
 
     public function autoSelectQuotes(array $quotes, Lead $lead, ?Employee $employee): void
     {
-        $autoSelectQuoteCount = SettingHelper::getFlightQuoteAutoSelectCount();
-        $i = 0;
         foreach ($quotes as $quote) {
-            if ($i === $autoSelectQuoteCount) {
-                break;
-            }
             $this->createQuoteFromSearch($quote, $lead, $employee);
-            $i++;
         }
     }
 
