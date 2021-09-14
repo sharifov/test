@@ -42,6 +42,7 @@ use sales\model\callLog\services\CallLogTransferService;
 use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use sales\model\callLogFilterGuard\entity\CallLogFilterGuardScopes;
 use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
+use sales\model\callLogFilterGuard\service\CallLogFilterGuardService;
 use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
@@ -419,40 +420,12 @@ class CommunicationController extends ApiBaseController
 
                 if (SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
-                        $twilioCallFilterGuard = new TwilioCallFilterGuard($client_phone_number);
-
-                        if (!empty($dataJson = $twilioCallFilterGuard->getResponseData())) {
-                            $dto = CallAntiSpamDto::fillFromCallTwilioResponse($dataJson, $callModel);
-                            $response = Yii::$app->callAntiSpam->checkData($dto);
-
-                            if (!empty($response['error'])) {
-                                throw new \RuntimeException(VarDumper::dumpAsString($response['error']));
-                            }
-                            if (($label = $response['data']['Label'] ?? null) === null || ($score = $response['data']['Score'] ?? null) === null) {
-                                throw new \RuntimeException('CallAntiSpam Error: Label and Score is required in response');
-                            }
-
-                            $contactPhoneList = ContactPhoneListService::getByPhone($client_phone_number);
-                            $callLogFilterGuard = CallLogFilterGuard::create(
-                                $callModel->c_id,
-                                $label,
-                                $score,
-                                $twilioCallFilterGuard->getTrustPercent(),
-                                $contactPhoneList->cpl_id ?? null
-                            );
-                            (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
-
-                            $dataJson = JsonHelper::decode($callModel->c_data_json);
-                            $dataJson['callAntiSpamData'] = [
-                                'type' => $callLogFilterGuard->clfg_type,
-                                'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                'trustPercent' => $callLogFilterGuard->clfg_trust_percent,
-                            ];
-                            $callModel->c_data_json = JsonHelper::encode($dataJson);
-                            $callModel->save(false);
-                        }
+                        (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                     } catch (\Throwable $throwable) {
-                        Yii::error(AppHelper::throwableLog($throwable), 'CommunicationController:CallLogFilterGuard');
+                        Yii::error(
+                            AppHelper::throwableLog($throwable),
+                            'CommunicationController:CallLogFilterGuard:generalLine'
+                        );
                     }
                 }
 
@@ -519,6 +492,17 @@ class CommunicationController extends ApiBaseController
                         $upp->upp_phone_list_id
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
+
+                    if (SettingHelper::isEnableCallLogFilterGuard()) {
+                        try {
+                            (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                        } catch (\Throwable $throwable) {
+                            Yii::error(
+                                AppHelper::throwableLog($throwable),
+                                'CommunicationController:CallLogFilterGuard:directCall'
+                            );
+                        }
+                    }
 
                     // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
 

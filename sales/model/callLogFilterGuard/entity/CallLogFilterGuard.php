@@ -23,6 +23,9 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
+            ['clfg_call_id', 'integer'],
+            ['clfg_call_id', 'unique'],
+
             ['clfg_sd_rate', 'number'],
 
             ['clfg_trust_percent', 'integer'],
