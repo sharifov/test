@@ -150,12 +150,15 @@ class CallUpdateMessage
         //var_dump($isPhoneInBlackList); die();
 
         $callAntiSpam = [];
-        $callAntiSpamData = json_decode($call->c_data_json, true)['callAntiSpamData'] ?? [];
-        if ($callAntiSpamData) {
-            $callAntiSpam = [
-                'type' => $callAntiSpamData['type'] ?? null,
-                'rate' => $callAntiSpamData['rate'] ?? null,
-                'trustPercent' => $callAntiSpamData['trustPercent'] ?? null
+        $callAntiSpamData = [];
+        if ($call->cParent && $call->cParent->c_data_json) {
+            $callAntiSpam = json_decode($call->cParent->c_data_json, true)['callAntiSpamData'] ?? [];
+        }
+        if ($callAntiSpam) {
+            $callAntiSpamData = [
+                'type' => $callAntiSpam['type'] ?? null,
+                'rate' => $callAntiSpam['rate'] ?? 0,
+                'trustPercent' => $callAntiSpam['trustPercent'] ?? null
             ];
         }
 
@@ -199,7 +202,7 @@ class CallUpdateMessage
             'isConferenceCreator' => $isConferenceCreator,
             'recordingDisabled' => $call->c_recording_disabled,
             'blacklistBtnEnabled' => PhoneBlackListGuard::canAdd($userId),
-            'callAntiSpamData' => $callAntiSpam
+            'callAntiSpamData' => $callAntiSpamData
         ];
     }
 }

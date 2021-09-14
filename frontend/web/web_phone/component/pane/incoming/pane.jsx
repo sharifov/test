@@ -130,7 +130,7 @@ function AntiSpamElement(props) {
 
         return (
             <div className="d-flex justify-content-center align-items-center">
-                <span style={style}>{typeTitle} Rate: {call.data.callAntiSpamData.trustPercent} %</span>
+                <span style={style}>{typeTitle} Rate: {parseInt(call.data.callAntiSpamData.rate)} %</span>
             </div>
         );
     }
