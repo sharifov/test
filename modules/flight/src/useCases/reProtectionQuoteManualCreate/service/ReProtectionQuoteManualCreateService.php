@@ -47,6 +47,7 @@ use sales\repositories\product\ProductQuoteRepository;
 use sales\services\parsingDump\BaggageService;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class ReProtectionQuoteManualCreateService
@@ -134,9 +135,8 @@ class ReProtectionQuoteManualCreateService
         $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
 
         $quoteData = self::prepareFlightQuoteData($form);
-        $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quoteData, $form->quoteCreator)));
-        $flightQuote->setTypeReProtection();
-        $flightQuote->setServiceFeePercent(0);
+        $flightQuoteCreateDTO = FlightQuoteCreateDTO::fillReProtectionManual($flight, $productQuote, $quoteData, Auth::id(), $form);
+        $flightQuote = FlightQuote::createReProtectionManual($flightQuoteCreateDTO);
         $this->flightQuoteRepository->save($flightQuote);
 
         $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
