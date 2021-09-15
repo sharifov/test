@@ -316,16 +316,10 @@ class LeadBadgesRepository
     {
         $query = Lead::find()->where([Lead::tableName() . '.status' => Lead::STATUS_SOLD]);
 
-        /*if ($user->isAdmin()) {
-            return $query;
-        }*/
-
         /** @abac null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS, Access to all sold leads*/
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS)) {
             return $query;
-        } /*else {
-            $query->where('0=1');
-        }*/
+        }
 
         $conditions = [];
         $displayFlag = false;
@@ -351,7 +345,11 @@ class LeadBadgesRepository
         /** @abac null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where user id owner*/
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere([Lead::tableName() . '.employee_id' => $user->id]);
-            $query->orWhere($this->inSplit($user->id));
+            $query->orWhere([ProfitSplit::tableName() . '.ps_user_id' => $user->id]);
+            $query->orWhere([TipsSplit::tableName() . '.ts_user_id' => $user->id]);
+            //$query->orWhere($this->inSplit($user->id));
+            $query->leftJoin('profit_split', 'ps_lead_id = leads.id and ps_user_id = ' . $user->id);
+            $query->leftJoin('tips_split', 'ts_lead_id = leads.id and ts_user_id = ' . $user->id);
             $displayFlag = true;
         }
         $lead = new Lead();
@@ -383,6 +381,8 @@ class LeadBadgesRepository
         }
 
         $query->andWhere($this->createSubQuery($user->id, $conditions));*/
+
+        //var_dump($query->createCommand()->getRawSql());die();
 
         if (!$displayFlag) {
             $query->where('0=1');
