@@ -1,0 +1,24 @@
+<?php
+
+namespace sales\traits;
+
+/**
+ * Trait FieldsTrait
+ *
+ * @property array $fields
+ */
+trait FieldsTrait
+{
+    public $fields = [];
+
+    public function fields(): array
+    {
+        return !empty($this->fields) ? $this->fields : parent::fields();
+    }
+
+    public function setFields(array $fields)
+    {
+        $this->fields = $fields;
+        return $this;
+    }
+}

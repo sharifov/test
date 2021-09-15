@@ -13,6 +13,7 @@ use common\models\Notifications;
 use common\models\Sources;
 use common\models\VisitorLog;
 use frontend\widgets\notification\NotificationMessage;
+use modules\flight\models\FlightQuoteSegment;
 use modules\flight\models\FlightSegment;
 use modules\product\src\useCases\product\api\create\flight\Handler;
 use sales\model\leadData\entity\LeadData;
@@ -1312,8 +1313,8 @@ class LeadController extends ApiBaseController
                     },
                     "lead_data": [
                         {
-                            "ld_field_key": "cross_system_xp",
-                            "ld_field_value": "example123"
+                            "key": "cross_system_xp",
+                            "value": "example123"
                         }
                     ]
                 }
@@ -1388,7 +1389,7 @@ class LeadController extends ApiBaseController
             ArrayHelper::setValue(
                 $response,
                 'lead_data',
-                LeadDataService::getByLeadForApi($lead)
+                LeadDataService::getByLeadFields($lead)
             );
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:lead:get:try');
