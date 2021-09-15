@@ -1350,7 +1350,6 @@ class LeadController extends ApiBaseController
         $this->checkPost();
         $this->startApiLog($this->action->uniqueId);
 
-
         $modelLead = new ApiLead();
         $modelLead->scenario = ApiLead::SCENARIO_GET;
 
@@ -1391,7 +1390,6 @@ class LeadController extends ApiBaseController
                 'lead_data',
                 LeadDataService::getByLeadForApi($lead)
             );
-
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:lead:get:try');
             if (Yii::$app->request->get('debug')) {
@@ -1403,7 +1401,6 @@ class LeadController extends ApiBaseController
             $response['error'] = $message;
             $response['error_code'] = 30;
         }
-
 
         if (isset($response['error']) && $response['error']) {
         } else {
