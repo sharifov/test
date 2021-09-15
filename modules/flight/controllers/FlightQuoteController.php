@@ -882,15 +882,34 @@ class FlightQuoteController extends FController
                 $reservationService->parseReservation($dump, true, $itinerary);
                 if ($reservationService->parseStatus && $reservationService->parseResult) {
                     $segments = $reservationService->parseResult;
+                    $trips = [];
+                    $tripIndex = 1;
+
                     foreach ($segments as $key => $segment) {
-                        $keyIata = $segment['departureAirport'] . $segment['arrivalAirport'];
+                        $keyIata = $segment['segmentIata'];
                         if (array_key_exists($keyIata, $originSegmentsBaggage)) {
                             $segments[$key]['baggage'] = $originSegmentsBaggage[$keyIata];
                             $defaultBaggage = $defaultBaggage ?? $originSegmentsBaggage[$keyIata];
                         }
+
+                        if ($key === 0) {
+                            $trips[$tripIndex]['duration'] = $segment['flightDuration'];
+                            $trips[$tripIndex]['segments'][] = $segment;
+                        } else {
+                            $prevSegment = $segments[$key - 1] ?? $segments[$key];
+                            $isMoreOneDay = ReProtectionQuoteManualCreateService::isMoreOneDay($prevSegment['arrivalDateTime'], $segment['departureDateTime']);
+                            if ($isMoreOneDay) {
+                                ++$tripIndex;
+                                $trips[$tripIndex]['duration'] = $segment['flightDuration'];
+                            } else {
+                                $trips[$tripIndex]['duration'] += $segment['flightDuration'];
+                            }
+                            $trips[$tripIndex]['segments'][] = $segment;
+                        }
                     }
 
                     $response['segments'] = $this->renderAjax('partial/_segment_rows', [
+                        'trips' => $trips,
                         'segments' => $segments,
                         'sourceHeight' => BaggageHelper::getBaggageHeightValuesCombine(),
                         'sourceWeight' => BaggageHelper::getBaggageWeightValuesCombine(),

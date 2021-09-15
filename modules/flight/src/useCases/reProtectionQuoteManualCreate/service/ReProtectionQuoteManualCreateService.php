@@ -251,10 +251,10 @@ class ReProtectionQuoteManualCreateService
         return $flightQuote;
     }
 
-    private static function isMoreOneDay(\DateTime $departureDateTime, \DateTime $arrivalDateTime): bool
+    public static function isMoreOneDay(\DateTime $departureDateTime, \DateTime $arrivalDateTime): bool
     {
         $diff = $departureDateTime->diff($arrivalDateTime);
-        return ((int)sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1) ? true : false;
+        return (int) sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
     }
 
     private function copyOriginalProductQuote(ProductQuote $originalQuote, ?int $ownerId, ?int $creatorId): ProductQuote
