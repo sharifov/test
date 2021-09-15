@@ -894,6 +894,7 @@ class FlightQuoteController extends FController
 
                         if ($key === 0) {
                             $trips[$tripIndex]['duration'] = $segment['flightDuration'];
+                            $segment['tripIndex'] = $tripIndex;
                             $trips[$tripIndex]['segments'][] = $segment;
                         } else {
                             $prevSegment = $segments[$key - 1] ?? $segments[$key];
@@ -904,6 +905,7 @@ class FlightQuoteController extends FController
                             } else {
                                 $trips[$tripIndex]['duration'] += $segment['flightDuration'];
                             }
+                            $segment['tripIndex'] = $tripIndex;
                             $trips[$tripIndex]['segments'][] = $segment;
                         }
                     }
