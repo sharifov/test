@@ -33,6 +33,8 @@ class LeadDataKey extends ActiveRecord
 {
     public const CACHE_TAG = 'lead-data-key-tag-dependency';
 
+    public const KEY_CROSS_SYSTEM_XP = 'cross_system_xp';
+
     public function rules(): array
     {
         return [
