@@ -189,7 +189,7 @@ class SalesSearch extends Model
             $from = $this->dateFrom;
             $to = $this->dateTo;
         } else {
-            $from = $this->minDate;
+            $from = $this->defaultMinDate;
             $to = $this->maxDate;
         }
 
