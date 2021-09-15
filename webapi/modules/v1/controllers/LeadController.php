@@ -17,6 +17,7 @@ use modules\flight\models\FlightSegment;
 use modules\product\src\useCases\product\api\create\flight\Handler;
 use sales\model\leadData\entity\LeadData;
 use sales\model\leadData\services\LeadDataCreateService;
+use sales\model\leadData\services\LeadDataService;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
@@ -1166,7 +1167,164 @@ class LeadController extends ApiBaseController
      * @apiSuccess {Array} data Data Array
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
+     * HTTP/1.1 200 OK
+     * {
+            "status": 200,
+            "name": "Success",
+            "code": 0,
+            "message": "",
+            "data": {
+                "response": {
+                    "lead": {
+                        "id": 371058,
+                        "client_id": 333094,
+                        "employee_id": 501,
+                        "status": 2,
+                        "uid": "61234c87a90ee",
+                        "project_id": 2,
+                        "source_id": 18,
+                        "trip_type": "RT",
+                        "cabin": "E",
+                        "adults": 1,
+                        "children": 0,
+                        "infants": 0,
+                        "notes_for_experts": null,
+                        "created": "2021-08-23 07:21:43",
+                        "updated": "2021-08-23 07:22:24",
+                        "request_ip": null,
+                        "request_ip_detail": null,
+                        "offset_gmt": null,
+                        "snooze_for": null,
+                        "rating": 0,
+                        "called_expert": 0,
+                        "discount_id": null,
+                        "bo_flight_id": null,
+                        "additional_information": null,
+                        "l_answered": 0,
+                        "clone_id": null,
+                        "description": null,
+                        "final_profit": null,
+                        "tips": "0.00",
+                        "gid": "4da708ecb49cdf2f0ccffacd5f0afeeb",
+                        "agents_processing_fee": 70,
+                        "l_call_status_id": 0,
+                        "l_pending_delay_dt": null,
+                        "l_client_first_name": "Test",
+                        "l_client_last_name": "",
+                        "l_client_phone": "+12015550123",
+                        "l_client_email": "xxx@gmail.com",
+                        "l_client_lang": null,
+                        "l_client_ua": null,
+                        "l_request_hash": "5c2d61ef547d4318f3befd6f62662433",
+                        "l_duplicate_lead_id": null,
+                        "l_init_price": null,
+                        "l_last_action_dt": "2021-08-24 09:06:50",
+                        "l_dep_id": 1,
+                        "l_delayed_charge": null,
+                        "l_type_create": 1,
+                        "l_is_test": 0,
+                        "hybrid_uid": null,
+                        "l_visitor_log_id": 28,
+                        "l_status_dt": "2021-08-23 07:21:43",
+                        "l_expiration_dt": null,
+                        "l_type": null
+                    },
+                    "flights": [
+                        {
+                            "id": 698035,
+                            "lead_id": 371058,
+                            "origin": "YWK",
+                            "destination": "YZV",
+                            "departure": "2021-11-01",
+                            "created": "2021-08-23 07:22:24",
+                            "updated": "2021-08-23 07:23:18",
+                            "flexibility": 0,
+                            "flexibility_type": "-",
+                            "origin_label": null,
+                            "destination_label": null
+                        },
+                        {
+                            "id": 698036,
+                            "lead_id": 371058,
+                            "origin": "YZV",
+                            "destination": "YWK",
+                            "departure": "2021-11-06",
+                            "created": "2021-08-23 07:22:24",
+                            "updated": "2021-08-23 07:23:18",
+                            "flexibility": 0,
+                            "flexibility_type": "-",
+                            "origin_label": null,
+                            "destination_label": null
+                        }
+                    ],
+                    "emails": [
+                        {
+                            "id": 130813,
+                            "client_id": 333094,
+                            "email": "xxx@gmail.com",
+                            "created": "2021-08-23 07:21:43",
+                            "updated": "2021-08-23 07:21:43",
+                            "comments": null,
+                            "type": null,
+                            "ce_title": null
+                        }
+                    ],
+                    "phones": [
+                        {
+                            "id": 342561,
+                            "client_id": 333094,
+                            "phone": "+12012345678",
+                            "created": "2021-05-04 06:01:34",
+                            "updated": "2021-05-04 06:01:34",
+                            "comments": null,
+                            "is_sms": 0,
+                            "validate_dt": null,
+                            "type": null,
+                            "cp_title": null,
+                            "cp_cpl_uid": null
+                        }
+                    ],
+                    "client": {
+                        "id": 333094,
+                        "first_name": "Bilbo",
+                        "middle_name": "Underhill",
+                        "last_name": "Baggins",
+                        "created": "2021-05-04 06:01:34",
+                        "updated": "2021-05-04 06:01:34",
+                        "uuid": "0cbe8947-0b91-4d25-a154-f85d773a3998",
+                        "parent_id": 70135,
+                        "is_company": 0,
+                        "is_public": 0,
+                        "company_name": null,
+                        "description": null,
+                        "disabled": 0,
+                        "rating": null,
+                        "cl_type_id": 1,
+                        "cl_type_create": 2,
+                        "cl_project_id": 2,
+                        "cl_ca_id": null,
+                        "cl_ppn": null,
+                        "cl_excluded": 0,
+                        "cl_ip": null,
+                        "cl_locale": null,
+                        "cl_marketing_country": null,
+                        "cl_call_recording_disabled": 0
+                    },
+                    "lead_data": [
+                        {
+                            "ld_field_key": "cross_system_xp",
+                            "ld_field_value": "example123"
+                        }
+                    ]
+                }
+            },
+            "action": "v1/lead/get",
+            "response_id": 8,
+            "request_dt": "2021-09-15 07:38:09",
+            "response_dt": "2021-09-15 07:38:09",
+            "execution_time": 0.039,
+            "memory_usage": 637944
+        }
      *
      * @apiError UserNotFound The id of the User was not found.
      *
@@ -1228,6 +1386,12 @@ class LeadController extends ApiBaseController
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;
             $response['client'] = $lead->client;
+            ArrayHelper::setValue(
+                $response,
+                'lead_data',
+                LeadDataService::getByLeadForApi($lead)
+            );
+
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:lead:get:try');
             if (Yii::$app->request->get('debug')) {
@@ -1249,11 +1413,7 @@ class LeadController extends ApiBaseController
             $responseData['message'] = '';
         }
 
-
         $responseData['data']['response'] = $response;
-        //$responseData['data']['request']                = $modelLead;
-
-
         $responseData = $this->apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
