@@ -17,6 +17,7 @@ use modules\flight\models\FlightQuoteStatusLog;
 use modules\flight\models\FlightQuoteTrip;
 use modules\flight\models\FlightSegment;
 use modules\flight\src\dto\flightSegment\SegmentDTO;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\repositories\flightQuoteBooking\FlightQuoteBookingRepository;
 use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
@@ -156,11 +157,27 @@ class ReProtectionQuoteManualCreateService
             $duration += (int)$itinerary->duration;
         }
 
-        $flightTrip = FlightQuoteTrip::create($flightQuote, $duration);
+        $flightTrip = FlightQuoteTrip::create($flightQuote, null);
         $flightQuoteTripId = $this->flightQuoteTripRepository->save($flightTrip);
 
         $flightQuoteSegments = [];
-        foreach ($form->itinerary as $itinerary) {
+        foreach ($form->itinerary as $key => $itinerary) {
+            if ($key === 0) {
+                $flightTrip->fqt_duration = $itinerary->duration;
+                $flightTrip->update(false, ['fqt_duration']);
+            } else {
+                $prevSegment = $form->itinerary[$key - 1] ?? $form->itinerary[$key];
+
+                $isMoreOneDay = self::isMoreOneDay(new \DateTime($prevSegment->arrivalTime), new \DateTime($itinerary->departureTime));
+                if ($isMoreOneDay) {
+                    $flightTrip = FlightQuoteTrip::create($flightQuote, $itinerary->duration);
+                    $flightQuoteTripId = $this->flightQuoteTripRepository->save($flightTrip);
+                } else {
+                    $flightTrip->fqt_duration += $itinerary->duration;
+                    $flightTrip->update(false, ['fqt_duration']);
+                }
+            }
+
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
             $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
@@ -232,6 +249,12 @@ class ReProtectionQuoteManualCreateService
         }
 
         return $flightQuote;
+    }
+
+    private static function isMoreOneDay(\DateTime $departureDateTime, \DateTime $arrivalDateTime): bool
+    {
+        $diff = $departureDateTime->diff($arrivalDateTime);
+        return ((int)sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1) ? true : false;
     }
 
     private function copyOriginalProductQuote(ProductQuote $originalQuote, ?int $ownerId, ?int $creatorId): ProductQuote

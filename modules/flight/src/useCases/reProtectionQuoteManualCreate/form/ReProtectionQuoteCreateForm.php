@@ -7,6 +7,7 @@ use common\models\Employee;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use yii\base\Model;
 use yii\helpers\Html;
@@ -25,7 +26,7 @@ use yii\helpers\Html;
  * @property $quoteCreator
  * @property $baggage_data
  *
- * @property $itinerary
+ * @property ItineraryDumpDTO[] $itinerary
  * @property $baggageFormsData
  */
 class ReProtectionQuoteCreateForm extends Model
@@ -41,7 +42,7 @@ class ReProtectionQuoteCreateForm extends Model
     public $reservationDump;
     public $baggage_data;
 
-    private $itinerary = [];
+    private array $itinerary = [];
     private array $baggageFormsData = [];
 
     public function __construct(?int $creatorId = null, $config = [])
