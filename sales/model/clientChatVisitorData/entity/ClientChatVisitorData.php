@@ -207,4 +207,9 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
     {
         return $this->decodedData['geo']['utc_offset'] ?? null;
     }
+
+    public function getCrossSystemXp(): ?string
+    {
+        return $this->decodedData['sources']['crossSystemXp'] ?? null;
+    }
 }
