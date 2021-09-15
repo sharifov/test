@@ -9,7 +9,7 @@ namespace sales\traits;
  */
 trait FieldsTrait
 {
-    public $fields = [];
+    public array $fields = [];
 
     public function fields(): array
     {
