@@ -114,7 +114,7 @@ function IncomingActions(props) {
 function AntiSpamElement(props) {
     let call = props.call;
 
-    if ('type' in call.data.callAntiSpamData) {
+    if ('callAntiSpamData' in call.data && 'type' in call.data.callAntiSpamData) {
         let typeTitle = 'Spam';
         let style = {
             color: '#ffffff',
