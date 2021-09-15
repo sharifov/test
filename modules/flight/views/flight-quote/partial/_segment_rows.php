@@ -17,6 +17,7 @@ use unclead\multipleinput\MultipleInputColumn;
 use yii\jui\AutoComplete;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
+
 ?>
 
 <?php foreach ($trips as $keyTrip => $trip) : ?>
