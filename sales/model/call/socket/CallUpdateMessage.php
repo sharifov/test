@@ -6,10 +6,13 @@ use common\models\Call;
 use common\models\Department;
 use common\models\Employee;
 use common\models\PhoneBlacklist;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\call\services\currentQueueCalls\ActiveConference;
+use sales\model\client\query\ClientLeadCaseCounter;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\phoneList\entity\PhoneList;
 

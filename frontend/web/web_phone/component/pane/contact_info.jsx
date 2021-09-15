@@ -12,6 +12,13 @@ function ContactInfo(props) {
                         <small className="incoming-info__label">Name</small>
                         <span className="incoming-info__value">{props.name}</span>
                     </li>
+                    <li>
+                        <div className="d-flex align-items-center justify-content-between">
+                            <small className="incoming-info__label">Leads ({'countActiveLeads' in props ? props.countActiveLeads : 0} / {'countAllLeads' in props ? props.countAllLeads : 0})</small>
+
+                            <small className="incoming-info__label"><i className="fa fa-plus"/> Create Lead</small>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </React.Fragment>

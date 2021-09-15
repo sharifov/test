@@ -6,12 +6,14 @@ use common\components\jobs\AgentCallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
+use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
+use sales\model\client\query\ClientLeadCaseCounter;
 use sales\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -319,6 +321,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
 
                     $auth = Yii::$app->authManager;
 
+                    $countActiveLeads = 0;
+                    $countAllLeads = 0;
+                    if ($call->c_client_id && $call->c_created_user_id) {
+                        $counter = new ClientLeadCaseCounter($call->c_client_id, $call->c_created_user_id);
+                        $countActiveLeads = $counter->countActiveLeads();
+                        $countAllLeads = $counter->countAllLeads();
+                    }
+
                     $callInfo = [
                         'id' => $call->c_id,
                         'callSid' => $call->c_call_sid,
@@ -348,6 +358,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
                             'canContactDetails' => $auth->checkAccess($this->cua_user_id, '/client/ajax-get-info'),
                             'canCallInfo' => $auth->checkAccess($this->cua_user_id, '/call/ajax-call-info'),
                             'callSid' => $call->c_call_sid,
+                            'countActiveLeads' => $countActiveLeads,
+                            'countAllLeads' => $countAllLeads
                         ],
                         'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                         'queue' => $this->isWarmTransfer() ? Call::QUEUE_DIRECT : Call::getQueueName($call),
