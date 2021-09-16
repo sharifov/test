@@ -6,10 +6,12 @@ use common\components\i18n\Formatter;
 use common\models\Call;
 use common\models\Department;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\PhoneBlacklist;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use sales\guards\phone\PhoneBlackListGuard;
+use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\call\services\currentQueueCalls\ActiveConference;
@@ -254,7 +256,8 @@ class CallUpdateMessage
             $counter = new ClientLeadCaseCounter($call->c_client_id, $call->c_created_user_id);
             $countActiveLeads = $counter->countActiveLeads();
             $countAllLeads = $counter->countAllLeads();
-            $leads = $call->cClient->leads;
+            $leads = $call->cClient->getLeads()->limit(SettingHelper::getLimitLeadsInContactInfoInPhoneWidget())->orderBy(['id' => SORT_DESC])->all();
+            /** @var Lead[] $leads */
             foreach ($leads as $lead) {
                 $clientLeads[] = [
                     'status' => $lead->getStatusLabel($lead->status),

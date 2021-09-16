@@ -24,6 +24,10 @@ function ContactInfo(props) {
                                 </div>
                             );
                         })}
+                        {props.canContactDetails && props.id
+                            ? <a href="#" data-client-id={props.id} data-is-client={props.isClient} className="cw-call-contact-info cw-btn-client-info"><span className="incoming-info__label">more...</span></a>
+                            : ''
+                        }
                     </li>
                 </ul>
             </div>

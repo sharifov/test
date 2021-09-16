@@ -495,4 +495,9 @@ class SettingHelper
     {
         return (bool) (Yii::$app->params['settings']['is_call_log_filter_guard'] ?? false);
     }
+
+    public static function getLimitLeadsInContactInfoInPhoneWidget(): int
+    {
+        return (int) (Yii::$app->params['settings']['limit_leads_in_phone_widget'] ?? 3);
+    }
 }
