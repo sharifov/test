@@ -253,6 +253,7 @@ class CurrentQueueCallsService
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+                'id' => $call->c_id
             ]);
 
             $last_time = strtotime($call->c_updated_dt);
@@ -345,6 +346,7 @@ class CurrentQueueCallsService
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+                'id' => $call->c_id
             ]);
             $last_time = strtotime($call->c_updated_dt);
         }
@@ -425,6 +427,7 @@ class CurrentQueueCallsService
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
                 'isWarmTransfer' => $item->isWarmTransfer(),
+                'id' => $call->c_id
             ]);
             $last_time = strtotime($item->cua_updated_dt);
         }
@@ -493,6 +496,7 @@ class CurrentQueueCallsService
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+                'id' => $call->c_id
             ]);
         }
 
