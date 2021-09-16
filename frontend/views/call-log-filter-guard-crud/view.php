@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'clfg_call_id',
                 'clfg_cpl_id',
+                'clfg_call_log_id',
                 'clfg_type',
                 'clfg_sd_rate',
                 'clfg_trust_percent',

@@ -67,4 +67,12 @@ class CallLogFilterGuardService
 
         return $callLogFilterGuard;
     }
+
+    public static function checkCallLog(?int $callId): ?CallLogFilterGuard
+    {
+        return CallLogFilterGuard::find()
+            ->where(['clfg_call_id' => $callId])
+            ->andWhere(['IS', 'clfg_call_log_id', null])
+            ->one();
+    }
 }

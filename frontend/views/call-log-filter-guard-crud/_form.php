@@ -22,6 +22,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'clfg_cpl_id')->textInput() ?>
 
+        <?= $form->field($model, 'clfg_call_log_id')->textInput() ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

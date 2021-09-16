@@ -17,6 +17,7 @@ use yii\helpers\ArrayHelper;
  * @property int|null $clfg_trust_percent
  * @property string|null $clfg_created_dt
  * @property int|null $clfg_cpl_id
+ * @property int|null $clfg_call_log_id
  */
 class CallLogFilterGuard extends \yii\db\ActiveRecord
 {
@@ -36,6 +37,8 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
 
             [['clfg_cpl_id'], 'integer'],
             [['clfg_cpl_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => ContactPhoneList::class, 'targetAttribute' => ['clfg_cpl_id' => 'cpl_id']],
+
+            ['clfg_call_log_id', 'integer'],
         ];
     }
 
@@ -61,7 +64,9 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
             'clfg_type' => 'Type',
             'clfg_sd_rate' => 'Sd Rate',
             'clfg_trust_percent' => 'Trust Percent',
-            'clfg_created_dt' => 'Created DT'
+            'clfg_created_dt' => 'Created DT',
+            'clfg_cpl_id' => 'ContactPhoneList ID',
+            'clfg_call_log_id' => 'CallLog ID',
         ];
     }
 
