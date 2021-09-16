@@ -71,7 +71,7 @@ use yii\helpers\Url;
                         $segmentBaggageForm->baggageData = $defaultBaggage;
                     }
 
-                        $multipleInputId = 'multiple_w_' . $segment['segmentIata'];
+                        $multipleInputId = 'multiple_w_' . $keyTrip . $key;
 
                         echo $formBaggage
                             ->field($segmentBaggageForm, 'baggageData')
