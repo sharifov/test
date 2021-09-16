@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\Project;
 use common\models\search\lead\LeadSearchByClient;
 use common\models\search\LeadSearch;
+use modules\lead\src\abac\LeadAbacObject;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
@@ -14,6 +15,7 @@ use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
 use sales\entities\cases\CasesSearchByClient;
 use sales\model\call\socket\CallUpdateMessage;
+use sales\model\client\abac\ClientAbacObject;
 use Yii;
 use common\models\Client;
 use common\models\search\ClientSearch;
@@ -243,6 +245,11 @@ class ClientController extends FController
         $callId = Yii::$app->request->post('callId');
         if (!$call = Call::findOne($callId)) {
             throw new BadRequestHttpException('Call Not found');
+        }
+
+        /** @abac ClientAbacObject::ACT_GET_INFO_JSON, ClientAbacObject::ACTION_READ, get client info json for phone widget*/
+        if (!(bool)\Yii::$app->abac->can(null, ClientAbacObject::ACT_GET_INFO_JSON, ClientAbacObject::ACTION_READ)) {
+            throw new ForbiddenHttpException('Access denied');
         }
 
         $result = [
