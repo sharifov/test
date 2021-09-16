@@ -15,9 +15,15 @@ function ContactInfo(props) {
                     <li>
                         <div className="d-flex align-items-center justify-content-between">
                             <small className="incoming-info__label">Leads ({'countActiveLeads' in props ? props.countActiveLeads : 0} / {'countAllLeads' in props ? props.countAllLeads : 0})</small>
-
-                            <small className="incoming-info__label"><i className="fa fa-plus"/> Create Lead</small>
+                            <CreateLeadButton {...props}/>
                         </div>
+                        {props.leads.map((lead, i) => {
+                            return (
+                                <div className="d-flex align-items-center justify-content-between" style={{"marginTop": "3px"}} key={lead.id}>
+                                    <span dangerouslySetInnerHTML={{__html: lead.formatHtml}} /> <span dangerouslySetInnerHTML={{__html: lead.status}} />
+                                </div>
+                            );
+                        })}
                     </li>
                 </ul>
             </div>
@@ -44,4 +50,13 @@ function ContactInfoHeader(props) {
             }
         </React.Fragment>
     );
+}
+
+function CreateLeadButton(props) {
+    if (props.canCreateLead) {
+        return (
+            <small className="incoming-info__label"><i className="fa fa-plus"/> Create Lead</small>
+        );
+    }
+    return ('');
 }

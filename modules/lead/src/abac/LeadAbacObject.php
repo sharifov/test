@@ -34,6 +34,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_CLIENT_SUBSCRIBE  = self::NS . 'act/client-subscribe';
     public const ACT_CLIENT_UNSUBSCRIBE  = self::NS . 'act/client-unsubscribe';
     public const ACT_SEARCH_LEADS_BY_IP  = self::NS . 'act/search-leads-by-ip';
+    public const ACT_CREATE_FROM_PHONE_WIDGET = self::NS . 'act/create-from-phone-widget';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -87,6 +88,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_IS_EMPTY_OWNER   => self::QUERY_SOLD_IS_EMPTY_OWNER,
         self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => self::UI_DISPLAY_QUOTE_SEARCH_PARAMS,
         self::CMD_AUTO_REDIAL => self::CMD_AUTO_REDIAL,
+        self::ACT_CREATE_FROM_PHONE_WIDGET => self::ACT_CREATE_FROM_PHONE_WIDGET,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -128,6 +130,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ACTION_QUERY_AND, self::ACTION_QUERY_OR],
         self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => [self::ACTION_ACCESS],
         self::CMD_AUTO_REDIAL => [self::ACTION_ACCESS],
+        self::ACT_CREATE_FROM_PHONE_WIDGET => [self::ACTION_CREATE],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [

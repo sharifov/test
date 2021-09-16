@@ -2422,7 +2422,7 @@ var PhoneWidgetPaneActive = function () {
     }), $addNoteContainer);
     $(".dialpad_btn_active").attr('data-conference-sid', call.data.conferenceSid);
     $("#call-pane__dial-number_active_dialpad").val('');
-    contactInfo.load(call.data.contact);
+    // contactInfo.load(call.data.contact);
     setCallSid(call.data.callSid);
     initControls();
   }
@@ -2539,7 +2539,7 @@ var PhoneWidgetPaneIncoming = function () {
   let dialpad = PhoneWidgetDialpad; // call => window.phoneWidget.call.Call
 
   function load(call) {
-    contactInfo.load(call.data.contact);
+    // contactInfo.load(call.data.contact);
     ReactDOM.unmountComponentAtNode($reactContainer);
     ReactDOM.render(React.createElement(IncomingPane, {
       call: call
@@ -2622,7 +2622,7 @@ var PhoneWidgetPaneOutgoing = function () {
   let dialpad = PhoneWidgetDialpad; // call => window.phoneWidget.call.Call
 
   function load(call) {
-    contactInfo.load(call.data.contact);
+    // contactInfo.load(call.data.contact);
     ReactDOM.unmountComponentAtNode($reactContainer);
     ReactDOM.render(React.createElement(OutgoingPane, {
       call: call

@@ -2,21 +2,26 @@
 
 namespace frontend\controllers;
 
+use common\models\Call;
 use common\models\Employee;
 use common\models\Project;
 use common\models\search\lead\LeadSearchByClient;
 use common\models\search\LeadSearch;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
+use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
 use sales\entities\cases\CasesSearchByClient;
+use sales\model\call\socket\CallUpdateMessage;
 use Yii;
 use common\models\Client;
 use common\models\search\ClientSearch;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -39,6 +44,11 @@ class ClientController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'ajax-get-info-json'
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -226,6 +236,28 @@ class ClientController extends FController
         $dataProvider->setPagination($pagination);
 
         return $dataProvider;
+    }
+
+    public function actionAjaxGetInfoJson(): Response
+    {
+        $callId = Yii::$app->request->post('callId');
+        if (!$call = Call::findOne($callId)) {
+            throw new BadRequestHttpException('Call Not found');
+        }
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $data = (new CallUpdateMessage())->getContactData($call, Auth::id());
+        } catch (\Throwable $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        }
+
+        return $this->asJson(ArrayHelper::merge($result, $data ?? []));
     }
 
     public function actionStats()

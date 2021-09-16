@@ -836,7 +836,33 @@ var PhoneWidgetCall = function () {
 
     function contactInfoClickEvent() {
         $(document).on('click', '.call-pane__info', function() {
-            $('.contact-info').slideDown(150);
+            let btn = $(this);
+            let btnHtml = btn.html();
+            let callId = btn.data('call-id');
+
+            $.ajax({
+                type: 'post',
+                url: '/client/ajax-get-info-json',
+                dataType: 'json',
+                data: {callId: callId},
+                beforeSend: function () {
+                    btn.html('<i class="fa fa-spin fa-spinner" />');
+                },
+                success: function (data) {
+                    if (data.error) {
+                        createNotify('Error', data.message, 'error');
+                    } else {
+                        PhoneWidgetContactInfo.load(data);
+                        $('.contact-info').slideDown(150);
+                    }
+                },
+                complete: function () {
+                    btn.html(btnHtml);
+                },
+                error: function (xhr) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }
+            });
         });
         $(document).on('click', '.additional-info.contact-info .additional-info__close', function() {
             $('.contact-info').slideUp(150);
