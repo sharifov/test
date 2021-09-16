@@ -10,6 +10,7 @@
 
 use common\models\Airports;
 use sales\forms\segment\SegmentBaggageForm;
+use sales\forms\segment\SegmentTripForm;
 use sales\services\parsingDump\BaggageService;
 use unclead\multipleinput\components\BaseColumn;
 use unclead\multipleinput\MultipleInput;
@@ -17,15 +18,42 @@ use unclead\multipleinput\MultipleInputColumn;
 use yii\jui\AutoComplete;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
+use yii\helpers\Html;
 
+$keyTripList = array_combine(array_keys($trips), array_keys($trips));
 ?>
 
 <?php foreach ($trips as $keyTrip => $trip) : ?>
-    <h6 title="duration: <?php echo $trip['duration'] ?>">Trip: <?php echo $keyTrip ?></h6>
+    <h6 >Trip: <?php echo $keyTrip ?></h6>
     <?php foreach ($trip['segments'] as $key => $segment) : ?>
         <div class="row">
-            <div class="col-1 border p-1">
-                <strong title="duration: <?php echo $segment['flightDuration'] ?>">Segment <?php echo $key + 1 ?></strong>
+            <div class="col- border p-1">
+                <strong>Segment <?php echo $key + 1 ?></strong><br />
+                <?php
+                    $segmentTripForm = new SegmentTripForm($segment['segmentIata']);
+                    $segmentTripForm->segment_iata = $segment['segmentIata'];
+                    $segmentTripForm->segment_trip_key = $keyTrip;
+                ?>
+                <?php $formSegmentTrip = ActiveForm::begin([
+                        'id' => $segmentTripForm->formName(),
+                        'enableClientValidation' => false,
+                        'enableAjaxValidation' => false,
+                        'options' => ['class' => 'segment_trip_forms'],
+                        'fieldConfig' => [
+                            'options' => [
+                                'tag' => false,
+                                'template' => '{input}',
+                            ],
+                        ],
+                    ]) ?>
+
+                    <?= $formSegmentTrip->field($segmentTripForm, 'segment_iata')->hiddenInput()->label(false) ?>
+                    Trip: <?php echo $formSegmentTrip->field($segmentTripForm, 'segment_trip_key')
+                        ->dropDownList($keyTripList, ['class' => '_'])
+                        ->label(false) ?>
+
+                <?php ActiveForm::end(); ?>
+
             </div>
             <div class="col-1 border p-1">
                 <?php echo $segment['airlineName'] ?>
@@ -47,6 +75,7 @@ use yii\helpers\Url;
                 <?php echo $segment['arrivalAirport'] ?>
             </div>
         </div>
+
         <div class="row">
             <div class="col-8">
                 <?php
