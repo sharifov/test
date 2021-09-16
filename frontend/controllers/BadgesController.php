@@ -140,6 +140,11 @@ class BadgesController extends FController
                         $result['alternative'] = $count;
                     }
                     break;
+                case 'business-inbox':
+                    if ($count = $this->getBusinessInbox()) {
+                        $result['business-inbox'] = $count;
+                    }
+                    break;
             }
         }
         return $result;
@@ -156,6 +161,19 @@ class BadgesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->leadBadgesRepository->getPendingCount($user);
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getBusinessInbox(): ?int
+    {
+        if (!Yii::$app->user->can('/lead/business-inbox')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->leadBadgesRepository->getBusinessInboxCount($user);
     }
 
     /**

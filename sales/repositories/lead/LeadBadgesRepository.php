@@ -47,6 +47,30 @@ class LeadBadgesRepository
      * @param Employee $user
      * @return int
      */
+    public function getBusinessInboxCount(Employee $user): int
+    {
+        return $this->getBusinessInboxQuery($user)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getBusinessInboxQuery(Employee $user): ActiveQuery
+    {
+        $query = Lead::find()->andWhere(['project_id' => 7])->orWhere(['cabin' => Lead::CABIN_BUSINESS])->orWhere(['cabin' => Lead::CABIN_FIRST]);
+
+        /*if ($user->isAdmin()) {
+            return $query;
+        }*/
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
     public function getInboxCount(Employee $user): int
     {
         return $this->getInboxQuery($user)->count();

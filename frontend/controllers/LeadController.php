@@ -1776,6 +1776,23 @@ class LeadController extends FController
         ]);
     }
 
+    /**
+     * @return string
+     */
+    public function actionBusinessInbox(): string
+    {
+        $searchModel = new LeadSearch();
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        $dataProvider = $searchModel->searchBusinessInbox(Yii::$app->request->queryParams, $user);
+
+        return $this->render('business-inbox', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
 
     /**
      * @return string
