@@ -119,5 +119,9 @@ return [
         'pattern' => 'queue/alternative',
         'route' => 'lead/alternative',
     ],
+    [
+        'pattern' => 'queue/business-inbox',
+        'route' => 'lead/business-inbox',
+    ],
 
 ];
