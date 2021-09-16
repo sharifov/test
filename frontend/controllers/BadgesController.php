@@ -105,7 +105,7 @@ class BadgesController extends FController
                         $result['booked'] = $count;
                     }
                     break;
-                case 'sold':
+                /*case 'sold':
                     if ($count = $this->getSold()) {
                         $result['sold'] = $count;
                     }
@@ -114,17 +114,17 @@ class BadgesController extends FController
                     if ($count = $this->getDuplicate()) {
                         $result['duplicate'] = $count;
                     }
-                    break;
+                    break;*/
                 case 'redial':
                     if ($count = $this->getRedial()) {
                         $result['redial'] = $count;
                     }
                     break;
-                case 'trash':
+                /*case 'trash':
                     if ($count = $this->getTrash()) {
                         $result['trash'] = $count;
                     }
-                    break;
+                    break;*/
                 case 'bonus':
                     if ($count = $this->getBonus()) {
                         $result['bonus'] = $count;
@@ -138,6 +138,11 @@ class BadgesController extends FController
                 case 'alternative':
                     if ($count = $this->getAlternative()) {
                         $result['alternative'] = $count;
+                    }
+                    break;
+                case 'business-inbox':
+                    if ($count = $this->getBusinessInbox()) {
+                        $result['business-inbox'] = $count;
                     }
                     break;
             }
@@ -156,6 +161,19 @@ class BadgesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->leadBadgesRepository->getPendingCount($user);
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getBusinessInbox(): ?int
+    {
+        if (!Yii::$app->user->can('/lead/business-inbox')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->leadBadgesRepository->getBusinessInboxCount($user);
     }
 
     /**

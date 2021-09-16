@@ -44,6 +44,15 @@ use yii\widgets\Pjax;
                 ],
             ],
             [
+                'attribute' => 'share',
+                'value' => static function ($data) {
+                     return ($data['share'] * 100) . ' %' ;
+                },
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
+            ],
+            [
                 'attribute' => 'l_status_dt',
                 'class' => DateColumn::class,
                 'label' => 'Sold Date',

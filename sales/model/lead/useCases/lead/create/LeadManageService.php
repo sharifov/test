@@ -18,6 +18,9 @@ use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
+use sales\model\leadData\entity\LeadData;
+use sales\model\leadData\repository\LeadDataRepository;
+use sales\model\leadDataKey\entity\LeadDataKey;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\visitorLog\useCase\CreateVisitorLog;
@@ -48,6 +51,7 @@ use yii\helpers\Json;
  * @property ClientChatLeadRepository $clientChatLeadRepository
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
  * @property VisitorLogRepository $visitorLogRepository
+ * @property LeadDataRepository $leadDataRepository
  */
 class LeadManageService
 {
@@ -91,6 +95,10 @@ class LeadManageService
      * @var VisitorLogRepository
      */
     private VisitorLogRepository $visitorLogRepository;
+    /**
+     * @var LeadDataRepository
+     */
+    private LeadDataRepository $leadDataRepository;
 
     /**
      * LeadManageService constructor.
@@ -104,6 +112,7 @@ class LeadManageService
      * @param ClientChatLeadRepository $clientChatLeadRepository
      * @param ClientChatVisitorDataRepository $clientChatVisitorDataRepository
      * @param VisitorLogRepository $visitorLogRepository
+     * @param LeadDataRepository $leadDataRepository
      */
     public function __construct(
         TransactionManager $transactionManager,
@@ -115,7 +124,8 @@ class LeadManageService
         LeadPreferencesRepository $leadPreferencesRepository,
         ClientChatLeadRepository $clientChatLeadRepository,
         ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
-        VisitorLogRepository $visitorLogRepository
+        VisitorLogRepository $visitorLogRepository,
+        LeadDataRepository $leadDataRepository
     ) {
         $this->transactionManager = $transactionManager;
         $this->casesManageService = $casesManageService;
@@ -127,6 +137,7 @@ class LeadManageService
         $this->clientChatLeadRepository = $clientChatLeadRepository;
         $this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
         $this->visitorLogRepository = $visitorLogRepository;
+        $this->leadDataRepository = $leadDataRepository;
     }
 
     /**
@@ -304,6 +315,11 @@ class LeadManageService
             $clientChatLead = ClientChatLead::create($chat->cch_id, $lead->id, new \DateTimeImmutable('now'));
 
             $this->clientChatLeadRepository->save($clientChatLead);
+
+            if ($crossSystemXp = $chatVisitorData->getCrossSystemXp()) {
+                $leadData = LeadData::create($lead->id, LeadDataKey::KEY_CROSS_SYSTEM_XP, $chatVisitorData->getCrossSystemXp());
+                $this->leadDataRepository->save($leadData);
+            }
 
             return $lead;
         });

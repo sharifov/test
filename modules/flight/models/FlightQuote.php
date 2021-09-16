@@ -473,6 +473,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         return $flightQuote;
     }
 
+    public static function createReProtectionManual(FlightQuoteCreateDTO $dto): FlightQuote
+    {
+        return self::create($dto);
+    }
+
     public static function clone(FlightQuote $quote, int $flightId, int $productQuoteId): self
     {
         $clone = new self();

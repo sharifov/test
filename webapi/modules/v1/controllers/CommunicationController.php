@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\components\antispam\CallAntiSpamDto;
 use common\components\jobs\CallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\ApiLog;
@@ -22,6 +23,8 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use DomainException;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
@@ -37,10 +40,17 @@ use sales\model\call\services\QueueLongTimeNotificationJobCreator;
 use sales\model\call\services\RepeatMessageCallJobCreator;
 use sales\model\callLog\services\CallLogConferenceTransferService;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuardScopes;
+use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
+use sales\model\callLogFilterGuard\service\CallLogFilterGuardService;
 use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\emailList\entity\EmailList;
 use sales\model\leadRedial\queue\AutoTakeJob;
@@ -368,6 +378,7 @@ class CommunicationController extends ApiBaseController
                 try {
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
+
                     if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
                         $callFilterGuardService->runRepression($postCall);
                     }
@@ -408,6 +419,20 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_priority,
                     $departmentPhone->dpp_phone_list_id
                 );
+
+                if (SettingHelper::isEnableCallLogFilterGuard()) {
+                    try {
+                        (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                    } catch (\Throwable $throwable) {
+                        $message = AppHelper::throwableLog($throwable);
+                        $category = 'CommunicationController:CallLogFilterGuard:generalLine';
+                        if ($throwable instanceof DomainException) {
+                            Yii::warning($message, $category);
+                        } else {
+                            Yii::error($message, $category);
+                        }
+                    }
+                }
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
@@ -472,6 +497,20 @@ class CommunicationController extends ApiBaseController
                         $upp->upp_phone_list_id
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
+
+                    if (SettingHelper::isEnableCallLogFilterGuard()) {
+                        try {
+                            (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                        } catch (\Throwable $throwable) {
+                            $message = AppHelper::throwableLog($throwable);
+                            $category = 'CommunicationController:CallLogFilterGuard:directCall';
+                            if ($throwable instanceof DomainException) {
+                                Yii::warning($message, $category);
+                            } else {
+                                Yii::error($message, $category);
+                            }
+                        }
+                    }
 
                     // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
 

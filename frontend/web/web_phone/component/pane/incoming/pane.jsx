@@ -33,6 +33,7 @@ class IncomingPane extends React.Component {
                 <CallInfo project={call.data.project} source={call.data.source}/>
                 <div className="contact-info-card">
                     <div className="contact-info-card__details">
+                        <AntiSpamElement call={call}/>
                         <div className="contact-info-card__line history-details">
                             <span className="contact-info-card__label">{call.data.type}</span>
                             <div className="credential">
@@ -108,4 +109,31 @@ function IncomingActions(props) {
             </div>
         </div>
     );
+}
+
+function AntiSpamElement(props) {
+    let call = props.call;
+
+    if ('callAntiSpamData' in call.data && 'type' in call.data.callAntiSpamData) {
+        let typeTitle = 'Spam';
+        let style = {
+            color: '#ffffff',
+            border: '1px solid #ff0000',
+            padding: '5px',
+            position: 'relative',
+            top: '-20px'
+        };
+        if (call.data.callAntiSpamData.type === 0) {
+            typeTitle = 'Trust';
+            style.border = '1px solid #37ff00'
+        }
+
+        return (
+            <div className="d-flex justify-content-center align-items-center">
+                <span style={style}>{typeTitle} Rate: {parseInt(call.data.callAntiSpamData.rate * 100)} %</span>
+            </div>
+        );
+    }
+
+    return ('');
 }

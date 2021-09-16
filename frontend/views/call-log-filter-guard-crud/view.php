@@ -32,9 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'clfg_call_id',
+                'clfg_cpl_id',
+                'clfg_call_log_id',
                 'clfg_type',
                 'clfg_sd_rate',
                 'clfg_trust_percent',
+                'clfg_created_dt:byUserDateTime',
             ],
         ]) ?>
 

@@ -6,6 +6,7 @@ use common\models\Lead;
 use sales\entities\serializer\Serializable;
 use sales\model\leadData\serializer\LeadDataSerializer;
 use sales\model\leadDataKey\entity\LeadDataKey;
+use sales\traits\FieldsTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -25,6 +26,8 @@ use yii\helpers\ArrayHelper;
  */
 class LeadData extends ActiveRecord implements Serializable
 {
+    use FieldsTrait;
+
     public static function tableName(): string
     {
         return 'lead_data';

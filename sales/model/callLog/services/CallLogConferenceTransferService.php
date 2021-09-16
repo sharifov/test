@@ -10,6 +10,8 @@ use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
+use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
+use sales\model\callLogFilterGuard\service\CallLogFilterGuardService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
 use Yii;
 use yii\helpers\VarDumper;
@@ -90,6 +92,11 @@ class CallLogConferenceTransferService
             if (!$log->save()) {
                 Yii::error($log->getErrors());
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $log->toArray(), 'message' => $log->getErrors()]));
+            }
+
+            if (!empty($call->c_parent_id) && $callLogFilterGuard = CallLogFilterGuardService::checkCallLog($call->c_parent_id)) {
+                $callLogFilterGuard->clfg_call_log_id = $log->cl_id;
+                (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
             }
 
             if ($call->c_lead_id) {

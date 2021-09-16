@@ -237,7 +237,12 @@ return [
             'collectorUrl' => 'sp.ovago.com',
             'appId' => 'crm-app',
             'enabled' => true,
-        ]
+        ],
+        'callAntiSpam' => [
+            'class' => \common\components\antispam\CallAntiSpamService::class,
+            'host' => 'http://localhost',
+            'port' => 8001
+        ],
     ],
     'bootstrap' => [
         'queue_sms_job',

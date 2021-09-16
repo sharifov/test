@@ -13,13 +13,6 @@ class LeadUserConversionRepository
     public function save(LeadUserConversion $model): LeadUserConversion
     {
         if ($this->exist($model->luc_lead_id, $model->luc_user_id)) {
-            \Yii::warning(
-                [
-                    'message' => 'LeadUserConversion already exist',
-                    'data' => $model->toArray()
-                ],
-                'LeadUserConversionRepository:Save:alreadyExist'
-            );
             return $model;
         }
         if (!$model->save()) {

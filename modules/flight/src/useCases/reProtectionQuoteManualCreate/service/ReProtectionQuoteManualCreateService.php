@@ -17,6 +17,7 @@ use modules\flight\models\FlightQuoteStatusLog;
 use modules\flight\models\FlightQuoteTrip;
 use modules\flight\models\FlightSegment;
 use modules\flight\src\dto\flightSegment\SegmentDTO;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\repositories\flightQuoteBooking\FlightQuoteBookingRepository;
 use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
@@ -47,6 +48,7 @@ use sales\repositories\product\ProductQuoteRepository;
 use sales\services\parsingDump\BaggageService;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class ReProtectionQuoteManualCreateService
@@ -134,9 +136,8 @@ class ReProtectionQuoteManualCreateService
         $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
 
         $quoteData = self::prepareFlightQuoteData($form);
-        $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quoteData, $form->quoteCreator)));
-        $flightQuote->setTypeReProtection();
-        $flightQuote->setServiceFeePercent(0);
+        $flightQuoteCreateDTO = FlightQuoteCreateDTO::fillReProtectionManual($flight, $productQuote, $quoteData, Auth::id(), $form);
+        $flightQuote = FlightQuote::createReProtectionManual($flightQuoteCreateDTO);
         $this->flightQuoteRepository->save($flightQuote);
 
         $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
@@ -156,11 +157,27 @@ class ReProtectionQuoteManualCreateService
             $duration += (int)$itinerary->duration;
         }
 
-        $flightTrip = FlightQuoteTrip::create($flightQuote, $duration);
+        $flightTrip = FlightQuoteTrip::create($flightQuote, null);
         $flightQuoteTripId = $this->flightQuoteTripRepository->save($flightTrip);
 
         $flightQuoteSegments = [];
-        foreach ($form->itinerary as $itinerary) {
+        foreach ($form->itinerary as $key => $itinerary) {
+            if ($key === 0) {
+                $flightTrip->fqt_duration = $itinerary->duration;
+                $flightTrip->update(false, ['fqt_duration']);
+            } else {
+                $prevSegment = $form->itinerary[$key - 1] ?? $form->itinerary[$key];
+
+                $isMoreOneDay = self::isMoreOneDay(new \DateTime($prevSegment->arrivalTime), new \DateTime($itinerary->departureTime));
+                if ($isMoreOneDay) {
+                    $flightTrip = FlightQuoteTrip::create($flightQuote, $itinerary->duration);
+                    $flightQuoteTripId = $this->flightQuoteTripRepository->save($flightTrip);
+                } else {
+                    $flightTrip->fqt_duration += $itinerary->duration;
+                    $flightTrip->update(false, ['fqt_duration']);
+                }
+            }
+
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
             $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
@@ -232,6 +249,12 @@ class ReProtectionQuoteManualCreateService
         }
 
         return $flightQuote;
+    }
+
+    public static function isMoreOneDay(\DateTime $departureDateTime, \DateTime $arrivalDateTime): bool
+    {
+        $diff = $departureDateTime->diff($arrivalDateTime);
+        return (int) sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
     }
 
     private function copyOriginalProductQuote(ProductQuote $originalQuote, ?int $ownerId, ?int $creatorId): ProductQuote
