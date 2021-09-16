@@ -14,7 +14,7 @@ function ContactInfo(props) {
                     </li>
                     <li>
                         <div className="d-flex align-items-center justify-content-between">
-                            <small className="incoming-info__label">Leads ({'countActiveLeads' in props ? props.countActiveLeads : 0} / {'countAllLeads' in props ? props.countAllLeads : 0})</small>
+                            <small className="incoming-info__label" title="Active Leads / All Leads">Leads ({'countActiveLeads' in props ? props.countActiveLeads : 0} / {'countAllLeads' in props ? props.countAllLeads : 0})</small>
                             <CreateLeadButton {...props}/>
                         </div>
                         {props.leads.map((lead, i) => {
@@ -59,7 +59,7 @@ function ContactInfoHeader(props) {
 function CreateLeadButton(props) {
     if (props.canCreateLead) {
         return (
-            <small className="incoming-info__label"><i className="fa fa-plus"/> Create Lead</small>
+            <small className="incoming-info__label">Create Lead</small>
         );
     }
     return ('');
