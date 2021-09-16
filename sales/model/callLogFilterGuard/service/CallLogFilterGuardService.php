@@ -21,8 +21,8 @@ class CallLogFilterGuardService
 {
     public function handler(string $phoneNumber, Call $call): CallLogFilterGuard
     {
-        if (CallLogFilterGuard::find()->where(['clfg_call_id' => $call->c_id])->exists()) {
-            throw new DomainException('CallLogFilterGuard with callID(' . $call->c_id . ') already exist');
+        if ($callLogFilterGuard = CallLogFilterGuard::findOne(['clfg_call_id' => $call->c_id])) {
+            return $callLogFilterGuard;
         }
 
         $twilioCallFilterGuard = (new TwilioCallFilterGuard($phoneNumber))->default();
