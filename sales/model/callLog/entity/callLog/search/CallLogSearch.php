@@ -141,12 +141,18 @@ class CallLogSearch extends CallLog
 
     public function search($params, Employee $user): ActiveDataProvider
     {
+        $filters = $params['CallLogSearch'] ?? [];
+        unset($filters['createTimeRange']);
+        unset($filters['createTimeStart']);
+        unset($filters['createTimeEnd']);
+
         $query = static::find()
             ->with(['project', 'department', 'phoneList', 'user'])
             ->joinWith(['callLogLead.lead', 'callLogCase.case', 'queue', 'record']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'totalCount' => !array_filter($filters) ? $this->callLogGridItemsCount($params) : null,
             'sort' => ['defaultOrder' => ['cl_call_created_dt' => SORT_DESC]],
         ]);
 
@@ -264,6 +270,21 @@ class CallLogSearch extends CallLog
             ->andFilterWhere(['like', 'cl_phone_to', $this->cl_phone_to]);
 
         return $dataProvider;
+    }
+
+    private function callLogGridItemsCount($params)
+    {
+        $query = static::find();
+        $this->load($params);
+
+        if ($this->createTimeRange) {
+            $date = explode(' - ', $this->createTimeRange);
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($date[0]));
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($date[1]));
+            $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
+            $query->from([new Expression(static::tableName() . ' PARTITION(' . QueryHelper::getPartitionsByYears($date[0], $date[1]) . ') ')])->alias('cl');
+        }
+        return $query->count();
     }
 
     public function getCallHistory(int $userId): ActiveDataProvider
