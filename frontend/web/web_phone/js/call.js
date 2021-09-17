@@ -9,6 +9,8 @@ var PhoneWidgetCall = function () {
         'callStatusUrl': '',
         'ajaxSaveCallUrl': '',
         'clearMissedCallsUrl': '',
+        'ajaxCreateLeadUrl': '',
+        'ajaxClientGetInfoJsonUrl': '/client/ajax-get-info-json'
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -72,6 +74,7 @@ var PhoneWidgetCall = function () {
         muteIncomingAudioEvent();
         recordingClickEvent();
         addPhoneBlacklistEvent();
+        createLeadEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -842,7 +845,7 @@ var PhoneWidgetCall = function () {
 
             $.ajax({
                 type: 'post',
-                url: '/client/ajax-get-info-json',
+                url: settings.ajaxClientGetInfoJsonUrl,
                 dataType: 'json',
                 data: {callId: callId},
                 beforeSend: function () {
@@ -944,6 +947,44 @@ var PhoneWidgetCall = function () {
                 return false;
             }
             callRequester.clientInfo(clientId, isClient === 'true');
+        });
+    }
+
+    function createLeadEvent() {
+        $(document).on('click', '.cw-btn-create-lead', function(e) {
+            e.preventDefault();
+            let btn = $(this);
+            let callSid = btn.attr('data-call-sid');
+            let btnHtml = btn.html();
+            $.ajax({
+                type: 'post',
+                data: {
+                    callSid: callSid
+                },
+                url: settings.ajaxCreateLeadUrl,
+                dataType: 'json',
+                beforeSend: function () {
+                    btn.addClass('disabled').html('<i class="fa fa-spin fa-spinner" />');
+                },
+                success: function (data) {
+                    if (data.error) {
+                        createNotify('Error', data.message, 'error');
+                    } else {
+                        if(data.warning) {
+                            createNotify('Warning', data.message, 'warning');
+                        }
+                        createNotify('Success', 'Lead created successfully', 'success');
+                        PhoneWidgetContactInfo.load(data.contactData);
+                        window.open(data.url, '_blank').focus();
+                    }
+                },
+                complete: function () {
+                    btn.removeClass('disabled').html(btnHtml);
+                },
+                error: function (xhr) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }
+            });
         });
     }
 
