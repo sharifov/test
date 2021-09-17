@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aedcf1fe36b439f1b45020ca197f3d6b",
+    "content-hash": "b006e8bf4747a740534c3468ac553b60",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -1223,16 +1223,16 @@
         },
         {
             "name": "casbin/casbin",
-            "version": "v3.12.0",
+            "version": "v3.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-casbin/php-casbin.git",
-                "reference": "1eb5fd0b22e1f41bb2210976f03c06b6336db94a"
+                "reference": "a3d99663905d8211b9e4510578ed6c5800efb29b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-casbin/php-casbin/zipball/1eb5fd0b22e1f41bb2210976f03c06b6336db94a",
-                "reference": "1eb5fd0b22e1f41bb2210976f03c06b6336db94a",
+                "url": "https://api.github.com/repos/php-casbin/php-casbin/zipball/a3d99663905d8211b9e4510578ed6c5800efb29b",
+                "reference": "a3d99663905d8211b9e4510578ed6c5800efb29b",
                 "shasum": ""
             },
             "require": {
@@ -1241,7 +1241,6 @@
                 "symfony/expression-language": "^3.4|^4.0|^5.0"
             },
             "require-dev": {
-                "mockery/mockery": "^1.2",
                 "php-coveralls/php-coveralls": "^2.1",
                 "phpstan/phpstan": "^0.12",
                 "phpunit/phpunit": "~7.0|~8.0|~9.0"
@@ -1274,7 +1273,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-casbin/php-casbin/issues",
-                "source": "https://github.com/php-casbin/php-casbin/tree/v3.12.0"
+                "source": "https://github.com/php-casbin/php-casbin/tree/v3.7.0"
             },
             "funding": [
                 {
@@ -1282,7 +1281,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2021-09-15T16:07:39+00:00"
+            "time": "2021-08-09T11:57:38+00:00"
         },
         {
             "name": "cebe/markdown",
