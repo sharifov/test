@@ -129,8 +129,9 @@ if ($quote->productQuoteLastChange) {
                 <tr>
                   <th style="width: 30px;">Nr</th>
                   <th>Status</th>
-                  <th style="width: 20px">Recommended</th>
+                  <th style="width: 20px" title="Recommended"><i class="fas fa-star"></i></th>
                   <th style="width: 180px">Created</th>
+                  <th>Owner</th>
                   <th style="width: 10px;"></th>
                 </tr>
               </thead>
@@ -149,8 +150,13 @@ if ($quote->productQuoteLastChange) {
                         */ ?>
                       <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($reprotectionQuote->pq_id)?>, GID: <?=Html::encode($reprotectionQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($reprotectionQuote->pq_id)?>, GID: <?=Html::encode($reprotectionQuote->pq_gid)?>"><?=($nr + 1)?></td>
                       <td><?= ProductQuoteStatus::asFormat($reprotectionQuote->pq_status_id)?></td>
-                      <td><?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star yellow']) : '-' ?></td>
+                      <td><?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star', 'title' => 'Recommended']) : '-' ?></td>
                       <td><small><?=$reprotectionQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($reprotectionQuote->pq_created_dt)) : '-'?></small></td>
+                      <td>
+                          <?php if ($reprotectionQuote->pqOwnerUser) : ?>
+                            <i class="fa fa-user"></i> <?= $reprotectionQuote->pqOwnerUser->username ?>
+                          <?php endif; ?>
+                      </td>
                       <td>
                         <div class="btn-group">
 

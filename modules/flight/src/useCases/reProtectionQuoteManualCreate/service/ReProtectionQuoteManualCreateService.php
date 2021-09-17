@@ -35,6 +35,7 @@ use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQ
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
@@ -122,15 +123,14 @@ class ReProtectionQuoteManualCreateService
 
     public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form, ?int $userId): FlightQuote
     {
-//        if ($flight->flightQuotes) {
-//            foreach ($flight->flightQuotes as $flightQuote) {
-//                $oldProductQuote = $flightQuote->fqProductQuote;
-//                if (!$oldProductQuote->isCanceled() || $oldProductQuote->isDeclined()) {
-//                    $oldProductQuote->cancelled($userId, 'Create ReProtection Quote');
-//                    $this->productQuoteRepository->save($oldProductQuote);
-//                }
-//            }
-//        }
+        if ($reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originProductQuote->pq_id)) {
+            foreach ($reprotectionQuotes as $reprotectionQuote) {
+                if ($reprotectionQuote->pq_owner_user_id === null && (!$reprotectionQuote->isCanceled() || $reprotectionQuote->isDeclined() || !$reprotectionQuote->isError())) {
+                    $reprotectionQuote->declined($userId, 'Create ReProtection Quote');
+                    $this->productQuoteRepository->save($reprotectionQuote);
+                }
+            }
+        }
 
         $originFlightQuote = $originProductQuote->flightQuote;
         $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
