@@ -59,7 +59,9 @@ function ContactInfoHeader(props) {
 function CreateLeadButton(props) {
     if (props.canCreateLead) {
         return (
-            <small className="incoming-info__label">Create Lead</small>
+            <a href="#" data-call-sid={props.callSid} className="cw-call-contact-info cw-btn-create-lead">
+                <small className="incoming-info__label">Create Lead</small>
+            </a>
         );
     }
     return ('');

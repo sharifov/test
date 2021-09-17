@@ -2,7 +2,10 @@
 
 namespace sales\model\lead\useCases\lead\create;
 
+use common\models\Call;
 use common\models\Client;
+use common\models\DepartmentPhoneProject;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadPreferences;
@@ -23,6 +26,7 @@ use sales\model\leadData\repository\LeadDataRepository;
 use sales\model\leadDataKey\entity\LeadDataKey;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
+use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use sales\model\visitorLog\useCase\CreateVisitorLog;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
@@ -52,6 +56,7 @@ use yii\helpers\Json;
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
  * @property VisitorLogRepository $visitorLogRepository
  * @property LeadDataRepository $leadDataRepository
+ * @property LeadUserConversionRepository $leadUserConversionRepository
  */
 class LeadManageService
 {
@@ -99,6 +104,10 @@ class LeadManageService
      * @var LeadDataRepository
      */
     private LeadDataRepository $leadDataRepository;
+    /**
+     * @var LeadUserConversionRepository
+     */
+    private LeadUserConversionRepository $leadUserConversionRepository;
 
     /**
      * LeadManageService constructor.
@@ -125,7 +134,8 @@ class LeadManageService
         ClientChatLeadRepository $clientChatLeadRepository,
         ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
         VisitorLogRepository $visitorLogRepository,
-        LeadDataRepository $leadDataRepository
+        LeadDataRepository $leadDataRepository,
+        LeadUserConversionRepository $leadUserConversionRepository
     ) {
         $this->transactionManager = $transactionManager;
         $this->casesManageService = $casesManageService;
@@ -138,6 +148,7 @@ class LeadManageService
         $this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
         $this->visitorLogRepository = $visitorLogRepository;
         $this->leadDataRepository = $leadDataRepository;
+        $this->leadUserConversionRepository = $leadUserConversionRepository;
     }
 
     /**
@@ -325,5 +336,72 @@ class LeadManageService
         });
 
         return $lead;
+    }
+
+    public function createFromPhoneWidget(Call $call, Employee $user): Lead
+    {
+        $internalPhoneNumber = $call->isIn() ? $call->c_to : $call->c_from;
+        $clientPhoneNumber = $call->isIn() ? $call->c_from : $call->c_to;
+
+        $sourceId = null;
+        if ($departmentPhoneProject = DepartmentPhoneProject::findOne(['dpp_phone_number' => $internalPhoneNumber])) {
+            $sourceId = $departmentPhoneProject->dpp_source_id;
+        }
+
+        if (!$sourceId && ($project = $call->cProject) && $sources = $project->sources) {
+            $sourceId = $sources[0]->id;
+        }
+
+        $lead = Lead::createManually(
+            $call->c_client_id,
+            $call->cClient->first_name,
+            $call->cClient->last_name,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $sourceId,
+            $call->c_project_id,
+            null,
+            $clientPhoneNumber,
+            null,
+            $call->c_dep_id,
+            null
+        );
+        $lead->processing($user->id, $user->id, LeadFlow::DESCRIPTION_MANUAL_FROM_CALL);
+
+        $hash = $this->leadHashGenerator->generate(
+            null,
+            $call->c_project_id,
+            null,
+            null,
+            null,
+            null,
+            [$clientPhoneNumber],
+            null
+        );
+        $lead->setRequestHash($hash);
+        $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$clientPhoneNumber]);
+
+        return $this->transactionManager->wrap(function () use ($lead, $call, $user) {
+            $leadId = $this->leadRepository->save($lead);
+
+            $this->createLeadPreferences($leadId, new PreferencesCreateForm());
+
+            if ($logId = (new CreateVisitorLog())->create($call->cClient, $lead)) {
+                $lead->setVisitorLog($logId);
+                $this->leadRepository->save($lead);
+            }
+
+            $leadUserConversion = LeadUserConversion::create(
+                $leadId,
+                $user->id,
+                LeadUserConversionDictionary::DESCRIPTION_MANUAL
+            );
+            $this->leadUserConversionRepository->save($leadUserConversion);
+
+            return $lead;
+        });
     }
 }
