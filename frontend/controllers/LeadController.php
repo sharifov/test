@@ -27,6 +27,8 @@ use common\models\search\LeadChecklistSearch;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -2256,8 +2258,15 @@ class LeadController extends FController
     {
         $callSid = Yii::$app->request->post('callSid');
 
+
         if (!$call = Call::findOne(['c_call_sid' => $callSid])) {
             throw new BadRequestHttpException('Call not found');
+        }
+
+        $leadAbacDto = new LeadAbacDto(null, $call->c_created_user_id);
+        /** @abac new LeadAbacDto(null, $call->c_created_user_id), LeadAbacObject::ACT_CREATE_FROM_PHONE_WIDGET, LeadAbacObject::ACTION_CREATE, Restrict access to create lead in phone widget in contact info block */
+        if (!(bool)\Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CREATE_FROM_PHONE_WIDGET, LeadAbacObject::ACTION_CREATE, $call->cCreatedUser)) {
+            throw new ForbiddenHttpException('Access denied');
         }
 
         $result = [
