@@ -367,7 +367,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function getPqOrder(): ActiveQuery
     {
-        return $this->hasOne(Order::class, ['or_id' => 'pq_order_id']);
+        return $this->hasOne(Order::class, ['or_id' => 'pq_order_id'])->orderBy(['or_id' => SORT_DESC]);
     }
 
     /**

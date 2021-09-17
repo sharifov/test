@@ -433,6 +433,11 @@ class Cases extends ActiveRecord implements Objectable
         return $this->cs_status === CasesStatus::STATUS_TRASH;
     }
 
+    public function isAwaiting(): bool
+    {
+        return $this->cs_status === CasesStatus::STATUS_AWAITING;
+    }
+
     public function isActive(): bool
     {
         return $this->isPending() || $this->isProcessing() || $this->isFollowUp();

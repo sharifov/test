@@ -102,6 +102,15 @@ class CaseReProtectionService
         return $this->getCase();
     }
 
+    public function caseNeedAction(): Cases
+    {
+        if (!$this->getCase()->isNeedAction()) {
+            $this->getCase()->onNeedAction();
+            $this->casesRepository->save($this->getCase());
+        }
+        return $this->getCase();
+    }
+
     public function setCaseDeadline(FlightQuote $flightQuote): Cases
     {
         if (!(($firstSegment = $flightQuote->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
