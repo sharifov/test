@@ -300,7 +300,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
             \Yii::info(
                 [
-                    'flightRequest' => $flightRequest->toArray(),
+                    'case' => $case->toArray(),
                     'productQuoteChange' => $productQuoteChange->toArray()
                 ],
                 'info\Debug:ReprotectionCreateJob'
