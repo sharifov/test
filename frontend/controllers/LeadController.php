@@ -65,6 +65,7 @@ use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\department\department\DefaultPhoneType;
+use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\model\lead\useCases\lead\create\LeadManageService as UseCaseLeadManageService;
@@ -2235,7 +2236,7 @@ class LeadController extends FController
 
             try {
                 $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
-                $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+                $lead = $leadManageService->createByClientChat((new CreateLeadByChatDTO($form, $chat, $userId))->leadInProgressDataPrepare());
 
                 $leadUserConversion = LeadUserConversion::create(
                     $lead->id,

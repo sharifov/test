@@ -11,6 +11,7 @@ use sales\model\clientChat\componentEvent\component\ComponentDTOInterface;
 use sales\model\clientChat\componentRule\component\defaultConfig\CreateLeadOnRoomConnectedConfig;
 use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
 use sales\model\clientChatDataRequest\form\FlightSearchDataRequestForm;
+use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageService;
 use sales\services\quote\addQuote\AddQuoteService;
@@ -45,7 +46,7 @@ class CreateLeadOnRoomConnected implements RunnableComponentInterface
             $createLeadByChatForm = new LeadCreateByChatForm($chat);
 
             if ($createLeadByChatForm->validate()) {
-                $lead = $this->leadManageService->createByClientChat($createLeadByChatForm, $chat, null);
+                $lead = $this->leadManageService->createByClientChat((new CreateLeadByChatDTO($createLeadByChatForm, $chat, null))->leadNewDataPrepare());
 
                 $addTopQuotesEnabled = (bool)($dto->getRunnableComponentConfig()['add_top_quotes']['enabled'] ?? $this->getDefaultConfig()['add_top_quotes']['enabled']);
                 $addTopQuotesCount = (int)($dto->getRunnableComponentConfig()['add_top_quotes']['count'] ?? $this->getDefaultConfig()['add_top_quotes']['count']);

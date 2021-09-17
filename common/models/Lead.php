@@ -859,7 +859,7 @@ class Lead extends ActiveRecord implements Objectable
         $projectId,
         $depId,
         ?int $creatorId,
-        int $visitorLogId,
+        ?int $visitorLogId,
         ?string $ip,
         ?string $gmtOffset
     ): self {

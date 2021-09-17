@@ -24,6 +24,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
 use sales\model\clientChatDataRequest\form\FlightSearchDataRequestForm;
+use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -473,7 +474,7 @@ class ClientChatFlightQuoteController extends FController
     private function createLeadAndLinkWithChat(LeadCreateByChatForm $form, ClientChat $chat, int $userId): Lead
     {
         $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
-        $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+        $lead = $leadManageService->createByClientChat((new CreateLeadByChatDTO($form, $chat, $userId))->leadInProgressDataPrepare());
 
         $leadUserConversion = LeadUserConversion::create(
             $lead->id,
