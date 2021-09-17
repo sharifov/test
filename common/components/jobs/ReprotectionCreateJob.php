@@ -298,6 +298,13 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     }
                 }
             }
+            \Yii::info(
+                [
+                    'flightRequest' => $flightRequest->toArray(),
+                    'productQuoteChange' => $productQuoteChange->toArray()
+                ],
+                'info\Debug:ReprotectionCreateJob'
+            ); /* TODO:: FOR DEBUG:: must by remove  */
 
             throw new DomainException('Unknown process exception');
         } catch (Throwable $throwable) {
