@@ -152,17 +152,23 @@ class ReProtectionQuoteManualCreateService
         $relation = ProductQuoteRelation::createReProtection($originProductQuote->pq_id, $flightQuote->fq_product_quote_id, $userId);
         $this->productQuoteRelationRepository->save($relation);
 
-        $tripList = [];
+        $tripList = explode(',', $form->keyTripList);
+        $tripList = array_combine(array_values($tripList), array_values($tripList));
         $segmentTripMap = [];
+        foreach ($tripList as $tripKey => $value) {
+            $flightQuoteTrip = FlightQuoteTrip::create($flightQuote, null);
+            $this->flightQuoteTripRepository->save($flightQuoteTrip);
+            $tripList[$tripKey] = $flightQuoteTrip;
+        }
         foreach ($form->getSegmentTripFormsData() as $keyTripForm => $value) {
             if (!is_array($value) || !array_key_exists('segment_iata', $value) || !array_key_exists('segment_trip_key', $value)) {
                 continue;
             }
             $segmentTripMap[$value['segment_iata']] = $value['segment_trip_key'];
-            if (empty($tripList[$value['segment_trip_key']])) {
-                $flightQuoteTrip = FlightQuoteTrip::create($flightQuote, null);
-                $this->flightQuoteTripRepository->save($flightQuoteTrip);
-                $tripList[$value['segment_trip_key']] = $flightQuoteTrip;
+        }
+        foreach ($tripList as $tripKey => $flightQuoteTrip) {/* TODO: tmp solution */
+            if (!in_array($tripKey, $segmentTripMap, false)) {
+                $flightQuoteTrip->delete();
             }
         }
 
