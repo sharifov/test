@@ -244,7 +244,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_source_type_id = CasesSourceType::API;
         $case->cs_is_automate = true;
         $case->cs_project_id = $projectId;
-        $case->statusToNew(null, 'Flight ReProtection Create');
+        $case->pending(null, 'Flight ReProtection Create');
         return $case;
     }
 

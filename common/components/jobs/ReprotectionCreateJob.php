@@ -292,7 +292,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         return;
                     }
 
-                    if ($case->isPending() || $case->isStatusAutoProcessing() || $case->isFollowUp()) {
+                    if ($case->isPending() || $case->isStatusAutoProcessing() || $case->isFollowUp() || $case->isStatusNew()) {
                         $caseReProtectionService->caseToManual('Manual processing requested');
                         return;
                     }
