@@ -12,6 +12,8 @@ use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\useCases\reprotectionDecision;
 use modules\order\src\entities\order\Order;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
+use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
@@ -119,7 +121,8 @@ class ProductQuoteController extends FController
                     'flight-reprotection-confirm',
                     'flight-reprotection-refund',
                     'origin-reprotection-quote-diff',
-                    'set-recommended'
+                    'set-recommended',
+                    'ajax-decline-reprotection-quote'
                 ]
             ]
         ];
@@ -519,6 +522,39 @@ class ProductQuoteController extends FController
             Yii::error(AppHelper::throwableLog($e, true), 'ProductQuoteController::actionSetRecommended::Throwable');
             $result['error'] = true;
             $result['message'] = 'Server Error';
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxDeclineReprotectionQuote()
+    {
+        $reprotectionQuoteId = Yii::$app->request->post('quoteId');
+
+        if (!$reprotectionQuote = ProductQuote::findOne($reprotectionQuoteId)) {
+            throw new BadRequestHttpException('Reprotection quote not found');
+        }
+
+        $productQuoteAbacDto = new ProductQuoteAbacDto($reprotectionQuote);
+        if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::ACT_DECLINE_REPROTECTION_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $reprotectionQuote->declined(Auth::id());
+            $this->productQuoteRepository->save($reprotectionQuote);
+        } catch (\RuntimeException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'ProductQuoteController:actionAjaxDeclineReprotectionQuote:Throwable');
+            $result['error'] = true;
+            $result['message'] = 'Internal Server Error';
         }
 
         return $this->asJson($result);

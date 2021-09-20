@@ -665,7 +665,7 @@ $('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotecti
         createNotify('Reprotection confirm', 'Server error', 'error');
     });
 });
-$('body').off('click', '.btn-reprotection-refund, .btn-reprotection-recommended').on('click', '.btn-reprotection-refund, .btn-reprotection-recommended', function (e) {
+$('body').off('click', '.btn-reprotection-refund, .btn-reprotection-recommended, .btn-reprotection-decline').on('click', '.btn-reprotection-refund, .btn-reprotection-recommended, .btn-reprotection-decline', function (e) {
     e.preventDefault();
     
     let btn = $(this);

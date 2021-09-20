@@ -2,6 +2,8 @@
 
 use modules\cases\src\abac\CasesAbacObject;
 use modules\order\src\entities\order\Order;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
+use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -140,6 +142,7 @@ if ($quote->productQuoteLastChange) {
                     <tr>
                         <?php
                         $isRecommended = $reprotectionQuote->isRecommended();
+                        $productQuoteAbacDto = new ProductQuoteAbacDto($reprotectionQuote);
                         /*
                         <td style="padding:5px;" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
@@ -215,6 +218,15 @@ if ($quote->productQuoteLastChange) {
                                     'data-reprotection-quote-id' => $reprotectionQuote->pq_id,
                                     'data-title' => 'Reprotection Set Recommended'
                                 ]); ?>
+                              <?php endif; ?>
+
+                              <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::ACT_DECLINE_REPROTECTION_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+                                    <?= Html::a('<i class="fas fa-times"></i> Decline', null, [
+                                      'class' => 'dropdown-item btn-reprotection-decline danger',
+                                      'data-url' => Url::to(['/product/product-quote/ajax-decline-reprotection-quote']),
+                                      'data-reprotection-quote-id' => $reprotectionQuote->pq_id,
+                                      'data-title' => 'Decline Reprotection'
+                                  ]); ?>
                               <?php endif; ?>
 
                           </div>
