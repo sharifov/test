@@ -111,7 +111,7 @@ class CaseReProtectionService
         }
         return $this->getCase();
     }
-    
+
     public function setCaseDeadline(FlightQuote $flightQuote): Cases
     {
         foreach ($flightQuote->flightQuoteTrips as $key => $trip) {
