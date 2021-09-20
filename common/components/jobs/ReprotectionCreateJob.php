@@ -124,6 +124,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     }
                     $reProtectionCreateService->createCaseSale($saleData, $case);
                 } catch (Throwable $throwable) {
+                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Case sale not created');
                     $caseReProtectionService->caseToManual('Case sale not created');
                     if (isset($flightRequest) && $client === null) {
                         $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
