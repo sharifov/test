@@ -35,6 +35,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_CLIENT_UNSUBSCRIBE  = self::NS . 'act/client-unsubscribe';
     public const ACT_SEARCH_LEADS_BY_IP  = self::NS . 'act/search-leads-by-ip';
     public const ACT_CREATE_FROM_PHONE_WIDGET = self::NS . 'act/create-from-phone-widget';
+    public const ACT_LINK_TO_CALL = self::NS . 'act/link-to-call';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -89,6 +90,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => self::UI_DISPLAY_QUOTE_SEARCH_PARAMS,
         self::CMD_AUTO_REDIAL => self::CMD_AUTO_REDIAL,
         self::ACT_CREATE_FROM_PHONE_WIDGET => self::ACT_CREATE_FROM_PHONE_WIDGET,
+        self::ACT_LINK_TO_CALL => self::ACT_LINK_TO_CALL,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -131,6 +133,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => [self::ACTION_ACCESS],
         self::CMD_AUTO_REDIAL => [self::ACTION_ACCESS],
         self::ACT_CREATE_FROM_PHONE_WIDGET => [self::ACTION_CREATE],
+        self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [

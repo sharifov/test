@@ -710,7 +710,7 @@ window.phoneWidget.events = {
       });
     };
 
-    this.clientInfo = function (id, isClient) {
+    this.clientInfo = function (id, callSid, isClient) {
       $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
       let text = isClient ? 'Client details' : 'Contact info';
       $('#call-box-modal-label').html(text + ' (' + id + ')');
@@ -718,7 +718,8 @@ window.phoneWidget.events = {
       $.ajax({
         type: 'post',
         data: {
-          client_id: id
+          client_id: id,
+            callSid: callSid
         },
         url: this.settings.clientInfoUrl
       }).done(function (data) {
@@ -6011,13 +6012,14 @@ var PhoneWidgetCall = function () {
       e.preventDefault();
       let clientId = $(this).attr('data-client-id');
       let isClient = $(this).attr('data-is-client');
+      let callSid = $(this).attr('data-call-sid');
 
       if (typeof clientId === 'undefined') {
         createNotify('Client Info', 'Not found Client ID', 'error');
         return false;
       }
 
-      callRequester.clientInfo(clientId, isClient === 'true');
+      callRequester.clientInfo(clientId, callSid,isClient === 'true');
     });
   }
 

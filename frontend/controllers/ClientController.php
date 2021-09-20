@@ -164,8 +164,12 @@ class ClientController extends FController
         if (!$clientId = Yii::$app->request->post('client_id')) {
             $clientId = Yii::$app->request->get('client_id');
         }
+        if (!$callSid = Yii::$app->request->post('callSid')) {
+            $callSid = Yii::$app->request->get('callSid');
+        }
         $client = $this->findModel((int)$clientId);
         $case = Cases::findOne(Yii::$app->request->post('case_id'));
+        $call = Call::findOne(['c_call_sid' => $callSid]);
 
         $providers = [];
 
@@ -182,7 +186,8 @@ class ClientController extends FController
         return $this->renderAjax('ajax_info', ArrayHelper::merge(
             [
                 'model' => $client,
-                'case' => $case
+                'case' => $case,
+                'call' => $call
             ],
             $providers
         ));

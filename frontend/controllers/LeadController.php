@@ -184,7 +184,8 @@ class LeadController extends FController
                     'view',
                     'take',
                     'create-by-chat',
-                    'ajax-create-from-phone-widget'
+                    'ajax-create-from-phone-widget',
+                    'ajax-link-to-call'
                 ],
             ],
         ];
@@ -2749,6 +2750,37 @@ class LeadController extends FController
     {
         $keyCache = Yii::$app->request->get('key_cache');
         return Yii::$app->cacheFile->get($keyCache);
+    }
+
+    public function actionAjaxLinkToCall(): Response
+    {
+        $leadId = Yii::$app->request->post('leadId');
+        $callId = Yii::$app->request->post('callId');
+
+        if (!$lead = Lead::findOne($leadId)) {
+            throw new BadRequestHttpException('Lead not found');
+        }
+
+        if (!$call = Call::findOne($callId)) {
+            throw new BadRequestHttpException('Call not found');
+        }
+
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_LINK_TO_CALL, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        $call->c_lead_id = $lead->id;
+        if (!$call->save()) {
+            $result['error'] = true;
+            $result['message'] = $call->getErrorSummary(true)[0];
+        }
+        return $this->asJson($result);
     }
 
     /**

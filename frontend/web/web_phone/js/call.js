@@ -942,11 +942,12 @@ var PhoneWidgetCall = function () {
             e.preventDefault();
             let clientId = $(this).attr('data-client-id');
             let isClient = $(this).attr('data-is-client');
+            let callSid = $(this).attr('data-call-sid');
             if (typeof clientId === 'undefined') {
                 createNotify('Client Info', 'Not found Client ID', 'error');
                 return false;
             }
-            callRequester.clientInfo(clientId, isClient === 'true');
+            callRequester.clientInfo(clientId, callSid,isClient === 'true');
         });
     }
 

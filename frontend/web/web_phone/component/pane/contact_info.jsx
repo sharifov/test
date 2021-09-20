@@ -45,7 +45,7 @@ function ContactInfoHeader(props) {
     return (
         <React.Fragment>
             {props.canContactDetails && props.id
-                ? <a href="#" data-client-id={props.id} data-is-client={props.isClient} className="cw-call-contact-info cw-btn-client-info"><span className="additional-info__header-title">{props.isClient ? 'Client details': 'Contact info'}</span></a>
+                ? <a href="#" data-client-id={props.id} data-is-client={props.isClient} data-call-sid={props.callSid} className="cw-call-contact-info cw-btn-client-info"><span className="additional-info__header-title">{props.isClient ? 'Client details': 'Contact info'}</span></a>
                 : <span className="additional-info__header-title">{props.isClient ? 'Client details': 'Contact info'}</span>
             }
             {props.canCallInfo
