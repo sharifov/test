@@ -98,7 +98,11 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 }
                 $caseReProtectionService->setCase($case);
 
-                if ($originProductQuote && $order = $originProductQuote->pqOrder) {
+                if (
+                    $originProductQuote &&
+                    ($order = $originProductQuote->pqOrder) &&
+                    !CaseOrder::find()->where(['co_order_id' => $order->or_id, 'co_case_id' => $case->cs_id])->exists()
+                ) {
                     $caseOrder = CaseOrder::create($case->cs_id, $order->or_id);
                     $caseOrder->detachBehavior('user');
                     if (!$caseOrder->save()) {
