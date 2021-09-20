@@ -54,6 +54,11 @@ class CasesStatus
         ],
         self::STATUS_NEW => [
             self::STATUS_PENDING,
+            self::STATUS_PROCESSING,
+            self::STATUS_FOLLOW_UP,
+            self::STATUS_TRASH,
+            self::STATUS_SOLVED,
+            self::STATUS_AWAITING,
             self::STATUS_AUTO_PROCESSING,
             self::STATUS_ERROR,
             self::STATUS_NEW,
