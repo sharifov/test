@@ -37,6 +37,7 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -69,6 +70,7 @@ use yii\helpers\VarDumper;
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteRelationRepository $productQuoteRelationRepository
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
+ * @property ProductQuoteDataManageService $productQuoteDataManageService
  */
 class ReProtectionQuoteManualCreateService
 {
@@ -86,6 +88,7 @@ class ReProtectionQuoteManualCreateService
     private FlightQuoteManageService $flightQuoteManageService;
     private ProductQuoteRelationRepository $productQuoteRelationRepository;
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
+    private ProductQuoteDataManageService $productQuoteDataManageService;
 
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
@@ -102,7 +105,8 @@ class ReProtectionQuoteManualCreateService
         FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository,
         FlightQuoteManageService $flightQuoteManageService,
         ProductQuoteRelationRepository $productQuoteRelationRepository,
-        ProductQuoteOptionRepository $productQuoteOptionRepository
+        ProductQuoteOptionRepository $productQuoteOptionRepository,
+        ProductQuoteDataManageService $productQuoteDataManageService
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
@@ -119,6 +123,7 @@ class ReProtectionQuoteManualCreateService
         $this->flightQuoteManageService = $flightQuoteManageService;
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
+        $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
     public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form, ?int $userId): FlightQuote
@@ -247,6 +252,8 @@ class ReProtectionQuoteManualCreateService
                 }
             }
         }
+
+        $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
 
         return $flightQuote;
     }
