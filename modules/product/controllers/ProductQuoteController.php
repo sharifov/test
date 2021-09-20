@@ -23,6 +23,7 @@ use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\exception\CheckRestrictionException;
 use sales\helpers\app\AppHelper;
@@ -352,6 +353,7 @@ class ProductQuoteController extends FController
                                 ]
                             ];
                             $hybridService->whReprotection($case->cs_project_id, $data);
+                            $case->addEventLog(null, 'Request HybridService sent successfully');
                         } catch (\Throwable $throwable) {
                             $errorData = [];
                             $errorData['message'] = 'OTA site is not informed (hybridService->whReprotection)';
