@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\reprotectionCreate\service;
 
 use DomainException;
+use frontend\assets\overridden\KartikActiveFormAsset;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -110,8 +111,29 @@ class CaseReProtectionService
         }
         return $this->getCase();
     }
-
+    
     public function setCaseDeadline(FlightQuote $flightQuote): Cases
+    {
+        foreach ($flightQuote->flightQuoteTrips as $key => $trip) {
+            if (!(($firstSegment = $trip->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
+                throw new \RuntimeException('Deadline not created. Reason - Segments departure not correct');
+            }
+            if (date('Y-m-d H:i:s') <= date('Y-m-d H:i:s', strtotime($firstSegment->fqs_departure_dt))) {
+                $schdCaseDeadlineHours = SettingHelper::getSchdCaseDeadlineHours();
+                $deadline = date('Y-m-d H:i:s', strtotime($firstSegment->fqs_departure_dt . ' -' . $schdCaseDeadlineHours . ' hours'));
+
+                if ($deadline === false) {
+                    throw new \RuntimeException('Deadline not created');
+                }
+                $this->getCase()->cs_deadline_dt = $deadline;
+                $this->casesRepository->save($this->getCase());
+                return $this->getCase();
+            }
+        }
+        throw new \RuntimeException('Deadline not created. Time departure segments is not correct');
+    }
+
+    public function setCaseDeadlineOld(FlightQuote $flightQuote): Cases
     {
         if (!(($firstSegment = $flightQuote->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
             throw new \RuntimeException('Deadline not created. Reason - Segments departure not correct');
