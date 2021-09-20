@@ -199,6 +199,10 @@ $user = Yii::$app->user->identity;
                         'linkToCall' => static function (Lead $model, $key, $index) use ($call) {
                             $leadAbacDto = new LeadAbacDto($model, Auth::id());
                             return $call && $call->isStatusInProgress() && $call->c_lead_id !== $model->id && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_LINK_TO_CALL, LeadAbacObject::ACTION_ACCESS);
+                        },
+                        'take' => static function (Lead $model, $key, $index) use ($call) {
+                            $leadAbacDto = new LeadAbacDto($model, Auth::id());
+                            return $call && $call->isStatusInProgress() && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CALL, LeadAbacObject::ACTION_ACCESS);
                         }
                     ],
                     'buttons' => [
@@ -214,9 +218,17 @@ $user = Yii::$app->user->identity;
                                     'data-lead-id' => $model->id
                                 ]
                             );
+                        },
+                        'take' => static function ($url, Lead $model) {
+                            return Html::a('Take', '#', [
+                                'class' => 'btn btn-primary btn-xs btn-lead-take',
+                                'data-pjax' => 0,
+                                'title' => 'Take',
+                                'data-url' => Url::to(['/lead/take', 'gid' => $model->gid])
+                            ]);
                         }
                     ],
-                    'template' => '{linkToCall}',
+                    'template' => '{linkToCall} {take}',
                 ]
             ],
         ]) ?>
@@ -228,7 +240,16 @@ $user = Yii::$app->user->identity;
 $linkLeadToCallUrl = Url::to(['/lead/ajax-link-to-call']);
 $urlGetClientInfo = Url::to(['/client/ajax-get-info', 'client_id' => $call->c_client_id, 'callSid' => $call->c_call_sid]);
 $js = <<<JS
-$('body').off('click', '.btn-link-lead-to-call').on('click', '.btn-link-lead-to-call', function (e) {
+$('body').off('click', '.btn-lead-take').on('click', '.btn-lead-take', function (e) {
+    e.preventDefault();
+    let url = $(this).data('url');
+    let leadWindow = window.open(url, '_blank');
+    leadWindow.addEventListener('load', function () {
+        pjaxReload({container: '#client_leads_info', push: false, replace: false, timeout: 5000, url: '$urlGetClientInfo'});
+    });
+    leadWindow.focus();
+});
+ $('body').off('click', '.btn-link-lead-to-call').on('click', '.btn-link-lead-to-call', function (e) {
     e.preventDefault();
     
     let btn = $(this);
