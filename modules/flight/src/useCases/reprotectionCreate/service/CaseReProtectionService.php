@@ -126,10 +126,13 @@ class CaseReProtectionService
                 $deadline = $departureTime->modify(' -' . $schdCaseDeadlineHours . ' hours')->format('Y-m-d H:i:s');
                 $this->getCase()->cs_deadline_dt = $deadline;
                 $this->casesRepository->save($this->getCase());
-                return $this->getCase();
             }
         }
-        throw new \RuntimeException('Deadline not created. Time departure segments is not correct');
+        \Yii::warning(
+            'CaseDeadline not set by FlightQuote(' . $flightQuote->getId() . ')',
+            'CaseReProtectionService:setCaseDeadline:notSet'
+        );
+        return $this->getCase();
     }
 
     public function setCaseDeadlineOld(FlightQuote $flightQuote): Cases
