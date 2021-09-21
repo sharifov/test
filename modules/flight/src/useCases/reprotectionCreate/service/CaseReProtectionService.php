@@ -112,7 +112,7 @@ class CaseReProtectionService
         return $this->getCase();
     }
 
-    public function setCaseDeadline(FlightQuote $flightQuote): Cases
+    public function setCaseDeadline(FlightQuote $flightQuote): ?string
     {
         foreach ($flightQuote->flightQuoteTrips as $key => $trip) {
             if (!(($firstSegment = $trip->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
@@ -127,13 +127,14 @@ class CaseReProtectionService
                 $this->getCase()->cs_deadline_dt = $deadline;
                 $this->casesRepository->save($this->getCase());
                 $this->getCase()->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set deadline from FlightQuote(' . $flightQuote->getId() . ')');
+                return $deadline;
             }
         }
         \Yii::warning(
             'CaseDeadline not set by FlightQuote(' . $flightQuote->getId() . ')',
             'CaseReProtectionService:setCaseDeadline:notSet'
         );
-        return $this->getCase();
+        return null;
     }
 
     public function setCaseDeadlineOld(FlightQuote $flightQuote): Cases
