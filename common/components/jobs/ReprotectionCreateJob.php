@@ -25,6 +25,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
 use sales\dispatchers\EventDispatcher;
@@ -76,6 +77,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         $productQuoteChangeRepository = Yii::createObject(ProductQuoteChangeRepository::class);
         $flightRequestService = Yii::createObject(FlightRequestService::class);
         $eventDispatcher = Yii::createObject(EventDispatcher::class);
+        $productQuoteDataManageService = Yii::createObject(ProductQuoteDataManageService::class);
 
         $client = null;
 
@@ -286,6 +288,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $caseReProtectionService->caseToManual('Auto SCHD Email not sent');
                         $flightRequestService->pending(VarDumper::dumpAsString($throwable->getMessage()));
                     }
+
+                    $productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuote->pq_id, $reProtectionQuote->pq_id);
+                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set recommended quote(' . $reProtectionQuote->pq_gid . ')');
                     return;
                 }
 
