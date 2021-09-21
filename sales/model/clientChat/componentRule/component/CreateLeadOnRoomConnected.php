@@ -42,10 +42,14 @@ class CreateLeadOnRoomConnected implements RunnableComponentInterface
         $createLeadIfAlreadyExists = $dto->getRunnableComponentConfig()['create_lead_if_already_exists'] ?? $this->getDefaultConfig()['create_lead_if_already_exists'];
         $chat = $dto->getClientChatEntity();
 
+        Yii::info('step1', 'info\CreateLeadOnRoomConnected');
+
         if ($chat && ((($leads = $chat->leads) && $createLeadIfAlreadyExists) || (!$leads))) {
             $createLeadByChatForm = new LeadCreateByChatForm($chat);
 
+            Yii::info('step2', 'info\CreateLeadOnRoomConnected');
             if ($createLeadByChatForm->validate()) {
+                Yii::info('step3', 'info\CreateLeadOnRoomConnected');
                 $lead = $this->leadManageService->createByClientChat((new CreateLeadByChatDTO($createLeadByChatForm, $chat, null))->leadNewDataPrepare());
 
                 $addTopQuotesEnabled = (bool)($dto->getRunnableComponentConfig()['add_top_quotes']['enabled'] ?? $this->getDefaultConfig()['add_top_quotes']['enabled']);
