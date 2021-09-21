@@ -118,13 +118,12 @@ class CaseReProtectionService
             if (!(($firstSegment = $trip->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
                 throw new \RuntimeException('Deadline not created. Reason - Segments departure not correct');
             }
-            if (date('Y-m-d H:i:s') <= date('Y-m-d H:i:s', strtotime($firstSegment->fqs_departure_dt))) {
-                $schdCaseDeadlineHours = SettingHelper::getSchdCaseDeadlineHours();
-                $deadline = date('Y-m-d H:i:s', strtotime($firstSegment->fqs_departure_dt . ' -' . $schdCaseDeadlineHours . ' hours'));
+            $curTime = new \DateTime('now', new \DateTimeZone('UTC'));
+            $departureTime = new \DateTime($firstSegment->fqs_departure_dt, new \DateTimeZone('UTC'));
 
-                if ($deadline === false) {
-                    throw new \RuntimeException('Deadline not created');
-                }
+            if ($curTime <= $departureTime) {
+                $schdCaseDeadlineHours = SettingHelper::getSchdCaseDeadlineHours();
+                $deadline = $departureTime->modify(' -' . $schdCaseDeadlineHours . ' hours')->format('Y-m-d H:i:s');
                 $this->getCase()->cs_deadline_dt = $deadline;
                 $this->casesRepository->save($this->getCase());
                 return $this->getCase();
