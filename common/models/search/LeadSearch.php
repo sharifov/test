@@ -173,9 +173,16 @@ class LeadSearch extends Lead
 
     private $leadBadgesRepository;
 
+    private $defaultDateRange;
+    private $defaultMinDate;
+    private $defaultMaxDate;
+
     public function __construct($config = [])
     {
         $this->leadBadgesRepository = new LeadBadgesRepository();
+        $this->defaultMinDate = date("Y-m-01 00:00");
+        $this->defaultMaxDate = date("Y-m-d 23:59");
+        $this->defaultDateRange = $this->defaultMinDate . ' - ' . $this->defaultMaxDate;
         parent::__construct($config);
     }
 
@@ -202,7 +209,7 @@ class LeadSearch extends Lead
                 return $value ? filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : null;
             }],
 
-            [['created', 'updated', 'l_last_action_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['created', 'updated', 'l_last_action_dt', 'l_status_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             [['last_ticket_date', 'show_fields'], 'safe'],
             // [['show_fields'],'checkIsArray'],
@@ -250,6 +257,10 @@ class LeadSearch extends Lead
             [['quote_labels'], 'safe'],
 
             [['is_conversion'], 'in', 'range' => [0, 1]],
+
+            ['sold_date_from', 'default', 'value' => $this->defaultMinDate],
+            ['sold_date_to', 'default', 'value' => $this->defaultMaxDate],
+            ['createTimeRange', 'default', 'value' => $this->defaultDateRange],
         ];
     }
 
@@ -1902,17 +1913,13 @@ class LeadSearch extends Lead
      */
     public function searchSold($params, Employee $user): ActiveDataProvider
     {
-//        $projectIds = array_keys(EmployeeAccess::getProjects());
-//        $query = Lead::find()->with('project', 'source');
-
-        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source', 'employee')->joinWith('leadFlowSold');
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
+        $query = $this->leadBadgesRepository->getSoldQuery($user)/*->with('project', 'source', 'employee')->joinWith('leadFlowSold')*/;
+        //$query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $this->load($params);
         $leadTable = Lead::tableName();
 
-        $query->select([$leadTable . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        //$query->select([$leadTable . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
-        // $query->leftJoin(Quote::tableName(), [Quote::tableName() . '.lead_id' => new Expression('leads.id')])->where([Quote::tableName() . '.status' => Quote::STATUS_APPLIED]);
 
         // add conditions that should always apply here
 
@@ -1928,8 +1935,9 @@ class LeadSearch extends Lead
                         'asc' => [LeadFlow::tableName() . '.created' => SORT_ASC],
                         'desc' => [LeadFlow::tableName() . '.created' => SORT_DESC],
                     ],
+                    'l_status_dt'
                 ],
-                'defaultOrder' => ['id' => SORT_DESC],
+                'defaultOrder' => ['l_status_dt' => SORT_DESC],
             ],
             'pagination' => [
                 'pageSize' => 30,
@@ -1950,18 +1958,21 @@ class LeadSearch extends Lead
             $leadTable . '.source_id' => $this->source_id,
             $leadTable . '.employee_id' => $this->employee_id,
             $leadTable . '.l_type' => $this->l_type,
+            'DATE(l_status_dt)' => $this->l_status_dt,
         ]);
-
-//        $query
-//        ->andWhere(['leads.status' => Lead::STATUS_SOLD])
-//        ->andWhere(['IN', $leadTable . '.project_id', $projectIds]);
 
         if ($this->updated) {
             $query->andFilterWhere(['=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->updated))]);
         }
 
-        if ($this->last_ticket_date) {
-//            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+        if ($this->sold_date_from) {
+            $query->andFilterWhere(['>=', 'l_status_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->sold_date_from))]);
+        }
+        if ($this->sold_date_to) {
+            $query->andFilterWhere(['<', 'l_status_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->sold_date_to))]);
+        }
+
+        /*if ($this->last_ticket_date) {
             $subQuery = LeadFlow::find()->select(['lead_flow.lead_id'])->distinct('lead_flow.lead_id')->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
             $subQuery->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_ticket_date))])
                 ->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_ticket_date) + 3600 * 24)]);
@@ -1978,7 +1989,7 @@ class LeadSearch extends Lead
                 $subQuery->andFilterWhere(['<', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->sold_date_to))]);
             }
             $query->andWhere(['IN', 'leads.id', $subQuery]);
-        }
+        }*/
 
 //        if($this->employee_id){
 //            $query
@@ -2742,6 +2753,56 @@ class LeadSearch extends Lead
 
         return $dataProvider;
     }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchBusinessInbox($params, Employee $user): ActiveDataProvider
+    {
+        $query = $this->leadBadgesRepository->getBusinessInboxQuery($user);
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $leadTable = Lead::tableName();
+
+        $this->load($params);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
+        ]);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable . '.id' => $this->id,
+            $leadTable . '.project_id' => $this->project_id,
+            $leadTable . '.source_id' => $this->source_id,
+            $leadTable . '.client_id' => $this->client_id,
+            $leadTable . '.cabin' => $this->cabin,
+            $leadTable . '.request_ip' => $this->request_ip,
+            $leadTable . '.l_init_price' => $this->l_init_price,
+            $leadTable . '.l_is_test' => $this->l_is_test,
+            $leadTable . '.l_call_status_id' => $this->l_call_status_id,
+            $leadTable . '.l_type' => $this->l_type,
+        ]);
+
+        if ($this->limit > 0) {
+            $query->limit($this->limit);
+            //$dataProvider->setTotalCount($this->limit);
+        }
+
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+
+        return $dataProvider;
+    }
+
     /**
      * @param $params
      * @param Employee $user

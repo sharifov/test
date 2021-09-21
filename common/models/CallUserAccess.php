@@ -304,6 +304,19 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         }
                     }
 
+                    $callAntiSpam = [];
+                    $callAntiSpamData = [];
+                    if ($call->cParent && $call->cParent->c_data_json) {
+                        $callAntiSpam = json_decode($call->cParent->c_data_json, true)['callAntiSpamData'] ?? [];
+                    }
+                    if ($callAntiSpam) {
+                        $callAntiSpamData = [
+                            'type' => $callAntiSpam['type'] ?? null,
+                            'rate' => $callAntiSpam['rate'] ?? 0,
+                            'trustPercent' => $callAntiSpam['trustPercent'] ?? null
+                        ];
+                    }
+
                     $auth = Yii::$app->authManager;
 
                     $callInfo = [
@@ -338,7 +351,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         ],
                         'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                         'queue' => $this->isWarmTransfer() ? Call::QUEUE_DIRECT : Call::getQueueName($call),
-                        'isWarmTransfer' => $this->isWarmTransfer()
+                        'isWarmTransfer' => $this->isWarmTransfer(),
+                        'callAntiSpamData' => $callAntiSpamData
                     ];
                 }
                 Notifications::publish(

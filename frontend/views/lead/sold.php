@@ -290,15 +290,18 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw',
         ],
-
         [
+            'class' => \common\components\grid\DateTimeColumn::class,
+            'label' => 'Sold Date',
+            'attribute' => 'l_status_dt',
+        ],
+
+        /*[
             'label' => 'Sold Date',
             'attribute' => 'last_ticket_date',
             'value' => static function (Lead $model) {
-//                return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
                 return ($model->leadFlowSold && $model->leadFlowSold->created) ? Yii::$app->formatter->asDatetime(strtotime($model->leadFlowSold->created)) : '';
             },
-            //'format' => 'datetime',
             'filter' => DatePicker::widget([
                 'model' => $searchModel,
                 'attribute' => 'last_ticket_date',
@@ -313,7 +316,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'style' => 'width: 100px;text-align:center;'
             ]
-        ],
+        ],*/
         [
             'label' => 'Date of Departure',
             'value' => static function ($model) {

@@ -130,13 +130,7 @@ class ReservationService
      */
     private function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airports $departureCity, ?Airports $arrivalCity)
     {
-        if (isset($departureCity, $arrivalCity) && $departureCity->dst !== $arrivalCity->dst) {
-            $flightDuration = ($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60;
-            $flightDuration = (int)$flightDuration + ((int)$departureCity->dst * 60) - ((int)$arrivalCity->dst * 60);
-        } else {
-            $flightDuration = ($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60;
-        }
-        return $flightDuration;
+        return ($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60;
     }
 
     /**

@@ -75,28 +75,24 @@ class FlightController extends BaseController
         $behaviors['logger'] = [
             'class' => SimpleLoggerBehavior::class,
             'except' => [
-                'reprotection-get',
                 'product-quote-get',
             ],
         ];
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'except' => [
-                'reprotection-get',
                 'product-quote-get',
             ],
         ];
         $behaviors['responseStatusCode'] = [
             'class' => ResponseStatusCodeBehavior::class,
             'except' => [
-                'reprotection-get',
                 'product-quote-get',
             ],
         ];
         $behaviors['technical'] = [
             'class' => TechnicalInfoBehavior::class,
             'except' => [
-                'reprotection-get',
                 'product-quote-get',
             ],
         ];

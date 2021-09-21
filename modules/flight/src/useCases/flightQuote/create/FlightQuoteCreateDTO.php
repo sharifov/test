@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\flightQuote\create;
 
+use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -85,5 +86,20 @@ class FlightQuoteCreateDTO
         $this->originSearchData = json_encode($quote);
         $this->lastTicketDate = $quote['prices']['lastTicketDate'] ?? null;
         $this->requestHash = $flight->fl_request_hash_key;
+    }
+
+    public static function fillReProtectionManual(
+        Flight $flight,
+        ProductQuote $productQuote,
+        array $quote,
+        ?int $userId,
+        ReProtectionQuoteCreateForm $form
+    ): FlightQuoteCreateDTO {
+        $model = new self($flight, $productQuote, $quote, $userId);
+        $model->cabinClass = $form->cabin;
+        $model->tripTypeId = $form->tripType;
+        $model->typeId = FlightQuote::TYPE_REPROTECTION;
+        $model->serviceFeePercent = 0;
+        return $model;
     }
 }
