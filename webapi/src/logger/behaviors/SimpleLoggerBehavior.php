@@ -53,7 +53,10 @@ class SimpleLoggerBehavior extends LoggerBehavior
         $user = Yii::$app->user;
 
         try {
-            $data = Json::encode($this->filterData($request->post()));
+            $data = Json::encode($this->filterData([
+                'post' => $request->post(),
+                'get' => $request->get()
+            ]));
             $logger->start(
                 new StartDTO([
                     'data' => $data,
