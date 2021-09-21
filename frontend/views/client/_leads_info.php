@@ -238,7 +238,7 @@ $user = Yii::$app->user->identity;
 
 <?php
 $linkLeadToCallUrl = Url::to(['/lead/ajax-link-to-call']);
-$urlGetClientInfo = Url::to(['/client/ajax-get-info', 'client_id' => $call->c_client_id, 'callSid' => $call->c_call_sid]);
+$urlGetClientInfo = Url::to(['/client/ajax-get-info', 'client_id' => $call->c_client_id ?? null, 'callSid' => $call->c_call_sid ?? null]);
 $js = <<<JS
 $('body').off('click', '.btn-lead-take').on('click', '.btn-lead-take', function (e) {
     e.preventDefault();

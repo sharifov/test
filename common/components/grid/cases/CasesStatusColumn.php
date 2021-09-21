@@ -15,8 +15,6 @@ class CasesStatusColumn extends DataColumn
 
     public function init(): void
     {
-        parent::init();
-
         if ($this->attribute === null) {
             $this->attribute = 'cs_status';
         }
@@ -30,6 +28,8 @@ class CasesStatusColumn extends DataColumn
         }
 
         $this->contentOptions = ArrayHelper::merge($this->contentOptions, ['class' => 'text-center']);
+
+        parent::init();
     }
 
     protected function renderDataCellContent($model, $key, $index): string

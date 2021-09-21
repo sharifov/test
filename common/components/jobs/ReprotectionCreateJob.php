@@ -25,6 +25,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
 use sales\dispatchers\EventDispatcher;
@@ -76,6 +77,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         $productQuoteChangeRepository = Yii::createObject(ProductQuoteChangeRepository::class);
         $flightRequestService = Yii::createObject(FlightRequestService::class);
         $eventDispatcher = Yii::createObject(EventDispatcher::class);
+        $productQuoteDataManageService = Yii::createObject(ProductQuoteDataManageService::class);
 
         $client = null;
 
@@ -153,6 +155,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         );
                         $caseReProtectionService->setCaseDeadline($originProductQuote->flightQuote);
                     } catch (Throwable $throwable) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Order not created');
                         $caseReProtectionService->caseToManual('Order not created');
 
                         if (isset($case, $flightRequest) && $client === null) {
@@ -183,6 +186,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             try {
                 $reProtectionCreateService->originProductQuoteDecline($originProductQuote, $case);
             } catch (Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Flight quote not updated');
                 $caseReProtectionService->caseToManual('Flight quote not updated');
                 throw new DomainException('OriginProductQuote not declined');
             }
@@ -190,6 +194,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             $reProtectionCreateService->declineReProtectionQuotes($originProductQuote->pq_id, $originProductQuote->pq_gid, $case);
 
             if (empty($flightRequest->getFlightQuoteData())) {
+                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'New schedule change happened, no quote provided');
                 $caseReProtectionService->caseToManual('New schedule change happened, no quote provided');
                 throw new DomainException('New schedule change happened, no quote provided');
             }
@@ -209,6 +214,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 $caseReProtectionService->setCaseDeadline($flightQuote);
                 $reProtectionQuote = $flightQuote->fqProductQuote;
             } catch (\Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Could not create new reProtection quote');
                 $caseReProtectionService->caseToManual('Could not create new reProtection quote');
                 $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
                 $reProtectionCreateService::writeLog($throwable);
@@ -222,6 +228,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             if ($productQuoteChange->isStatusNew() || $productQuoteChange->isDecisionPending()) {
                 if ($case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
                     if (!$case->cs_user_id) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'New reprotection request');
                         $caseReProtectionService->caseToManual('New reprotection request');
                     } else {
                         $caseReProtectionService->caseNeedAction();
@@ -277,8 +284,16 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $eventDispatcher->dispatch(new ProductQuoteChangeAutoDecisionPendingEvent($productQuoteChange->pqc_id));
                         $flightRequestService->done('Client Email send');
                     } catch (\Throwable $throwable) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Auto SCHD Email not sent');
                         $caseReProtectionService->caseToManual('Auto SCHD Email not sent');
                         $flightRequestService->pending(VarDumper::dumpAsString($throwable->getMessage()));
+                    }
+
+                    try {
+                        $productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuote->pq_id, $reProtectionQuote->pq_id);
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set recommended quote(' . $reProtectionQuote->pq_gid . ')');
+                    } catch (\Throwable $throwable) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Quote(' . $reProtectionQuote->pq_gid . ') not set recommended');
                     }
                     return;
                 }
@@ -298,6 +313,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     }
 
                     if ($case->isPending() || $case->isStatusAutoProcessing() || $case->isFollowUp() || $case->isStatusNew()) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Manual processing requested');
                         $caseReProtectionService->caseToManual('Manual processing requested');
                         return;
                     }
