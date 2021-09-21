@@ -104,7 +104,7 @@
 		"kartik-v/yii2-widget-fileinput": "@dev",
 		"kartik-v/yii2-mpdf": "^1.0",
 		"pixel418/markdownify": "^2.3",
-		"casbin/casbin": "^3.1",
+		"casbin/casbin": "3.7",
 		"snowplow/snowplow-tracker": "0.4.0",
 		"vlucas/phpdotenv": "^5.3"
 	},

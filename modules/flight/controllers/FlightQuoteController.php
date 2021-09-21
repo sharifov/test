@@ -825,6 +825,7 @@ class FlightQuoteController extends FController
                 if (!$form->validate()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
                 }
+
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId) {
                     return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId);
@@ -848,7 +849,7 @@ class FlightQuoteController extends FController
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $response = ['message' => '', 'status' => 0, 'reservation_dump' => [], 'segments' => '',];
+            $response = ['message' => '', 'status' => 0, 'reservation_dump' => [], 'segments' => '', 'key_trip_list' => ''];
             $originSegmentsBaggage = [];
             $defaultBaggage = null;
 
@@ -917,6 +918,8 @@ class FlightQuoteController extends FController
                         'sourceWeight' => BaggageHelper::getBaggageWeightValuesCombine(),
                         'defaultBaggage' => $defaultBaggage,
                     ]);
+
+                    $response['key_trip_list'] = implode(',', array_keys($trips));
                 }
 
                 $response['message'] = 'Success';
