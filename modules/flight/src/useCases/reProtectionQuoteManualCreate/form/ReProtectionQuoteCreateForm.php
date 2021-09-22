@@ -98,7 +98,7 @@ class ReProtectionQuoteCreateForm extends Model
 
     public function checkReservationDump(): void
     {
-        $dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, true, $this->itinerary);
+        $dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, false, $this->itinerary);
         if (empty($dumpParser)) {
             $this->addError('reservationDump', 'Incorrect reservation dump!');
         }
