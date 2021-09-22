@@ -321,8 +321,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
             \Yii::info(
                 [
-                    'case' => $case->toArray(),
-                    'productQuoteChange' => $productQuoteChange->toArray()
+                    'case' => ArrayHelper::merge($case->toArray(), ['status' => CasesStatus::getName($case->cs_status)]),
+                    'productQuoteChange' => ArrayHelper::merge($productQuoteChange->toArray(), ['status' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id)]),
                 ],
                 'info\Debug:ReprotectionCreateJob'
             ); /* TODO:: FOR DEBUG:: must by remove  */
