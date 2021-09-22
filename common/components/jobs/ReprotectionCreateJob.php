@@ -236,7 +236,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         Notifications::createAndPublish(
                             $case->cs_user_id,
                             'New reProtection quote has been added',
-                            'New reProtection quote has been added for Case: (' . $linkToCase . ') ',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . '). Manual action required',
                             Notifications::TYPE_INFO,
                             true
                         );
@@ -305,7 +305,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         Notifications::createAndPublish(
                             $case->cs_user_id,
                             'New reProtection quote has been added',
-                            'New reProtection quote has been added for Case: (' . $linkToCase . ') ',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . '). Manual action required',
                             Notifications::TYPE_INFO,
                             true
                         );
