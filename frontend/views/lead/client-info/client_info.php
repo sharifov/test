@@ -6,6 +6,7 @@
  * @var $leadForm LeadForm
  */
 
+use common\models\ClientEmailQuery;
 use common\models\Employee;
 use common\models\Lead;
 use yii\helpers\Html;
@@ -168,7 +169,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                             <?php endif; ?>
                         </div>
                         <div id="client-manage-email">
-                            <?php if ($emails = $lead->client->clientEmails) : ?>
+                            <?php if ($emails = ClientEmailQuery::getWithSameClientsEmailsCount($lead->client_id)) : ?>
                                 <?php
                                 if ($leadForm->viewPermission) {
                                     echo $this->render('_client_manage_email', [
