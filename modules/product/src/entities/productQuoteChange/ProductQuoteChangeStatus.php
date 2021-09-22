@@ -41,6 +41,7 @@ class ProductQuoteChangeStatus
         self::DECIDED,
         self::IN_PROGRESS,
         self::COMPLETE,
+        self::CANCELED,
         //self::DECISION_PENDING
     ];
 
