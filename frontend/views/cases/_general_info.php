@@ -13,7 +13,7 @@ use yii\widgets\DetailView;
 
 <div class="x_panel">
     <div class="x_title">
-        <h2><i class="fa fa-info" title="<?php echo $model->cs_deadline_dt ?>"></i> General Info</h2>
+        <h2><i class="fa fa-info" title="deadline: <?php echo $model->cs_deadline_dt ?>"></i> General Info</h2>
         <ul class="nav navbar-right panel_toolbox">
             <?php if (Auth::can('cases/update', ['case' => $model])) : ?>
             <li>
