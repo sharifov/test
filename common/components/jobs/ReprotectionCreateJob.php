@@ -324,7 +324,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     'case' => ArrayHelper::merge($case->toArray(), ['status' => CasesStatus::getName($case->cs_status)]),
                     'productQuoteChange' => ArrayHelper::merge($productQuoteChange->toArray(), ['status' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id)]),
                 ],
-                'info\Debug:ReprotectionCreateJob'
+                'info\ReprotectionCreateJob:UnknownProcessException'
             ); /* TODO:: FOR DEBUG:: must by remove  */
 
             throw new DomainException('Unknown process exception');
