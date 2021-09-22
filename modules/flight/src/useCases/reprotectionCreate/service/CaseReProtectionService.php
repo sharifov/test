@@ -126,7 +126,7 @@ class CaseReProtectionService
                 $deadline = $departureTime->modify(' -' . $schdCaseDeadlineHours . ' hours')->format('Y-m-d H:i:s');
                 $this->getCase()->cs_deadline_dt = $deadline;
                 $this->casesRepository->save($this->getCase());
-                $this->getCase()->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set deadline from FlightQuote(' . $flightQuote->getId() . ')');
+                $this->getCase()->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set deadline from FlightQuote', ['uid' => $flightQuote->fq_uid]);
                 return $deadline;
             }
         }
