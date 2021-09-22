@@ -54,8 +54,7 @@ RUN touch /usr/local/etc/php/conf.d/swoole.ini && \
     echo "extension=swoole.so\nextension=swoole_async.so" > /usr/local/etc/php/conf.d/swoole.ini
 
 
-
-RUN ./yii websocket-server/start
+CMD ["./yii websocket-server/start"]
 
 EXPOSE 8080
 
