@@ -849,10 +849,9 @@ $js = <<<JS
             modal.modal('show');
         });
         return false;
-    });
+    });    
     
-    
-     $('.btn-reservation-dump').on('click', function(e) {
+     $('body').on('click', '.btn-reservation-dump', function (e) {
         e.preventDefault();
         let modal = $('#modal-df');
         let title = $(this).attr('title');
@@ -864,7 +863,6 @@ $js = <<<JS
         
         modal.find('.modal-body').html(content2);
         modal.modal('show');
-        //return false;
     });
     
     
