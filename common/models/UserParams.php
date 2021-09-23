@@ -28,9 +28,26 @@ use yii\db\ActiveRecord;
  *
  * @property Employee $upUpdatedUser
  * @property Employee $upUser
+ * @property bool $up_call_user_level [tinyint]
  */
 class UserParams extends \yii\db\ActiveRecord
 {
+    private const CALL_LEVEL_PRIORITY_ZERO = 0;
+    private const CALL_LEVEL_PRIORITY_ONE = 1;
+    private const CALL_LEVEL_PRIORITY_TWO = 2;
+    private const CALL_LEVEL_PRIORITY_THREE = 3;
+    private const CALL_LEVEL_PRIORITY_FOUR = 4;
+    private const CALL_LEVEL_PRIORITY_FIVE = 5;
+
+    private const CALL_LEVEL_PRIORITY_NAME_LIST = [
+        self::CALL_LEVEL_PRIORITY_ZERO => '-',
+        self::CALL_LEVEL_PRIORITY_ONE => '-1',
+        self::CALL_LEVEL_PRIORITY_TWO => '0',
+        self::CALL_LEVEL_PRIORITY_THREE => '1',
+        self::CALL_LEVEL_PRIORITY_FOUR => '2',
+        self::CALL_LEVEL_PRIORITY_FIVE => '3',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -46,11 +63,13 @@ class UserParams extends \yii\db\ActiveRecord
     {
         return [
             [['up_user_id','up_work_minutes', 'up_work_start_tm','up_timezone'], 'required'],
-            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes', 'up_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads', 'up_frequency_minutes', 'up_call_expert_limit', 'up_leaderboard_enabled'], 'integer'],
+            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes', 'up_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads', 'up_frequency_minutes', 'up_call_expert_limit', 'up_leaderboard_enabled', 'up_call_user_level'], 'integer'],
             [['up_base_amount'], 'number'],
             [['up_updated_dt'], 'safe'],
             [['up_timezone'], 'string', 'max' => 40],
             [['up_user_id'], 'unique'],
+            [['up_call_user_level'], 'default', 'value' => 0],
+            [['up_call_user_level'], 'in', 'range' => array_keys(self::getCallPriorityLevelList())],
             [['up_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_updated_user_id' => 'id']],
             [['up_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_user_id' => 'id']],
         ];
@@ -76,7 +95,8 @@ class UserParams extends \yii\db\ActiveRecord
             'up_min_percent_for_take_leads' => 'Min percent for take leads',
             'up_frequency_minutes' => 'Take Frequency Minutes',
             'up_call_expert_limit'  => 'Call Expert limit',
-            'up_leaderboard_enabled'  => 'Leader Board Enabled'
+            'up_leaderboard_enabled'  => 'Leader Board Enabled',
+            'up_call_user_level' => 'Call Priority Level'
         ];
     }
 
@@ -117,5 +137,15 @@ class UserParams extends \yii\db\ActiveRecord
     public static function find()
     {
         return new UserParamsQuery(static::class);
+    }
+
+    public static function getCallPriorityLevelList(): array
+    {
+        return self::CALL_LEVEL_PRIORITY_NAME_LIST;
+    }
+
+    public static function getCallPriorityLevelLabel(int $level): string
+    {
+        return self::getCallPriorityLevelList()[$level] ?? '(not set)';
     }
 }
