@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel modules\product\src\entities\productQuoteData\search\ProductQuoteDataSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Product Quote Datas';
+$this->title = 'Product Quote Data';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="product-quote-data-index">
