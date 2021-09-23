@@ -10,7 +10,6 @@ namespace sales\model\project\entity\params;
  * @property string $feedbackEmailFrom
  * @property string $feedbackNameFrom
  * @property bool $feedbackBookingIdRequired
- * @property bool $allow_auto_case_create
  */
 class CaseParams
 {
@@ -19,7 +18,6 @@ class CaseParams
     public string $feedbackEmailFrom;
     public string $feedbackNameFrom;
     public bool $feedbackBookingIdRequired;
-    public bool $allow_auto_case_create;
 
     public function __construct(array $params)
     {
@@ -28,7 +26,6 @@ class CaseParams
         $this->feedbackEmailFrom = $params['feedbackEmailFrom'] ?? self::default()['feedbackEmailFrom'];
         $this->feedbackNameFrom = $params['feedbackNameFrom'] ?? self::default()['feedbackNameFrom'];
         $this->feedbackBookingIdRequired = (bool)($params['feedbackBookingIdRequired'] ?? self::default()['feedbackBookingIdRequired']);
-        $this->allow_auto_case_create = (bool) ($params['allow_auto_case_create'] ?? self::default()['allow_auto_case_create']);
     }
 
     public function isActiveFeedback(?string $caseOrderUid): bool
@@ -47,7 +44,6 @@ class CaseParams
             'feedbackEmailFrom' => '',
             'feedbackNameFrom' => '',
             'feedbackBookingIdRequired' => '',
-            'allow_auto_case_create' => true,
         ];
     }
 }

@@ -14,7 +14,6 @@ use common\models\Client;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
-use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\UserGroupAssign;
 use sales\forms\lead\PhoneCreateForm;
@@ -31,7 +30,6 @@ use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadManageService;
 use sales\services\phone\blackList\PhoneBlackListManageService;
-use sales\services\project\ProjectParamsService;
 use yii\base\BaseObject;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
@@ -114,8 +112,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                     $call->setStatusQueue();
                 }
 
-                if ($call->c_dep_id && ($departmentParams = $call->cDep->getParams()) && $project = Project::findOne($call->c_project_id)) {
-                    $projectParams = $project->getParams();
+                if ($call->c_dep_id && ($departmentParams = $call->cDep->getParams())) {
                     if ($departmentParams->object->type->isLead()) {
                         if ($call->c_from) {
 //                        $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
@@ -143,12 +140,7 @@ class CallQueueJob extends BaseJob implements JobInterface
 
                             try {
                                 $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
-
-                                if (
-                                    !$lead &&
-                                    $departmentParams->object->lead->createOnCall &&
-                                    $projectParams->object->lead->allow_auto_lead_create
-                                ) {
+                                if (!$lead && $departmentParams->object->lead->createOnCall) {
                                     $lead = (Yii::createObject(LeadManageService::class))
                                         ->createByIncomingCall(
                                             $call->c_from,
@@ -165,10 +157,7 @@ class CallQueueJob extends BaseJob implements JobInterface
 
                                 $call->c_lead_id = $lead->id ?? null;
 
-                                if (
-                                    !$departmentParams->object->lead->createOnCall &&
-                                    !$projectParams->object->lead->allow_auto_lead_create
-                                ) {
+                                if (!$departmentParams->object->lead->createOnCall) {
                                     $clientForm = ClientCreateForm::createWidthDefaultName();
                                     $clientForm->projectId = $call->c_project_id;
                                     $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
@@ -198,20 +187,17 @@ class CallQueueJob extends BaseJob implements JobInterface
                         }
                     } elseif ($departmentParams->object->type->isCase()) {
                         try {
-                            $allowAutoCreateByProject = $projectParams->object->case->allow_auto_case_create;
-                            $createCaseOnIncoming = ($allowAutoCreateByProject && $departmentParams->object->case->createOnCall);
-
                             $case = $this->casesCreateService->getOrCreateByCall(
                                 [new PhoneCreateForm(['phone' => $call->c_from])],
                                 $call->c_id,
                                 $call->c_project_id,
                                 (int)$call->c_dep_id,
-                                $createCaseOnIncoming,
+                                $departmentParams->object->case->createOnCall,
                                 $departmentParams->object->case->trashActiveDaysLimit
                             );
                             $call->c_case_id = $case->cs_id ?? null;
 
-                            if (!$departmentParams->object->case->createOnCall && !$allowAutoCreateByProject) {
+                            if (!$departmentParams->object->case->createOnCall) {
                                 $clientForm = ClientCreateForm::createWidthDefaultName();
                                 $clientForm->projectId = $call->c_project_id;
                                 $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
