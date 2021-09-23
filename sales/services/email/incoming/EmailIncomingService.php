@@ -4,6 +4,7 @@ namespace sales\services\email\incoming;
 
 use common\models\Client;
 use common\models\Department;
+use common\models\Project;
 use common\models\Sources;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
@@ -80,8 +81,11 @@ class EmailIncomingService
 
             $client = $this->clientManageService->getOrCreateByEmails([new EmailCreateForm(['email' => $clientEmail])], $clientForm);
 
-            if ($contact->department && ($departmentParams = $contact->department->getParams())) {
+            if ($contact->department && ($departmentParams = $contact->department->getParams()) && $project = Project::findOne($contact->projectId)) {
+                $projectParams = $project->getParams();
+
                 if ($departmentParams->object->type->isLead()) {
+                    $createLeadOnEmail = ($projectParams->object->lead->allow_auto_lead_create && $departmentParams->object->lead->createOnEmail);
                     $leadId = $this->getOrCreateLead(
                         $client->id,
                         $clientEmail,
@@ -89,20 +93,21 @@ class EmailIncomingService
                         $internalEmail,
                         $emailId,
                         $contact->department->dep_id,
-                        $departmentParams->object->lead->createOnEmail
+                        $createLeadOnEmail
                     );
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');
                     return new Process($leadId, null);
                 }
 
                 if ($departmentParams->object->type->isCase()) {
+                    $createCaseOnEmail = ($projectParams->object->case->allow_auto_case_create && $departmentParams->object->case->createOnEmail);
                     $caseId = $this->getOrCreateCase(
                         $client->id,
                         $contact->projectId,
                         $internalEmail,
                         $emailId,
                         $contact->department->dep_id,
-                        $departmentParams->object->case->createOnEmail,
+                        $createCaseOnEmail,
                         $departmentParams->object->case->trashActiveDaysLimit,
                     );
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');

@@ -4,6 +4,7 @@ namespace sales\services\sms\incoming;
 
 use common\models\Client;
 use common\models\Department;
+use common\models\Project;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
@@ -93,15 +94,18 @@ class SmsIncomingService
                 throw new \DomainException('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Project Id not found');
             }
 
-            if ($contact->department && ($departmentParams = $contact->department->getParams())) {
+            if ($contact->department && ($departmentParams = $contact->department->getParams()) && $project = Project::findOne($form->si_project_id)) {
+                $projectParams = $project->getParams();
+
                 if ($departmentParams->object->type->isLead()) {
+                    $createLeadOnSms = ($projectParams->object->lead->allow_auto_lead_create && $departmentParams->object->lead->createOnSms);
                     $sms = $this->createSmsByLeadType(
                         $form,
                         $client->id,
                         $contact->userId,
                         $isInternalPhone,
                         $contact->department->dep_id,
-                        $departmentParams->object->lead->createOnSms
+                        $createLeadOnSms
                     );
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService');
                     $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
@@ -109,13 +113,14 @@ class SmsIncomingService
                 }
 
                 if ($departmentParams->object->type->isCase()) {
+                    $createCaseOnSms = ($projectParams->object->case->allow_auto_case_create && $departmentParams->object->case->createOnSms);
                     $sms = $this->createSmsByCaseType(
                         $form,
                         $client->id,
                         $contact->userId,
                         $isInternalPhone,
                         $contact->department->dep_id,
-                        $departmentParams->object->case->createOnSms,
+                        $createCaseOnSms,
                         $departmentParams->object->case->trashActiveDaysLimit
                     );
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService');
