@@ -6,6 +6,7 @@ use common\components\Metrics;
 use common\models\Call;
 use common\models\Employee;
 use common\models\ProjectEmployeeAccess;
+use common\models\search\LeadQcallSearch;
 use common\models\Sources;
 use common\models\UserProfile;
 use console\helpers\OutputHelper;
@@ -325,6 +326,33 @@ class CallController extends Controller
         }
         echo "Results redirects for hold calls: " . PHP_EOL .  VarDumper::dumpAsString($results, 10, false) . PHP_EOL;
         return 0;
+    }
+
+    public function actionRedialCall()
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+        $processed = 0;
+        $timeStart = microtime(true);
+
+        $callRedialSearch = new LeadQcallSearch();
+
+        $leads = $callRedialSearch->searchByRedialLeads([$callRedialSearch->formName() => [
+            'l_is_test' => 0
+        ]]);
+
+
+        foreach ($leads as $lead) {
+            var_dump($lead);
+            die;
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 
     /**
