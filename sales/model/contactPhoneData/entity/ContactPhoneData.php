@@ -33,7 +33,7 @@ class ContactPhoneData extends \yii\db\ActiveRecord
 
             ['cpd_key', 'required'],
             ['cpd_key', 'string', 'max' => 30],
-            [['cpd_key'], 'in', 'range' => ContactPhoneDataDictionary::KEY_LIST],
+            [['cpd_key'], 'in', 'range' => array_keys(ContactPhoneDataDictionary::KEY_LIST)],
 
             ['cpd_value', 'required'],
             ['cpd_value', 'string', 'max' => 100],
