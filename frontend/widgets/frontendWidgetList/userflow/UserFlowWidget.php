@@ -5,6 +5,9 @@ namespace frontend\widgets\frontendWidgetList\userflow;
 use sales\auth\Auth;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\base\InvalidConfigException;
+use frontend\widgets\frontendWidgetList\userflow\abac\dto\UserFlowWidgetDto;
+use frontend\widgets\frontendWidgetList\userflow\abac\UserFlowWidgetObject;
 
 /**
  * LouAssistWidget
@@ -14,6 +17,20 @@ use yii\helpers\VarDumper;
 class UserFlowWidget extends \yii\bootstrap\Widget
 {
     public $params;
+
+    public function beforeRun()
+    {
+        if (!parent::beforeRun()) {
+            return false;
+        }
+
+        /** @abac null, UserFlowWidgetObject::UI_INCLUDE_WIDGET, UserFlowWidgetObject::ACTION_INCLUDE, Run UserFlowWidget */
+        if (\Yii::$app->abac->can(null, UserFlowWidgetObject::UI_INCLUDE_WIDGET, UserFlowWidgetObject::ACTION_INCLUDE)) {
+            return true;
+        }
+
+        return false; // false to not run the widget
+    }
 
     public function run()
     {
