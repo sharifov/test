@@ -296,7 +296,7 @@ class CaseController extends Controller
                 try {
                     $case->refresh();
                     if (!$case->isPending()) {
-                        $case->pending(null, 'No reProtection action from client');
+                        $case->pending(null, 'Deadline expired');
                         $case->addEventLog(
                             CaseEventLog::CASE_STATUS_CHANGED,
                             'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: System. Reason: Reprotection client activeless'
