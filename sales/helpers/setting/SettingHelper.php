@@ -583,4 +583,11 @@ class SettingHelper
             'busy'
         ]);
     }
+
+    public static function getCallbackToCallerExcludedStatusList(): array
+    {
+        return self::getCallbackToCallerData()['excludeProjectKeys'] ?? [
+            'priceline'
+        ];
+    }
 }

@@ -425,7 +425,7 @@ class CommunicationController extends ApiBaseController
                     try {
                         $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                         if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
-                            if (SettingHelper::isCallbackToCallerEnabled()) {
+                            if (SettingHelper::isCallbackToCallerEnabled() && !in_array($callModel->cProject->project_key, SettingHelper::getCallbackToCallerExcludedStatusList())) {
                                 $result = Yii::$app->communication->twilioDial(
                                     $incoming_phone_number,
                                     $client_phone_number,
@@ -544,7 +544,7 @@ class CommunicationController extends ApiBaseController
                         try {
                             $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                             if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
-                                if (SettingHelper::isCallbackToCallerEnabled()) {
+                                if (SettingHelper::isCallbackToCallerEnabled() && !in_array($callModel->cProject->project_key, SettingHelper::getCallbackToCallerExcludedStatusList())) {
                                     $result = Yii::$app->communication->twilioDial(
                                         $incoming_phone_number,
                                         $client_phone_number,
