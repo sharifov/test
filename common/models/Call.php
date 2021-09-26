@@ -270,13 +270,42 @@ class Call extends \yii\db\ActiveRecord
     public const DEFAULT_PRIORITY_VALUE = 0;
 
     public const STIR_STATUS_FULL = 'A';
+    public const STIR_STATUS_FULL_FAILED = 'AF';
     public const STIR_STATUS_PARTIAL = 'B';
+    public const STIR_STATUS_PARTIAL_FAILED = 'BF';
     public const STIR_STATUS_GATEWAY = 'C';
+    public const STIR_STATUS_GATEWAY_FAILED = 'CF';
+    public const STIR_STATUS_NO_VALIDATION = 'NV';
+    public const STIR_STATUS_VALIDATION_FAILED = 'VF';
 
     public const STIR_STATUS_LIST = [
         self::STIR_STATUS_FULL => 'Full Attestation (A)',
         self::STIR_STATUS_PARTIAL => 'Partial Attestation (B)',
         self::STIR_STATUS_GATEWAY => 'Gateway Attestation (C)',
+        self::STIR_STATUS_FULL_FAILED => 'Full Attestation (AF) Failed',
+        self::STIR_STATUS_PARTIAL_FAILED => 'Partial Attestation (BF) Failed',
+        self::STIR_STATUS_GATEWAY_FAILED => 'Gateway Attestation (CF) Failed',
+        self::STIR_STATUS_NO_VALIDATION => '(NV) No Validation',
+        self::STIR_STATUS_VALIDATION_FAILED => '(VF) Validation Failed',
+    ];
+
+    public const STIR_VERSTAT_LIST = [
+        'TN-Validation-Passed-A' => self::STIR_STATUS_FULL,
+        'TN-Validation-Passed-B' => self::STIR_STATUS_PARTIAL,
+        'TN-Validation-Passed-C' => self::STIR_STATUS_GATEWAY,
+        'TN-Validation-Failed-A' => self::STIR_STATUS_FULL_FAILED,
+        'TN-Validation-Failed-B' => self::STIR_STATUS_PARTIAL_FAILED,
+        'TN-Validation-Failed-C' => self::STIR_STATUS_GATEWAY_FAILED,
+        'No-TN-Validation' => self::STIR_STATUS_NO_VALIDATION,
+        'TN-Validation-Failed' => self::STIR_STATUS_VALIDATION_FAILED,
+        'A' => self::STIR_STATUS_FULL,
+        'B' => self::STIR_STATUS_PARTIAL,
+        'C' => self::STIR_STATUS_GATEWAY
+    ];
+
+    public const STIR_TRUSTED_GROUP = [
+        'TN-Validation-Passed-A',
+        'TN-Validation-Passed-B'
     ];
 
     private ?Data $data = null;
@@ -512,7 +541,7 @@ class Call extends \yii\db\ActiveRecord
         $call->c_project_id = $projectId;
         $call->c_dep_id = $depId;
         $call->c_client_id = $clientId;
-        $call->c_stir_status = ArrayHelper::getValue($requestDataDTO, 'callData.StirStatus');
+        $call->c_stir_status = self::getStirStatusByVerstatKey(ArrayHelper::getValue($requestDataDTO, 'callData.StirVerstat', ''));
         $call->setStatusIvr();
         return $call;
     }
@@ -2711,5 +2740,15 @@ class Call extends \yii\db\ActiveRecord
             }
         }
         return $data;
+    }
+
+    public static function getStirStatusByVerstatKey(string $verstatKey): ?string
+    {
+        return self::STIR_VERSTAT_LIST[$verstatKey] ?? null;
+    }
+
+    public static function isTrustedVerstat(string $key): bool
+    {
+        return in_array($key, self::STIR_TRUSTED_GROUP);
     }
 }

@@ -353,6 +353,8 @@ class CommunicationController extends ApiBaseController
                 $response['error_code'] = 11;
             }
 
+            $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || Call::isTrustedVerstat($postCall['StirVerstat'] ?? '');
+
             try {
                 $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
             } catch (CallDeclinedException $e) {
@@ -378,7 +380,7 @@ class CommunicationController extends ApiBaseController
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
 
-                    if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
+                    if (!$isTrustStirCall && $callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
                         $callFilterGuardService->runRepression($postCall);
                     }
                 } catch (CallDeclinedException $e) {
@@ -419,7 +421,7 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
-                if (SettingHelper::isEnableCallLogFilterGuard()) {
+                if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
                         $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                         if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
@@ -506,7 +508,7 @@ class CommunicationController extends ApiBaseController
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
-                    if (SettingHelper::isEnableCallLogFilterGuard()) {
+                    if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                         try {
                             $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                             if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
@@ -1208,7 +1210,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from_country = Call::getDisplayRegion($calData['FromCountry'] ?? '');
             $call->c_from_state = $calData['FromState'] ?? null;
             $call->c_from_city = $calData['FromCity'] ?? null;
-            $call->c_stir_status = $calData['StirStatus'] ?? null;
+            $call->c_stir_status = Call::getStirStatusByVerstatKey($calData['StirVerstat'] ?? '');
 
             if ($parentCall) {
                 $call->c_parent_id = $parentCall->c_id;
@@ -1471,7 +1473,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $callData['From'];
             $call->c_to = $callData['To']; //Called
             $call->c_created_user_id = null;
-            $call->c_stir_status = $callData['StirStatus'] ?? null;
+            $call->c_stir_status = Call::getStirStatusByVerstatKey($callData['StirVerstat'] ?? '');
 
             self::copyDataFromCustomParams($call, $customParameters);
 
