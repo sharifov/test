@@ -1,0 +1,159 @@
+version: '3.9'
+
+services:
+  nginx:
+    build: ./nginx
+    volumes:
+      - ./../../../logs:${APP_ROOT}/logs
+      - ./../../../logs:/var/log/nginx
+      - ./../../../ssl:${APP_ROOT}/ssl
+      - ./../../../fileStorage:${APP_ROOT}/fileStorage
+      - ./../../:${APP_ROOT}/www
+    ports:
+      - "444:443" #frontend
+      - "8090:90" #api
+    depends_on:
+      - web
+    restart: always
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_DIR=${NGINX_TEMPLATE_PATH}
+      - APP_ROOT=${APP_ROOT}
+      - HOST=${HOST}
+      - HOST_API=${HOST_API}
+      - SSL_CRT_PATH=${SSL_CRT_PATH}
+      - SSL_KEY_PATH=${SSL_KEY_PATH}
+      - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
+    networks:
+      default:
+      sales-communication:
+        aliases:
+          - ${HOST_API}
+
+  web:
+    build: ./web
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+     - mysql
+     - psql
+     - redis
+     - beanstalkd
+     - centrifugo
+     - queue
+    restart: always
+    environment:
+      PHP_IDE_CONFIG: "serverName=SalesWebServer"
+    networks:
+      - default
+      - sales-communication
+
+  redis:
+    build: ./redis
+    restart: always
+    networks:
+      - default
+    ports:
+      - "6379"
+
+  mysql:
+    build: ./mysql
+    volumes:
+      - ./../../../mysql-docker/db:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    restart: always
+    networks:
+      - default
+
+  psql:
+    build: ./psql
+    environment:
+      POSTGRES_PASSWORD: root
+    volumes:
+      - ./../../../psql-docker/db:/var/lib/postgresql/data
+      - ./../../../psql-docker/dump:/dump
+    ports:
+      - "5435:5432"
+    restart: always
+    networks:
+      - default
+
+  centrifugo:
+    image: centrifugo/centrifugo:v2
+    volumes:
+      - ./../../../centrifugo-docker/config.json:/centrifugo/config.json
+    command: centrifugo -c config.json
+    ports:
+      - 8010:8000
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    networks:
+      default:
+        aliases:
+          - centrifugo
+    restart: always
+
+  ws:
+    build: ./ws
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+      - mysql
+      - psql
+      - redis
+      - beanstalkd
+    restart: always
+    command: ./yii websocket-server/start
+    networks:
+      - default
+
+  beanstalkd:
+    build:
+      context: ./beanstalkd
+      args:
+        version: ${BEANSTALKD_VERSION}
+    restart: always
+    ports:
+      - "11300"
+    networks:
+      - default
+
+  queue:
+    build:
+      context: ./queue
+      args:
+        APP_ROOT: ${APP_ROOT}
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+      - mysql
+      - psql
+      - beanstalkd
+      - centrifugo
+    networks:
+      - default
+      - sales-communication
+    restart: always
+
+  console:
+    build: ./console
+    user: ${USER_ID}:${USER_GID}
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+      - mysql
+      - psql
+      - beanstalkd
+    networks:
+      - default
+      - sales-communication
+    restart: always
+
+networks:
+  default:
+  sales-communication:
+    name: sales-communication

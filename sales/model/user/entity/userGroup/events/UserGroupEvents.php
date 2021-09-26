@@ -24,7 +24,7 @@ class UserGroupEvents extends Component
     /**
      * @param $params
      */
-    public function webHookUpdate($params): void
+    public static function webHookUpdate($params): void
     {
 
         $data['object'] = 'user-group';
@@ -43,7 +43,7 @@ class UserGroupEvents extends Component
     /**
      * @param $params
      */
-    public function webHookInsert($params): void
+    public static function webHookInsert($params): void
     {
         $data['object'] = 'user-group';
         $data['action'] = 'insert';
@@ -56,7 +56,7 @@ class UserGroupEvents extends Component
     /**
      * @param $params
      */
-    public function webHookDelete($params): void
+    public static function webHookDelete($params): void
     {
         $data['object'] = 'user-group';
         $data['action'] = 'delete';

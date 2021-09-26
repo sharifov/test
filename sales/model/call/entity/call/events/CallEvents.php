@@ -20,7 +20,7 @@ class CallEvents extends Component
     /**
      * @param $params
      */
-    public function updateUserStatus($params): void
+    public static function updateUserStatus($params): void
     {
         /**
          * @var $call Call
