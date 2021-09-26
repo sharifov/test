@@ -21,6 +21,14 @@ use yii\helpers\ArrayHelper;
  */
 class CallLogFilterGuard extends \yii\db\ActiveRecord
 {
+    public const TYPE_TRUST = 0;
+    public const TYPE_SPAM = 1;
+
+    public const TYPE_LIST = [
+        self::TYPE_TRUST => 'Trust',
+        self::TYPE_SPAM => 'Spam'
+    ];
+
     public function rules(): array
     {
         return [
@@ -94,5 +102,20 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
         $model->clfg_trust_percent = $trustPercent;
         $model->clfg_cpl_id = $contactPhoneListId;
         return $model;
+    }
+
+    public function isSpam(): bool
+    {
+        return $this->clfg_type === self::TYPE_SPAM;
+    }
+
+    public function guardSpam(float $rate): bool
+    {
+        return $this->isSpam() && $this->clfg_sd_rate > $rate;
+    }
+
+    public function getTypeName(): ?string
+    {
+        return self::TYPE_LIST[$this->clfg_type] ?? null;
     }
 }

@@ -422,7 +422,16 @@ class CommunicationController extends ApiBaseController
 
                 if (SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
-                        (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                        $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                        if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
+                            Yii::info([
+                                'callId' => $callModel->c_id,
+                                'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                'type' => $callLogFilterGuard->getTypeName(),
+                                'phone' => $callModel->c_from
+                            ], 'info\CallSpamFilter:CallDeclinedException');
+                            return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                        }
                     } catch (\Throwable $throwable) {
                         $message = AppHelper::throwableLog($throwable);
                         $category = 'CommunicationController:CallLogFilterGuard:generalLine';
@@ -500,7 +509,16 @@ class CommunicationController extends ApiBaseController
 
                     if (SettingHelper::isEnableCallLogFilterGuard()) {
                         try {
-                            (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                            $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                            if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
+                                Yii::info([
+                                    'callId' => $callModel->c_id,
+                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                    'type' => $callLogFilterGuard->getTypeName(),
+                                    'phone' => $callModel->c_from
+                                ], 'info\CallSpamFilter:CallDeclinedException');
+                                return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                            }
                         } catch (\Throwable $throwable) {
                             $message = AppHelper::throwableLog($throwable);
                             $category = 'CommunicationController:CallLogFilterGuard:directCall';
@@ -3206,5 +3224,19 @@ class CommunicationController extends ApiBaseController
         foreach ($usersForNotify as $userForNotify) {
             Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $userForNotify], Message::updateStatus($sms));
         }
+    }
+
+    private function returnTwmlAsBusy(?string $message): VoiceResponse
+    {
+        $vr = new VoiceResponse();
+        if ($message) {
+            $vr->pause(['length' => 5]);
+            $vr->say($message, [
+                'language' => 'en-US',
+                'voice' => 'alice'
+            ]);
+        }
+        $vr->reject(['reason' => 'busy']);
+        return $vr;
     }
 }
