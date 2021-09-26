@@ -425,13 +425,45 @@ class CommunicationController extends ApiBaseController
                     try {
                         $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                         if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
-                            Yii::info([
-                                'callId' => $callModel->c_id,
-                                'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                'type' => $callLogFilterGuard->getTypeName(),
-                                'phone' => $callModel->c_from
-                            ], 'info\CallSpamFilter:CallDeclinedException');
-                            return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                            if (SettingHelper::isCallbackToCallerEnabled()) {
+                                $result = Yii::$app->communication->twilioDial(
+                                    $incoming_phone_number,
+                                    $client_phone_number,
+                                    SettingHelper::getCallbackToCallerCurlTimeout(),
+                                    SettingHelper::getCallbackToCallerMessage(),
+                                    SettingHelper::getCallbackToCallerDialCallTimeout(),
+                                    SettingHelper::getCallbackToCallerDialCallLimit(),
+                                );
+
+                                if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
+                                    Yii::info([
+                                        'callId' => $callModel->c_id,
+                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                        'type' => $callLogFilterGuard->getTypeName(),
+                                        'phone' => $callModel->c_from,
+                                        'message' => $result['data']['message']
+                                    ], 'info\CallSpamFilter:DirectCall:CommunicationError');
+                                } elseif (
+                                    (isset($result['data']['result']['status']) && !in_array(
+                                        $result['data']['result']['status'],
+                                        SettingHelper::getCallbackToCallerSuccessStatusList()
+                                    ))
+                                ) {
+                                    Yii::info([
+                                        'callId' => $callModel->c_id,
+                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                        'type' => $callLogFilterGuard->getTypeName(),
+                                        'phone' => $callModel->c_from,
+                                        'result' => $result,
+                                        'successStatusList' => SettingHelper::getCallbackToCallerSuccessStatusList(),
+                                        'statusResult' => !in_array(
+                                            $result['data']['result']['status'],
+                                            SettingHelper::getCallbackToCallerSuccessStatusList()
+                                        )
+                                    ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
+                                    return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                                }
+                            }
                         }
                     } catch (\Throwable $throwable) {
                         $message = AppHelper::throwableLog($throwable);
@@ -512,13 +544,45 @@ class CommunicationController extends ApiBaseController
                         try {
                             $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                             if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
-                                Yii::info([
-                                    'callId' => $callModel->c_id,
-                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                    'type' => $callLogFilterGuard->getTypeName(),
-                                    'phone' => $callModel->c_from
-                                ], 'info\CallSpamFilter:CallDeclinedException');
-                                return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                                if (SettingHelper::isCallbackToCallerEnabled()) {
+                                    $result = Yii::$app->communication->twilioDial(
+                                        $incoming_phone_number,
+                                        $client_phone_number,
+                                        SettingHelper::getCallbackToCallerCurlTimeout(),
+                                        SettingHelper::getCallbackToCallerMessage(),
+                                        SettingHelper::getCallbackToCallerDialCallTimeout(),
+                                        SettingHelper::getCallbackToCallerDialCallLimit(),
+                                    );
+
+                                    if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
+                                        Yii::info([
+                                            'callId' => $callModel->c_id,
+                                            'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                            'type' => $callLogFilterGuard->getTypeName(),
+                                            'phone' => $callModel->c_from,
+                                            'message' => $result['data']['message']
+                                        ], 'info\CallSpamFilter:DirectCall:CommunicationError');
+                                    } elseif (
+                                        (isset($result['data']['result']['status']) && !in_array(
+                                            $result['data']['result']['status'],
+                                            SettingHelper::getCallbackToCallerSuccessStatusList()
+                                        ))
+                                    ) {
+                                        Yii::info([
+                                            'callId' => $callModel->c_id,
+                                            'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                            'type' => $callLogFilterGuard->getTypeName(),
+                                            'phone' => $callModel->c_from,
+                                            'result' => $result,
+                                            'successStatusList' => SettingHelper::getCallbackToCallerSuccessStatusList(),
+                                            'statusResult' => !in_array(
+                                                $result['data']['result']['status'],
+                                                SettingHelper::getCallbackToCallerSuccessStatusList()
+                                            )
+                                        ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
+                                        return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                                    }
+                                }
                             }
                         } catch (\Throwable $throwable) {
                             $message = AppHelper::throwableLog($throwable);
