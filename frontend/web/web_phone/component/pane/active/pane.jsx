@@ -49,7 +49,7 @@ function ActiveContactInfo(props) {
     return (
         <div className="contact-info-card">
             <div className="contact-info-card__details">
-                <AntiSpamElement call={call}/>
+                {/*<AntiSpamElement call={call}/>*/}
                 <div className="contact-info-card__line history-details">
                     {call.data.typeId !== 3
                         ? <span className="contact-info-card__label">{call.data.type}</span>

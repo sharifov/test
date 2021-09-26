@@ -436,13 +436,13 @@ class CommunicationController extends ApiBaseController
                                 );
 
                                 if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
-                                    Yii::info([
+                                    Yii::error([
                                         'callId' => $callModel->c_id,
                                         'rate' => $callLogFilterGuard->clfg_sd_rate,
                                         'type' => $callLogFilterGuard->getTypeName(),
                                         'phone' => $callModel->c_from,
                                         'message' => $result['data']['message']
-                                    ], 'info\CallSpamFilter:DirectCall:CommunicationError');
+                                    ], 'CallSpamFilter:DepartmentCall:CommunicationError');
                                 } elseif (
                                     (isset($result['data']['result']['status']) && !in_array(
                                         $result['data']['result']['status'],
@@ -460,7 +460,7 @@ class CommunicationController extends ApiBaseController
                                             $result['data']['result']['status'],
                                             SettingHelper::getCallbackToCallerSuccessStatusList()
                                         )
-                                    ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
+                                    ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
                                     return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
                                 }
                             }
@@ -555,13 +555,13 @@ class CommunicationController extends ApiBaseController
                                     );
 
                                     if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
-                                        Yii::info([
+                                        Yii::error([
                                             'callId' => $callModel->c_id,
                                             'rate' => $callLogFilterGuard->clfg_sd_rate,
                                             'type' => $callLogFilterGuard->getTypeName(),
                                             'phone' => $callModel->c_from,
                                             'message' => $result['data']['message']
-                                        ], 'info\CallSpamFilter:DirectCall:CommunicationError');
+                                        ], 'CallSpamFilter:DirectCall:CommunicationError');
                                     } elseif (
                                         (isset($result['data']['result']['status']) && !in_array(
                                             $result['data']['result']['status'],
