@@ -13,6 +13,8 @@ use yii\helpers\VarDumper;
 
 class SettingHelper
 {
+    private static ?array $callSpamFilter = null;
+
     public static function getCaseSaleTicketEmailData(): array
     {
         return \Yii::$app->params['settings']['case_sale_ticket_email_data'] ?? [];
@@ -489,5 +491,42 @@ class SettingHelper
     public static function isEnableCallLogFilterGuard(): bool
     {
         return (bool) (Yii::$app->params['settings']['is_call_log_filter_guard'] ?? false);
+    }
+
+    public static function getLimitLeadsInContactInfoInPhoneWidget(): int
+    {
+        return (int) (Yii::$app->params['settings']['limit_leads_in_phone_widget'] ?? 3);
+    }
+
+    public static function getCallSpamFilterData(): array
+    {
+        $settings = Yii::$app->params['settings']['call_spam_filter'] ?? null;
+        if (self::$callSpamFilter !== null) {
+            return self::$callSpamFilter;
+        }
+        if ($settings) {
+            self::$callSpamFilter = JsonHelper::decode($settings);
+        }
+        return self::$callSpamFilter ?? [
+                'enabled' => false,
+                'rate' => 0.3567,
+                'redialEnabled' => false,
+                'message' => ''
+        ];
+    }
+
+    public static function callSpamFilterEnabled(): bool
+    {
+        return (bool) (self::getCallSpamFilterData()['enabled'] ?? false);
+    }
+
+    public static function getCallSpamFilterRate(): float
+    {
+        return (float) (self::getCallSpamFilterData()['rate'] ?? 0.3567);
+    }
+
+    public static function getCallSpamFilterMessage(): string
+    {
+        return (string) (self::getCallSpamFilterData()['message'] ?? '');
     }
 }
