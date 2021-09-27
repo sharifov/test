@@ -53,6 +53,8 @@ if ($viewModel->lead) {
         let chatId = createQuoteBtn.data('chat-id');
         let url = createQuoteBtn.data('url');
         let sendQuote = Boolean(createQuoteBtn.data('send-quote'));
+        var parent = createQuoteBtn.parent()
+        var parentLength = parent.children().length
         
         $('#preloader').removeClass('d-none');
         $.ajax({
@@ -74,8 +76,12 @@ if ($viewModel->lead) {
                 
                 $('#preloader').addClass('d-none');
                 if(data.status == true){
-                    if (!sendQuote) {
+                    if (!sendQuote) {                        
                         createQuoteBtn.remove();
+                        
+                        if (parentLength === 1) {
+                            parent.removeClass("dropdown-menu")
+                        }
                     }
                     
                     new PNotify({
