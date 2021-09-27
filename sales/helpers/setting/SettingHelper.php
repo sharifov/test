@@ -595,5 +595,4 @@ class SettingHelper
             'priceline'
         ];
     }
-
 }
