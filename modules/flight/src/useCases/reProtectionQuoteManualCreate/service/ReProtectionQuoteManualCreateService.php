@@ -37,6 +37,7 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -69,6 +70,7 @@ use yii\helpers\VarDumper;
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteRelationRepository $productQuoteRelationRepository
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
+ * @property ProductQuoteDataManageService $productQuoteDataManageService
  */
 class ReProtectionQuoteManualCreateService
 {
@@ -86,6 +88,7 @@ class ReProtectionQuoteManualCreateService
     private FlightQuoteManageService $flightQuoteManageService;
     private ProductQuoteRelationRepository $productQuoteRelationRepository;
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
+    private ProductQuoteDataManageService $productQuoteDataManageService;
 
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
@@ -102,7 +105,8 @@ class ReProtectionQuoteManualCreateService
         FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository,
         FlightQuoteManageService $flightQuoteManageService,
         ProductQuoteRelationRepository $productQuoteRelationRepository,
-        ProductQuoteOptionRepository $productQuoteOptionRepository
+        ProductQuoteOptionRepository $productQuoteOptionRepository,
+        ProductQuoteDataManageService $productQuoteDataManageService
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
@@ -119,6 +123,7 @@ class ReProtectionQuoteManualCreateService
         $this->flightQuoteManageService = $flightQuoteManageService;
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
+        $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
     public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form, ?int $userId): FlightQuote
@@ -148,41 +153,47 @@ class ReProtectionQuoteManualCreateService
             $this->flightQuotePaxPriceRepository->save($paxPrice);
         }
 
-        $flightQuoteFlight = $this->flightQuoteManageService->createFlightQuoteFlight($flightQuote, null);
+        $this->flightQuoteManageService->createFlightQuoteFlight($flightQuote, null);
         $relation = ProductQuoteRelation::createReProtection($originProductQuote->pq_id, $flightQuote->fq_product_quote_id, $userId);
         $this->productQuoteRelationRepository->save($relation);
 
-        $duration = 0;
-        foreach ($form->itinerary as $itinerary) {
-            $duration += (int)$itinerary->duration;
+        $tripList = explode(',', $form->keyTripList);
+        $tripList = array_combine(array_values($tripList), array_values($tripList));
+        $segmentTripMap = [];
+        foreach ($tripList as $tripKey => $value) {
+            $flightQuoteTrip = FlightQuoteTrip::create($flightQuote, null);
+            $this->flightQuoteTripRepository->save($flightQuoteTrip);
+            $tripList[$tripKey] = $flightQuoteTrip;
         }
-
-        $flightTrip = FlightQuoteTrip::create($flightQuote, null);
-        $flightQuoteTripId = $this->flightQuoteTripRepository->save($flightTrip);
+        foreach ($form->getSegmentTripFormsData() as $keyTripForm => $value) {
+            if (!is_array($value) || !array_key_exists('segment_iata', $value) || !array_key_exists('segment_trip_key', $value)) {
+                continue;
+            }
+            $segmentTripMap[$value['segment_iata']] = $value['segment_trip_key'];
+        }
+        foreach ($tripList as $tripKey => $flightQuoteTrip) {/* TODO: tmp solution */
+            if (!in_array($tripKey, $segmentTripMap, false)) {
+                $flightQuoteTrip->delete();
+            }
+        }
 
         $flightQuoteSegments = [];
         foreach ($form->itinerary as $key => $itinerary) {
-            if ($key === 0) {
-                $flightTrip->fqt_duration = $itinerary->duration;
-                $flightTrip->update(false, ['fqt_duration']);
-            } else {
-                $prevSegment = $form->itinerary[$key - 1] ?? $form->itinerary[$key];
+            $keyIata = $itinerary->departureAirportCode . $itinerary->arrivalAirportCode;
 
-                $isMoreOneDay = self::isMoreOneDay(new \DateTime($prevSegment->arrivalTime), new \DateTime($itinerary->departureTime));
-                if ($isMoreOneDay) {
-                    $flightTrip = FlightQuoteTrip::create($flightQuote, $itinerary->duration);
-                    $flightQuoteTripId = $this->flightQuoteTripRepository->save($flightTrip);
-                } else {
-                    $flightTrip->fqt_duration += $itinerary->duration;
-                    $flightTrip->update(false, ['fqt_duration']);
-                }
+            if ((!$tripKey = $segmentTripMap[$keyIata] ?? null) || !$flightQuoteTrip = $tripList[$tripKey] ?? null) {
+                throw new \DomainException('Segment (' . $keyIata . ') not found in TripList');
             }
 
+            $flightQuoteTripId = $flightQuoteTrip->fqt_id;
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
             $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
             $flightQuoteSegments[$keyIata] = $flightQuoteSegment;
+
+            $flightQuoteTrip->fqt_duration += $itinerary->duration;
+            $flightQuoteTrip->update(false, ['fqt_duration']);
         }
 
         if ($form->getBaggageFormsData()) {
@@ -247,6 +258,8 @@ class ReProtectionQuoteManualCreateService
                 }
             }
         }
+
+        $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
 
         return $flightQuote;
     }

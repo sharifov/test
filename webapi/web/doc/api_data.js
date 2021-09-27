@@ -1,6 +1,156 @@
 define({ "api": [
   {
     "type": "get, post",
+    "url": "/health-check",
+    "title": "Get health check",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>components health check passed statuses (&quot;true&quot; or &quot;false&quot;)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
+    "url": "/health-check/metrics",
+    "title": "Get health check metrics text",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales_Metrics",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "metrics",
+            "description": "<p>in plain text format containing components health statuses (&quot;1&quot; for OK, &quot;0&quot; for failed)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 1\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 0\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
     "version": "0.1.0",
@@ -1616,7 +1766,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example ROOM_CONNECTED:",
-          "content": "{\n            \"event\": \"ROOM_CONNECTED\",\n            \"data\": {\n                \"rid\": \"d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4\",\n                \"geo\": {\n                    \"ip\": \"92.115.180.30\",\n                    \"version\": \"IPv4\",\n                    \"city\": \"Chisinau\",\n                    \"region\": \"Chi\\u0219in\\u0103u Municipality\",\n                    \"region_code\": \"CU\",\n                    \"country\": \"MD\",\n                    \"country_name\": \"Republic of Moldova\",\n                    \"country_code\": \"MD\",\n                    \"country_code_iso3\": \"MDA\",\n                    \"country_capital\": \"Chisinau\",\n                    \"country_tld\": \".md\",\n                    \"continent_code\": \"EU\",\n                    \"in_eu\": false,\n                    \"postal\": \"MD-2000\",\n                    \"latitude\": 47.0056,\n                    \"longitude\": 28.8575,\n                    \"timezone\": \"Europe\\/Chisinau\",\n                    \"utc_offset\": \"+0300\",\n                    \"country_calling_code\": \"+373\",\n                    \"currency\": \"MDL\",\n                    \"currency_name\": \"Leu\",\n                    \"languages\": \"ro,ru,gag,tr\",\n                    \"country_area\": 33843,\n                    \"country_population\": 3545883,\n                    \"asn\": \"AS8926\",\n                    \"org\": \"Moldtelecom SA\"\n                },\n                \"visitor\": {\n                    \"conversations\": 0,\n                    \"lastAgentMessage\": null,\n                    \"lastVisitorMessage\": null,\n                    \"id\": \"fef46d63-8a30-4eec-89eb-62f1bfc0ffcd\",\n                    \"uuid\": \"54d87707-bb54-46e3-9eca-8f776c7bcacf\",\n                    \"project\": \"ovago\",\n                    \"leadIds\": [\n                        234556,\n                        357346\n                    ],\n                    \"caseIds\": [\n                        345464634,\n                        345634634\n                    ]\n                },\n                \"sources\": [],\n                \"page\": {\n                    \"url\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\",\n                    \"title\": \"Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com\",\n                    \"referrer\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\"\n                },\n                \"system\": {\n                    \"user_agent\": \"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/85.0.4183.102 Safari\\/537.36\",\n                    \"language\": \"en-US\",\n                    \"resolution\": \"1920x1080\"\n                },\n                \"custom\": {\n                    \"event\": {\n                        \"eventName\": \"UPDATE\",\n                        \"eventProps\": []\n                    }\n                }\n            }\n}",
+          "content": "{\n            \"event\": \"ROOM_CONNECTED\",\n            \"data\": {\n                \"rid\": \"d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4\",\n                \"geo\": {\n                    \"ip\": \"92.115.180.30\",\n                    \"version\": \"IPv4\",\n                    \"city\": \"Chisinau\",\n                    \"region\": \"Chi\\u0219in\\u0103u Municipality\",\n                    \"region_code\": \"CU\",\n                    \"country\": \"MD\",\n                    \"country_name\": \"Republic of Moldova\",\n                    \"country_code\": \"MD\",\n                    \"country_code_iso3\": \"MDA\",\n                    \"country_capital\": \"Chisinau\",\n                    \"country_tld\": \".md\",\n                    \"continent_code\": \"EU\",\n                    \"in_eu\": false,\n                    \"postal\": \"MD-2000\",\n                    \"latitude\": 47.0056,\n                    \"longitude\": 28.8575,\n                    \"timezone\": \"Europe\\/Chisinau\",\n                    \"utc_offset\": \"+0300\",\n                    \"country_calling_code\": \"+373\",\n                    \"currency\": \"MDL\",\n                    \"currency_name\": \"Leu\",\n                    \"languages\": \"ro,ru,gag,tr\",\n                    \"country_area\": 33843,\n                    \"country_population\": 3545883,\n                    \"asn\": \"AS8926\",\n                    \"org\": \"Moldtelecom SA\"\n                },\n                \"visitor\": {\n                    \"conversations\": 0,\n                    \"lastAgentMessage\": null,\n                    \"lastVisitorMessage\": null,\n                    \"id\": \"fef46d63-8a30-4eec-89eb-62f1bfc0ffcd\",\n                    \"username\": \"Test Usrename\",\n                    \"name\": \"Test Name\",\n                    \"uuid\": \"54d87707-bb54-46e3-9eca-8f776c7bcacf\",\n                    \"project\": \"ovago\",\n                    \"channel\": \"1\",\n                    \"email\": \"test@techork.com\",\n                    \"leadIds\": [\n                        234556,\n                        357346\n                    ],\n                    \"caseIds\": [\n                        345464634,\n                        345634634\n                    ]\n                },\n                \"sources\": {\n                    \"crossSystemXp\": \"123465.1\"\n                },\n                \"page\": {\n                    \"url\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\",\n                    \"title\": \"Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com\",\n                    \"referrer\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\"\n                },\n                \"system\": {\n                    \"user_agent\": \"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/85.0.4183.102 Safari\\/537.36\",\n                    \"language\": \"en-US\",\n                    \"resolution\": \"1920x1080\"\n                },\n                \"custom\": {\n                    \"event\": {\n                        \"eventName\": \"UPDATE\",\n                        \"eventProps\": []\n                    }\n                }\n            }\n}",
           "type": "json"
         }
       ]

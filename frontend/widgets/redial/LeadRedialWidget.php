@@ -6,7 +6,7 @@ use common\models\Call;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use sales\helpers\setting\SettingHelper;
-use sales\model\leadRedial\services\ClientPhones;
+use sales\model\leadRedial\queue\ClientPhones;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;

@@ -94,19 +94,25 @@ $select2Properties = [
                     <?= $form->field($model, 'cs_lead_id') ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'cs_created_dt')->widget(
-                        \dosamigos\datepicker\DatePicker::class,
-                        [
-                        'inline' => false,
-                        'clientOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd-M-yyyy',
-                        ]
-                        ]
-                    );?>
+                    <?= $form->field($model, 'cs_source_type_id')->dropDownList(CasesSourceType::getList(), ['prompt' => '']) ?>
                 </div>
                 <div class="col-md-2">
-                    <?= $form->field($model, 'cs_source_type_id')->dropDownList(CasesSourceType::getList(), ['prompt' => '']) ?>
+                    <?= $form->field($model, 'createdRange', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                        'presetDropdown' => false,
+                        'hideInput' => true,
+                        'convertFormat' => true,
+                        'pluginOptions' => [
+                            'timePicker' => true,
+                            'timePickerIncrement' => 1,
+                            'timePicker24Hour' => true,
+                            'locale' => [
+                                'format' => 'd-M-Y',
+                                'separator' => ' - '
+                            ]
+                        ]
+                    ])->label('Created Date From / To') ?>
                 </div>
             </div>
         </div>
@@ -209,6 +215,9 @@ $select2Properties = [
                 ]);
                 ?>
         </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssChargeType')->dropDownList(CaseSale::getChargeTypesList(), ['prompt' => '---']) ?>
+        </div>
         <div class="col-md-2">
             <?= $form->field($model, 'cssInOutDate', [
                         'options' => ['class' => 'form-group']
@@ -226,11 +235,8 @@ $select2Properties = [
                             ]
                         ]
                     ])->label('Flight Date From / To') ?>
+        </div>
 
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cssChargeType')->dropDownList(CaseSale::getChargeTypesList(), ['prompt' => '---']) ?>
-        </div>
         <div class="col-md-2">
             <?= $form->field($model, 'saleTicketSendEmailDate', [
                 'options' => ['class' => 'form-group'],
@@ -270,6 +276,48 @@ $select2Properties = [
         <div class="col-md-1">
             <?= $form->field($model, 'isAutomate')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
         </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'hasSale')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'nextFlightForm', [
+                'options' => ['class' => 'form-group']
+            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                'presetDropdown' => false,
+                'hideInput' => true,
+                'convertFormat' => true,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
+                    'timePicker24Hour' => true,
+                    'locale' => [
+                        'format' => 'd-M-Y',
+                        'separator' => ' - '
+                    ]
+                ]
+            ])->label('Next Flight Date From / To') ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <?= $form->field($model, 'statusRange', [
+                'options' => ['class' => 'form-group']
+            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                'presetDropdown' => false,
+                'hideInput' => true,
+                'convertFormat' => true,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
+                    'timePicker24Hour' => true,
+                    'locale' => [
+                        'format' => 'd-M-Y',
+                        'separator' => ' - '
+                    ]
+                ]
+            ])->label('Status Date From / To') ?>
+        </div>
     </div>
 
     <div class="row">
@@ -296,6 +344,15 @@ $select2Properties = [
         </div>
         <div class="col-md-1">
             <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'hasChange')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'hasRefund')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'hasOrder')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
         </div>
     </div>
 

@@ -69,7 +69,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
             <div class="chat__list">
 
                 <div class="communication-block-scroll">
-                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId ,'enablePushState' => false]) ?>
+                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId, 'timeout' => 6000,'enablePushState' => false]) ?>
 
                     <?php $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE) ?>
                     <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
@@ -107,7 +107,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                     <?php yii\widgets\Pjax::end() ?>
                 </div>
 
-                <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm ,'enablePushState' => false]) ?>
+                <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm, 'timeout' => 6000, 'enablePushState' => false]) ?>
 
                 <?php if ($model->isProcessing() || $model->isSolved()) :?>
                      <div class="chat__form panel">

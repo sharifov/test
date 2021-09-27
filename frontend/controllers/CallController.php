@@ -31,6 +31,7 @@ use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\call\abac\CallAbacObject;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\call\services\reserve\CallReserver;
 use sales\model\call\services\reserve\Key;
@@ -43,6 +44,11 @@ use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferen
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\ReturnToHoldCall;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use sales\model\contactPhoneData\service\ContactPhoneDataService;
+use sales\model\contactPhoneList\entity\ContactPhoneList;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
@@ -1508,6 +1514,51 @@ class CallController extends FController
             'error' => false,
             'notifier' => $enableNotifier
         ]);
+    }
+
+    public function actionAllowList(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            /** @abac CallAbacObject::ACT_ALLOW_LIST, CallAbacObject::ACTION_UPDATE, Access to add/remove ContactPhoneData - key allow_list */
+            if (!Yii::$app->abac->can(null, CallAbacObject::ACT_ALLOW_LIST, CallAbacObject::ACTION_UPDATE)) {
+                throw new ForbiddenHttpException('Access Denied');
+            }
+
+            $result = ['message' => '', 'status' => 0, 'result' => ''];
+            $callId = (int) Yii::$app->request->post('call_id');
+
+            try {
+                if (!$call = Call::findOne($callId)) {
+                    throw new \DomainException('Call not found');
+                }
+
+                $contactPhoneList = ContactPhoneListService::getOrCreate($call->c_from);
+                if (ContactPhoneListService::isAllowList($call->c_from)) {
+                    ContactPhoneDataService::removeByCplIdAndKey($contactPhoneList->cpl_id, ContactPhoneDataDictionary::KEY_ALLOW_LIST);
+                    $result['result'] = 'removed';
+                } else {
+                    ContactPhoneDataService::getOrCreate(
+                        $contactPhoneList->cpl_id,
+                        ContactPhoneDataDictionary::KEY_ALLOW_LIST,
+                        '1'
+                    );
+                    $result['result'] = 'added';
+                }
+
+                $result['message'] = 'Success';
+                $result['status'] = 1;
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::warning(AppHelper::throwableLog($exception), 'CallController:actionAllowList::exception');
+                $result['message'] = VarDumper::dumpAsString($exception->getMessage());
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'CallController:actionAllowList:throwable');
+                $result['message'] = 'Internal Server Error';
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
     }
 
     private function addUsersForCall(Call $call, array $users): array

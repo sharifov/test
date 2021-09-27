@@ -58,11 +58,28 @@ class LeadBadgesRepository
      */
     public function getBusinessInboxQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->andWhere(['project_id' => 7])->orWhere(['cabin' => Lead::CABIN_BUSINESS])->orWhere(['cabin' => Lead::CABIN_FIRST]);
-
-        /*if ($user->isAdmin()) {
-            return $query;
-        }*/
+        $query = Lead::find()
+        ->orWhere([
+            'and',
+            ['project_id' => 7],
+            ['l_is_test' => false],
+            ['status' => Lead::STATUS_PENDING],
+            ['<>', 'l_call_status_id', 5]
+        ])
+        ->orWhere([
+            'and',
+            ['cabin' => Lead::CABIN_BUSINESS],
+            ['l_is_test' => false],
+            ['status' => Lead::STATUS_PENDING],
+            ['<>', 'l_call_status_id', 5]
+        ])
+        ->orWhere([
+            'and',
+            ['cabin' => Lead::CABIN_FIRST],
+            ['l_is_test' => false],
+            ['status' => Lead::STATUS_PENDING],
+            ['<>', 'l_call_status_id', 5]
+        ]);
 
         return $query;
     }

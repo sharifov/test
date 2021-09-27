@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\reprotectionCreate\service;
 
 use DomainException;
+use frontend\assets\overridden\KartikActiveFormAsset;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -111,7 +112,32 @@ class CaseReProtectionService
         return $this->getCase();
     }
 
-    public function setCaseDeadline(FlightQuote $flightQuote): Cases
+    public function setCaseDeadline(FlightQuote $flightQuote): ?string
+    {
+        foreach ($flightQuote->flightQuoteTrips as $key => $trip) {
+            if (!(($firstSegment = $trip->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
+                throw new \RuntimeException('Deadline not created. Reason - Segments departure not correct');
+            }
+            $curTime = new \DateTime('now', new \DateTimeZone('UTC'));
+            $departureTime = new \DateTime($firstSegment->fqs_departure_dt, new \DateTimeZone('UTC'));
+
+            if ($curTime <= $departureTime) {
+                $schdCaseDeadlineHours = SettingHelper::getSchdCaseDeadlineHours();
+                $deadline = $departureTime->modify(' -' . $schdCaseDeadlineHours . ' hours')->format('Y-m-d H:i:s');
+                $this->getCase()->cs_deadline_dt = $deadline;
+                $this->casesRepository->save($this->getCase());
+                $this->getCase()->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set deadline from FlightQuote', ['uid' => $flightQuote->fq_uid]);
+                return $deadline;
+            }
+        }
+        \Yii::warning(
+            'CaseDeadline not set by FlightQuote(' . $flightQuote->getId() . ')',
+            'CaseReProtectionService:setCaseDeadline:notSet'
+        );
+        return null;
+    }
+
+    public function setCaseDeadlineOld(FlightQuote $flightQuote): Cases
     {
         if (!(($firstSegment = $flightQuote->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
             throw new \RuntimeException('Deadline not created. Reason - Segments departure not correct');

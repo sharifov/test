@@ -25,6 +25,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
 use sales\dispatchers\EventDispatcher;
@@ -76,6 +77,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
         $productQuoteChangeRepository = Yii::createObject(ProductQuoteChangeRepository::class);
         $flightRequestService = Yii::createObject(FlightRequestService::class);
         $eventDispatcher = Yii::createObject(EventDispatcher::class);
+        $productQuoteDataManageService = Yii::createObject(ProductQuoteDataManageService::class);
 
         $client = null;
 
@@ -224,7 +226,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
 
             if ($productQuoteChange->isStatusNew() || $productQuoteChange->isDecisionPending()) {
-                if ($case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
+                if ($case->isError() || $case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
                     if (!$case->cs_user_id) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'New reprotection request');
                         $caseReProtectionService->caseToManual('New reprotection request');
@@ -234,7 +236,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         Notifications::createAndPublish(
                             $case->cs_user_id,
                             'New reProtection quote has been added',
-                            'New reProtection quote has been added for Case: (' . $linkToCase . ') ',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . '). Manual action required',
                             Notifications::TYPE_INFO,
                             true
                         );
@@ -286,6 +288,13 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $caseReProtectionService->caseToManual('Auto SCHD Email not sent');
                         $flightRequestService->pending(VarDumper::dumpAsString($throwable->getMessage()));
                     }
+
+                    try {
+                        $productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuote->pq_id, $reProtectionQuote->pq_id);
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set recommended quote(' . $reProtectionQuote->pq_gid . ')');
+                    } catch (\Throwable $throwable) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Quote(' . $reProtectionQuote->pq_gid . ') not set recommended');
+                    }
                     return;
                 }
 
@@ -296,7 +305,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         Notifications::createAndPublish(
                             $case->cs_user_id,
                             'New reProtection quote has been added',
-                            'New reProtection quote has been added for Case: (' . $linkToCase . ') ',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . '). Manual action required',
                             Notifications::TYPE_INFO,
                             true
                         );
@@ -312,10 +321,10 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
             \Yii::info(
                 [
-                    'case' => $case->toArray(),
-                    'productQuoteChange' => $productQuoteChange->toArray()
+                    'case' => ArrayHelper::merge($case->toArray(), ['status' => CasesStatus::getName($case->cs_status)]),
+                    'productQuoteChange' => ArrayHelper::merge($productQuoteChange->toArray(), ['status' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id)]),
                 ],
-                'info\Debug:ReprotectionCreateJob'
+                'info\ReprotectionCreateJob:UnknownProcessException'
             ); /* TODO:: FOR DEBUG:: must by remove  */
 
             throw new DomainException('Unknown process exception');

@@ -184,7 +184,7 @@ class ClientEmail extends \yii\db\ActiveRecord
 
         $query = (new Query())->select(['id'])->distinct()
             ->from(Client::tableName())
-            ->where(['NOT IN', 'id', $this->client_id])
+            ->where(['<>', 'id', $this->client_id])
             ->andWhere(['IN', 'id', $subQuery]);
 
         return (int)$query->count();

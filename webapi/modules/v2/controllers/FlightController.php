@@ -85,7 +85,7 @@ class FlightController extends BaseController
         $behaviors['logger'] = [
             'class' => SimpleLoggerBehavior::class,
             'except' => [
-                'product-quote-get',
+//                'product-quote-get',
             ],
         ];
         $behaviors['request'] = [

@@ -2,6 +2,8 @@
 
 namespace sales\model\contactPhoneList\service;
 
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
 use sales\model\contactPhoneList\repository\ContactPhoneListRepository;
 use sales\services\phone\checkPhone\CheckPhoneService;
@@ -33,5 +35,15 @@ class ContactPhoneListService
             ->where(['cpl_uid' => $uid])
             ->asArray()
             ->all();
+    }
+
+    public static function isAllowList(string $phone): bool
+    {
+        return ContactPhoneList::find()
+            ->innerJoin(ContactPhoneData::tableName(), 'cpd_cpl_id = cpl_id')
+            ->where(['cpl_uid' => CheckPhoneService::uidGenerator($phone)])
+            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_ALLOW_LIST])
+            ->andWhere(['cpd_value' => '1'])
+            ->exists();
     }
 }

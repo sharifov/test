@@ -1,1 +1,6 @@
 /composer.lock -merge
+/webapi/web/apidoc/ linguist-generated=true
+/webapi/web/phpdoc/ linguist-generated=true
+/frontend/web/all_shared/ linguist-generated=true
+*.min.js linguist-generated=true
+*.min.css linguist-generated=true

@@ -357,7 +357,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
                     view.setColumns(arr);
                     totalCallsChart.draw(data, options);
-                    totalCallsChart.draw(view, options);
+                    //totalCallsChart.draw(view, options);
                 });
 
                 $("#columnType").on('click', function () {
@@ -408,7 +408,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
                     view.setColumns(arr);
                     totalCallsChart.draw(data, options);
-                    totalCallsChart.draw(view, options);
+                    //totalCallsChart.draw(view, options);
                 });
             });
         });

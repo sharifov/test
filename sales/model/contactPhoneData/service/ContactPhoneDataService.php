@@ -23,4 +23,12 @@ class ContactPhoneDataService
     {
         return ContactPhoneData::findOne(['cpd_cpl_id' => $cplId, 'cpd_key' => $key]);
     }
+
+    public static function removeByCplIdAndKey(int $cplId, string $key): int
+    {
+        if ($contactPhoneData = self::getByCplIdAndKey($cplId, $key)) {
+            return (int) $contactPhoneData->delete();
+        }
+        return 0;
+    }
 }

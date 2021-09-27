@@ -105,6 +105,7 @@ $pjaxId = 'pjax-container-prices';
                 </div>
 
                 <?= Html::hiddenInput('flightId', $flight->fl_id, ['id' => 'flightId']) ?>
+                <?= Html::hiddenInput('keyTripList', null, ['id' => 'keyTripList']) ?>
 
                 <div class="row">
                     <div class="col-md-12">
@@ -149,7 +150,8 @@ $pjaxId = 'pjax-container-prices';
 
                         </div>
 
-                        <?= Html::hiddenInput('baggage_data', $flight->fl_id, ['id' => 'baggage_data']) ?>
+                        <?= Html::hiddenInput('baggage_data', null, ['id' => 'baggage_data']) ?>
+                        <?= Html::hiddenInput('segment_trip_data', null, ['id' => 'segment_trip_data']) ?>
 
                         <div class="row">
                             <div class="col-md-12 text-center">
@@ -188,7 +190,8 @@ $pjaxId = 'pjax-container-prices';
     
     $(document).on('beforeSubmit', '#add-quote-form', function(event) {
         let baggageData = $('.segment_baggage_forms').serialize();
-        $('#baggage_data').val(baggageData);
+        $('#baggage_data').val(baggageData);        
+        $('#segment_trip_data').val($('.segment_trip_forms').serialize());
     });
     
     addRPQuoteForm.on('click', '#save_dump_btn', function () {
@@ -196,6 +199,7 @@ $pjaxId = 'pjax-container-prices';
         $('#error_summary_box').html('');
         let baggageData = $('.segment_baggage_forms').serialize();
         $('#baggage_data').val(baggageData);
+        $('#segment_trip_data').val($('.segment_trip_forms').serialize());
         
         loadingBtn($(this), true);
         
@@ -265,12 +269,15 @@ $pjaxId = 'pjax-container-prices';
             })
             .done(function(dataResponse) {
                 loadingBtn($('#prepare_dump_btn'), false);
+                
+                console.log(dataResponse); // TODO:: for debug
     
                 if (dataResponse.status === 1) {
                 
                     if (dataResponse.segments.length) {
                        $('#box_segments').html(dataResponse.segments); 
                     }
+                    $('#keyTripList').val(dataResponse.key_trip_list);
                     
                     $('#save_dump_btn').show(500);
                 } else {

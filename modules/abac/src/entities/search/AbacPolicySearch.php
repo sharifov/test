@@ -46,6 +46,7 @@ class AbacPolicySearch extends AbacPolicy
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['ap_id' => SORT_DESC]],
         ]);
 
         $this->load($params);
