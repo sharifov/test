@@ -2,6 +2,8 @@
 
 namespace console\controllers;
 
+use common\models\Department;
+use common\models\Project;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\helpers\setting\SettingHelper;
 use sales\model\client\notifications\client\entity\NotificationType;
@@ -66,12 +68,15 @@ use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
+use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\project\entity\params\Params;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use yii\console\Controller;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\console\ExitCode;
@@ -81,9 +86,21 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+    public function actionR()
+    {
+        $access = CallRedialUserAccess::find()->andWhere(['crua_lead_id' => 513195, 'crua_user_id' => 295])->one();
+        $repo = \Yii::createObject(CallRedialUserAccessRepository::class);
+        $repo->remove($access);
+        die;
+    }
 
     public function actionA()
     {
+        $repo = \Yii::createObject(CallRedialUserAccessRepository::class);
+        $access = CallRedialUserAccess::create(513195, 295, new \DateTimeImmutable());
+        $repo->save($access);
+        die;
+
 
 //        \Yii::createObject(\sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class)->handle(new ProductQuoteChangeDecisionModifyEvent(113, 192));
 //        die;

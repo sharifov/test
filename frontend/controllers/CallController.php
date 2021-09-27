@@ -1270,8 +1270,14 @@ class CallController extends FController
                 $leadRedialQueue = Yii::createObject(\sales\model\leadRedial\queue\LeadRedialQueue::class);
                 $redialCall = $leadRedialQueue->getCall(Auth::id());
                 if ($redialCall) {
-                    $response['isRedialCall'] = true;
-                    $response['redialCall'] = $redialCall->toArray();
+                    $prepare = new PrepareCurrentCallsForNewCall($userId);
+                    if ($prepare->prepare()) {
+                        $response['isRedialCall'] = true;
+                        $response['redialCall'] = $redialCall->toArray();
+                    } else {
+                        $response['error'] = true;
+                        $response['message'] = 'Processing current call error. Please try again.';
+                    }
                 } else {
                     Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
                     $response['error'] = true;

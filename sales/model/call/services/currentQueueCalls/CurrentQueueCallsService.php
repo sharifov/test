@@ -8,10 +8,12 @@ use common\models\Conference;
 use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Project;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\conference\service\ConferenceDataService;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\phoneList\entity\PhoneList;
 use yii\db\Expression;
 
@@ -525,7 +527,7 @@ class CurrentQueueCallsService
             return $calls;
         }
 
-        $queue = CallUserAccess::find()
+        $defaultQueue = CallUserAccess::find()
             ->select([
                 'count(*) as count',
                 Project::tableName() . '.name as project',
@@ -549,14 +551,52 @@ class CurrentQueueCallsService
             ])
             ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD])
             ->groupBy(['c_project_id', 'c_dep_id'])
+            ->indexBy(function ($raw) {
+                return $raw['project'] . '.' . $raw['department'];
+            })
             ->asArray()
             ->all();
 
-        foreach ($queue as $item) {
+        $redialQueue = CallRedialUserAccess::find()
+            ->select([
+                'count(*) as count',
+                Project::tableName() . '.name as project',
+                'dep_name as department',
+            ])
+            ->innerJoin(Lead::tableName(), Lead::tableName() . '.id = crua_lead_id')
+            ->innerJoin(Project::tableName(), Project::tableName() . '.id = ' . Lead::tableName() . '.project_id')
+            ->innerJoin(Department::tableName(), Department::tableName() . '.dep_id = ' . Lead::tableName() . '.l_dep_id')
+            ->andWhere(['crua_user_id' => $this->userId])
+            ->groupBy([Lead::tableName() . '.project_id', Lead::tableName() . '.l_dep_id'])
+            ->indexBy(function ($raw) {
+                return $raw['project'] . '.' . $raw['department'];
+            })
+            ->asArray()
+            ->all();
+
+        foreach ($defaultQueue as $call) {
+            $key = $call['project'] . '.' . $call['department'];
+            if (isset($redialQueue[$key])) {
+                $calls[] = new PriorityQueueCall([
+                    'count' => (int)$call['count'] + (int)$redialQueue[$key]['count'],
+                    'project' => $call['project'],
+                    'department' => $call['department'],
+                ]);
+                unset($redialQueue[$key]);
+            } else {
+                $calls[] = new PriorityQueueCall([
+                    'count' => (int)$call['count'],
+                    'project' => $call['project'],
+                    'department' => $call['department'],
+                ]);
+            }
+        }
+
+        foreach ($redialQueue as $call) {
             $calls[] = new PriorityQueueCall([
-                'count' => (int)$item['count'],
-                'project' => $item['project'],
-                'department' => $item['department'],
+                'count' => (int)$call['count'],
+                'project' => $call['project'],
+                'department' => $call['department'],
             ]);
         }
 
