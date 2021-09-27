@@ -55,6 +55,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
     <?= $this->render('_total_calls_chart_summary', [
         'totalCallsDbData' => $viewModel->callData,
+        'groupsCount' => $viewModel->groupsCount
     ]) ?>
 
     <script type="text/javascript">

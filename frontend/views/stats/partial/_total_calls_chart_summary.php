@@ -2,12 +2,12 @@
 
 /**
  * @var $totalCallsDbData array
+ * @var $groupsCount int
  */
 
 $totalIncomingCalls = $totalIncomingCallsAvg = $totalIncomingDuration = 0;
 $totalOutgoingCalls = $totalOutgoingCallsAvg = $totalOutgoingDuration = 0;
 $totalInOutCalls = $totalInOutCallsAvg = $totalInOutCallsDuration = 0;
-$groupsCount = count($totalCallsDbData) / 3;
 
 foreach ($totalCallsDbData as $results) {
     if ($results['callType'] === 'in') {
