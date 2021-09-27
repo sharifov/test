@@ -7,6 +7,8 @@ use common\models\UserOnline;
 use common\models\UserProfile;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\DayTimeHours;
+use sales\helpers\setting\SettingHelper;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
 use Yii;
 use common\models\Call;
 use common\models\ClientPhone;
@@ -45,6 +47,7 @@ class LeadQcallSearch extends LeadQcall
     public $deadline;
     public $l_is_test;
     public $l_call_status_id;
+    public $accessToCall;
 
     /**
      * {@inheritdoc}
@@ -64,6 +67,7 @@ class LeadQcallSearch extends LeadQcall
             ['l_is_test', 'in', 'range' => [0,1]],
             ['attempts', 'integer'],
             ['l_call_status_id', 'integer'],
+            ['accessToCall', 'integer']
         ];
     }
 
@@ -445,14 +449,14 @@ class LeadQcallSearch extends LeadQcall
         return $dataProvider;
     }
 
-    public function searchByRedialLeads($params)
+    public function searchRedialLeads($params)
     {
         $nowDt = date('Y-m-d H:i:s');
-        $query = self::find()->select([self::tableName() . '.*']);
+        $query = self::find()->select('*');
 
-//        $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
+        $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
 
-        $query->innerJoin(Lead::tableName());
+        $query->joinWith('lqcLead');
 
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(Project::getList())]);
 
@@ -592,6 +596,15 @@ class LeadQcallSearch extends LeadQcall
 //            'attempts' => SORT_ASC,
 //            'lqc_dt_from' => SORT_ASC
 //        ]);
+        $query->addSelect([
+            'accessToCall' => CallRedialUserAccess::find()
+                ->alias('crua')
+                ->select('count(crua.crua_lead_id)')
+                ->where('crua_lead_id = ' . Lead::tableName() . '.id')
+                ->andWhere('time_to_sec(TIMEDIFF(now(), crua.crua_created_dt)) < :limitTime', [
+                    'limitTime' => SettingHelper::getRedialUserAccessExpiredSecondsLimit()
+                ])
+        ]);
 
         $defaultOrder = array_merge($defaultOrder, [
             'same_priority' => SORT_DESC,
@@ -616,7 +629,9 @@ class LeadQcallSearch extends LeadQcall
             Lead::tableName() . '.cabin' => $this->cabin,
             Lead::tableName() . '.l_is_test' => $this->l_is_test,
         ]);
-        return $query->asArray()->all();
+
+        $query->andHaving(['<', 'accessToCall', SettingHelper::getRedialGetLimitAgents()]);
+        return $query->all();
     }
 
     /**

@@ -6,19 +6,27 @@ use common\components\Metrics;
 use common\models\Call;
 use common\models\Employee;
 use common\models\ProjectEmployeeAccess;
+use common\models\query\EmployeeQuery;
 use common\models\search\LeadQcallSearch;
 use common\models\Sources;
 use common\models\UserProfile;
 use console\helpers\OutputHelper;
+use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\callTerminateLog\entity\CallTerminateLog;
 use sales\model\callTerminateLog\repository\CallTerminateLogRepository;
 use sales\model\callTerminateLog\service\CallTerminateLogService;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
+use sales\model\leadRedial\entity\CallRedialUserAccessQuery;
+use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\services\phone\blackList\PhoneBlackListManageService;
 use yii\console\Controller;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -32,6 +40,7 @@ use yii\helpers\VarDumper;
  * @property int $defaultInProgressMinutes
  * @property int $defaultIvrMinutes
  * @property OutputHelper $outputHelper
+ * @property CallRedialUserAccessRepository $callRedialUserAccessRepository
  */
 class CallController extends Controller
 {
@@ -44,17 +53,25 @@ class CallController extends Controller
     private $terminatorEnable = false;
     private $terminatorParams;
     private $outputHelper;
+    private CallRedialUserAccessRepository $callRedialUserAccessRepository;
 
     /**
      * @param $id
      * @param $module
      * @param OutputHelper $outputHelper
+     * @param CallRedialUserAccessRepository $callRedialUserAccessRepository
      * @param array $config
      */
-    public function __construct($id, $module, OutputHelper $outputHelper, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        OutputHelper $outputHelper,
+        CallRedialUserAccessRepository $callRedialUserAccessRepository,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->outputHelper = $outputHelper;
+        $this->callRedialUserAccessRepository = $callRedialUserAccessRepository;
         $this->setSettings();
     }
 
@@ -337,14 +354,47 @@ class CallController extends Controller
 
         $callRedialSearch = new LeadQcallSearch();
 
-        $leads = $callRedialSearch->searchByRedialLeads([$callRedialSearch->formName() => [
+        $leads = $callRedialSearch->searchRedialLeads([$callRedialSearch->formName() => [
             'l_is_test' => 0
         ]]);
 
-
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
         foreach ($leads as $lead) {
-            var_dump($lead);
-            die;
+            $enabledSortingForBusinessLead = $lead->lqcLead->isBusiness() && SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel();
+
+            $limitAgents = SettingHelper::getRedialGetLimitAgents() - $lead->accessToCall;
+
+            $agents = EmployeeQuery::getAgentsForRedialCallByLead(
+                $enabledSortingForBusinessLead,
+                $lead->lqcLead->project_id,
+                $lead->lqcLead->l_dep_id,
+                SettingHelper::getRedialUserAccessExpiredSecondsLimit(),
+                $limitAgents <= 0 ? SettingHelper::getRedialGetLimitAgents() : $limitAgents
+            );
+
+            $countAgentsWithMinimumSkillValue = 0;
+            foreach ($agents as $agent) {
+                try {
+                    if ($enabledSortingForBusinessLead) {
+                        if ($countAgentsWithMinimumSkillValue && (int)$agent['up_skill'] < SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel()) {
+                            continue;
+                        }
+
+                        $callRedialUserAccess = CallRedialUserAccessQuery::insertOrUpdate($lead->lqc_lead_id, $agent['id'], new \DateTimeImmutable());
+                        $eventDispatcher->dispatchAll($callRedialUserAccess->releaseEvents());
+
+                        if ((int)$agent['up_skill'] >= SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel()) {
+                            $countAgentsWithMinimumSkillValue++;
+                        }
+                    } else {
+                        $callRedialUserAccess = CallRedialUserAccessQuery::insertOrUpdate($lead->lqc_lead_id, $agent['id'], new \DateTimeImmutable());
+                        $eventDispatcher->dispatchAll($callRedialUserAccess->releaseEvents());
+                    }
+                } catch (\Throwable $e) {
+                    Yii::info(VarDumper::dumpAsString(ArrayHelper::toArray($agents)), 'info\agents');
+                    Yii::error(AppHelper::throwableLog($e, true), 'console');
+                }
+            }
         }
 
         $timeEnd = microtime(true);
