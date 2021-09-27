@@ -59,6 +59,7 @@ services:
     build: ./mysql
     volumes:
       - ./../../../mysql-docker/db:/var/lib/mysql
+      - ./../../../mysql-docker/dump:/dump
     ports:
       - "3307:3306"
     environment:
