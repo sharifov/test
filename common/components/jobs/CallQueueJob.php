@@ -23,6 +23,7 @@ use sales\helpers\setting\SettingHelper;
 use sales\model\callTerminateLog\entity\CallTerminateLog;
 use sales\model\callTerminateLog\repository\CallTerminateLogRepository;
 use sales\model\callTerminateLog\service\CallTerminateLogService;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesCreateService;
@@ -147,7 +148,8 @@ class CallQueueJob extends BaseJob implements JobInterface
                                 if (
                                     !$lead &&
                                     $departmentParams->object->lead->createOnCall &&
-                                    $projectParams->object->lead->allow_auto_lead_create
+                                    $projectParams->object->lead->allow_auto_lead_create &&
+                                    !ContactPhoneListService::isAutoCreateLeadOff($call->c_from)
                                 ) {
                                     $lead = (Yii::createObject(LeadManageService::class))
                                         ->createByIncomingCall(
@@ -199,7 +201,11 @@ class CallQueueJob extends BaseJob implements JobInterface
                     } elseif ($departmentParams->object->type->isCase()) {
                         try {
                             $allowAutoCreateByProject = $projectParams->object->case->allow_auto_case_create;
-                            $createCaseOnIncoming = ($allowAutoCreateByProject && $departmentParams->object->case->createOnCall);
+                            $createCaseOnIncoming = (
+                                $allowAutoCreateByProject &&
+                                $departmentParams->object->case->createOnCall &&
+                                !ContactPhoneListService::isAutoCreateCaseOff($call->c_from)
+                            );
 
                             $case = $this->casesCreateService->getOrCreateByCall(
                                 [new PhoneCreateForm(['phone' => $call->c_from])],

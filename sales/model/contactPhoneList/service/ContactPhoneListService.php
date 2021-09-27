@@ -46,4 +46,24 @@ class ContactPhoneListService
             ->andWhere(['cpd_value' => '1'])
             ->exists();
     }
+
+    public static function isAutoCreateLeadOff(string $phone): bool
+    {
+        return ContactPhoneList::find()
+            ->innerJoin(ContactPhoneData::tableName(), 'cpd_cpl_id = cpl_id')
+            ->where(['cpl_uid' => CheckPhoneService::uidGenerator($phone)])
+            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_AUTO_CREATE_LEAD_OFF])
+            ->andWhere(['cpd_value' => '1'])
+            ->exists();
+    }
+
+    public static function isAutoCreateCaseOff(string $phone): bool
+    {
+        return ContactPhoneList::find()
+            ->innerJoin(ContactPhoneData::tableName(), 'cpd_cpl_id = cpl_id')
+            ->where(['cpl_uid' => CheckPhoneService::uidGenerator($phone)])
+            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_AUTO_CREATE_CASE_OFF])
+            ->andWhere(['cpd_value' => '1'])
+            ->exists();
+    }
 }
