@@ -171,7 +171,14 @@ class CasesManageService
         $this->guardAccessUserToCase($case, $user);
         $case->processing($user->id, $creatorId, $description);
         $this->casesRepository->save($case);
-        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($user->username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
+
+        if ($creatorId) {
+            $creator = $this->finder->userFind($creatorId);
+        }
+        $eventDescription = 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status];
+        $eventDescription .= ' By: ' . ($creator->username ?? 'System.');
+        $eventDescription .= ($description ? ' Reason: ' . $description : '');
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, $eventDescription);
     }
 
     /**

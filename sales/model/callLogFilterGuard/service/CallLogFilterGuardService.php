@@ -27,7 +27,7 @@ class CallLogFilterGuardService
 
         $twilioCallFilterGuard = (new TwilioCallFilterGuard($phoneNumber))->default();
 
-        if (empty($dataJson = $twilioCallFilterGuard->getResponseData())) {
+        if (empty($dataJson = $twilioCallFilterGuard->response)) {
             throw new DomainException('TwilioCallFilterGuard Error: ResponseData is empty');
         }
 
