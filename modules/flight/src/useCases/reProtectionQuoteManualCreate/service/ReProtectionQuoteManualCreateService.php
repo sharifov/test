@@ -290,6 +290,10 @@ class ReProtectionQuoteManualCreateService
             $arrivalUtc = clone($arrival);
             $arrivalUtc = $arrivalUtc->setTimezone(new \DateTimeZone('UTC'));
 
+            if ($arrivalUtc < $departureUtc) {
+                $arrivalUtc = $arrivalUtc->modify('+1 days');
+            }
+
             $flightQuoteSegment->fqs_departure_dt = $departureUtc->format('Y-m-d H:i:s');
             $flightQuoteSegment->fqs_arrival_dt = $arrivalUtc->format('Y-m-d H:i:s');
             $flightQuoteSegment->fqs_duration = ($arrivalUtc->getTimestamp() - $departureUtc->getTimestamp()) / 60;
