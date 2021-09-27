@@ -113,7 +113,7 @@ class CallLog extends \yii\db\ActiveRecord
 
             [['cl_conference_id'], 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['cl_conference_id' => 'cf_id']],
 
-            ['cl_stir_status', 'string', 'max' => 1],
+            ['cl_stir_status', 'string', 'max' => 2],
             ['cl_stir_status', 'trim', 'skipOnEmpty' => true],
             ['cl_stir_status', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
         ];
