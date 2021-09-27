@@ -436,6 +436,14 @@ class CommunicationController extends ApiBaseController
                                     SettingHelper::getCallbackToCallerDialCallLimit(),
                                 );
 
+                                Yii::info([
+                                    'callId' => $callModel->c_id,
+                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                    'type' => $callLogFilterGuard->getTypeName(),
+                                    'phone' => $callModel->c_from,
+                                    'result' => $result,
+                                ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
+
                                 if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
                                     Yii::error([
                                         'callId' => $callModel->c_id,
@@ -447,21 +455,10 @@ class CommunicationController extends ApiBaseController
                                 } elseif (
                                     (isset($result['data']['result']['status']) && !in_array(
                                         $result['data']['result']['status'],
-                                        SettingHelper::getCallbackToCallerSuccessStatusList()
+                                        SettingHelper::getCallbackToCallerSuccessStatusList(),
+                                        true
                                     ))
                                 ) {
-                                    Yii::info([
-                                        'callId' => $callModel->c_id,
-                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                        'type' => $callLogFilterGuard->getTypeName(),
-                                        'phone' => $callModel->c_from,
-                                        'result' => $result,
-                                        'successStatusList' => SettingHelper::getCallbackToCallerSuccessStatusList(),
-                                        'statusResult' => !in_array(
-                                            $result['data']['result']['status'],
-                                            SettingHelper::getCallbackToCallerSuccessStatusList()
-                                        )
-                                    ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
                                     return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
                                 }
                             }
@@ -555,6 +552,14 @@ class CommunicationController extends ApiBaseController
                                         SettingHelper::getCallbackToCallerDialCallLimit(),
                                     );
 
+                                    Yii::info([
+                                        'callId' => $callModel->c_id,
+                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                        'type' => $callLogFilterGuard->getTypeName(),
+                                        'phone' => $callModel->c_from,
+                                        'result' => $result,
+                                    ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
+
                                     if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
                                         Yii::error([
                                             'callId' => $callModel->c_id,
@@ -566,21 +571,10 @@ class CommunicationController extends ApiBaseController
                                     } elseif (
                                         (isset($result['data']['result']['status']) && !in_array(
                                             $result['data']['result']['status'],
-                                            SettingHelper::getCallbackToCallerSuccessStatusList()
+                                            SettingHelper::getCallbackToCallerSuccessStatusList(),
+                                            true
                                         ))
                                     ) {
-                                        Yii::info([
-                                            'callId' => $callModel->c_id,
-                                            'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                            'type' => $callLogFilterGuard->getTypeName(),
-                                            'phone' => $callModel->c_from,
-                                            'result' => $result,
-                                            'successStatusList' => SettingHelper::getCallbackToCallerSuccessStatusList(),
-                                            'statusResult' => !in_array(
-                                                $result['data']['result']['status'],
-                                                SettingHelper::getCallbackToCallerSuccessStatusList()
-                                            )
-                                        ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
                                         return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
                                     }
                                 }
