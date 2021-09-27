@@ -174,6 +174,36 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
+    public function twilioDial(string $phoneFrom, string $phoneTo, int $requestTimeout, string $message, int $dialCallTimeout, int $dialCallLimit, array $options = []): array
+    {
+        $out = ['error' => false, 'data' => []];
+        $options = array_merge($options, [
+            "twiml" => "<Response><Say>$message</Say></Response>",
+            'statusCallbackEvent' => ['answered', 'completed'],
+            'timeout' => $dialCallTimeout,
+            'timeLimit' => $dialCallLimit
+        ]);
+
+        $response = $this->sendRequest('twilio/get-status-by-dial', [
+            'phone_from' => $phoneFrom,
+            'phone_to' => $phoneTo,
+            'options' => $options
+        ], 'POST', [], [CURLOPT_TIMEOUT => $requestTimeout]);
+
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $out['data'] = $response->data['data'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::twilioMakeCall');
+        }
+
+        return $out;
+    }
+
     /**
      * @param int $project_id
      * @param string $template_type

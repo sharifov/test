@@ -354,6 +354,8 @@ class CommunicationController extends ApiBaseController
                 $response['error_code'] = 11;
             }
 
+            $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || Call::isTrustedVerstat($postCall['StirVerstat'] ?? '');
+
             try {
                 $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
             } catch (CallDeclinedException $e) {
@@ -379,7 +381,7 @@ class CommunicationController extends ApiBaseController
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
 
-                    if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
+                    if (!$isTrustStirCall && $callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
                         $callFilterGuardService->runRepression($postCall);
                     }
                 } catch (CallDeclinedException $e) {
@@ -420,9 +422,50 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
-                if (SettingHelper::isEnableCallLogFilterGuard()) {
+                if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
-                        (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                        $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                        if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
+                            if (SettingHelper::isCallbackToCallerEnabled() && !in_array($callModel->cProject->project_key, SettingHelper::getCallbackToCallerExcludedStatusList())) {
+                                $result = Yii::$app->communication->twilioDial(
+                                    $incoming_phone_number,
+                                    $client_phone_number,
+                                    SettingHelper::getCallbackToCallerCurlTimeout(),
+                                    SettingHelper::getCallbackToCallerMessage(),
+                                    SettingHelper::getCallbackToCallerDialCallTimeout(),
+                                    SettingHelper::getCallbackToCallerDialCallLimit(),
+                                );
+
+                                if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
+                                    Yii::error([
+                                        'callId' => $callModel->c_id,
+                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                        'type' => $callLogFilterGuard->getTypeName(),
+                                        'phone' => $callModel->c_from,
+                                        'message' => $result['data']['message']
+                                    ], 'CallSpamFilter:DepartmentCall:CommunicationError');
+                                } elseif (
+                                    (isset($result['data']['result']['status']) && !in_array(
+                                        $result['data']['result']['status'],
+                                        SettingHelper::getCallbackToCallerSuccessStatusList()
+                                    ))
+                                ) {
+                                    Yii::info([
+                                        'callId' => $callModel->c_id,
+                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                        'type' => $callLogFilterGuard->getTypeName(),
+                                        'phone' => $callModel->c_from,
+                                        'result' => $result,
+                                        'successStatusList' => SettingHelper::getCallbackToCallerSuccessStatusList(),
+                                        'statusResult' => !in_array(
+                                            $result['data']['result']['status'],
+                                            SettingHelper::getCallbackToCallerSuccessStatusList()
+                                        )
+                                    ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
+                                    return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                                }
+                            }
+                        }
                     } catch (\Throwable $throwable) {
                         $message = AppHelper::throwableLog($throwable);
                         $category = 'CommunicationController:CallLogFilterGuard:generalLine';
@@ -498,9 +541,50 @@ class CommunicationController extends ApiBaseController
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
-                    if (SettingHelper::isEnableCallLogFilterGuard()) {
+                    if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                         try {
-                            (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                            $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                            if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
+                                if (SettingHelper::isCallbackToCallerEnabled() && !in_array($callModel->cProject->project_key, SettingHelper::getCallbackToCallerExcludedStatusList())) {
+                                    $result = Yii::$app->communication->twilioDial(
+                                        $incoming_phone_number,
+                                        $client_phone_number,
+                                        SettingHelper::getCallbackToCallerCurlTimeout(),
+                                        SettingHelper::getCallbackToCallerMessage(),
+                                        SettingHelper::getCallbackToCallerDialCallTimeout(),
+                                        SettingHelper::getCallbackToCallerDialCallLimit(),
+                                    );
+
+                                    if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
+                                        Yii::error([
+                                            'callId' => $callModel->c_id,
+                                            'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                            'type' => $callLogFilterGuard->getTypeName(),
+                                            'phone' => $callModel->c_from,
+                                            'message' => $result['data']['message']
+                                        ], 'CallSpamFilter:DirectCall:CommunicationError');
+                                    } elseif (
+                                        (isset($result['data']['result']['status']) && !in_array(
+                                            $result['data']['result']['status'],
+                                            SettingHelper::getCallbackToCallerSuccessStatusList()
+                                        ))
+                                    ) {
+                                        Yii::info([
+                                            'callId' => $callModel->c_id,
+                                            'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                            'type' => $callLogFilterGuard->getTypeName(),
+                                            'phone' => $callModel->c_from,
+                                            'result' => $result,
+                                            'successStatusList' => SettingHelper::getCallbackToCallerSuccessStatusList(),
+                                            'statusResult' => !in_array(
+                                                $result['data']['result']['status'],
+                                                SettingHelper::getCallbackToCallerSuccessStatusList()
+                                            )
+                                        ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
+                                        return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                                    }
+                                }
+                            }
                         } catch (\Throwable $throwable) {
                             $message = AppHelper::throwableLog($throwable);
                             $category = 'CommunicationController:CallLogFilterGuard:directCall';
@@ -1191,7 +1275,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from_country = Call::getDisplayRegion($calData['FromCountry'] ?? '');
             $call->c_from_state = $calData['FromState'] ?? null;
             $call->c_from_city = $calData['FromCity'] ?? null;
-            $call->c_stir_status = $calData['StirStatus'] ?? null;
+            $call->c_stir_status = Call::getStirStatusByVerstatKey($calData['StirVerstat'] ?? '');
 
             if ($parentCall) {
                 $call->c_parent_id = $parentCall->c_id;
@@ -1468,7 +1552,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $callData['From'];
             $call->c_to = $callData['To']; //Called
             $call->c_created_user_id = null;
-            $call->c_stir_status = $stirStatus;
+            $call->c_stir_status = Call::getStirStatusByVerstatKey($callData['StirVerstat'] ?? '');
 
             self::copyDataFromCustomParams($call, $customParameters);
 
@@ -3206,5 +3290,19 @@ class CommunicationController extends ApiBaseController
         foreach ($usersForNotify as $userForNotify) {
             Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $userForNotify], Message::updateStatus($sms));
         }
+    }
+
+    private function returnTwmlAsBusy(?string $message): VoiceResponse
+    {
+        $vr = new VoiceResponse();
+        if ($message) {
+            $vr->pause(['length' => 5]);
+            $vr->say($message, [
+                'language' => 'en-US',
+                'voice' => 'alice'
+            ]);
+        }
+        $vr->reject(['reason' => 'busy']);
+        return $vr;
     }
 }
