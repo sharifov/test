@@ -30,6 +30,7 @@ use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\forms\lead\PhoneCreateForm;
+use sales\guards\call\CallRedialGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
@@ -425,7 +426,7 @@ class CommunicationController extends ApiBaseController
                     try {
                         $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                         if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
-                            if (SettingHelper::isCallbackToCallerEnabled() && !in_array($callModel->cProject->project_key, SettingHelper::getCallbackToCallerExcludedStatusList())) {
+                            if (CallRedialGuard::guard($callModel->cProject->project_key, $callModel->cDep->dep_key)) {
                                 $result = Yii::$app->communication->twilioDial(
                                     $incoming_phone_number,
                                     $client_phone_number,
@@ -541,7 +542,7 @@ class CommunicationController extends ApiBaseController
                         try {
                             $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                             if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
-                                if (SettingHelper::isCallbackToCallerEnabled() && !in_array($callModel->cProject->project_key, SettingHelper::getCallbackToCallerExcludedStatusList())) {
+                                if (CallRedialGuard::guard($callModel->cProject->project_key, $callModel->cDep->dep_key)) {
                                     $result = Yii::$app->communication->twilioDial(
                                         $incoming_phone_number,
                                         $client_phone_number,
