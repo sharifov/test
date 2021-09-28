@@ -27,7 +27,7 @@ class CasesApiMapper extends Cases
                 return CasesStatus::getName($model->cs_status);
             },
             'category_key' => function ($model) {
-                return CaseCategory::getKey($model->cs_category_id) ?: '' ;
+                return CaseCategory::getKey($model->cs_category_id) ?: '';
             },
             'next_flight' => function ($model) {
                 return $model->next_flight ?? '';
