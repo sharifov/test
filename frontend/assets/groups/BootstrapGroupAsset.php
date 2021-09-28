@@ -14,6 +14,8 @@ class BootstrapGroupAsset extends \yii\web\AssetBundle
 
     public $js = ['https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js'];
 
+    public $jsOptions = ['position' => \yii\web\View::POS_HEAD];
+
     public $depends = [
         JqueryAsset::class,
     ];
