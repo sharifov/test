@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\PhoneBlacklist */
 
-$this->title = 'Create Phone Blacklist';
-$this->params['breadcrumbs'][] = ['label' => 'Phone Blacklists', 'url' => ['index']];
+$this->title = 'Create Phone BlockList';
+$this->params['breadcrumbs'][] = ['label' => 'Phone BlockLists', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="phone-blacklist-create">

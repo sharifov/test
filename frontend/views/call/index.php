@@ -99,8 +99,8 @@ $pjaxListId = 'pjax-call-index';
                             && $model->isStatusInProgress();
                     },
                     'allow_list' => static function (Call $model, $key, $index) use ($user) {
-                        /** @abac CallAbacObject::ACT_ALLOW_LIST, CallAbacObject::ACTION_UPDATE, Access to add/remove ContactPhoneData - key allow_list */
-                        return (Yii::$app->abac->can(null, CallAbacObject::ACT_ALLOW_LIST, CallAbacObject::ACTION_UPDATE));
+                        /** @abac CallAbacObject::ACT_DATA_ALLOW_LIST, CallAbacObject::ACTION_TOGGLE_DATA, Access to add/remove ContactPhoneData - key allow_list */
+                        return (Yii::$app->abac->can(null, CallAbacObject::ACT_DATA_ALLOW_LIST, CallAbacObject::ACTION_TOGGLE_DATA));
                     },
                 ],
                 'buttons' => [

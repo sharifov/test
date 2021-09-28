@@ -1521,8 +1521,8 @@ class CallController extends FController
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
-            /** @abac CallAbacObject::ACT_ALLOW_LIST, CallAbacObject::ACTION_UPDATE, Access to add/remove ContactPhoneData - key allow_list */
-            if (!Yii::$app->abac->can(null, CallAbacObject::ACT_ALLOW_LIST, CallAbacObject::ACTION_UPDATE)) {
+            /** @abac CallAbacObject::ACT_DATA_ALLOW_LIST, CallAbacObject::ACTION_TOGGLE_DATA, Access to add/remove ContactPhoneData - key allow_list */
+            if (!Yii::$app->abac->can(null, CallAbacObject::ACT_DATA_ALLOW_LIST, CallAbacObject::ACTION_TOGGLE_DATA)) {
                 throw new ForbiddenHttpException('Access Denied');
             }
 
@@ -1542,7 +1542,7 @@ class CallController extends FController
                     ContactPhoneDataService::getOrCreate(
                         $contactPhoneList->cpl_id,
                         ContactPhoneDataDictionary::KEY_ALLOW_LIST,
-                        '1'
+                        ContactPhoneDataDictionary::DEFAULT_TRUE_VALUE
                     );
                     $result['result'] = 'added';
                 }

@@ -39,31 +39,34 @@ class ContactPhoneListService
 
     public static function isAllowList(string $phone): bool
     {
-        return ContactPhoneList::find()
-            ->innerJoin(ContactPhoneData::tableName(), 'cpd_cpl_id = cpl_id')
-            ->where(['cpl_uid' => CheckPhoneService::uidGenerator($phone)])
-            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_ALLOW_LIST])
-            ->andWhere(['cpd_value' => '1'])
-            ->exists();
+        return self::isExistByDataKey($phone, ContactPhoneDataDictionary::KEY_ALLOW_LIST);
+    }
+
+    public static function isTrust(string $phone): bool
+    {
+        return self::isExistByDataKey($phone, ContactPhoneDataDictionary::KEY_IS_TRUSTED);
     }
 
     public static function isAutoCreateLeadOff(string $phone): bool
     {
-        return ContactPhoneList::find()
-            ->innerJoin(ContactPhoneData::tableName(), 'cpd_cpl_id = cpl_id')
-            ->where(['cpl_uid' => CheckPhoneService::uidGenerator($phone)])
-            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_AUTO_CREATE_LEAD_OFF])
-            ->andWhere(['cpd_value' => '1'])
-            ->exists();
+        return self::isExistByDataKey($phone, ContactPhoneDataDictionary::KEY_AUTO_CREATE_LEAD_OFF);
     }
 
     public static function isAutoCreateCaseOff(string $phone): bool
     {
+        return self::isExistByDataKey($phone, ContactPhoneDataDictionary::KEY_AUTO_CREATE_CASE_OFF);
+    }
+
+    public static function isExistByDataKey(
+        string $phone,
+        string $key,
+        string $value = ContactPhoneDataDictionary::DEFAULT_TRUE_VALUE
+    ): bool {
         return ContactPhoneList::find()
             ->innerJoin(ContactPhoneData::tableName(), 'cpd_cpl_id = cpl_id')
             ->where(['cpl_uid' => CheckPhoneService::uidGenerator($phone)])
-            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_AUTO_CREATE_CASE_OFF])
-            ->andWhere(['cpd_value' => '1'])
+            ->andWhere(['cpd_key' => $key])
+            ->andWhere(['cpd_value' => $value])
             ->exists();
     }
 }
