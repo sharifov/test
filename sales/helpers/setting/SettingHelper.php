@@ -589,10 +589,15 @@ class SettingHelper
         ]);
     }
 
-    public static function getCallbackToCallerExcludedStatusList(): array
+    public static function getCallbackToCallerExcludedProjectList(): array
     {
         return self::getCallbackToCallerData()['excludeProjectKeys'] ?? [
             'priceline'
         ];
+    }
+
+    public static function getCallbackToCallerExcludedDepartmentList(): array
+    {
+        return self::getCallbackToCallerData()['excludeDepartmentKeys'] ?? [];
     }
 }
