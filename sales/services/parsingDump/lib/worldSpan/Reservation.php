@@ -146,7 +146,8 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
         }
 
         $data['arrival_date_time'] = $this->getArrivalDateTime(
-            $data['departure_date_time'],
+            $data['departure_date_day'],
+            $data['departure_date_month'],
             $data['arrival_time_hh'],
             $data['arrival_time_mm'],
             $data['arrival_offset'],
@@ -159,25 +160,15 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
         return $data;
     }
 
-    /**
-     * @param DateTime $departureDateTime
-     * @param string $arrivalHour
-     * @param string $arrivalMinute
-     * @param string $arrivalOffset
-     * @param DateTimeZone|null $timezone
-     * @return DateTime|false|null
-     */
     public function getArrivalDateTime(
-        ?DateTime $departureDateTime,
+        string $day,
+        string $month,
         string $arrivalHour,
         string $arrivalMinute,
         string $arrivalOffset,
         DateTimeZone $timezone = null
-    ) {
-        if (!$departureDateTime) {
-            return null;
-        }
-        $sourceDate = clone $departureDateTime;
+    ): DateTime {
+        $sourceDate = $this->createDateTime($day, $month, $arrivalHour, $arrivalMinute, $timezone);
         $arrivalOffset = $this->prepareArrivalOffset($arrivalOffset);
         if ($arrivalOffset === 0) {
             $result = $sourceDate->setTime($arrivalHour, $arrivalMinute);

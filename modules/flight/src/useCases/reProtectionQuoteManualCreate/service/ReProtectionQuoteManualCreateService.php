@@ -132,7 +132,8 @@ class ReProtectionQuoteManualCreateService
         Flight $flight,
         ProductQuote $originProductQuote,
         ReProtectionQuoteCreateForm $form,
-        ?int $userId
+        ?int $userId,
+        array $segments
     ): FlightQuote {
         if ($reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originProductQuote->pq_id)) {
             foreach ($reprotectionQuotes as $reprotectionQuote) {
@@ -196,7 +197,7 @@ class ReProtectionQuoteManualCreateService
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
 
             if ($form->gds === SearchService::GDS_WORLDSPAN) {
-                $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment);
+                $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment, $segments);
             }
 
             $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
@@ -275,13 +276,17 @@ class ReProtectionQuoteManualCreateService
         return $flightQuote;
     }
 
-    private static function postProcessingWordspan(FlightQuoteSegment $flightQuoteSegment): FlightQuoteSegment /* TODO:: tmp solution */
+    private static function postProcessingWordspan(FlightQuoteSegment $flightQuoteSegment, array $segments): FlightQuoteSegment /* TODO:: tmp solution */
     {
-        $departure = new \DateTime($flightQuoteSegment->fqs_departure_dt);
-        $arrival = new \DateTime($flightQuoteSegment->fqs_arrival_dt);
+        $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
+        $keySegment = array_search($keyIata, array_column($segments, 'segmentIata'), false);
 
-        if ($arrival < $departure) {
-            $flightQuoteSegment->fqs_arrival_dt = $arrival->modify('+1 days')->format('Y-m-d H:i:s');
+        if ($keySegment !== false) {
+            $departure = $segments[$keySegment]['departureDateTime'];
+            $arrival = $segments[$keySegment]['arrivalDateTime'];
+
+            $flightQuoteSegment->fqs_departure_dt = $departure->format('Y-m-d H:i:s');
+            $flightQuoteSegment->fqs_arrival_dt = $arrival->format('Y-m-d H:i:s');
             $flightQuoteSegment->fqs_duration = ($arrival->getTimestamp() - $departure->getTimestamp()) / 60;
         }
         return $flightQuoteSegment;

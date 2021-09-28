@@ -826,9 +826,17 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
                 }
 
+                $gds = GdsByQuoteGuard::guard($form->gds);
+                $itinerary = $segments = [];
+                $reservationService = new ReservationService($gds);
+                $reservationService->parseReservation($form->reservationDump, true, $itinerary);
+                if ($reservationService->parseStatus && $reservationService->parseResult) {
+                    $segments = $reservationService->parseResult;
+                }
+
                 $userId = Auth::id();
-                $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId) {
-                    return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId);
+                $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments) {
+                    return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId, $segments);
                 });
 
                 $response['message'] = 'Success. FlightQuote ID( ' . $flightQuote->getId() . ') created';
