@@ -16,6 +16,7 @@ class QaTaskAbacObject extends AbacBaseModel implements AbacInterface
     public const ALL = self::NS . '*';
 
     public const ACT_USER_ASSIGN = self::NS . 'act/user_assign';
+    public const ACT_MULTI_CANCEL = self::NS . 'act/multiple_cancel';
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_ACCESS  = 'access';
@@ -23,12 +24,14 @@ class QaTaskAbacObject extends AbacBaseModel implements AbacInterface
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
-        self::ACT_USER_ASSIGN => self::ACT_USER_ASSIGN
+        self::ACT_USER_ASSIGN => self::ACT_USER_ASSIGN,
+        self::ACT_MULTI_CANCEL => self::ACT_MULTI_CANCEL
     ];
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::ACT_USER_ASSIGN => [self::ACTION_ACCESS]
+        self::ACT_USER_ASSIGN => [self::ACTION_ACCESS],
+        self::ACT_MULTI_CANCEL => [self::ACTION_ACCESS]
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */

@@ -52,6 +52,23 @@ $this->params['breadcrumbs'][] = $this->title;
                     )
                     ?>
                 <?php endif; ?>
+
+                <?php /** @abac null, QaTaskAbacObject::ACT_MULTI_CANCEL, QaTaskAbacObject::ACTION_ACCESS, Cancel Multiple Qa Tasks */ ?>
+                <?php if (Yii::$app->abac->can(null, QaTaskAbacObject::ACT_MULTI_CANCEL, QaTaskAbacObject::ACTION_ACCESS)) : ?>
+                    <?php echo
+                    Html::a(
+                        '<i class="fa fa-times text-danger"></i> Multiple Cancel',
+                        null,
+                        [
+                            'class' => 'dropdown-item btn-multiple-cancel',
+                            'data' => [
+                                'url' => Url::to(['/qa-task/qa-task-action/multiple-cancel']),
+                                'title' => 'Multiple cancel',
+                            ],
+                        ]
+                    )
+                    ?>
+                <?php endif; ?>
             </p>
         </div>
     </div>
@@ -202,6 +219,45 @@ $(document).on('click', '#btn-check-all',  function (e) {
 });
 
 $(document).on('click', '.btn-multiple-update', function(e) {
+    e.preventDefault();        
+    let arrIds = [];
+    if (sessionStorage.selectedTasks) {
+        let data = jQuery.parseJSON( sessionStorage.selectedTasks );
+        arrIds = Object.values(data);    
+        
+        let modal = $('#modal-df');
+        let urlAction = $(this).data('url');
+        let title = $(this).data('title');
+        
+        console.log(arrIds);
+        
+        $.ajax({
+            type: 'get',
+            url: urlAction,
+            dataType: 'html',
+            cache: false,
+            data: {'gid[]': arrIds.length ? arrIds : []},
+            beforeSend: function () {
+                modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+                modal.find('.modal-title').html(title);
+                modal.modal('show');
+            },
+            success: function (data) {
+                modal.find('.modal-body').html(data);
+            },
+            error: function (xhr) {
+                if (xhr.status != 403) {
+                    modal.find('.modal-body').html('Error: ' + xhr.responseText);
+                } else {
+                    modal.find('.modal-body').html('Access denied.');
+                }
+                            
+            },
+        });
+    }
+});
+
+$(document).on('click', '.btn-multiple-cancel', function(e) {
     e.preventDefault();        
     let arrIds = [];
     if (sessionStorage.selectedTasks) {
