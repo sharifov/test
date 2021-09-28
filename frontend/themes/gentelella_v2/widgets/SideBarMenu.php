@@ -353,9 +353,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'list',
                     'items' => [
-                        ['label' => 'Phone List', 'url' => ['/contact-phone-list-crud/index']],
+                        ['label' => 'Phone List CRUD', 'url' => ['/contact-phone-list-crud/index']],
                         ['label' => 'Phone Data', 'url' => ['/contact-phone-data-crud/index']],
                         ['label' => 'Phone service info', 'url' => ['/contact-phone-service-info-crud/index']],
+                        ['label' => 'Phone List', 'url' => ['/contact-phone-list/index']],
                     ]
                 ]
             ]
