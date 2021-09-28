@@ -551,12 +551,13 @@ class Call extends \yii\db\ActiveRecord
         return $call;
     }
 
-    public function assignParentCall(int $callId, int $projectId, int $depId, int $sourceTypeId): void
+    public function assignParentCall(int $callId, int $projectId, int $depId, int $sourceTypeId, ?int $stirStatus): void
     {
         $this->c_parent_id = $callId;
         $this->c_project_id = $projectId;
         $this->c_dep_id = $depId;
         $this->c_source_type_id = $sourceTypeId;
+        $this->c_stir_status = $stirStatus;
     }
 
     /**

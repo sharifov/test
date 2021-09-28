@@ -1280,6 +1280,7 @@ class CommunicationController extends ApiBaseController
                 $call->c_language_id = $parentCall->c_language_id;
                 $call->c_group_id = $parentCall->c_group_id;
                 $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
+                $call->c_stir_status = $parentCall->c_stir_status;
 
 //                if ($parentCall->callUserGroups && !$call->callUserGroups) {
 //                    foreach ($parentCall->callUserGroups as $cugItem) {
@@ -1396,6 +1397,7 @@ class CommunicationController extends ApiBaseController
         $call->c_call_type_id = $parentCall->c_call_type_id;
         $call->c_conference_id = $parentCall->c_conference_id;
         $call->c_conference_sid = $parentCall->c_conference_sid;
+        $call->c_stir_status = $parentCall->c_stir_status;
     }
 
     private static function copyDataFromCustomParams(Call $call, CallCustomParameters $customParameters): void
@@ -1533,6 +1535,7 @@ class CommunicationController extends ApiBaseController
             $call->c_com_call_id = $callData['c_com_call_id'] ?? null;
             $call->setTypeIn();
 
+            $call->c_stir_status = Call::getStirStatusByVerstatKey($callData['StirVerstat'] ?? '');
             if ($parentCall) {
                 self::copyDataFromParentCall($call, $parentCall);
 
@@ -1547,7 +1550,6 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $callData['From'];
             $call->c_to = $callData['To']; //Called
             $call->c_created_user_id = null;
-            $call->c_stir_status = Call::getStirStatusByVerstatKey($callData['StirVerstat'] ?? '');
 
             self::copyDataFromCustomParams($call, $customParameters);
 
