@@ -28,6 +28,15 @@ class CallRedialUserAccessRepository
         throw new NotFoundException('Call redial access not found. LeadId: ' . $leadId . ' UserId: ' . $userId);
     }
 
+    public function get(int $leadId, int $userId): ?CallRedialUserAccess
+    {
+        $access = CallRedialUserAccess::find()->andWhere(['crua_lead_id' => $leadId, 'crua_user_id' => $userId])->one();
+        if ($access) {
+            return $access;
+        }
+        return null;
+    }
+
     public function save(CallRedialUserAccess $access): void
     {
         if (!$access->save(false)) {

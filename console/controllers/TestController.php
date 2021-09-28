@@ -68,8 +68,10 @@ use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\model\leadRedial\assign\LeadRedialAccessChecker;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
+use sales\model\leadRedial\queue\CallNextLeads;
 use sales\model\project\entity\params\Params;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
@@ -86,6 +88,12 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+    public function actionMmm()
+    {
+        $t  = (new LeadRedialAccessChecker())->exist(295);
+        VarDumper::dump($t);
+    }
+
     public function actionR()
     {
         $access = CallRedialUserAccess::find()->andWhere(['crua_lead_id' => 513195, 'crua_user_id' => 295])->one();

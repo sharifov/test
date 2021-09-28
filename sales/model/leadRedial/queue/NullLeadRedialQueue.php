@@ -2,9 +2,11 @@
 
 namespace sales\model\leadRedial\queue;
 
+use common\models\Employee;
+
 class NullLeadRedialQueue implements LeadRedialQueue
 {
-    public function getCall(int $userId): ?RedialCall
+    public function getCall(Employee $user): ?RedialCall
     {
         return null;
     }

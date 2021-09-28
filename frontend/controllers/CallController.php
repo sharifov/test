@@ -49,6 +49,8 @@ use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use sales\model\contactPhoneData\service\ContactPhoneDataService;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\leadRedial\assign\LeadRedialAccessChecker;
+use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
@@ -1267,18 +1269,26 @@ class CallController extends FController
             }
 
             if (!$isReserved) {
-                $leadRedialQueue = Yii::createObject(\sales\model\leadRedial\queue\LeadRedialQueue::class);
-                $redialCall = $leadRedialQueue->getCall(Auth::id());
-                if ($redialCall) {
-                    $prepare = new PrepareCurrentCallsForNewCall($userId);
-                    if ($prepare->prepare()) {
-                        $response['isRedialCall'] = true;
-                        $response['redialCall'] = $redialCall->toArray();
+                if (Yii::createObject(LeadRedialAccessChecker::class)->exist(Auth::id())) {
+                    $leadRedialQueue = Yii::createObject(\sales\model\leadRedial\queue\LeadRedialQueue::class);
+                    $redialCall = $leadRedialQueue->getCall(Auth::user());
+                    if ($redialCall) {
+                        $prepare = new PrepareCurrentCallsForNewCall($userId);
+                        if ($prepare->prepare()) {
+                            $response['isRedialCall'] = true;
+                            $response['redialCall'] = $redialCall->toArray();
+                        } else {
+                            $response['error'] = true;
+                            $response['message'] = 'Processing current call error. Please try again.';
+                        }
                     } else {
+                        Yii::createObject(LeadRedialUnAssigner::class)->unAssign($userId);
+                        Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
                         $response['error'] = true;
-                        $response['message'] = 'Processing current call error. Please try again.';
+                        $response['message'] = 'Phone line queue is empty.';
                     }
                 } else {
+                    Yii::createObject(LeadRedialUnAssigner::class)->unAssign($userId);
                     Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
                     $response['error'] = true;
                     $response['message'] = 'Phone line queue is empty.';

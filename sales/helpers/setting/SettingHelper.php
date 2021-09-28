@@ -500,4 +500,9 @@ class SettingHelper
     {
         return (int) (Yii::$app->params['settings']['limit_leads_in_phone_widget'] ?? 3);
     }
+
+    public static function getLeadRedialAccessExpiredSeconds(): int
+    {
+        return 20; //todo
+    }
 }

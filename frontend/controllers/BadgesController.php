@@ -316,7 +316,7 @@ class BadgesController extends FController
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        return (new LeadQcallSearch())->searchByRedial([], $user)->query->count();
+        return (new LeadQcallSearch())->searchByRedial([], $user, true)->query->count();
     }
 
     /**
