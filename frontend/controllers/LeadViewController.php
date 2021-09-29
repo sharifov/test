@@ -4,9 +4,11 @@ namespace frontend\controllers;
 
 use common\models\Client;
 use common\models\ClientEmail;
+use common\models\ClientEmailQuery;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\LeadPreferences;
+use common\models\query\ClientPhoneQuery;
 use common\models\search\ClientSearch;
 use common\models\search\lead\LeadSearchByClient;
 use frontend\models\LeadForm;
@@ -267,7 +269,8 @@ class LeadViewController extends FController
                 $response['error'] = false;
                 $response['message'] = 'New phone was successfully added: ' . $form->phone;
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
-                    'clientPhones' => $lead->client->clientPhones,
+                    //'clientPhones' => $lead->client->clientPhones,
+                    'clientPhones' => ClientPhoneQuery::getWithSameClientsPhonesCount($lead->client_id),
                     'lead' => $lead,
                     'disableMasking' => $disableMasking,
                     'leadAbacDto' => $leadAbacDto
@@ -395,7 +398,8 @@ class LeadViewController extends FController
                 $response['error'] = false;
                 $response['message'] = 'Phone was successfully updated: ' . $form->phone;
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
-                    'clientPhones' => $lead->client->clientPhones,
+                    //'clientPhones' => $lead->client->clientPhones,
+                    'clientPhones' => ClientPhoneQuery::getWithSameClientsPhonesCount($lead->client_id),
                     'lead' => $lead,
                     'disableMasking' => $disableMasking,
                     'leadAbacDto' => $leadAbacDto
@@ -499,7 +503,8 @@ class LeadViewController extends FController
                 $response['error'] = false;
                 $response['message'] = 'New email was successfully added: ' . $form->email;
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
-                    'clientEmails' => $lead->client->clientEmails,
+                    //'clientEmails' => $lead->client->clientEmails,
+                    'clientEmails' => ClientEmailQuery::getWithSameClientsEmailsCount($lead->client_id),
                     'lead' => $lead,
                     'leadAbacDto' => $leadAbacDto,
                     'disableMasking' => $disableMasking
@@ -627,7 +632,8 @@ class LeadViewController extends FController
                 $response['error'] = false;
                 $response['message'] = 'Email was successfully updated: ' . $form->email;
                 $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
-                    'clientEmails' => $lead->client->clientEmails,
+                    //'clientEmails' => $lead->client->clientEmails,
+                    'clientEmails' => ClientEmailQuery::getWithSameClientsEmailsCount($lead->client_id),
                     'lead' => $lead,
                     'leadAbacDto' => $leadAbacDto,
                     'disableMasking' => $disableMasking
