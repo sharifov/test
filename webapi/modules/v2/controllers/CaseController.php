@@ -344,7 +344,7 @@ class CaseController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{50}}           gid                         Client Email required
+     * @apiParam {string{50}}           gid                         Case GID required
      *
      * @apiParamExample {json} Request-Example:
      * {
