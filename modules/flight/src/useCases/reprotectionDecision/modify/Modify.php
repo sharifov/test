@@ -57,7 +57,7 @@ class Modify
 
         $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($originalProductQuote->pq_id);
         if (!$productQuoteChange->isDecisionPending()) {
-            throw new \DomainException('Product Quote Change status is not in "Decision pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"');
+            throw new \DomainException('Product Quote Change status is not in "Decision pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"', 101);
         }
 
         $quote = $this->transactionManager->wrap(function () use ($originalProductQuote, $newQuote, $productQuoteChange, $userId) {
