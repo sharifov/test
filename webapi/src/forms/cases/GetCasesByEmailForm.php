@@ -10,7 +10,7 @@ use yii\base\Model;
  * @package webapi\src\forms\cases
  *
  * @property string $contact_email
- * @property boolean $active_only
+ * @property string $active_only
  * @property int|null $project_key
  * @property int|null $department_key
  * @property int|null $results_limit
