@@ -7,6 +7,7 @@ use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
+use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
 /* @var frontend\models\search\UserFailedLoginSearch $searchModel */
@@ -22,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Create User Failed Login', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -47,5 +48,5 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 
-
+    <?php Pjax::end(); ?>
 </div>

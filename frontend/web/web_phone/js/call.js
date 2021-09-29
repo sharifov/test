@@ -9,6 +9,8 @@ var PhoneWidgetCall = function () {
         'callStatusUrl': '',
         'ajaxSaveCallUrl': '',
         'clearMissedCallsUrl': '',
+        'ajaxCreateLeadUrl': '',
+        'ajaxClientGetInfoJsonUrl': '/client/ajax-get-info-json'
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -72,6 +74,7 @@ var PhoneWidgetCall = function () {
         muteIncomingAudioEvent();
         recordingClickEvent();
         addPhoneBlacklistEvent();
+        createLeadEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -836,7 +839,33 @@ var PhoneWidgetCall = function () {
 
     function contactInfoClickEvent() {
         $(document).on('click', '.call-pane__info', function() {
-            $('.contact-info').slideDown(150);
+            let btn = $(this);
+            let btnHtml = btn.html();
+            let callId = btn.data('call-id');
+
+            $.ajax({
+                type: 'post',
+                url: settings.ajaxClientGetInfoJsonUrl,
+                dataType: 'json',
+                data: {callId: callId},
+                beforeSend: function () {
+                    btn.html('<i class="fa fa-spin fa-spinner" />');
+                },
+                success: function (data) {
+                    if (data.error) {
+                        createNotify('Error', data.message, 'error');
+                    } else {
+                        PhoneWidgetContactInfo.load(data);
+                        $('.contact-info').slideDown(150);
+                    }
+                },
+                complete: function () {
+                    btn.html(btnHtml);
+                },
+                error: function (xhr) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }
+            });
         });
         $(document).on('click', '.additional-info.contact-info .additional-info__close', function() {
             $('.contact-info').slideUp(150);
@@ -913,11 +942,50 @@ var PhoneWidgetCall = function () {
             e.preventDefault();
             let clientId = $(this).attr('data-client-id');
             let isClient = $(this).attr('data-is-client');
+            let callSid = $(this).attr('data-call-sid');
             if (typeof clientId === 'undefined') {
                 createNotify('Client Info', 'Not found Client ID', 'error');
                 return false;
             }
-            callRequester.clientInfo(clientId, isClient === 'true');
+            callRequester.clientInfo(clientId, callSid,isClient === 'true');
+        });
+    }
+
+    function createLeadEvent() {
+        $(document).on('click', '.cw-btn-create-lead', function(e) {
+            e.preventDefault();
+            let btn = $(this);
+            let callSid = btn.attr('data-call-sid');
+            let btnHtml = btn.html();
+            $.ajax({
+                type: 'post',
+                data: {
+                    callSid: callSid
+                },
+                url: settings.ajaxCreateLeadUrl,
+                dataType: 'json',
+                beforeSend: function () {
+                    btn.addClass('disabled').html('<i class="fa fa-spin fa-spinner" />');
+                },
+                success: function (data) {
+                    if (data.error) {
+                        createNotify('Error', data.message, 'error');
+                    } else {
+                        if(data.warning) {
+                            createNotify('Warning', data.message, 'warning');
+                        }
+                        createNotify('Success', 'Lead created successfully', 'success');
+                        PhoneWidgetContactInfo.load(data.contactData);
+                        window.open(data.url, '_blank').focus();
+                    }
+                },
+                complete: function () {
+                    btn.removeClass('disabled').html(btnHtml);
+                },
+                error: function (xhr) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }
+            });
         });
     }
 

@@ -13,9 +13,11 @@ use sales\helpers\communication\StatisticsHelper;
 use sales\auth\Auth;
 use common\components\grid\cases\CasesStatusColumn;
 
-/** @var $this yii\web\View
+/**
+ * @var $this yii\web\View
  * @var $searchModel sales\entities\cases\CasesQSearch
  * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $isAgent bool
  */
 
 $this->title = 'First Priority Queue';
@@ -30,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(['id' => 'cases-q-first-priority-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
     <?= GridView::widget([
+        'id' => 'first-priority-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
@@ -212,3 +215,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#first-priority-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

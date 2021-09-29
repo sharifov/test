@@ -51,7 +51,7 @@ var PhoneWidgetPaneActive = function () {
         $(".dialpad_btn_active").attr('data-conference-sid', call.data.conferenceSid);
         $("#call-pane__dial-number_active_dialpad").val('');
 
-        contactInfo.load(call.data.contact);
+        // contactInfo.load(call.data.contact);
         setCallSid(call.data.callSid);
         initControls();
     }

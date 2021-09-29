@@ -12,17 +12,21 @@ use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\useCases\reprotectionDecision;
 use modules\order\src\entities\order\Order;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
+use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\exception\CheckRestrictionException;
 use sales\helpers\app\AppHelper;
@@ -50,6 +54,7 @@ use yii\web\Response;
  * @property ProductQuoteRepository $productQuoteRepository
  * @property CasesRepository $casesRepository
  * @property CasesCommunicationService $casesCommunicationService
+ * @property ProductQuoteDataManageService $productQuoteDataManageService
  */
 class ProductQuoteController extends FController
 {
@@ -70,6 +75,10 @@ class ProductQuoteController extends FController
      * @var CasesCommunicationService
      */
     private CasesCommunicationService $casesCommunicationService;
+    /**
+     * @var ProductQuoteDataManageService
+     */
+    private ProductQuoteDataManageService $productQuoteDataManageService;
 
     /**
      * ProductQuoteController constructor.
@@ -78,6 +87,9 @@ class ProductQuoteController extends FController
      * @param ProductQuoteCloneService $productQuoteCloneService
      * @param EventDispatcher $eventDispatcher
      * @param ProductQuoteRepository $productQuoteRepository
+     * @param CasesRepository $casesRepository
+     * @param CasesCommunicationService $casesCommunicationService
+     * @param ProductQuoteDataManageService $productQuoteDataManageService
      * @param array $config
      */
     public function __construct(
@@ -88,6 +100,7 @@ class ProductQuoteController extends FController
         ProductQuoteRepository $productQuoteRepository,
         CasesRepository $casesRepository,
         CasesCommunicationService $casesCommunicationService,
+        ProductQuoteDataManageService $productQuoteDataManageService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -96,6 +109,7 @@ class ProductQuoteController extends FController
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesRepository = $casesRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
     /**
@@ -118,7 +132,8 @@ class ProductQuoteController extends FController
                     'flight-reprotection-confirm',
                     'flight-reprotection-refund',
                     'origin-reprotection-quote-diff',
-                    'set-recommended'
+                    'set-recommended',
+                    'ajax-decline-reprotection-quote'
                 ]
             ]
         ];
@@ -331,7 +346,7 @@ class ProductQuoteController extends FController
                             throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
                         }
 
-                        $case->addEventLog(null, $mail->eTemplateType->etp_name . ' email sent. By: ' . Auth::user()->username);
+                        $case->addEventLog(null, ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username);
 
                         $productQuoteChange = ProductQuoteChange::find()->byProductQuote($originQuote->pq_id)->byCaseId($case->cs_id)->one();
                         if ($productQuoteChange) {
@@ -348,9 +363,11 @@ class ProductQuoteController extends FController
                                     'booking_id' => $case->cs_order_uid,
                                     'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
                                     'case_gid' => $case->cs_gid,
+                                    'product_quote_gid' => $originQuote->pq_gid,
                                 ]
                             ];
                             $hybridService->whReprotection($case->cs_project_id, $data);
+                            $case->addEventLog(null, 'Request HybridService sent successfully');
                         } catch (\Throwable $throwable) {
                             $errorData = [];
                             $errorData['message'] = 'OTA site is not informed (hybridService->whReprotection)';
@@ -497,18 +514,7 @@ class ProductQuoteController extends FController
                 throw new NotFoundException('Origin Quote Not Found');
             }
 
-            $reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originQuote->pq_id);
-
-            foreach ($reprotectionQuotes as $reprotectionQuoteRecommended) {
-                if ($reprotectionQuoteRecommended->productQuoteDataRecommended && !$reprotectionQuoteRecommended->productQuoteDataRecommended->delete()) {
-                    throw new \RuntimeException('Unable to remove recommended reprotection quote flag');
-                }
-            }
-
-            $recommendedQuote = ProductQuoteData::createRecommended($reprotectionQuote->pq_id);
-            if (!$recommendedQuote->save()) {
-                throw new \RuntimeException('Unable to set recommended reprotection quote flag: ' . $recommendedQuote->getErrorSummary(true)[0]);
-            }
+            $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originQuote->pq_id, $reprotectionQuote->pq_id);
         } catch (NotFoundException | \RuntimeException | \DomainException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();
@@ -516,6 +522,39 @@ class ProductQuoteController extends FController
             Yii::error(AppHelper::throwableLog($e, true), 'ProductQuoteController::actionSetRecommended::Throwable');
             $result['error'] = true;
             $result['message'] = 'Server Error';
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxDeclineReprotectionQuote()
+    {
+        $reprotectionQuoteId = Yii::$app->request->post('quoteId');
+
+        if (!$reprotectionQuote = ProductQuote::findOne($reprotectionQuoteId)) {
+            throw new BadRequestHttpException('Reprotection quote not found');
+        }
+
+        $productQuoteAbacDto = new ProductQuoteAbacDto($reprotectionQuote);
+        if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::ACT_DECLINE_REPROTECTION_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $reprotectionQuote->declined(Auth::id());
+            $this->productQuoteRepository->save($reprotectionQuote);
+        } catch (\RuntimeException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'ProductQuoteController:actionAjaxDeclineReprotectionQuote:Throwable');
+            $result['error'] = true;
+            $result['message'] = 'Internal Server Error';
         }
 
         return $this->asJson($result);

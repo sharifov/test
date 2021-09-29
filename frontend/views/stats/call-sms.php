@@ -40,7 +40,7 @@ if ($user->isAdmin() || $user->isQa()) {
 ?>
     <div class="stats-call-sms">
         <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
-        <?php Pjax::begin(); ?>
+        <?php Pjax::begin(['scrollTo' => 0]); ?>
         <div class="card card-default">
             <div class="card-header"><i class="fa fa-bar-chart"></i> Call & SMS Stats</div>
             <div class="card-body">

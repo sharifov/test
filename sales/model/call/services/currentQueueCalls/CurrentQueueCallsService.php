@@ -221,6 +221,8 @@ class CurrentQueueCallsService
                 $source = '';
             }
 
+            $callAntiSpamData = $this->getTrustSpamData($call);
+
             //todo remove after removed not conference call
             $call->c_status_id = Call::STATUS_IN_PROGRESS;
             $calls[] = new ActiveQueueCall([
@@ -253,6 +255,8 @@ class CurrentQueueCallsService
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+                'id' => $call->c_id,
+                'callAntiSpamData' => $callAntiSpamData
             ]);
 
             $last_time = strtotime($call->c_updated_dt);
@@ -315,6 +319,7 @@ class CurrentQueueCallsService
         }
 
         foreach ($queue as $call) {
+            $callAntiSpamData = $this->getTrustSpamData($call);
             $calls[] = new OutgoingQueueCall([
                 'callSid' => $call->c_call_sid,
                 'conferenceSid' => $call->c_conference_sid,
@@ -345,6 +350,8 @@ class CurrentQueueCallsService
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+                'id' => $call->c_id,
+                'callAntiSpamData' => $callAntiSpamData
             ]);
             $last_time = strtotime($call->c_updated_dt);
         }
@@ -394,6 +401,8 @@ class CurrentQueueCallsService
                 continue;
             }
 
+            $callAntiSpamData = $this->getTrustSpamData($call);
+
             $calls[] = new IncomingQueueCall([
                 'callSid' => $call->c_call_sid,
                 'conferenceSid' => $call->c_conference_sid,
@@ -425,6 +434,8 @@ class CurrentQueueCallsService
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
                 'isWarmTransfer' => $item->isWarmTransfer(),
+                'id' => $call->c_id,
+                'callAntiSpamData' => $callAntiSpamData
             ]);
             $last_time = strtotime($item->cua_updated_dt);
         }
@@ -463,6 +474,7 @@ class CurrentQueueCallsService
             } elseif ($call->isOut()) {
                 $phone = $call->c_to;
             }
+            $callAntiSpamData = $this->getTrustSpamData($call);
             $calls[] = new IncomingQueueCall([
                 'callSid' => $call->c_call_sid,
                 'conferenceSid' => $call->c_conference_sid,
@@ -493,6 +505,8 @@ class CurrentQueueCallsService
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+                'id' => $call->c_id,
+                'callAntiSpamData' => $callAntiSpamData
             ]);
         }
 
@@ -547,5 +561,22 @@ class CurrentQueueCallsService
         }
 
         return $calls;
+    }
+
+    private function getTrustSpamData(Call $call): array
+    {
+        $callAntiSpam = [];
+        $callAntiSpamData = [];
+        if ($call->cParent && $call->cParent->c_data_json) {
+            $callAntiSpam = json_decode($call->cParent->c_data_json, true)['callAntiSpamData'] ?? [];
+        }
+        if ($callAntiSpam) {
+            $callAntiSpamData = [
+                'type' => $callAntiSpam['type'] ?? null,
+                'rate' => $callAntiSpam['rate'] ?? 0,
+                'trustPercent' => $callAntiSpam['trustPercent'] ?? null
+            ];
+        }
+        return $callAntiSpamData;
     }
 }

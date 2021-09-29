@@ -8,7 +8,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel common\models\search\PhoneBlacklistLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Phone Blacklist Logs';
+$this->title = 'Phone BlockList Logs';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="phone-blacklist-log-index">
@@ -16,10 +16,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Phone Blacklist Log', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Phone BlockList Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-phone-blacklist-log']); ?>
+    <?php Pjax::begin(['id' => 'pjax-phone-blacklist-log', 'scrollTo' => 0]); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([

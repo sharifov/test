@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 
 <div class="orders-q-new">
-    <?php Pjax::begin(['id' => 'orders-q-processing-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'orders-q-processing-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

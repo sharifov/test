@@ -37,7 +37,7 @@ class OutgoingPane extends React.Component {
                             <span className="contact-info-card__label">{call.data.type}</span>
                             <div className="credential">
                                 <div className="contact-info-card__name">
-                                    <button className="call-pane__info">
+                                    <button className="call-pane__info" data-call-id={call.data.id}>
                                         <i className="user-icon fa fa-user"> </i>
                                         <i className="info-icon fa fa-info"> </i>
                                     </button>

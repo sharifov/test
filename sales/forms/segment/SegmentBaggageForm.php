@@ -7,16 +7,16 @@ use sales\services\parsingDump\BaggageService;
 use yii\base\Model;
 
 /**
- * @property string $type
- * @property int $piece
- * @property string $paxCode
- * @property string $segmentIata
- * @property string $weight
- * @property string $height
- * @property double|null $price
- * @property string $currency
- * @property array $baggageData
- * @property int $segmentId
+ * @property $type
+ * @property $piece
+ * @property $paxCode
+ * @property $segmentIata
+ * @property $weight
+ * @property $height
+ * @property $price
+ * @property $currency
+ * @property $baggageData
+ * @property $segmentId
  */
 class SegmentBaggageForm extends Model
 {

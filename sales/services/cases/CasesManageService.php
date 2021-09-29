@@ -117,9 +117,9 @@ class CasesManageService
         $case = $this->finder->caseFind($caseId);
         $user = $this->finder->userFind($userId);
 
-        if (!($case->isPending() || $case->isFollowUp() || $case->isTrash())) {
+        /*if (!($case->isPending() || $case->isFollowUp() || $case->isTrash())) {
             throw new \DomainException('Case could not be taken now.');
-        }
+        }*/
 
         $this->processing($case, $user, $creatorId, $description);
     }
@@ -171,7 +171,14 @@ class CasesManageService
         $this->guardAccessUserToCase($case, $user);
         $case->processing($user->id, $creatorId, $description);
         $this->casesRepository->save($case);
-        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($user->username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
+
+        if ($creatorId) {
+            $creator = $this->finder->userFind($creatorId);
+        }
+        $eventDescription = 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status];
+        $eventDescription .= ' By: ' . ($creator->username ?? 'System.');
+        $eventDescription .= ($description ? ' Reason: ' . $description : '');
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, $eventDescription);
     }
 
     /**

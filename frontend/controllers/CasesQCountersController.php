@@ -82,11 +82,11 @@ class CasesQCountersController extends FController
                         $result['processing'] = $count;
                     }
                     break;
-                case 'solved':
+                /*case 'solved':
                     if ($count = $this->getSolved()) {
                         $result['solved'] = $count;
                     }
-                    break;
+                    break;*/
                 case 'trash':
                     if ($count = $this->getTrash()) {
                         $result['trash'] = $count;
@@ -182,7 +182,7 @@ class CasesQCountersController extends FController
      */
     private function getAwaiting(): ?int
     {
-        if (!Yii::$app->user->can('/cases-q/waiting')) {
+        if (!Yii::$app->user->can('/cases-q/awaiting')) {
             return null;
         }
         /** @var Employee $user */

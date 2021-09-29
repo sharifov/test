@@ -5,8 +5,8 @@ use yii\bootstrap4\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\PhoneBlacklistLog */
 
-$this->title = 'Update Phone Blacklist Log: ' . $model->pbll_id;
-$this->params['breadcrumbs'][] = ['label' => 'Phone Blacklist Logs', 'url' => ['index']];
+$this->title = 'Update Phone Blocklist Log: ' . $model->pbll_id;
+$this->params['breadcrumbs'][] = ['label' => 'Phone Blocklist Logs', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->pbll_id, 'url' => ['view', 'id' => $model->pbll_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>

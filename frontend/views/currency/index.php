@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],]) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

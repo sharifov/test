@@ -98,7 +98,7 @@ $user = Yii::$app->user->identity;
     $viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
     $buttonsSubAction = [];
 
-    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isBookFailed() || $leadModel->isPending() || $leadModel->isProcessing() || $leadModel->isAlternative()) && $leadModel->getAppliedAlternativeQuotes() === null);
+    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isBookFailed() || $leadModel->isPending() || $leadModel->isProcessing() || $leadModel->isAlternative() || $leadModel->isNew()) && $leadModel->getAppliedAlternativeQuotes() === null);
     $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
     if ($processingConditions) {
@@ -182,7 +182,7 @@ $user = Yii::$app->user->identity;
         <?php if ($takeConditions) {
             if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold())) {
                 echo $buttonTakeOver;
-            } elseif ($leadModel->isPending() || $leadModel->isFollowUp() || $leadModel->isAlternative() || $leadModel->isBookFailed()) {
+            } elseif ($leadModel->isPending() || $leadModel->isFollowUp() || $leadModel->isAlternative() || $leadModel->isBookFailed() || $leadModel->isNew()) {
                 echo $buttonTake;
             }
         }?>
@@ -849,10 +849,9 @@ $js = <<<JS
             modal.modal('show');
         });
         return false;
-    });
+    });    
     
-    
-     $('.btn-reservation-dump').on('click', function(e) {
+     $('body').on('click', '.btn-reservation-dump', function (e) {
         e.preventDefault();
         let modal = $('#modal-df');
         let title = $(this).attr('title');
@@ -864,7 +863,6 @@ $js = <<<JS
         
         modal.find('.modal-body').html(content2);
         modal.modal('show');
-        //return false;
     });
     
     

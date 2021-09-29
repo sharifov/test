@@ -9,6 +9,7 @@ use sales\helpers\quote\ImageHelper;
 use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 /**
  * @var $resultKey int
@@ -22,6 +23,12 @@ use yii\helpers\ArrayHelper;
 
 $user = Yii::$app->user->identity;
 $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
+
+$leadQuotes = $lead->quotes;
+$flightQuotes = [];
+foreach ($leadQuotes as $quote) {
+    $flightQuotes[] = json_decode($quote->origin_search_data, true)['key'] ?? '';
+}
 ?>
 <?php
 
@@ -32,8 +39,9 @@ $airportChange = $result['airportChange'];
 $technicalStopCnt = $result['technicalStopCnt'];
 $bagFilter = $result['bagFilter'];
 
-//$isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuotes, $result['key']);
-$isQuoteAssignedToFlight = false;
+$isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
+$urlCreateQuoteFromSearch = Url::to(['client-chat-flight-quote/create-quote-from-search', 'leadId' => $lead->id]);
+$urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-search', 'leadId' => $lead->id]);
 ?>
 <div
     class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>"
@@ -445,18 +453,90 @@ $isQuoteAssignedToFlight = false;
                 'data-target' => '#search_result_item_' . $resultKey,
             ]) ?>
 
-            <?php if (!$isQuoteAssignedToFlight) : ?>
-                <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add And Send Quote</span>', [
-                    'class' => 'btn btn-success search_create_quote__btn',
-                    'data-title' => implode(', ', $tripsInfo),
-                    'data-key' => $result['key'],
-                    'data-gds' => $result['gds'],
-                    'data-key-cache' => $keyCache,
-                    'data-result' => 'search-result__quote-' . $resultKey,
-                    'data-project' => $lead->project_id,
-                    'data-chat-id' => $chatId
-                ]) ?>
-            <?php endif; ?>
+            <div class="btn-group js-btn-box" style="margin: 0 7px; height: 32px;">
+                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa fa-bars"></i> Add
+                </button>
+                <div class="dropdown-menu small">
+                    <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
+                        'class' => 'dropdown-item quote__btn',
+                        'data-title' => implode(', ', $tripsInfo),
+                        'data-key' => $result['key'],
+                        'data-gds' => $result['gds'],
+                        'data-key-cache' => $keyCache,
+                        'data-result' => 'search-result__quote-' . $resultKey,
+                        'data-project' => $lead->project_id,
+                        'data-chat-id' => $chatId,
+                        'data-send-quote' => false,
+                        'data-url' => $urlCreateQuoteFromSearch,
+                        'disabled' => $isQuoteAssignedToFlight
+                    ]) ?>
+
+                    <?php if ($projectRelations = $lead->project->projectRelations) : ?>
+                        <?php foreach ($projectRelations as $relatedProject) : ?>
+                            <?php echo
+                            Html::button(
+                                '<i class="fa fa-plus"></i>&nbsp; <span>Add Quote to ' . $relatedProject->prlRelatedProject->name . '</span>',
+                                [
+                                    'class' => 'dropdown-item quote__btn',
+                                    'style' => 'width: 180px; margin-left: 0; margin-bottom: 2px; text-align: left;',
+                                    'data-title' => implode(', ', $tripsInfo),
+                                    'data-key' => $result['key'],
+                                    'data-gds' => $result['gds'],
+                                    'data-key-cache' => $keyCache,
+                                    'data-result' => 'search-result__quote-' . $resultKey,
+                                    'data-project' => $relatedProject->prl_related_project_id,
+                                    'data-send-quote' => false,
+                                    'data-chat-id' => $chatId,
+                                    'data-url' => $urlCreateQuoteFromSearch,
+                                ]
+                            )
+                            ?>
+                        <?php endforeach ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+
+            <div class="btn-group js-btn-box" style="margin: 0 7px; height: 32px;">
+                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa fa-bars"></i> Send
+                </button>
+                <div class="dropdown-menu small">
+
+                    <?= Html::button('<i class="fa fa-paper-plane"></i>&nbsp; <span>Send</span>', [
+                        'class' => 'dropdown-item quote__btn',
+                        'data-title' => implode(', ', $tripsInfo),
+                        'data-key' => $result['key'],
+                        'data-gds' => $result['gds'],
+                        'data-key-cache' => $keyCache,
+                        'data-result' => 'search-result__quote-' . $resultKey,
+                        'data-project' => $lead->project_id,
+                        'data-chat-id' => $chatId,
+                        'data-send-quote' => true,
+                        'data-url' => $urlSendQuoteFromSearch
+                    ]) ?>
+
+                    <?php if ($projectRelations = $lead->project->projectRelations) : ?>
+                        <?php foreach ($projectRelations as $relatedProject) : ?>
+                            <?php echo
+                             Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Send Quote of ' . $relatedProject->prlRelatedProject->name . ' Provider</span>', [
+                                 'class' => 'dropdown-item quote__btn',
+                                 'data-title' => implode(', ', $tripsInfo),
+                                 'data-key' => $result['key'],
+                                 'data-gds' => $result['gds'],
+                                 'data-key-cache' => $keyCache,
+                                 'data-result' => 'search-result__quote-' . $resultKey,
+                                 'data-project' => $relatedProject->prl_related_project_id,
+                                 'data-chat-id' => $chatId,
+                                 'data-send-quote' => true,
+                                 'data-url' => $urlSendQuoteFromSearch
+                             ])
+                            ?>
+                        <?php endforeach ?>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </div>
 </div>

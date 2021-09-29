@@ -5,7 +5,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\contactPhoneList\entity\ContactPhoneListSearch */
-/* @var $form common\components\bootstrap4\activeForm\ActiveForm */
+/* @var $form yii\widgets\ActiveForm */
 ?>
 
 <div class="contact-phone-list-search">

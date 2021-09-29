@@ -4,6 +4,8 @@ namespace sales\model\leadRedial\entity;
 
 use common\models\Employee;
 use common\models\LeadQcall;
+use sales\entities\EventTrait;
+use sales\model\leadRedial\entity\events\CallRedialAccessCreatedEvent;
 
 /**
  * This is the model class for table "{{%call_redial_user_access}}".
@@ -17,6 +19,24 @@ use common\models\LeadQcall;
  */
 class CallRedialUserAccess extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
+    public static function create(int $leadId, int $userId, \DateTimeImmutable $createdDt): self
+    {
+        $access = new self();
+        $access->crua_lead_id = $leadId;
+        $access->crua_user_id = $userId;
+        $access->crua_created_dt = $createdDt->format('Y-m-d H:i:s');
+        $access->recordEvent(new CallRedialAccessCreatedEvent($leadId, $userId));
+        return $access;
+    }
+
+    public function remove()
+    {
+        $this->recordEvent(new CallRedialAccessCreatedEvent($this->crua_lead_id, $this->crua_user_id));
+        return $this->delete();
+    }
+
     public function rules(): array
     {
         return [

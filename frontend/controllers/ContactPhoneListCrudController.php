@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\model\contactPhoneList\entity\ContactPhoneListCrudSearch;
 use Yii;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
 use sales\model\contactPhoneList\entity\ContactPhoneListSearch;
@@ -41,7 +42,7 @@ class ContactPhoneListCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new ContactPhoneListSearch();
+        $searchModel = new ContactPhoneListCrudSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

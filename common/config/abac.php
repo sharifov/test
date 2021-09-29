@@ -11,7 +11,11 @@ return [
         'lead' => \modules\lead\src\abac\LeadAbacObject::class,
         'email' => \modules\email\src\abac\EmailAbacObject::class,
         'qa-task' => \modules\qaTask\src\abac\QaTaskAbacObject::class,
-        'client-chat' => \sales\model\clientChat\entity\abac\ClientChatAbacObject::class
+        'client-chat' => \sales\model\clientChat\entity\abac\ClientChatAbacObject::class,
+        'client' => \sales\model\client\abac\ClientAbacObject::class,
+        'product-quote' => \modules\product\src\abac\ProductQuoteAbacObject::class,
+        'call' => \sales\model\call\abac\CallAbacObject::class,
+        'user-flow-widget' => \frontend\widgets\frontendWidgetList\userflow\abac\UserFlowWidgetObject::class
     ],
     'scanDirs' => [
         '/modules/',

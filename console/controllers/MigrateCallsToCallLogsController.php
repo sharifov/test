@@ -13,6 +13,8 @@ use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
+use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
+use sales\model\callLogFilterGuard\service\CallLogFilterGuardService;
 use sales\model\phoneList\entity\PhoneList;
 use yii\console\Controller;
 use yii\helpers\Console;
@@ -800,6 +802,11 @@ class MigrateCallsToCallLogsController extends Controller
 
             if (!$callLog->save()) {
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callLog->toArray(), 'message' => $callLog->getErrors()]));
+            }
+
+            if (($parentId = $call['c_parent_id'] ?? null) && $callLogFilterGuard = CallLogFilterGuardService::checkCallLog($parentId)) {
+                $callLogFilterGuard->clfg_call_log_id = $callLog->cl_id;
+                (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
             }
 
             if ($call['c_lead_id']) {

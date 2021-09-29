@@ -50,7 +50,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'fr_created_api_user_id',
-                        'class' => common\components\grid\ApiUserColumn::class,
+                        'value' => static function (FlightRequest $model) {
+                            return $model->apiUser->au_name . ' (' . $model->fr_created_api_user_id . ')';
+                        }
                     ],
                     [
                         'attribute' => 'fr_status_id',

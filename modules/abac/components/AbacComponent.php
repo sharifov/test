@@ -12,6 +12,7 @@ namespace modules\abac\components;
 use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
+use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use stdClass;
 use Yii;
@@ -82,13 +83,12 @@ class AbacComponent extends Component
     }
 
     /**
+     * @param Employee $me
      * @return \stdClass
      */
-    private function getEnv()
+    private function getEnv(Employee $me)
     {
         /** @var Employee $me */
-        $me = Yii::$app->user->identity;
-
         $user = new \stdClass();
         $user->id = $me->id;
         $user->username = $me->username;
@@ -100,8 +100,11 @@ class AbacComponent extends Component
         $request = new \stdClass();
         $request->controller = Yii::$app->controller->uniqueId;
         $request->action = Yii::$app->controller->action->uniqueId;
-        $request->url = Yii::$app->request->url;
-        $request->ip = Yii::$app->request->getUserIP();
+
+        if (Yii::$app->request instanceof \yii\base\Request) {
+            $request->url = Yii::$app->request->url ?? null;
+            $request->ip = Yii::$app->request->getUserIP() ?? null;
+        }
         // $request->get = Yii::$app->request->get();
 
         $dt = new \stdClass();
@@ -128,15 +131,19 @@ class AbacComponent extends Component
      * @param stdClass|null $subject
      * @param string $object
      * @param string $action
+     * @param Employee|null $user
      * @return bool|null
      */
-    final public function can(?\stdClass $subject, string $object, string $action): ?bool
+    final public function can(?\stdClass $subject, string $object, string $action, ?Employee $user = null): ?bool
     {
         if (!$subject) {
             $subject = new \stdClass();
         }
         try {
-            $subject->env = $this->getEnv();
+            if (!$user) {
+                $user = Auth::user();
+            }
+            $subject->env = $this->getEnv($user);
             //$sub->data = $subject;
 
             if ($this->enforser->enforce($subject, $object, $action) === true) {

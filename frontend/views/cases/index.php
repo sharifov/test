@@ -22,6 +22,7 @@ use sales\auth\Auth;
 use common\models\Language;
 use kartik\select2\Select2;
 use common\components\grid\BooleanColumn;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -209,16 +210,9 @@ $gridId = 'cases-grid-id';
                 },
                 'filter' => CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
             ],
-            /*[
-                'class' => CasesStatusColumn::class,
-            ],*/
             [
-                'attribute' => 'cs_status',
-                'value' => static function (Cases $model) {
-                    $value = CasesStatus::getName($model->cs_status);
-                    return '<span class="label ' . CasesStatus::getClass($model->cs_status) . '">' . $value . '</span>';
-                },
-                'format' => 'raw'
+                'class' => CasesStatusColumn::class,
+                'logRecord' => false
             ],
             [
                 'label' => 'Status Dt',
@@ -297,16 +291,18 @@ $gridId = 'cases-grid-id';
                 'attribute' => 'cs_order_uid',
             ],
             [
+                'class' => \common\components\grid\DateColumn::class,
+                'label' => 'Next Flight Date',
+                'attribute' => 'nextFlight',
+            ],
+            [
                 'attribute' => 'cs_is_automate',
                 'class' => BooleanColumn::class,
                 'visible' => $searchModel->showFields && in_array('cs_is_automate', $searchModel->showFields, true),
             ],
             [
-                'attribute' => 'cs_created_dt',
-                'value' => static function (Cases $model) {
-                    return $model->cs_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
-                },
-                'format' => 'raw'
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cs_created_dt'
             ],
             [
                 'attribute' => 'cs_last_action_dt',
@@ -385,6 +381,11 @@ $js = <<<JS
 $('.close-icon').on('click', function(){    
     $('.multiple-update-summary').slideUp();
 })
+
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#' + '$gridId').position().top }, 400);
+    })
+
 JS;
 $this->registerJs($js);
 

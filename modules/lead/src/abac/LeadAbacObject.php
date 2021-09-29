@@ -34,6 +34,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_CLIENT_SUBSCRIBE  = self::NS . 'act/client-subscribe';
     public const ACT_CLIENT_UNSUBSCRIBE  = self::NS . 'act/client-unsubscribe';
     public const ACT_SEARCH_LEADS_BY_IP  = self::NS . 'act/search-leads-by-ip';
+    public const ACT_CREATE_FROM_PHONE_WIDGET = self::NS . 'act/create-from-phone-widget';
+    public const ACT_LINK_TO_CALL = self::NS . 'act/link-to-call';
+    public const ACT_TAKE_LEAD_FROM_CALL = self::NS . 'act/take-from-call';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -87,6 +90,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_IS_EMPTY_OWNER   => self::QUERY_SOLD_IS_EMPTY_OWNER,
         self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => self::UI_DISPLAY_QUOTE_SEARCH_PARAMS,
         self::CMD_AUTO_REDIAL => self::CMD_AUTO_REDIAL,
+        self::ACT_CREATE_FROM_PHONE_WIDGET => self::ACT_CREATE_FROM_PHONE_WIDGET,
+        self::ACT_LINK_TO_CALL => self::ACT_LINK_TO_CALL,
+        self::ACT_TAKE_LEAD_FROM_CALL => self::ACT_TAKE_LEAD_FROM_CALL,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -101,7 +107,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE],
+        self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE, self::ACTION_CREATE],
         self::ACT_CLIENT_DETAILS => [self::ACTION_ACCESS],
         self::ACT_CLIENT_ADD_PHONE => [self::ACTION_ACCESS, self::ACTION_CREATE],
         self::ACT_CLIENT_EDIT_PHONE => [self::ACTION_ACCESS, self::ACTION_UPDATE],
@@ -128,6 +134,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ACTION_QUERY_AND, self::ACTION_QUERY_OR],
         self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => [self::ACTION_ACCESS],
         self::CMD_AUTO_REDIAL => [self::ACTION_ACCESS],
+        self::ACT_CREATE_FROM_PHONE_WIDGET => [self::ACTION_CREATE],
+        self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
+        self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -267,6 +276,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ATTR_LEAD_IS_OWNER],
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ATTR_LEAD_HAS_OWNER_QUERY],
         self::CMD_AUTO_REDIAL  => [],
+        self::ACT_TAKE_LEAD_FROM_CALL  => [],
     ];
 
     /**
@@ -307,6 +317,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_CLIENT_EDIT_EMAIL][] = $attrStatus;
         $attributeList[self::ACT_USER_SAME_EMAIL_INFO][] = $attrStatus;
         $attributeList[self::ACT_SEARCH_LEADS_BY_IP][] = $attrStatus;
+        $attributeList[self::ACT_TAKE_LEAD_FROM_CALL][] = $attrStatus;
 
         return $attributeList;
     }

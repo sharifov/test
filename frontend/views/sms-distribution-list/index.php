@@ -42,7 +42,7 @@ $gridId = 'sms-grid-id';
     </div>
 
 
-    <?php Pjax::begin(['id' => 'pjax-sms-grid-list']); ?>
+    <?php Pjax::begin(['id' => 'pjax-sms-grid-list', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?php //=Html::beginForm(['/sms-distribution-list/update-multiple'],'post', ['data-pjax' => true])?>

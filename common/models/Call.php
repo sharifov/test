@@ -33,6 +33,7 @@ use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\model\client\notifications\ClientNotificationCanceler;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -129,6 +130,7 @@ use Locale;
  * @property ConferenceParticipant[] $conferenceParticipants
  * @property ConferenceParticipant $currentParticipant
  * @property Conference[] $conferences
+ * @property CallLogFilterGuard $callLogFilterGuard
  */
 class Call extends \yii\db\ActiveRecord
 {
@@ -275,13 +277,42 @@ class Call extends \yii\db\ActiveRecord
     public const DEFAULT_PRIORITY_VALUE = 0;
 
     public const STIR_STATUS_FULL = 'A';
+    public const STIR_STATUS_FULL_FAILED = 'AF';
     public const STIR_STATUS_PARTIAL = 'B';
+    public const STIR_STATUS_PARTIAL_FAILED = 'BF';
     public const STIR_STATUS_GATEWAY = 'C';
+    public const STIR_STATUS_GATEWAY_FAILED = 'CF';
+    public const STIR_STATUS_NO_VALIDATION = 'NV';
+    public const STIR_STATUS_VALIDATION_FAILED = 'VF';
 
     public const STIR_STATUS_LIST = [
         self::STIR_STATUS_FULL => 'Full Attestation (A)',
         self::STIR_STATUS_PARTIAL => 'Partial Attestation (B)',
         self::STIR_STATUS_GATEWAY => 'Gateway Attestation (C)',
+        self::STIR_STATUS_FULL_FAILED => 'Full Attestation (AF) Failed',
+        self::STIR_STATUS_PARTIAL_FAILED => 'Partial Attestation (BF) Failed',
+        self::STIR_STATUS_GATEWAY_FAILED => 'Gateway Attestation (CF) Failed',
+        self::STIR_STATUS_NO_VALIDATION => '(NV) No Validation',
+        self::STIR_STATUS_VALIDATION_FAILED => '(VF) Validation Failed',
+    ];
+
+    public const STIR_VERSTAT_LIST = [
+        'TN-Validation-Passed-A' => self::STIR_STATUS_FULL,
+        'TN-Validation-Passed-B' => self::STIR_STATUS_PARTIAL,
+        'TN-Validation-Passed-C' => self::STIR_STATUS_GATEWAY,
+        'TN-Validation-Failed-A' => self::STIR_STATUS_FULL_FAILED,
+        'TN-Validation-Failed-B' => self::STIR_STATUS_PARTIAL_FAILED,
+        'TN-Validation-Failed-C' => self::STIR_STATUS_GATEWAY_FAILED,
+        'No-TN-Validation' => self::STIR_STATUS_NO_VALIDATION,
+        'TN-Validation-Failed' => self::STIR_STATUS_VALIDATION_FAILED,
+        'A' => self::STIR_STATUS_FULL,
+        'B' => self::STIR_STATUS_PARTIAL,
+        'C' => self::STIR_STATUS_GATEWAY
+    ];
+
+    public const STIR_TRUSTED_GROUP = [
+        'TN-Validation-Passed-A',
+        'TN-Validation-Passed-B'
     ];
 
     private ?Data $data = null;
@@ -517,17 +548,18 @@ class Call extends \yii\db\ActiveRecord
         $call->c_project_id = $projectId;
         $call->c_dep_id = $depId;
         $call->c_client_id = $clientId;
-        $call->c_stir_status = ArrayHelper::getValue($requestDataDTO, 'callData.StirStatus');
+        $call->c_stir_status = self::getStirStatusByVerstatKey(ArrayHelper::getValue($requestDataDTO, 'callData.StirVerstat', ''));
         $call->setStatusIvr();
         return $call;
     }
 
-    public function assignParentCall(int $callId, int $projectId, int $depId, int $sourceTypeId): void
+    public function assignParentCall(int $callId, int $projectId, int $depId, int $sourceTypeId, ?int $stirStatus): void
     {
         $this->c_parent_id = $callId;
         $this->c_project_id = $projectId;
         $this->c_dep_id = $depId;
         $this->c_source_type_id = $sourceTypeId;
+        $this->c_stir_status = $stirStatus;
     }
 
     /**
@@ -640,6 +672,11 @@ class Call extends \yii\db\ActiveRecord
     public function getCallUserAccesses(): ActiveQuery
     {
         return $this->hasMany(CallUserAccess::class, ['cua_call_id' => 'c_id']);
+    }
+
+    public function getCallLogFilterGuard(): ActiveQuery
+    {
+        return $this->hasOne(CallLogFilterGuard::class, ['clfg_call_id' => 'c_id']);
     }
 
     /**
@@ -1432,7 +1469,9 @@ class Call extends \yii\db\ActiveRecord
                 $job->delayJob = $delayJob;
                 Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
             }
+        }
 
+        if ($isChangedStatus && $this->isStatusCompleted()) {
             if ($this->c_case_id) {
                 $productQuoteChanges = ProductQuoteChange::find()->select(['pqc_id'])->byCaseId($this->c_case_id)->isNotDecided()->column();
                 if ($productQuoteChanges) {
@@ -2731,8 +2770,19 @@ class Call extends \yii\db\ActiveRecord
         return $data;
     }
 
+
     public function isClientNotification(): bool
     {
         return $this->c_source_type_id === self::SOURCE_CLIENT_NOTIFICATION;
+    }
+
+    public static function getStirStatusByVerstatKey(string $verstatKey): ?string
+    {
+        return self::STIR_VERSTAT_LIST[$verstatKey] ?? null;
+    }
+
+    public static function isTrustedVerstat(string $key): bool
+    {
+        return in_array($key, self::STIR_TRUSTED_GROUP);
     }
 }

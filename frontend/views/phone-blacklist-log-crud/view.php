@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model common\models\PhoneBlacklistLog */
 
 $this->title = $model->pbll_phone;
-$this->params['breadcrumbs'][] = ['label' => 'Phone Blacklist Logs', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Phone BlockList Logs', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>

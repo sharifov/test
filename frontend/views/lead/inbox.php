@@ -417,6 +417,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
 
                         if (!$isAgent) {
+                            $buttons .= ' &nbsp';
                             $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
                                 'class' => 'btn btn-info btn-xs',
                                 'data-pjax' => 0
@@ -433,7 +434,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 <?php
 echo '<div class="table-responsive">' . GridView::widget([
-
+    'id' => 'lead-inbox-gv',
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,
@@ -489,6 +490,15 @@ echo '<div class="table-responsive">' . GridView::widget([
     <?php $this->registerJs('$(".knob_element").knob();', \yii\web\View::POS_READY); ?>
 <?php //endif; ?>
 
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#lead-inbox-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>
 
 <?php
 $js = '

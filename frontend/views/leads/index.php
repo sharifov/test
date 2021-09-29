@@ -629,7 +629,11 @@ $js = <<<JS
          $('[data-toggle="tooltip"]').tooltip({html:true});
     });
 
-   $('[data-toggle="tooltip"]').tooltip({html:true});
+    $('[data-toggle="tooltip"]').tooltip({html:true});
+   
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#' + '$gridId').position().top }, 400);
+    })
 
 JS;
     $this->registerJs($js, View::POS_READY);

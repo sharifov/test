@@ -92,7 +92,7 @@ class ReprotectionCreateForm extends Model
         return $this->project;
     }
 
-    public function getFlightQuoteForm(): ?ReProtectionFlightQuoteForm
+    public function getFlightQuoteForm(): ?FlightQuoteForm
     {
         return $this->flightQuoteForm;
     }

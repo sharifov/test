@@ -158,8 +158,12 @@ class ClientChatRequestController extends ApiBaseController
                     "lastAgentMessage": null,
                     "lastVisitorMessage": null,
                     "id": "fef46d63-8a30-4eec-89eb-62f1bfc0ffcd",
+                    "username": "Test Usrename",
+                    "name": "Test Name",
                     "uuid": "54d87707-bb54-46e3-9eca-8f776c7bcacf",
                     "project": "ovago",
+                    "channel": "1",
+                    "email": "test@techork.com",
                     "leadIds": [
                         234556,
                         357346
@@ -169,7 +173,9 @@ class ClientChatRequestController extends ApiBaseController
                         345634634
                     ]
                 },
-                "sources": [],
+                "sources": {
+                    "crossSystemXp": "123465.1"
+                },
                 "page": {
                     "url": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28",
                     "title": "Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com",

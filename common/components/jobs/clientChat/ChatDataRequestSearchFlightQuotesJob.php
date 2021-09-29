@@ -8,8 +8,10 @@ use common\models\Project;
 use frontend\helpers\QuoteHelper;
 use sales\dto\searchService\SearchServiceQuoteDTO;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatDataRequest\form\FlightSearchDataRequestForm;
-use yii\helpers\VarDumper;
+use sales\model\clientChatLead\entity\ClientChatLead;
+use Yii;
 use yii\queue\JobInterface;
 
 /**
@@ -18,27 +20,33 @@ use yii\queue\JobInterface;
  *
  * @property-read FlightSearchDataRequestForm $form
  * @property-read string $cacheKey
- * @property-read string $chatRid
+ * @property-read int $chatId
  * @property-read int|null $projectId
  */
 class ChatDataRequestSearchFlightQuotesJob extends BaseJob implements JobInterface
 {
     private FlightSearchDataRequestForm $form;
 
-    private string $chatRid;
+    private int $chatId;
 
     private ?int $projectId;
 
-    public function __construct(FlightSearchDataRequestForm $form, string $chatRid, ?int $projectId, ?float $timeStart = null, $config = [])
+    public function __construct(FlightSearchDataRequestForm $form, int $chatId, ?int $projectId, ?float $timeStart = null, $config = [])
     {
         $this->form = $form;
-        $this->chatRid = $chatRid;
+        $this->chatId = $chatId;
         $this->projectId = $projectId;
         parent::__construct($timeStart, $config);
     }
 
     public function execute($queue)
     {
+        $chat = ClientChat::findOne($this->chatId);
+        if (!$chat) {
+            Yii::warning('Chat not found by id: ' . $this->chatId, 'ChatDataRequestSearchFlightQuotesJob::ChatNotFound');
+            return;
+        }
+
         $dto = new SearchServiceQuoteDTO(null);
         $dto->cabin = $this->form->getCabinCode();
         $dto->adt = $this->form->adults;
@@ -62,21 +70,30 @@ class ChatDataRequestSearchFlightQuotesJob extends BaseJob implements JobInterfa
             $dto->cid = $project->airSearchCid ?? $dto->cid;
         }
 
+        $leadIds = ClientChatLead::find()->select(['ccl_lead_id'])->where(['ccl_chat_id' => $chat->cch_id])->column();
+        foreach ($leadIds as $leadId) {
+            $quotes = Yii::$app->cacheFile->get($this->getCacheKey($chat->cch_rid, (int)$leadId));
+            if ($quotes === false || (is_array($quotes) && !empty($quotes['results']))) {
+                return;
+            }
+        }
+
         try {
-            \Yii::info(VarDumper::dumpAsString($dto), 'info\ChatDataRequestSearchFlightQuotesJob::searchQuotes');
             $quotes = SearchService::getOnlineQuotes($dto);
-            \Yii::info(VarDumper::dumpAsString($quotes), 'info\ChatDataRequestSearchFlightQuotesJob::searchResult');
             if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
-                \Yii::$app->cacheFile->set($this->getCacheKey(), $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
-                \Yii::info(VarDumper::dumpAsString($quotes), 'info\ChatDataRequestSearchFlightQuotesJob::quotesResult');
+                Yii::$app->cacheFile->set($this->getCacheKey($chat->cch_rid, null), $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
             }
         } catch (\Throwable $e) {
-            \Yii::error(AppHelper::throwableLog($e, true), 'ChatDataRequestSearchFlightQuotesJob::Throwable');
+            Yii::error(AppHelper::throwableLog($e, true), 'ChatDataRequestSearchFlightQuotesJob::Throwable');
         }
     }
 
-    private function getCacheKey(): string
+    private function getCacheKey(string $chatRid, ?int $leadId): string
     {
-        return 'quote-search-' . $this->chatRid;
+        $key = 'quote-search-' . $chatRid;
+        if ($leadId) {
+            $key .= '-lead-' . $leadId;
+        }
+        return $key;
     }
 }

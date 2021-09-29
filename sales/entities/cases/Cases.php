@@ -244,7 +244,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_source_type_id = CasesSourceType::API;
         $case->cs_is_automate = true;
         $case->cs_project_id = $projectId;
-        $case->statusToNew(null, 'Flight ReProtection Create');
+        $case->pending(null, 'Flight ReProtection Create');
         return $case;
     }
 
@@ -431,6 +431,16 @@ class Cases extends ActiveRecord implements Objectable
     public function isTrash(): bool
     {
         return $this->cs_status === CasesStatus::STATUS_TRASH;
+    }
+
+    public function isAwaiting(): bool
+    {
+        return $this->cs_status === CasesStatus::STATUS_AWAITING;
+    }
+
+    public function isError(): bool
+    {
+        return $this->cs_status === CasesStatus::STATUS_ERROR;
     }
 
     public function isActive(): bool

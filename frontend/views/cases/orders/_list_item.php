@@ -214,15 +214,14 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th></th>
                 </tr>
                 <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
-                    $quote = $productQuote;
-                    $ordTotalPrice += $quote->pq_price;
-                    $ordTotalFee += $quote->pq_service_fee_sum;
-                    $ordClientTotalPrice += $quote->pq_client_price;
-                    $ordOptionTotalPrice += $quote->optionAmountSum;
+//                    $ordTotalPrice += $productQuote->pq_price;
+//                    $ordTotalFee += $productQuote->pq_service_fee_sum;
+//                    $ordClientTotalPrice += $productQuote->pq_client_price;
+//                    $ordOptionTotalPrice += $productQuote->optionAmountSum;
                     ?>
                       <tr>
                           <?= $this->render('_reprotection_quote_item', [
-                              'quote' => $quote,
+                              'quote' => $productQuote,
                               'nr' => $nr++,
                               'order' => $order,
                               'isReprotection' => false,
@@ -232,16 +231,16 @@ $orderAbacDto = new OrderAbacDto($order);
                       </tr>
                 <?php endforeach; ?>
                 <?php
-                    $ordTotalPrice = round($ordTotalPrice, 2);
-                    $ordClientTotalPrice = round($ordClientTotalPrice, 2);
-                    $ordOptionTotalPrice = round($ordOptionTotalPrice, 2);
-                    $ordTotalFee = round($ordTotalFee, 2);
+//                    $ordTotalPrice = round($ordTotalPrice, 2);
+//                    $ordClientTotalPrice = round($ordClientTotalPrice, 2);
+//                    $ordOptionTotalPrice = round($ordOptionTotalPrice, 2);
+//                    $ordTotalFee = round($ordTotalFee, 2);
 
-                    $orderTipsAmount = $order->orderTips ? $order->orderTips->ot_amount : 0.00;
-                    $orderTipsAmountClient = $order->orderTips ? $order->orderTips->ot_client_amount : 0.00;
+//                    $orderTipsAmount = $order->orderTips->ot_amount ?? 0.00;
+                    $orderTipsAmountClient = $order->orderTips->ot_client_amount ?? 0.00;
 
-                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice + $orderTipsAmount, 2);
-                    $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
+//                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice + $orderTipsAmount, 2);
+//                    $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
 
                 ?>
                 <?php /*
@@ -261,9 +260,9 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th></th>
                 </tr>
  */ ?>
-                <tr>
+                <tr title="From DB">
                     <th class="text-right" colspan="7">Total (price + opt + tips): </th>
-                    <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <td></td>
                 </tr>
             <?php endif; ?>
@@ -665,7 +664,7 @@ $('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotecti
         createNotify('Reprotection confirm', 'Server error', 'error');
     });
 });
-$('body').off('click', '.btn-reprotection-refund, .btn-reprotection-recommended').on('click', '.btn-reprotection-refund, .btn-reprotection-recommended', function (e) {
+$('body').off('click', '.btn-reprotection-refund, .btn-reprotection-recommended, .btn-reprotection-decline').on('click', '.btn-reprotection-refund, .btn-reprotection-recommended, .btn-reprotection-decline', function (e) {
     e.preventDefault();
     
     let btn = $(this);

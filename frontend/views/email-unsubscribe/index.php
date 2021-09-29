@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Email Unsubscribe', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('partial/_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

@@ -38,6 +38,8 @@ class ActiveQueueCall extends Model
     public $isClient;
     public $clientId;
     public $recordingDisabled;
+    public $id;
+    public $callAntiSpamData;
 
     public function getData(): array
     {

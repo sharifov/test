@@ -1,0 +1,193 @@
+version: '3.7'
+
+services:
+
+#    swoole:
+#        container_name: swoole
+#        build:
+#            context: ./docker/swoole/
+#            dockerfile: Dockerfile
+#        ports:
+#            - "84:9501"
+
+    web:
+        container_name: web
+        restart: always
+        privileged: true
+        tty: true
+        build:
+            context: ./docker/
+            dockerfile: Dockerfile
+            args:
+                PHP_VERSION: ${PHP_VERSION}
+        working_dir: ${APP_PTH_CONTAINER}
+#        ports:
+#            - "8088:8080"
+        volumes:
+            - ${APP_PATH_HOST}:${APP_PTH_CONTAINER}
+#            - ./docker/nginx/:/etc/nginx/conf.d/
+#            - ./docker/supervisor/:/etc/supervisor/
+#        depends_on:
+#            - swoole
+
+
+
+#        environment:
+#            - VIRTUAL_HOST=${PROJECT_NAME}.zeit.test,www.${PROJECT_NAME}.zeit.test,api.${PROJECT_NAME}.zeit.test
+
+#
+#                    networks:
+#                        - nginx-proxy
+#                        - default
+#                    depends_on:
+#                        - db
+#                        - beanstalkd
+
+#        ports:
+#            - "80:80"
+#        networks:
+#            - default
+#        depends_on:
+#            - db
+#        volumes:
+#            - "../app:/var/www/app"
+#            - "./conf/nginx:/etc/nginx/sites-available"
+
+
+    composer:
+        container_name: composer
+        image: composer:${COMPOSER_VERSION}
+        volumes:
+            - ${APP_PATH_HOST}:${APP_PTH_CONTAINER}
+#        working_dir: ${APP_PTH_CONTAINER}
+        working_dir: ${APP_PTH_CONTAINER}
+        depends_on:
+            - web
+        command: composer install --ignore-platform-reqs
+
+#    web:
+#        container_name: web
+#        image: yiisoftware/yii2-php:${PHP_VERSION}
+#        working_dir: ${APP_PTH_CONTAINER}
+#        volumes:
+#            - ${APP_PATH_HOST}:${APP_PTH_CONTAINER}
+
+    nginx:
+        image: nginx:${NGINX_VERSION}
+        container_name: nginx
+        ports:
+            - "8082:80"
+            - "8081:81"
+ #           - 444:443
+        volumes:
+            - ${APP_PATH_HOST}:${APP_PTH_CONTAINER}
+            - ./docker/nginx/:/etc/nginx/conf.d/
+#            - ./docker/supervisor/:/etc/supervisor/
+  #          - ./ssl/:/etc/nginx/ssl/
+        depends_on:
+            - web
+        restart: always
+        environment:
+            TZ: UTC
+
+    mysql:
+        container_name: mysql
+        image: mysql:${MYSQL_VERSION}
+        ports:
+            - "3307:3306"
+
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            TZ: UTC
+            DB_PATH_HOST: /tmp/mysql
+        volumes:
+            - ./docker/mysql/dump/:/docker-entrypoint-initdb.d
+#            - ${DB_PATH_HOST}:/var/lib/mysql
+
+    adminer:
+        container_name: adminer
+        image: adminer
+        restart: always
+        ports:
+            - "8084:8080"
+
+    pgsql:
+        container_name: pgsql
+        image: postgres:${POSTGRES_VERSION}
+        ports:
+            - "6432:5432"
+        volumes:
+            - ./docker/pgsql/dump/:/docker-entrypoint-initdb.d
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    redis:
+        container_name: redis
+        image: redis:latest
+        #ports:
+         #   - 6379:6379
+
+    beanstalkd:
+        container_name: beanstalkd
+        image: schickling/beanstalkd:latest
+        restart: always
+
+    #    volumes:
+    #        - "./shared/beanstalkd/logs:/var/beanstalkd"
+    #    ports:
+    #        - "11300:11300"
+    #    networks:
+    #        - default
+
+#    prometheus:
+#        image: prom/prometheus:latest
+#        container_name: prometheus
+#        restart: unless-stopped
+#        user: "0:0"
+#        ports:
+#            - "9090:9090/tcp"
+
+#    phpmyadmin:
+#        container_name: phpmyadmin
+#        image: phpmyadmin/phpmyadmin
+#        ports:
+#            - "8888:80"
+#        environment:
+#            - PMA_ARBITRARY=1
+#            - PMA_HOST=mysql
+#        depends_on:
+#            - mysql
+
+
+    centrifugo:
+        container_name: centrifugo
+        image: centrifugo/centrifugo:latest
+        volumes:
+            - ./docker/centrifugo/:/centrifugo/
+        command: "centrifugo -c config.json"
+        ports:
+            - "8001:8000"
+        ulimits:
+            nofile:
+                soft: 65535
+                hard: 65535
+
+#    supervisor:
+#        container_name: supervisor
+#        build: ./docker/supervisor/
+#        volumes:
+#            - ./:/app
+#            - ./docker/supervisor/:/etc/supervisor/
+#        command: [ "supervisord", "-c", "/etc/supervisor/supervisord.conf" ]
+#        depends_on:
+#            - php
+#            - pgsql
+#            - mysql
+#            - redis
+#            - beanstalkd
+#            - centrifugo

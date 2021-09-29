@@ -7,6 +7,7 @@ use common\models\Employee;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use yii\base\Model;
 use yii\helpers\Html;
@@ -24,9 +25,12 @@ use yii\helpers\Html;
  * @property $reservationDump
  * @property $quoteCreator
  * @property $baggage_data
+ * @property $segment_trip_data
+ * @property $keyTripList
  *
- * @property $itinerary
- * @property $baggageFormsData
+ * @property ItineraryDumpDTO[] $itinerary
+ * @property array $baggageFormsData
+ * @property array $segmentTripFormsData
  */
 class ReProtectionQuoteCreateForm extends Model
 {
@@ -40,9 +44,12 @@ class ReProtectionQuoteCreateForm extends Model
     public $quoteCreator;
     public $reservationDump;
     public $baggage_data;
+    public $segment_trip_data;
+    public $keyTripList;
 
-    private $itinerary = [];
+    private array $itinerary = [];
     private array $baggageFormsData = [];
+    private array $segmentTripFormsData = [];
 
     public function __construct(?int $creatorId = null, $config = [])
     {
@@ -54,7 +61,7 @@ class ReProtectionQuoteCreateForm extends Model
     {
         return [
             [['gds', 'pcc', 'tripType', 'cabin', 'validatingCarrier', 'fareType', 'reservationDump'], 'string'],
-            [['gds', 'validatingCarrier', 'cabin', 'tripType', 'fareType', 'reservationDump', 'quoteCreator'], 'required'],
+            [['gds', 'validatingCarrier', 'cabin', 'tripType', 'fareType', 'reservationDump', 'quoteCreator', 'keyTripList'], 'required'],
             ['quoteCreator', 'integer'],
 
             [['reservationDump'], 'string'],
@@ -69,7 +76,17 @@ class ReProtectionQuoteCreateForm extends Model
             [['reservationDump'], 'checkReservationDump'],
             [['baggage_data'], 'string'],
             [['baggage_data'], 'baggageDataHandle'],
+            [['segment_trip_data'], 'safe'],
+            [['segment_trip_data'], 'segmentTripPrepare'],
+            [['keyTripList'], 'string'],
         ];
+    }
+
+    public function segmentTripPrepare(): void
+    {
+        if (!empty($this->segment_trip_data)) {
+            parse_str($this->segment_trip_data, $this->segmentTripFormsData);
+        }
     }
 
     public function baggageDataHandle(): void
@@ -81,7 +98,7 @@ class ReProtectionQuoteCreateForm extends Model
 
     public function checkReservationDump(): void
     {
-        $dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, true, $this->itinerary);
+        $dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, false, $this->itinerary);
         if (empty($dumpParser)) {
             $this->addError('reservationDump', 'Incorrect reservation dump!');
         }
@@ -100,5 +117,10 @@ class ReProtectionQuoteCreateForm extends Model
     public function getItinerary(): array
     {
         return $this->itinerary;
+    }
+
+    public function getSegmentTripFormsData(): array
+    {
+        return $this->segmentTripFormsData;
     }
 }

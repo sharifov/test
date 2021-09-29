@@ -85,28 +85,24 @@ class FlightController extends BaseController
         $behaviors['logger'] = [
             'class' => SimpleLoggerBehavior::class,
             'except' => [
-                'reprotection-get',
-                'product-quote-get',
+//                'product-quote-get',
             ],
         ];
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'except' => [
-                'reprotection-get',
                 'product-quote-get',
             ],
         ];
         $behaviors['responseStatusCode'] = [
             'class' => ResponseStatusCodeBehavior::class,
             'except' => [
-                'reprotection-get',
                 'product-quote-get',
             ],
         ];
         $behaviors['technical'] = [
             'class' => TechnicalInfoBehavior::class,
             'except' => [
-                'reprotection-get',
                 'product-quote-get',
             ],
         ];
@@ -1320,7 +1316,7 @@ class FlightController extends BaseController
                 'message' => 'Reprotection decision error',
                 'request' => $form->getAttributes(),
                 'error' => $e->getMessage(),
-                'exception' => AppHelper::throwableLog($e, true),
+                'exception' => AppHelper::throwableLog($e, false),
             ], 'FlightController:reprotectionDecision');
             return new ErrorResponse(
                 new DataMessage([
@@ -1984,14 +1980,14 @@ class FlightController extends BaseController
      * @apiParam {string{7..10}}    booking_id          Booking ID
      * @apiParam {string{100}}      [email]             Email
      * @apiParam {string{20}}       [phone]             Phone
-     * @apiParam {string{200}}      [flight_request]    Flight Request
+     * @apiParam {object}           [flight_request]   Flight Request
      *
      * @apiParamExample {json} Request-Example:
      *  {
      *      "booking_id": "XXXYYYZ",
      *      "email": "example@mail.com",
      *      "phone": "+13736911111",
-     *      "flight_request": ""
+     *      "flight_request": {"exampleKey" : "exampleValue"}
      *  }
      *
      * @apiSuccessExample {json} Success-Response:

@@ -14,7 +14,7 @@ $root = str_replace('\\', '/', __DIR__);
 $tplEnvFile = '../.env.example';
 $env['skipFiles'] = ['.env', $tplEnvFile, 'env_scan', 'env_scan_new', 'env_fill_in', 'env_diff', 'env_tools_lib.php'];
 
-echo "Environment Scan Tool v1.0\n\n";
+echo "Environment Scan Tool v1.1\n\n";
 echo '... Start scan keys: ' . date('H:i:s'). " ...\n";
 $files = getFileList("$root/");
 if (isset($env['skipFiles'])) {

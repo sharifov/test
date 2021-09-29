@@ -72,12 +72,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
 
         if (($profile = $user->userProfile) && $profile->up_auto_redial) {
-            $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
+            $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo text"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
         }
 
         $menuLItems[] = ['label' => 'New', 'url' => ['/lead/new'], 'icon' => 'paste text-warning'];
 
         $menuLItems[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase'];
+        $menuLItems[] = ['label' => 'Business Inbox <span id="badges-business-inbox" data-type="business-inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/business-inbox'], 'icon' => 'ioxhost text-info'];
 
         if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
             $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase'];
@@ -227,6 +228,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Queue', 'url' => ['/call-log-queue/index']],
                         ['label' => 'Record', 'url' => ['/call-log-record/index']],
                         ['label' => 'Twilio Recording Log', 'url' => ['/call-recording-log-crud/index']],
+                        ['label' => 'Call Log Filter Guard', 'url' => ['/call-log-filter-guard-crud/index']],
                     ],
                 ],
                 [
@@ -351,9 +353,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'list',
                     'items' => [
-                        ['label' => 'Phone List', 'url' => ['/contact-phone-list-crud/index']],
+                        ['label' => 'Phone List CRUD', 'url' => ['/contact-phone-list-crud/index']],
                         ['label' => 'Phone Data', 'url' => ['/contact-phone-data-crud/index']],
                         ['label' => 'Phone service info', 'url' => ['/contact-phone-service-info-crud/index']],
+                        ['label' => 'Phone List', 'url' => ['/contact-phone-list/index']],
                     ]
                 ]
             ]
@@ -517,8 +520,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
 
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
-                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
-                ['label' => 'Phone Blacklist Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
+                ['label' => 'Phone BlockList', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+                ['label' => 'Phone BlockList Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],

@@ -51,7 +51,7 @@ class UserAccessAcceptPending implements UserAccessManageRequestInterface
         if ($enabled && $chatDataRequest && $chatDataRequest->ccdr_data_json && is_array($chatDataRequest->ccdr_data_json)) {
             $form = new FlightSearchDataRequestForm($chatDataRequest->ccdr_data_json);
             if ($form->validate()) {
-                $job = new ChatDataRequestSearchFlightQuotesJob($form, $this->chat->cch_rid, $this->chat->cch_project_id);
+                $job = new ChatDataRequestSearchFlightQuotesJob($form, $this->chat->cch_id, $this->chat->cch_project_id);
                 \Yii::$app->queue_client_chat_job->priority(10)->push($job);
             }
         }

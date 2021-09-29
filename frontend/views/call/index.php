@@ -9,9 +9,13 @@ use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\call\CallDurationColumn;
 use sales\auth\Auth;
+use sales\model\call\abac\CallAbacObject;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\bootstrap4\Modal;
 use sales\helpers\phone\MaskPhoneHelper;
@@ -27,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 $pjaxListId = 'pjax-call-index';
+
 ?>
 
 <div class="call-index">
@@ -45,6 +50,7 @@ $pjaxListId = 'pjax-call-index';
 
     <?php Pjax::begin(['id' => $pjaxListId, 'timeout' => 10000]); ?>
     <?= GridView::widget([
+        'id' => 'call-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
@@ -69,7 +75,7 @@ $pjaxListId = 'pjax-call-index';
                 'options' => ['style' => 'width: 80px']
             ],
             ['class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {delete} {cancel} {join}',
+                'template' => '{view} {update} {delete} {cancel} {join} {allow_list}',
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
@@ -85,7 +91,6 @@ $pjaxListId = 'pjax-call-index';
                     'cancel' => static function (Call $model, $key, $index) use ($user) {
                         return $user->isAdmin() && $model->isIn() && ($model->isStatusIvr() || $model->isStatusQueue() || $model->isStatusRinging() || $model->isStatusInProgress());
                     },
-
                     'join' => static function (Call $model, $key, $index) use ($user) {
                         return
                             ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false)
@@ -93,6 +98,10 @@ $pjaxListId = 'pjax-call-index';
                             && (int)$model['cp_type_id'] === ConferenceParticipant::TYPE_AGENT
                             && ($model->isIn() || $model->isOut() || $model->isReturn())
                             && $model->isStatusInProgress();
+                    },
+                    'allow_list' => static function (Call $model, $key, $index) use ($user) {
+                        /** @abac CallAbacObject::ACT_DATA_ALLOW_LIST, CallAbacObject::ACTION_TOGGLE_DATA, Access to add/remove ContactPhoneData - key allow_list */
+                        return (Yii::$app->abac->can(null, CallAbacObject::ACT_DATA_ALLOW_LIST, CallAbacObject::ACTION_TOGGLE_DATA));
                     },
                 ],
                 'buttons' => [
@@ -119,7 +128,18 @@ $pjaxListId = 'pjax-call-index';
                                 <a class="dropdown-item conference-coach" href="#" onclick="joinBarge(\'' . $model->c_call_sid . '\');">Barge</a>
                               </div>
                             </div>';
-                    }
+                    },
+                    'allow_list' => static function ($url, Call $model) {
+                        $title = ContactPhoneListService::isAllowList($model->c_from) ? 'Remove Phone number from Allow List' : 'Add Phone number to Allow List';
+                        return'<div class="dropdown">
+                              <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-check-square"></i>
+                              </button>
+                              <div role="menu" class="dropdown-menu">
+                                <a class="dropdown-item js-allow-list" data-call-id="' . $model->c_id . '" href="#">' . $title . '</a>
+                              </div>
+                            </div>';
+                    },
                 ],
             ],
 
@@ -365,8 +385,80 @@ $pjaxListId = 'pjax-call-index';
                 'attribute' => 'c_stir_status',
                 'filter' => \common\models\Call::STIR_STATUS_LIST
             ],
+            [
+                'attribute' => 'clfg_type',
+                'filter' => CallLogFilterGuard::TYPE_LIST,
+                'value' => static function (Call $model) {
+                    return $model->callLogFilterGuard ? $model->callLogFilterGuard->getTypeName() : null;
+                },
+            ],
+            [
+                'attribute' => 'clfg_rate',
+                'value' => static function (Call $model) {
+                    return $model->callLogFilterGuard->clfg_sd_rate ?? null;
+                }
+            ],
+            [
+                'attribute' => 'clfg_redial_status',
+                'filter' => Call::STATUS_LIST,
+                'value' => static function (Call $model) {
+                    return $model->callLogFilterGuard ? $model->callLogFilterGuard->getRedialStatusName() : null;
+                },
+            ]
 
         ],
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+$urlAllowList = Url::to(['/call/allow-list']);
+
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#call-gv').position().top }, 400);
+    });
+
+    $(document).on('click', '.js-allow-list', function (e) { 
+        e.preventDefault();
+    
+        let btn = $(this);
+        btn.prop('disabled', true);
+        
+        $.ajax({
+            url: '{$urlAllowList}',
+            type: 'POST',
+            data: {call_id: $(this).data('call-id')},
+            dataType: 'json'
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                if (dataResponse.result === 'added') {
+                    btn.text('Remove Phone number from Allow List');
+                } else {
+                    btn.text('Add Phone number to Allow List');
+                }
+            } else if (dataResponse.message.length) {
+                createNotify('Error', dataResponse.message, 'error');
+            } else {
+                createNotify('Error', 'Error, please check logs', 'error');
+            }
+            btn.prop('disabled', false);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log({
+                jqXHR : jqXHR,
+                textStatus : textStatus,
+                errorThrown : errorThrown
+            });
+        })
+        .always(function(jqXHR, textStatus, errorThrown) {
+            setTimeout(function () {
+                btn.prop('disabled', false);
+            }, 2000);
+        });
+    });
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

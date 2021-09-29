@@ -287,9 +287,15 @@ class ClientNotificationListener
         if (!$firstDepartureSegment) {
             throw new \DomainException('Not found first flight segment. ProductQuoteId: ' . $productQuoteId . ' ProductQuoteRelationId: ' . $productQuoteRelation->pqr_related_pq_id);
         }
-        $departureAirportTimeZone = Airports::find()->select(['timezone'])->andWhere(['iata' => $firstDepartureSegment->fqs_departure_airport_iata])->scalar();
+
+        $airport = Airports::find()->select(['timezone'])->andWhere(['iata' => $firstDepartureSegment->fqs_departure_airport_iata])->asArray()->one();
+        if (!$airport) {
+            throw new \DomainException('Not found Airport. IATA: ' . $firstDepartureSegment->fqs_departure_airport_iata . '  ProductQuoteId: ' . $productQuoteId . ' ProductQuoteRelationId: ' . $productQuoteRelation->pqr_related_pq_id);
+        }
+
+        $departureAirportTimeZone = $airport['timezone'];
         if (!$departureAirportTimeZone) {
-            throw new \DomainException('Not found Airport time zone. IATA: ' . $firstDepartureSegment->fqs_departure_airport_iata . '  ProductQuoteId: ' . $productQuoteId . ' ProductQuoteRelationId: ' . $productQuoteRelation->pqr_related_pq_id);
+            throw new \DomainException('Airport time zone is empty. IATA: ' . $firstDepartureSegment->fqs_departure_airport_iata . '  ProductQuoteId: ' . $productQuoteId . ' ProductQuoteRelationId: ' . $productQuoteRelation->pqr_related_pq_id);
         }
 
         $startInterval = SettingHelper::getClientNotificationStartInterval();

@@ -42,7 +42,7 @@ function mainAgentProfit(){
     $.each($('.profit-amount'), function( key, obj ) {
       sum += parseFloat($(obj).html());
     });
-    $('#main-agent-profit').html(total-sum);
+    $('#main-agent-profit').html((total-sum).toFixed(4));
 }
 JS;
 $this->registerJs($js);?>

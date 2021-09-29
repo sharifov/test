@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-plus"></i> Create Flight Quote Option', ['create'], ['class' => 'btn btn-success btn-sm']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-flight-quote-option']); ?>
+    <?php Pjax::begin(['id' => 'pjax-flight-quote-option', 'scrollTo' => 0]); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

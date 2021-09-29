@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 <p>
@@ -290,15 +290,18 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw',
         ],
-
         [
+            'class' => \common\components\grid\DateTimeColumn::class,
+            'label' => 'Sold Date',
+            'attribute' => 'l_status_dt',
+        ],
+
+        /*[
             'label' => 'Sold Date',
             'attribute' => 'last_ticket_date',
             'value' => static function (Lead $model) {
-//                return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
                 return ($model->leadFlowSold && $model->leadFlowSold->created) ? Yii::$app->formatter->asDatetime(strtotime($model->leadFlowSold->created)) : '';
             },
-            //'format' => 'datetime',
             'filter' => DatePicker::widget([
                 'model' => $searchModel,
                 'attribute' => 'last_ticket_date',
@@ -313,7 +316,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'style' => 'width: 100px;text-align:center;'
             ]
-        ],
+        ],*/
         [
             'label' => 'Date of Departure',
             'value' => static function ($model) {
@@ -364,6 +367,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
     <?php
     echo \yii\grid\GridView::widget([
+        'id' => 'lead-sold-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => $gridColumns,
@@ -399,5 +403,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::end(); ?>
 
-
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#lead-sold-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

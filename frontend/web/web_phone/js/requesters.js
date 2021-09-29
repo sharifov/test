@@ -338,14 +338,14 @@
             }
         };
 
-        this.clientInfo = function (id, isClient) {
+        this.clientInfo = function (id, callSid, isClient) {
             $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
             let text = isClient ? 'Client details' : 'Contact info';
             $('#call-box-modal-label').html(text + ' (' + id + ')');
             $('#call-box-modal').modal();
             $.ajax({
                 type: 'post',
-                data: {client_id: id},
+                data: {client_id: id, callSid: callSid},
                 url: this.settings.clientInfoUrl
             })
                 .done(function (data) {

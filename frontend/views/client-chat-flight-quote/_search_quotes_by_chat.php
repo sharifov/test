@@ -41,9 +41,8 @@ if ($viewModel->leadCreated) {
 }
 
 if ($viewModel->lead) {
-    $urlCreateQuoteFromSearch = Url::to(['client-chat-flight-quote/create-quote-from-search', 'leadId' => $viewModel->lead->id]);
     $js = <<<JS
-    $('body').off('click', '.search_create_quote__btn').on('click', '.search_create_quote__btn', function (e) {
+    $('body').off('click', '.quote__btn').on('click', '.quote__btn', function (e) {
         e.preventDefault();
         let createQuoteBtn = $(this);
         var key = $(this).data('key');
@@ -52,10 +51,14 @@ if ($viewModel->lead) {
         var searchResId = $(this).data('result');
         let projectId = createQuoteBtn.data('project');
         let chatId = createQuoteBtn.data('chat-id');
+        let url = createQuoteBtn.data('url');
+        let sendQuote = Boolean(createQuoteBtn.data('send-quote'));
+        var parent = createQuoteBtn.parent()
+        var parentLength = parent.children().length
         
         $('#preloader').removeClass('d-none');
         $.ajax({
-            url: '$urlCreateQuoteFromSearch',
+            url: url,
             type: 'post',
             data: {
                 'key': key, 
@@ -73,7 +76,13 @@ if ($viewModel->lead) {
                 
                 $('#preloader').addClass('d-none');
                 if(data.status == true){
-                    createQuoteBtn.remove();
+                    if (!sendQuote) {                        
+                        createQuoteBtn.remove();
+                        
+                        if (parentLength === 1) {
+                            parent.removeClass("dropdown-menu")
+                        }
+                    }
                     
                     new PNotify({
                         title: "Create quote - search",

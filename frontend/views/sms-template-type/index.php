@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="sms-template-type-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>

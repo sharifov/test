@@ -22,6 +22,9 @@ use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
+use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
+use sales\model\callLogFilterGuard\service\CallLogFilterGuardService;
 use sales\model\callNote\entity\CallNote;
 use sales\model\phoneList\entity\PhoneList;
 use Yii;
@@ -407,6 +410,11 @@ class CallLogTransferService
 
             if (!$log->save()) {
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $log->toArray(), 'message' => $log->getErrors()]));
+            }
+
+            if (($parentId = $this->call['c_parent_id'] ?? null) && $callLogFilterGuard = CallLogFilterGuardService::checkCallLog($parentId)) {
+                $callLogFilterGuard->clfg_call_log_id = $log->cl_id;
+                (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
             }
 
             if ($this->call['c_lead_id']) {

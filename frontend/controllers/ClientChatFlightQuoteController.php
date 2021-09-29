@@ -24,6 +24,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
 use sales\model\clientChatDataRequest\form\FlightSearchDataRequestForm;
+use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -75,7 +76,8 @@ class ClientChatFlightQuoteController extends FController
                     'view-edit-form',
                     'edit',
                     'validate',
-                    'create-quote-from-search'
+                    'create-quote-from-search',
+                    'send-quote-from-search',
                 ],
             ],
             [
@@ -363,7 +365,80 @@ class ClientChatFlightQuoteController extends FController
 
                 if ($resultSearch !== false) {
                     try {
-                        $this->createQuote($keyCache, $resultSearch, $key, $lead, $chat, $providerProjectId, Auth::user());
+                        $this->createQuote($keyCache, $resultSearch, $key, $lead, $chat, $providerProjectId, Auth::user(), false);
+
+                        $result['status'] = true;
+                    } catch (\RuntimeException | \DomainException $e) {
+                        $result['error'] = $e->getMessage();
+                    } catch (\Throwable $e) {
+                        $result['error'] = 'Internal Server Error';
+                        Yii::error(AppHelper::throwableLog($e, true), 'ClientChatFlightController::actionCreateQuoteFromSearch::Throwable');
+                    }
+                } else {
+                    $result['error'] = 'Not found Quote from Search result from Cache. Please update search request!';
+                }
+            } else {
+                $result['error'] = 'Key or Lead or Chat is empty!';
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $leadId
+     * @return array
+     * @throws \yii\db\Exception
+     */
+    public function actionSendQuoteFromSearch($leadId)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = [
+            'error' => '',
+            'status' => false
+        ];
+
+        /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
+        $chatId = Yii::$app->request->post('chatId');
+
+        $lead = Lead::findOne(['id' => $leadId]);
+        $chat = ClientChat::findOne((int)$chatId);
+        if (Yii::$app->request->isPost) {
+            //$gds = Yii::$app->request->post('gds');
+            $key = Yii::$app->request->post('key');
+            $keyCache = Yii::$app->request->post('keyCache', '');
+            $providerProjectId = Yii::$app->request->post('projectId');
+
+            if ($key && $lead && $chat) {
+                if ((int) $providerProjectId === (int) $lead->project_id) {
+                    $providerProjectId = null;
+                }
+
+                $keyCache = empty($keyCache) ? ('quote-search-' . $chat->cch_rid . '-lead-' . $lead->id) : $keyCache;
+                $resultSearch = Yii::$app->cacheFile->get($keyCache);
+
+                if ($resultSearch !== false) {
+                    try {
+                        $createdQuote = false;
+                        $leadQuotes = $lead->quotes;
+                        foreach ($leadQuotes as $quote) {
+                            if (json_decode($quote->origin_search_data, true)['key'] == $key && $quote->provider_project_id == $providerProjectId) {
+                                $capture = $this->generateQuoteCapture($quote);
+
+                                $this->sendCapturesQuote($chat, $quote, $capture);
+
+                                $createdQuote = true;
+                            }
+                        }
+
+                        if (!$createdQuote) {
+                            $this->createQuote($keyCache, $resultSearch, $key, $lead, $chat, $providerProjectId, Auth::user(), true);
+                        }
+
 
                         $result['status'] = true;
                     } catch (\RuntimeException | \DomainException $e) {
@@ -399,7 +474,7 @@ class ClientChatFlightQuoteController extends FController
     private function createLeadAndLinkWithChat(LeadCreateByChatForm $form, ClientChat $chat, int $userId): Lead
     {
         $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
-        $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+        $lead = $leadManageService->createByClientChat((new CreateLeadByChatDTO($form, $chat, $userId))->leadInProgressDataPrepare());
 
         $leadUserConversion = LeadUserConversion::create(
             $lead->id,
@@ -411,8 +486,16 @@ class ClientChatFlightQuoteController extends FController
         return $lead;
     }
 
-    private function createQuote(string $keyCache, array $resultSearch, string $key, Lead $lead, ClientChat $chat, ?int $providerProjectId, Employee $user): Quote
-    {
+    private function createQuote(
+        string $keyCache,
+        array $resultSearch,
+        string $key,
+        Lead $lead,
+        ClientChat $chat,
+        ?int $providerProjectId,
+        Employee $user,
+        bool $sendQuote
+    ): Quote {
         $result = $keyCache ? $resultSearch['results'] : $resultSearch['data']['results'];
         foreach ($result as $entry) {
             if ($entry['key'] == $key) {
@@ -653,14 +736,19 @@ class ClientChatFlightQuoteController extends FController
                     $quote->sendUpdateBO();
                 }
 
-                try {
-                    $capture = $this->generateQuoteCapture($quote);
+                if ($sendQuote) {
+                    try {
+                        $capture = $this->generateQuoteCapture($quote);
 
-                    $this->sendCapturesQuote($chat, $quote, $capture);
-                } catch (\Throwable $e) {
-                    Yii::error(AppHelper::throwableLog($e, true), 'ClientChatFlightQuoteController:generateQuoteCapture');
-                    $transaction->rollBack();
-                    throw new $e();
+                        $this->sendCapturesQuote($chat, $quote, $capture);
+                    } catch (\DomainException | \RuntimeException $e) {
+                        $transaction->rollBack();
+                        throw new $e();
+                    } catch (\Throwable $e) {
+                        Yii::error(AppHelper::throwableLog($e, true), 'ClientChatFlightQuoteController:generateQuoteCapture');
+                        $transaction->rollBack();
+                        throw new $e();
+                    }
                 }
 
                 ClientChatSocketCommands::clientChatAddQuotesButton($chat, $lead->id);

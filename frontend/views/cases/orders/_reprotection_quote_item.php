@@ -2,6 +2,8 @@
 
 use modules\cases\src\abac\CasesAbacObject;
 use modules\order\src\entities\order\Order;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
+use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -129,8 +131,9 @@ if ($quote->productQuoteLastChange) {
                 <tr>
                   <th style="width: 30px;">Nr</th>
                   <th>Status</th>
-                  <th style="width: 20px">Recommended</th>
+                  <th style="width: 20px" title="Recommended"><i class="fas fa-star"></i></th>
                   <th style="width: 180px">Created</th>
+                  <th>Owner</th>
                   <th style="width: 10px;"></th>
                 </tr>
               </thead>
@@ -139,6 +142,7 @@ if ($quote->productQuoteLastChange) {
                     <tr>
                         <?php
                         $isRecommended = $reprotectionQuote->isRecommended();
+                        $productQuoteAbacDto = new ProductQuoteAbacDto($reprotectionQuote);
                         /*
                         <td style="padding:5px;" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
@@ -149,8 +153,13 @@ if ($quote->productQuoteLastChange) {
                         */ ?>
                       <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($reprotectionQuote->pq_id)?>, GID: <?=Html::encode($reprotectionQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($reprotectionQuote->pq_id)?>, GID: <?=Html::encode($reprotectionQuote->pq_gid)?>"><?=($nr + 1)?></td>
                       <td><?= ProductQuoteStatus::asFormat($reprotectionQuote->pq_status_id)?></td>
-                      <td><?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star yellow']) : '-' ?></td>
+                      <td><?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star', 'title' => 'Recommended']) : '-' ?></td>
                       <td><small><?=$reprotectionQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($reprotectionQuote->pq_created_dt)) : '-'?></small></td>
+                      <td>
+                          <?php if ($reprotectionQuote->pqOwnerUser) : ?>
+                            <i class="fa fa-user"></i> <?= $reprotectionQuote->pqOwnerUser->username ?>
+                          <?php endif; ?>
+                      </td>
                       <td>
                         <div class="btn-group">
 
@@ -209,6 +218,15 @@ if ($quote->productQuoteLastChange) {
                                     'data-reprotection-quote-id' => $reprotectionQuote->pq_id,
                                     'data-title' => 'Reprotection Set Recommended'
                                 ]); ?>
+                              <?php endif; ?>
+
+                              <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::ACT_DECLINE_REPROTECTION_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+                                    <?= Html::a('<i class="fas fa-times"></i> Decline', null, [
+                                      'class' => 'dropdown-item btn-reprotection-decline danger',
+                                      'data-url' => Url::to(['/product/product-quote/ajax-decline-reprotection-quote']),
+                                      'data-reprotection-quote-id' => $reprotectionQuote->pq_id,
+                                      'data-title' => 'Decline Reprotection'
+                                  ]); ?>
                               <?php endif; ?>
 
                           </div>

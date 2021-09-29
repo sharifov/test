@@ -25,7 +25,8 @@ $user = Yii::$app->user->identity;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin([
         'id' => 'emails',
-        'timeout' => 5000
+        'timeout' => 5000,
+        'scrollTo' => 0
     ]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 

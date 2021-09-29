@@ -133,7 +133,7 @@ class QuoteController extends FController
 //            $pjaxId = Yii::$app->request->post('pjaxId', '');
 
             if ($lead !== null) {
-                $keyCache = sprintf('quote-search-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+                $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
 
                 $quotes = \Yii::$app->cacheFile->get($keyCache);
 
@@ -541,7 +541,7 @@ class QuoteController extends FController
             }
             $gds = Yii::$app->request->post('gds', '');
 
-            $keyCache = sprintf('quote-search-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+            $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
             $quotes = \Yii::$app->cacheFile->get($keyCache);
 
             if ($quotes === false) {

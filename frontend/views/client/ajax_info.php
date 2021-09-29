@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 /* @var $leadsDataProvider yii\data\ActiveDataProvider */
 /* @var $casesDataProvider yii\data\ActiveDataProvider
  * @var $case \sales\entities\cases\Cases
+ * @var $call|null \common\models\Call
  */
 
 ?>
@@ -17,8 +18,8 @@ use yii\widgets\Pjax;
 
     <?php if ($model->isClient()) : ?>
         <?php //if (Yii::$app->user->can('leadSection')): ?>
-            <?php Pjax::begin(['id' => 'client_leads_info', 'timeout' => 2000, 'enablePushState' => false]); ?>
-                <?= $this->render('_leads_info', ['dataProvider' => $leadsDataProvider]) ?>
+            <?php Pjax::begin(['id' => 'client_leads_info', 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+                <?= $this->render('_leads_info', ['dataProvider' => $leadsDataProvider, 'call' => $call]) ?>
             <?php Pjax::end() ?>
         <?php //endif; ?>
 
