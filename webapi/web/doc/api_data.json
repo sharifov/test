@@ -4032,8 +4032,8 @@
           "type": "json"
         },
         {
-          "title": "Error-Response (101):",
-          "content": "HTTP/1.1 101 Domain Exception\n{\n       \"status\": 101,\n       \"message\": \"Product Quote Change status is not in Decision pending. Current status *\",\n       \"errors\": [\n           \"Product Quote Change status is not in Decision pending. Current status *\"\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "title": "Error-Response (422) Code 101:",
+          "content": "HTTP/1.1 422 Error\n{\n       \"status\": 422,\n       \"message\": \"Error\",\n       \"data\": [\n             \"success\": false,\n             \"error\": \"Product Quote Change status is not in \\\"Decision pending\\\". Current status Canceled\"\n       ],\n       \"code\": 101,\n       \"errors\": [],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
