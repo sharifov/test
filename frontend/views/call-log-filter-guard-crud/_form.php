@@ -24,6 +24,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'clfg_call_log_id')->textInput() ?>
 
+        <?= $form->field($model, 'clfg_redial_status')->dropDownList(\common\models\Call::STATUS_LIST, ['prompt' => '--']) ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
