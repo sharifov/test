@@ -28,11 +28,26 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
         $this->executionTimeRegister();
         try {
             if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
-                $gaQuote->send();
-                Yii::info(
-                    'Quote (ID:' . $this->quote->id . ') info sent to GA',
-                    'info\SendQuoteInfoToGaJob:execute:sent'
-                );
+                $response = $gaQuote->send();
+                if ($response) {
+                    Yii::info(
+                        [
+                            'quoteId' => $this->quote->id,
+                            'message' => 'Info sent to GA',
+                            'data' => $gaQuote->getPostData()
+                        ],
+                        'info\SendQuoteInfoToGaJob:execute:sent'
+                    );
+                } else {
+                    Yii::warning(
+                        [
+                            'quoteId' => $this->quote->id,
+                            'message' => 'Info NOT sent to GA',
+                            'data' => $gaQuote->getPostData()
+                        ],
+                        'SendQuoteInfoToGaJob:execute'
+                    );
+                }
             }
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'SendQuoteInfoToGaJob:execute:Throwable');
