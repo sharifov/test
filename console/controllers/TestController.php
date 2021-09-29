@@ -33,6 +33,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
+use sales\helpers\LogExecutionTime;
 use sales\model\cases\useCases\cases\api\create\Command;
 use sales\model\cases\useCases\cases\api\create\Handler;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
@@ -496,5 +497,24 @@ class TestController extends Controller
         $command = new Command(null, null, 1, '', [], 1, '', '', '', '');
         $handler = \Yii::createObject(Handler::class);
         $handler->handle($command);
+    }
+
+    public function actionTestLogExecutionTime()
+    {
+        $logExecutionTime = new LogExecutionTime();
+        $logExecutionTime->start('step1');
+        sleep(2);
+        $logExecutionTime->end()->start('step2');
+        sleep(3);
+        $logExecutionTime->end();
+        $logExecutionTime->start('step3');
+        $logExecutionTime->end();
+        $logExecutionTime->start('step4');
+        sleep(1);
+        $logExecutionTime->end()->start('step5');
+        sleep(5);
+        $logExecutionTime->end();
+
+        var_dump($logExecutionTime->getResult());
     }
 }
