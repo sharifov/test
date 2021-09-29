@@ -29,11 +29,12 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
         try {
             if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
                 $response = $gaQuote->send();
-                if ($response) {
+                if ($response->isOk) {
                     Yii::info(
                         [
                             'quoteId' => $this->quote->id,
                             'message' => 'Info sent to GA',
+                            'requestData' => $response->data,
                             'data' => $gaQuote->getPostData()
                         ],
                         'info\SendQuoteInfoToGaJob:execute:sent'
@@ -43,6 +44,8 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
                         [
                             'quoteId' => $this->quote->id,
                             'message' => 'Info NOT sent to GA',
+                            'responseContent' => $response->content,
+                            'requestData' => $response->data,
                             'data' => $gaQuote->getPostData()
                         ],
                         'SendQuoteInfoToGaJob:execute'
