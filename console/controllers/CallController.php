@@ -21,6 +21,8 @@ use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessQuery;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
+use sales\model\leadRedial\job\LeadRedialAssignToUsersJob;
+use sales\services\lead\LeadRedialService;
 use sales\services\phone\blackList\PhoneBlackListManageService;
 use yii\console\Controller;
 use Yii;
@@ -358,43 +360,11 @@ class CallController extends Controller
             'l_is_test' => 0
         ]]);
 
-        $eventDispatcher = Yii::createObject(EventDispatcher::class);
         foreach ($leads as $lead) {
-            $enabledSortingForBusinessLead = $lead->lqcLead->isBusiness() && SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel();
-
             $limitAgents = SettingHelper::getRedialGetLimitAgents() - $lead->accessToCall;
-
-            $agents = EmployeeQuery::getAgentsForRedialCallByLead(
-                $enabledSortingForBusinessLead,
-                $lead->lqcLead->project_id,
-                $lead->lqcLead->l_dep_id,
-                SettingHelper::getRedialUserAccessExpiredSecondsLimit(),
-                $limitAgents <= 0 ? SettingHelper::getRedialGetLimitAgents() : $limitAgents
-            );
-
-            $countAgentsWithMinimumSkillValue = 0;
-            foreach ($agents as $agent) {
-                try {
-                    if ($enabledSortingForBusinessLead) {
-                        if ($countAgentsWithMinimumSkillValue && (int)$agent['up_skill'] < SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel()) {
-                            continue;
-                        }
-
-                        $callRedialUserAccess = CallRedialUserAccessQuery::insertOrUpdate($lead->lqc_lead_id, $agent['id'], new \DateTimeImmutable());
-                        $eventDispatcher->dispatchAll($callRedialUserAccess->releaseEvents());
-
-                        if ((int)$agent['up_skill'] >= SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel()) {
-                            $countAgentsWithMinimumSkillValue++;
-                        }
-                    } else {
-                        $callRedialUserAccess = CallRedialUserAccessQuery::insertOrUpdate($lead->lqc_lead_id, $agent['id'], new \DateTimeImmutable());
-                        $eventDispatcher->dispatchAll($callRedialUserAccess->releaseEvents());
-                    }
-                } catch (\Throwable $e) {
-                    Yii::info(VarDumper::dumpAsString(ArrayHelper::toArray($agents)), 'info\agents');
-                    Yii::error(AppHelper::throwableLog($e, true), 'console');
-                }
-            }
+            $job = new LeadRedialAssignToUsersJob($lead->lqc_lead_id, $limitAgents <= 0 ? SettingHelper::getRedialGetLimitAgents() : $limitAgents);
+            Yii::$app->queue_job->priority(1)->push($job);
+            $processed++;
         }
 
         $timeEnd = microtime(true);
