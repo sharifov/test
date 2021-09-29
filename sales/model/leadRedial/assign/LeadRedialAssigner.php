@@ -2,49 +2,37 @@
 
 namespace sales\model\leadRedial\assign;
 
+use sales\dispatchers\EventDispatcher;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
-use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 
 /**
  * Class LeadRedialAssigner
  *
- * @property Users $users
- * @property CallRedialUserAccessRepository $callRedialUserAccessRepository
+ * @property EventDispatcher $eventDispatcher
  */
 class LeadRedialAssigner
 {
-    private Users $users;
-    private CallRedialUserAccessRepository $callRedialUserAccessRepository;
+    private EventDispatcher $eventDispatcher;
 
-    public function __construct(
-        Users $users,
-        CallRedialUserAccessRepository $callRedialUserAccessRepository
-    ) {
-        $this->users = $users;
-        $this->callRedialUserAccessRepository = $callRedialUserAccessRepository;
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function assign(int $leadId, int $countUsers, \DateTimeImmutable $createdDt): void
+    public function assign(int $leadId, int $userId, \DateTimeImmutable $createdDt): void
     {
-        $users = $this->users->getUsers($leadId, $countUsers);
+        $access = CallRedialUserAccess::create($leadId, $userId, $createdDt);
 
-        foreach ($users as $userId) {
-            try {
-                $access = CallRedialUserAccess::create($leadId, $userId, $createdDt);
-                $this->callRedialUserAccessRepository->save($access);
-            } catch (\Throwable $e) {
-                \Yii::error([
-                    'message' => $e->getMessage(),
-                    'userId' => $userId,
-                    'leadId' => $leadId,
-                ], 'NewLeadRedialAssigner');
-            }
-        }
-    }
+        CallRedialUserAccess::getDb()->createCommand(
+            "insert into " . CallRedialUserAccess::tableName() . " (`crua_lead_id`, `crua_user_id`, `crua_created_dt`) values (:value, :value2, :value3) on duplicate key update crua_created_dt = :value3, crua_lead_id = :value, crua_user_id = :value2",
+            [
+                ':value' => $access->crua_lead_id,
+                ':value2' => $access->crua_user_id,
+                ':value3' => $access->crua_created_dt,
+            ]
+        )->execute();
 
-    public function remove(int $leadId, int $userId): void
-    {
-        $access = $this->callRedialUserAccessRepository->find($leadId, $userId);
-        $this->callRedialUserAccessRepository->remove($access);
+        $access->setIsNewRecord(false);
+        $this->eventDispatcher->dispatchAll($access->releaseEvents());
     }
 }

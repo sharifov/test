@@ -568,13 +568,7 @@ class CurrentQueueCallsService
             ->innerJoin(Project::tableName(), Project::tableName() . '.id = ' . Lead::tableName() . '.project_id')
             ->innerJoin(Department::tableName(), Department::tableName() . '.dep_id = ' . Lead::tableName() . '.l_dep_id')
             ->andWhere(['crua_user_id' => $this->userId])
-            ->andWhere([
-                '>',
-                'crua_created_dt',
-                (new \DateTimeImmutable())
-                    ->modify('- ' . SettingHelper::getLeadRedialAccessExpiredSeconds() . ' seconds')
-                    ->format('Y-m-d H:i:s')
-            ])
+            ->withoutExpired()
             ->groupBy([Lead::tableName() . '.project_id', Lead::tableName() . '.l_dep_id'])
             ->indexBy(function ($raw) {
                 return $raw['project'] . '.' . $raw['department'];

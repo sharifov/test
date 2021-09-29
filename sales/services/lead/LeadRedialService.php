@@ -323,40 +323,4 @@ class LeadRedialService
 
         throw new \DomainException('Not found phoneFrom. Please, contact to administrator.');
     }
-
-    public function assignAgentsToLead(Lead $lead, int $limitAgents): void
-    {
-        $enabledSortingForBusinessLead = $lead->isBusiness() && SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel();
-
-        $agents = EmployeeQuery::getAgentsForRedialCallByLead(
-            $enabledSortingForBusinessLead,
-            $lead->project_id,
-            $lead->l_dep_id,
-            SettingHelper::getRedialUserAccessExpiredSecondsLimit(),
-            $limitAgents
-        );
-
-        $countAgentsWithMinimumSkillValue = 0;
-        foreach ($agents as $agent) {
-            try {
-                if ($enabledSortingForBusinessLead) {
-                    if ($countAgentsWithMinimumSkillValue && (int)$agent['up_skill'] < SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel()) {
-                        continue;
-                    }
-
-                    $callRedialUserAccess = CallRedialUserAccessQuery::insertOrUpdate($lead->id, $agent['id'], new \DateTimeImmutable());
-                    $this->eventDispatcher->dispatchAll($callRedialUserAccess->releaseEvents());
-
-                    if ((int)$agent['up_skill'] >= SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel()) {
-                        $countAgentsWithMinimumSkillValue++;
-                    }
-                } else {
-                    $callRedialUserAccess = CallRedialUserAccessQuery::insertOrUpdate($lead->id, $agent['id'], new \DateTimeImmutable());
-                    $this->eventDispatcher->dispatchAll($callRedialUserAccess->releaseEvents());
-                }
-            } catch (\Throwable $e) {
-                Yii::error(AppHelper::throwableLog($e, true), 'LeadRedialService:assignAgentsToLead:Throwable');
-            }
-        }
-    }
 }

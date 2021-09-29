@@ -6,7 +6,6 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\PhoneBlacklist;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
-use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\lead\LeadQcallRepository;
 use sales\repositories\lead\LeadRepository;
@@ -96,7 +95,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 continue;
             }
 
-            $this->leadRedialUnAssigner->unAssign($user->id);
+            $this->leadRedialUnAssigner->unAssignByUser($user->id);
 
             $this->transactionManager->wrap(function () use ($lead, $leadQcall) {
                 $lead->callPrepare();
