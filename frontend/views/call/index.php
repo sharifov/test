@@ -11,6 +11,7 @@ use common\components\grid\call\CallDurationColumn;
 use sales\auth\Auth;
 use sales\model\call\abac\CallAbacObject;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -384,6 +385,26 @@ $pjaxListId = 'pjax-call-index';
                 'attribute' => 'c_stir_status',
                 'filter' => \common\models\Call::STIR_STATUS_LIST
             ],
+            [
+                'attribute' => 'clfg_type',
+                'filter' => CallLogFilterGuard::TYPE_LIST,
+                'value' => static function (Call $model) {
+                    return $model->callLogFilterGuard ? $model->callLogFilterGuard->getTypeName() : null;
+                },
+            ],
+            [
+                'attribute' => 'clfg_rate',
+                'value' => static function (Call $model) {
+                    return $model->callLogFilterGuard->clfg_sd_rate ?? null;
+                }
+            ],
+            [
+                'attribute' => 'clfg_redial_status',
+                'filter' => Call::STATUS_LIST,
+                'value' => static function (Call $model) {
+                    return $model->callLogFilterGuard ? $model->callLogFilterGuard->getRedialStatusName() : null;
+                },
+            ]
 
         ],
     ]); ?>

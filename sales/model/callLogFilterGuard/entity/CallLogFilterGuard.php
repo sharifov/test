@@ -2,6 +2,7 @@
 
 namespace sales\model\callLogFilterGuard\entity;
 
+use common\models\Call;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -18,6 +19,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $clfg_created_dt
  * @property int|null $clfg_cpl_id
  * @property int|null $clfg_call_log_id
+ * @property int|null $clfg_redial_status [tinyint(1)]
  */
 class CallLogFilterGuard extends \yii\db\ActiveRecord
 {
@@ -47,6 +49,9 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
             [['clfg_cpl_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => ContactPhoneList::class, 'targetAttribute' => ['clfg_cpl_id' => 'cpl_id']],
 
             ['clfg_call_log_id', 'integer'],
+
+            ['clfg_redial_status', 'integer'],
+            ['clfg_redial_status', 'in', 'range' => array_keys(Call::STATUS_LIST), 'skipOnEmpty' => true]
         ];
     }
 
@@ -75,6 +80,7 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
             'clfg_created_dt' => 'Created DT',
             'clfg_cpl_id' => 'ContactPhoneList ID',
             'clfg_call_log_id' => 'CallLog ID',
+            'clfg_redial_status' => 'Call Redial Status',
         ];
     }
 
@@ -117,5 +123,15 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
     public function getTypeName(): ?string
     {
         return self::TYPE_LIST[$this->clfg_type] ?? null;
+    }
+
+    public function getRedialStatusName(): ?string
+    {
+        return Call::STATUS_LIST[$this->clfg_redial_status] ?? null;
+    }
+
+    public function setRedialStatusByTwilioStatus(string $statusName): void
+    {
+        $this->clfg_redial_status = Call::getStatusByTwilioStatus($statusName);
     }
 }

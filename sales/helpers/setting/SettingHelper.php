@@ -14,6 +14,7 @@ use yii\helpers\VarDumper;
 class SettingHelper
 {
     private static ?array $callSpamFilter = null;
+    private static ?array $callbackToCaller = null;
 
     public static function getCaseSaleTicketEmailData(): array
     {
@@ -533,5 +534,70 @@ class SettingHelper
     public static function getCallSpamFilterMessage(): string
     {
         return (string) (self::getCallSpamFilterData()['message'] ?? '');
+    }
+
+    public static function getCallbackToCallerData()
+    {
+        $settings = Yii::$app->params['settings']['callback_to_caller'] ?? null;
+        if (self::$callbackToCaller !== null) {
+            return self::$callbackToCaller;
+        }
+        if ($settings) {
+            self::$callbackToCaller = JsonHelper::decode($settings);
+        }
+        return self::$callbackToCaller ?? [
+            'enabled' => false,
+            'message' => '',
+            'curlTimeout' => 30,
+            'dialCallTimeout' => 10,
+            'dialCallLimit' => 1,
+            'successStatusList' => [
+                'busy'
+            ]
+        ];
+    }
+
+    public static function isCallbackToCallerEnabled(): bool
+    {
+        return (bool) (self::getCallbackToCallerData()['enabled'] ?? false);
+    }
+
+    public static function getCallbackToCallerMessage(): string
+    {
+        return (string) (self::getCallbackToCallerData()['message'] ?? '');
+    }
+
+    public static function getCallbackToCallerCurlTimeout(): int
+    {
+        return (int) (self::getCallbackToCallerData()['curlTimeout'] ?? 30);
+    }
+
+    public static function getCallbackToCallerDialCallTimeout(): int
+    {
+        return (int) (self::getCallbackToCallerData()['dialCallTimeout'] ?? 10);
+    }
+
+    public static function getCallbackToCallerDialCallLimit(): int
+    {
+        return (int) (self::getCallbackToCallerData()['dialCallLimit'] ?? 1);
+    }
+
+    public static function getCallbackToCallerSuccessStatusList(): array
+    {
+        return (self::getCallbackToCallerData()['successStatusList'] ?? [
+            'busy'
+        ]);
+    }
+
+    public static function getCallbackToCallerExcludedProjectList(): array
+    {
+        return self::getCallbackToCallerData()['excludeProjectKeys'] ?? [
+            'priceline'
+        ];
+    }
+
+    public static function getCallbackToCallerExcludedDepartmentList(): array
+    {
+        return self::getCallbackToCallerData()['excludeDepartmentKeys'] ?? [];
     }
 }
