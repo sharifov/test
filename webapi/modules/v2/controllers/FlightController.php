@@ -1316,7 +1316,7 @@ class FlightController extends BaseController
                 'message' => 'Reprotection decision error',
                 'request' => $form->getAttributes(),
                 'error' => $e->getMessage(),
-                'exception' => AppHelper::throwableLog($e, true),
+                'exception' => AppHelper::throwableLog($e, false),
             ], 'FlightController:reprotectionDecision');
             return new ErrorResponse(
                 new DataMessage([
