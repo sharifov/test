@@ -4030,6 +4030,11 @@
           "title": "Error-Response:",
           "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type\": [\n              \"Type cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
+        },
+        {
+          "title": "Error-Response (101):",
+          "content": "HTTP/1.1 101 Domain Exception\n{\n       \"status\": 101,\n       \"message\": \"Product Quote Change status is not in Decision pending. Current status *\",\n       \"errors\": [\n           \"Product Quote Change status is not in Decision pending. Current status *\"\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
         }
       ]
     },

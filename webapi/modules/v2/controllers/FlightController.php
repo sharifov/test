@@ -11,6 +11,7 @@ use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
 use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeForm;
 use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchangeService;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -1258,6 +1259,22 @@ class FlightController extends BaseController
      *            "type": [
      *               "Type cannot be blank."
      *             ]
+     *        ],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (101):
+     * HTTP/1.1 101 Domain Exception
+     * {
+     *        "status": 101,
+     *        "message": "Product Quote Change status is not in Decision pending. Current status *",
+     *        "errors": [
+     *            "Product Quote Change status is not in Decision pending. Current status *"
      *        ],
      *        "technical": {
      *           ...
