@@ -4866,4 +4866,11 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return self::TYPE_CREATE_LIST[$this->l_type_create] ?? 'Undefined';
     }
+
+    public function isBusiness(): bool
+    {
+        return in_array($this->project_id, SettingHelper::getBusinessProjectIds(), true)
+            || $this->cabin === self::CABIN_BUSINESS
+            || $this->cabin === self::CABIN_FIRST;
+    }
 }

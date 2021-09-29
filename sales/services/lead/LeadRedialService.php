@@ -2,6 +2,11 @@
 
 namespace sales\services\lead;
 
+use common\models\query\EmployeeQuery;
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
+use sales\model\leadRedial\entity\CallRedialUserAccessQuery;
 use sales\model\leadRedial\queue\AgentPhone;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -23,6 +28,7 @@ use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -34,6 +40,7 @@ use yii\helpers\VarDumper;
  * @property TakeGuard $takeGuard
  * @property QCallService $qCallService
  * @property AgentPhone $agentPhone
+ * @property EventDispatcher $eventDispatcher
  */
 class LeadRedialService
 {
@@ -43,6 +50,7 @@ class LeadRedialService
     private $takeGuard;
     private $qCallService;
     private AgentPhone $agentPhone;
+    private EventDispatcher $eventDispatcher;
 
     public function __construct(
         LeadRepository $leadRepository,
@@ -50,7 +58,8 @@ class LeadRedialService
         TransactionManager $transactionManager,
         TakeGuard $takeGuard,
         QCallService $qCallService,
-        AgentPhone $agentPhone
+        AgentPhone $agentPhone,
+        EventDispatcher $eventDispatcher
     ) {
         $this->leadRepository = $leadRepository;
         $this->serviceFinder = $serviceFinder;
@@ -58,6 +67,7 @@ class LeadRedialService
         $this->takeGuard = $takeGuard;
         $this->qCallService = $qCallService;
         $this->agentPhone = $agentPhone;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -312,5 +322,41 @@ class LeadRedialService
         }
 
         throw new \DomainException('Not found phoneFrom. Please, contact to administrator.');
+    }
+
+    public function assignAgentsToLead(Lead $lead, int $limitAgents): void
+    {
+        $enabledSortingForBusinessLead = $lead->isBusiness() && SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel();
+
+        $agents = EmployeeQuery::getAgentsForRedialCallByLead(
+            $enabledSortingForBusinessLead,
+            $lead->project_id,
+            $lead->l_dep_id,
+            SettingHelper::getRedialUserAccessExpiredSecondsLimit(),
+            $limitAgents
+        );
+
+        $countAgentsWithMinimumSkillValue = 0;
+        foreach ($agents as $agent) {
+            try {
+                if ($enabledSortingForBusinessLead) {
+                    if ($countAgentsWithMinimumSkillValue && (int)$agent['up_skill'] < SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel()) {
+                        continue;
+                    }
+
+                    $callRedialUserAccess = CallRedialUserAccessQuery::insertOrUpdate($lead->id, $agent['id'], new \DateTimeImmutable());
+                    $this->eventDispatcher->dispatchAll($callRedialUserAccess->releaseEvents());
+
+                    if ((int)$agent['up_skill'] >= SettingHelper::getRedialBusinessFlightLeadsMinimumSkillLevel()) {
+                        $countAgentsWithMinimumSkillValue++;
+                    }
+                } else {
+                    $callRedialUserAccess = CallRedialUserAccessQuery::insertOrUpdate($lead->id, $agent['id'], new \DateTimeImmutable());
+                    $this->eventDispatcher->dispatchAll($callRedialUserAccess->releaseEvents());
+                }
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableLog($e, true), 'LeadRedialService:assignAgentsToLead:Throwable');
+            }
+        }
     }
 }

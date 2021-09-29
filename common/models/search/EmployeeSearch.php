@@ -618,7 +618,7 @@ class EmployeeSearch extends Employee
     {
         $users = self::find()
             ->joinChatUserChannel($chat->cch_channel_id)
-            ->online()
+            ->online('ccuc_user_id')
             ->registeredInRc();
 
         if (!$chat->hasOwner() && $chat->isPending()) {

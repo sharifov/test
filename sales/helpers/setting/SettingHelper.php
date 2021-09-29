@@ -501,8 +501,33 @@ class SettingHelper
         return (int) (Yii::$app->params['settings']['limit_leads_in_phone_widget'] ?? 3);
     }
 
+
     public static function getLeadRedialAccessExpiredSeconds(): int
     {
         return 20; //todo
+    }
+
+    public static function getRedialGetLimitAgents(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_get_limit_agents'] ?? 5);
+    }
+
+    public static function getBusinessProjectIds(): array
+    {
+        $settings = Yii::$app->params['settings']['business_project_ids'] ?? null;
+        if ($settings) {
+            return JsonHelper::decode($settings);
+        }
+        return [7];
+    }
+
+    public static function getRedialBusinessFlightLeadsMinimumSkillLevel(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'] ?? 0);
+    }
+
+    public static function getRedialUserAccessExpiredSecondsLimit(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_user_access_expired_seconds'] ?? 60);
     }
 }
