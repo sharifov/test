@@ -165,4 +165,13 @@ class CaseCategory extends ActiveRecord
     {
         return new CasesCategoryQuery(static::class);
     }
+
+    /**
+     * @param int|null $categoryId
+     * @return false|int|string|null
+     */
+    public static function getKey(?int $categoryId)
+    {
+        return self::find()->select(['cc_key'])->where(['cc_id' => $categoryId])->limit(1)->scalar();
+    }
 }
