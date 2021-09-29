@@ -47,7 +47,7 @@ class LeadQcallSearch extends LeadQcall
     public $deadline;
     public $l_is_test;
     public $l_call_status_id;
-    public $accessToCall;
+    public $agentsHasAccessToCall;
 
     /**
      * {@inheritdoc}
@@ -67,7 +67,7 @@ class LeadQcallSearch extends LeadQcall
             ['l_is_test', 'in', 'range' => [0,1]],
             ['attempts', 'integer'],
             ['l_call_status_id', 'integer'],
-            ['accessToCall', 'integer']
+            ['agentsHasAccessToCall', 'integer']
         ];
     }
 
@@ -597,7 +597,7 @@ class LeadQcallSearch extends LeadQcall
 //            'lqc_dt_from' => SORT_ASC
 //        ]);
         $query->addSelect([
-            'accessToCall' => CallRedialUserAccess::find()
+            'agentsHasAccessToCall' => CallRedialUserAccess::find()
                 ->alias('crua')
                 ->select('count(crua.crua_lead_id)')
                 ->where('crua_lead_id = ' . Lead::tableName() . '.id')
@@ -630,7 +630,7 @@ class LeadQcallSearch extends LeadQcall
             Lead::tableName() . '.l_is_test' => $this->l_is_test,
         ]);
 
-        $query->andHaving(['<', 'accessToCall', SettingHelper::getRedialGetLimitAgents()]);
+        $query->andHaving(['<', 'agentsHasAccessToCall', SettingHelper::getRedialGetLimitAgents()]);
         return $query->all();
     }
 
