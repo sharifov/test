@@ -689,7 +689,7 @@ define({ "api": [
             "size": "50",
             "optional": false,
             "field": "gid",
-            "description": "<p>Client Email required</p>"
+            "description": "<p>Case GID required</p>"
           }
         ]
       },
