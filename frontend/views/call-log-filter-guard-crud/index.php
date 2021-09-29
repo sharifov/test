@@ -1,6 +1,8 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\models\Call;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -32,9 +34,22 @@ $this->params['breadcrumbs'][] = $this->title;
             'clfg_call_id',
             'clfg_cpl_id',
             'clfg_call_log_id',
-            'clfg_type',
+            [
+                'attribute' => 'clfg_type',
+                'value' => static function (CallLogFilterGuard $model) {
+                    return $model->getTypeName();
+                },
+                'filter' => CallLogFilterGuard::TYPE_LIST
+            ],
             'clfg_sd_rate',
             'clfg_trust_percent',
+            [
+                'attribute' => 'clfg_redial_status',
+                'value' => static function (CallLogFilterGuard $model) {
+                    return $model->getRedialStatusName();
+                },
+                'filter' => Call::STATUS_LIST
+            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'clfg_created_dt',

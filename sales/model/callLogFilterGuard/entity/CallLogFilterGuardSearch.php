@@ -2,8 +2,8 @@
 
 namespace sales\model\callLogFilterGuard\entity;
 
+use common\models\Call;
 use yii\data\ActiveDataProvider;
-use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 
 class CallLogFilterGuardSearch extends CallLogFilterGuard
 {
@@ -23,6 +23,10 @@ class CallLogFilterGuardSearch extends CallLogFilterGuard
             [['clfg_cpl_id'], 'integer'],
 
             ['clfg_call_log_id', 'integer'],
+
+            ['clfg_redial_status', 'integer'],
+            ['clfg_redial_status', 'in', 'range' => array_keys(Call::STATUS_LIST)],
+
         ];
     }
 
@@ -51,6 +55,7 @@ class CallLogFilterGuardSearch extends CallLogFilterGuard
             'clfg_cpl_id' => $this->clfg_cpl_id,
             'DATE(clfg_created_dt)' => $this->clfg_created_dt,
             'clfg_call_log_id' => $this->clfg_call_log_id,
+            'clfg_redial_status' => $this->clfg_redial_status,
         ]);
 
         return $dataProvider;

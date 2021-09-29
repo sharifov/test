@@ -422,11 +422,11 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
-                if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
+                if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard() && SettingHelper::callSpamFilterEnabled()) {
                     try {
                         $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
-                        if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
-                            if (CallRedialGuard::guard($callModel->cProject->project_key, $callModel->cDep->dep_key)) {
+                        if ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
+                            if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
                                 $result = Yii::$app->communication->twilioDial(
                                     $incoming_phone_number,
                                     $client_phone_number,
@@ -444,6 +444,12 @@ class CommunicationController extends ApiBaseController
                                     'result' => $result,
                                 ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
 
+                                $redialStatus = $result['data']['result']['status'] ?? null;
+                                if ($redialStatus) {
+                                    $callLogFilterGuard->setRedialStatusByTwilioStatus($redialStatus);
+                                    (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
+                                }
+
                                 if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
                                     Yii::error([
                                         'callId' => $callModel->c_id,
@@ -453,11 +459,11 @@ class CommunicationController extends ApiBaseController
                                         'message' => $result['data']['message']
                                     ], 'CallSpamFilter:DepartmentCall:CommunicationError');
                                 } elseif (
-                                    (isset($result['data']['result']['status']) && !in_array(
-                                        $result['data']['result']['status'],
+                                    !in_array(
+                                        $redialStatus,
                                         SettingHelper::getCallbackToCallerSuccessStatusList(),
                                         true
-                                    ))
+                                    )
                                 ) {
                                     return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
                                 }
@@ -542,7 +548,7 @@ class CommunicationController extends ApiBaseController
                         try {
                             $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                             if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
-                                if (CallRedialGuard::guard($callModel->cProject->project_key, $callModel->cDep->dep_key)) {
+                                if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
                                     $result = Yii::$app->communication->twilioDial(
                                         $incoming_phone_number,
                                         $client_phone_number,
@@ -560,6 +566,12 @@ class CommunicationController extends ApiBaseController
                                         'result' => $result,
                                     ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
 
+                                    $redialStatus = $result['data']['result']['status'] ?? null;
+                                    if ($redialStatus) {
+                                        $callLogFilterGuard->setRedialStatusByTwilioStatus($redialStatus);
+                                        (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
+                                    }
+
                                     if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
                                         Yii::error([
                                             'callId' => $callModel->c_id,
@@ -569,11 +581,11 @@ class CommunicationController extends ApiBaseController
                                             'message' => $result['data']['message']
                                         ], 'CallSpamFilter:DirectCall:CommunicationError');
                                     } elseif (
-                                        (isset($result['data']['result']['status']) && !in_array(
+                                        $redialStatus && !in_array(
                                             $result['data']['result']['status'],
                                             SettingHelper::getCallbackToCallerSuccessStatusList(),
                                             true
-                                        ))
+                                        )
                                     ) {
                                         return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
                                     }

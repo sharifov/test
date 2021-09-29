@@ -31,6 +31,7 @@ use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -127,6 +128,7 @@ use Locale;
  * @property ConferenceParticipant[] $conferenceParticipants
  * @property ConferenceParticipant $currentParticipant
  * @property Conference[] $conferences
+ * @property CallLogFilterGuard $callLogFilterGuard
  */
 class Call extends \yii\db\ActiveRecord
 {
@@ -665,6 +667,11 @@ class Call extends \yii\db\ActiveRecord
     public function getCallUserAccesses(): ActiveQuery
     {
         return $this->hasMany(CallUserAccess::class, ['cua_call_id' => 'c_id']);
+    }
+
+    public function getCallLogFilterGuard(): ActiveQuery
+    {
+        return $this->hasOne(CallLogFilterGuard::class, ['clfg_call_id' => 'c_id']);
     }
 
     /**
