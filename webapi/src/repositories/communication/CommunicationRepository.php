@@ -39,7 +39,7 @@ class CommunicationRepository
         if (!$call) {
             $call = Call::createByIncoming($requestDataDTO, $call_project_id, $call_dep_id, $clientPhone->id ?? null);
             if ($parentCall) {
-                $call->assignParentCall($parentCall->c_id, $parentCall->c_project_id, $parentCall->c_dep_id, $parentCall->c_source_type_id);
+                $call->assignParentCall($parentCall->c_id, $parentCall->c_project_id, $parentCall->c_dep_id, $parentCall->c_source_type_id, $parentCall->c_stir_status);
 
                 if ($parentCall->callUserGroups && !$call->callUserGroups) {
                     foreach ($parentCall->callUserGroups as $cugItem) {

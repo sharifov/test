@@ -10,6 +10,7 @@ use kartik\daterange\DateRangeBehavior;
 use sales\access\EmployeeGroupAccess;
 use sales\auth\Auth;
 use sales\helpers\query\QueryHelper;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use sales\repositories\call\CallSearchRepository;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -68,6 +69,10 @@ class CallSearch extends Call
 
     public $cp_type_id;
 
+    public $clfg_type;
+    public $clfg_rate;
+    public $clfg_redial_status;
+
     /**
      * user groups id's
      *
@@ -110,6 +115,12 @@ class CallSearch extends Call
             ['cp_type_id', 'integer'],
 
             ['c_stir_status', 'string'],
+
+            ['clfg_type', 'integer'],
+            ['clfg_type', 'in', 'range' => array_keys(CallLogFilterGuard::TYPE_LIST)],
+            ['clfg_rate', 'number'],
+            ['clfg_redial_status', 'integer'],
+            ['clfg_redial_status', 'in', 'range' => array_keys(self::STATUS_LIST)],
         ];
     }
 
@@ -126,6 +137,14 @@ class CallSearch extends Call
         ];
     }
 
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), [
+            'clfg_type' => 'Log Filter Type',
+            'clfg_rate' => 'Log Filter Rate',
+            'clfg_redial_status' => 'Log Filter Redial Status',
+        ]);
+    }
 
     /**
      * {@inheritdoc}
@@ -158,6 +177,8 @@ class CallSearch extends Call
 
         $query->leftJoin(ConferenceParticipant::tableName(), 'cp_call_id = c_id AND cp_type_id = ' . ConferenceParticipant::TYPE_AGENT . ' AND cp_status_id <> ' . ConferenceParticipant::STATUS_LEAVE . ' AND cp_status_id IS NOT NULL');
 
+        $query->joinWith('callLogFilterGuard');
+
         $this->load($params);
 
         if (!$this->validate()) {
@@ -187,6 +208,18 @@ class CallSearch extends Call
 
         if ($this->projectId) {
             $query->andFilterWhere(['=', 'c_project_id', $this->projectId]);
+        }
+
+        if ($this->clfg_type !== null) {
+            $query->andFilterWhere(['=', 'clfg_type', $this->clfg_type]);
+        }
+
+        if ($this->clfg_rate !== null) {
+            $query->andFilterWhere(['clfg_sd_rate' => $this->clfg_rate]);
+        }
+
+        if ($this->clfg_redial_status !== null) {
+            $query->andFilterWhere(['=', 'clfg_redial_status', $this->clfg_redial_status]);
         }
 
         if ($this->statusId) {
