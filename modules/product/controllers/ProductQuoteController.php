@@ -546,8 +546,14 @@ class ProductQuoteController extends FController
         ];
 
         try {
+            if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id)) {
+                throw new NotFoundException('Origin Quote Not Found');
+            }
+
             $reprotectionQuote->declined(Auth::id());
             $this->productQuoteRepository->save($reprotectionQuote);
+
+            $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originQuote->pq_id, $reprotectionQuote->pq_id);
         } catch (\RuntimeException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();
