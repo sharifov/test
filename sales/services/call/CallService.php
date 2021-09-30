@@ -90,7 +90,7 @@ class CallService
                 $data['FromState'] ?? null,
                 $data['FromCity'] ?? null,
                 null,
-                $data['StirStatus'] ?? null
+                Call::getStirStatusByVerstatKey($data['StirVerstat'] ?? '')
             );
             $call->setDataCreatedParams($data);
         }

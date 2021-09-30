@@ -1,8 +1,25 @@
 version: '3.9'
 
 services:
+  php-fpm:
+    build:
+      context: ./php-fpm
+      args:
+        PHP_FPM_VERSION: ${PHP_FPM_VERSION}
+
+  swoole:
+    build:
+      context: ./swoole
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    depends_on:
+      - php-fpm
+
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
+      args:
+        NGINX_VERSION: ${NGINX_VERSION}
     volumes:
       - ./../../../logs:${APP_ROOT}/logs
       - ./../../../logs:/var/log/nginx
@@ -30,12 +47,15 @@ services:
       sales-communication:
         aliases:
           - ${HOST_API}
-
   web:
-    build: ./web
+    build:
+      context: ./web
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
+     - php-fpm
      - mysql
      - psql
      - redis
@@ -50,7 +70,10 @@ services:
       - sales-communication
 
   redis:
-    build: ./redis
+    build:
+      context: ./redis
+      args:
+        REDIS_VERSION: ${REDIS_VERSION}
     restart: always
     networks:
       - default
@@ -58,7 +81,10 @@ services:
       - ${REDIS_PORT}
 
   mysql:
-    build: ./mysql
+    build:
+      context: ./mysql
+      args:
+        MYSQL_VERSION: ${MYSQL_VERSION}
     volumes:
       - ./../../../mysql-docker/db:/var/lib/mysql
       - ./../../../mysql-docker/dump:/dump
@@ -71,7 +97,10 @@ services:
       - default
 
   psql:
-    build: ./psql
+    build:
+      context: ./psql
+      args:
+        POSTGRES_VERSION: ${POSTGRES_VERSION}
     environment:
       POSTGRES_PASSWORD: PSQL_PASSWORD
     volumes:
@@ -84,7 +113,7 @@ services:
       - default
 
   centrifugo:
-    image: centrifugo/centrifugo:v2
+    image: centrifugo/centrifugo:v${CENTRIFUGO_VERSION}
     volumes:
       - ./../../../centrifugo-docker/config.json:/centrifugo/config.json
     command: centrifugo -c config.json
@@ -101,10 +130,14 @@ services:
     restart: always
 
   ws:
-    build: ./ws
+    build:
+      context: ./ws
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
+      - php-fpm
       - mysql
       - psql
       - redis
@@ -130,9 +163,11 @@ services:
       context: ./queue
       args:
         APP_ROOT: ${APP_ROOT}
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
+      - php-fpm
       - mysql
       - psql
       - beanstalkd
@@ -143,11 +178,15 @@ services:
     restart: always
 
   console:
-    build: ./console
+    build:
+      context: ./console
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     user: ${USER_ID}:${USER_GID}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
+      - php-fpm
       - mysql
       - psql
       - beanstalkd

@@ -9,7 +9,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\contactPhoneList\entity\ContactPhoneListSearch */
+/* @var $searchModel sales\model\contactPhoneList\entity\ContactPhoneListCrudSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Contact Phone Lists';
@@ -18,6 +18,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="contact-phone-list-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
+
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
         <?= Html::a('Create Contact Phone List', ['create'], ['class' => 'btn btn-success']) ?>

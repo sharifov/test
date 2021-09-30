@@ -353,9 +353,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'list',
                     'items' => [
-                        ['label' => 'Phone List', 'url' => ['/contact-phone-list-crud/index']],
+                        ['label' => 'Phone List CRUD', 'url' => ['/contact-phone-list-crud/index']],
                         ['label' => 'Phone Data', 'url' => ['/contact-phone-data-crud/index']],
                         ['label' => 'Phone service info', 'url' => ['/contact-phone-service-info-crud/index']],
+                        ['label' => 'Phone List', 'url' => ['/contact-phone-list/index']],
                     ]
                 ]
             ]
@@ -519,8 +520,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
 
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
-                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
-                ['label' => 'Phone Blacklist Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
+                ['label' => 'Phone BlockList', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+                ['label' => 'Phone BlockList Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],

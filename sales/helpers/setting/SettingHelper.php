@@ -13,6 +13,9 @@ use yii\helpers\VarDumper;
 
 class SettingHelper
 {
+    private static ?array $callSpamFilter = null;
+    private static ?array $callbackToCaller = null;
+
     public static function getCaseSaleTicketEmailData(): array
     {
         return \Yii::$app->params['settings']['case_sale_ticket_email_data'] ?? [];
@@ -523,5 +526,102 @@ class SettingHelper
     public static function getRedialUserAccessExpiredSecondsLimit(): int
     {
         return (int) (Yii::$app->params['settings']['redial_user_access_expired_seconds'] ?? 20);
+    }
+
+    public static function getCallSpamFilterData(): array
+    {
+        $settings = Yii::$app->params['settings']['call_spam_filter'] ?? null;
+        if (self::$callSpamFilter !== null) {
+            return self::$callSpamFilter;
+        }
+        if ($settings) {
+            self::$callSpamFilter = JsonHelper::decode($settings);
+        }
+        return self::$callSpamFilter ?? [
+                'enabled' => false,
+                'rate' => 0.3567,
+                'redialEnabled' => false,
+                'message' => ''
+        ];
+    }
+
+    public static function callSpamFilterEnabled(): bool
+    {
+        return (bool) (self::getCallSpamFilterData()['enabled'] ?? false);
+    }
+
+    public static function getCallSpamFilterRate(): float
+    {
+        return (float) (self::getCallSpamFilterData()['rate'] ?? 0.3567);
+    }
+
+    public static function getCallSpamFilterMessage(): string
+    {
+        return (string) (self::getCallSpamFilterData()['message'] ?? '');
+    }
+
+    public static function getCallbackToCallerData()
+    {
+        $settings = Yii::$app->params['settings']['callback_to_caller'] ?? null;
+        if (self::$callbackToCaller !== null) {
+            return self::$callbackToCaller;
+        }
+        if ($settings) {
+            self::$callbackToCaller = JsonHelper::decode($settings);
+        }
+        return self::$callbackToCaller ?? [
+            'enabled' => false,
+            'message' => '',
+            'curlTimeout' => 30,
+            'dialCallTimeout' => 10,
+            'dialCallLimit' => 1,
+            'successStatusList' => [
+                'busy'
+            ]
+        ];
+    }
+
+    public static function isCallbackToCallerEnabled(): bool
+    {
+        return (bool) (self::getCallbackToCallerData()['enabled'] ?? false);
+    }
+
+    public static function getCallbackToCallerMessage(): string
+    {
+        return (string) (self::getCallbackToCallerData()['message'] ?? '');
+    }
+
+    public static function getCallbackToCallerCurlTimeout(): int
+    {
+        return (int) (self::getCallbackToCallerData()['curlTimeout'] ?? 30);
+    }
+
+    public static function getCallbackToCallerDialCallTimeout(): int
+    {
+        return (int) (self::getCallbackToCallerData()['dialCallTimeout'] ?? 10);
+    }
+
+    public static function getCallbackToCallerDialCallLimit(): int
+    {
+        return (int) (self::getCallbackToCallerData()['dialCallLimit'] ?? 1);
+    }
+
+    public static function getCallbackToCallerSuccessStatusList(): array
+    {
+        return (self::getCallbackToCallerData()['successStatusList'] ?? [
+            'busy'
+        ]);
+    }
+
+    public static function getCallbackToCallerExcludedProjectList(): array
+    {
+        return self::getCallbackToCallerData()['excludeProjectKeys'] ?? [
+            'priceline'
+        ];
+    }
+
+    public static function getCallbackToCallerExcludedDepartmentList(): array
+    {
+        return self::getCallbackToCallerData()['excludeDepartmentKeys'] ?? [];
     }
 }

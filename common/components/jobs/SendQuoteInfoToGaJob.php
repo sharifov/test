@@ -28,14 +28,41 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
         $this->executionTimeRegister();
         try {
             if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
-                $gaQuote->send();
-                Yii::info(
-                    'Quote (ID:' . $this->quote->id . ') info sent to GA',
-                    'info\SendQuoteInfoToGaJob:execute:sent'
-                );
+                $response = $gaQuote->send();
+                if (!$response) {
+                    throw new \DomainException('response is empty');
+                }
+
+                if ($response->isOk) {
+                    Yii::info(
+                        [
+                            'quoteId' => $this->quote->id,
+                            'message' => 'Info sent to GA',
+                            'requestData' => VarDumper::dumpAsString($response->data),
+                            'data' => $gaQuote->getPostData()
+                        ],
+                        'info\SendQuoteInfoToGaJob:execute:sent'
+                    );
+                } else {
+                    Yii::warning(
+                        [
+                            'quoteId' => $this->quote->id,
+                            'message' => 'Info NOT sent to GA',
+                            'responseContent' => VarDumper::dumpAsString($response->content),
+                            'requestData' => VarDumper::dumpAsString($response->data),
+                            'data' => $gaQuote->getPostData()
+                        ],
+                        'SendQuoteInfoToGaJob:execute:warning'
+                    );
+                }
             }
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'SendQuoteInfoToGaJob:execute:Throwable');
+            $message = AppHelper::throwableLog($throwable, true);
+            $message['quoteId'] = $this->quote->id ?? null;
+            \Yii::error(
+                $message,
+                'SendQuoteInfoToGaJob:execute:Throwable'
+            );
         }
         return false;
     }
