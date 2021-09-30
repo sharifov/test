@@ -113,7 +113,7 @@ services:
       - default
 
   centrifugo:
-    image: centrifugo/centrifugo:v${CENTRIFUGO_VERSION}
+    image: centrifugo/centrifugo:${CENTRIFUGO_VERSION}
     volumes:
       - ./../../../centrifugo-docker/config.json:/centrifugo/config.json
     command: centrifugo -c config.json
