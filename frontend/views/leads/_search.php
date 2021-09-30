@@ -141,7 +141,7 @@ use frontend\extensions\DatePicker;
                             <?= $form->field($model, 'quoteTypeId')->dropDownList(Quote::TYPE_LIST, ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-1">
-                            <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False', 1 => 'True'])->label('Is Test') ?>
+                            <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False', 1 => 'True'], ['prompt' => '-', 'options' => [ 0 => ['selected' => true] ]])->label('Is Test') ?>
                         </div>
                     <!--</div>
                     <div class="row">-->
