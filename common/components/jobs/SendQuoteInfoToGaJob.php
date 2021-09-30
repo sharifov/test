@@ -57,7 +57,7 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
                 }
             }
         } catch (\Throwable $throwable) {
-            $message = AppHelper::throwableLog($throwable);
+            $message = AppHelper::throwableLog($throwable, true);
             $message['quoteId'] = $this->quote->id ?? null;
             \Yii::error(
                 $message,
