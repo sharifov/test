@@ -29,12 +29,16 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
         try {
             if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
                 $response = $gaQuote->send();
+                if (!$response) {
+                    throw new \DomainException('response is empty');
+                }
+
                 if ($response->isOk) {
                     Yii::info(
                         [
                             'quoteId' => $this->quote->id,
                             'message' => 'Info sent to GA',
-                            'requestData' => $response->data,
+                            'requestData' => VarDumper::dumpAsString($response->data),
                             'data' => $gaQuote->getPostData()
                         ],
                         'info\SendQuoteInfoToGaJob:execute:sent'
@@ -44,16 +48,21 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
                         [
                             'quoteId' => $this->quote->id,
                             'message' => 'Info NOT sent to GA',
-                            'responseContent' => $response->content,
-                            'requestData' => $response->data,
+                            'responseContent' => VarDumper::dumpAsString($response->content),
+                            'requestData' => VarDumper::dumpAsString($response->data),
                             'data' => $gaQuote->getPostData()
                         ],
-                        'SendQuoteInfoToGaJob:execute'
+                        'SendQuoteInfoToGaJob:execute:warning'
                     );
                 }
             }
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'SendQuoteInfoToGaJob:execute:Throwable');
+            $message = AppHelper::throwableLog($throwable);
+            $message['quoteId'] = $this->quote->id ?? null;
+            \Yii::error(
+                $message,
+                'SendQuoteInfoToGaJob:execute:Throwable'
+            );
         }
         return false;
     }
