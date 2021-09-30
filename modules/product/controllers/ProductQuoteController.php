@@ -17,10 +17,12 @@ use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
@@ -553,7 +555,22 @@ class ProductQuoteController extends FController
             $reprotectionQuote->declined(Auth::id());
             $this->productQuoteRepository->save($reprotectionQuote);
 
-            $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originQuote->pq_id, $reprotectionQuote->pq_id);
+            $lastReProtectionQuote = ProductQuote::find()
+                ->with('productQuoteDataRecommended')
+                ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
+                    'typeId' => ProductQuoteRelation::TYPE_REPROTECTION,
+                    'parentQuoteId' => $originQuote->pq_id
+                ])
+                ->andWhere(['!=', 'pq_status_id', ProductQuoteStatus::DECLINED])
+                ->orderBy(['pq_id' => SORT_DESC])
+                ->one();
+
+            if ($lastReProtectionQuote) {
+                $this->productQuoteDataManageService->updateRecommendedReprotectionQuote(
+                    $originQuote->pq_id,
+                    $lastReProtectionQuote->pq_id
+                );
+            }
         } catch (\RuntimeException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();
