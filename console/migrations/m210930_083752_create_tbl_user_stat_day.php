@@ -23,7 +23,7 @@ class m210930_083752_create_tbl_user_stat_day extends Migration
             'usd_user_id' => $this->integer()->notNull(),
             'usd_day' => $this->tinyInteger(2),
             'usd_month' => $this->tinyInteger(2)->unsigned()->notNull(),
-            'usd_year' => $this->tinyInteger(4)->unsigned()->notNull(),
+            'usd_year' => $this->smallInteger()->unsigned()->notNull(),
             'usd_created_dt' => $this->dateTime()
         ], $tableOptions);
 

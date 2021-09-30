@@ -10,8 +10,13 @@ class UserStatDayKey
         self::GROSS_PROFIT => 'Gross Profit'
     ];
 
-    public function getList(): array
+    public static function getList(): array
     {
         return self::LIST;
+    }
+
+    public static function getNameById(int $id): ?string
+    {
+        return self::LIST[$id] ?? null;
     }
 }
