@@ -51,7 +51,7 @@ class LeadRedialExpiredAccessJob extends BaseJob implements JobInterface
 
             $limitAgents = SettingHelper::getRedialGetLimitAgents() - (int)$agentsHasAccessToCall;
 
-            \Yii::$app->queue_job->push(new LeadRedialAssignToUsersJob($this->leadId, $limitAgents, 0));
+            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($this->leadId, $limitAgents, 0));
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Processing expired access error',

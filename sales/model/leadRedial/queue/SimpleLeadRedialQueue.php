@@ -106,7 +106,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 $this->qCallService->resetReservation($leadQcall);
             });
 
-            \Yii::$app->queue_job->delay(self::LEAD_PREPARE_DELAY)->push(new LeadCallPrepareCheckerJob($lead->id));
+            \Yii::$app->queue_lead_redial->delay(self::LEAD_PREPARE_DELAY)->push(new LeadCallPrepareCheckerJob($lead->id));
 
             return new RedialCall(
                 $agentPhone,
