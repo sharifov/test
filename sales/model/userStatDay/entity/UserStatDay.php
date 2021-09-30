@@ -94,7 +94,7 @@ class UserStatDay extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'usd_user_id']);
     }
 
-    public function create(float $value, int $userId, int $day, int $month, int $year): self
+    public static function create(float $value, int $userId, int $day, int $month, int $year): self
     {
         $self = new self();
         $self->usd_value = $value;
