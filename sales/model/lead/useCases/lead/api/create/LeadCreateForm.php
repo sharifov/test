@@ -128,8 +128,8 @@ class LeadCreateForm extends Model
                 $this->loadAndValidateFlights();
             }, 'skipOnError' => true, 'skipOnEmpty' => true],
 
-            [['allow_contact_internal_phone', 'allow_contact_internal_email'], 'default', 'value' => false],
-            [['allow_contact_internal_phone', 'allow_contact_internal_email'], 'boolean'],
+            [['allow_contact_internal_phone', 'allow_contact_internal_email', 'is_test'], 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
+            [['allow_contact_internal_phone', 'allow_contact_internal_email', 'is_test'], 'default', 'value' => false],
 
             ['client', 'required'],
             ['client', IsArrayValidator::class],
@@ -145,9 +145,6 @@ class LeadCreateForm extends Model
                 'targetClass' => Language::class, 'targetAttribute' => ['user_language' => 'language_id']],
 
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
-
-            ['is_test', 'boolean', 'trueValue' => 'true', 'falseValue' => 'false', 'strict' => true],
-            ['is_test', 'filter', 'filter' => 'strtolower'],
 
             [['lead_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
 
