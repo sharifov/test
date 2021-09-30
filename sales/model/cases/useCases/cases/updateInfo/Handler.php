@@ -23,7 +23,7 @@ class Handler
     {
         $case = $this->repository->find($command->caseId);
 
-        if ($case->cs_category_id != $command->categoryId) {
+        if (($case->cs_category_id != $command->categoryId) && $case->category) {
             $case->addEventLog(CaseEventLog::CASE_CATEGORY_CHANGE, 'Case category changed to ' . $case->category->cc_name . ' By: ' . ($command->username ?? 'System.'));
         }
 
