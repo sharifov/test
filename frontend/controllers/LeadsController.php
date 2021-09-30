@@ -122,6 +122,10 @@ class LeadsController extends FController
             $params['LeadSearch']['employee_id'] = $user->id;
         }
 
+        if (!isset($params['LeadSearch']['l_is_test'])) {
+            $params['LeadSearch']['l_is_test'] = '0';
+        }
+
         if ($isAgent) {
             $dataProvider = $searchModel->searchAgent($params);
         } else {

@@ -146,7 +146,7 @@ class LeadCreateForm extends Model
 
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
-            ['is_test', 'boolean', 'trueValue' => 'true', 'falseValue' => 'false', 'strict' => true, 'skipOnEmpty' => true, 'default', 'value' => false],
+            ['is_test', 'boolean', 'trueValue' => 'true', 'falseValue' => 'false', 'strict' => true],
             ['is_test', 'filter', 'filter' => 'strtolower'],
 
             [['lead_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
