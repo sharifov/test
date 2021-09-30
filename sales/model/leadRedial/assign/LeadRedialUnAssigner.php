@@ -24,7 +24,7 @@ class LeadRedialUnAssigner
 
     public function unAssignByUser(int $userId): void
     {
-        $accesses = CallRedialUserAccess::find()->andWhere(['crua_user_id' => $userId])->all();
+        $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
             $this->unAssign($access);
         }
