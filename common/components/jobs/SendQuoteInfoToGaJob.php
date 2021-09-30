@@ -33,12 +33,18 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
                     throw new \DomainException('response is empty');
                 }
 
+                \Yii::info(
+                    VarDumper::dumpAsString($response),
+                    'info\SendQuoteInfoToGaJob:Debug'
+                );
+                /* TODO: FOR DEBUG:: must by remove */
+
                 if ($response->isOk) {
                     Yii::info(
                         [
                             'quoteId' => $this->quote->id,
                             'message' => 'Info sent to GA',
-                            'requestData' => VarDumper::dumpAsString($response->data),
+                            //'requestData' => VarDumper::dumpAsString($response->data),
                             'data' => $gaQuote->getPostData()
                         ],
                         'info\SendQuoteInfoToGaJob:execute:sent'
