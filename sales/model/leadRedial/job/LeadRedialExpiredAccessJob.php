@@ -45,7 +45,7 @@ class LeadRedialExpiredAccessJob extends BaseJob implements JobInterface
                 return;
             }
 
-            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($this->leadId,  0));
+            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($this->leadId, 0));
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Processing expired access error',
