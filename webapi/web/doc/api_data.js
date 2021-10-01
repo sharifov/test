@@ -469,10 +469,11 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "bool",
+            "type": "int",
+            "size": "0..1",
             "optional": false,
             "field": "active_only",
-            "description": "<p>&quot;true&quot; for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or &quot;false&quot; for all cases</p>"
+            "description": "<p>1 for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases</p>"
           },
           {
             "group": "Parameter",
@@ -500,7 +501,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": \"true\",\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": 0,\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -581,10 +582,11 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "bool",
+            "type": "int",
+            "size": "0..1",
             "optional": false,
             "field": "active_only",
-            "description": "<p>&quot;true&quot; for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or &quot;false&quot; for all cases</p>"
+            "description": "<p>1 for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases</p>"
           },
           {
             "group": "Parameter",
@@ -612,7 +614,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": \"true\",\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": 1,\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -777,10 +779,11 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "bool",
+            "type": "int",
+            "size": "0..1",
             "optional": false,
             "field": "active_only",
-            "description": "<p>&quot;true&quot; for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or &quot;false&quot; for all cases</p>"
+            "description": "<p>1 for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases</p>"
           },
           {
             "group": "Parameter",
@@ -808,7 +811,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": \"true\",\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": 1,\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -889,10 +892,11 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "bool",
+            "type": "int",
+            "size": "0..1",
             "optional": false,
             "field": "active_only",
-            "description": "<p>&quot;true&quot; for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or &quot;false&quot; for all cases</p>"
+            "description": "<p>1 for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases</p>"
           },
           {
             "group": "Parameter",
@@ -920,7 +924,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": \"true\",\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": 0,\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]

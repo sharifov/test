@@ -33,7 +33,7 @@ class GetCasesByPhoneForm extends Model
             ['contact_phone', PhoneInputValidator::class],
             ['contact_phone', 'exist', 'targetClass' => ClientPhone::class, 'targetAttribute' => ['contact_phone' => 'phone'], 'message' => 'Client Phone number not found in DB.'],
             ['active_only', 'filter', 'filter' => 'strtolower'],
-            ['active_only', 'boolean', 'trueValue' => 'true', 'falseValue' => 'false', 'strict' => true],
+            ['active_only', 'in', 'range' => ['true', 'false', '1', '0']],
             ['results_limit', 'integer'],
             ['project_key', 'string', 'max' => 50],
             ['department_key', 'string', 'max' => 20],
