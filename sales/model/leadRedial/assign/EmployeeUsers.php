@@ -15,7 +15,8 @@ class EmployeeUsers implements Users
             $lead->project_id,
             $lead->l_dep_id,
             SettingHelper::getRedialUserAccessExpiredSecondsLimit(),
-            $limitUsers
+            $limitUsers,
+            SettingHelper::getCalculateGrossProfitInDays()
         );
     }
 }
