@@ -177,11 +177,12 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         return $query->asArray()->all();
     }
 
-    private static function getSalesQuery(string $from, string $to): Query
+    public static function getSalesQuery(string $from, string $to): Query
     {
         $query = new Query();
         $query->select([
             '(ROUND(if(sp.`owner_share` is null, 1, sp.`owner_share`) * (final_profit - agents_processing_fee), 2)) as gross_profit',
+            'employee_id'
         ]);
         $query->from(Lead::tableName());
         $query->leftJoin([
@@ -190,19 +191,18 @@ class EmployeeQuery extends \yii\db\ActiveQuery
                 ->innerJoin('profit_split', 'ps_lead_id = id')
                 ->where(['status' => Lead::STATUS_SOLD])
                 ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
-                ->andWhere('employee_id = ' . Employee::tableName() . '.id')
                 ->groupBy(['id'])
         ], 'sp.id = leads.id');
         $query->where(['status' => Lead::STATUS_SOLD]);
         $query->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
-        $query->andWhere('employee_id = ' . Employee::tableName() . '.id');
 
         $complementaryQuery = new Query();
         $complementaryQuery->select([
             '(ROUND((final_profit - agents_processing_fee) * ps_percent/100, 2)) as gross_profit',
+            'employee_id'
         ]);
         $complementaryQuery->from(Lead::tableName());
-        $complementaryQuery->innerJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id');
+        $complementaryQuery->innerJoin('profit_split', 'ps_lead_id = id');
         $complementaryQuery->where(['status' => Lead::STATUS_SOLD]);
         $complementaryQuery->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
         $query->union($complementaryQuery, true);
