@@ -115,7 +115,6 @@ return [
             'class' => \common\components\HybridService::class,
             'username' => '',
             'password' => '',
-            'webHookEndpoint' => '',
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,

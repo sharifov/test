@@ -52,7 +52,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
+     * @apiParam {int{0..1}}            active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases
      * @apiParam {string}               [department_key]                 Department key
      * @apiParam {string}               [project_key]                    Project key
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -60,7 +60,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
-     *       "active_only": "true",
+     *       "active_only": 0,
      *       "department_key": "support",
      *       "project_key": "ovago",
      *       "results_limit": 10
@@ -199,7 +199,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{320}}          contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
+     * @apiParam {int{0..1}}            active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases
      * @apiParam {string}               [department_key]                 Department key
      * @apiParam {string}               [project_key]                    Project key
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -207,7 +207,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
-     *       "active_only": "true",
+     *       "active_only": 1,
      *       "department_key": "support",
      *       "project_key": "ovago",
      *       "results_limit": 10
@@ -494,7 +494,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
-     * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
+     * @apiParam {int{0..1}}            active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases
      * @apiParam {string}               [department_key]                 Department key
      * @apiParam {string}               [project_key]                    Project key
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -502,7 +502,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
-     *       "active_only": "true",
+     *       "active_only": 1,
      *       "department_key": "support",
      *       "project_key": "ovago",
      *       "results_limit": 10
@@ -620,7 +620,7 @@ class CaseController extends BaseController
      *  }
      *
      * @apiParam {string{320}}          contact_email                    Client Email required
-     * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
+     * @apiParam {int{0..1}}            active_only                      1 for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases
      * @apiParam {string}               [department_key]                 Department key
      * @apiParam {string}               [project_key]                    Project key
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
@@ -628,7 +628,7 @@ class CaseController extends BaseController
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
-     *       "active_only": "true",
+     *       "active_only": 0,
      *       "department_key": "support",
      *       "project_key": "ovago",
      *       "results_limit": 10

@@ -10,7 +10,7 @@ use yii\base\Model;
  * @package webapi\src\forms\cases
  *
  * @property string $contact_email
- * @property boolean $active_only
+ * @property string $active_only
  * @property int|null $project_key
  * @property int|null $department_key
  * @property int|null $results_limit
@@ -30,7 +30,7 @@ class GetCasesByEmailForm extends Model
             ['contact_email', 'email'],
             ['contact_email', 'exist', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['contact_email' => 'email'], 'message' => 'Client Email not found in DB.'],
             ['active_only', 'filter', 'filter' => 'strtolower'],
-            ['active_only', 'boolean', 'trueValue' => 'true', 'falseValue' => 'false', 'strict' => true],
+            ['active_only', 'in', 'range' => ['true', 'false', '1', '0']],
             ['results_limit', 'integer'],
             ['project_key', 'string', 'max' => 50],
             ['department_key', 'string', 'max' => 20],
