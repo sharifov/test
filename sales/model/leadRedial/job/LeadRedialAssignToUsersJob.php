@@ -4,6 +4,7 @@ namespace sales\model\leadRedial\job;
 
 use common\components\jobs\BaseJob;
 use common\models\Lead;
+use sales\helpers\app\AppHelper;
 use sales\services\lead\LeadRedialService;
 use Yii;
 use yii\queue\JobInterface;
@@ -35,9 +36,13 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
     {
         $lead = Lead::findOne($this->leadId);
 
-        if ($lead) {
-            $leadRedialService = Yii::createObject(LeadRedialService::class);
-            $leadRedialService->assignAgentsToLead($lead, $this->agentsLimit);
+        try {
+            if ($lead) {
+                $leadRedialService = Yii::createObject(LeadRedialService::class);
+                $leadRedialService->assignAgentsToLead($lead, $this->agentsLimit);
+            }
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e, true), 'LeadRedialAssignToUsersJob');
         }
     }
 }

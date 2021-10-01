@@ -31,4 +31,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function grossProfit(): self
+    {
+        return $this->andWhere(['usd_key' => UserStatDayKey::GROSS_PROFIT]);
+    }
 }

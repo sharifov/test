@@ -333,7 +333,8 @@ class LeadRedialService
             $lead->project_id,
             $lead->l_dep_id,
             SettingHelper::getRedialUserAccessExpiredSecondsLimit(),
-            $limitAgents
+            $limitAgents,
+            SettingHelper::getCalculateGrossProfitInDays()
         );
 
         $countAgentsWithMinimumSkillValue = 0;

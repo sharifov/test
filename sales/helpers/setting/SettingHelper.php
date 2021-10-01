@@ -524,4 +524,9 @@ class SettingHelper
     {
         return (int) (Yii::$app->params['settings']['redial_user_access_expired_seconds'] ?? 60);
     }
+
+    public static function getCalculateGrossProfitInDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['calculate_gross_profit_in_days'] ?? 14);
+    }
 }
