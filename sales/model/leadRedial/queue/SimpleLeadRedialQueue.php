@@ -98,7 +98,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 continue;
             }
 
-            $this->leadRedialUnAssigner->unAssignByUser($user->id);
+            $this->leadRedialUnAssigner->acceptCall($user->id);
 
             $this->transactionManager->wrap(function () use ($lead, $leadQcall) {
                 $lead->callPrepare();

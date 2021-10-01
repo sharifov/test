@@ -14,7 +14,6 @@ use yii\queue\JobInterface;
  * Class LeadRedialAssignToUsersJob
  *
  * @property int $leadId
- * @property int $agentsLimit
  * @property int $retryNumber
  */
 class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
@@ -24,15 +23,12 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
 
     public int $leadId;
 
-    public int $agentsLimit;
-
     public int $retryNumber;
 
-    public function __construct(int $leadId, int $agentsLimit, int $retryNumber, ?float $timeStart = null, $config = [])
+    public function __construct(int $leadId, int $retryNumber, ?float $timeStart = null, $config = [])
     {
         parent::__construct($timeStart, $config);
         $this->leadId = $leadId;
-        $this->agentsLimit = $agentsLimit;
         $this->retryNumber = $retryNumber;
     }
 
@@ -53,14 +49,19 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
                         ], 'LeadRedialAssignToUsersJob');
                         return;
                     }
-                    Yii::$app->queue_lead_redial->delay(self::LOCK_DELAY)->push(new self($this->leadId, $this->agentsLimit, $this->retryNumber + 1));
+                    Yii::$app->queue_lead_redial->delay(self::LOCK_DELAY)->push(new self($this->leadId, $this->retryNumber + 1));
                     return;
                 }
 
                 $isAssigned = false;
                 try {
+                    $countUsers = (new UserCounter())->getCount($lead->id);
+
+                    if ($countUsers < 1) {
+                        return;
+                    }
                     $assigner = Yii::createObject(LeadRedialMultiAssigner::class);
-                    $isAssigned = $assigner->assign($lead, $this->agentsLimit, new \DateTimeImmutable());
+                    $isAssigned = $assigner->assign($lead, $countUsers, new \DateTimeImmutable());
                 } catch (\Throwable $e) {
                     Yii::error([
                         'message' => 'Assign users error',

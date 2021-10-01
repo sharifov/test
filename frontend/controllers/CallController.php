@@ -1282,14 +1282,12 @@ class CallController extends FController
                             $response['message'] = 'Processing current call error. Please try again.';
                         }
                     } else {
-                        Yii::createObject(LeadRedialUnAssigner::class)->unAssignByUser($userId);
-                        Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
+                        Yii::createObject(LeadRedialUnAssigner::class)->emptyQueue($userId);
                         $response['error'] = true;
                         $response['message'] = 'Phone line queue is empty.';
                     }
                 } else {
-                    Yii::createObject(LeadRedialUnAssigner::class)->unAssignByUser($userId);
-                    Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
+                    Yii::createObject(LeadRedialUnAssigner::class)->emptyQueue($userId);
                     $response['error'] = true;
                     $response['message'] = 'Phone line queue is empty.';
                 }

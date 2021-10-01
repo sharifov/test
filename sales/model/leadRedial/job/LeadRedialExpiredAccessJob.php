@@ -5,9 +5,7 @@ namespace sales\model\leadRedial\job;
 use common\components\jobs\BaseJob;
 use common\models\Lead;
 use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
-use sales\model\leadRedial\entity\CallRedialUserAccess;
 use yii\queue\JobInterface;
 
 /**
@@ -41,17 +39,13 @@ class LeadRedialExpiredAccessJob extends BaseJob implements JobInterface
                 return;
             }
 
-            $agentsHasAccessToCall = CallRedialUserAccess::find()
-                ->select('count(crua_lead_id)')
-                ->andWhere('time_to_sec(TIMEDIFF(now(), crua_created_dt)) < :limitTime', [
-                    'limitTime' => SettingHelper::getRedialUserAccessExpiredSecondsLimit()
-                ])
-                ->andWhere(['crua_lead_id' => $this->leadId])
-                ->scalar();
+            $countUsers = (new UserCounter())->getCount($lead->id);
 
-            $limitAgents = SettingHelper::getRedialGetLimitAgents() - (int)$agentsHasAccessToCall;
+            if ($countUsers < 1) {
+                return;
+            }
 
-            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($this->leadId, $limitAgents, 0));
+            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($this->leadId,  0));
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Processing expired access error',
