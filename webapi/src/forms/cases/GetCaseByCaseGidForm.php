@@ -8,17 +8,17 @@ use yii\base\Model;
  * Class GetCaseByCaseGidForm
  * @package webapi\src\forms\cases
  *
- * @property int $case_gid
+ * @property int $gid
  */
 class GetCaseByCaseGidForm extends Model
 {
-    public $case_gid;
+    public $gid;
 
     public function rules(): array
     {
         return [
-            ['case_gid', 'required'],
-            ['case_gid', 'string', 'max' => 50],
+            ['gid', 'required'],
+            ['gid', 'string', 'max' => 50],
         ];
     }
 

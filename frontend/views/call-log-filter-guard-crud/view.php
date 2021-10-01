@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -38,6 +39,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'clfg_sd_rate',
                 'clfg_trust_percent',
                 'clfg_created_dt:byUserDateTime',
+                [
+                    'attribute' => 'clfg_redial_status',
+                    'value' => static function (CallLogFilterGuard $model) {
+                        return $model->getRedialStatusName();
+                    }
+                ]
             ],
         ]) ?>
 

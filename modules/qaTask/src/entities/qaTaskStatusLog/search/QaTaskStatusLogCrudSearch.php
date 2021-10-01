@@ -57,6 +57,7 @@ class QaTaskStatusLogCrudSearch extends QaTaskStatusLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['tsl_id' => 'DESC']]
         ]);
 
         $this->load($params);

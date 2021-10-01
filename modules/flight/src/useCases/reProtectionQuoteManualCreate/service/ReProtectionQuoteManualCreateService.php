@@ -283,22 +283,12 @@ class ReProtectionQuoteManualCreateService
 
         if ($keySegment !== false) {
             $departure = $segments[$keySegment]['departureDateTime'];
-            $departureUtc = clone($departure);
-            $departureUtc = $departureUtc->setTimezone(new \DateTimeZone('UTC'));
-
             $arrival = $segments[$keySegment]['arrivalDateTime'];
-            $arrivalUtc = clone($arrival);
-            $arrivalUtc = $arrivalUtc->setTimezone(new \DateTimeZone('UTC'));
 
-            if ($arrivalUtc < $departureUtc) {
-                $arrivalUtc = $arrivalUtc->modify('+1 days');
-            }
-
-            $flightQuoteSegment->fqs_departure_dt = $departureUtc->format('Y-m-d H:i:s');
-            $flightQuoteSegment->fqs_arrival_dt = $arrivalUtc->format('Y-m-d H:i:s');
-            $flightQuoteSegment->fqs_duration = ($arrivalUtc->getTimestamp() - $departureUtc->getTimestamp()) / 60;
+            $flightQuoteSegment->fqs_departure_dt = $departure->format('Y-m-d H:i:s');
+            $flightQuoteSegment->fqs_arrival_dt = $arrival->format('Y-m-d H:i:s');
+            $flightQuoteSegment->fqs_duration = ($arrival->getTimestamp() - $departure->getTimestamp()) / 60;
         }
-
         return $flightQuoteSegment;
     }
 

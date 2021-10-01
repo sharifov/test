@@ -189,6 +189,12 @@ return [
             'port' => env('common.config.params.queue.port'),
             'tube' => 'queue_virtual_cron',
         ],
+        'queue_lead_redial' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => env('common.config.params.queue.host'),
+            'port' => env('common.config.params.queue.port'),
+            'tube' => 'queue_lead_redial',
+        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => env('common.config.main.components.telegram.botUsername'),

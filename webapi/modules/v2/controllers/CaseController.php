@@ -53,16 +53,16 @@ class CaseController extends BaseController
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
      * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
-     * @apiParam {int}                  [cases_department_id]            Department ID
-     * @apiParam {int}                  [cases_project_id]               Project ID
+     * @apiParam {string}               [department_key]                 Department key
+     * @apiParam {string}               [project_key]                    Project key
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
      *
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
      *       "active_only": "true",
-     *       "cases_department_id": 2,
-     *       "cases_project_id": 6,
+     *       "department_key": "support",
+     *       "project_key": "ovago",
      *       "results_limit": 10
      *   }
      *
@@ -75,28 +75,28 @@ class CaseController extends BaseController
      *     "message": "OK",
      *     "data": [
      *             {
-     *                 "case_id": "88473",
-     *                 "case_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
-     *                 "case_created_dt": "2020-02-26 15:26:25",
-     *                 "case_updated_dt": "2020-02-26 17:07:18",
-     *                 "case_last_action_dt": "2020-02-27 15:08:39",
-     *                 "case_category_id": "16",
-     *                 "case_order_uid": "P6QWNH",
-     *                 "case_project_name": "ARANGRANT",
-     *                 "case_next_flight": "2022-05-22",
-     *                 "case_status_name": "Processing"
+     *                 "id": "88473",
+     *                 "gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "created_dt": "2020-02-26 15:26:25",
+     *                 "updated_dt": "2020-02-26 17:07:18",
+     *                 "last_action_dt": "2020-02-27 15:08:39",
+     *                 "category_id": "16",
+     *                 "order_uid": "P6QWNH",
+     *                 "project_name": "OVAGO",
+     *                 "next_flight": "2022-05-22",
+     *                 "status_name": "Processing"
      *             },
      *             {
-     *                 "case_id": "130705",
-     *                 "case_gid": "37129b222479f0468d6355fcf4bd0235",
-     *                 "case_created_dt": "2020-03-24 09:14:28",
-     *                 "case_updated_dt": "2020-03-24 11:00:34",
-     *                 "case_last_action_dt": "2020-03-24 11:00:34",
-     *                 "case_category_id": "16",
-     *                 "case_order_uid": null,
-     *                 "case_project_name": "WOWFARE",
-     *                 "case_next_flight": null,
-     *                 "case_status_name": "Processing"
+     *                 "id": "130705",
+     *                 "gid": "37129b222479f0468d6355fcf4bd0235",
+     *                 "created_dt": "2020-03-24 09:14:28",
+     *                 "updated_dt": "2020-03-24 11:00:34",
+     *                 "last_action_dt": "2020-03-24 11:00:34",
+     *                 "category_id": "16",
+     *                 "order_uid": null,
+     *                 "project_name": "OVAGO",
+     *                 "next_flight": null,
+     *                 "status_name": "Processing"
      *             }
      *     ],
      *     "technical": {
@@ -180,7 +180,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->project_key, $form->department_key));
     }
 
 
@@ -198,18 +198,18 @@ class CaseController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{320}}           contact_email                    Client Email required
+     * @apiParam {string{320}}          contact_email                    Client Email required
      * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
-     * @apiParam {int}                  [cases_department_id]            Department ID
-     * @apiParam {int}                  [cases_project_id]               Project ID
+     * @apiParam {string}               [department_key]                 Department key
+     * @apiParam {string}               [project_key]                    Project key
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
      *
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
      *       "active_only": "true",
-     *       "cases_department_id": 2,
-     *       "cases_project_id": 6,
+     *       "department_key": "support",
+     *       "project_key": "ovago",
      *       "results_limit": 10
      *   }
      *
@@ -222,28 +222,28 @@ class CaseController extends BaseController
      *     "message": "OK",
      *     "data": [
      *             {
-     *                 "case_id": "88473",
-     *                 "case_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
-     *                 "case_created_dt": "2020-02-26 15:26:25",
-     *                 "case_updated_dt": "2020-02-26 17:07:18",
-     *                 "case_last_action_dt": "2020-02-27 15:08:39",
-     *                 "case_category_id": "16",
-     *                 "case_order_uid": "P6QWNH",
-     *                 "case_project_name": "ARANGRANT",
-     *                 "case_next_flight": "2022-05-22",
-     *                 "case_status_name": "Processing"
+     *                 "id": "88473",
+     *                 "gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "created_dt": "2020-02-26 15:26:25",
+     *                 "updated_dt": "2020-02-26 17:07:18",
+     *                 "last_action_dt": "2020-02-27 15:08:39",
+     *                 "category_id": "16",
+     *                 "order_uid": "P6QWNH",
+     *                 "project_name": "OVAGO",
+     *                 "next_flight": "2022-05-22",
+     *                 "status_name": "Processing"
      *             },
      *             {
-     *                 "case_id": "130705",
-     *                 "case_gid": "37129b222479f0468d6355fcf4bd0235",
-     *                 "case_created_dt": "2020-03-24 09:14:28",
-     *                 "case_updated_dt": "2020-03-24 11:00:34",
-     *                 "case_last_action_dt": "2020-03-24 11:00:34",
-     *                 "case_category_id": "16",
-     *                 "case_order_uid": null,
-     *                 "case_project_name": "WOWFARE",
-     *                 "case_next_flight": null,
-     *                 "case_status_name": "Processing"
+     *                 "id": "130705",
+     *                 "gid": "37129b222479f0468d6355fcf4bd0235",
+     *                 "created_dt": "2020-03-24 09:14:28",
+     *                 "updated_dt": "2020-03-24 11:00:34",
+     *                 "last_action_dt": "2020-03-24 11:00:34",
+     *                 "category_id": "16",
+     *                 "order_uid": null,
+     *                 "project_name": "OVAGO",
+     *                 "next_flight": null,
+     *                 "status_name": "Processing"
      *             }
      *     ],
      *     "technical": {
@@ -327,7 +327,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->project_key, $form->department_key));
     }
 
     /**
@@ -344,11 +344,11 @@ class CaseController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{50}}           case_gid                         Client Email required
+     * @apiParam {string{50}}           gid                         Case GID required
      *
      * @apiParamExample {json} Request-Example:
      * {
-     *       "case_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *       "gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
      * }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -359,16 +359,16 @@ class CaseController extends BaseController
      *     "status": 200,
      *     "message": "OK",
      *     "data": {
-     *                 "case_id": "88473",
-     *                 "case_gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
-     *                 "case_created_dt": "2020-02-26 15:26:25",
-     *                 "case_updated_dt": "2020-02-26 17:07:18",
-     *                 "case_last_action_dt": "2020-02-27 15:08:39",
-     *                 "case_category_id": "16",
-     *                 "case_order_uid": "P6QWNH",
-     *                 "case_project_name": "ARANGRANT",
-     *                 "case_next_flight": "2022-05-22",
-     *                 "case_status_name": "Processing"
+     *                 "id": "88473",
+     *                 "gid": "c5f3f405ea489bd6e6a1f3886086c9d9",
+     *                 "created_dt": "2020-02-26 15:26:25",
+     *                 "updated_dt": "2020-02-26 17:07:18",
+     *                 "last_action_dt": "2020-02-27 15:08:39",
+     *                 "category_id": "16",
+     *                 "order_uid": "P6QWNH",
+     *                 "project_name": "ARANGRANT",
+     *                 "next_flight": "2022-05-22",
+     *                 "status_name": "Processing"
      *     },
      *     "technical": {
      *         "action": "v2/case/get",
@@ -388,7 +388,7 @@ class CaseController extends BaseController
      *     "status": 422,
      *     "message": "Validation error",
      *     "errors": [
-     *             "Case with this case_gid not found."
+     *             "Case with this gid not found."
      *     ],
      *     "code": "21304",
      *     "technical": {
@@ -409,7 +409,7 @@ class CaseController extends BaseController
      *     "status": 422,
      *     "message": "Validation error",
      *     "errors": {
-     *         "case_gid": [
+     *         "gid": [
      *             "Case Gid should contain at most 50 characters."
      *         ]
      *     },
@@ -454,13 +454,13 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        $case = CasesQuery::findCaseByCaseGid($form->case_gid);
+        $case = CasesQuery::findCaseByCaseGid($form->gid);
 
         try {
             if (empty($case)) {
                 return new ErrorResponse(
                     new MessageMessage(Messages::VALIDATION_ERROR),
-                    new ErrorsMessage("Case with this case_gid not found."),
+                    new ErrorsMessage("Case with this gid not found."),
                     new CodeMessage(CaseCodeException::API_GET_CASE_BY_GID_NOT_FOUND)
                 );
             } else {
@@ -495,16 +495,16 @@ class CaseController extends BaseController
      *
      * @apiParam {string{20}}           contact_phone                    Client Phone required
      * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
-     * @apiParam {int}                  [cases_department_id]            Department ID
-     * @apiParam {int}                  [cases_project_id]               Project ID
+     * @apiParam {string}               [department_key]                 Department key
+     * @apiParam {string}               [project_key]                    Project key
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
      *
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_phone": "+18888888888",
      *       "active_only": "true",
-     *       "cases_department_id": 2,
-     *       "cases_project_id": 6,
+     *       "department_key": "support",
+     *       "project_key": "ovago",
      *       "results_limit": 10
      *   }
      *
@@ -601,7 +601,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesGidByPhone($form->contact_phone, $form->active_only, $form->results_limit, $form->project_key, $form->department_key));
     }
 
 
@@ -619,18 +619,18 @@ class CaseController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{320}}           contact_email                    Client Email required
+     * @apiParam {string{320}}          contact_email                    Client Email required
      * @apiParam {bool}                 active_only                      "true" for requesting active cases only (depends on Department->object->case->trashActiveDaysLimit or global trash_cases_active_days_limit Site setting) or "false" for all cases
-     * @apiParam {int}                  [cases_department_id]            Department ID
-     * @apiParam {int}                  [cases_project_id]               Project ID
+     * @apiParam {string}               [department_key]                 Department key
+     * @apiParam {string}               [project_key]                    Project key
      * @apiParam {int}                  [results_limit]                  Limits number of cases in results list
      *
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.test",
      *       "active_only": "true",
-     *       "cases_department_id": 2,
-     *       "cases_project_id": 6,
+     *       "department_key": "support",
+     *       "project_key": "ovago",
      *       "results_limit": 10
      *   }
      *
@@ -705,7 +705,7 @@ class CaseController extends BaseController
      *       "status": 400,
      *       "message": "Load data error",
      *       "errors": [
-     *           "Not found  GET request params"
+     *           "Not found GET request params"
      *       ],
      *       "code": 21302,
      *       "technical": {
@@ -727,7 +727,7 @@ class CaseController extends BaseController
             return $this->getCasesValidationErrorResponse($form);
         }
 
-        return $this->getCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->cases_project_id, $form->cases_department_id));
+        return $this->getCasesResult(CasesQuery::findCasesGidByEmail($form->contact_email, $form->active_only, $form->results_limit, $form->project_key, $form->department_key));
     }
 
     private function getCasesLoadDataErrorResponse(): ErrorResponse

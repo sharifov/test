@@ -476,17 +476,17 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": true,
-            "field": "cases_department_id",
-            "description": "<p>Department ID</p>"
+            "field": "department_key",
+            "description": "<p>Department key</p>"
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": true,
-            "field": "cases_project_id",
-            "description": "<p>Project ID</p>"
+            "field": "project_key",
+            "description": "<p>Project key</p>"
           },
           {
             "group": "Parameter",
@@ -500,7 +500,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": \"true\",\n      \"cases_department_id\": 2,\n      \"cases_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": \"true\",\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -528,7 +528,7 @@ define({ "api": [
         },
         {
           "title": "Error-Response(Load data error) (400):",
-          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
           "type": "json"
         }
       ]
@@ -588,17 +588,17 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": true,
-            "field": "cases_department_id",
-            "description": "<p>Department ID</p>"
+            "field": "department_key",
+            "description": "<p>Department key</p>"
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": true,
-            "field": "cases_project_id",
-            "description": "<p>Project ID</p>"
+            "field": "project_key",
+            "description": "<p>Project key</p>"
           },
           {
             "group": "Parameter",
@@ -612,7 +612,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": \"true\",\n      \"cases_department_id\": 2,\n      \"cases_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": \"true\",\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -688,15 +688,15 @@ define({ "api": [
             "type": "string",
             "size": "50",
             "optional": false,
-            "field": "case_gid",
-            "description": "<p>Client Email required</p>"
+            "field": "gid",
+            "description": "<p>Case GID required</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"case_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n}",
+          "content": "{\n      \"gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n}",
           "type": "json"
         }
       ]
@@ -705,7 +705,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": {\n                \"case_id\": \"88473\",\n                \"case_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"case_created_dt\": \"2020-02-26 15:26:25\",\n                \"case_updated_dt\": \"2020-02-26 17:07:18\",\n                \"case_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": \"P6QWNH\",\n                \"case_project_name\": \"ARANGRANT\",\n                \"case_next_flight\": \"2022-05-22\",\n                \"case_status_name\": \"Processing\"\n    },\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": {\n                \"id\": \"88473\",\n                \"gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"created_dt\": \"2020-02-26 15:26:25\",\n                \"updated_dt\": \"2020-02-26 17:07:18\",\n                \"last_action_dt\": \"2020-02-27 15:08:39\",\n                \"category_id\": \"16\",\n                \"order_uid\": \"P6QWNH\",\n                \"project_name\": \"ARANGRANT\",\n                \"next_flight\": \"2022-05-22\",\n                \"status_name\": \"Processing\"\n    },\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
           "type": "json"
         }
       ]
@@ -714,12 +714,12 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response(Validation error) (422):",
-          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": [\n            \"Case with this case_gid not found.\"\n    ],\n    \"code\": \"21304\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": [\n            \"Case with this gid not found.\"\n    ],\n    \"code\": \"21304\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
           "type": "json"
         },
         {
           "title": "Error-Response(Validation error) (422):",
-          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"case_gid\": [\n            \"Case Gid should contain at most 50 characters.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"gid\": [\n            \"Case Gid should contain at most 50 characters.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
           "type": "json"
         },
         {
@@ -784,17 +784,17 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": true,
-            "field": "cases_department_id",
-            "description": "<p>Department ID</p>"
+            "field": "department_key",
+            "description": "<p>Department key</p>"
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": true,
-            "field": "cases_project_id",
-            "description": "<p>Project ID</p>"
+            "field": "project_key",
+            "description": "<p>Project key</p>"
           },
           {
             "group": "Parameter",
@@ -808,7 +808,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": \"true\",\n      \"cases_department_id\": 2,\n      \"cases_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": \"true\",\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -817,7 +817,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"case_id\": \"88473\",\n                \"case_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"case_created_dt\": \"2020-02-26 15:26:25\",\n                \"case_updated_dt\": \"2020-02-26 17:07:18\",\n                \"case_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": \"P6QWNH\",\n                \"case_project_name\": \"ARANGRANT\",\n                \"case_next_flight\": \"2022-05-22\",\n                \"case_status_name\": \"Processing\"\n            },\n            {\n                \"case_id\": \"130705\",\n                \"case_gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"case_created_dt\": \"2020-03-24 09:14:28\",\n                \"case_updated_dt\": \"2020-03-24 11:00:34\",\n                \"case_last_action_dt\": \"2020-03-24 11:00:34\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": null,\n                \"case_project_name\": \"WOWFARE\",\n                \"case_next_flight\": null,\n                \"case_status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-email\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"id\": \"88473\",\n                \"gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"created_dt\": \"2020-02-26 15:26:25\",\n                \"updated_dt\": \"2020-02-26 17:07:18\",\n                \"last_action_dt\": \"2020-02-27 15:08:39\",\n                \"category_id\": \"16\",\n                \"order_uid\": \"P6QWNH\",\n                \"project_name\": \"OVAGO\",\n                \"next_flight\": \"2022-05-22\",\n                \"status_name\": \"Processing\"\n            },\n            {\n                \"id\": \"130705\",\n                \"gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"created_dt\": \"2020-03-24 09:14:28\",\n                \"updated_dt\": \"2020-03-24 11:00:34\",\n                \"last_action_dt\": \"2020-03-24 11:00:34\",\n                \"category_id\": \"16\",\n                \"order_uid\": null,\n                \"project_name\": \"OVAGO\",\n                \"next_flight\": null,\n                \"status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-email\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
           "type": "json"
         }
       ]
@@ -896,17 +896,17 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": true,
-            "field": "cases_department_id",
-            "description": "<p>Department ID</p>"
+            "field": "department_key",
+            "description": "<p>Department key</p>"
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": true,
-            "field": "cases_project_id",
-            "description": "<p>Project ID</p>"
+            "field": "project_key",
+            "description": "<p>Project key</p>"
           },
           {
             "group": "Parameter",
@@ -920,7 +920,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": \"true\",\n      \"cases_department_id\": 2,\n      \"cases_project_id\": 6,\n      \"results_limit\": 10\n  }",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": \"true\",\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
           "type": "json"
         }
       ]
@@ -929,7 +929,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"case_id\": \"88473\",\n                \"case_gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"case_created_dt\": \"2020-02-26 15:26:25\",\n                \"case_updated_dt\": \"2020-02-26 17:07:18\",\n                \"case_last_action_dt\": \"2020-02-27 15:08:39\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": \"P6QWNH\",\n                \"case_project_name\": \"ARANGRANT\",\n                \"case_next_flight\": \"2022-05-22\",\n                \"case_status_name\": \"Processing\"\n            },\n            {\n                \"case_id\": \"130705\",\n                \"case_gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"case_created_dt\": \"2020-03-24 09:14:28\",\n                \"case_updated_dt\": \"2020-03-24 11:00:34\",\n                \"case_last_action_dt\": \"2020-03-24 11:00:34\",\n                \"case_category_id\": \"16\",\n                \"case_order_uid\": null,\n                \"case_project_name\": \"WOWFARE\",\n                \"case_next_flight\": null,\n                \"case_status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-phone\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"id\": \"88473\",\n                \"gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"created_dt\": \"2020-02-26 15:26:25\",\n                \"updated_dt\": \"2020-02-26 17:07:18\",\n                \"last_action_dt\": \"2020-02-27 15:08:39\",\n                \"category_id\": \"16\",\n                \"order_uid\": \"P6QWNH\",\n                \"project_name\": \"OVAGO\",\n                \"next_flight\": \"2022-05-22\",\n                \"status_name\": \"Processing\"\n            },\n            {\n                \"id\": \"130705\",\n                \"gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"created_dt\": \"2020-03-24 09:14:28\",\n                \"updated_dt\": \"2020-03-24 11:00:34\",\n                \"last_action_dt\": \"2020-03-24 11:00:34\",\n                \"category_id\": \"16\",\n                \"order_uid\": null,\n                \"project_name\": \"OVAGO\",\n                \"next_flight\": null,\n                \"status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-phone\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
           "type": "json"
         }
       ]
@@ -4029,6 +4029,11 @@ define({ "api": [
         {
           "title": "Error-Response:",
           "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type\": [\n              \"Type cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422) Code 101:",
+          "content": "HTTP/1.1 422 Error\n{\n       \"status\": 422,\n       \"message\": \"Error\",\n       \"data\": [\n             \"success\": false,\n             \"error\": \"Product Quote Change status is not in \\\"Decision pending\\\". Current status Canceled\"\n       ],\n       \"code\": 101,\n       \"errors\": [],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]

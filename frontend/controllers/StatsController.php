@@ -290,7 +290,7 @@ class StatsController extends FController
                 $range = 'M';
                 $chartTimeFormat = 'Y-m';
                 $currentDate =  date('Y-m-01', strtotime($date[0]));
-                $lastDate =  date('Y-m-31', strtotime($date[1]));
+                $lastDate =  date('Y-m-t', strtotime($date[1]));
             }
             if (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy != 'H' && $rangeBy != 'M') {
                 $range = 'D';
@@ -301,7 +301,7 @@ class StatsController extends FController
                 $range = 'M';
                 $chartTimeFormat = 'Y-m';
                 $currentDate = date('Y-m-01', strtotime($date[0]));
-                $lastDate = date('Y-m-31', strtotime($date[1]));
+                $lastDate = date('Y-m-t', strtotime($date[1]));
             } elseif (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'H') {
                 $range = 'HD';
                 $chartTimeFormat = 'Y-m-d H:i';

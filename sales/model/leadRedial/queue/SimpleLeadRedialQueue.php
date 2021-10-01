@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\PhoneBlacklist;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
+use sales\model\leadRedial\job\LeadCallPrepareCheckerJob;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\lead\LeadQcallRepository;
 use sales\repositories\lead\LeadRepository;
@@ -29,6 +30,8 @@ use sales\services\TransactionManager;
  */
 class SimpleLeadRedialQueue implements LeadRedialQueue
 {
+    private const LEAD_PREPARE_DELAY = 30;
+
     private Leads $leads;
     private Reserver $reserver;
     private LeadRedialService $leadRedialService;
@@ -95,13 +98,15 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 continue;
             }
 
-            $this->leadRedialUnAssigner->unAssignByUser($user->id);
+            $this->leadRedialUnAssigner->acceptCall($user->id);
 
             $this->transactionManager->wrap(function () use ($lead, $leadQcall) {
                 $lead->callPrepare();
                 $this->leadRepository->save($lead);
                 $this->qCallService->resetReservation($leadQcall);
             });
+
+            \Yii::$app->queue_lead_redial->delay(self::LEAD_PREPARE_DELAY)->push(new LeadCallPrepareCheckerJob($lead->id));
 
             return new RedialCall(
                 $agentPhone,

@@ -43,6 +43,7 @@ use yii\base\Model;
  *
  * @property bool|null $allow_contact_internal_phone
  * @property bool|null $allow_contact_internal_email
+ * @property bool|null $is_test
  */
 class LeadCreateForm extends Model
 {
@@ -75,6 +76,7 @@ class LeadCreateForm extends Model
 
     public $allow_contact_internal_phone;
     public $allow_contact_internal_email;
+    public $is_test;
 
     public function rules(): array
     {
@@ -143,6 +145,9 @@ class LeadCreateForm extends Model
                 'targetClass' => Language::class, 'targetAttribute' => ['user_language' => 'language_id']],
 
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
+
+            ['is_test', 'boolean', 'trueValue' => 'true', 'falseValue' => 'false', 'strict' => true],
+            ['is_test', 'filter', 'filter' => 'strtolower'],
 
             [['lead_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
 

@@ -17,22 +17,32 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
     public const ALL = self::NS . '*';
 
     /** ACTION PERMISSION */
-    public const ACT_ALL            = self::NS . '*';
-    public const ACT_ALLOW_LIST     = self::NS . 'act/allow-list';
+    public const ACT_ALL                        = self::NS . '*';
+    public const ACT_DATA_ALLOW_LIST            = self::NS . 'act/data-allow-list';
+    public const ACT_DATA_IS_TRUSTED            = self::NS . 'act/data-is-trusted';
+    public const ACT_DATA_AUTO_CREATE_CASE_OFF  = self::NS . 'act/data-auto-create-case-off';
+    public const ACT_DATA_AUTO_CREATE_LEAD_OFF  = self::NS . 'act/data-auto-create-lead-off';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
-        self::ACT_ALL       => self::ACT_ALL,
-        self::ACT_ALLOW_LIST       => self::ACT_ALLOW_LIST,
+        self::ACT_ALL                       => self::ACT_ALL,
+        self::ACT_DATA_ALLOW_LIST           => self::ACT_DATA_ALLOW_LIST,
+        self::ACT_DATA_IS_TRUSTED           => self::ACT_DATA_IS_TRUSTED,
+        self::ACT_DATA_AUTO_CREATE_CASE_OFF => self::ACT_DATA_AUTO_CREATE_CASE_OFF,
+        self::ACT_DATA_AUTO_CREATE_LEAD_OFF => self::ACT_DATA_AUTO_CREATE_LEAD_OFF,
     ];
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_UPDATE  = 'update';
+    public const ACTION_TOGGLE_DATA  = 'toggle_data';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::ACT_ALL               => [self::ACTION_UPDATE],
-        self::ACT_ALLOW_LIST        => [self::ACTION_UPDATE],
+        self::ACT_ALL                       => [self::ACTION_UPDATE, self::ACTION_TOGGLE_DATA],
+        self::ACT_DATA_ALLOW_LIST           => [self::ACTION_TOGGLE_DATA],
+        self::ACT_DATA_IS_TRUSTED           => [self::ACTION_TOGGLE_DATA],
+        self::ACT_DATA_AUTO_CREATE_CASE_OFF => [self::ACTION_TOGGLE_DATA],
+        self::ACT_DATA_AUTO_CREATE_LEAD_OFF => [self::ACTION_TOGGLE_DATA],
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [];

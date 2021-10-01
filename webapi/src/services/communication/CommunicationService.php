@@ -624,6 +624,7 @@ class CommunicationService
                 $call->c_project_id = $parentCall->c_project_id;
                 $call->c_dep_id = $parentCall->c_dep_id;
                 $call->c_source_type_id = $parentCall->c_source_type_id;
+                $call->c_stir_status = $parentCall->c_stir_status;
 
 
                 $call->c_lead_id = $parentCall->c_lead_id;
