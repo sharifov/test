@@ -4490,7 +4490,7 @@
           {
             "group": "Parameter",
             "type": "bool",
-            "optional": false,
+            "optional": true,
             "field": "lead.is_test",
             "description": "<p>Is test lead (default false)</p>"
           },
@@ -5009,7 +5009,7 @@
           {
             "group": "Parameter",
             "type": "bool",
-            "optional": false,
+            "optional": true,
             "field": "lead.is_test",
             "description": "<p>Is test lead (default false)</p>"
           },

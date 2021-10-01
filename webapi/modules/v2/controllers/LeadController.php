@@ -80,7 +80,7 @@ class LeadController extends BaseController
      * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} [lead.cabin]   Cabin (by default E)
      * @apiParam {int}                  [lead.flight_id]                            BO Flight ID
      * @apiParam {string{5}}            lead.user_language                          User Language
-     * @apiParam {bool}                 lead.is_test                                Is test lead (default false)
+     * @apiParam {bool}                 [lead.is_test]                              Is test lead (default false)
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  [lead.expire_at]                  Expire at
      * @apiParam {object[]}             [lead.lead_data]                            Array of Lead Data
      * @apiParam {string{50}}           [lead.lead_data.field_key]                  Lead Data Key
