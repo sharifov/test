@@ -1,0 +1,171 @@
+upstream centrifugo {
+    ip_hash;
+    server centrifugo:8000;
+}
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    charset utf-8;
+    client_max_body_size 128M;
+
+	fastcgi_buffers 16 16k;
+	fastcgi_buffer_size 32k;
+
+    listen 443 ssl;
+    server_name ${HOST}:${HOST_PORT};
+
+    ssl_certificate ${SSL_CRT_PATH};
+    ssl_certificate_key ${SSL_KEY_PATH};
+
+    set $base_root ${APP_ROOT}/www;
+    root $base_root;
+
+    access_log ${APP_ROOT}/logs/access.log;
+    error_log ${APP_ROOT}/logs/error.log;
+
+    index index.php index.html;
+
+    location / {
+        root $base_root/frontend/web;
+        try_files $uri $uri/ /frontend/web/index.php$is_args$args;
+
+        # omit static files logging, and if they don't exist, avoid processing by Yii (uncomment if necessary)
+        #location ~ ^/.+\.(css|js|ico|png|jpe?g|gif|svg|ttf|mp4|mov|swf|pdf|zip|rar)$ {
+        #    log_not_found off;
+        #    access_log off;
+           # try_files $uri =404;
+        #}
+
+        location ~ ^/assets/.+\.php(/|$) {
+            deny all;
+        }
+    }
+
+    location /ws/ {
+        proxy_pass http://ws:${WEB_SOCKET_SERVER_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_connect_timeout       600;
+        proxy_send_timeout          600;
+        proxy_read_timeout          90m;
+        send_timeout                600;
+    }
+
+
+     location /centrifugo/ {
+        rewrite ^/centrifugo/(.*)        /$1 break;
+        proxy_pass_header Server;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_pass http://centrifugo;
+    }
+
+    location /centrifugo/connection {
+        rewrite ^/centrifugo(.*)        $1 break;
+
+        proxy_next_upstream error;
+        gzip on;
+        gzip_min_length 1000;
+        gzip_proxied any;
+        proxy_buffering off;
+        keepalive_timeout 65;
+        proxy_pass http://centrifugo;
+        proxy_read_timeout 600s;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_set_header Host $http_host;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+
+    location /supervisor/ {
+        proxy_pass http://queue;
+        proxy_http_version 1.1;
+
+        proxy_connect_timeout       600;
+        proxy_send_timeout          600;
+        proxy_read_timeout          90m;
+        send_timeout                600;
+    }
+
+    location ~ ^/.+\.php(/|$) {
+
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass web:9000;
+        try_files $uri =404;
+
+        rewrite (?!^/((frontend|backend)/web|admin))^ /frontend/web$uri break;
+        rewrite (?!^/backend/web)^/admin(/.+)$ /backend/web$1 break;
+
+        #fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(.*)$;
+        #include /etc/nginx/fastcgi_params;
+        #fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        #try_files $fastcgi_script_name =404;
+    }
+
+    location ^~ /fs {
+        alias ${APP_ROOT}/fileStorage;
+        try_files $uri $uri/ /fs/$1;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}
+
+server {
+    charset utf-8;
+    client_max_body_size 128M;
+
+    listen 80;
+
+    server_name ${HOST_API};
+
+    root        ${APP_ROOT}/www/webapi/web/;
+    index       index.php;
+
+    access_log  ${APP_ROOT}/logs/api-access.log;
+    error_log   ${APP_ROOT}/logs/api-error.log;
+
+    location / {
+        # Redirect everything that isn't a real file to index.php
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+
+    # uncomment to avoid processing of calls to non-existing static files by Yii
+    #location ~ \.(js|css|png|jpg|gif|swf|ico|pdf|mov|fla|zip|rar)$ {
+    #    try_files $uri =404;
+    #}
+    #error_page 404 /404.html;
+
+    # deny accessing php files for the /assets directory
+    location ~ ^/assets/.*\.php$ {
+        deny all;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass web:9000;
+        try_files $uri =404;
+    }
+
+    location /health-check {
+        try_files $uri $uri/ /health-check.php;
+    }
+
+    location ~* /\. {
+        deny all;
+    }
+}

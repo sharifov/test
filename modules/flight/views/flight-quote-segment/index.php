@@ -34,15 +34,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'fqs_flight_quote_trip_id',
             'fqs_uid',
             'fqs_flight_id',
-            [
+            'fqs_departure_dt',
+            'fqs_arrival_dt',
+            /*[
                 'class' => DateTimeColumn::class,
                 'attribute' => 'fqs_departure_dt'
-            ],
-            //'fqs_arrival_dt',
-            [
+            ],*/
+            /*[
                 'class' => DateTimeColumn::class,
                 'attribute' => 'fqs_arrival_dt'
-            ],
+            ],*/
             'fqs_stop',
             'fqs_flight_number',
             'fqs_booking_class',

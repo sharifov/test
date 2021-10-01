@@ -522,7 +522,7 @@ class SettingHelper
 
     public static function getRedialUserAccessExpiredSecondsLimit(): int
     {
-        return (int) (Yii::$app->params['settings']['redial_user_access_expired_seconds'] ?? 60);
+        return (int) (Yii::$app->params['settings']['redial_user_access_expired_seconds'] ?? 20);
     }
 
     public static function getCalculateGrossProfitInDays(): int

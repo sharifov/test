@@ -46,6 +46,7 @@ class ProductQuoteDataSearch extends ProductQuoteData
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['pqd_id' => SORT_DESC]],
         ]);
 
         $this->load($params);

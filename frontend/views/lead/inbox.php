@@ -417,6 +417,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
 
                         if (!$isAgent) {
+                            $buttons .= ' &nbsp';
                             $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
                                 'class' => 'btn btn-info btn-xs',
                                 'data-pjax' => 0

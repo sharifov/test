@@ -2,10 +2,9 @@
 
 namespace sales\model\leadRedial\assign;
 
-class Users
+use common\models\Lead;
+
+interface Users
 {
-    public function getUsers(int $leadId, int $countUsers): array
-    {
-        return [295];
-    }
+    public function getUsers(Lead $lead, int $limitUsers, bool $enabledSortingForBusinessLead): array;
 }

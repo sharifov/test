@@ -80,7 +80,7 @@ class LeadRedialController extends FController
         $params = Yii::$app->request->queryParams;
         $params['is_test'] = Yii::$app->request->get('is_test', 0);
         $searchModel = new LeadQcallSearch();
-        $dataProvider = $searchModel->searchByRedial($params, $user);
+        $dataProvider = $searchModel->searchByRedial($params, $user, true);
         $dataProviderLastCalls = $searchModel->searchLastCalls([], $user);
 
         $guard = [];
@@ -222,7 +222,7 @@ class LeadRedialController extends FController
             return $this->asJson($data);
         }
 
-        $dataProvider = (new LeadQcallSearch())->searchByRedial([], $user);
+        $dataProvider = (new LeadQcallSearch())->searchByRedial([], $user, true);
         $query = $dataProvider->query;
         $query->addOrderBy(($dataProvider->sort)->getOrders())->limit(100);
 //        VarDumper::dump($query->createCommand()->getRawSql());die;

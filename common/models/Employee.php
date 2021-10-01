@@ -2708,6 +2708,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $glCallCount = (int) Call::find()->select('COUNT(*)')->where(['c_created_user_id' => $this->id, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_status_id' => Call::STATUS_COMPLETED])
             ->andWhere(['IS NOT', 'c_parent_id', null])
             ->andWhere(['>=', 'c_created_dt', $date_time])
+            ->andWhere(['c_source_type_id' => Call::SOURCE_GENERAL_LINE])
             ->scalar();
 
         $lastUserCallStatus = UserCallStatus::find()->where(['us_user_id' => $this->id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();

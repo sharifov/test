@@ -2,9 +2,11 @@
 
 namespace modules\flight\src\useCases\reProtectionQuoteManualCreate\service;
 
+use common\components\SearchService;
 use common\models\QuoteSegment;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
+use DateTime;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
@@ -126,8 +128,13 @@ class ReProtectionQuoteManualCreateService
         $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
-    public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form, ?int $userId): FlightQuote
-    {
+    public function createReProtectionManual(
+        Flight $flight,
+        ProductQuote $originProductQuote,
+        ReProtectionQuoteCreateForm $form,
+        ?int $userId,
+        array $segments
+    ): FlightQuote {
         if ($reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originProductQuote->pq_id)) {
             foreach ($reprotectionQuotes as $reprotectionQuote) {
                 if ($reprotectionQuote->pq_owner_user_id === null && (!$reprotectionQuote->isCanceled() || $reprotectionQuote->isDeclined() || !$reprotectionQuote->isError())) {
@@ -188,11 +195,16 @@ class ReProtectionQuoteManualCreateService
             $flightQuoteTripId = $flightQuoteTrip->fqt_id;
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
+
+            if ($form->gds === SearchService::GDS_WORLDSPAN) {
+                $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment, $segments);
+            }
+
             $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
             $flightQuoteSegments[$keyIata] = $flightQuoteSegment;
 
-            $flightQuoteTrip->fqt_duration += $itinerary->duration;
+            $flightQuoteTrip->fqt_duration += $flightQuoteSegment->fqs_duration;
             $flightQuoteTrip->update(false, ['fqt_duration']);
         }
 
@@ -262,6 +274,32 @@ class ReProtectionQuoteManualCreateService
         $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
 
         return $flightQuote;
+    }
+
+    private static function postProcessingWordspan(FlightQuoteSegment $flightQuoteSegment, array $segments): FlightQuoteSegment /* TODO:: tmp solution */
+    {
+        $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
+        $keySegment = array_search($keyIata, array_column($segments, 'segmentIata'), false);
+
+        if ($keySegment !== false) {
+            $departure = $segments[$keySegment]['departureDateTime'];
+            $departureUtc = clone($departure);
+            $departureUtc = $departureUtc->setTimezone(new \DateTimeZone('UTC'));
+
+            $arrival = $segments[$keySegment]['arrivalDateTime'];
+            $arrivalUtc = clone($arrival);
+            $arrivalUtc = $arrivalUtc->setTimezone(new \DateTimeZone('UTC'));
+
+            if ($arrivalUtc < $departureUtc) {
+                $arrivalUtc = $arrivalUtc->modify('+1 days');
+            }
+
+            $flightQuoteSegment->fqs_departure_dt = $departureUtc->format('Y-m-d H:i:s');
+            $flightQuoteSegment->fqs_arrival_dt = $arrivalUtc->format('Y-m-d H:i:s');
+            $flightQuoteSegment->fqs_duration = ($arrivalUtc->getTimestamp() - $departureUtc->getTimestamp()) / 60;
+        }
+
+        return $flightQuoteSegment;
     }
 
     public static function isMoreOneDay(\DateTime $departureDateTime, \DateTime $arrivalDateTime): bool

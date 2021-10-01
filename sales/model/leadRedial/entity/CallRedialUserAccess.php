@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\LeadQcall;
 use sales\entities\EventTrait;
 use sales\model\leadRedial\entity\events\CallRedialAccessCreatedEvent;
+use sales\model\leadRedial\entity\events\CallRedialAccessRemovedEvent;
 
 /**
  * This is the model class for table "{{%call_redial_user_access}}".
@@ -33,7 +34,7 @@ class CallRedialUserAccess extends \yii\db\ActiveRecord
 
     public function remove()
     {
-        $this->recordEvent(new CallRedialAccessCreatedEvent($this->crua_lead_id, $this->crua_user_id));
+        $this->recordEvent(new CallRedialAccessRemovedEvent($this->crua_lead_id, $this->crua_user_id));
         return $this->delete();
     }
 

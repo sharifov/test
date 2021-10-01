@@ -226,7 +226,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
 
             if ($productQuoteChange->isStatusNew() || $productQuoteChange->isDecisionPending()) {
-                if ($case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
+                if ($case->isError() || $case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
                     if (!$case->cs_user_id) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'New reprotection request');
                         $caseReProtectionService->caseToManual('New reprotection request');
@@ -236,7 +236,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         Notifications::createAndPublish(
                             $case->cs_user_id,
                             'New reProtection quote has been added',
-                            'New reProtection quote has been added for Case: (' . $linkToCase . ') ',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . '). Manual action required',
                             Notifications::TYPE_INFO,
                             true
                         );
@@ -305,7 +305,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         Notifications::createAndPublish(
                             $case->cs_user_id,
                             'New reProtection quote has been added',
-                            'New reProtection quote has been added for Case: (' . $linkToCase . ') ',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . '). Manual action required',
                             Notifications::TYPE_INFO,
                             true
                         );

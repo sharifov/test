@@ -16,7 +16,7 @@ class UserCallStatusEvents extends Component
     /**
      * @param $params
      */
-    public function updateUserStatus($params): void
+    public static function updateUserStatus($params): void
     {
 
         /**
@@ -59,7 +59,7 @@ class UserCallStatusEvents extends Component
     /**
      * @param $params
      */
-    public function resetCallPhoneStatus($params): void
+    public static function resetCallPhoneStatus($params): void
     {
         /**
          * @var $userCallStatusModel UserCallStatus

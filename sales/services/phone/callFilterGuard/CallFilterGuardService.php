@@ -151,7 +151,7 @@ class CallFilterGuardService
         return ContactPhoneList::find()
             ->innerJoin(ContactPhoneData::tableName(), 'cpl_id = cpd_cpl_id')
             ->where(['cpl_uid' => CheckPhoneService::uidGenerator($this->phone)])
-            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_IS_TRUSTED])
+            ->andWhere(['IN', 'cpd_key', [ContactPhoneDataDictionary::KEY_IS_TRUSTED, ContactPhoneDataDictionary::KEY_ALLOW_LIST]])
             ->andWhere(['cpd_value' => '1'])
             ->exists();
     }

@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
 use common\models\Lead;
+use sales\auth\Auth;
 
 /**
  * @var $this yii\web\View
@@ -29,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->id;
             },
             'options' => [
@@ -54,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'source_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
             'filter' => \common\models\Sources::getList(true)
@@ -63,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
 
                 $createdTS = strtotime($model->created);
 
@@ -84,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Request',
             'format' => 'raw',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
 
                 $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
 
@@ -107,7 +108,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Client',
             'format' => 'raw',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
 
                 if ($model->client) {
                     $clientName = trim($model->client->first_name . ' ' . $model->client->last_name);
@@ -144,7 +145,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             'options' => ['style' => 'width:90px'],
@@ -153,7 +154,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Location',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 $str = '';
                 if ($model->request_ip_detail) {
                     $ipData = @json_decode($model->request_ip_detail, true);
@@ -173,7 +174,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Calls',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 $cnt = $model->getCountCalls();
                 return $cnt ?: '-';
             },
@@ -188,7 +189,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'header' => 'Depart',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
 
                 $segments = $model->leadFlightSegments;
 
@@ -210,7 +211,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'header' => 'Segments',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $segmentData = [];
@@ -235,7 +236,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Pax',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return '<span title="adult"><i class="fa fa-male"></i> ' . $model->adults . '</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants . '</span>';
             },
             'format' => 'raw',
@@ -250,30 +251,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'cabin',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->getCabinClassName();
             },
-            'filter' => \common\models\Lead::CABIN_LIST
+            'filter' => Lead::CABIN_LIST
         ],
 
         [
             'attribute' => 'l_call_status_id',
-            'value' => static function (\common\models\Lead $model) {
-                return \common\models\Lead::CALL_STATUS_LIST[$model->l_call_status_id] ?? '-';
+            'value' => static function (Lead $model) {
+                return Lead::CALL_STATUS_LIST[$model->l_call_status_id] ?? '-';
             },
-            'filter' => \common\models\Lead::CALL_STATUS_LIST
+            'filter' => Lead::CALL_STATUS_LIST
         ],
 
         [
             'attribute' => 'request_ip',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->request_ip;
             },
         ],
 
         [
             'attribute' => 'l_pending_delay_dt',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->l_pending_delay_dt ? Yii::$app->formatter->asDatetime(strtotime($model->l_pending_delay_dt)) : '-';
             },
         ],
@@ -281,7 +282,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => false //\common\models\Employee::getList()
@@ -289,7 +290,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Duplicate',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->leads0 ? Html::a(count($model->leads0), ['lead/duplicate', 'LeadSearch[l_request_hash]' => $model->l_request_hash], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',
@@ -298,7 +299,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'l_init_price',
             //'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->l_init_price ? number_format($model->l_init_price, 2) . ' $' : '-';
             },
             'contentOptions' => [
@@ -309,7 +310,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Is Test',
             'attribute' => 'l_is_test',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 if ($model->l_is_test) {
                     $label = '<label class="label label-success">True</label>';
                 } else {
@@ -318,7 +319,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $label;
             },
             'options' => [
-                'style' => 'width:180px'
+                'style' => 'width:75px'
             ],
             'format' => 'raw',
             'filter' => [
@@ -329,26 +330,37 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'class' => 'yii\grid\ActionColumn',
-            'template' => '{action}',
+            'template' => '{take} <br> {view}',
+            'visibleButtons' => [
+                /*'take' => static function (Lead $model, $key, $index) {
+                    return Auth::can('lead/view', ['lead' => $model]);
+                },*/
+                'view' => static function (Lead $model, $key, $index) {
+                    return Auth::can('lead/view', ['lead' => $model]);
+                },
+            ],
             'buttons' => [
-                'action' => function ($url, \common\models\Lead $model, $key) {
-                    $buttons = '';
-
-                    $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
-                            'class' => 'btn btn-info btn-xs',
-                            'data-pjax' => 0,
-                            'target' => '_blank',
-                        ]);
-
-                    $buttons .= ' ' . Html::a('<i class="fa fa-list-ul"></i> View', ['leads/view', 'id' => $model->id], [
-                            'class' => 'btn btn-warning btn-xs',
-                            'data-pjax' => 0,
-                            'target' => '_blank',
-                        ]);
-
-                    return $buttons;
+                'take' => static function ($url, Lead $model) {
+                    return Html::a('<i class="fa fa-download"></i> Take', [
+                            'lead/take',
+                        'gid' => $model->gid
+                    ], [
+                        'class' => 'btn btn-primary btn-xs take-processing-btn',
+                        'data-pjax' => 0,
+                    ]);
+                },
+                'view' => static function ($url, Lead $model) {
+                    return Html::a('<i class="glyphicon glyphicon-search"></i> View', [
+                        'lead/view',
+                        'gid' => $model->gid
+                    ], [
+                        'class' => 'btn btn-info btn-xs',
+                        'target' => '_blank',
+                        'data-pjax' => 0,
+                        'title' => 'View',
+                    ]);
                 }
-            ]
+            ],
         ]
     ];
 
@@ -359,12 +371,12 @@ echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,
-    'rowOptions' => function (\common\models\Lead $model) {
+    'rowOptions' => function (Lead $model) {
         if ($model->l_pending_delay_dt && time() < strtotime($model->l_pending_delay_dt)) {
             return ['class' => 'danger'];
         }
 
-        if (!$model->l_client_time && (time() - strtotime($model->created)) > (\common\models\Lead::PENDING_ALLOW_CALL_TIME_MINUTES * 60)) {
+        if (!$model->l_client_time && (time() - strtotime($model->created)) > (Lead::PENDING_ALLOW_CALL_TIME_MINUTES * 60)) {
             return ['class' => 'danger'];
         }
     }
