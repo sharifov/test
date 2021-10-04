@@ -168,7 +168,7 @@ class CasesQuery extends ActiveQuery
         }
         $query->andWhere($where)
               ->orderBy('cs_created_dt ASC');
-        if ($activeOnly == '1' || $activeOnly == 'true') {
+        if ($activeOnly == 1) {
             $deps_params = [];
             $deps = Department::find()->all();
             foreach ($deps as $dep) {

@@ -427,7 +427,7 @@
   {
     "type": "get",
     "url": "/v2/case/find-list-by-email",
-    "title": "Get Cases GID list by Client Email",
+    "title": "Get Cases GID by Email",
     "version": "0.2.0",
     "name": "findCasesListByEmail",
     "group": "Cases",
@@ -540,7 +540,7 @@
   {
     "type": "get",
     "url": "/v2/case/find-list-by-phone",
-    "title": "Get Cases GID list by Client Phone number",
+    "title": "Get Cases GID by Phone",
     "version": "0.2.0",
     "name": "findCasesListByPhone",
     "group": "Cases",
@@ -653,7 +653,7 @@
   {
     "type": "get",
     "url": "/v2/case/get",
-    "title": "Get data Case by Case GID",
+    "title": "Get Case",
     "version": "0.2.0",
     "name": "getCaseDataByCaseGid",
     "group": "Cases",
@@ -737,7 +737,7 @@
   {
     "type": "get",
     "url": "/v2/case/get-list-by-email",
-    "title": "Get Cases list by Client Email",
+    "title": "Get Cases Email",
     "version": "0.2.0",
     "name": "getCasesListByEmail",
     "group": "Cases",
@@ -850,7 +850,7 @@
   {
     "type": "get",
     "url": "/v2/case/get-list-by-phone",
-    "title": "Get Cases list by Client Phone number",
+    "title": "Get Cases by Phone",
     "version": "0.2.0",
     "name": "getCasesListByPhone",
     "group": "Cases",
