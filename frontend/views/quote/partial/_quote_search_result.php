@@ -71,7 +71,9 @@ JS;
     $flightQuotes = [];
     if (!empty($lead->quotes)) {
         foreach ($lead->quotes as $item) {
-            $flightQuotes[] = json_decode($item->origin_search_data)->key;
+            if ($originSearchData = json_decode($item->origin_search_data)) {
+                $flightQuotes[] = $originSearchData->key;
+            }
         }
     }
     ?>

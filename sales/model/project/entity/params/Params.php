@@ -9,7 +9,6 @@ namespace sales\model\project\entity\params;
  * @property ObjectParams $object
  * @property CallParams $call
  * @property SmsParams $sms
- * @property string $webHookEndpoint
  * @property Webhook $webhook
  * @property ClientNotification $clientNotification
  */

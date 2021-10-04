@@ -22,7 +22,7 @@ class QuoteSendEventListener
         try {
             if (GaHelper::checkSettings(GaHelper::TYPE_QUOTE) && $event->quote->lead->isReadyForGa()) {
                 $job = new SendQuoteInfoToGaJob();
-                $job->quote = $event->quote;
+                $job->quoteId = $event->quote->id;
                 Yii::$app->queue_job->priority(20)->push($job);
             }
         } catch (\Throwable $throwable) {

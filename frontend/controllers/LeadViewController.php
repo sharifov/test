@@ -872,7 +872,12 @@ class LeadViewController extends FController
     public function actionAjaxGetInfo(): string
     {
         $user = Auth::user();
-        $model = $this->findLeadById(Yii::$app->request->post('lead_id'));
+
+        if (!$leadId = Yii::$app->request->post('lead_id')) {
+            $leadId = Yii::$app->request->get('client_id');
+        }
+
+        $model = $this->findLeadById($leadId);
         $leadAbacDto = new LeadAbacDto($model, $user->id);
 
         /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS, Restrict access to action client details on lead*/
@@ -889,8 +894,8 @@ class LeadViewController extends FController
         $client = Client::findOne((int)$clientId);
 
         $providers = [];
-        $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id, $user);
-        $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id, $user->id);
+        $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id, $leadId, $user);
+        $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id, $leadId, $user->id);
 
         return $this->renderAjax('ajax_info', ArrayHelper::merge(
             [
@@ -907,7 +912,7 @@ class LeadViewController extends FController
      * @return ActiveDataProvider
      * @throws \ReflectionException
      */
-    private function getCasesDataProvider(int $clientId, int $userId): ActiveDataProvider
+    private function getCasesDataProvider(int $clientId, int $leadId, int $userId): ActiveDataProvider
     {
         $params[CasesSearchByClient::getShortName()]['clientId'] = $clientId;
 
@@ -919,7 +924,7 @@ class LeadViewController extends FController
 
         $pagination = $dataProvider->pagination;
         $pagination->pageSize = 10;
-        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId, 'lead_id' => $leadId]);
         $pagination->pageParam = 'case-page';
         $pagination->pageSizeParam = 'case-per-page';
         $dataProvider->pagination = $pagination;
@@ -933,7 +938,7 @@ class LeadViewController extends FController
      * @return ActiveDataProvider
      * @throws \ReflectionException
      */
-    private function getLeadsDataProvider(int $clientId, Employee $user): ActiveDataProvider
+    private function getLeadsDataProvider(int $clientId, int $leadId, Employee $user): ActiveDataProvider
     {
         $params[LeadSearchByClient::getShortName()]['clientId'] = $clientId;
 
@@ -945,7 +950,7 @@ class LeadViewController extends FController
 
         $pagination = $dataProvider->getPagination();
         $pagination->pageSize = 10;
-        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId, 'lead_id' => $leadId]);
         $pagination->pageParam = 'lead-page';
         $pagination->pageSizeParam = 'lead-per-page';
         $dataProvider->setPagination($pagination);

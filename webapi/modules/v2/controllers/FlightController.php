@@ -11,15 +11,12 @@ use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
 use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeForm;
 use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchangeService;
-use modules\product\src\entities\productQuoteData\ProductQuoteData;
-use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\helpers\app\AppHelper;
 use sales\repositories\NotFoundException;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
-use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\logger\behaviors\TechnicalInfoBehavior;
 use webapi\src\Messages;
@@ -32,12 +29,10 @@ use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
-use webapi\src\response\messages\StatusFailedMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
 use modules\flight\src\useCases\reprotectionDecision;
-use yii\helpers\VarDumper;
 
 /**
  * Class FlightController
@@ -1266,6 +1261,25 @@ class FlightController extends BaseController
      *           ...
      *        }
      * }
+     *
+     * @apiErrorExample {json} Error-Response (422) Code 101:
+     * HTTP/1.1 422 Error
+     * {
+     *        "status": 422,
+     *        "message": "Error",
+     *        "data": [
+     *              "success": false,
+     *              "error": "Product Quote Change status is not in \"Decision pending\". Current status Canceled"
+     *        ],
+     *        "code": 101,
+     *        "errors": [],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
      */
     public function actionReprotectionDecision()
     {
@@ -1311,6 +1325,20 @@ class FlightController extends BaseController
                     'success' => true,
                 ])
             );
+        } catch (\DomainException $e) {
+            \Yii::error([
+                'message' => 'DomainException: Reprotection decision error',
+                'error' => $e->getMessage(),
+                'request' => $form->getAttributes(),
+            ], 'FlightController:reprotectionDecision:DomainException');
+
+            return new ErrorResponse(
+                new DataMessage([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ]),
+                new CodeMessage($e->getCode())
+            );
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Reprotection decision error',
@@ -1318,6 +1346,7 @@ class FlightController extends BaseController
                 'error' => $e->getMessage(),
                 'exception' => AppHelper::throwableLog($e, false),
             ], 'FlightController:reprotectionDecision');
+
             return new ErrorResponse(
                 new DataMessage([
                     'success' => false,
@@ -2040,6 +2069,25 @@ class FlightController extends BaseController
      *           ...
      *        }
      * }
+     *
+     * @apiErrorExample {json} Error-Response (422) Code 101:
+     * HTTP/1.1 422 Error
+     * {
+     *        "status": 422,
+     *        "message": "Error",
+     *        "data": [
+     *              "success": false,
+     *              "error": "Product Quote Change status is not in \"Decision pending\". Current status Canceled"
+     *        ],
+     *        "code": 101,
+     *        "errors": [],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
      */
     public function actionReprotectionExchange()
     {
@@ -2076,6 +2124,20 @@ class FlightController extends BaseController
                     'success' => true,
                     'warnings' => $reProtectionExchangeForm->getWarnings()
                 ])
+            );
+        } catch (\DomainException $exception) {
+            \Yii::error([
+                'message' => 'DomainException: Reprotection Exchange error',
+                'error' => $exception->getMessage(),
+                'request' => $reProtectionExchangeForm->getAttributes(),
+            ], 'FlightController:reprotectionExchange:DomainException');
+
+            return new ErrorResponse(
+                new DataMessage([
+                    'success' => false,
+                    'error' => $exception->getMessage()
+                ]),
+                new CodeMessage($exception->getCode())
             );
         } catch (\Throwable $throwable) {
             $message = [

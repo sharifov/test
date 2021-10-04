@@ -10,6 +10,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
 use sales\entities\cases\CaseEventLog;
@@ -25,6 +26,7 @@ use sales\services\TransactionManager;
  * @property CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteRelationRepository $productQuoteRelationRepository
+ * @property ProductQuoteDataManageService $productQuoteDataManageService
  */
 class Modify
 {
@@ -34,6 +36,7 @@ class Modify
     private CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes;
     private FlightQuoteManageService $flightQuoteManageService;
     private ProductQuoteRelationRepository $productQuoteRelationRepository;
+    private ProductQuoteDataManageService $productQuoteDataManageService;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
@@ -41,7 +44,8 @@ class Modify
         TransactionManager $transactionManager,
         CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes,
         FlightQuoteManageService $flightQuoteManageService,
-        ProductQuoteRelationRepository $productQuoteRelationRepository
+        ProductQuoteRelationRepository $productQuoteRelationRepository,
+        ProductQuoteDataManageService $productQuoteDataManageService
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
@@ -49,6 +53,7 @@ class Modify
         $this->cancelOtherReprotectionQuotes = $cancelOtherReprotectionQuotes;
         $this->flightQuoteManageService = $flightQuoteManageService;
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
+        $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
     public function handle(string $bookingId, array $newQuote, ?int $userId): void
@@ -57,7 +62,7 @@ class Modify
 
         $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($originalProductQuote->pq_id);
         if (!$productQuoteChange->isDecisionPending()) {
-            throw new \DomainException('Product Quote Change status is not in "Decision pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"');
+            throw new \DomainException('Product Quote Change status is not in "Decision pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"', 101);
         }
 
         $quote = $this->transactionManager->wrap(function () use ($originalProductQuote, $newQuote, $productQuoteChange, $userId) {
@@ -67,6 +72,8 @@ class Modify
             $this->modifyProductQuoteChange($productQuoteChange, $userId);
             return $quote;
         });
+
+        $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originalProductQuote->pq_id, $quote->pq_id);
 
         $this->createBoRequestJob($quote, $userId);
     }

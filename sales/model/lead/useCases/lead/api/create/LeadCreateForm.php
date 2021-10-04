@@ -43,6 +43,7 @@ use yii\base\Model;
  *
  * @property bool|null $allow_contact_internal_phone
  * @property bool|null $allow_contact_internal_email
+ * @property bool|null $is_test
  */
 class LeadCreateForm extends Model
 {
@@ -75,6 +76,7 @@ class LeadCreateForm extends Model
 
     public $allow_contact_internal_phone;
     public $allow_contact_internal_email;
+    public $is_test;
 
     public function rules(): array
     {
@@ -126,8 +128,8 @@ class LeadCreateForm extends Model
                 $this->loadAndValidateFlights();
             }, 'skipOnError' => true, 'skipOnEmpty' => true],
 
-            [['allow_contact_internal_phone', 'allow_contact_internal_email'], 'default', 'value' => false],
-            [['allow_contact_internal_phone', 'allow_contact_internal_email'], 'boolean'],
+            [['allow_contact_internal_phone', 'allow_contact_internal_email', 'is_test'], 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
+            [['allow_contact_internal_phone', 'allow_contact_internal_email', 'is_test'], 'default', 'value' => false],
 
             ['client', 'required'],
             ['client', IsArrayValidator::class],
