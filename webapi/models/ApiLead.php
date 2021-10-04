@@ -94,6 +94,7 @@ class ApiLead extends Model
     public $client_middle_name;
     public $user_agent;
     public $user_language;
+    public $is_test;
     public $visitor_log;
 
     public $visitorLogErrors = [];
@@ -149,6 +150,9 @@ class ApiLead extends Model
 
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
+
+            ['is_test', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
+            ['is_test', 'default', 'value' => false],
 
             [['user_agent'], 'string'],
 
