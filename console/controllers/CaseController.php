@@ -320,4 +320,45 @@ class CaseController extends Controller
         printf("\n --- Execute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
+
+    public function actionCaseToNeed(): void
+    {
+        $now = (new \DateTime());
+        $report = [];
+        $casesQuery = Cases::find()->alias('case')
+            ->andWhere('case.cs_status != ' . CasesStatus::STATUS_PENDING)
+            ->andWhere('case.cs_is_automate != true')
+            ->andWhere(['<', 'case.cs_deadline_dt', $now->format('Y-m-d H:i:s')])
+            ->groupBy('case.cs_id');
+        $count = $casesQuery->count();
+
+        Console::output('Cases to need action...' . PHP_EOL);
+
+        foreach ($casesQuery->batch(100) as $casesBatch) {
+            /** @var Cases $case */
+            foreach ($casesBatch as $case) {
+                try {
+                    $case->onNeedAction();
+                    $case->save();
+                    $report[$case->cs_id] = $item = 'Case: ' . $case->cs_id . ' -> To need action';
+                    echo $item . PHP_EOL;
+                } catch (\Throwable $exception) {
+                    $report[] = $item = 'Case: ' . $case->cs_id . ' not updated';
+                    echo $item . PHP_EOL;
+                    \Yii::error(
+                        AppHelper::throwableLog($exception),
+                        'Cases:CaseToNeedAction'
+                    );
+                }
+            }
+        }
+        echo $count . ' Cases -> offNeedAction' . PHP_EOL;
+        $message = '0 cases changed';
+
+        if (count($report) > 0) {
+            $message = count($report) . ' cases changed. [' . implode(', ', array_keys($report)) . ']';
+        }
+
+        Yii::info($message, 'info\CronCasesToNeedAction');
+    }
 }
