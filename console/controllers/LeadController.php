@@ -8,6 +8,7 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Task;
+use sales\helpers\app\AppHelper;
 use sales\repositories\lead\LeadRepository;
 use yii\console\Controller;
 use yii\db\Query;
@@ -326,14 +327,17 @@ class LeadController extends Controller
             /** @var Lead $lead */
             foreach ($leadsBatch as $lead) {
                 try {
-                    $lead->trash();
+                    $lead->trash(null, null, 'Auto Trash Follow Up leads with dates passed');
                     $this->leadRepository->save($lead);
                     $report[$lead->id] = $item = 'Lead: ' . $lead->id . ' -> Trashed';
                     echo $item . PHP_EOL;
                 } catch (\Throwable $exception) {
                     $report[] = $item = 'Lead: ' . $lead->id . ' not updated';
                     echo $item . PHP_EOL;
-                    Yii::error($exception, 'Lead:LeadToTrash');
+                    \Yii::error(
+                        AppHelper::throwableLog($exception),
+                        'Lead:LeadToTrash'
+                    );
                 }
             }
         }

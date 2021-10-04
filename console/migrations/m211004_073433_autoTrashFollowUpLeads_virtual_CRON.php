@@ -1,5 +1,6 @@
 <?php
 
+use sales\helpers\app\AppHelper;
 use yii\db\Migration;
 
 /**
@@ -29,7 +30,10 @@ class m211004_073433_autoTrashFollowUpLeads_virtual_CRON extends Migration
                 Yii::error($cs->errors, 'm211004_073433_autoTrashFollowUpLeads_virtual_CRON:safeUp');
             }
         } catch (Throwable $throwable) {
-            Yii::error($throwable, 'm211004_073433_autoTrashFollowUpLeads_virtual_CRON:safeUp:Throwable');
+            \Yii::error(
+                AppHelper::throwableLog($throwable),
+                'm211004_073433_autoTrashFollowUpLeads_virtual_CRON:safeUp:Throwable'
+            );
         }
     }
 
@@ -48,7 +52,10 @@ class m211004_073433_autoTrashFollowUpLeads_virtual_CRON extends Migration
                 }
             }
         } catch (Throwable $throwable) {
-            Yii::error($throwable, 'm211004_073433_autoTrashFollowUpLeads_virtual_CRON:safeDown:Throwable');
+            \Yii::error(
+                AppHelper::throwableLog($throwable),
+                'm211004_073433_autoTrashFollowUpLeads_virtual_CRON:safeDown:Throwable'
+            );
         }
     }
 }
