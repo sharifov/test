@@ -99,7 +99,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     <span id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit "
                      data-content='<?= $model->getEstimationProfitText();?>'>
                         <?= '$' . $model->lead->getFinalProfit();?>
-                        <i class="fas fa-question-circle"></i>
+                        <i class="fas fa-info-circle"></i>
                     </span>
                 <?php else :?>
                     <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
