@@ -96,17 +96,18 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 <?php $priceData = $model->getPricesData(); ?>
 
                 <?php if ($model->isApplied() && $model->lead->final_profit !== null) :?>
-                    <span id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit "
+                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit "
                      data-content='<?= $model->getEstimationProfitText();?>'>
                         <?= '$' . $model->lead->getFinalProfit();?>
                         <i class="fas fa-info-circle"></i>
-                    </span>
+                    </a>
                 <?php else :?>
-                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
+                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
                  data-content='<?= $model->getEstimationProfitText();?>'>
                         <?php if (isset($priceData['total'])) :?>
                             <?=number_format($model->getEstimationProfit(), 2);?>$
                         <?php endif;?>
+                        <i class="fas fa-info-circle"></i>
                     </a>
                 <?php endif;?>
 
