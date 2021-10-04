@@ -13,7 +13,7 @@ use yii\base\Model;
 class QaTaskMultipleCancelFrom extends Model
 {
     public $gids;
-    public $userId;
+   // public $userId;
     public $actionId;
     public $comment;
 
@@ -25,7 +25,7 @@ class QaTaskMultipleCancelFrom extends Model
     public function __construct($config = [])
     {
         $this->actionReasons = QaTaskActionReason::find()->select(['tar_name', 'tar_id'])->where(['tar_action_id' => QaTaskActions::CANCEL, 'tar_enabled' => 1])->indexBy('tar_id')->asArray()->column();
-        $this->actionReasonsExists = $this->actionReasons && Auth::user()->isQaSuper();
+        $this->actionReasonsExists = (bool)$this->actionReasons;
         parent::__construct($config);
     }
 
@@ -36,10 +36,10 @@ class QaTaskMultipleCancelFrom extends Model
             ['gids', IsArrayValidator::class],
             ['gids', 'each', 'rule' => ['string']],
 
-            ['userId', 'safe'],
-            [['userId', 'actionId'], 'integer'],
+            //['userId', 'safe'],
+            /*[['userId', 'actionId'], 'integer'],
             [['userId', 'actionId'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['userId', 'exist', 'skipOnEmpty' => false, 'targetClass' => Employee::class, 'targetAttribute' => ['userId' => 'id']],
+            ['userId', 'exist', 'skipOnEmpty' => false, 'targetClass' => Employee::class, 'targetAttribute' => ['userId' => 'id']],*/
 
             ['comment', 'string', 'max' => 255],
             ['actionId', 'required', 'when' => function () {
@@ -51,6 +51,8 @@ class QaTaskMultipleCancelFrom extends Model
             ['comment', 'required', 'when' => function () {
                 return QaTaskActionReason::find()->where(['tar_enabled' => 1, 'tar_id' => $this->actionId, 'tar_comment_required' => 1])->exists();
             }],
+
+            [['actionId', 'comment'], 'required', 'skipOnEmpty' => true],
 
             [['status'], 'default', 'value' => QaTaskStatus::CANCELED],
         ];
