@@ -19,7 +19,7 @@ class TwilioCallFilterGuard implements CheckServiceInterface
 {
     private string $phone;
     private int $trustPercent = 0;
-    private $response;
+    public $response;
 
     public function __construct(string $phone)
     {

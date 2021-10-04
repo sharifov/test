@@ -515,9 +515,10 @@ class SettingHelper
         }
         return self::$callSpamFilter ?? [
                 'enabled' => false,
-                'rate' => 0.3567,
+                'spam_rate' => 0.75,
                 'redialEnabled' => false,
-                'message' => ''
+                'message' => '',
+                'trust_rate' => 0.8
         ];
     }
 
@@ -528,7 +529,12 @@ class SettingHelper
 
     public static function getCallSpamFilterRate(): float
     {
-        return (float) (self::getCallSpamFilterData()['rate'] ?? 0.3567);
+        return (float) (self::getCallSpamFilterData()['spam_rate'] ?? 0.3567);
+    }
+
+    public static function getCallTrustFilterRate(): float
+    {
+        return (float) (self::getCallSpamFilterData()['trust_rate'] ?? 0.8);
     }
 
     public static function getCallSpamFilterMessage(): string
