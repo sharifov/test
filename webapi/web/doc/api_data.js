@@ -427,7 +427,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/v2/case/find-list-by-email",
-    "title": "Get Cases GID by Email",
+    "title": "Get Cases GID list by Email",
     "version": "0.2.0",
     "name": "findCasesListByEmail",
     "group": "Cases",
@@ -540,7 +540,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/v2/case/find-list-by-phone",
-    "title": "Get Cases GID by Phone",
+    "title": "Get Cases GID list by Phone",
     "version": "0.2.0",
     "name": "findCasesListByPhone",
     "group": "Cases",
@@ -737,7 +737,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/v2/case/get-list-by-email",
-    "title": "Get Cases Email",
+    "title": "Get Cases by Email",
     "version": "0.2.0",
     "name": "getCasesListByEmail",
     "group": "Cases",
