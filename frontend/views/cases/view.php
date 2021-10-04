@@ -87,10 +87,10 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
             <p>
                 <?php if ($model->isTrash()) :?>
                     <?php if (Auth::can('cases/take_Trash', ['case' => $model])) :?>
-                        <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
+                        <?= CasesViewRenderHelper::renderChangeStatusButton($model)?>
                     <?php endif ?>
                 <?php else :?>
-                    <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
+                    <?= CasesViewRenderHelper::renderChangeStatusButton($model)?>
                 <?php endif ?>
 
                 <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
