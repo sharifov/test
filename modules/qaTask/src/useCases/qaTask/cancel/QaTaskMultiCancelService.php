@@ -29,7 +29,7 @@ class QaTaskMultiCancelService
         foreach ($form->gids as $gid) {
             $task = $this->qaTaskRepository->findByGid($gid);
             $prevStatus = $task->t_status_id;
-            $task->t_assigned_user_id = $form->userId;
+            //$task->t_assigned_user_id = $form->userId;
             $task->t_status_id = $form->status;
 
             $this->qaTaskRepository->save($task);
@@ -40,7 +40,7 @@ class QaTaskMultiCancelService
                 $task->t_status_id,
                 $form->actionId,
                 $form->comment,
-                QaTaskActions::CANCEL,
+                QaTaskActions::MULTIPLE_CANCEL,
                 $task->t_assigned_user_id,
                 $creatorId
             ));
