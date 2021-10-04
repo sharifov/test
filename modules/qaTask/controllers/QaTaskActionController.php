@@ -473,7 +473,9 @@ class QaTaskActionController extends FController
         $form = new QaTaskMultipleCancelFrom();
         $form->gids = Yii::$app->request->get('gid', []);
 
-        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+        $isLoad = $form->load(Yii::$app->request->post());
+
+        if ($form->load(Yii::$app->request->post(), $isLoad ? null : '') && $form->validate()) {
             $this->qaTaskMultiCancelService->handle($form, Auth::id());
             \Yii::$app->session->addFlash('success', 'Success');
             return '<script>location.reload()</script>';
