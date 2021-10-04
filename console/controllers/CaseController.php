@@ -325,11 +325,11 @@ class CaseController extends Controller
     {
         $now = (new \DateTime());
         $report = [];
-        $casesQuery = Cases::find()->alias('case')
-            ->andWhere('case.cs_status != ' . CasesStatus::STATUS_PENDING)
-            ->andWhere('case.cs_is_automate != true')
-            ->andWhere(['<', 'case.cs_deadline_dt', $now->format('Y-m-d H:i:s')])
-            ->groupBy('case.cs_id');
+        $casesQuery = Cases::find()
+            ->andWhere(['!=', 'cs_status', CasesStatus::STATUS_PENDING])
+            ->andWhere(['!=', 'cs_is_automate', 'true'])
+            ->andWhere(['<', 'cs_deadline_dt', $now->format('Y-m-d H:i:s')])
+            ->groupBy('cs_id');
         $count = $casesQuery->count();
 
         Console::output('Cases to need action...' . PHP_EOL);
