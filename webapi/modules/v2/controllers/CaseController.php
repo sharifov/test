@@ -185,7 +185,7 @@ class CaseController extends BaseController
 
 
     /**
-     * @api {get} /v2/case/get-list-by-email Get Cases Email
+     * @api {get} /v2/case/get-list-by-email Get Cases by Email
      * @apiVersion 0.2.0
      * @apiName getCasesListByEmail
      * @apiGroup Cases
@@ -480,7 +480,7 @@ class CaseController extends BaseController
     }
 
     /**
-     * @api {get} /v2/case/find-list-by-phone Get Cases GID by Phone
+     * @api {get} /v2/case/find-list-by-phone Get Cases GID list by Phone
      * @apiVersion 0.2.0
      * @apiName findCasesListByPhone
      * @apiGroup Cases
@@ -606,7 +606,7 @@ class CaseController extends BaseController
 
 
     /**
-     * @api {get} /v2/case/find-list-by-email Get Cases GID by Email
+     * @api {get} /v2/case/find-list-by-email Get Cases GID list by Email
      * @apiVersion 0.2.0
      * @apiName findCasesListByEmail
      * @apiGroup Cases
