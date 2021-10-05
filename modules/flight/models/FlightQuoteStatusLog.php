@@ -26,7 +26,7 @@ class FlightQuoteStatusLog extends \yii\db\ActiveRecord
     public const STATUS_CREATED = 1;
     public const STATUS_APPLIED = 2;
     public const STATUS_DECLINED = 3;
-    public const STATUS_SEND = 4;
+    public const STATUS_SENT = 4;
     public const STATUS_OPENED = 5;
 
 
@@ -34,7 +34,7 @@ class FlightQuoteStatusLog extends \yii\db\ActiveRecord
         self::STATUS_CREATED => 'New',
         self::STATUS_APPLIED => 'Applied',
         self::STATUS_DECLINED => 'Declined',
-        self::STATUS_SEND => 'Sent',
+        self::STATUS_SENT => 'Sent',
         self::STATUS_OPENED => 'Opened'
     ];
 

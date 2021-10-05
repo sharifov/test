@@ -3429,7 +3429,7 @@ Reason: {reason}',
     {
         $data = Quote::find()
             ->where(['lead_id' => $this->id, 'status' => [
-                Quote::STATUS_SEND,
+                Quote::STATUS_SENT,
                 Quote::STATUS_OPENED,
                 Quote::STATUS_APPLIED]
             ])->all();
@@ -4858,7 +4858,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return Quote::find()
             ->andWhere(['lead_id' => $this->id])
-            ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
+            ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED]])
             ->exists();
     }
 

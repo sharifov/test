@@ -487,7 +487,7 @@ class QuoteController extends ApiBaseController
                 );
             }
 
-            if ((int)$model->status === Quote::STATUS_SEND) {
+            if ((int)$model->status === Quote::STATUS_SENT) {
                 $excludeIP = Quote::isExcludedIP($clientIP);
                 if (!$excludeIP) {
                     $model->status = Quote::STATUS_OPENED;

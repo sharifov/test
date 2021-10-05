@@ -149,9 +149,9 @@ class Coupon extends ActiveRecord implements Serializable
         return $this->hasMany(CouponProduct::class, ['cup_coupon_id' => 'c_id']);
     }
 
-    public function isSend(): bool
+    public function isSent(): bool
     {
-        return $this->c_status_id === CouponStatus::SEND;
+        return $this->c_status_id === CouponStatus::SENT;
     }
 
     public function isUsed(): bool
