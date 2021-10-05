@@ -1126,6 +1126,7 @@ class CallController extends FController
                                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                                 if ($prepare->prepare()) {
                                     $this->callService->acceptCall($callUserAccess, $userId);
+                                    Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                                 }
                             } else {
                                 Notifications::publish('callAlreadyTaken', ['user_id' => $userId], ['callSid' => $call->c_call_sid]);
@@ -1187,6 +1188,7 @@ class CallController extends FController
                     $prepare = new PrepareCurrentCallsForNewCall($userId);
                     if ($prepare->prepare()) {
                         $this->callService->acceptWarmTransferCall($callUserAccess, $userId);
+                        Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                     }
                 } else {
                     Notifications::publish('callAlreadyTaken', ['user_id' => $userId], ['callSid' => $call->c_call_sid]);
@@ -1264,6 +1266,7 @@ class CallController extends FController
                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                 if ($prepare->prepare()) {
                     $this->callService->acceptCall($access, $userId);
+                    Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                 }
                 break;
             }
@@ -1319,24 +1322,27 @@ class CallController extends FController
 
         if ($call_sid) {
             try {
+                $userId = Auth::id();
                 $call = $this->callRepository->findBySid($call_sid);
-                $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => Auth::id(), 'cua_call_id' => $call->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->one();
+                $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $userId, 'cua_call_id' => $call->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->one();
                 if (!$callUserAccess) {
                     throw new \DomainException('Not found call user access');
                 }
-                $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
+                $prepare = new PrepareCurrentCallsForNewCall($userId);
                 if (!$prepare->prepare()) {
                     throw new \DomainException('Prepare current calls error');
                 }
 
                 $return = new ReturnToHoldCall();
-                if (!$return->return($call, Auth::id())) {
+                if (!$return->return($call, $userId)) {
                     throw new \DomainException('Return Hold call error');
                 }
 
                 if (!$return->acceptHoldCall($callUserAccess)) {
                     throw new \DomainException('Accept Hold call error');
                 }
+
+                Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
 
                 $response = [
                     'error' => false,
