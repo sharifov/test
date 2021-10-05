@@ -125,7 +125,9 @@ $user = Yii::$app->user->identity;
     if ($leadModel->isTrash()) {
         $buttonsSubAction[] = $buttonReturnLead;
         $buttonsSubAction[] = $buttonReject;
-        $buttonsSubAction[] = $buttonTake;
+        if ($user->isAgent()) {
+            $buttonsSubAction[] = $buttonTake;
+        }
     }
     if ($viwModeSuperAdminCondition) {
         if ($leadModel->isSold()) {
