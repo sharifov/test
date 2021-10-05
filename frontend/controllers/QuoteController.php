@@ -563,6 +563,11 @@ class QuoteController extends FController
             }
             $form = new FlightQuoteSearchForm();
 
+            $defaultSort = [];
+            if ($form->getSortBy()) {
+                $defaultSort = [$form->getSortBy() => $form->getSortType()];
+            }
+
             $dataProvider = new ArrayDataProvider([
                 'allModels' => $quotes['results'] ?? [],
                 'pagination' => [
@@ -571,7 +576,7 @@ class QuoteController extends FController
                 ],
                 'sort' => [
                     'attributes' => ['price', 'duration'],
-                    'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                    'defaultOrder' => $defaultSort,
                 ],
             ]);
 
