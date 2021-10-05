@@ -606,4 +606,9 @@ class SettingHelper
     {
         return self::getCallbackToCallerData()['excludeDepartmentKeys'] ?? [];
     }
+
+    public static function clientNotificationSuccessCallMinDuration(): int
+    {
+        return (int) (Yii::$app->params['settings']['client_notification_success_call_min_duration'] ?? 30);
+    }
 }

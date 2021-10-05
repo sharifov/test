@@ -1471,18 +1471,6 @@ class Call extends \yii\db\ActiveRecord
             }
         }
 
-        if ($isChangedStatus && $this->isStatusCompleted()) {
-            if ($this->c_case_id) {
-                $productQuoteChanges = ProductQuoteChange::find()->select(['pqc_id'])->byCaseId($this->c_case_id)->isNotDecided()->column();
-                if ($productQuoteChanges) {
-                    $clientNotificationCanceler = Yii::createObject(ClientNotificationCanceler::class);
-                    foreach ($productQuoteChanges as $productQuoteChangeId) {
-                        $clientNotificationCanceler->cancel(\sales\model\client\notifications\client\entity\NotificationType::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT, $productQuoteChangeId);
-                    }
-                }
-            }
-        }
-
         $this->sendFrontendData();
     }
 
