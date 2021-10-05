@@ -41,6 +41,7 @@ class ClientNotificationPhoneListSearch extends ClientNotificationPhoneList
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['cnfl_id' => SORT_DESC]],
         ]);
 
         $this->load($params);

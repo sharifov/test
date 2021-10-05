@@ -39,6 +39,7 @@ class ClientNotificationSmsListSearch extends ClientNotificationSmsList
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['cnsl_id' => SORT_DESC]],
         ]);
 
         $this->load($params);
