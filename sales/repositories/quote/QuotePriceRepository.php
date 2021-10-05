@@ -21,4 +21,12 @@ class QuotePriceRepository
         }
         return $quotePrice->id;
     }
+
+    public static function findByQuoteIdAndPaxCode(int $quoteId, string $paxCode): ?QuotePrice
+    {
+        return QuotePrice::find()
+            ->where(['quote_id' => $quoteId])
+            ->andWhere(['passenger_type' => $paxCode])
+            ->one();
+    }
 }
