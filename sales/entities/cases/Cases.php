@@ -490,6 +490,11 @@ class Cases extends ActiveRecord implements Objectable
         return $this->cs_user_id === $userId;
     }
 
+    public function hasOwner(): bool
+    {
+        return (bool)$this->cs_user_id;
+    }
+
     /**
      * @param int $status
      */

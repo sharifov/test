@@ -4,6 +4,7 @@ namespace modules\cases\src\abac;
 
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
+use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesStatus;
 
 class CasesAbacObject extends AbacBaseModel implements AbacInterface
@@ -123,115 +124,24 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
-    protected const ATTR_TO_PENDING = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_pending',
-        'field' => 'to_pending',
-        'label' => 'To Pending',
-
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
+    protected const ATTR_CASE_CATEGORY = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'category_id',
+        'field' => 'category_id',
+        'label' => 'Category',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
         'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
-    protected const ATTR_TO_PROCESSING = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_processing',
-        'field' => 'to_processing',
-        'label' => 'To Processing',
-
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_TO_FOLLOW_UP = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_follow_up',
-        'field' => 'to_follow_up',
-        'label' => 'To Follow Up',
-
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_TO_SOLVED = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_solved',
-        'field' => 'to_solved',
-        'label' => 'To Solved',
-
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_TO_TRASH = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_trash',
-        'field' => 'to_trash',
-        'label' => 'To Trash',
-
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_TO_NEW = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_new',
-        'field' => 'to_new',
-        'label' => 'To New',
-
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_TO_AWAITING = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_awaiting',
-        'field' => 'to_awaiting',
-        'label' => 'To Awaiting',
-
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_TO_AUTO_PROCESSING = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_auto_processing',
-        'field' => 'to_auto_processing',
-        'label' => 'To Auto Processing',
-
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_TO_ERROR = [
-        'optgroup' => 'Case Transfer',
-        'id' => self::NS . 'to_error',
-        'field' => 'to_error',
-        'label' => 'To Error',
+    protected const ATTR_IS_COMMON_GROUP = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'is_common_group',
+        'field' => 'is_common_group',
+        'label' => 'Is Common Group',
 
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
@@ -242,46 +152,46 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER],
-        self::ACT_REPROTECTION_QUOTE_SEND_EMAIL => [self::ATTR_CASE_IS_OWNER],
-        self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ATTR_CASE_IS_OWNER],
-        self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ATTR_CASE_IS_OWNER],
-        self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ATTR_CASE_IS_OWNER],
+        self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
+        self::ACT_REPROTECTION_QUOTE_SEND_EMAIL => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
+        self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
+        self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
+        self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
         self::OBJ_CASE_IN_PENDING => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_PENDING,
+            self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_CASE_IN_PROCESSING => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_PROCESSING,
+            self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_CASE_IN_FOLLOW_UP => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_FOLLOW_UP,
+            self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_CASE_IN_SOLVED => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_SOLVED,
+            self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_CASE_IN_TRASH => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_TRASH,
+            self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_CASE_IN_NEW => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_NEW,
+            self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_CASE_IN_AWAITING => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_AWAITING,
+            self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_CASE_IN_AUTO_PROCESSING => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_AUTO_PROCESSING,
+            self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_CASE_IN_ERROR => [
             self::ATTR_CASE_IS_OWNER,
-            self::ATTR_TO_ERROR,
+            self::ATTR_IS_COMMON_GROUP
         ],
     ];
 
@@ -307,18 +217,30 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public static function getObjectAttributeList(): array
     {
         $attrStatus = self::ATTR_CASE_STATUS;
+        $attrCategory = self::ATTR_CASE_CATEGORY;
+
         $attrStatus['values'] = CasesStatus::STATUS_LIST;
+        $attrCategory['values'] = CaseCategory::getList();
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::OBJ_CASE_IN_PENDING][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_PENDING][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_PROCESSING][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_PROCESSING][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_FOLLOW_UP][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_FOLLOW_UP][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_SOLVED][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_SOLVED][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_TRASH][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_TRASH][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_NEW][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_NEW][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_AWAITING][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_AWAITING][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_AUTO_PROCESSING][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_AUTO_PROCESSING][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_ERROR][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_IN_ERROR][] = $attrCategory;
 
         return $attributeList;
     }
