@@ -1,6 +1,7 @@
 <?php
 
 use frontend\assets\groups\BootstrapGroupAsset;
+use kartik\daterange\MomentAsset;
 use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
@@ -183,7 +184,8 @@ return [
                 ],
 
                 \yii\bootstrap4\BootstrapAsset::class => [
-                    'class' => BootstrapGroupAsset::class,
+                    'css' => [],
+                    'js' => []
                 ],
                 \yii\bootstrap4\BootstrapPluginAsset::class => [
                     'class' => BootstrapGroupAsset::class,

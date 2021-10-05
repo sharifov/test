@@ -311,7 +311,7 @@ if (!$lead->isNewRecord) {
         let leadId = $(this).attr('data-lead-id');
         let modal = $('#modal-sm');
         
-        $('#modal-sm-label').html('Add conversation');
+        $('#modal-sm-label').html('Add conversion');
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load('{$addConversationUrl}', function(response, status, xhr) {
             $('#preloader').addClass('d-none');

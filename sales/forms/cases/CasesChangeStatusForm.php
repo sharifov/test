@@ -124,7 +124,7 @@ class CasesChangeStatusForm extends Model
 
     public function getConvertedDeadline(): ?string
     {
-        if ($this->deadline === null) {
+        if (empty($this->deadline)) {
             return null;
         }
 

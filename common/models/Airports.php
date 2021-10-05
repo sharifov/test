@@ -355,7 +355,7 @@ class Airports extends \yii\db\ActiveRecord
 //                            continue;
 //                        }
 
-                        if ($airport->city !== $item['CityAscii']) {
+                        if (isset($item['CityAscii']) && $airport->city !== $item['CityAscii']) {
                             $airport->city = $item['CityAscii'];
                             $diff .= ', ' . $airport->city . ' => ' . $item['CityAscii'];
                         }
@@ -423,7 +423,7 @@ class Airports extends \yii\db\ActiveRecord
                             $diff .= ', multicity = ' . ($airport->a_multicity ? 'true' : 'false');
                         }
 
-                        if ($airport->timezone !== $item['TimezoneId']) {
+                        if (isset($item['TimezoneId']) && $airport->timezone !== $item['TimezoneId']) {
                             $airport->timezone = $item['TimezoneId'];
                             $diff .= ', timezone = ' . $airport->timezone;
                             if ($airport->timezone) {

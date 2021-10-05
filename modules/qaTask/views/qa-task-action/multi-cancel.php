@@ -24,15 +24,15 @@ $pjaxId = 'pjaxQaTaskMultiCancel'
 
 <?= $form->errorSummary($model) ?>
 
-<?= $form->field($model, 'userId')->widget(Select2::class, [
+<?php /*echo $form->field($model, 'userId')->widget(Select2::class, [
     'model' => $model,
     'data' => Employee::getList(),
     'options' => [
         'prompt' => '---'
     ]
-]) ?>
+]) */?>
 
-<?php if ($model->actionReasonsExists && \sales\auth\Auth::user()->isQaSuper()) : ?>
+<?php if ($model->actionReasonsExists) : ?>
     <?= $form->field($model, 'actionId')->dropdownList($model->actionReasons, [
         'prompt' => '---',
     ]) ?>
