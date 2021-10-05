@@ -218,9 +218,20 @@ $(document).on('click', '#btn-check-all',  function (e) {
     }
 });
 
+function checkedVerify(title) {
+    if (!$("input[name='selection[]']:checked").length) {
+        new PNotify({title: title, type: "error", text: 'Not selected rows.', hide: true});
+        return false;
+    }
+    return true;
+}
+
 $(document).on('click', '.btn-multiple-update', function(e) {
     e.preventDefault();        
     let arrIds = [];
+    
+    if (!checkedVerify('Assign user')) return false;
+    
     if (sessionStorage.selectedTasks) {
         let data = jQuery.parseJSON( sessionStorage.selectedTasks );
         arrIds = Object.values(data);    
@@ -260,6 +271,9 @@ $(document).on('click', '.btn-multiple-update', function(e) {
 $(document).on('click', '.btn-multiple-cancel', function(e) {
     e.preventDefault();        
     let arrIds = [];
+    
+    if (!checkedVerify('Multiple cancel')) return false;
+    
     if (sessionStorage.selectedTasks) {
         let data = jQuery.parseJSON( sessionStorage.selectedTasks );
         arrIds = Object.values(data);    
