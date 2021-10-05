@@ -2,12 +2,12 @@
 
 namespace sales\model\leadRedial\assign;
 
-use common\components\purifier\Purifier;
 use common\models\Notifications;
 use common\models\UserCallStatus;
-use frontend\widgets\notification\NotificationMessage;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
+use sales\model\leadRedial\entity\CallRedialUserAccessWithCallStatus;
+use sales\model\user\entity\userStatus\UserStatus;
 use yii\helpers\VarDumper;
 
 /**
@@ -43,14 +43,23 @@ class LeadRedialUnAssigner
 
     public function unAssignByLeadWithTimeExpired(int $leadId, \DateTimeImmutable $date): bool
     {
-        $accesses = CallRedialUserAccess::find()->byLeadId($leadId)->withExpired()->all();
+        $accesses = CallRedialUserAccessWithCallStatus::find()
+            ->select(['*', 'us_is_on_call as userIsOnCall'])
+            ->byLeadId($leadId)
+            ->withExpired()
+            ->leftJoin(UserStatus::tableName(), 'us_user_id = crua_user_id')
+            ->all();
         if (!$accesses) {
             return false;
         }
+
+        /** @var CallRedialUserAccessWithCallStatus $access */
         foreach ($accesses as $access) {
             $this->unAssign($access);
-            $this->offPhone($access->crua_user_id, $date);
-            $this->missedCallNotification($access->crua_user_id);
+            if (!$access->userIsOnCall) {
+                $this->offPhone($access->crua_user_id, $date);
+                $this->missedCallNotification($access->crua_user_id);
+            }
         }
         return true;
     }
