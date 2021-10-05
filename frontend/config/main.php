@@ -183,19 +183,12 @@ return [
                     'class' => \frontend\assets\JqueryAsset::class,
                 ],
 
-                MomentAsset::class => [
-                    'class' => \frontend\assets\MomentAsset::class
-                ],
-
                 \yii\bootstrap4\BootstrapAsset::class => [
-                    'class' => BootstrapGroupAsset::class,
-                    'jsOptions' => [
-                        'position' => \yii\web\View::POS_END
-                    ]
+                    'css' => [],
+                    'js' => []
                 ],
                 \yii\bootstrap4\BootstrapPluginAsset::class => [
                     'class' => BootstrapGroupAsset::class,
-                    'depends' => []
                 ],
 
                 BootstrapAsset::class => [
