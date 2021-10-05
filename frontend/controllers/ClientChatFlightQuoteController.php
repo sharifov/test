@@ -354,6 +354,7 @@ class ClientChatFlightQuoteController extends FController
             $key = Yii::$app->request->post('key');
             $keyCache = Yii::$app->request->post('keyCache', '');
             $providerProjectId = Yii::$app->request->post('projectId');
+            $exMarkups = Yii::$app->request->post('exMarkups', []);
 
             if ($key && $lead && $chat) {
                 if ((int) $providerProjectId === (int) $lead->project_id) {
@@ -365,7 +366,7 @@ class ClientChatFlightQuoteController extends FController
 
                 if ($resultSearch !== false) {
                     try {
-                        $this->createQuote($keyCache, $resultSearch, $key, $lead, $chat, $providerProjectId, Auth::user(), false);
+                        $this->createQuote($keyCache, $resultSearch, $key, $lead, $chat, $providerProjectId, Auth::user(), false, $exMarkups);
 
                         $result['status'] = true;
                     } catch (\RuntimeException | \DomainException $e) {
@@ -412,6 +413,7 @@ class ClientChatFlightQuoteController extends FController
             $key = Yii::$app->request->post('key');
             $keyCache = Yii::$app->request->post('keyCache', '');
             $providerProjectId = Yii::$app->request->post('projectId');
+            $exMarkups = Yii::$app->request->post('exMarkups', []);
 
             if ($key && $lead && $chat) {
                 if ((int) $providerProjectId === (int) $lead->project_id) {
@@ -436,9 +438,8 @@ class ClientChatFlightQuoteController extends FController
                         }
 
                         if (!$createdQuote) {
-                            $this->createQuote($keyCache, $resultSearch, $key, $lead, $chat, $providerProjectId, Auth::user(), true);
+                            $this->createQuote($keyCache, $resultSearch, $key, $lead, $chat, $providerProjectId, Auth::user(), true, $exMarkups);
                         }
-
 
                         $result['status'] = true;
                     } catch (\RuntimeException | \DomainException $e) {
@@ -494,7 +495,8 @@ class ClientChatFlightQuoteController extends FController
         ClientChat $chat,
         ?int $providerProjectId,
         Employee $user,
-        bool $sendQuote
+        bool $sendQuote,
+        array $exMarkups = []
     ): Quote {
         $result = $keyCache ? $resultSearch['results'] : $resultSearch['data']['results'];
         foreach ($result as $entry) {
@@ -713,6 +715,11 @@ class ClientChatFlightQuoteController extends FController
                 foreach ($entry['passengers'] as $paxCode => $paxEntry) {
                     for ($i = 0; $i < $paxEntry['cnt']; $i++) {
                         $price = new QuotePrice();
+
+                        if (array_key_exists($paxCode, $exMarkups)) {
+                            $price->extra_mark_up = $exMarkups[$paxCode];
+                        }
+
                         $price->passenger_type = $paxCode;
                         $price->fare = $paxEntry['baseFare'];
                         $price->taxes = $paxEntry['baseTax'];
@@ -742,6 +749,7 @@ class ClientChatFlightQuoteController extends FController
 
                         $this->sendCapturesQuote($chat, $quote, $capture);
                     } catch (\DomainException | \RuntimeException $e) {
+                        Yii::warning(AppHelper::throwableLog($e, true), 'ClientChatFlightQuoteController:sendQuoteCapture');
                         $transaction->rollBack();
                         throw new $e();
                     } catch (\Throwable $e) {
