@@ -186,6 +186,11 @@ class CallQueueJob extends BaseJob implements JobInterface
                                 if (!$call->c_client_id) {
                                     $call->c_client_id = $lead->client_id ?? null;
                                 }
+
+                                if ($lead) {
+                                    $call->c_client_id = $lead->client_id;
+                                }
+
                                 if (($lead && !$lead->isCallReady()) && $call->isEnded()) {
                                     $leadRepository = Yii::createObject(LeadRepository::class);
                                     $lead->callReady();
@@ -238,8 +243,9 @@ class CallQueueJob extends BaseJob implements JobInterface
                             if (!$originalAgentId && $case && $case->cs_user_id) {
                                 $originalAgentId = $case->cs_user_id;
                             }
-
                             if ($case) {
+                                $call->c_client_id = $case->cs_client_id;
+
                                 try {
                                     $job = new CreateSaleFromBOJob();
                                     $job->case_id = $case->cs_id;
