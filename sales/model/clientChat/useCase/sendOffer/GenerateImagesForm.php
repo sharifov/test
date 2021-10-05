@@ -84,7 +84,7 @@ class GenerateImagesForm extends Model
             return [];
         }
 
-        if (!$quotesList = $this->lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED])->getModels()) {
+        if (!$quotesList = $this->lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED])->getModels()) {
             return [];
         }
 

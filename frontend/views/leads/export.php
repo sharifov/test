@@ -349,7 +349,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                     $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
                     if (!$quote) {
-                        $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_SEND])->orderBy(['id' => SORT_DESC])->one();
+                        $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_SENT])->orderBy(['id' => SORT_DESC])->one();
                     }
 
                     if ($quote) {
