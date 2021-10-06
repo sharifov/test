@@ -71,6 +71,7 @@ use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackF
 use sales\model\leadRedial\assign\LeadRedialAccessChecker;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
+use sales\model\leadRedial\priorityLevel\ConversionFetcher;
 use sales\model\leadRedial\queue\CallNextLeads;
 use sales\model\project\entity\params\Params;
 use sales\services\clientChatMessage\ClientChatMessageService;
@@ -88,6 +89,13 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+    public function actionC()
+    {
+        $fetcher = new ConversionFetcher();
+        $r = $fetcher->fetch(414, new \DateTimeImmutable('2019-01-01 00:00:00'));
+        VarDumper::dump($r);
+    }
+
     public function actionMmm()
     {
         $t  = (new LeadRedialAccessChecker())->exist(295);
