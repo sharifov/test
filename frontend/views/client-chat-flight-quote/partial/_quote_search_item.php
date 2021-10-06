@@ -46,6 +46,8 @@ $isQuoteAssignedToFlight = array_key_exists($result['key'], $flightQuotes);
 
 $urlCreateQuoteFromSearch = Url::to(['client-chat-flight-quote/create-quote-from-search', 'leadId' => $lead->id]);
 $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-search', 'leadId' => $lead->id]);
+
+$keyId = md5($result['key']);
 ?>
 <div
     class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>"
@@ -292,7 +294,7 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                         <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
                             ?><td><?= (isset($pax['markup'])) ? $pax['markup'] : ''?></td><?php
                         endif;?>
-                        <td class="box_ex_markup_<?php echo $keyCache ?>">
+                        <td class="box_ex_markup_<?php echo $keyId ?>">
                             <?php $readonly = $isQuoteAssignedToFlight ? 'readonly="1"' : '' ?>
                             <?php $border = $isQuoteAssignedToFlight ? ' border: 0; ' : '' ?>
                     <?php
@@ -500,7 +502,8 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                         'data-chat-id' => $chatId,
                         'data-send-quote' => false,
                         'data-url' => $urlCreateQuoteFromSearch,
-                        'disabled' => $isQuoteAssignedToFlight
+                        'disabled' => $isQuoteAssignedToFlight,
+                        'data-key-id' => $keyId,
                     ]) ?>
 
                     <?php if ($projectRelations = $lead->project->projectRelations) : ?>
@@ -520,6 +523,7 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                                     'data-send-quote' => false,
                                     'data-chat-id' => $chatId,
                                     'data-url' => $urlCreateQuoteFromSearch,
+                                    'data-key-id' => $keyId,
                                 ]
                             )
                             ?>
@@ -545,7 +549,8 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                         'data-project' => $lead->project_id,
                         'data-chat-id' => $chatId,
                         'data-send-quote' => true,
-                        'data-url' => $urlSendQuoteFromSearch
+                        'data-url' => $urlSendQuoteFromSearch,
+                        'data-key-id' => $keyId,
                     ]) ?>
 
                     <?php if ($projectRelations = $lead->project->projectRelations) : ?>
@@ -561,7 +566,8 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                                  'data-project' => $relatedProject->prl_related_project_id,
                                  'data-chat-id' => $chatId,
                                  'data-send-quote' => true,
-                                 'data-url' => $urlSendQuoteFromSearch
+                                 'data-url' => $urlSendQuoteFromSearch,
+                                 'data-key-id' => $keyId,
                              ])
                             ?>
                         <?php endforeach ?>
