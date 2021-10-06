@@ -91,14 +91,13 @@ class UserController extends Controller
         $result = $query->all();
         $userStatDayErrors = [];
         foreach ($result as $userGrossProfit) {
-            $userStatDay = UserStatDay::create(
+            $userStatDay = UserStatDay::createGrossProfit(
                 $userGrossProfit['gross_profit'],
                 $userGrossProfit['employee_id'],
                 (int)$date->format('d'),
                 (int)$date->format('m'),
                 (int)$date->format('Y')
             );
-            $userStatDay->setGrossProfit();
             if (!$userStatDay->save()) {
                 $userStatDayErrors[] = $userStatDay->getErrorSummary(true)[0];
             }

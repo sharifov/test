@@ -94,7 +94,7 @@ class UserStatDay extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'usd_user_id']);
     }
 
-    public static function create(float $value, int $userId, int $day, int $month, int $year): self
+    private static function create(float $value, int $userId, int $day, int $month, int $year, int $key): self
     {
         $self = new self();
         $self->usd_value = $value;
@@ -102,11 +102,12 @@ class UserStatDay extends \yii\db\ActiveRecord
         $self->usd_day = $day;
         $self->usd_month = $month;
         $self->usd_year = $year;
+        $self->usd_key = $key;
         return $self;
     }
 
-    public function setGrossProfit(): void
+    public static function createGrossProfit(float $value, int $userId, int $day, int $month, int $year): self
     {
-        $this->usd_key = UserStatDayKey::GROSS_PROFIT;
+        return self::create($value, $userId, $day, $month, $year, UserStatDayKey::GROSS_PROFIT);
     }
 }
