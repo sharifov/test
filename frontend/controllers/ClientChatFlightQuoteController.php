@@ -42,6 +42,7 @@ use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
+use yii\web\HtmlResponseFormatter;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -105,6 +106,8 @@ class ClientChatFlightQuoteController extends FController
         if (!Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) {
             throw new ForbiddenHttpException('Access Denied');
         }
+
+        $errors = [];
 
         $chat = ClientChat::findOne(['cch_id' => $chatId]);
         $viewModel = new ViewModelSearchQuotes();
@@ -226,10 +229,19 @@ class ClientChatFlightQuoteController extends FController
 
             $viewModel->lead = $lead;
         } catch (\RuntimeException | \DomainException | NotFoundException | ForbiddenHttpException $e) {
-            Yii::$app->getSession()->addFlash('warning', $e->getMessage());
+            Yii::warning(AppHelper::throwableLog($e), 'QuoteController::actionAjaxSearchQuotesByChat::Warning');
+            $message = $e->getMessage();
+            $errors[] = $message;
+            Yii::$app->getSession()->addFlash('warning', $message);
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e, true), 'QuoteController::actionAjaxSearchQuotesByChat::Throwable');
-            Yii::$app->getSession()->addFlash('danger', 'Internal Server Error');
+            $message = 'Internal Server Error';
+            $errors[] = $message;
+            Yii::$app->getSession()->addFlash('danger', $message);
+        }
+
+        if ($errors) {
+            return 'Error: ' . implode(',', $errors);
         }
 
         if ($viewModel->flightRequestFormMode !== 'view') {
@@ -237,7 +249,7 @@ class ClientChatFlightQuoteController extends FController
         }
 
         return $this->renderAjax('_search_quotes_by_chat', [
-            'viewModel' => $viewModel
+            'viewModel' => $viewModel,
         ]);
     }
 
