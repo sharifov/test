@@ -95,9 +95,6 @@ class AirSearchService extends Component
             $this->request->setFormat($format);
         }
 
-        \Yii::info(VarDumper::dumpAsString(get_object_vars($this)), 'info\Debug:' . self::class . ':' . __FUNCTION__);
-        /* TODO: FOR DEBUG:: must by remove */
-
         $response = $this->request->send();
 
         $metrics = \Yii::$container->get(Metrics::class);
