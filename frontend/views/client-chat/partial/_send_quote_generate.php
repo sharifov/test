@@ -9,14 +9,15 @@ use yii\web\View;
 /** @var GenerateImagesForm $form */
 /** @var array $captures */
 
+$chatSendOfferListUrl = \yii\helpers\Url::toRoute('/client-chat/send-quote-list');
 ?>
 <div class="send-offer-container">
     <?php if ($form->getErrors()) : ?>
         <h4><?= Html::errorSummary($form, ['encode' => true]) ?></h4>
-        <?= Html::button('Back', ['class' => 'btn btn-info chat-offer', 'data-chat-id' => $form->chatId, 'data-lead-id' => $form->leadId]) ?>
+        <?= Html::button('Back', ['class' => 'btn btn-info chat-offer', 'data-chat-id' => $form->chatId, 'data-lead-id' => $form->leadId, 'data-url' => $chatSendOfferListUrl]) ?>
     <?php elseif ($errorMessage) : ?>
         <h3><?= $errorMessage ?></h3>
-        <?= Html::button('Back', ['class' => 'btn btn-info chat-offer', 'data-chat-id' => $form->chatId, 'data-lead-id' => $form->leadId]) ?>
+        <?= Html::button('Back', ['class' => 'btn btn-info chat-offer', 'data-chat-id' => $form->chatId, 'data-lead-id' => $form->leadId, 'data-url' => $chatSendOfferListUrl]) ?>
     <?php else : ?>
         <?php foreach ($captures as $key => $capture) : ?>
             <div>
@@ -36,7 +37,7 @@ use yii\web\View;
             <hr>
         <?php endforeach; ?>
         <br>
-        <?= Html::button('Back', ['class' => 'btn btn-info chat-offer', 'data-chat-id' => $form->chatId, 'data-lead-id' => $form->leadId]) ?>
+        <?= Html::button('Back', ['class' => 'btn btn-info chat-offer', 'data-chat-id' => $form->chatId, 'data-lead-id' => $form->leadId, 'data-url' => $chatSendOfferListUrl]) ?>
         <?= Html::button('Send', ['class' => 'btn btn-success client-chat-send-offer', 'data-chat-id' => $form->chatId, 'data-lead-id' => $form->leadId]) ?>
     <?php endif; ?>
 </div>
