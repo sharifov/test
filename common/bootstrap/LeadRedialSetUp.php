@@ -2,9 +2,12 @@
 
 namespace common\bootstrap;
 
+use sales\helpers\setting\SettingHelper;
 use sales\model\leadRedial\assign\EmployeeUsers;
 use sales\model\leadRedial\assign\TestUsers;
 use sales\model\leadRedial\assign\Users;
+use sales\model\leadRedial\priorityLevel\PriorityLevel;
+use sales\model\leadRedial\priorityLevel\SettingsPriorityLevel;
 use sales\model\leadRedial\queue\CallNextLeads;
 use sales\model\leadRedial\queue\LeadRedialQueue;
 use sales\model\leadRedial\queue\Leads;
@@ -34,6 +37,10 @@ class LeadRedialSetUp implements BootstrapInterface
         $container->setSingleton(Users::class, static function () use ($container) {
             return new EmployeeUsers();
 //            return new TestUsers();
+        });
+
+        $container->setSingleton(PriorityLevel::class, static function () use ($container) {
+            return new SettingsPriorityLevel();
         });
     }
 }
