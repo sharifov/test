@@ -756,14 +756,14 @@
             <dt class="phpdocumentor-table-of-contents__entry -constant -public">
     <a href="classes/common-models-Quote.html#constant_STATUS_CLASS_LIST">STATUS_CLASS_LIST</a>
     <span>
-        &nbsp;= [self::STATUS_CREATED =&gt; &#039;lq-created&#039;, self::STATUS_APPLIED =&gt; &#039;lq-applied&#039;, self::STATUS_DECLINED =&gt; &#039;lq-declined&#039;, self::STATUS_SEND =&gt; &#039;lq-send&#039;, self::STATUS_OPENED =&gt; &#039;lq-opened&#039;]                    </span>
+        &nbsp;= [self::STATUS_CREATED =&gt; &#039;lq-created&#039;, self::STATUS_APPLIED =&gt; &#039;lq-applied&#039;, self::STATUS_DECLINED =&gt; &#039;lq-declined&#039;, self::STATUS_SENT =&gt; &#039;lq-send&#039;, self::STATUS_OPENED =&gt; &#039;lq-opened&#039;]                    </span>
 </dt>
 <dd></dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -public">
     <a href="classes/common-models-Quote.html#constant_STATUS_CLASS_SPAN">STATUS_CLASS_SPAN</a>
     <span>
-        &nbsp;= [self::STATUS_CREATED =&gt; &#039;status-new&#039;, self::STATUS_APPLIED =&gt; &#039;status-applied&#039;, self::STATUS_DECLINED =&gt; &#039;status-declined&#039;, self::STATUS_SEND =&gt; &#039;status-send&#039;, self::STATUS_OPENED =&gt; &#039;status-opened&#039;]                    </span>
+        &nbsp;= [self::STATUS_CREATED =&gt; &#039;status-new&#039;, self::STATUS_APPLIED =&gt; &#039;status-applied&#039;, self::STATUS_DECLINED =&gt; &#039;status-declined&#039;, self::STATUS_SENT =&gt; &#039;status-send&#039;, self::STATUS_OPENED =&gt; &#039;status-opened&#039;]                    </span>
 </dt>
 <dd></dd>
 
@@ -784,7 +784,7 @@
             <dt class="phpdocumentor-table-of-contents__entry -constant -public">
     <a href="classes/common-models-Quote.html#constant_STATUS_LIST">STATUS_LIST</a>
     <span>
-        &nbsp;= [self::STATUS_CREATED =&gt; &#039;New&#039;, self::STATUS_APPLIED =&gt; &#039;Applied&#039;, self::STATUS_DECLINED =&gt; &#039;Declined&#039;, self::STATUS_SEND =&gt; &#039;Sent&#039;, self::STATUS_OPENED =&gt; &#039;Opened&#039;]                    </span>
+        &nbsp;= [self::STATUS_CREATED =&gt; &#039;New&#039;, self::STATUS_APPLIED =&gt; &#039;Applied&#039;, self::STATUS_DECLINED =&gt; &#039;Declined&#039;, self::STATUS_SENT =&gt; &#039;Sent&#039;, self::STATUS_OPENED =&gt; &#039;Opened&#039;]                    </span>
 </dt>
 <dd></dd>
 
@@ -796,7 +796,7 @@
 <dd></dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -public">
-    <a href="classes/common-models-Quote.html#constant_STATUS_SEND">STATUS_SEND</a>
+    <a href="classes/common-models-Quote.html#constant_STATUS_SENT">STATUS_SENT</a>
     <span>
         &nbsp;= 4                    </span>
 </dt>
@@ -2789,7 +2789,7 @@
     <span class="phpdocumentor-signature__visibility">public</span>
     <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">STATUS_CLASS_LIST</span>
-    = <span class="phpdocumentor-signature__default-value">[self::STATUS_CREATED =&gt; &#039;lq-created&#039;, self::STATUS_APPLIED =&gt; &#039;lq-applied&#039;, self::STATUS_DECLINED =&gt; &#039;lq-declined&#039;, self::STATUS_SEND =&gt; &#039;lq-send&#039;, self::STATUS_OPENED =&gt; &#039;lq-opened&#039;]</span>
+    = <span class="phpdocumentor-signature__default-value">[self::STATUS_CREATED =&gt; &#039;lq-created&#039;, self::STATUS_APPLIED =&gt; &#039;lq-applied&#039;, self::STATUS_DECLINED =&gt; &#039;lq-declined&#039;, self::STATUS_SENT =&gt; &#039;lq-send&#039;, self::STATUS_OPENED =&gt; &#039;lq-opened&#039;]</span>
 </code>
 
 
@@ -2818,7 +2818,7 @@
     <span class="phpdocumentor-signature__visibility">public</span>
     <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">STATUS_CLASS_SPAN</span>
-    = <span class="phpdocumentor-signature__default-value">[self::STATUS_CREATED =&gt; &#039;status-new&#039;, self::STATUS_APPLIED =&gt; &#039;status-applied&#039;, self::STATUS_DECLINED =&gt; &#039;status-declined&#039;, self::STATUS_SEND =&gt; &#039;status-send&#039;, self::STATUS_OPENED =&gt; &#039;status-opened&#039;]</span>
+    = <span class="phpdocumentor-signature__default-value">[self::STATUS_CREATED =&gt; &#039;status-new&#039;, self::STATUS_APPLIED =&gt; &#039;status-applied&#039;, self::STATUS_DECLINED =&gt; &#039;status-declined&#039;, self::STATUS_SENT =&gt; &#039;status-send&#039;, self::STATUS_OPENED =&gt; &#039;status-opened&#039;]</span>
 </code>
 
 
@@ -2905,7 +2905,7 @@
     <span class="phpdocumentor-signature__visibility">public</span>
     <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">STATUS_LIST</span>
-    = <span class="phpdocumentor-signature__default-value">[self::STATUS_CREATED =&gt; &#039;New&#039;, self::STATUS_APPLIED =&gt; &#039;Applied&#039;, self::STATUS_DECLINED =&gt; &#039;Declined&#039;, self::STATUS_SEND =&gt; &#039;Sent&#039;, self::STATUS_OPENED =&gt; &#039;Opened&#039;]</span>
+    = <span class="phpdocumentor-signature__default-value">[self::STATUS_CREATED =&gt; &#039;New&#039;, self::STATUS_APPLIED =&gt; &#039;Applied&#039;, self::STATUS_DECLINED =&gt; &#039;Declined&#039;, self::STATUS_SENT =&gt; &#039;Sent&#039;, self::STATUS_OPENED =&gt; &#039;Opened&#039;]</span>
 </code>
 
 
@@ -2946,9 +2946,9 @@
 
 </article>
                     <article class="phpdocumentor-element -constant -public ">
-    <h4 class="phpdocumentor-element__name" id="constant_STATUS_SEND">
-        STATUS_SEND
-        <a href="classes/common-models-Quote.html#constant_STATUS_SEND" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="constant_STATUS_SENT">
+        STATUS_SENT
+        <a href="classes/common-models-Quote.html#constant_STATUS_SENT" class="headerlink"><i class="fas fa-link"></i></a>
     </h4>
 
     <aside class="phpdocumentor-element-found-in">
@@ -2962,7 +2962,7 @@
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">public</span>
     <span class="phpdocumentor-signature__type">mixed</span>
-    <span class="phpdocumentor-signature__name">STATUS_SEND</span>
+    <span class="phpdocumentor-signature__name">STATUS_SENT</span>
     = <span class="phpdocumentor-signature__default-value">4</span>
 </code>
 

@@ -56,8 +56,9 @@ if ($viewModel->lead) {
         let sendQuote = Boolean(createQuoteBtn.data('send-quote'));
         var parent = createQuoteBtn.parent();
         var parentLength = parent.children().length;
+        let keyId = $(this).data('key-id');
 
-        let boxExMarkupEl = $('.box_ex_markup_' + keyCache);
+        let boxExMarkupEl = $('.box_ex_markup_' + keyId);
         let exMarkups = {};
         if (boxExMarkupEl.length) {
             boxExMarkupEl.children('.ex_markup').each(function(index, el) {

@@ -127,7 +127,7 @@ class AgentActivitySearch extends Call
         $query->addSelect(['(SELECT COUNT(*) FROM email WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 1) AS email_sent ']);
         $query->addSelect(['(SELECT COUNT(*) FROM email WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 2) AS email_received ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM quote_status_log WHERE (created ' . $between_condition . ') AND employee_id=e.id AND status = ' . Quote::STATUS_SEND . ') AS quotes_sent ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM quote_status_log WHERE (created ' . $between_condition . ') AND employee_id=e.id AND status = ' . Quote::STATUS_SENT . ') AS quotes_sent ']);
 
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf LEFT JOIN leads l ON lf.lead_id = l.id WHERE (lf.created ' . $between_condition . ') AND l.employee_id=e.id AND lf.status=' . Lead::STATUS_SOLD . ') AS st_sold ']);
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ') AS st_processing ']);

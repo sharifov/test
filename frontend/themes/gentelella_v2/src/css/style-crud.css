@@ -5741,9 +5741,6 @@ input[disabled] + .radio-tab__text {
 .row > form {
     width: 100%;
 }
-.nav.child_menu li a {
-  display: flex;
-}
 .nav-sm ul.nav.child_menu li a {
     display: flex;
     flex-direction: row-reverse;

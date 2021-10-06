@@ -1447,7 +1447,7 @@ class LeadSearch extends Lead
                         ->where(QuotePrice::tableName() . '.quote_id = ' . Quote::tableName() . '.id') ])
                 ->from(Quote::tableName())
                 ->where(Quote::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
-                ->andWhere(['=', Quote::tableName() . '.status', [Quote::STATUS_APPLIED, Quote::STATUS_SEND]])
+                ->andWhere(['=', Quote::tableName() . '.status', [Quote::STATUS_APPLIED, Quote::STATUS_SENT]])
                 ->andWhere(Lead::tableName() . '.status=' . Lead::STATUS_SOLD)
         ]);
 
@@ -2231,7 +2231,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->quote_status > 0) {
-            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
             if ($this->quote_status == 2) {
                 //echo $subQuery->createCommand()->getRawSql(); exit;
                 $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
@@ -2428,7 +2428,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->quote_status > 0) {
-            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
             if ($this->quote_status == 2) {
                 //echo $subQuery->createCommand()->getRawSql(); exit;
                 $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
@@ -2571,7 +2571,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->quote_status > 0) {
-            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
             if ($this->quote_status == 2) {
                 //echo $subQuery->createCommand()->getRawSql(); exit;
                 $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
@@ -2680,7 +2680,7 @@ class LeadSearch extends Lead
 //        }
 //
 //        if($this->quote_status > 0) {
-//            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+//            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
 //            if($this->quote_status == 2) {
 //                //echo $subQuery->createCommand()->getRawSql(); exit;
 //                $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') > 0'));

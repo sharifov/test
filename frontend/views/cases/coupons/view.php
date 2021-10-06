@@ -76,7 +76,7 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                                 <tr>
                                     <td><?= $key + 1 ?></td>
                                     <td>
-                                        <?php if (!$coupon->coupon->isSend()) : ?>
+                                        <?php if (!$coupon->coupon->isSent()) : ?>
                                             <?= Html::checkbox($sendCouponsForm->formName() . '[couponIds][' . $key . ']', false, ['value' => $coupon->cc_coupon_id]) ?>
                                         <?php  endif; ?>
                                     </td>
