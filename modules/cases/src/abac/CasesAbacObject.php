@@ -33,7 +33,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const UI_BTN_EVENT_LOG_VIEW    = self::NS . 'ui/btn/event-log-view';
 
     /** OBJECT PERMISSION */
-    public const OBJ_CASE_IN_PENDING         = self::NS . 'obj/in_pending';
+    /*public const OBJ_CASE_IN_PENDING         = self::NS . 'obj/in_pending';
     public const OBJ_CASE_IN_PROCESSING      = self::NS . 'obj/in_processing';
     public const OBJ_CASE_IN_FOLLOW_UP       = self::NS . 'obj/in_follow_up';
     public const OBJ_CASE_IN_SOLVED          = self::NS . 'obj/in_solved';
@@ -41,7 +41,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_CASE_IN_AWAITING        = self::NS . 'obj/in_awaiting';
     public const OBJ_CASE_IN_AUTO_PROCESSING = self::NS . 'obj/in_auto_processing';
     public const OBJ_CASE_IN_ERROR           = self::NS . 'obj/in_error';
-    public const OBJ_CASE_IN_NEW             = self::NS . 'obj/in_new';
+    public const OBJ_CASE_IN_NEW             = self::NS . 'obj/in_new';*/
 
     public const OBJ_CASE_STATUS_ROUTE_RULES = self::NS . 'obj/status_rules';
 
@@ -57,7 +57,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_FLIGHT_REPROTECTION_QUOTE                 => self::ACT_FLIGHT_REPROTECTION_QUOTE,
         self::ACT_VIEW_QUOTES_DIFF                          => self::ACT_VIEW_QUOTES_DIFF,
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE   => self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE,
-        self::OBJ_CASE_IN_PENDING                           => self::OBJ_CASE_IN_PENDING,
+        /*self::OBJ_CASE_IN_PENDING                           => self::OBJ_CASE_IN_PENDING,
         self::OBJ_CASE_IN_PROCESSING                        => self::OBJ_CASE_IN_PROCESSING,
         self::OBJ_CASE_IN_FOLLOW_UP                         => self::OBJ_CASE_IN_FOLLOW_UP,
         self::OBJ_CASE_IN_SOLVED                            => self::OBJ_CASE_IN_SOLVED,
@@ -65,7 +65,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_CASE_IN_AWAITING                          => self::OBJ_CASE_IN_AWAITING,
         self::OBJ_CASE_IN_AUTO_PROCESSING                   => self::OBJ_CASE_IN_AUTO_PROCESSING,
         self::OBJ_CASE_IN_ERROR                             => self::OBJ_CASE_IN_ERROR,
-        self::OBJ_CASE_IN_NEW                               => self::OBJ_CASE_IN_NEW,
+        self::OBJ_CASE_IN_NEW                               => self::OBJ_CASE_IN_NEW,*/
 
         self::OBJ_CASE_STATUS_ROUTE_RULES                   => self::OBJ_CASE_STATUS_ROUTE_RULES,
     ];
@@ -91,7 +91,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ACTION_CREATE],
         self::ACT_VIEW_QUOTES_DIFF          => [self::ACTION_ACCESS],
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
-        self::OBJ_CASE_IN_PENDING           => [self::ACTION_TRANSFER],
+        /*self::OBJ_CASE_IN_PENDING           => [self::ACTION_TRANSFER],
         self::OBJ_CASE_IN_PROCESSING        => [self::ACTION_TRANSFER],
         self::OBJ_CASE_IN_FOLLOW_UP         => [self::ACTION_TRANSFER],
         self::OBJ_CASE_IN_SOLVED            => [self::ACTION_TRANSFER],
@@ -99,7 +99,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_CASE_IN_AWAITING          => [self::ACTION_TRANSFER],
         self::OBJ_CASE_IN_AUTO_PROCESSING   => [self::ACTION_TRANSFER],
         self::OBJ_CASE_IN_ERROR             => [self::ACTION_TRANSFER],
-        self::OBJ_CASE_IN_NEW               => [self::ACTION_TRANSFER],
+        self::OBJ_CASE_IN_NEW               => [self::ACTION_TRANSFER],*/
 
         self::OBJ_CASE_STATUS_ROUTE_RULES   => [self::ACTION_TRANSFER],
     ];
@@ -176,7 +176,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
         self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
         self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
-        self::OBJ_CASE_IN_PENDING => [
+        /*self::OBJ_CASE_IN_PENDING => [
             self::ATTR_CASE_IS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
@@ -211,7 +211,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_CASE_IN_ERROR => [
             self::ATTR_CASE_IS_OWNER,
             self::ATTR_IS_COMMON_GROUP
-        ],
+        ],*/
 
         self::OBJ_CASE_STATUS_ROUTE_RULES => [
             self::ATTR_CASE_IS_OWNER,
@@ -249,7 +249,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attrCategory['values'] = CaseCategory::getList();
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::OBJ_CASE_IN_PENDING][] = $attrStatus;
+        /*$attributeList[self::OBJ_CASE_IN_PENDING][] = $attrStatus;
         $attributeList[self::OBJ_CASE_IN_PENDING][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_PROCESSING][] = $attrStatus;
         $attributeList[self::OBJ_CASE_IN_PROCESSING][] = $attrCategory;
@@ -266,7 +266,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::OBJ_CASE_IN_AUTO_PROCESSING][] = $attrStatus;
         $attributeList[self::OBJ_CASE_IN_AUTO_PROCESSING][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_ERROR][] = $attrStatus;
-        $attributeList[self::OBJ_CASE_IN_ERROR][] = $attrCategory;
+        $attributeList[self::OBJ_CASE_IN_ERROR][] = $attrCategory;*/
 
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatus;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrCategory;
