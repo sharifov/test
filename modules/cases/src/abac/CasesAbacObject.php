@@ -43,6 +43,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_CASE_IN_ERROR           = self::NS . 'obj/in_error';
     public const OBJ_CASE_IN_NEW             = self::NS . 'obj/in_new';
 
+    public const OBJ_CASE_STATUS_ROUTE_RULES = self::NS . 'obj/status_rules';
+
     public const OBJECT_LIST = [
         self::LOGIC_CLIENT_DATA                             => self::LOGIC_CLIENT_DATA,
         self::UI_BLOCK_EVENT_LOG_LIST                       => self::UI_BLOCK_EVENT_LOG_LIST,
@@ -64,6 +66,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_CASE_IN_AUTO_PROCESSING                   => self::OBJ_CASE_IN_AUTO_PROCESSING,
         self::OBJ_CASE_IN_ERROR                             => self::OBJ_CASE_IN_ERROR,
         self::OBJ_CASE_IN_NEW                               => self::OBJ_CASE_IN_NEW,
+
+        self::OBJ_CASE_STATUS_ROUTE_RULES                   => self::OBJ_CASE_STATUS_ROUTE_RULES,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -96,6 +100,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_CASE_IN_AUTO_PROCESSING   => [self::ACTION_TRANSFER],
         self::OBJ_CASE_IN_ERROR             => [self::ACTION_TRANSFER],
         self::OBJ_CASE_IN_NEW               => [self::ACTION_TRANSFER],
+
+        self::OBJ_CASE_STATUS_ROUTE_RULES   => [self::ACTION_TRANSFER],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -116,6 +122,19 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'id' => self::NS . 'status_id',
         'field' => 'status_id',
         'label' => 'Status',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_CASE_STATUS_RULE = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'to_status',
+        'field' => 'to_status',
+        'label' => 'To Status',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
         'values' => [],
@@ -193,6 +212,11 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_CASE_IS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+
+        self::OBJ_CASE_STATUS_ROUTE_RULES => [
+            self::ATTR_CASE_IS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
+        ],
     ];
 
     /**
@@ -218,8 +242,10 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     {
         $attrStatus = self::ATTR_CASE_STATUS;
         $attrCategory = self::ATTR_CASE_CATEGORY;
+        $attrStatusRule = self::ATTR_CASE_STATUS_RULE;
 
         $attrStatus['values'] = CasesStatus::STATUS_LIST;
+        $attrStatusRule['values'] = CasesStatus::STATUS_LIST;
         $attrCategory['values'] = CaseCategory::getList();
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
@@ -241,6 +267,10 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::OBJ_CASE_IN_AUTO_PROCESSING][] = $attrCategory;
         $attributeList[self::OBJ_CASE_IN_ERROR][] = $attrStatus;
         $attributeList[self::OBJ_CASE_IN_ERROR][] = $attrCategory;
+
+        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatus;
+        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrCategory;
+        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatusRule;
 
         return $attributeList;
     }
