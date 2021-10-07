@@ -311,17 +311,14 @@ Modal::end();
            return false;
      });
 
-    $(document).on('click', '#btn-status-history', function(){
-            let modal = $('#modalCase');
-            //$('#search-sale-panel').toggle();
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            $('#modalCase-label').html($(this).attr('title'));
-            
-            $.get('$statusHistoryAjaxUrl', function(data) {
-                modal.find('.modal-body').html(data);
-            });
-            
-           return false;
+    $(document).on('click', '#btn-status-history', function() {
+        let modal = $('#modalCase');
+        modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#modalCase-label').html($(this).attr('title'));
+        
+        $.get('$statusHistoryAjaxUrl', function(data) {
+            modal.find('.modal-body').html(data);
+        });
      });
     
     $(document).on('click', '.showModalButton', function(){
@@ -334,7 +331,6 @@ Modal::end();
         $.post(url, function(data) {
             $('#modal-' + id).find('.modal-body').html(data);
         });
-       //return false;
     });
     
     $(document).on('click','#client-unsubscribe-button', function (e) {
