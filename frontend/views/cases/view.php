@@ -95,8 +95,8 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                 <?php endif ?>
 
                 <?php
-                    $canStatusLog = 1;//Auth::can('/lead/flow-transition');
-                    $canDataLogs = 1;//Auth::can('/global-log/ajax-view-general-lead-log');
+                    $canStatusLog = Auth::can('/lead/flow-transition');
+                    $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
                 ?>
                 <?php if ($canStatusLog || $canDataLogs) : ?>
                     <div class="dropdown" style="float: left; padding-right: 10px;">
