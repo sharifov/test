@@ -35,7 +35,7 @@ class CasesViewRenderHelper
 //                unset($list[CasesStatus::STATUS_PROCESSING]);
 //            }
 //        }
-        return $list ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) : '';
+        return $list ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status', 'style' => 'margin-right: 6px;']) : '';
     }
 
     public static function renderCheckedButton(Cases $case): string

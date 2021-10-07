@@ -85,14 +85,13 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
 
     <div class="x_panel">
         <div class="x_content" style="display: block;">
-            <p>
                 <?php if ($model->isTrash()) :?>
                     <?php if (Auth::can('cases/take_Trash', ['case' => $model])) :?>
                         <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
                     <?php endif ?>
                 <?php else :?>
                     <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
-                <?php endif ?>
+                <?php endif; ?>
 
                 <?php
                     $canStatusLog = Auth::can('/lead/flow-transition');
@@ -137,7 +136,6 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                 'method' => 'post',
             ],
         ])*/ ?>
-            </p>
         </div>
     </div>
 
