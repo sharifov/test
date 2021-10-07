@@ -158,19 +158,21 @@ class GlobalLogSearch extends GlobalLog
     public function searchByCase($params): ActiveDataProvider
     {
         $this->load($params);
-
-        $query = GlobalLog::find()->alias('gl')
-            ->join('join', 'cases', 'cases.cs_id = gl.gl_obj_id')
-            ->where(['gl_obj_id' => $this->caseId])
-            ->andWhere(['gl_model' => Cases::class])
-            ->orderBy(['gl_id' => SORT_ASC]);
+        $query = GlobalLog::find()->alias('gl');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => ['pageSize' => 10],
         ]);
 
-        $this->validate();
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        $query->innerJoin('cases', 'cases.cs_id = gl.gl_obj_id')
+            ->where(['gl_obj_id' => $this->caseId])
+            ->andWhere(['gl_model' => GlobalLog::MODEL_CASES])
+            ->orderBy(['gl_id' => SORT_ASC]);
 
         return $dataProvider;
     }
