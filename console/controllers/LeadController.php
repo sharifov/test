@@ -321,13 +321,19 @@ class LeadController extends Controller
             ->andWhere(['lead.status' => Lead::STATUS_FOLLOW_UP])
             ->andWhere(['<', 'segment.departure', $now->format('Y-m-d')])
             ->groupBy('lead.id');
+
+        $leads->orWhere(['AND',
+            ['IN', 'lead.status', Lead::TRAVEL_DATE_PASSED_STATUS_LIST],
+            ['<', 'segment.departure', $now->modify('-1 day')->format('Y-m-d')],
+        ]);
+
         $count = $leads->count();
 
         foreach ($leads->batch(100) as $leadsBatch) {
             /** @var Lead $lead */
             foreach ($leadsBatch as $lead) {
                 try {
-                    $lead->trash(null, null, 'Auto Trash Follow Up leads with dates passed');
+                    $lead->trash(null, null, 'Auto Trash leads with Travel Dates Passed');
                     $this->leadRepository->save($lead);
                     $report[$lead->id] = $item = 'Lead: ' . $lead->id . ' -> Trashed';
                     echo $item . PHP_EOL;
@@ -342,7 +348,7 @@ class LeadController extends Controller
             }
         }
 
-        echo $count . ' Leads with status `Follow Up` moved in Trash' . PHP_EOL;
+        echo $count . ' Leads with Travel Dates Passed moved in Trash' . PHP_EOL;
         $message = '0 leads trashed';
 
         if (count($report) > 0) {
