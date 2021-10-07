@@ -55,7 +55,7 @@ class CasesStatusTransferList
     {
         $list = self::ORIGIN;
 
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_PENDING, CasesAbacObject::ACTION_TRANSFER)) {
+        /*if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_PENDING, CasesAbacObject::ACTION_TRANSFER)) {
             unset($list[CasesStatus::STATUS_PENDING]);
         }
         if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_PROCESSING, CasesAbacObject::ACTION_TRANSFER)) {
@@ -81,6 +81,12 @@ class CasesStatusTransferList
         }
         if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_ERROR, CasesAbacObject::ACTION_TRANSFER)) {
             unset($list[CasesStatus::STATUS_ERROR]);
+        }*/
+
+        foreach ($list as $statusId => $status) {
+            if (!Yii::$app->abac->can(new CasesAbacDto($case, $statusId), CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
+                unset($list[$statusId]);
+            }
         }
 
         return $list;
