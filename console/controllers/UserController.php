@@ -5,7 +5,10 @@ namespace console\controllers;
 use common\models\query\EmployeeQuery;
 use common\models\UserConnection;
 use common\models\UserOnline;
+use sales\helpers\setting\SettingHelper;
 use sales\model\user\entity\monitor\UserMonitor;
+use sales\model\userData\entity\UserDataKey;
+use sales\model\userData\entity\UserDataQuery;
 use sales\model\userStatDay\entity\UserStatDay;
 use yii\console\Controller;
 use yii\db\Query;
@@ -74,7 +77,8 @@ class UserController extends Controller
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-        $processed = 0;
+        $processedUserStatDay = 0;
+        $processedUserData = 0;
         $timeStart = microtime(true);
 
         $date = new \DateTimeImmutable('-1 day');
@@ -101,17 +105,50 @@ class UserController extends Controller
             if (!$userStatDay->save()) {
                 $userStatDayErrors[] = $userStatDay->getErrorSummary(true)[0];
             }
-            $processed++;
+            $processedUserStatDay++;
         }
 
         if ($userStatDayErrors) {
             \Yii::error('Saving user_stat_day row failed while calculating users gross profit: ' . PHP_EOL . VarDumper::dumpAsString($userStatDayErrors), 'console:UserController:actionCalculateGrossProfit:userStatDay:save');
         }
 
+        $dateNow = new \DateTimeImmutable();
+        $datePeriod = $dateNow->modify('-' . SettingHelper::getCalculateGrossProfitInDays() . ' days');
+
+        $query = new Query();
+        $subQuery = EmployeeQuery::getSalesQuery($datePeriod->format('Y-m-d 00:00:00'), $date->format('Y-m-d 23:59:59'));
+        $query->from(['gross_profit_query' => $subQuery]);
+        $query->select([
+            'gross_profit' => 'sum(gross_profit)',
+            'employee_id'
+        ]);
+        $query->groupBy(['employee_id']);
+
+        $result = $query->all();
+
+        $userGrossProfitPeriodErrors = [];
+        foreach ($result as $userGrossProfit) {
+            $insertOrUpdateResult = UserDataQuery::insertOrUpdate((int)$userGrossProfit['employee_id'], UserDataKey::GROSS_PROFIT, (string)$userGrossProfit['gross_profit'], $dateNow);
+            if (!$insertOrUpdateResult) {
+                $userGrossProfitPeriodErrors[] = 'Save user data failed with data: ' . VarDumper::dumpAsString([
+                    'employeeId' => $userGrossProfit['employee_id'],
+                    'key' => UserDataKey::GROSS_PROFIT,
+                    'gross_profit' => $userGrossProfit['gross_profit'],
+                    'updatedDt' => $dateNow->format('Y-m-d H:i:s')
+                ]);
+            }
+            $processedUserData++;
+        }
+        if ($userGrossProfitPeriodErrors) {
+            \Yii::error('Saving user_data row failed while calculating users gross profit: ' . PHP_EOL . VarDumper::dumpAsString($userGrossProfitPeriodErrors), 'console:UserController:actionCalculateGrossProfit:userStatDay:save');
+        }
+
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %n'), PHP_EOL;
+            ' s] %g Processed UserStatDay: %w[' . $processedUserStatDay . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed UserData: %w[' . $processedUserData . '] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
