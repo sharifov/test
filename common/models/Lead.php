@@ -279,6 +279,13 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_NEW            => 'New',
     ];
 
+    public const TRAVEL_DATE_PASSED_STATUS_LIST = [
+        self::STATUS_PENDING,
+        self::STATUS_PROCESSING,
+        self::STATUS_FOLLOW_UP,
+        self::STATUS_NEW,
+    ];
+
     public const STATUS_MULTIPLE_UPDATE_LIST = [
         self::STATUS_FOLLOW_UP      => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
         self::STATUS_ON_HOLD        => self::STATUS_LIST[self::STATUS_ON_HOLD],
