@@ -10,6 +10,7 @@ use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
 use sales\entities\EventTrait;
+use sales\traits\FieldsTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -35,6 +36,7 @@ use yii\helpers\ArrayHelper;
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
     use EventTrait;
+    use FieldsTrait;
 
     public function behaviors(): array
     {
