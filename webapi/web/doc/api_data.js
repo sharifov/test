@@ -9163,8 +9163,8 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": false,
-            "field": "billing.country_code",
-            "description": "<p>Country code</p>"
+            "field": "billing.country_id",
+            "description": "<p>Country code (for example &quot;US&quot;)</p>"
           },
           {
             "group": "Parameter",
@@ -9202,14 +9202,14 @@ define({ "api": [
             "group": "Parameter",
             "type": "object",
             "optional": false,
-            "field": "payment",
-            "description": "<p>Payment</p>"
+            "field": "payment_request",
+            "description": "<p>Payment request</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "payment.amount",
+            "field": "payment_request.amount",
             "description": "<p>Amount</p>"
           },
           {
@@ -9217,7 +9217,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "payment.currency",
+            "field": "payment_request.currency",
             "description": "<p>Currency code</p>"
           },
           {
@@ -9225,21 +9225,21 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": false,
-            "field": "payment.method_key",
+            "field": "payment_request.method_key",
             "description": "<p>Method key (for example &quot;cc&quot;)</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": false,
-            "field": "payment.method_data",
+            "field": "payment_request.method_data",
             "description": "<p>Method data</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": false,
-            "field": "payment.method_data.card",
+            "field": "payment_request.method_data.card",
             "description": "<p>Card (for credit card)</p>"
           },
           {
@@ -9247,7 +9247,7 @@ define({ "api": [
             "type": "string",
             "size": "50",
             "optional": false,
-            "field": "payment.method_data.card.number",
+            "field": "payment_request.method_data.card.number",
             "description": "<p>Number</p>"
           },
           {
@@ -9255,21 +9255,21 @@ define({ "api": [
             "type": "string",
             "size": "50",
             "optional": true,
-            "field": "payment.method_data.card.holder_name",
+            "field": "payment_request.method_data.card.holder_name",
             "description": "<p>Holder name</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "payment.method_data.card.exp_month",
+            "field": "payment_request.method_data.card.exp_month",
             "description": "<p>Month</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "payment.method_data.card.exp_year",
+            "field": "payment_request.method_data.card.exp_year",
             "description": "<p>Year</p>"
           },
           {
@@ -9277,7 +9277,7 @@ define({ "api": [
             "type": "string",
             "size": "32",
             "optional": false,
-            "field": "payment.method_data.card.cvv",
+            "field": "payment_request.method_data.card.cvv",
             "description": "<p>CVV</p>"
           },
           {

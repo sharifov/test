@@ -53,7 +53,7 @@ class FlightQuoteExchangeController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{7..10}}        booking_id                              Booking ID
+     * @apiParam {string{7..10}}        booking_id                                      Booking ID
      * @apiParam {object}               [flight_product_quote]                          Flight quote
      * @apiParam {string{2}}            flight_product_quote.gds                        Gds
      * @apiParam {string{10}}           flight_product_quote.pcc                        pcc
@@ -69,23 +69,23 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{50}}           [billing.address_line2]      Address line 2
      * @apiParam {string{30}}           billing.city                 City
      * @apiParam {string{40}}           [billing.state]              State
-     * @apiParam {string{2}}            billing.country_code         Country code
+     * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
      * @apiParam {string{10}}           [billing.zip]                Zip
      * @apiParam {string{20}}           [billing.contact_phone]      Contact phone
      * @apiParam {string{160}}          [billing.contact_email]      Contact email
      * @apiParam {string{60}}           [billing.contact_name]       Contact name
-     * @apiParam {object}               payment                      Payment
-     * @apiParam {number}               payment.amount               Amount
-     * @apiParam {string{3}}            payment.currency             Currency code
-     * @apiParam {string{2}}            payment.method_key           Method key (for example "cc")
-     * @apiParam {object}               payment.method_data          Method data
-     * @apiParam {object}               payment.method_data.card     Card (for credit card)
-     * @apiParam {string{50}}           payment.method_data.card.number          Number
-     * @apiParam {string{50}}           [payment.method_data.card.holder_name]   Holder name
-     * @apiParam {int}                  payment.method_data.card.exp_month       Month
-     * @apiParam {int}                  payment.method_data.card.exp_year        Year
-     * @apiParam {string{32}}           payment.method_data.card.cvv             CVV
-     * @apiParam {object}               flight_product_quote.trips.segments             Segments
+     * @apiParam {object}               payment_request                      Payment request
+     * @apiParam {number}               payment_request.amount               Amount
+     * @apiParam {string{3}}            payment_request.currency             Currency code
+     * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")
+     * @apiParam {object}               payment_request.method_data          Method data
+     * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
+     * @apiParam {string{50}}           payment_request.method_data.card.number          Number
+     * @apiParam {string{50}}           [payment_request.method_data.card.holder_name]   Holder name
+     * @apiParam {int}                  payment_request.method_data.card.exp_month       Month
+     * @apiParam {int}                  payment_request.method_data.card.exp_year        Year
+     * @apiParam {string{32}}           payment_request.method_data.card.cvv             CVV
+     * @apiParam {object}                      flight_product_quote.trips.segments                          Segments
      * @apiParam {string{format Y-m-d H:i}}    flight_product_quote.trips.segments.departureTime            DepartureTime
      * @apiParam {string{format Y-m-d H:i}}    flight_product_quote.trips.segments.arrivalTime              ArrivalTime
      * @apiParam {string{3}}                   flight_product_quote.trips.segments.departureAirportCode     Departure Airport Code IATA
