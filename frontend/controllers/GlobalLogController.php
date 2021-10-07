@@ -116,6 +116,29 @@ class GlobalLogController extends FController
     }
 
     /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxViewGeneralCaseLog(): string
+    {
+        if (Yii::$app->request->isAjax) {
+            $caseId = Yii::$app->request->get('cid');
+
+            $searchModel = new GlobalLogSearch();
+            $params = Yii::$app->request->queryParams;
+            $params['GlobalLogSearch']['caseId'] = $caseId;
+            $dataProvider = $searchModel->searchByCase($params);
+
+            return $this->renderAjax('partial/_general_case_log', [
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+                'cid' => $caseId,
+            ]);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
      * Finds the GlobalLog model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
