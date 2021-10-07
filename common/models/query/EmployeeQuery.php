@@ -15,6 +15,7 @@ use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userClientChatData\entity\UserClientChatData;
+use sales\model\userData\entity\UserData;
 use sales\model\userStatDay\entity\UserStatDayQuery;
 use yii\db\Expression;
 use yii\db\Query;
@@ -96,7 +97,6 @@ class EmployeeQuery extends \yii\db\ActiveQuery
      * @param int $departmentId
      * @param int $redialUserAccessExpiredSeconds
      * @param int $limit
-     * @param int $periodDays
      * @return array []
      * @throws \Exception
      */
@@ -105,43 +105,24 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         int $projectId,
         int $departmentId,
         int $redialUserAccessExpiredSeconds,
-        int $limit,
-        int $periodDays
+        int $limit
     ): array {
         $query = Employee::find();
         $query->select([
             Employee::tableName() . '.id',
-            'up.up_skill'
+            'up.up_skill',
+            'gross_profit' => 'ud_value'
         ]);
         $query->groupBy([
             'id',
             'up_skill',
-            'uparams.up_call_user_level'
+            'uparams.up_call_user_level',
+            'gross_profit'
         ]);
 
         $joinedField = Employee::tableName() . '.id';
 
-        $dateNow = new \DateTimeImmutable();
-        $datePeriod = $dateNow->modify('-' . $periodDays . ' days');
-
-        $grossProfitQuery = UserStatDayQuery::getGrossProfitQuery()
-        ->andWhere([
-            'OR',
-            new Expression('usd.usd_year = :yearPeriod and usd.usd_month = :monthPeriod and usd.usd_day >= :dayPeriod', [
-                'yearPeriod' => (int)$datePeriod->format('Y'),
-                'monthPeriod' => (int)$datePeriod->format('m'),
-                'dayPeriod' => (int)$datePeriod->format('d')
-            ]),
-            new Expression('usd.usd_year = :year and usd.usd_month = :month and usd.usd_day <= :day', [
-                'year' => (int)$dateNow->format('Y'),
-                'month' => (int)$dateNow->format('m'),
-                'day' => (int)$dateNow->format('d')
-            ])
-        ]);
-
-        $query->addSelect([
-            'gross_profit' => $grossProfitQuery
-        ]);
+        $query->leftJoin(UserData::tableName(), 'ud_user_id = ' . $joinedField);
 
         $query->enabledAutoRedial($joinedField);
         $query->online($joinedField);
@@ -185,7 +166,7 @@ class EmployeeQuery extends \yii\db\ActiveQuery
             'gross_profit' => SORT_DESC
         ]);
         $query->limit($limit);
-        \Yii::info($query->createCommand()->rawSql, 'info\getAgentsForRedialCallByLead');
+//        \Yii::info($query->createCommand()->rawSql, 'info\getAgentsForRedialCallByLead');
         return $query->asArray()->all();
     }
 
