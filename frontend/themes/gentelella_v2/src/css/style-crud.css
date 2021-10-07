@@ -5645,10 +5645,6 @@ input[disabled] + .radio-tab__text {
 }
 /****** END LABELS ******/
 
-.word-break-all {
-  word-break: break-all;
-}
-
 /****** TABLES ******/
 .table {
     color: #596b7d;
