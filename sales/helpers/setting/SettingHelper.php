@@ -389,6 +389,11 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['client_notifications_history_days'] ?? 30);
     }
 
+    public static function getLeadTravelDatesPassedTrashedHours(): int
+    {
+        return (int)(Yii::$app->params['settings']['leads_travel_dates_passed_trashed_hours'] ?? 24);
+    }
+
     public static function getCallDistributionSort(): array
     {
         $sort = [

@@ -9,6 +9,7 @@ use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Task;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\lead\LeadRepository;
 use yii\console\Controller;
 use yii\db\Query;
@@ -324,7 +325,11 @@ class LeadController extends Controller
 
         $leads->orWhere(['AND',
             ['IN', 'lead.status', Lead::TRAVEL_DATE_PASSED_STATUS_LIST],
-            ['<', 'segment.departure', $now->modify('-1 day')->format('Y-m-d')],
+            [
+                '<',
+                'segment.departure',
+                $now->modify('-' . SettingHelper::getLeadTravelDatesPassedTrashedHours() . ' hours')->format('Y-m-d')
+            ],
         ]);
 
         $count = $leads->count();
