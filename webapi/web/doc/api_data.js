@@ -9001,6 +9001,455 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v2/flight-quote-exchange/create",
+    "title": "Voluntary Exchange Create",
+    "version": "0.2.0",
+    "name": "Voluntary_Exchange_Create",
+    "group": "Voluntary_Exchange",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "flight_product_quote",
+            "description": "<p>Flight quote</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "flight_product_quote.gds",
+            "description": "<p>Gds</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "flight_product_quote.pcc",
+            "description": "<p>pcc</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "flight_product_quote.fareType",
+            "description": "<p>ValidatingCarrier</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "flight_product_quote.trips",
+            "description": "<p>Trips</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_product_quote.trips.duration",
+            "description": "<p>Trip Duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "billing",
+            "description": "<p>Billing</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.last_name",
+            "description": "<p>Last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "billing.middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.company_name",
+            "description": "<p>Company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "billing.address_line1",
+            "description": "<p>Address line 1</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "billing.address_line2",
+            "description": "<p>Address line 2</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.city",
+            "description": "<p>City</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.state",
+            "description": "<p>State</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country_id",
+            "description": "<p>Country code (for example &quot;US&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": true,
+            "field": "billing.zip",
+            "description": "<p>Zip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": true,
+            "field": "billing.contact_phone",
+            "description": "<p>Contact phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": true,
+            "field": "billing.contact_email",
+            "description": "<p>Contact email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "60",
+            "optional": true,
+            "field": "billing.contact_name",
+            "description": "<p>Contact name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request",
+            "description": "<p>Payment request</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "payment_request.amount",
+            "description": "<p>Amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payment_request.currency",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "payment_request.method_key",
+            "description": "<p>Method key (for example &quot;cc&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data",
+            "description": "<p>Method data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data.card",
+            "description": "<p>Card (for credit card)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "payment_request.method_data.card.number",
+            "description": "<p>Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "payment_request.method_data.card.holder_name",
+            "description": "<p>Holder name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.exp_month",
+            "description": "<p>Month</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.exp_year",
+            "description": "<p>Year</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "payment_request.method_data.card.cvv",
+            "description": "<p>CVV</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "flight_product_quote.trips.segments",
+            "description": "<p>Segments</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "flight_product_quote.trips.segments.departureTime",
+            "description": "<p>DepartureTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "flight_product_quote.trips.segments.arrivalTime",
+            "description": "<p>ArrivalTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "flight_product_quote.trips.segments.departureAirportCode",
+            "description": "<p>Departure Airport Code IATA</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "flight_product_quote.trips.segments.arrivalAirportCode",
+            "description": "<p>Arrival Airport Code IATA</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.flightNumber",
+            "description": "<p>Flight Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "1",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.bookingClass",
+            "description": "<p>BookingClass</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.duration",
+            "description": "<p>Segment duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.departureAirportTerminal",
+            "description": "<p>Departure Airport Terminal Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.arrivalAirportTerminal",
+            "description": "<p>Arrival Airport Terminal Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.operatingAirline",
+            "description": "<p>Operating Airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.marketingAirline",
+            "description": "<p>Marketing Airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.airEquipType",
+            "description": "<p>AirEquipType</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.marriageGroup",
+            "description": "<p>MarriageGroup</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.mileage",
+            "description": "<p>Mileage</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.meal",
+            "description": "<p>Meal</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "flight_product_quote.trips.segments.fareCode",
+            "description": "<p>Fare Code</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"booking_id\":\"XXXYYYZ\",\n    \"flight_quote\":{\n        \"gds\": \"S\",\n        \"pcc\": \"8KI0\",\n        \"validatingCarrier\": \"PR\",\n        \"fareType\": \"SR\",\n        \"trips\":[\n            {\n                \"duration\":848,\n                \"segments\":[\n                    {\n                        \"departureTime\":\"2021-06-10 21:30\",\n                        \"arrivalTime\":\"2021-06-11 07:30\",\n                        \"flightNumber\":\"8727\",\n                        \"bookingClass\":\"E\",\n                        \"stop\":0,\n                        \"stops\":[\n                        ],\n                        \"duration\":600,\n                        \"departureAirportCode\":\"ROB\",\n                        \"departureAirportTerminal\":null,\n                        \"arrivalAirportCode\":\"CDG\",\n                        \"arrivalAirportTerminal\":null,\n                        \"operatingAirline\":null,\n                        \"airEquipType\":null,\n                        \"marketingAirline\":\"DL\",\n                        \"marriageGroup\":\"\",\n                        \"mileage\":null,\n                        \"cabin\":\"Y\",\n                        \"meal\":null,\n                        \"fareCode\":null,\n                        \"baggage\":[\n                        ],\n                        \"brandId\":null\n                    },\n                    {\n                        \"departureTime\":\"2021-06-11 10:15\",\n                        \"arrivalTime\":\"2021-06-11 12:55\",\n                        \"flightNumber\":\"8395\",\n                        \"bookingClass\":\"E\",\n                        \"stop\":0,\n                        \"stops\":[\n\n                        ],\n                        \"duration\":160,\n                        \"departureAirportCode\":\"CDG\",\n                        \"departureAirportTerminal\":null,\n                        \"arrivalAirportCode\":\"LAX\",\n                        \"arrivalAirportTerminal\":null,\n                        \"operatingAirline\":null,\n                        \"airEquipType\":null,\n                        \"marketingAirline\":\"DL\",\n                        \"marriageGroup\":\"\",\n                        \"mileage\":null,\n                        \"cabin\":\"Y\",\n                        \"meal\":null,\n                        \"fareCode\":null,\n                        \"baggage\":[\n\n                        ],\n                        \"brandId\":null\n                    },\n                    {\n                        \"departureTime\":\"2021-06-11 17:46\",\n                        \"arrivalTime\":\"2021-06-11 19:14\",\n                        \"flightNumber\":\"3580\",\n                        \"bookingClass\":\"E\",\n                        \"stop\":0,\n                        \"stops\":[\n\n                        ],\n                        \"duration\":88,\n                        \"departureAirportCode\":\"LAX\",\n                        \"departureAirportTerminal\":null,\n                        \"arrivalAirportCode\":\"SMF\",\n                        \"arrivalAirportTerminal\":null,\n                        \"operatingAirline\":null,\n                        \"airEquipType\":null,\n                        \"marketingAirline\":\"DL\",\n                        \"marriageGroup\":\"\",\n                        \"mileage\":null,\n                        \"cabin\":\"Y\",\n                        \"meal\":null,\n                        \"fareCode\":null,\n                        \"baggage\":[\n\n                        ],\n                        \"brandId\":null\n                    }\n                ]\n            },\n            {\n                \"duration\":1233,\n                \"segments\":[\n                    {\n                        \"departureTime\":\"2021-09-10 10:27\",\n                        \"arrivalTime\":\"2021-09-10 12:34\",\n                        \"flightNumber\":\"3864\",\n                        \"bookingClass\":\"E\",\n                        \"stop\":0,\n                        \"stops\":[\n\n                        ],\n                        \"duration\":127,\n                        \"departureAirportCode\":\"SMF\",\n                        \"departureAirportTerminal\":null,\n                        \"arrivalAirportCode\":\"SEA\",\n                        \"arrivalAirportTerminal\":null,\n                        \"operatingAirline\":null,\n                        \"airEquipType\":\"E7W\",\n                        \"marketingAirline\":\"DL\",\n                        \"marriageGroup\":\"\",\n                        \"mileage\":null,\n                        \"cabin\":\"Y\",\n                        \"meal\":null,\n                        \"fareCode\":null,\n                        \"baggage\":[\n\n                        ],\n                        \"brandId\":null\n                    },\n                    {\n                        \"departureTime\":\"2021-09-10 08:13\",\n                        \"arrivalTime\":\"2021-09-10 13:34\",\n                        \"flightNumber\":\"759\",\n                        \"bookingClass\":\"E\",\n                        \"stop\":0,\n                        \"stops\":[\n\n                        ],\n                        \"duration\":201,\n                        \"departureAirportCode\":\"SEA\",\n                        \"departureAirportTerminal\":null,\n                        \"arrivalAirportCode\":\"MSP\",\n                        \"arrivalAirportTerminal\":null,\n                        \"operatingAirline\":null,\n                        \"airEquipType\":\"739\",\n                        \"marketingAirline\":\"DL\",\n                        \"marriageGroup\":\"\",\n                        \"mileage\":null,\n                        \"cabin\":\"Y\",\n                        \"meal\":null,\n                        \"fareCode\":null,\n                        \"baggage\":[\n\n                        ],\n                        \"brandId\":null\n                    },\n                    {\n                        \"departureTime\":\"2021-09-10 16:45\",\n                        \"arrivalTime\":\"2021-09-11 08:15\",\n                        \"flightNumber\":\"42\",\n                        \"bookingClass\":\"E\",\n                        \"stop\":0,\n                        \"stops\":[\n\n                        ],\n                        \"duration\":510,\n                        \"departureAirportCode\":\"MSP\",\n                        \"departureAirportTerminal\":null,\n                        \"arrivalAirportCode\":\"CDG\",\n                        \"arrivalAirportTerminal\":null,\n                        \"operatingAirline\":null,\n                        \"airEquipType\":\"333\",\n                        \"marketingAirline\":\"DL\",\n                        \"marriageGroup\":\"\",\n                        \"mileage\":null,\n                        \"cabin\":\"Y\",\n                        \"meal\":null,\n                        \"fareCode\":null,\n                        \"baggage\":[\n\n                        ],\n                        \"brandId\":null\n                    },\n                    {\n                        \"departureTime\":\"2021-09-11 10:15\",\n                        \"arrivalTime\":\"2021-09-11 16:50\",\n                        \"flightNumber\":\"7351\",\n                        \"bookingClass\":\"E\",\n                        \"stop\":1,\n                        \"stops\":[\n                            {\n                                \"locationCode\":\"BKO\",\n                                \"departureDateTime\":\"2021-09-11 15:20\",\n                                \"arrivalDateTime\":\"2021-09-11 13:55\",\n                                \"duration\":85,\n                                \"elapsedTime\":null,\n                                \"equipment\":null\n                            }\n                        ],\n                        \"duration\":395,\n                        \"departureAirportCode\":\"CDG\",\n                        \"departureAirportTerminal\":null,\n                        \"arrivalAirportCode\":\"ROB\",\n                        \"arrivalAirportTerminal\":null,\n                        \"operatingAirline\":null,\n                        \"airEquipType\":\"359\",\n                        \"marketingAirline\":\"DL\",\n                        \"marriageGroup\":\"\",\n                        \"mileage\":null,\n                        \"cabin\":\"Y\",\n                        \"meal\":null,\n                        \"fareCode\":null,\n                        \"baggage\":[\n\n                        ],\n                        \"brandId\":null\n                    }\n                ]\n            }\n        ]\n    }\n  },\n    \"payment\":{\n        \"method_key\":\"cc\",\n        \"method_data\":{\n            \"card\":{\n                \"number\":\"4111555577778888\",\n                \"holder_name\":\"John Doe\",\n                \"exp_month\":10,\n                \"exp_year\":2022,\n                \"cvv\":\"097\"\n            }\n        },\n        \"amount\": 29.95,\n        \"currency\":\"USD\"\n    },\n    \"billing\":{\n        \"first_name\":\"John\",\n        \"last_name\":\"Doe\",\n        \"middle_name\":null,\n        \"company_name\":\"General Motors\",\n        \"address_line1\":\"123 Main Street\",\n        \"address_line2\":\"\",\n        \"city\":\"Paris\",\n        \"state\":\"State\",\n        \"country\":\"United States\",\n        \"zip\":\"94000\",\n        \"contact_phone\":\"+137396512345\",\n        \"contact_email\":\"alex@test.com\",\n        \"contact_name\":\"Mr. Alexander\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"TODO\": \"todo::\"\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
+    "groupTitle": "Voluntary_Exchange"
+  },
+  {
+    "type": "post",
     "url": "/v2/flight-quote-exchange/info",
     "title": "Voluntary Exchange Info",
     "version": "0.2.0",
