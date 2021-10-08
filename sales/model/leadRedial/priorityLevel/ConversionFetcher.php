@@ -2,66 +2,52 @@
 
 namespace sales\model\leadRedial\priorityLevel;
 
+use common\models\Employee;
 use common\models\Lead;
+use common\models\ProfitSplit;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
+use yii\db\Expression;
 use yii\db\Query;
 
 class ConversionFetcher
 {
-    public function fetch(int $userId, \DateTimeImmutable $fromDt)
+    public function fetch(\DateTimeImmutable $fromDt, \DateTimeImmutable $toDt): array
     {
         $from = $fromDt->format('Y-m-d H:i:s');
-        $to = date('Y-m-d H:i:s');
+        $to = $toDt->format('Y-m-d H:i:s');
 
         $query = (new Query())
             ->select([
-                Lead::tableName() . '.id',
-                Lead::tableName() . '.gid',
-                '(ROUND(if(sp.`owner_share` is null, 1, sp.`owner_share`) * (final_profit - agents_processing_fee), 2)) as gross_profit',
-                'if(sp.`owner_share` is null, 1, ROUND(sp.owner_share, 2)) as share',
-                'l_status_dt',
-                'created'
+                'users.id as user_id',
+                'conversion_percent' => new Expression('if ((conversion_cnt is null or conversion_cnt = 0 or share is null or share = 0), 0, (share / conversion_cnt))')
             ])
-            ->from(Lead::tableName())
-            ->leftJoin([
-            'sp' => (new Query())->select(['id', '(100 - sum(ps_percent)) / 100 as owner_share'])
-                ->from(Lead::tableName())
-                ->innerJoin('profit_split', 'ps_lead_id = id')
-                ->where(['status' => Lead::STATUS_SOLD])
-                ->andWhere([
-                    'OR',
-                    ['IS', 'l_status_dt', null],
-                    ['BETWEEN', 'DATE(l_status_dt)', $from, $to]
+            ->from(['users' => Employee::tableName()])
+            ->leftJoin(['profit_split' => (new Query())
+                ->select([
+                    'ps_user_id as user_id',
+                    'sum((ROUND((ps_percent / 100), 2))) as share',
+                    'if (conversion_count is null, 0, conversion_count) as conversion_cnt',
                 ])
-                ->andWhere(['employee_id' => $userId])
-                ->groupBy(['id'])
-            ], 'sp.id = leads.id')
-            ->andWhere(['status' => Lead::STATUS_SOLD])
-            ->andWhere([
-                'OR',
-                ['IS', 'l_status_dt', null],
-                ['BETWEEN', 'DATE(l_status_dt)', $from, $to]
-            ])
-            ->andWhere(['employee_id' => $userId]);
+                ->from(ProfitSplit::tableName())
+                ->innerJoin(
+                    ['l' => Lead::tableName()],
+                    'l.id = ps_lead_id AND l.status = :status AND (DATE(l.l_status_dt) BETWEEN :from AND :to)',
+                    [':status' => Lead::STATUS_SOLD, ':from' => $from, ':to' => $to]
+                )
+                ->leftJoin([
+                    'conversion' => (new Query())
+                        ->from(LeadUserConversion::tableName())
+                        ->select([
+                            'luc_user_id',
+                            'count(*) as conversion_count',
+                        ])
+                        ->andWhere(['BETWEEN', 'DATE(luc_created_dt)', $from, $to])
+                    ->groupBy(['luc_user_id'])
+                ], 'conversion.luc_user_id = ps_user_id')
+                ->groupBy(['user_id'])
+            ], 'profit_split.user_id = users.id')
+            ->andWhere(['users.status' => Employee::STATUS_ACTIVE]);
 
-
-        return $query->createCommand()->getRawSql();
-
-        $complementaryQuery = new Query();
-        $complementaryQuery->select([
-            'id',
-            'gid',
-            '(ROUND((final_profit - agents_processing_fee) * ps_percent/100, 2)) as gross_profit',
-            'ROUND((ps_percent / 100), 2) as share',
-            'l_status_dt',
-            'created'
-        ]);
-        $complementaryQuery->from(Lead::tableName());
-        $complementaryQuery->innerJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . $userId);
-        $complementaryQuery->where(['status' => Lead::STATUS_SOLD]);
-        $complementaryQuery->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
-
-        $query->union($complementaryQuery, true);
-
-        return $query->createCommand()->getRawSql();
+        return $query->createCommand()->queryAll();
     }
 }

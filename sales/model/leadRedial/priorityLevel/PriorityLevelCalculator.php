@@ -2,7 +2,7 @@
 
 namespace sales\model\leadRedial\priorityLevel;
 
-interface PriorityLevel
+interface PriorityLevelCalculator
 {
     public function calculate(float $percent): int;
 }

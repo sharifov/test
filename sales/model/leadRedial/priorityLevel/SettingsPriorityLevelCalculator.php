@@ -8,7 +8,7 @@ namespace sales\model\leadRedial\priorityLevel;
  * @property array $settings
  * @property int $default
  */
-class SettingsPriorityLevel implements PriorityLevel
+class SettingsPriorityLevelCalculator implements PriorityLevelCalculator
 {
     private array $settings;
     private int $default;

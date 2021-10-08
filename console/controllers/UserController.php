@@ -5,7 +5,10 @@ namespace console\controllers;
 use common\models\query\EmployeeQuery;
 use common\models\UserConnection;
 use common\models\UserOnline;
+use common\models\UserParams;
 use sales\helpers\setting\SettingHelper;
+use sales\model\leadRedial\priorityLevel\ConversionFetcher;
+use sales\model\leadRedial\priorityLevel\PriorityLevelCalculator;
 use sales\model\user\entity\monitor\UserMonitor;
 use sales\model\userData\entity\UserDataKey;
 use sales\model\userData\entity\UserDataQuery;
@@ -151,5 +154,47 @@ class UserController extends Controller
             ' s] %g Processed UserData: %w[' . $processedUserData . '] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionCalculatePriorityLevel(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $timeStart = microtime(true);
+
+        $dateNow = new \DateTimeImmutable();
+        $dateFrom = $dateNow->modify('-' . SettingHelper::getCalculatePriorityLevelInDays() . ' days');
+
+        $conversions = (new ConversionFetcher())->fetch($dateFrom, $dateNow);
+
+        $priorityLevelCalculator = \Yii::createObject(PriorityLevelCalculator::class);
+        $levels = array_map(static function ($value) use ($priorityLevelCalculator) {
+            return [
+                'user_id' => (int)$value['user_id'],
+                'priority_level' => $priorityLevelCalculator->calculate($value['conversion_percent']),
+            ];
+        }, $conversions);
+
+        foreach ($levels as $level) {
+            try {
+                UserParams::updateAll(
+                    ['up_call_user_level' => $level['priority_level']],
+                    'up_user_id = :userId',
+                    [':userId' => $level['user_id']]
+                );
+            } catch (\Throwable $e) {
+                \Yii::error([
+                    'message' => 'Update user priority level',
+                    'exception' => $e->getMessage(),
+                    'userId' => $level['user_id'],
+                    'level' => $level['priority_level'],
+                ], 'UserController:actionCalculatePriorityLevel');
+            }
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 }

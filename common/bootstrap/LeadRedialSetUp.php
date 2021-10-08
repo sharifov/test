@@ -6,8 +6,8 @@ use sales\helpers\setting\SettingHelper;
 use sales\model\leadRedial\assign\EmployeeUsers;
 use sales\model\leadRedial\assign\TestUsers;
 use sales\model\leadRedial\assign\Users;
-use sales\model\leadRedial\priorityLevel\PriorityLevel;
-use sales\model\leadRedial\priorityLevel\SettingsPriorityLevel;
+use sales\model\leadRedial\priorityLevel\PriorityLevelCalculator;
+use sales\model\leadRedial\priorityLevel\SettingsPriorityLevelCalculator;
 use sales\model\leadRedial\queue\CallNextLeads;
 use sales\model\leadRedial\queue\LeadRedialQueue;
 use sales\model\leadRedial\queue\Leads;
@@ -39,8 +39,8 @@ class LeadRedialSetUp implements BootstrapInterface
 //            return new TestUsers();
         });
 
-        $container->setSingleton(PriorityLevel::class, static function () use ($container) {
-            return new SettingsPriorityLevel();
+        $container->setSingleton(PriorityLevelCalculator::class, static function () use ($container) {
+            return new SettingsPriorityLevelCalculator();
         });
     }
 }

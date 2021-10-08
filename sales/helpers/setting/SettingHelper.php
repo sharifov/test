@@ -629,4 +629,9 @@ class SettingHelper
     {
         return (int) (Yii::$app->params['settings']['calculate_gross_profit_in_days'] ?? 14);
     }
+
+    public static function getCalculatePriorityLevelInDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['calculate_priority_level_in_days'] ?? 14);
+    }
 }
