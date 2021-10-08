@@ -194,7 +194,7 @@ class UserController extends Controller
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 }

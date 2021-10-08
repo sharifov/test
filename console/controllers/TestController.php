@@ -89,13 +89,6 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
-    public function actionC()
-    {
-        $fetcher = new ConversionFetcher();
-        $r = $fetcher->fetch(414, new \DateTimeImmutable('2019-01-01 00:00:00'));
-        VarDumper::dump($r);
-    }
-
     public function actionMmm()
     {
         $t  = (new LeadRedialAccessChecker())->exist(295);

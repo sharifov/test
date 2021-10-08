@@ -25,7 +25,7 @@ class ConversionFetcher
             ->leftJoin(['profit_split' => (new Query())
                 ->select([
                     'ps_user_id as user_id',
-                    'sum((ROUND((ps_percent / 100), 2))) as share',
+                    'sum(ps_percent) as share',
                     'if (conversion_count is null, 0, conversion_count) as conversion_cnt',
                 ])
                 ->from(ProfitSplit::tableName())
