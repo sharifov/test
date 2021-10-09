@@ -69,6 +69,7 @@ use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use sales\model\leadRedial\assign\LeadRedialAccessChecker;
+use sales\model\leadRedial\assign\Users;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\leadRedial\priorityLevel\ConversionFetcher;
@@ -91,8 +92,17 @@ class TestController extends Controller
 {
     public function actionMmm()
     {
-        $t  = (new LeadRedialAccessChecker())->exist(295);
-        VarDumper::dump($t);
+        $users = \Yii::createObject(Users::class);
+        $lead = Lead::findOne(513195);
+        $r = $users->getUsers($lead, 4, false);
+        VarDumper::dump($r);
+    }
+
+    public function actionNnn()
+    {
+        $call = Call::findOne(3385614);
+        $r = Employee::getUsersForCallQueue($call, 10);
+        VarDumper::dump($r);
     }
 
     public function actionR()

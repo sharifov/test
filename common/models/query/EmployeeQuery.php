@@ -12,10 +12,12 @@ use common\models\UserOnline;
 use common\models\UserParams;
 use common\models\UserProfile;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\model\leadRedial\assign\SortUsers;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\model\userData\entity\UserData;
+use sales\model\userData\entity\UserDataKey;
 use sales\model\userStatDay\entity\UserStatDayQuery;
 use yii\db\Expression;
 use yii\db\Query;
@@ -111,7 +113,9 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         $query->select([
             Employee::tableName() . '.id',
             'up.up_skill',
-            'gross_profit' => 'ud_value'
+            'gross_profit' => 'ud_value',
+//            'us_phone_ready_time',
+//            'up_call_user_level',
         ]);
         $query->groupBy([
             'id',
@@ -122,7 +126,11 @@ class EmployeeQuery extends \yii\db\ActiveQuery
 
         $joinedField = Employee::tableName() . '.id';
 
-        $query->leftJoin(UserData::tableName(), 'ud_user_id = ' . $joinedField);
+        $query->leftJoin(
+            UserData::tableName(),
+            'ud_user_id = ' . Employee::tableName() . '.id' . ' and ud_key = :key',
+            [':key' => UserDataKey::GROSS_PROFIT]
+        );
 
         $query->enabledAutoRedial($joinedField);
         $query->online($joinedField);
@@ -161,10 +169,11 @@ class EmployeeQuery extends \yii\db\ActiveQuery
             ]);
         }
 
-        $query->addOrderBy([
-            'uparams.up_call_user_level' => SORT_DESC,
-            'gross_profit' => SORT_DESC
-        ]);
+        $sort = (new SortUsers())->getValue();
+        if ($sort) {
+            $query->addOrderBy($sort);
+        }
+
         $query->limit($limit);
 //        \Yii::info($query->createCommand()->rawSql, 'info\getAgentsForRedialCallByLead');
         return $query->asArray()->all();

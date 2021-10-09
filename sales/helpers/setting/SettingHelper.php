@@ -399,6 +399,8 @@ class SettingHelper
         $defaultSort = [
             'general_line_call_count' => null,
             'phone_ready_time' => $sort['ASC'],
+            'priority_level' => $sort['DESC'],
+            'gross_profit' => $sort['DESC'],
         ];
 
         $callDistributionSort = Yii::$app->params['settings']['call_distribution_sort'] ?? [
@@ -417,6 +419,14 @@ class SettingHelper
 
         if (empty($finalSort['general_line_call_count'])) {
             unset($finalSort['general_line_call_count']);
+        }
+
+        if (empty($finalSort['priority_level'])) {
+            unset($finalSort['priority_level']);
+        }
+
+        if (empty($finalSort['gross_profit'])) {
+            unset($finalSort['gross_profit']);
         }
 
         return $finalSort;

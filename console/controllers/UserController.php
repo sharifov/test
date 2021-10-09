@@ -164,32 +164,39 @@ class UserController extends Controller
 
         $dateNow = new \DateTimeImmutable();
         $dateFrom = $dateNow->modify('-' . SettingHelper::getCalculatePriorityLevelInDays() . ' days');
-
         $conversions = (new ConversionFetcher())->fetch($dateFrom, $dateNow);
-
         $priorityLevelCalculator = \Yii::createObject(PriorityLevelCalculator::class);
-        $levels = array_map(static function ($value) use ($priorityLevelCalculator) {
-            return [
-                'user_id' => (int)$value['user_id'],
-                'priority_level' => $priorityLevelCalculator->calculate($value['conversion_percent']),
-            ];
-        }, $conversions);
+        $userDataErrors = [];
 
-        foreach ($levels as $level) {
+        foreach ($conversions as $conversion) {
             try {
                 UserParams::updateAll(
-                    ['up_call_user_level' => $level['priority_level']],
+                    ['up_call_user_level' => $priorityLevelCalculator->calculate($conversion['conversion_percent'])],
                     'up_user_id = :userId',
-                    [':userId' => $level['user_id']]
+                    [':userId' => (int)$conversion['user_id']]
                 );
+
+                $insertOrUpdateResult = UserDataQuery::insertOrUpdate((int)$conversion['user_id'], UserDataKey::CONVERSION_PERCENT, (string)$conversion['conversion_percent'], $dateNow);
+                if (!$insertOrUpdateResult) {
+                    $userDataErrors[] = 'Save user data failed with data: ' . VarDumper::dumpAsString([
+                            'employeeId' => $conversion['user_id'],
+                            'key' => UserDataKey::CONVERSION_PERCENT,
+                            'conversion' => $conversion['conversion_percent'],
+                            'updatedDt' => $dateNow->format('Y-m-d H:i:s')
+                        ]);
+                }
             } catch (\Throwable $e) {
                 \Yii::error([
                     'message' => 'Update user priority level',
                     'exception' => $e->getMessage(),
-                    'userId' => $level['user_id'],
-                    'level' => $level['priority_level'],
+                    'userId' => $conversion['user_id'],
+                    'conversion_percent' => $conversion['conversion_percent'],
                 ], 'UserController:actionCalculatePriorityLevel');
             }
+        }
+
+        if ($userDataErrors) {
+            \Yii::error('Saving user_data row failed while calculating users conversion: ' . PHP_EOL . VarDumper::dumpAsString($userDataErrors), 'console:UserController:actionCalculatePriorityLevel:userData:save');
         }
 
         $timeEnd = microtime(true);
