@@ -118,21 +118,28 @@ use yii\helpers\Html;
                 </thead>
                 <tbody>
                 <?php $n = 1; ?>
-                <?php foreach ($users as $userModel) : ?>
+                <?php foreach ($users as $user) : ?>
                     <?php
-                        $roles = $userModel->getRoles();
-                        $isReady = $userModel->isCallStatusReady();
+                    $userModel = $user['model'];
+                    $isBusy = $user['isBusy'];
 
-                        $btnClass = 'btn-success';
+                    $roles = $userModel->getRoles();
+                    $isReady = $userModel->isCallStatusReady();
 
-                    if (!$isReady) {
+                    if ($isBusy) {
+                        $btnClass = 'btn-danger';
+                    } elseif (!$isReady) {
                         $btnClass = 'btn-warning';
+                    } else {
+                        $btnClass = 'btn-success';
                     }
-
                     ?>
-                    <tr>
+                    <tr<?= $isBusy ? ' style="background-color: #ccc"' : '' ?>>
                         <td class="text-right"><?=$n++;?>.</td>
-                        <td><i class="fa fa-user"></i> <b><?=Html::encode($userModel->username)?></b></td>
+                        <td>
+                            <i class="fa fa-user"></i> <b><?=Html::encode($userModel->username)?></b>
+                            <?= $isBusy ? ' (Busy)' : '' ?>
+                        </td>
                         <td><?=( is_array($roles) ? implode(', ', $roles) : '-')?></td>
                         <td class="text-center">
                             <?php if (Auth::can('PhoneWidget_TransferToUser', ['call' => $call])) : ?>

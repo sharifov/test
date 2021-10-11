@@ -15,6 +15,7 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\coupon\entity\couponSend\CouponSend;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\AccessCache;
 use sales\model\user\entity\ShiftTime;
@@ -30,6 +31,7 @@ use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -2314,7 +2316,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $query->select([
             'tbl_user_id' => 'user_connection.uc_user_id',
-            'tbl_call_type_id' => $subQuery1
+            'tbl_call_type_id' => $subQuery1,
         ]);
 
         $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $call->c_project_id]);
@@ -2330,8 +2332,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
 
-        $generalQuery = new Query();
+        $generalQuery = (new Query())->select([
+            '*',
+            'tbl_has_lead_redial_access' => new Expression('if ((redial.redial_count is null or redial.redial_count = 0), 0, 1)')
+        ]);
         $generalQuery->from(['tbl' => $query]);
+        $generalQuery->leftJoin([
+                'redial' => CallRedialUserAccess::find()->select([
+                    'count(*) as redial_count',
+                    'crua_user_id'
+                ])->groupBy(['crua_user_id'])
+        ], 'redial.crua_user_id = tbl_user_id');
         $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
 
         //$sqlRaw = $generalQuery->createCommand()->getRawSql();
