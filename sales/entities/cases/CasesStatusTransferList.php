@@ -55,34 +55,6 @@ class CasesStatusTransferList
     {
         $list = self::ORIGIN;
 
-        /*if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_PENDING, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_PENDING]);
-        }
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_PROCESSING, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_PROCESSING]);
-        }
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_FOLLOW_UP, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_FOLLOW_UP]);
-        }
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_SOLVED, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_SOLVED]);
-        }
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_TRASH, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_TRASH]);
-        }
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_NEW, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_NEW]);
-        }
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_AWAITING, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_AWAITING]);
-        }
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_AUTO_PROCESSING, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_AUTO_PROCESSING]);
-        }
-        if (!Yii::$app->abac->can(new CasesAbacDto($case), CasesAbacObject::OBJ_CASE_IN_ERROR, CasesAbacObject::ACTION_TRANSFER)) {
-            unset($list[CasesStatus::STATUS_ERROR]);
-        }*/
-
         foreach ($list as $statusId => $status) {
             if (!Yii::$app->abac->can(new CasesAbacDto($case, $statusId), CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
                 unset($list[$statusId]);

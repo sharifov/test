@@ -312,6 +312,17 @@ class Cases extends ActiveRecord implements Objectable
      * @param int|null $creatorId
      * @param string|null $description
      */
+    public function new(?int $creatorId, ?string $description = ''): void
+    {
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_NEW);
+        $this->recordEvent(new CasesNewStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
+        $this->setStatus(CasesStatus::STATUS_NEW);
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
     public function autoProcessing(?int $creatorId, ?string $description = ''): void
     {
         //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AUTO_PROCESSING);
