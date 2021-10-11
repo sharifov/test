@@ -1411,6 +1411,10 @@ var PhoneWidgetCall = function () {
             return;
         }
 
+        if (activeExist) {
+            window.phoneWidget.notifier.minimize();
+        }
+
         refreshPanes();
     }
 
@@ -1478,6 +1482,10 @@ var PhoneWidgetCall = function () {
         //iconUpdate();
     }
 
+    function hidePhoneNotifications() {
+        window.phoneWidget.notifier.minimize();
+    }
+
     return {
         init: init,
         volumeIndicatorsChange: volumeIndicatorsChange,
@@ -1500,7 +1508,8 @@ var PhoneWidgetCall = function () {
         iconUpdate: iconUpdate,
         audio: audio,
         showCallingPanel: showCallingPanel,
-        openCallTab: openCallTab
+        openCallTab: openCallTab,
+        hidePhoneNotifications: hidePhoneNotifications
     };
 }();
 

@@ -247,6 +247,12 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         }
                     }
 
+                    if (obj.cmd === 'hidePhoneNotifications') {
+                        if (typeof PhoneWidgetCall === 'object') {
+                            PhoneWidgetCall.hidePhoneNotifications();
+                        }
+                    }
+
                     if (obj.cmd === 'removeIncomingRequest') {
                         if (typeof obj.data !== 'undefined') {
                             if (typeof PhoneWidgetCall === 'object') {
