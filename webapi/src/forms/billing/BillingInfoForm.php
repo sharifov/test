@@ -3,6 +3,7 @@
 namespace webapi\src\forms\billing;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use sales\traits\FormNameModelTrait;
 use yii\validators\EmailValidator;
 
 /**
@@ -10,6 +11,8 @@ use yii\validators\EmailValidator;
  */
 class BillingInfoForm extends \yii\base\Model
 {
+    use FormNameModelTrait;
+
     public $first_name;
     public $last_name;
     public $middle_name;

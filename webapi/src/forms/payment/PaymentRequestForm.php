@@ -8,6 +8,7 @@ use common\models\PaymentMethod;
 use frontend\helpers\JsonHelper;
 use modules\order\src\forms\api\create\CreditCardForm;
 use sales\helpers\ErrorsToStringHelper;
+use sales\traits\FormNameModelTrait;
 use yii\base\Model;
 
 /**
@@ -21,6 +22,8 @@ use yii\base\Model;
  */
 class PaymentRequestForm extends Model
 {
+    use FormNameModelTrait;
+
     public const TYPE_METHOD_CARD = 'card';
 
     public $method_key;

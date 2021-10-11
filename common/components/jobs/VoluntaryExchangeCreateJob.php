@@ -62,13 +62,6 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             try {
                 $saleData = $boRequestService->getSaleData($flightRequest->fr_booking_id, $case);
 
-                $client = $createService->getOrCreateClient(
-                    $flightRequest->fr_project_id,
-                    $boRequestService->getOrderContactForm()
-                );
-
-                $caseService->addClient($client->id);
-
                 if ($caseSale = CaseSale::findOne(['css_cs_id' => $case->cs_id, 'css_sale_id' => $saleData['saleId']])) {
                     $caseSale->delete();
                 }
@@ -78,6 +71,17 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 /* TODO::  */
                 return;
             }
+
+            try {
+                $client = $createService->getOrCreateClient(
+                    $flightRequest->fr_project_id,
+                    $boRequestService->getOrderContactForm()
+                );
+                $caseService->addClient($client->id);
+            } catch (\Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Client not created');
+            }
+
 
             /* TODO:: end processing */
         } catch (Throwable $throwable) {
