@@ -170,7 +170,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @api {post} /v1/flight-quote-refund/create Voluntary Refund Create
      * @apiVersion 1.0.0
      * @apiName Voluntary Refund Create
-     * @apiGroup Voluntary Create
+     * @apiGroup Voluntary Refund
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>

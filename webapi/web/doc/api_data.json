@@ -9151,314 +9151,6 @@
   },
   {
     "type": "post",
-    "url": "/v1/flight-quote-refund/create",
-    "title": "Voluntary Refund Create",
-    "version": "1.0.0",
-    "name": "Voluntary_Refund_Create",
-    "group": "Voluntary_Create",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "0..10",
-            "optional": false,
-            "field": "booking_id",
-            "description": "<p>Booking ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "object",
-            "optional": false,
-            "field": "refund",
-            "description": "<p>Refund Data</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "number",
-            "optional": false,
-            "field": "refund.processingFee",
-            "description": "<p>Processing fee</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "number",
-            "optional": false,
-            "field": "refund.penaltyAmount",
-            "description": "<p>Airline penalty amount</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "number",
-            "optional": false,
-            "field": "refund.totalRefundAmount",
-            "description": "<p>Total refund amount</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "..3",
-            "optional": false,
-            "field": "refund.currency",
-            "description": "<p>Currency</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "object",
-            "optional": false,
-            "field": "billing",
-            "description": "<p>Billing</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "30",
-            "optional": false,
-            "field": "billing.first_name",
-            "description": "<p>First name</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "30",
-            "optional": false,
-            "field": "billing.last_name",
-            "description": "<p>Last name</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "30",
-            "optional": true,
-            "field": "billing.middle_name",
-            "description": "<p>Middle name</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "40",
-            "optional": true,
-            "field": "billing.company_name",
-            "description": "<p>Company</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "50",
-            "optional": false,
-            "field": "billing.address_line1",
-            "description": "<p>Address line 1</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "50",
-            "optional": true,
-            "field": "billing.address_line2",
-            "description": "<p>Address line 2</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "30",
-            "optional": false,
-            "field": "billing.city",
-            "description": "<p>City</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "40",
-            "optional": true,
-            "field": "billing.state",
-            "description": "<p>State</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "2",
-            "optional": false,
-            "field": "billing.country_id",
-            "description": "<p>Country code (for example &quot;US&quot;)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "10",
-            "optional": true,
-            "field": "billing.zip",
-            "description": "<p>Zip</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "20",
-            "optional": true,
-            "field": "billing.contact_phone",
-            "description": "<p>Contact phone</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "160",
-            "optional": true,
-            "field": "billing.contact_email",
-            "description": "<p>Contact email</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "60",
-            "optional": true,
-            "field": "billing.contact_name",
-            "description": "<p>Contact name</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "object",
-            "optional": false,
-            "field": "payment_request",
-            "description": "<p>Payment request</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "number",
-            "optional": false,
-            "field": "payment_request.amount",
-            "description": "<p>Amount</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "3",
-            "optional": false,
-            "field": "payment_request.currency",
-            "description": "<p>Currency code</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "2",
-            "optional": false,
-            "field": "payment_request.method_key",
-            "description": "<p>Method key (for example &quot;cc&quot;)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "object",
-            "optional": false,
-            "field": "payment_request.method_data",
-            "description": "<p>Method data</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "object",
-            "optional": false,
-            "field": "payment_request.method_data.card",
-            "description": "<p>Card (for credit card)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "50",
-            "optional": false,
-            "field": "payment_request.method_data.card.number",
-            "description": "<p>Number</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "50",
-            "optional": true,
-            "field": "payment_request.method_data.card.holder_name",
-            "description": "<p>Holder name</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "payment_request.method_data.card.exp_month",
-            "description": "<p>Month</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "payment_request.method_data.card.exp_year",
-            "description": "<p>Year</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "32",
-            "optional": false,
-            "field": "payment_request.method_data.card.cvv",
-            "description": "<p>CVV</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Request-Example:",
-          "content": "{\n    \"booking_id\": \"XXXXXXX\",\n    \"refund\": {\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"currency\": \"USD\"\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"cc\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"exp_month\": 10,\n                \"exp_year\": 2022,\n                \"cvv\": 097\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"code\": \"13200\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "examples": [
-        {
-          "title": "Error-Response Load Data:",
-          "content": "HTTP/1.1 200 OK\n {\n    \"status\": 400,\n    \"message\": \"Error\",\n    \"errors\": [\n        \"Load data error\"\n    ],\n    \"code\": \"13106\"\n }",
-          "type": "json"
-        },
-        {
-          "title": "Error-Response Validation:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"billing.first_name\": [\n            \"First Name cannot be blank.\"\n        ],\n        \"billing.last_name\": [\n            \"Last Name cannot be blank.\"\n        ],\n        \"billing.address_line1\": [\n            \"Address Line1 cannot be blank.\"\n        ],\n        \"billing.city\": [\n            \"City cannot be blank.\"\n        ],\n        \"billing.country_id\": [\n            \"Country Id cannot be blank.\"\n        ],\n        \"payment_request.method_key\": [\n            \"Method Key cannot be blank.\"\n        ],\n        \"payment_request.currency\": [\n            \"Currency cannot be blank.\"\n        ]\n    }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/modules/v1/controllers/FlightQuoteRefundController.php",
-    "groupTitle": "Voluntary_Create"
-  },
-  {
-    "type": "post",
     "url": "/v2/flight-quote-exchange/create",
     "title": "Voluntary Exchange Create",
     "version": "0.2.0",
@@ -9984,6 +9676,314 @@
     },
     "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
     "groupTitle": "Voluntary_Exchange"
+  },
+  {
+    "type": "post",
+    "url": "/v1/flight-quote-refund/create",
+    "title": "Voluntary Refund Create",
+    "version": "1.0.0",
+    "name": "Voluntary_Refund_Create",
+    "group": "Voluntary_Refund",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "0..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "refund",
+            "description": "<p>Refund Data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.processingFee",
+            "description": "<p>Processing fee</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.penaltyAmount",
+            "description": "<p>Airline penalty amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.totalRefundAmount",
+            "description": "<p>Total refund amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..3",
+            "optional": false,
+            "field": "refund.currency",
+            "description": "<p>Currency</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "billing",
+            "description": "<p>Billing</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.last_name",
+            "description": "<p>Last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "billing.middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.company_name",
+            "description": "<p>Company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "billing.address_line1",
+            "description": "<p>Address line 1</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "billing.address_line2",
+            "description": "<p>Address line 2</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.city",
+            "description": "<p>City</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.state",
+            "description": "<p>State</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country_id",
+            "description": "<p>Country code (for example &quot;US&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": true,
+            "field": "billing.zip",
+            "description": "<p>Zip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": true,
+            "field": "billing.contact_phone",
+            "description": "<p>Contact phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": true,
+            "field": "billing.contact_email",
+            "description": "<p>Contact email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "60",
+            "optional": true,
+            "field": "billing.contact_name",
+            "description": "<p>Contact name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request",
+            "description": "<p>Payment request</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "payment_request.amount",
+            "description": "<p>Amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payment_request.currency",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "payment_request.method_key",
+            "description": "<p>Method key (for example &quot;cc&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data",
+            "description": "<p>Method data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data.card",
+            "description": "<p>Card (for credit card)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "payment_request.method_data.card.number",
+            "description": "<p>Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "payment_request.method_data.card.holder_name",
+            "description": "<p>Holder name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.exp_month",
+            "description": "<p>Month</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.exp_year",
+            "description": "<p>Year</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "payment_request.method_data.card.cvv",
+            "description": "<p>CVV</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"booking_id\": \"XXXXXXX\",\n    \"refund\": {\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"currency\": \"USD\"\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"cc\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"exp_month\": 10,\n                \"exp_year\": 2022,\n                \"cvv\": 097\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"code\": \"13200\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response Load Data:",
+          "content": "HTTP/1.1 200 OK\n {\n    \"status\": 400,\n    \"message\": \"Error\",\n    \"errors\": [\n        \"Load data error\"\n    ],\n    \"code\": \"13106\"\n }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response Validation:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"billing.first_name\": [\n            \"First Name cannot be blank.\"\n        ],\n        \"billing.last_name\": [\n            \"Last Name cannot be blank.\"\n        ],\n        \"billing.address_line1\": [\n            \"Address Line1 cannot be blank.\"\n        ],\n        \"billing.city\": [\n            \"City cannot be blank.\"\n        ],\n        \"billing.country_id\": [\n            \"Country Id cannot be blank.\"\n        ],\n        \"payment_request.method_key\": [\n            \"Method Key cannot be blank.\"\n        ],\n        \"payment_request.currency\": [\n            \"Currency cannot be blank.\"\n        ]\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/FlightQuoteRefundController.php",
+    "groupTitle": "Voluntary_Refund"
   },
   {
     "type": "post",
