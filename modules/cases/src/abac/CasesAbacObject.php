@@ -4,6 +4,8 @@ namespace modules\cases\src\abac;
 
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesStatus;
 
@@ -141,10 +143,26 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_PQC_STATUS = [
+        'optgroup' => 'PQ Change',
+        'id' => self::NS . 'pqc_status',
+        'field' => 'pqc_status',
+        'label' => 'PQC Status',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
-        self::ACT_REPROTECTION_QUOTE_SEND_EMAIL => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
+        self::ACT_REPROTECTION_QUOTE_SEND_EMAIL => [
+            self::ATTR_CASE_IS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
+        ],
         self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
         self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
         self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
@@ -179,16 +197,22 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attrStatus = self::ATTR_CASE_STATUS;
         $attrCategory = self::ATTR_CASE_CATEGORY;
         $attrStatusRule = self::ATTR_CASE_STATUS_RULE;
+        $attrPqcStatus = self::ATTR_PQC_STATUS;
 
         $attrStatus['values'] = CasesStatus::STATUS_LIST;
         $attrStatusRule['values'] = CasesStatus::STATUS_LIST;
         $attrCategory['values'] = CaseCategory::getList();
+        $attrPqcStatus['values'] = ProductQuoteChangeStatus::getList();
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatus;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrCategory;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatusRule;
+
+        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrStatus;
+        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrCategory;
+        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrPqcStatus;
 
         return $attributeList;
     }
