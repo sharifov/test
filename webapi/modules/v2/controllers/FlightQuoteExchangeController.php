@@ -67,12 +67,7 @@ class FlightQuoteExchangeController extends BaseController
      *  }
      *
      * @apiParam {string{7..10}}        booking_id                                      Booking ID
-     * @apiParam {object}               [flight_product_quote]                          Flight quote
-     * @apiParam {string{2}}            flight_product_quote.gds                        Gds
-     * @apiParam {string{10}}           flight_product_quote.pcc                        pcc
-     * @apiParam {string{50}}           flight_product_quote.fareType                   ValidatingCarrier
-     * @apiParam {object}               flight_product_quote.trips                      Trips
-     * @apiParam {int}                  [flight_product_quote.trips.duration]           Trip Duration
+
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -98,6 +93,12 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {int}                  payment_request.method_data.card.exp_month       Month
      * @apiParam {int}                  payment_request.method_data.card.exp_year        Year
      * @apiParam {string{32}}           payment_request.method_data.card.cvv             CVV
+     * @apiParam {object}                      [flight_product_quote]                          Flight quote
+     * @apiParam {string{2}}                   flight_product_quote.gds                        Gds
+     * @apiParam {string{10}}                  flight_product_quote.pcc                        pcc
+     * @apiParam {string{50}}                  flight_product_quote.fareType                   ValidatingCarrier
+     * @apiParam {object}                      flight_product_quote.trips                      Trips
+     * @apiParam {int}                         [flight_product_quote.trips.duration]           Trip Duration
      * @apiParam {object}                      flight_product_quote.trips.segments                          Segments
      * @apiParam {string{format Y-m-d H:i}}    flight_product_quote.trips.segments.departureTime            DepartureTime
      * @apiParam {string{format Y-m-d H:i}}    flight_product_quote.trips.segments.arrivalTime              ArrivalTime
@@ -599,7 +600,7 @@ class FlightQuoteExchangeController extends BaseController
             $post = Yii::$app->request->post();
         } catch (\Throwable $throwable) {
             return new ErrorResponse(
-                new StatusCodeMessage(400),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
                 new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
@@ -609,14 +610,14 @@ class FlightQuoteExchangeController extends BaseController
         $voluntaryExchangeInfoForm = new VoluntaryExchangeInfoForm();
         if (!$voluntaryExchangeInfoForm->load($post)) {
             return new ErrorResponse(
-                new StatusCodeMessage(400),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
                 new ErrorsMessage(Messages::LOAD_DATA_ERROR),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }
         if (!$voluntaryExchangeInfoForm->validate()) {
             return new ErrorResponse(
-                new StatusCodeMessage(422),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($voluntaryExchangeInfoForm->getErrors()),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
@@ -646,7 +647,7 @@ class FlightQuoteExchangeController extends BaseController
                 'FlightQuoteExchangeController:actionInfo:Warning'
             );
             return new ErrorResponse(
-                new StatusCodeMessage(422),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
@@ -656,7 +657,7 @@ class FlightQuoteExchangeController extends BaseController
                 'FlightQuoteExchangeController:actionInfo:Throwable'
             );
             return new ErrorResponse(
-                new StatusCodeMessage(500),
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
