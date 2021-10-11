@@ -10,7 +10,12 @@ class CallNextLeads implements Leads
 {
     public function getLeads(Employee $user): array
     {
-        $dataProvider = (new LeadQcallSearch())->searchByRedial([], $user, false);
+        $search = new LeadQcallSearch();
+        $dataProvider = $search->searchByRedial([
+            $search->formName() => [
+                'l_is_test' => 0
+            ]
+        ], $user, false);
         $query = $dataProvider->query;
         $query->addOrderBy(($dataProvider->sort)->getOrders());
         $leads = $query->asArray()->all();

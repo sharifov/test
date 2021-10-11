@@ -7,6 +7,7 @@ use common\models\UserCallStatus;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\leadRedial\entity\CallRedialUserAccessWithCallStatus;
+use sales\model\leadRedial\job\LeadRedialAssignToUsersJob;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\helpers\VarDumper;
 
@@ -29,6 +30,9 @@ class LeadRedialUnAssigner
         $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
             $this->unAssign($access);
+            if (!$access->isEqual($leadId)) {
+                \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
+            }
         }
     }
 
@@ -37,6 +41,7 @@ class LeadRedialUnAssigner
         $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
             $this->unAssign($access);
+            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
         }
     }
 
@@ -45,6 +50,7 @@ class LeadRedialUnAssigner
         $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
             $this->unAssign($access);
+            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
         }
     }
 
@@ -57,7 +63,7 @@ class LeadRedialUnAssigner
         Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
     }
 
-    public function unAssignByLeadWithTimeExpired(int $leadId, \DateTimeImmutable $date): bool
+    public function unAssignByLeadWithTimeExpired(int $leadId, \DateTimeImmutable $date): void
     {
         $accesses = CallRedialUserAccessWithCallStatus::find()
             ->select(['*', 'us_is_on_call as userIsOnCall'])
@@ -65,8 +71,9 @@ class LeadRedialUnAssigner
             ->withExpired()
             ->leftJoin(UserStatus::tableName(), 'us_user_id = crua_user_id')
             ->all();
+
         if (!$accesses) {
-            return false;
+            return;
         }
 
         /** @var CallRedialUserAccessWithCallStatus $access */
@@ -77,7 +84,8 @@ class LeadRedialUnAssigner
                 $this->missedCallNotification($access->crua_user_id);
             }
         }
-        return true;
+
+        \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($leadId, 0));
     }
 
     private function missedCallNotification(int $userId): void

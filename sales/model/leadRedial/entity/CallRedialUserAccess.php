@@ -38,6 +38,11 @@ class CallRedialUserAccess extends \yii\db\ActiveRecord
         return $this->delete();
     }
 
+    public function isEqual(int $leadId): bool
+    {
+        return $this->crua_lead_id === $leadId;
+    }
+
     public function rules(): array
     {
         return [

@@ -3,7 +3,6 @@
 namespace sales\model\leadRedial\job;
 
 use common\components\jobs\BaseJob;
-use common\models\Lead;
 use sales\helpers\app\AppHelper;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use yii\queue\JobInterface;
@@ -29,23 +28,7 @@ class LeadRedialExpiredAccessJob extends BaseJob implements JobInterface
 
         try {
             $unAssigner = \Yii::createObject(LeadRedialUnAssigner::class);
-            $isUnAssigned = $unAssigner->unAssignByLeadWithTimeExpired($this->leadId, new \DateTimeImmutable());
-            if (!$isUnAssigned) {
-                return;
-            }
-
-            $lead = Lead::findOne($this->leadId);
-            if (!$lead) {
-                return;
-            }
-
-            $countUsers = (new UserCounter())->getCount($lead->id);
-
-            if ($countUsers < 1) {
-                return;
-            }
-
-            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($this->leadId, 0));
+            $unAssigner->unAssignByLeadWithTimeExpired($this->leadId, new \DateTimeImmutable());
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Processing expired access error',

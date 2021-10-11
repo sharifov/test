@@ -355,10 +355,9 @@ class CallController extends Controller
         $timeStart = microtime(true);
 
         $callRedialSearch = new LeadQcallSearch();
-
         $leads = $callRedialSearch->searchRedialLeads([$callRedialSearch->formName() => [
             'l_is_test' => 0
-        ]]);
+        ]])->all();
 
         foreach ($leads as $lead) {
 //            $limitAgents = SettingHelper::getRedialGetLimitAgents() - $lead->agentsHasAccessToCall;

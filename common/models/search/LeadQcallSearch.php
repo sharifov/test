@@ -631,10 +631,12 @@ class LeadQcallSearch extends LeadQcall
             Lead::tableName() . '.status' => $this->leadStatus,
             Lead::tableName() . '.cabin' => $this->cabin,
             Lead::tableName() . '.l_is_test' => $this->l_is_test,
+            'lqc_lead_id' => $this->lqc_lead_id,
         ]);
 
         $query->andHaving(['<', 'agentsHasAccessToCall', SettingHelper::getRedialGetLimitAgents()]);
-        return $query->all();
+
+        return $query;
     }
 
     /**
