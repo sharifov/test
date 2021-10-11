@@ -2,9 +2,16 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\components\jobs\VoluntaryExchangeCreateJob;
+use modules\flight\models\FlightRequest;
+use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
+use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCaseService as CaseService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
 use sales\helpers\app\AppHelper;
+use sales\helpers\app\HttpStatusCodeHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
@@ -20,22 +27,34 @@ use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightQuoteExchangeController
+ *
+ * @property VoluntaryExchangeObjectCollection $objectCollection
+ * @property FlightRequestRepository $flightRequestRepository
  */
 class FlightQuoteExchangeController extends BaseController
 {
+    private VoluntaryExchangeObjectCollection $objectCollection;
+    private FlightRequestRepository $flightRequestRepository;
+
     /**
      * @param $id
      * @param $module
      * @param ApiLogger $logger
+     * @param FlightRequestRepository $flightRequestRepository
+     * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
      * @param array $config
      */
     public function __construct(
         $id,
         $module,
         ApiLogger $logger,
+        FlightRequestRepository $flightRequestRepository,
+        VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
         $config = []
     ) {
-        /* TODO::  */
+
+        $this->objectCollection = $voluntaryExchangeObjectCollection;
+        $this->flightRequestRepository = $flightRequestRepository;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -409,37 +428,66 @@ class FlightQuoteExchangeController extends BaseController
             $post = Yii::$app->request->post();
         } catch (\Throwable $throwable) {
             return new ErrorResponse(
-                new StatusCodeMessage(400),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
                 new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }
 
-        $voluntaryExchangeInfoForm = new VoluntaryExchangeInfoForm(); /* TODO::  */
-        if (!$voluntaryExchangeInfoForm->load($post)) {
+        if (!$project = $this->auth->auProject) {
             return new ErrorResponse(
-                new StatusCodeMessage(400),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new ErrorsMessage('Not found Project with current user: ' . $this->auth->au_api_username),
+                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+            );
+        }
+
+        $voluntaryExchangeCreateForm = new VoluntaryExchangeCreateForm();
+        if (!$voluntaryExchangeCreateForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
                 new ErrorsMessage(Messages::LOAD_DATA_ERROR),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }
-        if (!$voluntaryExchangeInfoForm->validate()) {
+        if (!$voluntaryExchangeCreateForm->validate()) {
             return new ErrorResponse(
-                new StatusCodeMessage(422),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($voluntaryExchangeInfoForm->getErrors()),
+                new ErrorsMessage($voluntaryExchangeCreateForm->getErrors()),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
             );
         }
 
         try {
             /* TODO::  */
+            $bookingId = $voluntaryExchangeCreateForm->booking_id;
+            if ($productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($bookingId)) {
+                throw new \RuntimeException('VoluntaryExchange by BookingID(' . $bookingId . ') already processed');
+            }
+
+            $flightRequest = FlightRequest::create(
+                $bookingId,
+                FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
+                $post,
+                $project->id,
+                $this->auth->getId()
+            );
+            $flightRequest = $this->flightRequestRepository->save($flightRequest);
+
+            $job = new VoluntaryExchangeCreateJob();
+            $job->flight_request_id = $flightRequest->fr_id;
+            $jobId = Yii::$app->queue_job->priority(100)->push($job);
+
+            $flightRequest->fr_job_id = $jobId;
+            $this->flightRequestRepository->save($flightRequest);
+
+            $dataMessage['resultMessage'] = 'FlightRequest created';
+            $dataMessage['flightRequestId'] = $flightRequest->fr_id;
 
             return new SuccessResponse(
-                new DataMessage([
-                    'todo' => ''
-                ]),
+                new DataMessage($dataMessage),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
         } catch (\RuntimeException | \DomainException $throwable) {
@@ -448,7 +496,7 @@ class FlightQuoteExchangeController extends BaseController
                 'FlightQuoteExchangeController:actionInfo:Warning'
             );
             return new ErrorResponse(
-                new StatusCodeMessage(422),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
@@ -458,7 +506,7 @@ class FlightQuoteExchangeController extends BaseController
                 'FlightQuoteExchangeController:actionInfo:Throwable'
             );
             return new ErrorResponse(
-                new StatusCodeMessage(500),
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
@@ -583,7 +631,7 @@ class FlightQuoteExchangeController extends BaseController
         }
 
         try {
-            $productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($voluntaryExchangeInfoForm->booking_id, 30);
+            $productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($voluntaryExchangeInfoForm->booking_id);
             if (!$productQuoteChange) {
                 throw new \RuntimeException(
                     'ProductQuoteChange not found by BookingId(' . $voluntaryExchangeInfoForm->booking_id . ')',

@@ -20,6 +20,7 @@ class VoluntaryExchangeInfoService
             ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pqc_pq_id')
             ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
             ->where(['fqf_booking_id' => $bookingId])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE])
             ->orderBy(['pqc_id' => SORT_DESC])
             ->cache($duration)
             ->one();

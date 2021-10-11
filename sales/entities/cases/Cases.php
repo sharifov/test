@@ -248,6 +248,24 @@ class Cases extends ActiveRecord implements Objectable
         return $case;
     }
 
+    public static function createByApiVoluntaryExChange(
+        int $departmentId,
+        int $categoryId,
+        string $orderUid,
+        int $projectId
+    ): self {
+        $case = self::create();
+        $case->cs_dep_id = $departmentId;
+        $case->cs_category_id = $categoryId;
+        $case->cs_order_uid = $orderUid;
+        $case->cs_subject = 'Voluntary Change';
+        $case->cs_source_type_id = CasesSourceType::API;
+        $case->cs_is_automate = null;
+        $case->cs_project_id = $projectId;
+        $case->pending(null, 'Voluntary Change Create');
+        return $case;
+    }
+
     /**
      * @return string
      */
