@@ -21,6 +21,15 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Abac Policy', ['create'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('<i class="fa fa-list"></i> Policy list content', ['list-content'], ['class' => 'btn btn-default']) ?>
+
+        <?= Html::a('<i class="fa fa-upload"></i> Export', ['export'], [
+            'class' => 'btn btn-warning',
+            'data' => [
+                'confirm' => 'Are you sure you want to Export all ABAC policy rules?',
+            ],
+        ]) ?>
+
+        <?= Html::a('<i class="fa fa-download"></i> Import', ['import'], ['class' => 'btn btn-warning']) ?>
     </p>
 
     <?php Pjax::begin(['scrollTo' => 0]); ?>

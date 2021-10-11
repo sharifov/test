@@ -292,7 +292,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function pending(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PENDING);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PENDING);
         $this->recordEvent(new CasesPendingStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_PENDING);
     }
@@ -303,7 +303,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function awaiting(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AWAITING);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AWAITING);
         $this->recordEvent(new CasesAwaitingStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_AWAITING);
     }
@@ -314,7 +314,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function autoProcessing(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AUTO_PROCESSING);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AUTO_PROCESSING);
         $this->recordEvent(new CasesAutoProcessingStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_AUTO_PROCESSING);
     }
@@ -325,7 +325,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function error(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_ERROR);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_ERROR);
         $this->recordEvent(new CasesErrorStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_ERROR);
     }
@@ -340,7 +340,7 @@ class Cases extends ActiveRecord implements Objectable
 
     public function statusToNew(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_NEW);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_NEW);
         $this->recordEvent(new CasesNewStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_NEW);
     }
@@ -370,7 +370,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function processing(int $userId, ?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PROCESSING);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PROCESSING);
         if ($this->isProcessing() && $this->isOwner($userId)) {
             throw new \DomainException('Case is already processing to this user');
         }
@@ -397,7 +397,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function followUp(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_FOLLOW_UP);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_FOLLOW_UP);
         $this->recordEvent(new CasesFollowUpStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         if (!$this->isFreedOwner()) {
             $this->freedOwner();
@@ -419,7 +419,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function solved(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_SOLVED);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_SOLVED);
         $this->recordEvent(new CasesSolvedStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_SOLVED);
     }
@@ -438,7 +438,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function trash(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_TRASH);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_TRASH);
         $this->recordEvent(new CasesTrashStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_TRASH);
     }
@@ -506,6 +506,11 @@ class Cases extends ActiveRecord implements Objectable
             return false;
         }
         return $this->cs_user_id === $userId;
+    }
+
+    public function hasOwner(): bool
+    {
+        return (bool)$this->cs_user_id;
     }
 
     /**

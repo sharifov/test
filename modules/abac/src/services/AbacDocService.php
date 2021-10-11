@@ -70,6 +70,9 @@ class AbacDocService
         return true;
     }
 
+    /**
+     * @throws \Exception
+     */
     private function parseFile(string $filename): array
     {
         $data = [];

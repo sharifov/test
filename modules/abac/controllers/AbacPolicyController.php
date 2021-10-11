@@ -4,21 +4,26 @@ namespace modules\abac\controllers;
 
 use frontend\controllers\FController;
 use modules\abac\src\forms\AbacPolicyForm;
+use modules\abac\src\forms\AbacPolicyImportForm;
+use sales\auth\Auth;
 use Yii;
 use modules\abac\src\entities\AbacPolicy;
 use modules\abac\src\entities\search\AbacPolicySearch;
 use yii\base\BaseObject;
+use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
 
 /**
  * AbacPolicyController implements the CRUD actions for AbacPolicy model.
  */
 class AbacPolicyController extends FController
 {
+    public const SCHEMA_VERSION = '0.1';
     /**
      * @return array
      */
@@ -252,5 +257,111 @@ class AbacPolicyController extends FController
         }
 
         return $this->redirect(['list-content']);
+    }
+
+    public function actionExport()
+    {
+        $filePath = Yii::getAlias('@runtime/') . 'abac-export.json';
+
+        $dataList = AbacPolicy::find()->all();
+        $data = [];
+        if ($dataList) {
+            foreach ($dataList as $item) {
+                $data[] = [
+                    'id' => $item->ap_id,
+                    'object' => $item->ap_object,
+                    'subject' => $item->ap_subject,
+                    'subject_json' => $item->ap_subject_json,
+                    'action' => $item->ap_action,
+                    'action_json' => $item->ap_action_json,
+                    'effect' => $item->ap_effect,
+                    'sort_order' => $item->ap_sort_order,
+                    'title' => $item->ap_title,
+                    'enabled' => $item->ap_enabled,
+                    'created_dt' => $item->ap_created_dt,
+                    'updated_dt' => $item->ap_updated_dt
+                ];
+            }
+        }
+
+        $header['username'] = Auth::user()->username;
+        $header['datetime'] = date('Y-m-d H:i:s');
+        $header['env'] = YII_ENV;
+        $header['app_name'] = Yii::$app->name;
+        $header['app_ver'] = Yii::$app->params['release']['version'] ?? '';
+        $header['schema_ver'] = self::SCHEMA_VERSION;
+
+        $dataContent['header'] = $header;
+        $dataContent['data'] = $data;
+
+        $content = json_encode($dataContent);
+
+        if ($content) {
+            file_put_contents($filePath, $content);
+
+            if (file_exists($filePath)) {
+                $exportFileName = 'abac-export-' . YII_ENV . '-' . date('Ymd_Hi') . '.json';
+                return Yii::$app->response->sendFile($filePath, $exportFileName);
+            }
+        }
+        return false;
+    }
+
+    public function actionImport()
+    {
+        $cache = Yii::$app->cacheFile;
+        $model = new AbacPolicyImportForm();
+        $header = [];
+        $data = [];
+        $filePath = '';
+
+        $cacheKey = 'abac-import-' . Yii::$app->user->id;
+
+        if (Yii::$app->request->isPost) {
+            $model->importFile = UploadedFile::getInstance($model, 'importFile');
+            if ($filePath = $model->upload()) {
+                if (file_exists($filePath)) {
+                    $json = file_get_contents($filePath);
+                    $fileData = json_decode($json, true);
+                    if ($fileData) {
+                        $cache->set($cacheKey, $fileData, 600);
+                        $header = $fileData['header'] ?? [];
+                        $data = $fileData['data'] ?? [];
+                    }
+                    unlink($filePath);
+                }
+            } else {
+                $model->addError('importFile', 'Error: Not upload file');
+            }
+        }
+
+        $fileData = $cache->get($cacheKey);
+        if ($fileData !== false) {
+            $header = $fileData['header'] ?? [];
+            $data = $fileData['data'] ?? [];
+        }
+
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $data,
+            'sort' => [
+                'defaultOrder' => [
+                    'sort_order' => SORT_ASC,
+                    'enabled' => SORT_DESC,
+                ],
+                'attributes' => ['sort_order', 'enabled', 'effect', 'created_dt', 'updated_dt', 'object'],
+            ],
+            'pagination' => [
+                'pageSize' => 10000,
+            ],
+        ]);
+
+        return $this->render('import', [
+            'model' => $model,
+            'header' => $header,
+            'data' => $data,
+            'filePath' => $filePath,
+            'dataProvider' => $dataProvider
+        ]);
     }
 }

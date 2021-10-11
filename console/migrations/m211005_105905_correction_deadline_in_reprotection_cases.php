@@ -58,11 +58,12 @@ class m211005_105905_correction_deadline_in_reprotection_cases extends Migration
                         if ($curTime <= $departureTime && $case = Cases::findOne($value['case_id'])) {
                             $schdCaseDeadlineHours = SettingHelper::getSchdCaseDeadlineHours();
                             $deadline = $departureTime->modify(' -' . $schdCaseDeadlineHours . ' hours')->format('Y-m-d H:i:s');
+                            $oldDeadline = $case->cs_deadline_dt;
                             $case->cs_deadline_dt = $deadline;
                             if (!$case->save()) {
                                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($case));
                             }
-                            echo 'Case ' . $value['case_id'] . ' deadline is corrected.' . PHP_EOL;
+                            echo 'Case ' . $value['case_id'] . ' deadline is corrected. Old(' . $oldDeadline . ') New(' . $deadline . ')' . PHP_EOL;
                             continue;
                         }
                     }

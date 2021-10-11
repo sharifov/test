@@ -123,6 +123,7 @@ class AbacComponent extends Component
         $obj->req = $request;
         $obj->user = $user;
         $obj->dt = $dt;
+        $obj->available = true;
 
         return $obj;
     }

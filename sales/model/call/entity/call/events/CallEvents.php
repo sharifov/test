@@ -61,7 +61,9 @@ class CallEvents extends Component
                 )
                 ->exists();
 
-            if (!$call->c_parent_id && $call->isOut() && ($call->isStatusInProgress() || $call->isStatusRinging())) {
+            if ($call->c_parent_id && $call->isIn() && ($call->isStatusInProgress() || $call->isStatusRinging())) {
+                $userStatus->us_is_on_call = true;
+            } elseif (!$call->c_parent_id && $call->isOut() && ($call->isStatusInProgress() || $call->isStatusRinging())) {
                 $userStatus->us_is_on_call = true;
             }
 
