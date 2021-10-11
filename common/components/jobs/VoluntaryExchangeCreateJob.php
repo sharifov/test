@@ -5,6 +5,7 @@ namespace common\components\jobs;
 use common\models\CaseSale;
 use DomainException;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
@@ -13,9 +14,11 @@ use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchang
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\entities\cases\CaseEventLog;
+use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use Throwable;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
@@ -38,19 +41,12 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
         try {
             $objectCollection = Yii::createObject(VoluntaryExchangeObjectCollection::class);
             $boRequestService = Yii::createObject(BoRequestVoluntaryExchangeService::class);
+            $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
 
             if (!$flightRequest = FlightRequest::findOne($this->flight_request_id)) {
                 throw new DomainException('FlightRequest not found, ID (' . $this->flight_request_id . ')');
             }
-            $voluntaryExchangeCreateForm = new VoluntaryExchangeCreateForm();
-            if (!$voluntaryExchangeCreateForm->load((array) $flightRequest->fr_data_json)) {
-                throw new DomainException('VoluntaryExchangeCreateForm not loaded');
-            }
-            if (!$voluntaryExchangeCreateForm->validate()) {
-                throw new \DomainException(ErrorsToStringHelper::extractFromModel($voluntaryExchangeCreateForm));
-            }
-
-            $createService =  new VoluntaryExchangeCreateService($voluntaryExchangeCreateForm, $objectCollection);
+            $voluntaryExchangeCreateService =  new VoluntaryExchangeCreateService($objectCollection);
             $flightRequestService = new FlightRequestService($flightRequest, $objectCollection);
 
             if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
@@ -58,33 +54,102 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             }
             $caseService = new CaseService($case, $objectCollection);
 
-            /* TODO:: begin processing */
             try {
                 $saleData = $boRequestService->getSaleData($flightRequest->fr_booking_id, $case);
 
                 if ($caseSale = CaseSale::findOne(['css_cs_id' => $case->cs_id, 'css_sale_id' => $saleData['saleId']])) {
                     $caseSale->delete();
                 }
-                $createService->createCaseSale($saleData, $case);
+                $voluntaryExchangeCreateService->createCaseSale($saleData, $case);
             } catch (Throwable $throwable) {
                 $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Case sale not created');
-                /* TODO::  */
-                return;
+                throw $throwable;
             }
 
             try {
-                $client = $createService->getOrCreateClient(
+                $client = $voluntaryExchangeCreateService->getOrCreateClient(
                     $flightRequest->fr_project_id,
                     $boRequestService->getOrderContactForm()
                 );
                 $caseService->addClient($client->id);
             } catch (\Throwable $throwable) {
                 $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Client not created');
+                throw $throwable;
             }
 
+            try {
+                $order = $voluntaryExchangeCreateService->createOrder(
+                    $boRequestService->getOrderCreateFromSaleForm(),
+                    $boRequestService->getOrderContactForm(),
+                    $case,
+                    $flightRequest->fr_project_id
+                );
+            } catch (\Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Order not created');
+                throw $throwable;
+            }
 
-            /* TODO:: end processing */
+            try {
+                $originProductQuote = $voluntaryExchangeCreateService->createOriginProductQuoteInfrastructure(
+                    $boRequestService->getOrderCreateFromSaleForm(),
+                    $saleData,
+                    $order,
+                    $case
+                );
+            } catch (\Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'OriginProductQuote not created');
+                throw $throwable;
+            }
+
+            try {
+                $productQuoteChange = $voluntaryExchangeCreateService->createProductQuoteChange($originProductQuote->pq_id, $case->cs_id);
+            } catch (\Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'ProductQuoteChange not created');
+                throw $throwable;
+            }
+
+            try {
+                $caseService->setCaseDeadline($originProductQuote->flightQuote);
+            } catch (\Throwable $throwable) {
+                \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:setCaseDeadline');
+            }
+
+            try {
+                $voluntaryExchangeCreateService->originProductQuoteDecline($originProductQuote, $case);
+            } catch (Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'OriginProductQuote not declined');
+                throw $throwable;
+            }
+
+            if ($flightProductQuoteData = ArrayHelper::getValue($flightRequest, 'fr_data_json.flight_product_quote')) {
+                try {
+                    $flight = $voluntaryExchangeCreateService->getFlightByOriginQuote($originProductQuote);
+                    $flightQuote = $flightQuoteManageService->createVoluntaryExchange(
+                        $flight,
+                        $flightProductQuoteData,
+                        $originProductQuote->pq_order_id,
+                        $case,
+                        null,
+                        $originProductQuote
+                    );
+                    $caseService->setCaseDeadline($flightQuote);
+                    $exchangeQuote = $flightQuote->fqProductQuote;
+                    $voluntaryExchangeCreateService->recommendedExchangeQuote($originProductQuote->pq_id, $exchangeQuote->pq_id);
+                } catch (\Throwable $throwable) {
+                    $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Could not create new Voluntary Exchange quote');
+                    throw $throwable;
+                }
+            }
         } catch (Throwable $throwable) {
+            if (isset($flightRequestService)) {
+                $flightRequestService->error($throwable->getMessage());
+            }
+
+            if (isset($case, $flightRequest, $voluntaryExchangeCreateService, $caseService) && !isset($client)) {
+                $client = $voluntaryExchangeCreateService->createSimpleClient($flightRequest->fr_project_id);
+                $caseService->addClient($client->id);
+            }
+
             $data['flightRequest'] = $this->flight_request_id;
             VoluntaryExchangeCreateService::writeLog($throwable, $data);
         }

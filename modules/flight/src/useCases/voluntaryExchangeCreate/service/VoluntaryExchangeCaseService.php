@@ -2,12 +2,14 @@
 
 namespace modules\flight\src\useCases\voluntaryExchangeCreate\service;
 
+use modules\flight\models\FlightQuote;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\exception\CheckRestrictionException;
+use sales\helpers\setting\SettingHelper;
 
 /**
  * Class VoluntaryExchangeCaseService
@@ -54,7 +56,6 @@ class VoluntaryExchangeCaseService
             $bookingId,
             $projectId
         );
-
         $objectCollection->getCasesRepository()->save($case);
 
         $case->addEventLog(
@@ -64,6 +65,35 @@ class VoluntaryExchangeCaseService
         );
 
         return $case;
+    }
+
+    public function setCaseDeadline(FlightQuote $flightQuote): ?string
+    {
+        foreach ($flightQuote->flightQuoteTrips as $key => $trip) {
+            if (!(($firstSegment = $trip->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
+                throw new \RuntimeException('Deadline not created. Reason - Segments departure not correct');
+            }
+            $curTime = new \DateTime('now', new \DateTimeZone('UTC'));
+            $departureTime = new \DateTime($firstSegment->fqs_departure_dt, new \DateTimeZone('UTC'));
+
+            if ($curTime <= $departureTime) {
+                $schdCaseDeadlineHours = SettingHelper::getSchdCaseDeadlineHours();
+                $deadline = $departureTime->modify(' -' . $schdCaseDeadlineHours . ' hours')->format('Y-m-d H:i:s');
+                $this->case->cs_deadline_dt = $deadline;
+                $this->objectCollection->getCasesRepository()->save($this->case);
+                $this->case->addEventLog(
+                    CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                    'Set deadline from FlightQuote',
+                    ['uid' => $flightQuote->fq_uid]
+                );
+                return $deadline;
+            }
+        }
+        \Yii::warning(
+            'CaseDeadline not set by FlightQuote(' . $flightQuote->getId() . ')',
+            'VoluntaryExchangeCaseService:setCaseDeadline:notSet'
+        );
+        return null;
     }
 
     public static function getLastActiveCaseByBookingId(string $bookingId): ?Cases

@@ -7,7 +7,6 @@ use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
-use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCaseService as CaseService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
 use sales\helpers\app\AppHelper;
@@ -29,12 +28,10 @@ use yii\helpers\ArrayHelper;
  * Class FlightQuoteExchangeController
  *
  * @property VoluntaryExchangeObjectCollection $objectCollection
- * @property FlightRequestRepository $flightRequestRepository
  */
 class FlightQuoteExchangeController extends BaseController
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
-    private FlightRequestRepository $flightRequestRepository;
 
     /**
      * @param $id
@@ -48,13 +45,10 @@ class FlightQuoteExchangeController extends BaseController
         $id,
         $module,
         ApiLogger $logger,
-        FlightRequestRepository $flightRequestRepository,
         VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
         $config = []
     ) {
-
         $this->objectCollection = $voluntaryExchangeObjectCollection;
-        $this->flightRequestRepository = $flightRequestRepository;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -461,7 +455,6 @@ class FlightQuoteExchangeController extends BaseController
         }
 
         try {
-            /* TODO::  */
             $bookingId = $voluntaryExchangeCreateForm->booking_id;
             if ($productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($bookingId)) {
                 throw new \RuntimeException('VoluntaryExchange by BookingID(' . $bookingId . ') already processed');
@@ -474,14 +467,14 @@ class FlightQuoteExchangeController extends BaseController
                 $project->id,
                 $this->auth->getId()
             );
-            $flightRequest = $this->flightRequestRepository->save($flightRequest);
+            $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
             $job = new VoluntaryExchangeCreateJob();
             $job->flight_request_id = $flightRequest->fr_id;
             $jobId = Yii::$app->queue_job->priority(100)->push($job);
 
             $flightRequest->fr_job_id = $jobId;
-            $this->flightRequestRepository->save($flightRequest);
+            $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
             $dataMessage['resultMessage'] = 'FlightRequest created';
             $dataMessage['flightRequestId'] = $flightRequest->fr_id;
