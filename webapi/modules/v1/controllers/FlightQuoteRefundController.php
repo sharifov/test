@@ -353,7 +353,7 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteRefundController:actionInfo:Warning'
+                'FlightQuoteRefundController:actionCreate:Warning'
             );
             return new ErrorResponse(
                 new StatusCodeMessage(422),
@@ -363,7 +363,79 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteRefundController:actionInfo:Throwable'
+                'FlightQuoteRefundController:actionCreate:Throwable'
+            );
+            return new ErrorResponse(
+                new StatusCodeMessage(500),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
+        }
+    }
+
+    public function actionConfirm()
+    {
+        if (!$this->request->isPost) {
+            throw new MethodNotAllowedHttpException();
+        }
+
+        try {
+            $post = \Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::POST_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+
+        $voluntaryRefundCreateForm = new VoluntaryRefundCreateForm();
+        if (!$voluntaryRefundCreateForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+        if (!$voluntaryRefundCreateForm->validate()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(422),
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($voluntaryRefundCreateForm->getErrors()),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            );
+        }
+
+        try {
+//            $productQuoteRefund = ProductQuoteRefundQuery::getByBookingId($voluntaryRefundCreateForm->booking_id);
+//            if (!$productQuoteRefund) {
+//                throw new \RuntimeException(
+//                    'ProductQuoteRefund not found by BookingId(' . $voluntaryRefundCreateForm->booking_id . ')',
+//                    ApiCodeException::DATA_NOT_FOUND
+//                );
+//            }
+
+            return new SuccessResponse(
+//                new DataMessage([
+//                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),
+//                ]),
+                new CodeMessage(ApiCodeException::SUCCESS)
+            );
+        } catch (\RuntimeException | \DomainException $throwable) {
+            \Yii::warning(
+                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                'FlightQuoteRefundController:actionConfirm:Warning'
+            );
+            return new ErrorResponse(
+                new StatusCodeMessage(422),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                'FlightQuoteRefundController:actionConfirm:Throwable'
             );
             return new ErrorResponse(
                 new StatusCodeMessage(500),
