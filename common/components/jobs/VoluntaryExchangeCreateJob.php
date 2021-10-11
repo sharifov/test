@@ -8,18 +8,15 @@ use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
-use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
-use modules\flight\src\useCases\voluntaryExchangeCreate\service\BoRequestVoluntaryExchangeService;
-use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCaseService as CaseService;
-use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
-use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
+use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
+use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
+use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeService;
 use sales\entities\cases\CaseEventLog;
 use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
 use Throwable;
 use Yii;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
 
@@ -46,39 +43,39 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             if (!$flightRequest = FlightRequest::findOne($this->flight_request_id)) {
                 throw new DomainException('FlightRequest not found, ID (' . $this->flight_request_id . ')');
             }
-            $voluntaryExchangeCreateService =  new VoluntaryExchangeCreateService($objectCollection);
+            $voluntaryExchangeService =  new VoluntaryExchangeService($objectCollection);
             $flightRequestService = new FlightRequestService($flightRequest, $objectCollection);
 
             if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
                 $case = CaseService::createCase($flightRequest->fr_booking_id, $flightRequest->fr_project_id, $objectCollection);
             }
-            $caseService = new CaseService($case, $objectCollection);
+            $caseHandler = new CaseVoluntaryExchangeHandler($case, $objectCollection);
 
             try {
-                $saleData = $boRequestService->getSaleData($flightRequest->fr_booking_id, $case);
+                $saleData = $boRequestService->getSaleData($flightRequest->fr_booking_id, $case, CaseEventLog::VOLUNTARY_EXCHANGE_CREATE);
 
                 if ($caseSale = CaseSale::findOne(['css_cs_id' => $case->cs_id, 'css_sale_id' => $saleData['saleId']])) {
                     $caseSale->delete();
                 }
-                $voluntaryExchangeCreateService->createCaseSale($saleData, $case);
+                $voluntaryExchangeService->createCaseSale($saleData, $case);
             } catch (Throwable $throwable) {
                 $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Case sale not created');
                 throw $throwable;
             }
 
             try {
-                $client = $voluntaryExchangeCreateService->getOrCreateClient(
+                $client = $voluntaryExchangeService->getOrCreateClient(
                     $flightRequest->fr_project_id,
                     $boRequestService->getOrderContactForm()
                 );
-                $caseService->addClient($client->id);
+                $caseHandler->addClient($client->id);
             } catch (\Throwable $throwable) {
                 $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Client not created');
                 throw $throwable;
             }
 
             try {
-                $order = $voluntaryExchangeCreateService->createOrder(
+                $order = $voluntaryExchangeService->createOrder(
                     $boRequestService->getOrderCreateFromSaleForm(),
                     $boRequestService->getOrderContactForm(),
                     $case,
@@ -90,7 +87,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             }
 
             try {
-                $originProductQuote = $voluntaryExchangeCreateService->createOriginProductQuoteInfrastructure(
+                $originProductQuote = $voluntaryExchangeService->createOriginProductQuoteInfrastructure(
                     $boRequestService->getOrderCreateFromSaleForm(),
                     $saleData,
                     $order,
@@ -102,20 +99,20 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             }
 
             try {
-                $productQuoteChange = $voluntaryExchangeCreateService->createProductQuoteChange($originProductQuote->pq_id, $case->cs_id);
+                $productQuoteChange = $voluntaryExchangeService->createProductQuoteChange($originProductQuote->pq_id, $case->cs_id);
             } catch (\Throwable $throwable) {
                 $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'ProductQuoteChange not created');
                 throw $throwable;
             }
 
             try {
-                $caseService->setCaseDeadline($originProductQuote->flightQuote);
+                $caseHandler->setCaseDeadline($originProductQuote->flightQuote);
             } catch (\Throwable $throwable) {
                 \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:setCaseDeadline');
             }
 
             try {
-                $voluntaryExchangeCreateService->originProductQuoteDecline($originProductQuote, $case);
+                $voluntaryExchangeService->originProductQuoteDecline($originProductQuote, $case);
             } catch (Throwable $throwable) {
                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'OriginProductQuote not declined');
                 throw $throwable;
@@ -123,7 +120,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
 
             if ($flightProductQuoteData = ArrayHelper::getValue($flightRequest, 'fr_data_json.flight_product_quote')) {
                 try {
-                    $flight = $voluntaryExchangeCreateService->getFlightByOriginQuote($originProductQuote);
+                    $flight = $voluntaryExchangeService->getFlightByOriginQuote($originProductQuote);
                     $flightQuote = $flightQuoteManageService->createVoluntaryExchange(
                         $flight,
                         $flightProductQuoteData,
@@ -132,14 +129,18 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                         null,
                         $originProductQuote
                     );
-                    $caseService->setCaseDeadline($flightQuote);
+                    $caseHandler->setCaseDeadline($flightQuote);
                     $exchangeQuote = $flightQuote->fqProductQuote;
-                    $voluntaryExchangeCreateService->recommendedExchangeQuote($originProductQuote->pq_id, $exchangeQuote->pq_id);
+                    $voluntaryExchangeService->recommendedExchangeQuote($originProductQuote->pq_id, $exchangeQuote->pq_id);
                 } catch (\Throwable $throwable) {
                     $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Could not create new Voluntary Exchange quote');
                     throw $throwable;
                 }
             }
+
+            /* TODO:: paymentRequest processing */
+
+            /* TODO:: billingInfo processing */
 
             $flightRequestService->done('FlightRequest successfully processed');
         } catch (Throwable $throwable) {
@@ -147,13 +148,13 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 $flightRequestService->error($throwable->getMessage());
             }
 
-            if (isset($case, $flightRequest, $voluntaryExchangeCreateService, $caseService) && !isset($client)) {
-                $client = $voluntaryExchangeCreateService->createSimpleClient($flightRequest->fr_project_id);
-                $caseService->addClient($client->id);
+            if (isset($case, $flightRequest, $voluntaryExchangeService, $caseHandler) && !isset($client)) {
+                $client = $voluntaryExchangeService->createSimpleClient($flightRequest->fr_project_id);
+                $caseHandler->addClient($client->id);
             }
 
             $data['flightRequest'] = $this->flight_request_id;
-            VoluntaryExchangeCreateService::writeLog($throwable, $data);
+            VoluntaryExchangeService::writeLog($throwable, 'VoluntaryExchangeCreateJob:throwable', $data);
         }
     }
 }

@@ -1,33 +1,34 @@
 <?php
 
-namespace modules\flight\src\useCases\voluntaryExchangeCreate\form;
+namespace modules\flight\src\useCases\voluntaryExchangeConfirm\form;
 
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
+use modules\product\src\entities\productQuote\ProductQuote;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
 use yii\base\Model;
 
 /**
- * Class VoluntaryExchangeCreateForm
+ * Class VoluntaryExchangeConfirmForm
  *
  * @property $booking_id
  * @property $flight_product_quote
  * @property $payment_request
  * @property $billing
- * @property $is_automate
+ * @property $quote_gid
  *
  * @property PaymentRequestForm|null $paymentRequestForm
  * @property BillingInfoForm|null $billingInfoForm
  */
-class VoluntaryExchangeCreateForm extends Model
+class VoluntaryExchangeConfirmForm extends Model
 {
     public $booking_id;
     public $flight_product_quote;
     public $payment_request;
     public $billing;
-    public $is_automate;
+    public $quote_gid;
 
     private ?PaymentRequestForm $paymentRequestForm;
     private ?BillingInfoForm $billingInfoForm;
@@ -38,8 +39,9 @@ class VoluntaryExchangeCreateForm extends Model
             [['booking_id'], 'required'],
             [['booking_id'], 'string', 'max' => 10],
 
-            [['is_automate'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
-            [['is_automate'], 'default', 'value' => false],
+            [['quote_gid'], 'required'],
+            [['quote_gid'], 'string', 'max' => 32],
+            [['quote_gid'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['quote_gid' => 'pq_gid']],
 
             [['flight_product_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['flight_product_quote'], 'filter', 'filter' => static function ($value) {

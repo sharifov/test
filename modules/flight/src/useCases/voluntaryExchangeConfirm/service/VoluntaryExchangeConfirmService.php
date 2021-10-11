@@ -1,15 +1,15 @@
 <?php
 
-namespace modules\flight\src\useCases\voluntaryExchangeCreate\service;
+namespace modules\flight\src\useCases\voluntaryExchangeConfirm\service;
 
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 
 /**
- * Class VoluntaryExchangeCreateService
+ * Class VoluntaryExchangeConfirmService
  *
  * @property VoluntaryExchangeObjectCollection $objectCollection
  */
-class VoluntaryExchangeCreateService
+class VoluntaryExchangeConfirmService
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
 

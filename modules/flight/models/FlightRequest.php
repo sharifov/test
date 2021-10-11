@@ -36,10 +36,12 @@ class FlightRequest extends \yii\db\ActiveRecord
 {
     public const TYPE_RE_PROTECTION_CREATE = 1;
     public const TYPE_VOLUNTARY_EXCHANGE_CREATE = 2;
+    public const TYPE_VOLUNTARY_EXCHANGE_CONFIRM = 3;
 
     public const TYPE_LIST = [
         self::TYPE_RE_PROTECTION_CREATE => 'reprotection/create',
         self::TYPE_VOLUNTARY_EXCHANGE_CREATE => 'flight-quote-exchange/create',
+        self::TYPE_VOLUNTARY_EXCHANGE_CONFIRM => 'flight-quote-exchange/confirm',
     ];
 
     public const STATUS_NEW = 1;
