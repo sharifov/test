@@ -5,7 +5,6 @@ namespace sales\model\leadRedial\queue;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\PhoneBlacklist;
-use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\leadRedial\job\LeadCallPrepareCheckerJob;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\lead\LeadQcallRepository;
@@ -26,7 +25,6 @@ use sales\services\TransactionManager;
  * @property ClientPhones $clientPhones
  * @property AgentPhone $agentPhone
  * @property TransactionManager $transactionManager
- * @property LeadRedialUnAssigner $leadRedialUnAssigner
  */
 class SimpleLeadRedialQueue implements LeadRedialQueue
 {
@@ -41,7 +39,6 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
     private ClientPhones $clientPhones;
     private AgentPhone $agentPhone;
     private TransactionManager $transactionManager;
-    private LeadRedialUnAssigner $leadRedialUnAssigner;
 
     public function __construct(
         Leads $leads,
@@ -52,8 +49,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
         LeadRepository $leadRepository,
         ClientPhones $clientPhones,
         AgentPhone $agentPhone,
-        TransactionManager $transactionManager,
-        LeadRedialUnAssigner $leadRedialUnAssigner
+        TransactionManager $transactionManager
     ) {
         $this->leads = $leads;
         $this->reserver = $reserver;
@@ -64,7 +60,6 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
         $this->clientPhones = $clientPhones;
         $this->agentPhone = $agentPhone;
         $this->transactionManager = $transactionManager;
-        $this->leadRedialUnAssigner = $leadRedialUnAssigner;
     }
 
     public function getCall(Employee $user): ?RedialCall
@@ -97,8 +92,6 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 $this->reserver->reset($key);
                 continue;
             }
-
-            $this->leadRedialUnAssigner->acceptCall($user->id);
 
             $this->transactionManager->wrap(function () use ($lead, $leadQcall) {
                 $lead->callPrepare();

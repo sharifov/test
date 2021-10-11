@@ -1272,12 +1272,13 @@ class CallController extends FController
             }
 
             if (!$isReserved) {
-                if (Yii::createObject(LeadRedialAccessChecker::class)->exist(Auth::id())) {
+                if (Yii::createObject(LeadRedialAccessChecker::class)->exist($userId)) {
                     $leadRedialQueue = Yii::createObject(\sales\model\leadRedial\queue\LeadRedialQueue::class);
                     $redialCall = $leadRedialQueue->getCall(Auth::user());
                     if ($redialCall) {
                         $prepare = new PrepareCurrentCallsForNewCall($userId);
                         if ($prepare->prepare()) {
+                            Yii::createObject(LeadRedialUnAssigner::class)->acceptRedialCall($userId, $redialCall->leadId);
                             $response['isRedialCall'] = true;
                             $response['redialCall'] = $redialCall->toArray();
                         } else {

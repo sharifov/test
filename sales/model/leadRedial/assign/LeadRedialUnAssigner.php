@@ -24,7 +24,23 @@ class LeadRedialUnAssigner
         $this->callRedialUserAccessRepository = $callRedialUserAccessRepository;
     }
 
+    public function acceptRedialCall(int $userId, int $leadId): void
+    {
+        $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
+        foreach ($accesses as $access) {
+            $this->unAssign($access);
+        }
+    }
+
     public function acceptCall(int $userId): void
+    {
+        $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
+        foreach ($accesses as $access) {
+            $this->unAssign($access);
+        }
+    }
+
+    public function createCall(int $userId): void
     {
         $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
