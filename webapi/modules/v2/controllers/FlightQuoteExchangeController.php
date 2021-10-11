@@ -121,10 +121,10 @@ class FlightQuoteExchangeController extends BaseController
          {
             "booking_id":"XXXYYYZ",
             "flight_quote":{
-                "gds": "S",
-                "pcc": "8KI0",
-                "validatingCarrier": "PR",
-                "fareType": "SR",
+                "gds":"S",
+                "pcc":"8KI0",
+                "validatingCarrier":"PR",
+                "fareType":"SR",
                 "trips":[
                     {
                         "duration":848,
@@ -161,7 +161,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":160,
                                 "departureAirportCode":"CDG",
@@ -177,7 +176,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             },
@@ -188,7 +186,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":88,
                                 "departureAirportCode":"LAX",
@@ -204,7 +201,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             }
@@ -220,7 +216,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":127,
                                 "departureAirportCode":"SMF",
@@ -236,7 +231,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             },
@@ -247,7 +241,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":201,
                                 "departureAirportCode":"SEA",
@@ -263,7 +256,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             },
@@ -274,7 +266,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":510,
                                 "departureAirportCode":"MSP",
@@ -290,7 +281,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             },
@@ -324,15 +314,13 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             }
                         ]
                     }
                 ]
-            }
-          },
+            },
             "payment":{
                 "method_key":"cc",
                 "method_data":{
@@ -344,7 +332,7 @@ class FlightQuoteExchangeController extends BaseController
                         "cvv":"097"
                     }
                 },
-                "amount": 29.95,
+                "amount":29.95,
                 "currency":"USD"
             },
             "billing":{
@@ -370,7 +358,8 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "TODO": "todo::"
+                    "resultMessage": "FlightRequest created",
+                    "flightRequestId" : 123
                },
      *        "code": "13200",
      *        "technical": {

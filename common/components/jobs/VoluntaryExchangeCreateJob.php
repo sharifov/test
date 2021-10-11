@@ -140,6 +140,8 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                     throw $throwable;
                 }
             }
+
+            $flightRequestService->done('FlightRequest successfully processed');
         } catch (Throwable $throwable) {
             if (isset($flightRequestService)) {
                 $flightRequestService->error($throwable->getMessage());
