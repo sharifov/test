@@ -10,6 +10,7 @@ use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use sales\repositories\cases\CasesRepository;
+use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
 use sales\repositories\product\ProductQuoteRepository;
@@ -31,6 +32,14 @@ class VoluntaryExchangeObjectCollection
     private ?ProductQuoteChangeRepository $productQuoteChangeRepository;
     private ?ProductQuoteRepository $productQuoteRepository;
     private ?ProductQuoteDataManageService $productQuoteDataManageService;
+    private ?CasesCommunicationService $casesCommunicationService;
+
+    public function getCasesCommunicationService(): CasesCommunicationService
+    {
+        return $this->casesCommunicationService ?? ($this->casesCommunicationService = Yii::createObject(
+            CasesCommunicationService::class
+        ));
+    }
 
     public function getProductQuoteDataManageService(): ProductQuoteDataManageService
     {

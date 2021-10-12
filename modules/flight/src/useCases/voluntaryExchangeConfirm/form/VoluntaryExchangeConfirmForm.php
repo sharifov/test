@@ -14,7 +14,6 @@ use yii\base\Model;
  * Class VoluntaryExchangeConfirmForm
  *
  * @property $booking_id
- * @property $flight_product_quote
  * @property $payment_request
  * @property $billing
  * @property $quote_gid
@@ -25,7 +24,6 @@ use yii\base\Model;
 class VoluntaryExchangeConfirmForm extends Model
 {
     public $booking_id;
-    public $flight_product_quote;
     public $payment_request;
     public $billing;
     public $quote_gid;
@@ -42,11 +40,6 @@ class VoluntaryExchangeConfirmForm extends Model
             [['quote_gid'], 'required'],
             [['quote_gid'], 'string', 'max' => 32],
             [['quote_gid'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['quote_gid' => 'pq_gid']],
-
-            [['flight_product_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
-            [['flight_product_quote'], 'filter', 'filter' => static function ($value) {
-                return JsonHelper::decode($value);
-            }],
 
             [['payment_request'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['payment_request'], 'paymentRequestProcessing'],

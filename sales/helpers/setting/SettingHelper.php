@@ -432,7 +432,6 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
 
-
     public static function getReProtectionCaseCategory(): ?string
     {
         return Yii::$app->params['settings']['reprotection_case_category'] ?? null;
@@ -615,5 +614,10 @@ class SettingHelper
     public static function clientNotificationSuccessCallMinDuration(): int
     {
         return (int) (Yii::$app->params['settings']['client_notification_success_call_min_duration'] ?? 30);
+    }
+
+    public static function getVoluntaryExchangeCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
     }
 }

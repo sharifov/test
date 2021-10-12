@@ -4,6 +4,8 @@ namespace modules\flight\src\useCases\voluntaryExchangeCreate\form;
 
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
+use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\FlightQuoteForm;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
@@ -45,13 +47,30 @@ class VoluntaryExchangeCreateForm extends Model
             [['flight_product_quote'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);
             }],
+            [['flight_product_quote'], 'checkFlightQuoteForm'],
 
             [['payment_request'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['payment_request'], 'paymentRequestProcessing'],
 
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['billing'], 'billingProcessing'],
+
+            [['booking_id'], 'checkExistByHash'],
         ];
+    }
+
+    public function checkFlightQuoteForm($attribute)
+    {
+        if (!empty($this->flight_quote)) {
+            $flightQuoteForm = new FlightQuoteForm();
+            if (!$flightQuoteForm->load($this->flight_quote)) {
+                $this->addError($attribute, 'FlightQuoteForm not loaded');
+            } elseif (!$flightQuoteForm->validate()) {
+                $this->addError($attribute, 'FlightQuoteForm: ' . ErrorsToStringHelper::extractFromModel($flightQuoteForm, ' '));
+            } else {
+                $this->flightQuoteForm = $flightQuoteForm;
+            }
+        }
     }
 
     public function paymentRequestProcessing(string $attribute): void
@@ -79,6 +98,14 @@ class VoluntaryExchangeCreateForm extends Model
             } else {
                 $this->billingInfoForm = $billingInfoForm;
             }
+        }
+    }
+
+    public function checkExistByHash($attribute)
+    {
+        $hash = FlightRequest::generateHashFromDataJson($this->getAttributes());
+        if (FlightRequest::findOne(['fr_hash' => $hash])) {
+            $this->addError($attribute, 'FlightRequest already exist. Hash(' . $hash . ')');
         }
     }
 

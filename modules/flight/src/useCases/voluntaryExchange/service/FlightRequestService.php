@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\voluntaryExchange\service;
 
 use modules\flight\models\FlightRequest;
 use modules\flight\models\FlightRequestLog;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightRequestService
@@ -65,5 +66,10 @@ class FlightRequestService
     public function error(string $description): FlightRequest
     {
         return $this->changeStatus(FlightRequest::STATUS_ERROR, $description);
+    }
+
+    public function isAutomate(): bool
+    {
+        return (bool) ArrayHelper::getValue($this->flightRequest, 'fr_data_json.is_automate', false);
     }
 }

@@ -53,10 +53,10 @@ class FlightQuoteExchangeController extends BaseController
     }
 
     /**
-     * @api {post} /v2/flight-quote-exchange/create Voluntary Exchange Create
+     * @api {post} /v2/flight-quote-exchange/create Flight Voluntary Exchange Create
      * @apiVersion 0.2.0
-     * @apiName Voluntary Exchange Create
-     * @apiGroup Voluntary Exchange
+     * @apiName Flight Voluntary Exchange Create
+     * @apiGroup Flight Voluntary Exchange
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -448,7 +448,10 @@ class FlightQuoteExchangeController extends BaseController
         try {
             $bookingId = $voluntaryExchangeCreateForm->booking_id;
             if ($productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($bookingId)) {
-                throw new \RuntimeException('VoluntaryExchange by BookingID(' . $bookingId . ') already processed');
+                throw new \RuntimeException(
+                    'ProductQuoteChange(VoluntaryExchange) by BookingID(' . $bookingId . ') already processed',
+                    ApiCodeException::REQUEST_ALREADY_PROCESSED
+                );
             }
 
             $flightRequest = FlightRequest::create(
@@ -467,7 +470,7 @@ class FlightQuoteExchangeController extends BaseController
             $flightRequest->fr_job_id = $jobId;
             $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
-            $dataMessage['resultMessage'] = 'FlightRequest for "voluntary exchange create" created';
+            $dataMessage['resultMessage'] = 'FlightRequest is accepted for processing';
             $dataMessage['flightRequestId'] = $flightRequest->fr_id;
 
             return new SuccessResponse(
@@ -475,20 +478,28 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
         } catch (\RuntimeException | \DomainException $throwable) {
-            \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Warning'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Throwable'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
@@ -498,10 +509,10 @@ class FlightQuoteExchangeController extends BaseController
     }
 
     /**
-     * @api {post} /v2/flight-quote-exchange/confirm Voluntary Exchange Confirm
+     * @api {post} /v2/flight-quote-exchange/confirm Flight Voluntary Exchange Confirm
      * @apiVersion 0.2.0
-     * @apiName Voluntary Exchange Confirm
-     * @apiGroup Voluntary Exchange
+     * @apiName Flight Voluntary Exchange Confirm
+     * @apiGroup Flight Voluntary Exchange
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -680,20 +691,28 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
         } catch (\RuntimeException | \DomainException $throwable) {
-            \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Warning'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Throwable'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
@@ -703,10 +722,10 @@ class FlightQuoteExchangeController extends BaseController
     }
 
     /**
-     * @api {post} /v2/flight-quote-exchange/info Voluntary Exchange Info
+     * @api {post} /v2/flight-quote-exchange/info Flight Voluntary Exchange Info
      * @apiVersion 0.2.0
-     * @apiName Voluntary Exchange Info
-     * @apiGroup Voluntary Exchange
+     * @apiName Flight Voluntary Exchange Info
+     * @apiGroup Flight Voluntary Exchange
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -837,20 +856,28 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
         } catch (\RuntimeException | \DomainException $throwable) {
-            \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Warning'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Throwable'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
                 new ErrorsMessage($throwable->getMessage()),

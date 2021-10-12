@@ -5,6 +5,7 @@ namespace modules\flight\models;
 use common\components\validators\CheckJsonValidator;
 use common\models\Project;
 use modules\flight\models\query\FlightRequestQuery;
+use sales\behaviors\HashFromJsonBehavior;
 use sales\behaviors\StringToJsonBehavior;
 use common\models\ApiUser;
 use Yii;
@@ -111,6 +112,11 @@ class FlightRequest extends \yii\db\ActiveRecord
             'stringToJson' => [
                 'class' => StringToJsonBehavior::class,
                 'jsonColumn' => 'fr_data_json',
+            ],
+            'hashGenerate' => [
+                'class' => HashFromJsonBehavior::class,
+                'donorColumn' => 'fr_data_json',
+                'targetColumn' => 'fr_hash',
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);

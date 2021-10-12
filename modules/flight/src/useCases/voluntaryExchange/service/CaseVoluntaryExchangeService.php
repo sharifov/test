@@ -15,22 +15,32 @@ use sales\helpers\setting\SettingHelper;
  */
 class CaseVoluntaryExchangeService
 {
-    public const CASE_CATEGORY_KEY = 'exchange';
+    public const CASE_CREATE_CATEGORY_KEY = 'voluntary_exchange';
+
+    public static function getCategoryKey(): string
+    {
+        if (!empty(SettingHelper::getVoluntaryExchangeCaseCategory())) {
+            return SettingHelper::getVoluntaryExchangeCaseCategory();
+        }
+        return self::CASE_CREATE_CATEGORY_KEY;
+    }
 
     public static function createCase(
         string $bookingId,
         int $projectId,
+        ?bool $isAutomate,
         VoluntaryExchangeObjectCollection $objectCollection
     ): Cases {
-        if (!$caseCategory = CaseCategory::findOne(['cc_key' => self::CASE_CATEGORY_KEY])) {
-            throw new CheckRestrictionException('CaseCategory (' . self::CASE_CATEGORY_KEY . ') not found');
+        if (!$caseCategory = CaseCategory::findOne(['cc_key' => self::getCategoryKey()])) {
+            throw new CheckRestrictionException('CaseCategory (' . self::getCategoryKey() . ') not found');
         }
 
         $case = Cases::createByApiVoluntaryExChange(
             $caseCategory->cc_dep_id,
             $caseCategory->cc_id,
             $bookingId,
-            $projectId
+            $projectId,
+            $isAutomate
         );
         $objectCollection->getCasesRepository()->save($case);
 
@@ -48,7 +58,7 @@ class CaseVoluntaryExchangeService
         return Cases::find()->where(['cs_order_uid' => $bookingId])
             ->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH]])
             ->innerJoin(CaseCategory::tableName(), 'cs_category_id = cc_id and cc_key = :categoryKey', [
-                'categoryKey' => self::CASE_CATEGORY_KEY
+                'categoryKey' => self::getCategoryKey()
             ])
             ->orderBy(['cs_id' => SORT_DESC])
             ->one();

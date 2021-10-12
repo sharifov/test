@@ -7,6 +7,7 @@ use DomainException;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
+use modules\flight\src\useCases\voluntaryExchange\service\SendEmailVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
@@ -47,7 +48,12 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             $flightRequestService = new FlightRequestService($flightRequest, $objectCollection);
 
             if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
-                $case = CaseService::createCase($flightRequest->fr_booking_id, $flightRequest->fr_project_id, $objectCollection);
+                $case = CaseService::createCase(
+                    $flightRequest->fr_booking_id,
+                    $flightRequest->fr_project_id,
+                    $flightRequestService->isAutomate(),
+                    $objectCollection
+                );
             }
             $caseHandler = new CaseVoluntaryExchangeHandler($case, $objectCollection);
 
@@ -59,7 +65,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 }
                 $voluntaryExchangeService->createCaseSale($saleData, $case);
             } catch (Throwable $throwable) {
-                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Case sale not created');
+                $caseHandler->caseToPendingManual('Case sale not created');
                 throw $throwable;
             }
 
@@ -70,7 +76,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 );
                 $caseHandler->addClient($client->id);
             } catch (\Throwable $throwable) {
-                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Client not created');
+                $caseHandler->caseToPendingManual('Client not created');
                 throw $throwable;
             }
 
@@ -82,7 +88,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                     $flightRequest->fr_project_id
                 );
             } catch (\Throwable $throwable) {
-                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Order not created');
+                $caseHandler->caseToPendingManual('Order not created');
                 throw $throwable;
             }
 
@@ -94,14 +100,14 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                     $case
                 );
             } catch (\Throwable $throwable) {
-                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'OriginProductQuote not created');
+                $caseHandler->caseToPendingManual('OriginProductQuote not created');
                 throw $throwable;
             }
 
             try {
                 $productQuoteChange = $voluntaryExchangeService->createProductQuoteChange($originProductQuote->pq_id, $case->cs_id);
             } catch (\Throwable $throwable) {
-                $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'ProductQuoteChange not created');
+                $caseHandler->caseToPendingManual('ProductQuoteChange not created');
                 throw $throwable;
             }
 
@@ -114,11 +120,11 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             try {
                 $voluntaryExchangeService->originProductQuoteDecline($originProductQuote, $case);
             } catch (Throwable $throwable) {
-                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'OriginProductQuote not declined');
+                $caseHandler->caseToPendingManual('OriginProductQuote not declined');
                 throw $throwable;
             }
 
-            if ($flightProductQuoteData = ArrayHelper::getValue($flightRequest, 'fr_data_json.flight_product_quote')) {
+            if ($flightProductQuoteData = ArrayHelper::getValue($flightRequest, 'fr_data_json.flight_quote')) {
                 try {
                     $flight = $voluntaryExchangeService->getFlightByOriginQuote($originProductQuote);
                     $flightQuote = $flightQuoteManageService->createVoluntaryExchange(
@@ -130,10 +136,10 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                         $originProductQuote
                     );
                     $caseHandler->setCaseDeadline($flightQuote);
-                    $exchangeQuote = $flightQuote->fqProductQuote;
-                    $voluntaryExchangeService->recommendedExchangeQuote($originProductQuote->pq_id, $exchangeQuote->pq_id);
+                    $voluntaryExchangeQuote = $flightQuote->fqProductQuote;
+                    $voluntaryExchangeService->recommendedExchangeQuote($originProductQuote->pq_id, $voluntaryExchangeQuote->pq_id);
                 } catch (\Throwable $throwable) {
-                    $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Could not create new Voluntary Exchange quote');
+                    $caseHandler->caseToPendingManual('Could not create new Voluntary Exchange quote');
                     throw $throwable;
                 }
             }
@@ -141,6 +147,27 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             /* TODO:: paymentRequest processing */
 
             /* TODO:: billingInfo processing */
+
+            if (isset($voluntaryExchangeQuote) && $flightRequestService->isAutomate()) {
+                try {
+                    new SendEmailVoluntaryExchangeService(
+                        $case,
+                        $order,
+                        $voluntaryExchangeQuote,
+                        $originProductQuote,
+                        $flightRequest->fr_booking_id,
+                        $objectCollection
+                    );
+                    $flightRequestService->done('Client Email send');
+                    $productQuoteChange->decisionPending();
+                    $objectCollection->getProductQuoteChangeRepository()->save($productQuoteChange);
+                } catch (\Throwable $throwable) {
+                    $caseHandler->caseToPendingManual('Could not create new Voluntary Exchange quote');
+                    throw $throwable;
+                }
+
+                $caseHandler->caseToAutoProcessing();
+            }
 
             $flightRequestService->done('FlightRequest successfully processed');
         } catch (Throwable $throwable) {

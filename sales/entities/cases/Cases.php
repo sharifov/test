@@ -252,7 +252,8 @@ class Cases extends ActiveRecord implements Objectable
         int $departmentId,
         int $categoryId,
         string $orderUid,
-        int $projectId
+        int $projectId,
+        ?bool $is_automate
     ): self {
         $case = self::create();
         $case->cs_dep_id = $departmentId;
@@ -260,9 +261,9 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_order_uid = $orderUid;
         $case->cs_subject = 'Voluntary Change';
         $case->cs_source_type_id = CasesSourceType::API;
-        $case->cs_is_automate = null;
+        $case->cs_is_automate = $is_automate;
         $case->cs_project_id = $projectId;
-        $case->pending(null, 'Voluntary Change Create');
+        $case->pending(null, 'Voluntary Exchange Create');
         return $case;
     }
 
