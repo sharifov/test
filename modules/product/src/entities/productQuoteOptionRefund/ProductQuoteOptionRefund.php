@@ -182,7 +182,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             "type" => static function (self $model) {
                 return null;
             },
-            "airlinePenalty" => 'pqor_client_selling_price',
+            "airlinePenalty" => 'pqor_penalty_amount',
             "refundAmount" => 'pqor_client_refund_amount',
             "status" => static function (self $model) {
                 return ProductQuoteOptionRefundStatus::getName($model->pqor_status_id);
