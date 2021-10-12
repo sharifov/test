@@ -227,7 +227,18 @@ class FlightQuoteRefundController extends ApiBaseController
      *          "processingFee": 12.5,
      *          "penaltyAmount": 100.00,
      *          "totalRefundAmount": 112.5,
-     *          "currency": "USD"
+     *          "totalPaid": 305.50,
+     *          "currency": "USD",
+     *          "tickets": [
+     *              {
+     *                  "number": "465723459",
+     *                  "airlinePenalty": 25.36,
+     *                  "processingFee": 25,
+     *                  "refundAmount": 52.65,
+     *                  "sellingPrice": 150,
+     *                  "status": "issued"
+     *              }
+     *          ]
      *      },
      *      "billing": {
      *          "first_name": "John",
