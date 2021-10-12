@@ -193,7 +193,14 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {number}               refund.tickets.processingFee      Processing fee
      * @apiParam {number}               refund.tickets.refundAmount       Refund amount
      * @apiParam {number}               refund.tickets.sellingPrice       Selling price
-     * @apiParam {string="refunded","request-refund","issued"}               refund.tickets.status             Status
+     * @apiParam {string="refunded","request-refund","issued"}              refund.tickets.status             Status
+     * @apiParam {object}               refund.auxiliaryOptions             Auxiliary Options Array
+     * @apiParam {string}               refund.auxiliaryOptions.type        Auxiliary Options Type
+     * @apiParam {number}               refund.auxiliaryOptions.amount      Selling price
+     * @apiParam {number}               refund.auxiliaryOptions.refundable  Refundable price
+     * @apiParam {string="refunded","used","unpaid"}               refund.auxiliaryOptions.status  Status
+     * @apiParam {bool}                 refund.auxiliaryOptions.refundAllow  Refund Allowed
+     * @apiParam {object}                 [refund.auxiliaryOptions.details]  Details
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -237,6 +244,16 @@ class FlightQuoteRefundController extends ApiBaseController
      *                  "refundAmount": 52.65,
      *                  "sellingPrice": 150,
      *                  "status": "issued"
+     *              }
+     *          ],
+     *          "auxiliaryOptions": [
+     *              {
+     *                  "type": "package",
+     *                  "amount": 25.00,
+     *                  "refundable": 15.00,
+     *                  "status": "paid",
+     *                  "refundAllow": true,
+     *                  "details": {}
      *              }
      *          ]
      *      },

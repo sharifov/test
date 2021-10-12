@@ -10108,6 +10108,60 @@ define({ "api": [
             "group": "Parameter",
             "type": "object",
             "optional": false,
+            "field": "refund.auxiliaryOptions",
+            "description": "<p>Auxiliary Options Array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.type",
+            "description": "<p>Auxiliary Options Type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.amount",
+            "description": "<p>Selling price</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.refundable",
+            "description": "<p>Refundable price</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "allowedValues": [
+              "\"refunded\"",
+              "\"used\"",
+              "\"unpaid\""
+            ],
+            "optional": false,
+            "field": "refund.auxiliaryOptions.status",
+            "description": "<p>Status</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.refundAllow",
+            "description": "<p>Refund Allowed</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "refund.auxiliaryOptions.details",
+            "description": "<p>Details</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
             "field": "billing",
             "description": "<p>Billing</p>"
           },
@@ -10302,7 +10356,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"booking_id\": \"XXXXXXX\",\n    \"refund\": {\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"totalPaid\": 305.50,\n        \"currency\": \"USD\",\n        \"tickets\": [\n            {\n                \"number\": \"465723459\",\n                \"airlinePenalty\": 25.36,\n                \"processingFee\": 25,\n                \"refundAmount\": 52.65,\n                \"sellingPrice\": 150,\n                \"status\": \"issued\"\n            }\n        ]\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"cc\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"exp_month\": 10,\n                \"exp_year\": 2022,\n                \"cvv\": 097\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
+          "content": "{\n    \"booking_id\": \"XXXXXXX\",\n    \"refund\": {\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"totalPaid\": 305.50,\n        \"currency\": \"USD\",\n        \"tickets\": [\n            {\n                \"number\": \"465723459\",\n                \"airlinePenalty\": 25.36,\n                \"processingFee\": 25,\n                \"refundAmount\": 52.65,\n                \"sellingPrice\": 150,\n                \"status\": \"issued\"\n            }\n        ],\n        \"auxiliaryOptions\": [\n            {\n                \"type\": \"package\",\n                \"amount\": 25.00,\n                \"refundable\": 15.00,\n                \"status\": \"paid\",\n                \"refundAllow\": true,\n                \"details\": {}\n            }\n        ]\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"cc\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"exp_month\": 10,\n                \"exp_year\": 2022,\n                \"cvv\": 097\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
           "type": "json"
         }
       ]
