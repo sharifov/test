@@ -50,9 +50,4 @@ class BillingInfoForm extends \yii\base\Model
             [['contact_email'], EmailValidator::class, 'skipOnEmpty' => true],
         ];
     }
-
-    public function formName(): string
-    {
-        return '';
-    }
 }

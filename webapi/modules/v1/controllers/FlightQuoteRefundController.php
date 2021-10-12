@@ -180,12 +180,20 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{0..10}}    booking_id          Booking ID
-     * @apiParam {object}    refund                     Refund Data
-     * @apiParam {number}    refund.processingFee       Processing fee
-     * @apiParam {number}    refund.penaltyAmount       Airline penalty amount
-     * @apiParam {number}    refund.totalRefundAmount   Total refund amount
-     * @apiParam {string{..3}}    refund.currency       Currency
+     * @apiParam {string{0..10}}        booking_id          Booking ID
+     * @apiParam {object}               refund                            Refund Data
+     * @apiParam {string{..3}}          refund.currency                   Currency
+     * @apiParam {number}               refund.processingFee              Processing fee
+     * @apiParam {number}               refund.penaltyAmount              Airline penalty amount
+     * @apiParam {number}               refund.totalRefundAmount          Total refund amount
+     * @apiParam {number}               refund.totalPaid                  Total booking amount
+     * @apiParam {object}               refund.tickets                    Refund Tickets Array
+     * @apiParam {string}               refund.tickets.number             Ticket Number
+     * @apiParam {number}               refund.tickets.airlinePenalty     Airline penalty
+     * @apiParam {number}               refund.tickets.processingFee      Processing fee
+     * @apiParam {number}               refund.tickets.refundAmount       Refund amount
+     * @apiParam {number}               refund.tickets.sellingPrice       Selling price
+     * @apiParam {string="refunded","request-refund","issued"}               refund.tickets.status             Status
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -201,7 +209,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{160}}          [billing.contact_email]      Contact email
      * @apiParam {string{60}}           [billing.contact_name]       Contact name
      * @apiParam {object}               payment_request                      Payment request
-     * @apiParam {number}               payment_request.amount               Amount
+     * @apiParam {number}               payment_request.amount               Customer must pay for initiate refund process
      * @apiParam {string{3}}            payment_request.currency             Currency code
      * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")
      * @apiParam {object}               payment_request.method_data          Method data
