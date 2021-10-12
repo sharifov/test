@@ -15,7 +15,7 @@ use yii\base\Model;
  * Class VoluntaryExchangeCreateForm
  *
  * @property $booking_id
- * @property $flight_product_quote
+ * @property $flight_quote
  * @property $payment_request
  * @property $billing
  * @property $is_automate
@@ -26,7 +26,7 @@ use yii\base\Model;
 class VoluntaryExchangeCreateForm extends Model
 {
     public $booking_id;
-    public $flight_product_quote;
+    public $flight_quote;
     public $payment_request;
     public $billing;
     public $is_automate;
@@ -43,11 +43,11 @@ class VoluntaryExchangeCreateForm extends Model
             [['is_automate'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
             [['is_automate'], 'default', 'value' => false],
 
-            [['flight_product_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
-            [['flight_product_quote'], 'filter', 'filter' => static function ($value) {
+            [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
+            [['flight_quote'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);
             }],
-            [['flight_product_quote'], 'checkFlightQuoteForm'],
+            [['flight_quote'], 'checkFlightQuoteForm'],
 
             [['payment_request'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['payment_request'], 'paymentRequestProcessing'],

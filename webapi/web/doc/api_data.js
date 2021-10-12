@@ -1,156 +1,6 @@
 define({ "api": [
   {
     "type": "get, post",
-    "url": "/health-check",
-    "title": "Get health check",
-    "version": "0.1.0",
-    "name": "HealthCheck_Sales",
-    "group": "App",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Array",
-            "optional": false,
-            "field": "data",
-            "description": "<p>components health check passed statuses (&quot;true&quot; or &quot;false&quot;)</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "ServiceUnavailable",
-            "description": "<p>HTTP 503</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Error-Response:",
-          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/controllers/HealthController.php",
-    "groupTitle": "App"
-  },
-  {
-    "type": "get, post",
-    "url": "/health-check/metrics",
-    "title": "Get health check metrics text",
-    "version": "0.1.0",
-    "name": "HealthCheck_Sales_Metrics",
-    "group": "App",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "string",
-            "optional": false,
-            "field": "metrics",
-            "description": "<p>in plain text format containing components health statuses (&quot;1&quot; for OK, &quot;0&quot; for failed)</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 1\nhealthcheck_status{name=\"redis\"} 1",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "ServiceUnavailable",
-            "description": "<p>HTTP 503</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Error-Response:",
-          "content": "HTTP/1.1 503 Service Unavailable\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 0\nhealthcheck_status{name=\"redis\"} 1",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/controllers/HealthController.php",
-    "groupTitle": "App"
-  },
-  {
-    "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
     "version": "0.1.0",
@@ -4758,7 +4608,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "object",
             "optional": true,
-            "field": "flight_product_quote",
+            "field": "flight_quote",
             "description": "<p>Flight quote</p>"
           },
           {
@@ -4766,7 +4616,7 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": false,
-            "field": "flight_product_quote.gds",
+            "field": "flight_quote.gds",
             "description": "<p>Gds</p>"
           },
           {
@@ -4774,7 +4624,7 @@ define({ "api": [
             "type": "string",
             "size": "10",
             "optional": false,
-            "field": "flight_product_quote.pcc",
+            "field": "flight_quote.pcc",
             "description": "<p>pcc</p>"
           },
           {
@@ -4782,28 +4632,28 @@ define({ "api": [
             "type": "string",
             "size": "50",
             "optional": false,
-            "field": "flight_product_quote.fareType",
+            "field": "flight_quote.fareType",
             "description": "<p>ValidatingCarrier</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": false,
-            "field": "flight_product_quote.trips",
+            "field": "flight_quote.trips",
             "description": "<p>Trips</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": true,
-            "field": "flight_product_quote.trips.duration",
+            "field": "flight_quote.trips.duration",
             "description": "<p>Trip Duration</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": false,
-            "field": "flight_product_quote.trips.segments",
+            "field": "flight_quote.trips.segments",
             "description": "<p>Segments</p>"
           },
           {
@@ -4811,7 +4661,7 @@ define({ "api": [
             "type": "string",
             "size": "format Y-m-d H:i",
             "optional": false,
-            "field": "flight_product_quote.trips.segments.departureTime",
+            "field": "flight_quote.trips.segments.departureTime",
             "description": "<p>DepartureTime</p>"
           },
           {
@@ -4819,7 +4669,7 @@ define({ "api": [
             "type": "string",
             "size": "format Y-m-d H:i",
             "optional": false,
-            "field": "flight_product_quote.trips.segments.arrivalTime",
+            "field": "flight_quote.trips.segments.arrivalTime",
             "description": "<p>ArrivalTime</p>"
           },
           {
@@ -4827,7 +4677,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "flight_product_quote.trips.segments.departureAirportCode",
+            "field": "flight_quote.trips.segments.departureAirportCode",
             "description": "<p>Departure Airport Code IATA</p>"
           },
           {
@@ -4835,14 +4685,14 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "flight_product_quote.trips.segments.arrivalAirportCode",
+            "field": "flight_quote.trips.segments.arrivalAirportCode",
             "description": "<p>Arrival Airport Code IATA</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.flightNumber",
+            "field": "flight_quote.trips.segments.flightNumber",
             "description": "<p>Flight Number</p>"
           },
           {
@@ -4850,14 +4700,14 @@ define({ "api": [
             "type": "string",
             "size": "1",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.bookingClass",
+            "field": "flight_quote.trips.segments.bookingClass",
             "description": "<p>BookingClass</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.duration",
+            "field": "flight_quote.trips.segments.duration",
             "description": "<p>Segment duration</p>"
           },
           {
@@ -4865,7 +4715,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.departureAirportTerminal",
+            "field": "flight_quote.trips.segments.departureAirportTerminal",
             "description": "<p>Departure Airport Terminal Code</p>"
           },
           {
@@ -4873,7 +4723,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.arrivalAirportTerminal",
+            "field": "flight_quote.trips.segments.arrivalAirportTerminal",
             "description": "<p>Arrival Airport Terminal Code</p>"
           },
           {
@@ -4881,7 +4731,7 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.operatingAirline",
+            "field": "flight_quote.trips.segments.operatingAirline",
             "description": "<p>Operating Airline</p>"
           },
           {
@@ -4889,7 +4739,7 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.marketingAirline",
+            "field": "flight_quote.trips.segments.marketingAirline",
             "description": "<p>Marketing Airline</p>"
           },
           {
@@ -4897,7 +4747,7 @@ define({ "api": [
             "type": "string",
             "size": "30",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.airEquipType",
+            "field": "flight_quote.trips.segments.airEquipType",
             "description": "<p>AirEquipType</p>"
           },
           {
@@ -4905,14 +4755,14 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.marriageGroup",
+            "field": "flight_quote.trips.segments.marriageGroup",
             "description": "<p>MarriageGroup</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.mileage",
+            "field": "flight_quote.trips.segments.mileage",
             "description": "<p>Mileage</p>"
           },
           {
@@ -4920,7 +4770,7 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.meal",
+            "field": "flight_quote.trips.segments.meal",
             "description": "<p>Meal</p>"
           },
           {
@@ -4928,7 +4778,7 @@ define({ "api": [
             "type": "string",
             "size": "50",
             "optional": true,
-            "field": "flight_product_quote.trips.segments.fareCode",
+            "field": "flight_quote.trips.segments.fareCode",
             "description": "<p>Fare Code</p>"
           }
         ]
