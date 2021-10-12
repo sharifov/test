@@ -7,6 +7,7 @@ use common\models\Employee;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\interfaces\ProductQuoteObjectRefundStructure;
 use sales\repositories\NotFoundException;
+use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -39,6 +40,8 @@ use yii\db\ActiveRecord;
  */
 class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
 {
+    use FieldsTrait;
+
     /**
      * @return array
      */
@@ -162,5 +165,22 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
     public static function find()
     {
         return new Scopes(get_called_class());
+    }
+
+    public function getApiDataMapped(): array
+    {
+        return [
+            "number" => static function (self $model) {
+                return null;
+            },
+            "airlinePenalty" => 'pqor_penalty_amount',
+            "processingFee" => 'pqor_processing_fee_amount',
+            "refundable" => 'pqor_client_refund_amount',
+            "selling" => 'pqor_client_selling_price',
+            "clientCurrency" => 'pqor_client_currency',
+            "status" => static function (self $model) {
+                return ProductQuoteObjectRefundStatus::getName($model->pqor_status_id);
+            }
+        ];
     }
 }

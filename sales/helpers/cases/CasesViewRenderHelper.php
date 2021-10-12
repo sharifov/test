@@ -27,15 +27,18 @@ class CasesViewRenderHelper
         return '';
     }
 
-    public static function renderChangeStatusButton(int $status, Employee $user): string
+    public static function renderChangeStatusButton(Cases $case): string
     {
-        $list = CasesStatusTransferList::getAllowTransferListByUser($status, $user);
+        //$list = CasesStatusTransferList::getAllowTransferListByUser($status, $user);
+
+        $list = CasesStatusTransferList::getAllowTransferListByAbac($case);
+
 //        if (!$user->isAdmin() && !$user->isExSuper() && !$user->isSupSuper()) {
 //            if (isset($list[CasesStatus::STATUS_PROCESSING])) {
 //                unset($list[CasesStatus::STATUS_PROCESSING]);
 //            }
 //        }
-        return $list ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) : '';
+        return $list ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status', 'style' => 'margin-right: 6px;']) : '';
     }
 
     public static function renderCheckedButton(Cases $case): string

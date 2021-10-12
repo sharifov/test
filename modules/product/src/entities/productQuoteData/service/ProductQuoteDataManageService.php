@@ -13,7 +13,7 @@ class ProductQuoteDataManageService
 
         $recommendedQuote = ProductQuoteData::createRecommended($reprotectionQuoteId);
         if (!$recommendedQuote->save()) {
-            throw new \RuntimeException('Unable to set recommended reprotection quote flag: ' . $recommendedQuote->getErrorSummary(true)[0]);
+            throw new \RuntimeException('Unable to set recommended quote flag: ' . $recommendedQuote->getErrorSummary(true)[0]);
         }
         return $recommendedQuote;
     }

@@ -181,7 +181,7 @@ use yii\bootstrap4\Html;
                     'labelOptions' => [
                         'class' => 'control-label'
                     ]
-                ])->dropDownList(Quote::getSortList()) ?>
+                ])->dropDownList(Quote::getSortList(), ['prompt' => '--']) ?>
             </div>
         </div>
 

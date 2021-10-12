@@ -151,7 +151,7 @@ class Quote extends \yii\db\ActiveRecord
         STATUS_CREATED = 1,
         STATUS_APPLIED = 2,
         STATUS_DECLINED = 3,
-        STATUS_SEND = 4,
+        STATUS_SENT = 4,
         STATUS_OPENED = 5;
 
 
@@ -159,7 +159,7 @@ class Quote extends \yii\db\ActiveRecord
         self::STATUS_CREATED => 'New',
         self::STATUS_APPLIED => 'Applied',
         self::STATUS_DECLINED => 'Declined',
-        self::STATUS_SEND => 'Sent',
+        self::STATUS_SENT => 'Sent',
         self::STATUS_OPENED => 'Opened'
     ];
 
@@ -167,7 +167,7 @@ class Quote extends \yii\db\ActiveRecord
         self::STATUS_CREATED => 'lq-created',
         self::STATUS_APPLIED => 'lq-applied',
         self::STATUS_DECLINED => 'lq-declined',
-        self::STATUS_SEND => 'lq-send',
+        self::STATUS_SENT => 'lq-send',
         self::STATUS_OPENED => 'lq-opened'
     ];
 
@@ -175,7 +175,7 @@ class Quote extends \yii\db\ActiveRecord
         self::STATUS_CREATED => 'status-new',
         self::STATUS_APPLIED => 'status-applied',
         self::STATUS_DECLINED => 'status-declined',
-        self::STATUS_SEND => 'status-send',
+        self::STATUS_SENT => 'status-send',
         self::STATUS_OPENED => 'status-opened'
     ];
 
@@ -1539,7 +1539,7 @@ class Quote extends \yii\db\ActiveRecord
             case self::STATUS_DECLINED:
                 $label = '<span id="q-status-' . $this->uid . '" class="sl-quote__status status-label label label-danger" title="At ' . $date . '" data-toggle="tooltip">Declined</span>';
                 break;
-            case self::STATUS_SEND:
+            case self::STATUS_SENT:
                 $label = '<span id="q-status-' . $this->uid . '" class="sl-quote__status status-label label label-warning" title="At ' . $date . '" data-toggle="tooltip">Sent to client</span>';
                 break;
             case self::STATUS_OPENED:
@@ -2631,7 +2631,7 @@ class Quote extends \yii\db\ActiveRecord
     public function setStatusSend(): void
     {
         if (!($this->status === self::STATUS_APPLIED || $this->status === self::STATUS_OPENED)) {
-            $this->status = self::STATUS_SEND;
+            $this->status = self::STATUS_SENT;
         }
 
         if ($this->lead->isReadyForGa()) {

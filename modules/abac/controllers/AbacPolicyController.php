@@ -4,21 +4,26 @@ namespace modules\abac\controllers;
 
 use frontend\controllers\FController;
 use modules\abac\src\forms\AbacPolicyForm;
+use modules\abac\src\forms\AbacPolicyImportForm;
+use sales\auth\Auth;
 use Yii;
 use modules\abac\src\entities\AbacPolicy;
 use modules\abac\src\entities\search\AbacPolicySearch;
 use yii\base\BaseObject;
+use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
 
 /**
  * AbacPolicyController implements the CRUD actions for AbacPolicy model.
  */
 class AbacPolicyController extends FController
 {
+    public const SCHEMA_VERSION = '0.1';
     /**
      * @return array
      */
@@ -44,9 +49,12 @@ class AbacPolicyController extends FController
         $searchModel = new AbacPolicySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $importCount = count($this->getImportData());
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'importCount' => $importCount
         ]);
     }
 
@@ -252,5 +260,280 @@ class AbacPolicyController extends FController
         }
 
         return $this->redirect(['list-content']);
+    }
+
+    public function actionExport()
+    {
+        $filePath = Yii::getAlias('@runtime/') . 'abac-export.json';
+
+        $dataList = AbacPolicy::find()->all();
+        $data = [];
+        if ($dataList) {
+            foreach ($dataList as $item) {
+                $data[] = [
+                    'id' => $item->ap_id,
+                    'object' => $item->ap_object,
+                    'subject' => $item->ap_subject,
+                    'subject_json' => $item->ap_subject_json,
+                    'action' => $item->ap_action,
+                    'action_json' => $item->ap_action_json,
+                    'effect' => $item->ap_effect,
+                    'sort_order' => $item->ap_sort_order,
+                    'title' => $item->ap_title,
+                    'enabled' => $item->ap_enabled,
+                    'created_dt' => $item->ap_created_dt,
+                    'updated_dt' => $item->ap_updated_dt
+                ];
+            }
+        }
+
+        $header['username'] = Auth::user()->username;
+        $header['datetime'] = date('Y-m-d H:i:s');
+        $header['env'] = YII_ENV;
+        $header['app_name'] = Yii::$app->name;
+        $header['app_ver'] = Yii::$app->params['release']['version'] ?? '';
+        $header['schema_ver'] = self::SCHEMA_VERSION;
+
+        $dataContent['header'] = $header;
+        $dataContent['data'] = $data;
+
+        $content = json_encode($dataContent);
+
+        if ($content) {
+            file_put_contents($filePath, $content);
+
+            if (file_exists($filePath)) {
+                $exportFileName = 'abac-export-' . YII_ENV . '-' . date('Ymd_Hi') . '.json';
+                return Yii::$app->response->sendFile($filePath, $exportFileName);
+            }
+        }
+        return false;
+    }
+
+    public function actionImportIds()
+    {
+        $cache = Yii::$app->cacheFile;
+        $model = new AbacPolicyImportForm();
+        $header = [];
+        $data = [];
+
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (!empty($model->ids)) {
+                    $fileData = $cache->get($this->getCacheKey());
+                    if ($fileData !== false) {
+                        //$header = $fileData['header'] ?? [];
+                        $data = $fileData['data'] ?? [];
+
+                        $currentPolicyData = [];
+                        $currentPolicyList = AbacPolicy::find()->all();
+                        if ($currentPolicyList) {
+                            foreach ($currentPolicyList as $item) {
+                                $currentPolicyData[$item->ap_object][$item->ap_action][$item->ap_effect][$item->ap_subject][$item->ap_enabled] = true;
+                            }
+                        }
+
+                        $addCount = 0;
+
+                        if ($data) {
+                            foreach ($data as $key => $row) {
+                                if (!in_array($row['id'], $model->ids)) {
+                                    continue;
+                                }
+
+                                $exist = $currentPolicyData[$row['object']][$row['action']][$row['effect']][$row['subject']] ?? false;
+                                if ($exist) {
+                                    continue;
+                                }
+
+                                $abac = new AbacPolicy();
+                                $abac->ap_object = $row['object'];
+                                $abac->ap_action = $row['action'];
+                                $abac->ap_action_json = $row['action_json'];
+                                $abac->ap_subject = $row['subject'];
+                                $abac->ap_subject_json = $row['subject_json'];
+                                $abac->ap_effect = $row['effect'];
+                                $abac->ap_sort_order = (int) $row['sort_order'];
+                                $abac->ap_enabled = (bool) $row['enabled'];
+                                $abac->ap_object = $row['object'];
+                                $abac->ap_created_dt = $row['created_dt'];
+                                $abac->ap_updated_dt = date('Y-m-d H:i:s');
+                                if (!$abac->save()) {
+                                    Yii::error($abac->errors, 'AbacPolicy:actionImportIds:AbacPolicy:save');
+                                } else {
+                                    $addCount++;
+                                }
+                            }
+                            \Yii::$app->abac->invalidatePolicyCache();
+                        }
+
+                        Yii::$app->session->setFlash('success', 'Success Import data (' . $addCount . ' new items)');
+                    } else {
+                        Yii::$app->session->setFlash('error', 'Expired or not found Import Data cache file');
+                    }
+                }
+            }
+        }
+
+        return $this->redirect(['import']);
+    }
+
+    public function actionImport()
+    {
+        $cache = Yii::$app->cacheFile;
+        $model = new AbacPolicyImportForm();
+        $model->scenario = AbacPolicyImportForm::SCENARIO_FILE;
+        $header = [];
+        $data = [];
+        $filePath = '';
+        $isCache = false;
+
+
+        $headerLocal = [];
+        $headerLocal['username'] = Auth::user()->username;
+        $headerLocal['datetime'] = date('Y-m-d H:i:s');
+        $headerLocal['env'] = YII_ENV;
+        $headerLocal['app_name'] = Yii::$app->name;
+        $headerLocal['app_ver'] = Yii::$app->params['release']['version'] ?? '';
+        $headerLocal['schema_ver'] = self::SCHEMA_VERSION;
+
+        $cacheKey = $this->getCacheKey();
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->importFile = UploadedFile::getInstance($model, 'importFile');
+
+            //VarDumper::dump($model->importFile); exit;
+
+            if ($model->validate()) {
+//                VarDumper::dump(Yii::$app->request->post(), 10, true); // tempName
+
+                if ($model->importFile) {
+                    if ($filePath = $model->upload()) {
+                        if (file_exists($filePath)) {
+                            $json = file_get_contents($filePath);
+                            $fileData = json_decode($json, true);
+                            if ($fileData) {
+                                $cache->set($cacheKey, $fileData, 600);
+                                $header = $fileData['header'] ?? [];
+                                $data = $fileData['data'] ?? [];
+                            }
+                            unlink($filePath);
+                        }
+                    } else {
+                        $model->addError('importFile', 'Error: Not upload file');
+                    }
+                }
+            }
+        }
+
+        $fileData = $cache->get($cacheKey);
+        if ($fileData !== false) {
+            $isCache = true;
+            $header = $fileData['header'] ?? [];
+            $data = $fileData['data'] ?? [];
+        }
+
+        $currentPolicyData = [];
+        $currentPolicyList = AbacPolicy::find()->all();
+        if ($currentPolicyList) {
+            foreach ($currentPolicyList as $item) {
+                $currentPolicyData[$item->ap_object][$item->ap_action][$item->ap_effect][$item->ap_subject][$item->ap_enabled] = true;
+            }
+        }
+
+        $abacObjectList = Yii::$app->abac->getObjectList();
+
+        //VarDumper::dump($abacObjectList, 10, true);
+
+        if ($data) {
+            foreach ($data as $key => $row) {
+                $exist = $currentPolicyData[$row['object']][$row['action']][$row['effect']][$row['subject']] ?? false;
+
+                $existObject = in_array($row['object'], $abacObjectList);
+
+                if (!$existObject) {
+                    $data[$key]['action_id'] = AbacPolicyImportForm::ACT_ERROR;
+                    continue;
+                }
+
+
+                $abacActionList = Yii::$app->abac->getActionListByObject($row['object']);
+
+                $actionList = @json_decode($row['action_json'], true);
+
+                if ($actionList) {
+                    foreach ($actionList as $actionItem) {
+                        $existAction = in_array($actionItem, $abacActionList);
+                        if (!$existAction) {
+                            $data[$key]['action_id'] = AbacPolicyImportForm::ACT_ERROR;
+                            break;
+                        }
+                    }
+                }
+
+                $data[$key]['abac_action_list'] = $abacActionList;
+
+                if (empty($data[$key]['action_id'])) {
+                    $data[$key]['action_id'] = $exist ? AbacPolicyImportForm::ACT_EXISTS : AbacPolicyImportForm::ACT_CREATE;
+                }
+            }
+        }
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $data,
+            'sort' => [
+                'defaultOrder' => [
+                    'action_id' => SORT_ASC,
+                    'sort_order' => SORT_ASC,
+                    'enabled' => SORT_DESC,
+                ],
+                'attributes' => ['action_id', 'sort_order', 'enabled', 'effect', 'created_dt', 'updated_dt', 'object'],
+            ],
+            'pagination' => [
+                'pageSize' => 10000,
+            ],
+        ]);
+
+        return $this->render('import', [
+            'model' => $model,
+            'header' => $header,
+            'headerLocal' => $headerLocal,
+            'data' => $data,
+            'filePath' => $filePath,
+            'dataProvider' => $dataProvider,
+            'isCache' => $isCache,
+            'abacObjectList' => $abacObjectList
+        ]);
+    }
+
+
+    public function actionImportCancel()
+    {
+        $cache = Yii::$app->cacheFile;
+        $cache->delete($this->getCacheKey());
+        return $this->redirect(['import']);
+    }
+
+    /**
+     * @return string
+     */
+    private function getCacheKey(): string
+    {
+        return 'abac-import-' . Yii::$app->user->id;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    private function getImportData()
+    {
+        $cache = Yii::$app->cacheFile;
+        $data = [];
+        $fileData = $cache->get($this->getCacheKey());
+        if ($fileData !== false) {
+            // $header = $fileData['header'] ?? [];
+            $data = $fileData['data'] ?? [];
+        }
+        return $data;
     }
 }

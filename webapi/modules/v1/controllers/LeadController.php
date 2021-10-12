@@ -105,7 +105,8 @@ class LeadController extends ApiBaseController
      * @apiParam {string{3..100}}       [lead.client_last_name]                             Client last name
      * @apiParam {string{3..100}}       [lead.client_middle_name]                           Client middle name
      * @apiParam {string{20}}           lead.user_language                                  User language
-     * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  [lead.expire_at]                            Expire at
+     * @apiParam {bool}                 [lead.is_test]                                      Is test lead (default false)
+     * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  [lead.expire_at]                          Expire at
      *
      * @apiParam {object[]}             lead.visitor_log                                    Array of Visitor log
      * @apiParam {string{10}}           lead.visitor_log.vl_source_cid
@@ -164,6 +165,7 @@ class LeadController extends ApiBaseController
      *        "client_first_name": "Alexandr",
      *        "client_last_name": "Freeman",
      *        "user_language": "en-GB",
+     *        "is_test": true,
      *        "expire_at": "2020-01-20 12:12:12",
      *        "lead_data": [
      *               {

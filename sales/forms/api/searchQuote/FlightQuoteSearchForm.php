@@ -6,6 +6,7 @@ use common\models\Quote;
 use modules\flight\models\FlightQuote;
 use sales\helpers\app\AppHelper;
 use yii\base\Model;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -110,14 +111,14 @@ class FlightQuoteSearchForm extends Model
     /**
      * @return string
      */
-    public function getSortBy(): string
+    public function getSortBy(): ?string
     {
-        return Quote::getSortAttributeNameById($this->sortBy) ?? Quote::getDefaultSortAttributeName();
+        return Quote::getSortAttributeNameById($this->sortBy);
     }
 
-    public function getSortType(): int
+    public function getSortType(): ?int
     {
-        return Quote::getSortTypeBySortId($this->sortBy) ?? Quote::getDefaultSortType();
+        return Quote::getSortTypeBySortId($this->sortBy);
     }
 
     /**
@@ -127,6 +128,10 @@ class FlightQuoteSearchForm extends Model
      */
     public function applyFilters(array $quotes): array
     {
+        if ($this->getSortBy()) {
+            ArrayHelper::multisort($quotes['results'], $this->getSortBy(), $this->getSortType());
+        }
+
         if (!empty($this->fareType)) {
             $quotes['results'] = AppHelper::filterByArray($quotes['results'], 'fareType', $this->fareType);
         }

@@ -307,6 +307,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
             success: function (data) {
                 $('#preloader').addClass('hidden');
                 $.pjax.reload({container: '#quotes_list', async: false});
+                $('#c_quotes').val('');
             },
             error: function (error) {
                 $('#preloader').addClass('hidden');

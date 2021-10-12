@@ -124,7 +124,7 @@ class CasesChangeStatusForm extends Model
 
     public function getConvertedDeadline(): ?string
     {
-        if ($this->deadline === null) {
+        if (empty($this->deadline)) {
             return null;
         }
 
@@ -152,7 +152,8 @@ class CasesChangeStatusForm extends Model
      */
     public function statusList(): array
     {
-        $list = CasesStatusTransferList::getAllowTransferListByUser($this->case->cs_status, $this->user);
+        //$list = CasesStatusTransferList::getAllowTransferListByUser($this->case->cs_status, $this->user);
+        $list = CasesStatusTransferList::getAllowTransferListByAbac($this->case);
 
 //        if (!$this->user->isAdmin() && !$this->user->isExSuper() && !$this->user->isSupSuper()) {
 //            if (isset($list[CasesStatus::STATUS_PROCESSING])) {
@@ -160,11 +161,11 @@ class CasesChangeStatusForm extends Model
 //            }
 //        }
 
-        if ($this->case->isTrash() || $this->case->isFollowUp()) {
+        /*if ($this->case->isTrash() || $this->case->isFollowUp()) {
             if (isset($list[CasesStatus::STATUS_PENDING])) {
                 unset($list[CasesStatus::STATUS_PENDING]);
             }
-        }
+        }*/
         return $list;
     }
 

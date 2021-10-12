@@ -50,6 +50,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+            [
+                'attribute' => 'pqc_type_id',
+                'value' => static function (ProductQuoteChange $model) {
+                    return $model->pqc_type_id ?
+                        ProductQuoteChange::TYPE_LIST[$model->pqc_type_id] ?? 'Undefined' :
+                        Yii::$app->formatter->nullDisplay;
+                },
+                'format' => 'raw',
+            ],
             'pqc_is_automate:booleanByLabel',
             'pqc_created_dt:byUserDateTime',
             'pqc_updated_dt:byUserDateTime',

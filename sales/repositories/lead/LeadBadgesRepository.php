@@ -477,6 +477,18 @@ class LeadBadgesRepository
 
         $conditions = [];
 
+        if ($user->isAgent()) {
+            $conditions = ['and',
+                [
+                    Lead::tableName() . '.employee_id' => $user->id
+                ]
+            ];
+
+            $query->andWhere($conditions);
+
+            return $query;
+        }
+
         $query->andWhere($this->createSubQuery($user->id, $conditions));
 
         return $query;

@@ -85,6 +85,7 @@ use modules\hotel\models\HotelQuote;
 use modules\hotel\src\services\hotelQuote\CommunicationDataService;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\entities\lead\LeadQuery;
+use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\services\OrderPdfService;
@@ -2377,6 +2378,16 @@ class TestController extends FController
             }
         } else {
             VarDumper::dump($response['data'], 10, true);
+        }
+    }
+
+    public function actionAbac()
+    {
+
+        if (Yii::$app->abac->can(null, OrderAbacObject::ACT_READ, OrderAbacObject::ACTION_READ)) {
+            echo 'Yes';
+        } else {
+            echo 'No';
         }
     }
 }

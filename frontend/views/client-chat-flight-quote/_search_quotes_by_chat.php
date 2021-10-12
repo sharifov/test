@@ -36,12 +36,13 @@ use yii\helpers\Url;
 if ($viewModel->leadCreated) {
     $js = <<<JS
         refreshChatInfo('{$viewModel->chatId}');
-    JS;
+JS;
     $this->registerJs($js);
 }
 
 if ($viewModel->lead) {
     $js = <<<JS
+
     $('body').off('click', '.quote__btn').on('click', '.quote__btn', function (e) {
         e.preventDefault();
         let createQuoteBtn = $(this);
@@ -53,8 +54,21 @@ if ($viewModel->lead) {
         let chatId = createQuoteBtn.data('chat-id');
         let url = createQuoteBtn.data('url');
         let sendQuote = Boolean(createQuoteBtn.data('send-quote'));
-        var parent = createQuoteBtn.parent()
-        var parentLength = parent.children().length
+        var parent = createQuoteBtn.parent();
+        var parentLength = parent.children().length;
+        let keyId = $(this).data('key-id');
+
+        let boxExMarkupEl = $('.box_ex_markup_' + keyId);
+        let exMarkups = {};
+        if (boxExMarkupEl.length) {
+            boxExMarkupEl.children('.ex_markup').each(function(index, el) {
+                let valueExMarkup = $(this).val();
+                if (valueExMarkup.length && $.isNumeric(valueExMarkup)) {
+                    let paxCode = $(this).data('pax-code');
+                    exMarkups[paxCode] = valueExMarkup;
+                }
+            });
+        }
         
         $('#preloader').removeClass('d-none');
         $.ajax({
@@ -66,7 +80,8 @@ if ($viewModel->lead) {
                 'keyCache': keyCache, 
                 'createFromQuoteSearch':1,
                 'projectId': projectId,
-                'chatId': chatId
+                'chatId': chatId,
+                'exMarkups': exMarkups
             },
             beforeSend: function () {
               $('#'+searchResId).addClass('loading');

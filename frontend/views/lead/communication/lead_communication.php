@@ -675,6 +675,7 @@ $jsPath = Yii::$app->request->baseUrl . '/js/sounds/';
 
         function updateCommunication() {
             $.pjax.reload({url: currentUrl, container: '#<?= $pjaxContainerId ?>', push: false, replace: false, timeout: 6000, async: false});
+            $.pjax.reload({url: currentUrl, container: '#quotes_list', push: false, replace: false, timeout: 6000, async: false});
         }
 
     </script>

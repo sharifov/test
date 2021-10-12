@@ -9,6 +9,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
 use common\models\Quote;
+use sales\entities\cases\Cases;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\GlobalLog;
@@ -23,13 +24,15 @@ class GlobalLogSearch extends GlobalLog
 {
     public $leadId;
 
+    public $caseId;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['gl_id', 'gl_app_user_id', 'gl_obj_id', 'leadId', 'gl_action_type'], 'integer'],
+            [['gl_id', 'gl_app_user_id', 'gl_obj_id', 'leadId', 'caseId', 'gl_action_type'], 'integer'],
             [['gl_app_id', 'gl_model', 'gl_old_attr', 'gl_new_attr'], 'safe'],
             [['gl_created_at'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -144,6 +147,32 @@ class GlobalLogSearch extends GlobalLog
                                         ->union($queryClient)])
             ->orderBy(['gl_id' => SORT_ASC]);
 
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchByCase($params): ActiveDataProvider
+    {
+        $this->load($params);
+        $query = GlobalLog::find()->alias('gl');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => ['pageSize' => 10],
+        ]);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        $query->innerJoin('cases', 'cases.cs_id = gl.gl_obj_id')
+            ->where(['gl_obj_id' => $this->caseId])
+            ->andWhere(['gl_model' => GlobalLog::MODEL_CASES])
+            ->orderBy(['gl_id' => SORT_ASC]);
 
         return $dataProvider;
     }

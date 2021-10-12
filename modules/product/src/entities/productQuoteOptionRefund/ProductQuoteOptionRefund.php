@@ -6,6 +6,7 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -35,9 +36,12 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property Employee $updatedUser
  * @property Currency $clientCurrency
+ * @property int $pqor_order_refund_id [int]
  */
 class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
 {
+    use FieldsTrait;
+
     /**
      * @return array
      */
@@ -170,5 +174,19 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
     public static function find()
     {
         return new Scopes(get_called_class());
+    }
+
+    public function getApiDataMapped(): array
+    {
+        return [
+            "type" => static function (self $model) {
+                return null;
+            },
+            "airlinePenalty" => 'pqor_client_selling_price',
+            "refundAmount" => 'pqor_client_refund_amount',
+            "status" => static function (self $model) {
+                return ProductQuoteOptionRefundStatus::getName($model->pqor_status_id);
+            }
+        ];
     }
 }

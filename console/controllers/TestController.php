@@ -23,9 +23,10 @@ use modules\hotel\models\HotelQuote;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\lead\src\services\LeadFailBooking;
 use modules\order\src\entities\order\OrderRepository;
-use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\jobs\OrderCanceledConfirmationJob;
 use modules\order\src\payment\services\PaymentService;
+use modules\order\src\processManager\phoneToBook\events\FlightQuoteBookedEvent;
+use modules\order\src\processManager\phoneToBook\events\QuoteBookedEvent;
 use modules\order\src\processManager\jobs\BookingFlightJob;
 use modules\order\src\processManager\jobs\BookingHotelJob;
 use modules\order\src\processManager\phoneToBook\jobs\StartBookingJob;
@@ -35,14 +36,9 @@ use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
-use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
-use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
-use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
-use modules\product\src\entities\productQuoteObjectRefund\service\QuoteObjectRefundManageService;
-use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
+use sales\helpers\LogExecutionTime;
 use sales\model\cases\useCases\cases\api\create\Command;
 use sales\model\cases\useCases\cases\api\create\Handler;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
@@ -163,31 +159,6 @@ class TestController extends Controller
     public function actionX()
     {
 
-
-        $clientN = [
-            'clientNotification' => [
-                'productQuoteChange' => [
-                    'sendPhoneNotification' => [
-                        'enabled' => true,
-                        'phoneFrom' => 'phone from',
-                        'messageSay' => 'message say',
-                        'fileUrl' => 'url',
-                        'messageTemplateKey' => 'key tmpl',
-                    ],
-                    'sendSmsNotification' => [
-                        'enabled' => true,
-                        'phoneFrom' => 'phone from sms',
-                        'messageSay' => 'message say sms',
-                        'messageTemplateKey' => 'key tmpl sms',
-                    ],
-                ]
-            ]
-        ];
-
-        $params = \sales\model\project\entity\params\Params::fromArray($clientN);
-        VarDumper::dump($params);
-
-        die;
         $productQuote = ProductQuote::find()->andWhere(['pq_gid' => '1865ef55f3c6c01dca1f4f3128e82733'])->one();
         $r = ArrayHelper::toArray($productQuote);
         VarDumper::dump($r);
@@ -610,28 +581,22 @@ class TestController extends Controller
         $handler->handle($command);
     }
 
-    public function actionTestQuoteObjectRefund(int $orderId, int $productQuoteId, int $objectId)
+    public function actionTestLogExecutionTime()
     {
-        $quoteObjectRefundService = \Yii::createObject(QuoteObjectRefundManageService::class);
+        $logExecutionTime = new LogExecutionTime();
+        $logExecutionTime->start('step1');
+        sleep(2);
+        $logExecutionTime->end()->start('step2');
+        sleep(3);
+        $logExecutionTime->end();
+        $logExecutionTime->start('step3');
+        $logExecutionTime->end();
+        $logExecutionTime->start('step4');
+        sleep(1);
+        $logExecutionTime->end()->start('step5');
+        sleep(5);
+        $logExecutionTime->end();
 
-        $orderRefund = new OrderRefund();
-        $orderRefund->orr_uid = OrderRefund::generateUid();
-        $orderRefund->orr_order_id = $orderId;
-        $orderRefund->save();
-
-        $productQuoteRefund = new ProductQuoteRefund();
-        $productQuoteRefund->pqr_order_refund_id = $orderRefund->orr_id;
-        $productQuoteRefund->pqr_product_quote_id = $productQuoteId;
-        $productQuoteRefund->save();
-
-        $objectRefund = new ProductQuoteObjectRefund();
-        $objectRefund->pqor_product_quote_refund_id = $productQuoteRefund->pqr_id;
-        $objectRefund->pqor_quote_object_id = $objectId;
-        $structure = $quoteObjectRefundService->getQuoteObjectRefundStructure($productQuoteRefund->productQuote->pqProduct->pr_type_id, $objectId);
-        $objectRefund->pqor_title = $structure->getTitle();
-        $objectRefund->save();
-
-        print_r($structure);
-        die;
+        var_dump($logExecutionTime->getResult());
     }
 }

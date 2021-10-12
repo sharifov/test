@@ -563,6 +563,11 @@ class QuoteController extends FController
             }
             $form = new FlightQuoteSearchForm();
 
+            $defaultSort = [];
+            if ($form->getSortBy()) {
+                $defaultSort = [$form->getSortBy() => $form->getSortType()];
+            }
+
             $dataProvider = new ArrayDataProvider([
                 'allModels' => $quotes['results'] ?? [],
                 'pagination' => [
@@ -571,7 +576,7 @@ class QuoteController extends FController
                 ],
                 'sort' => [
                     'attributes' => ['price', 'duration'],
-                    'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                    'defaultOrder' => $defaultSort,
                 ],
             ]);
 
@@ -608,7 +613,7 @@ class QuoteController extends FController
             if (isset($attr['quotes'])) {
                 foreach ($attr['quotes'] as $quote) {
                     $model = Quote::findOne(['uid' => $quote]);
-                    if ($model !== null && in_array($model->status, [Quote::STATUS_SEND, Quote::STATUS_CREATED, Quote::STATUS_OPENED])) {
+                    if ($model !== null && in_array($model->status, [Quote::STATUS_SENT, Quote::STATUS_CREATED, Quote::STATUS_OPENED])) {
                         $model->status = $model::STATUS_DECLINED;
                         if (!$model->save()) {
                             $result['errors'][] = $model->getErrors();

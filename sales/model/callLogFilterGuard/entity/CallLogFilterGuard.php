@@ -115,9 +115,19 @@ class CallLogFilterGuard extends \yii\db\ActiveRecord
         return $this->clfg_type === self::TYPE_SPAM;
     }
 
+    public function isTrust(): bool
+    {
+        return $this->clfg_type === self::TYPE_TRUST;
+    }
+
     public function guardSpam(float $rate): bool
     {
         return $this->isSpam() && $this->clfg_sd_rate > $rate;
+    }
+
+    public function guardTrust(float $rate): bool
+    {
+        return $this->isTrust() && $this->clfg_sd_rate < $rate;
     }
 
     public function getTypeName(): ?string

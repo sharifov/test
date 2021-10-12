@@ -306,11 +306,11 @@ class Airports extends \yii\db\ActiveRecord
                     if (!$airport) {
                         $airport = new self();
                         $airport->iata = $item['Iata'];
-                        $airport->name = $item['Name'];
-                        $airport->city = $item['CityAscii'];
+                        $airport->name = $item['Name'] ?? null;
+                        $airport->city = $item['CityAscii'] ?? null;
 //                        $airport->city = $item['City'];
-                        $airport->a_close = (bool) $item['IsClosed'];
-                        $airport->a_disabled = (bool) $item['IsDisabled'];
+                        $airport->a_close = (bool) $item['IsClosed'] ?? false;
+                        $airport->a_disabled = (bool) $item['IsDisabled'] ?? false;
 
                         if (!empty($item['Latitude'])) {
                             $airport->latitude = round($item['Latitude'], 14);
@@ -318,15 +318,15 @@ class Airports extends \yii\db\ActiveRecord
                         if (!empty($item['Longitude'])) {
                             $airport->longitude = round($item['Longitude'], 14);
                         }
-                        $airport->country = $item['Country'];
-                        $airport->timezone = $item['TimezoneId'];
+                        $airport->country = $item['Country'] ?? null;
+                        $airport->timezone = $item['TimezoneId'] ?? null;
 
                         $airport->a_icao = $item['Icao'] ?? null;
-                        $airport->a_country_code = $item['CountryIso2'];
-                        $airport->a_city_code = $item['CityCode'];
+                        $airport->a_country_code = $item['CountryIso2'] ?? null;
+                        $airport->a_city_code = $item['CityCode'] ?? null;
                         $airport->a_state = $item['State'] ?? null;
-                        $airport->a_rank = $item['Rank'];
-                        $airport->a_multicity = (bool) $item['IsMulticity'];
+                        $airport->a_rank = $item['Rank'] ?? null;
+                        $airport->a_multicity = (bool) $item['IsMulticity'] ?? false;
 
                         if ($airport->timezone) {
                             $currentTimezone = new \DateTimeZone($airport->timezone);
@@ -355,7 +355,7 @@ class Airports extends \yii\db\ActiveRecord
 //                            continue;
 //                        }
 
-                        if ($airport->city !== $item['CityAscii']) {
+                        if (isset($item['CityAscii']) && $airport->city !== $item['CityAscii']) {
                             $airport->city = $item['CityAscii'];
                             $diff .= ', ' . $airport->city . ' => ' . $item['CityAscii'];
                         }
@@ -423,7 +423,7 @@ class Airports extends \yii\db\ActiveRecord
                             $diff .= ', multicity = ' . ($airport->a_multicity ? 'true' : 'false');
                         }
 
-                        if ($airport->timezone !== $item['TimezoneId']) {
+                        if (isset($item['TimezoneId']) && $airport->timezone !== $item['TimezoneId']) {
                             $airport->timezone = $item['TimezoneId'];
                             $diff .= ', timezone = ' . $airport->timezone;
                             if ($airport->timezone) {

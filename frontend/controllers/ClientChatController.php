@@ -1989,7 +1989,7 @@ class ClientChatController extends FController
 
     private function getSendQuoteProvider(Lead $lead): ActiveDataProvider
     {
-        return $lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]);
+        return $lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED]);
     }
 
     private function generateQuoteCapture(Quote $quote): array

@@ -31,7 +31,7 @@
 			"role": "Developer"
 		}
 	],
-	"version": "3.13.0",
+	"version": "3.32.0",
 	"time": "2021-02-19",
 	"minimum-stability" : "dev",
 	"prefer-stable": true,

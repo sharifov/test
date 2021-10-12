@@ -169,7 +169,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 }
 
                 if (!$originProductQuote->productQuoteLastChange) {
-                    $productQuoteChange = ProductQuoteChange::createNew($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                    $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
                     $productQuoteChangeRepository->save($productQuoteChange);
                 }
             }
@@ -213,6 +213,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 );
                 $caseReProtectionService->setCaseDeadline($flightQuote);
                 $reProtectionQuote = $flightQuote->fqProductQuote;
+                $reProtectionCreateService->recommendedReProtection($originProductQuote->pq_id, $reProtectionQuote->pq_id);
             } catch (\Throwable $throwable) {
                 $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Could not create new reProtection quote');
                 $caseReProtectionService->caseToManual('Could not create new reProtection quote');

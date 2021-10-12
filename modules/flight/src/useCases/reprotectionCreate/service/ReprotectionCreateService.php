@@ -24,6 +24,8 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\exception\ValidationException;
@@ -56,6 +58,7 @@ use yii\helpers\VarDumper;
  * @property ProductQuoteRepository $productQuoteRepository
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property ProductQuoteDataManageService $productQuoteDataManageService
  */
 class ReprotectionCreateService
 {
@@ -77,6 +80,7 @@ class ReprotectionCreateService
     private ProductQuoteRepository $productQuoteRepository;
     private FlightQuoteManageService $flightQuoteManageService;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteDataManageService $productQuoteDataManageService;
 
     /**
      * @param CasesSaleService $casesSaleService
@@ -100,7 +104,8 @@ class ReprotectionCreateService
         FlightFromSaleService $flightFromSaleService,
         ProductQuoteRepository $productQuoteRepository,
         FlightQuoteManageService $flightQuoteManageService,
-        ProductQuoteChangeRepository $productQuoteChangeRepository
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
+        ProductQuoteDataManageService $productQuoteDataManageService
     ) {
         $this->casesSaleService = $casesSaleService;
         $this->clientManageService = $clientManageService;
@@ -112,6 +117,7 @@ class ReprotectionCreateService
         $this->productQuoteRepository = $productQuoteRepository;
         $this->flightQuoteManageService = $flightQuoteManageService;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
     public function getOrCreateClient(int $projectId, OrderContactForm $orderContactForm): Client
@@ -167,7 +173,7 @@ class ReprotectionCreateService
             'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
             ['pq_gid' => $originProductQuote->pq_gid]
         );
-        $productQuoteChange = ProductQuoteChange::createNew($originProductQuote->pq_id, $case->cs_id, $productQuoteChangeIsAutomate);
+        $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $productQuoteChangeIsAutomate);
         $this->productQuoteChangeRepository->save($productQuoteChange);
         return $originProductQuote;
     }
@@ -181,6 +187,11 @@ class ReprotectionCreateService
             ['case_id' => $case->cs_id]
         );
         return $caseSale;
+    }
+
+    public function recommendedReProtection(int $originProductQuoteId, int $reProtectionQuoteId): ProductQuoteData
+    {
+        return $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuoteId, $reProtectionQuoteId);
     }
 
     public function originProductQuoteDecline(ProductQuote $originProductQuote, Cases $case): ProductQuote

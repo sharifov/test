@@ -228,4 +228,12 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
     {
         return $this->cp_type_id === self::TYPE_USER;
     }
+
+    public function getDuration(): ?int
+    {
+        if ($this->cp_leave_dt && $this->cp_join_dt) {
+            return strtotime($this->cp_leave_dt) - strtotime($this->cp_join_dt);
+        }
+        return null;
+    }
 }

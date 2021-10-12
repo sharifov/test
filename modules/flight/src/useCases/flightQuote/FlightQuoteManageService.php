@@ -669,6 +669,81 @@ class FlightQuoteManageService implements ProductQuoteService
         });
     }
 
+    public function createVoluntaryExchange(
+        Flight $flight,
+        array $quote,
+        int $orderId,
+        Cases $case,
+        ?int $userId = null,
+        ?ProductQuote $originProductQuote = null
+    ): FlightQuote {
+        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $orderId, $case, $originProductQuote) {
+            $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), null);
+            $productQuote->pq_order_id = $orderId;
+            $this->productQuoteRepository->save($productQuote);
+
+            $flightQuote = FlightQuote::createVoluntaryExchangeApi((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
+            $this->flightQuoteRepository->save($flightQuote);
+
+            $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
+            $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
+
+            $this->calcProductQuotePrice($productQuote, $flightQuote);
+
+            $this->createFlightTrip($flightQuote, $quote);
+
+            if ($originProductQuote && $originProductQuote->isFlight()) {
+                if ($flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices ?? null) {
+                    foreach ($flightQuotePaxPrices as $originalPaxPrice) {
+                        $paxPrice = FlightQuotePaxPrice::clone($originalPaxPrice, $flightQuote->fq_id);
+                        $this->flightQuotePaxPriceRepository->save($paxPrice);
+                    }
+                }
+                if ($originProductQuote->productQuoteOptions) {
+                    foreach ($originProductQuote->productQuoteOptions as $originalProductQuoteOption) {
+                        $productQuoteOption = ProductQuoteOption::copy($originalProductQuoteOption, $productQuote->pq_id);
+                        $this->productQuoteOptionRepository->save($productQuoteOption);
+                    }
+                }
+                $relation = ProductQuoteRelation::createReProtection(
+                    $originProductQuote->pq_id,
+                    $flightQuote->fq_product_quote_id
+                );
+                $this->productQuoteRelationRepository->save($relation);
+                if (ProductQuoteRelationQuery::countVoluntaryExchangeByOrigin($originProductQuote->pq_id) === 1) {
+                    $productQuoteData = ProductQuoteData::createRecommended($flightQuote->fq_product_quote_id);
+                    $this->productQuoteDataRepository->save($productQuoteData);
+                }
+
+                $this->cloneFlightQuoteBaggage($originProductQuote->flightQuote, $flightQuote);
+            }
+
+            $flightQuoteFlight = $this->createFlightQuoteFlight($flightQuote, null);
+            $flightQuoteBooking = FlightQuoteBooking::create(
+                $flightQuoteFlight->getId(),
+                null,
+                null,
+                $flightQuote->fq_gds,
+                $flightQuote->fq_gds_pcc,
+                $flightQuoteFlight->fqf_main_airline
+            );
+            if (!$flightQuoteBooking->validate()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteBooking));
+            }
+            $this->flightQuoteBookingRepository->save($flightQuoteBooking);
+
+            FlightQuoteLabelService::processingQuoteLabel($quote, $flightQuote->fq_id);
+
+            $case->addEventLog(
+                CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                'FlightQuote created GID: ' . ($productQuote->pq_gid ?? '-'),
+                ['pq_gid' => $productQuote->pq_gid ?? null]
+            );
+
+            return $flightQuote;
+        });
+    }
+
     public function createReprotectionModify(ProductQuote $originProductQuote, array $quote, int $orderId): ProductQuote
     {
         $userId = null;

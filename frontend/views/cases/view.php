@@ -7,6 +7,7 @@ use sales\auth\Auth;
 use sales\helpers\cases\CasesViewRenderHelper;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\bootstrap4\Modal;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
@@ -84,16 +85,50 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
 
     <div class="x_panel">
         <div class="x_content" style="display: block;">
-            <p>
                 <?php if ($model->isTrash()) :?>
                     <?php if (Auth::can('cases/take_Trash', ['case' => $model])) :?>
-                        <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
+                        <?= CasesViewRenderHelper::renderChangeStatusButton($model)?>
                     <?php endif ?>
                 <?php else :?>
-                    <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
-                <?php endif ?>
+                    <?= CasesViewRenderHelper::renderChangeStatusButton($model)?>
+                <?php endif; ?>
 
-                <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
+                <?php
+                    $canStatusLog = Auth::can('/lead/flow-transition');
+                    $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
+                ?>
+                <?php if ($canStatusLog || $canDataLogs) : ?>
+                    <div class="dropdown" style="float: left; padding-right: 10px;">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-bars"> </i> Logs
+                        </button>
+                        <div class="dropdown-menu">
+
+                            <?php if ($canStatusLog) : ?>
+                                <?= Html::a(
+                                    '<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''),
+                                    null,
+                                    [
+                                        'class' => 'dropdown-item',
+                                        'id' => 'btn-status-history',
+                                        'title' => 'Status history'
+                                    ]
+                                ) ?>
+                            <?php endif;?>
+
+                            <?php if ($canDataLogs) : ?>
+                                <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
+                                    'id' => 'btn-general-case-log',
+                                    'class' => 'dropdown-item showModalButton',
+                                    'data-modal_id' => 'lg',
+                                    'title' => 'General Case Log #' . $model->cs_id,
+                                    'data-content-url' => Url::to(['global-log/ajax-view-general-case-log', 'cid' => $model->cs_id])
+                                ]) ?>
+                            <?php endif; ?>
+
+                        </div>
+                    </div>
+                <?php endif; ?>
                 <?= CasesViewRenderHelper::renderTakeButton($model, $user) ?>
                 <?php if (Auth::can('cases/view_Checked', ['case' => $model])) : ?>
                     <?= CasesViewRenderHelper::renderCheckedButton($model) ?>
@@ -107,7 +142,6 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                 'method' => 'post',
             ],
         ])*/ ?>
-            </p>
         </div>
     </div>
 
@@ -283,19 +317,27 @@ Modal::end();
            return false;
      });
 
-    $(document).on('click', '#btn-status-history', function(){
-            let modal = $('#modalCase');
-            //$('#search-sale-panel').toggle();
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            $('#modalCase-label').html($(this).attr('title'));
-            
-            $.get('$statusHistoryAjaxUrl', function(data) {
-                modal.find('.modal-body').html(data);
-            });
-            
-           return false;
+    $(document).on('click', '#btn-status-history', function() {
+        let modal = $('#modalCase');
+        modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#modalCase-label').html($(this).attr('title'));
+        
+        $.get('$statusHistoryAjaxUrl', function(data) {
+            modal.find('.modal-body').html(data);
+        });
      });
     
+    $(document).on('click', '.showModalButton', function(){
+        let id = $(this).data('modal_id');
+        let url = $(this).data('content-url');
+
+        $('#modal-' + id + '-label').html($(this).attr('title'));
+        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+
+        $.post(url, function(data) {
+            $('#modal-' + id).find('.modal-body').html(data);
+        });
+    });
     
     $(document).on('click','#client-unsubscribe-button', function (e) {
         e.preventDefault();

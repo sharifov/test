@@ -33,6 +33,7 @@ class ClientNotificationSearch extends ClientNotification
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['cn_id' => SORT_DESC]],
         ]);
 
         $this->load($params);

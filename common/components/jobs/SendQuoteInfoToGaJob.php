@@ -17,7 +17,7 @@ use yii\queue\Queue;
  */
 class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
 {
-    public Quote $quote;
+    public int $quoteId;
 
     /**
      * @param Queue $queue
@@ -27,7 +27,11 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
     {
         $this->executionTimeRegister();
         try {
-            if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
+            if (!$quote = Quote::findOne(['id' => $this->quoteId])) {
+                throw new \DomainException('Quote not found');
+            }
+
+            if ($this->checkParams($quote) && $gaQuote = new GaQuote($quote)) {
                 $response = $gaQuote->send();
                 if (!$response) {
                     throw new \DomainException('response is empty');
@@ -36,7 +40,7 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
                 if ($response->isOk) {
                     Yii::info(
                         [
-                            'quoteId' => $this->quote->id,
+                            'quoteId' => $this->quoteId,
                             'message' => 'Info sent to GA',
                             'responseContent' => VarDumper::dumpAsString($response->content),
                             'data' => $gaQuote->getPostData()
@@ -46,7 +50,7 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
                 } else {
                     Yii::warning(
                         [
-                            'quoteId' => $this->quote->id,
+                            'quoteId' => $this->quoteId,
                             'message' => 'Info NOT sent to GA',
                             'responseContent' => VarDumper::dumpAsString($response->content),
                             'data' => $gaQuote->getPostData()
@@ -57,7 +61,7 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
             }
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable, true);
-            $message['quoteId'] = $this->quote->id ?? null;
+            $message['quoteId'] = $this->quoteId ?? null;
             \Yii::error(
                 $message,
                 'SendQuoteInfoToGaJob:execute:Throwable'
@@ -67,11 +71,12 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
     }
 
     /**
+     * @param Quote $quote
      * @return bool
      */
-    protected function checkParams(): bool
+    protected function checkParams(Quote $quote): bool
     {
-        return $this->quote->lead->isReadyForGa();
+        return $quote->lead->isReadyForGa();
     }
 
     /**

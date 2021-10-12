@@ -389,6 +389,11 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['client_notifications_history_days'] ?? 30);
     }
 
+    public static function getLeadTravelDatesPassedTrashedHours(): int
+    {
+        return (int)(Yii::$app->params['settings']['leads_travel_dates_passed_trashed_hours'] ?? 24);
+    }
+
     public static function getCallDistributionSort(): array
     {
         $sort = [
@@ -436,7 +441,6 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
-
 
     public static function getReProtectionCaseCategory(): ?string
     {
@@ -549,9 +553,10 @@ class SettingHelper
         }
         return self::$callSpamFilter ?? [
                 'enabled' => false,
-                'rate' => 0.3567,
+                'spam_rate' => 0.75,
                 'redialEnabled' => false,
-                'message' => ''
+                'message' => '',
+                'trust_rate' => 0.8
         ];
     }
 
@@ -562,7 +567,12 @@ class SettingHelper
 
     public static function getCallSpamFilterRate(): float
     {
-        return (float) (self::getCallSpamFilterData()['rate'] ?? 0.3567);
+        return (float) (self::getCallSpamFilterData()['spam_rate'] ?? 0.3567);
+    }
+
+    public static function getCallTrustFilterRate(): float
+    {
+        return (float) (self::getCallSpamFilterData()['trust_rate'] ?? 0.8);
     }
 
     public static function getCallSpamFilterMessage(): string
@@ -643,5 +653,15 @@ class SettingHelper
     public static function getCalculatePriorityLevelInDays(): int
     {
         return (int) (Yii::$app->params['settings']['calculate_priority_level_in_days'] ?? 14);
+    }
+
+    public static function clientNotificationSuccessCallMinDuration(): int
+    {
+        return (int) (Yii::$app->params['settings']['client_notification_success_call_min_duration'] ?? 30);
+    }
+
+    public static function getVoluntaryExchangeCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
     }
 }

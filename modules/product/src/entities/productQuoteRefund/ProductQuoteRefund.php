@@ -11,6 +11,7 @@ use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefu
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use sales\entities\cases\Cases;
 use sales\services\CurrencyHelper;
+use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -47,6 +48,8 @@ use yii\db\ActiveRecord;
  */
 class ProductQuoteRefund extends \yii\db\ActiveRecord
 {
+    use FieldsTrait;
+
     public static function create(
         $orderRefundId,
         $productQuoteId,
@@ -272,5 +275,40 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public static function find()
     {
         return new Scopes(get_called_class());
+    }
+
+    public function getApiDataMapped(): array
+    {
+        return [
+            'id' => 'pqr_id',
+            'productQuoteId' => 'pqr_product_quote_id',
+            'productQuoteGid' => static function (ProductQuoteRefund $model) {
+                return $model->productQuote->pq_gid ?? null;
+            },
+            'caseId' => 'pqr_case_id',
+            'caseGid' => static function (ProductQuoteRefund $model) {
+                return $model->case->cs_gid ?? null;
+            },
+            'orderId' => static function (ProductQuoteRefund $model) {
+                return $model->productQuote->pq_order_id ?? null;
+            },
+            'orderGid' => static function (ProductQuoteRefund $model) {
+                return $model->productQuote->pqOrder->or_gid ?? null;
+            },
+            'statusId' => 'pqr_status_id',
+            'statusName' => static function (ProductQuoteRefund $model) {
+                return ProductQuoteRefundStatus::getName($model->pqr_status_id);
+            },
+            'sellingPrice' => 'pqr_selling_price',
+            'penaltyAmount' => 'pqr_penalty_amount',
+            'processingFeeAmount' => 'pqr_processing_fee_amount',
+            'refundAmount' => 'pqr_refund_amount',
+            'clientCurrency' => 'pqr_client_currency',
+            'clientCurrencyRate' => 'pqr_client_currency_rate',
+            'clientSellingPrice' => 'pqr_client_selling_price',
+            'clientRefundAmount' => 'pqr_client_refund_amount',
+            'createdDt' => 'pqr_created_dt',
+            'updatedDt' => 'pqr_updated_dt',
+        ];
     }
 }

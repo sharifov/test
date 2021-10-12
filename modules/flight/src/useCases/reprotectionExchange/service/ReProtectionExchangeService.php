@@ -51,10 +51,10 @@ class ReProtectionExchangeService
     public function handle(ReProtectionExchangeForm $reProtectionExchangeForm): void
     {
         if (!$case = $reProtectionExchangeForm->getCase()) {
-            throw new \DomainException('Case not found');
+            throw new \DomainException('Case not found', 110);
         }
         if (!$productQuoteChange = $case->productQuoteChange) {
-            throw new \DomainException('ProductQuoteChange not found');
+            throw new \DomainException('ProductQuoteChange not found', 111);
         }
 
         $case->addEventLog(CaseEventLog::RE_PROTECTION_EXCHANGE, 'Exchange request started processing');
@@ -64,7 +64,7 @@ class ReProtectionExchangeService
                 ProductQuoteChangeStatus::getName(ProductQuoteChangeStatus::DECISION_PENDING);
 
             $case->addEventLog(CaseEventLog::RE_PROTECTION_EXCHANGE, $message);
-            throw new \DomainException($message);
+            throw new \DomainException($message, 101);
         }
 
         $productQuoteChange->statusToNew();

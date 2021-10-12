@@ -58,6 +58,7 @@ use sales\listeners\lead\LeadSnoozeEventLogListener;
 use sales\listeners\lead\LeadSnoozeNotificationsListener;
 use sales\listeners\lead\LeadSoldEventLogListener;
 use sales\listeners\lead\LeadSoldNotificationsListener;
+use sales\listeners\lead\LeadSoldSplitListener;
 use sales\listeners\lead\LeadTaskEventListener;
 use sales\listeners\lead\LeadTrashEventLogListener;
 
@@ -116,6 +117,7 @@ return [
     LeadSoldEvent::class => [
         LeadSoldEventLogListener::class,
         LeadSoldNotificationsListener::class,
+        LeadSoldSplitListener::class,
         LeadPhoneTrustListener::class,
     ],
     LeadTrashEvent::class => [LeadTrashEventLogListener::class],

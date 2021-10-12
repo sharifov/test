@@ -279,6 +279,13 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_NEW            => 'New',
     ];
 
+    public const TRAVEL_DATE_PASSED_STATUS_LIST = [
+        self::STATUS_PENDING,
+        self::STATUS_PROCESSING,
+        self::STATUS_FOLLOW_UP,
+        self::STATUS_NEW,
+    ];
+
     public const STATUS_MULTIPLE_UPDATE_LIST = [
         self::STATUS_FOLLOW_UP      => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
         self::STATUS_ON_HOLD        => self::STATUS_LIST[self::STATUS_ON_HOLD],
@@ -3429,7 +3436,7 @@ Reason: {reason}',
     {
         $data = Quote::find()
             ->where(['lead_id' => $this->id, 'status' => [
-                Quote::STATUS_SEND,
+                Quote::STATUS_SENT,
                 Quote::STATUS_OPENED,
                 Quote::STATUS_APPLIED]
             ])->all();
@@ -4858,7 +4865,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return Quote::find()
             ->andWhere(['lead_id' => $this->id])
-            ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
+            ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED]])
             ->exists();
     }
 

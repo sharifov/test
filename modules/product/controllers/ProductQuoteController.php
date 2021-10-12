@@ -17,10 +17,12 @@ use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
@@ -200,11 +202,6 @@ class ProductQuoteController extends FController
             $form->addError('general', 'Case Not Found');
         }
 
-        $caseAbacDto = new CasesAbacDto($case);
-        if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-        }
-
         if (!$order = Order::findOne((int)$orderId)) {
             throw new BadRequestHttpException('Order not found');
         }
@@ -216,6 +213,13 @@ class ProductQuoteController extends FController
                 if (!$originalQuote) {
                     throw new \RuntimeException('Original quote not found');
                 }
+
+                $caseAbacDto = new CasesAbacDto($case);
+                $caseAbacDto->pqc_status = $originalQuote->productQuoteLastChange->pqc_status_id;
+                if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                    throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+                }
+
                 $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
                 $emailData['reprotection_quote'] = $quote->serialize();
                 $emailData['original_quote'] = $originalQuote->serialize();
@@ -265,7 +269,7 @@ class ProductQuoteController extends FController
                         'previewEmailForm' => $previewEmailForm,
                     ]);
                 }
-            } catch (\DomainException | \RuntimeException $e) {
+            } catch (\DomainException | \RuntimeException | ForbiddenHttpException $e) {
                 $form->addError('error', $e->getMessage());
             } catch (\Throwable $e) {
                 Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewReprotectionQuoteEmail::Throwable');
@@ -292,20 +296,17 @@ class ProductQuoteController extends FController
                 throw new BadRequestHttpException('Case Not Found');
             }
 
+            $reprotectionQuote = $this->productQuoteRepository->find($previewEmailForm->productQuoteId);
+            $originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id);
+
             $caseAbacDto = new CasesAbacDto($case);
+            $caseAbacDto->pqc_status = $originQuote->productQuoteLastChange->pqc_status_id;
+
             if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                 throw new ForbiddenHttpException('You do not have access to perform this action', 403);
             }
             if ($previewEmailForm->validate()) {
                 try {
-                    $caseAbacDto = new CasesAbacDto($case);
-                    if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
-                        throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-                    }
-
-                    $reprotectionQuote = $this->productQuoteRepository->find($previewEmailForm->productQuoteId);
-
-                    $originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id);
                     if (!$originQuote) {
                         throw new \RuntimeException('Origin quote not found');
                     }
@@ -546,8 +547,29 @@ class ProductQuoteController extends FController
         ];
 
         try {
+            if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id)) {
+                throw new NotFoundException('Origin Quote Not Found');
+            }
+
             $reprotectionQuote->declined(Auth::id());
             $this->productQuoteRepository->save($reprotectionQuote);
+
+            $lastReProtectionQuote = ProductQuote::find()
+                ->with('productQuoteDataRecommended')
+                ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
+                    'typeId' => ProductQuoteRelation::TYPE_REPROTECTION,
+                    'parentQuoteId' => $originQuote->pq_id
+                ])
+                ->andWhere(['!=', 'pq_status_id', ProductQuoteStatus::DECLINED])
+                ->orderBy(['pq_id' => SORT_DESC])
+                ->one();
+
+            if ($lastReProtectionQuote) {
+                $this->productQuoteDataManageService->updateRecommendedReprotectionQuote(
+                    $originQuote->pq_id,
+                    $lastReProtectionQuote->pq_id
+                );
+            }
         } catch (\RuntimeException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();

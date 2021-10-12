@@ -2,11 +2,13 @@
 
 use common\components\SearchService;
 use common\models\Lead;
+use common\models\Quote;
 use frontend\helpers\QuoteHelper;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use sales\auth\Auth;
 use sales\helpers\quote\ImageHelper;
 use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
+use sales\repositories\quote\QuotePriceRepository;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
@@ -27,7 +29,8 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 $leadQuotes = $lead->quotes;
 $flightQuotes = [];
 foreach ($leadQuotes as $quote) {
-    $flightQuotes[] = json_decode($quote->origin_search_data, true)['key'] ?? '';
+    $key = json_decode($quote->origin_search_data, true)['key'] ?? '';
+    $flightQuotes[$key] = $quote;
 }
 ?>
 <?php
@@ -39,9 +42,12 @@ $airportChange = $result['airportChange'];
 $technicalStopCnt = $result['technicalStopCnt'];
 $bagFilter = $result['bagFilter'];
 
-$isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
+$isQuoteAssignedToFlight = array_key_exists($result['key'], $flightQuotes);
+
 $urlCreateQuoteFromSearch = Url::to(['client-chat-flight-quote/create-quote-from-search', 'leadId' => $lead->id]);
 $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-search', 'leadId' => $lead->id]);
+
+$keyId = md5($result['key']);
 ?>
 <div
     class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>"
@@ -275,6 +281,7 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                     <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
                         ?><th>MU, $</th><?php
                     endif;?>
+                    <th>Ex Mkp, $</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -287,6 +294,31 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                         <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
                             ?><td><?= (isset($pax['markup'])) ? $pax['markup'] : ''?></td><?php
                         endif;?>
+                        <td class="box_ex_markup_<?php echo $keyId ?>">
+                            <?php $readonly = $isQuoteAssignedToFlight ? 'readonly="1"' : '' ?>
+                            <?php $border = $isQuoteAssignedToFlight ? ' border: 0; ' : '' ?>
+                    <?php
+                        $value = '';
+                        /** @var Quote $quote */
+                    if (
+                        $isQuoteAssignedToFlight &&
+                        ($quote = $flightQuotes[$result['key']] ?? null) &&
+                        $price = QuotePriceRepository::findByQuoteIdAndPaxCode($quote->id, $paxCode)
+                    ) {
+                        $value = $price->extra_mark_up;
+                    }
+                    ?>
+                            <input
+                                type="number"
+                                value="<?php echo $value ?>"
+                                <?php echo $readonly ?>
+                                id="ex_markup_<?php echo $result['key'] ?>_<?php echo $paxCode?>"
+                                class="ex_markup"
+                                data-pax-code="<?php echo $paxCode?>"
+                                maxlength="10"
+                                autocomplete="off"
+                                style="width: 56px; <?php echo $border ?>" />
+                        </td>
                     </tr>
                 <?php endforeach;?>
                 </tbody>
@@ -298,6 +330,7 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                     <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
                         ?><td><?= $result['prices']['markup']?></td><?php
                     endif;?>
+                    <td></td>
                 </tr>
                 </tfoot>
             </table>
@@ -469,7 +502,8 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                         'data-chat-id' => $chatId,
                         'data-send-quote' => false,
                         'data-url' => $urlCreateQuoteFromSearch,
-                        'disabled' => $isQuoteAssignedToFlight
+                        'disabled' => $isQuoteAssignedToFlight,
+                        'data-key-id' => $keyId,
                     ]) ?>
 
                     <?php if ($projectRelations = $lead->project->projectRelations) : ?>
@@ -489,6 +523,7 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                                     'data-send-quote' => false,
                                     'data-chat-id' => $chatId,
                                     'data-url' => $urlCreateQuoteFromSearch,
+                                    'data-key-id' => $keyId,
                                 ]
                             )
                             ?>
@@ -514,7 +549,8 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                         'data-project' => $lead->project_id,
                         'data-chat-id' => $chatId,
                         'data-send-quote' => true,
-                        'data-url' => $urlSendQuoteFromSearch
+                        'data-url' => $urlSendQuoteFromSearch,
+                        'data-key-id' => $keyId,
                     ]) ?>
 
                     <?php if ($projectRelations = $lead->project->projectRelations) : ?>
@@ -530,7 +566,8 @@ $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-sea
                                  'data-project' => $relatedProject->prl_related_project_id,
                                  'data-chat-id' => $chatId,
                                  'data-send-quote' => true,
-                                 'data-url' => $urlSendQuoteFromSearch
+                                 'data-url' => $urlSendQuoteFromSearch,
+                                 'data-key-id' => $keyId,
                              ])
                             ?>
                         <?php endforeach ?>

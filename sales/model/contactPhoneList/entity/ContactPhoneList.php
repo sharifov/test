@@ -32,7 +32,8 @@ class ContactPhoneList extends \yii\db\ActiveRecord
             ['cpl_phone_number', 'required'],
             ['cpl_phone_number', 'string', 'max' => 20],
             ['cpl_phone_number', 'unique'],
-            [['cpl_phone_number'], PhoneInputValidator::class],
+            ['cpl_phone_number', 'trim'],
+//            [['cpl_phone_number'], PhoneInputValidator::class, 'message' => 'The format of Phone Number(' . $this->cpl_phone_number . ') is invalid.'],
 
             ['cpl_title', 'string', 'max' => 50],
 

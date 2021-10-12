@@ -2069,6 +2069,25 @@ class FlightController extends BaseController
      *           ...
      *        }
      * }
+     *
+     * @apiErrorExample {json} Error-Response (422) Code 101:
+     * HTTP/1.1 422 Error
+     * {
+     *        "status": 422,
+     *        "message": "Error",
+     *        "data": [
+     *              "success": false,
+     *              "error": "Product Quote Change status is not in \"Decision pending\". Current status Canceled"
+     *        ],
+     *        "code": 101,
+     *        "errors": [],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
      */
     public function actionReprotectionExchange()
     {
@@ -2105,6 +2124,20 @@ class FlightController extends BaseController
                     'success' => true,
                     'warnings' => $reProtectionExchangeForm->getWarnings()
                 ])
+            );
+        } catch (\DomainException $exception) {
+            \Yii::error([
+                'message' => 'DomainException: Reprotection Exchange error',
+                'error' => $exception->getMessage(),
+                'request' => $reProtectionExchangeForm->getAttributes(),
+            ], 'FlightController:reprotectionExchange:DomainException');
+
+            return new ErrorResponse(
+                new DataMessage([
+                    'success' => false,
+                    'error' => $exception->getMessage()
+                ]),
+                new CodeMessage($exception->getCode())
             );
         } catch (\Throwable $throwable) {
             $message = [
