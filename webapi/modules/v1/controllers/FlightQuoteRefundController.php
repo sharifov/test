@@ -4,6 +4,8 @@ namespace webapi\modules\v1\controllers;
 
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
 use modules\flight\src\useCases\voluntaryRefundInfo\form\VoluntaryRefundInfoForm;
+use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
+use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
 use sales\helpers\app\AppHelper;
 use webapi\src\ApiCodeException;
@@ -47,27 +49,24 @@ class FlightQuoteRefundController extends ApiBaseController
      *     "status": 200,
      *     "message": "OK",
      *     "data": {
-     *         "productQuoteRefund": {
-     *             "id": 3,
-     *             "productQuoteId": 774,
-     *             "productQuoteGid": "2bd12377691f282e11af12937674e3d1",
-     *             "caseId": null,
-     *             "caseGid": null,
-     *             "orderId": 544,
-     *             "orderGid": "2bd12377691f282e11af12937674e3d1",
-     *             "statusId": 1,
-     *             "statusName": "New",
-     *             "sellingPrice": "100.00",
-     *             "penaltyAmount": "200.00",
-     *             "processingFeeAmount": "200.00",
-     *             "refundAmount": "111.00",
-     *             "clientCurrency": "USD",
-     *             "clientCurrencyRate": "1.00",
-     *             "clientSellingPrice": "200.00",
-     *             "clientRefundAmount": "400.00",
-     *             "createdDt": "2021-07-28 13:52:03",
-     *             "updatedDt": "2021-07-28 13:52:03"
-     *         }
+     *          "tickets": [
+     *              {
+     *                  "number": "25346346",
+     *                  "airlinePenalty": 47.54,
+     *                  "processingFee": 85.65,
+     *                  "refundable": 81.25,
+     *                  "selling": 200.54,
+     *                  "status": "paid"
+     *              }
+     *          ],
+     *          "auxiliaryOptions": [
+     *              {
+     *                  "type": "package",
+     *                  "selling": 45.59,
+     *                  "refundAmount": 25.25,
+     *                  "status": "paid"
+     *              }
+     *          ]
      *     },
      *     "code": "13200"
      * }
@@ -137,9 +136,19 @@ class FlightQuoteRefundController extends ApiBaseController
                 );
             }
 
+            $tickets = $productQuoteRefund->productQuoteObjectRefunds;
+
+            $auxiliaryOptions = $productQuoteRefund->productQuoteOptionRefunds;
+
             return new SuccessResponse(
                 new DataMessage([
-                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),
+                //                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),
+                    'tickets' => array_map(static function (ProductQuoteObjectRefund $model) {
+                        return $model->setFields($model->getApiDataMapped())->toArray();
+                    }, $tickets),
+                    'auxiliaryOptions' => array_map(static function (ProductQuoteOptionRefund $model) {
+                        return $model->setFields($model->getApiDataMapped())->toArray();
+                    }, $auxiliaryOptions),
                 ]),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
