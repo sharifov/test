@@ -5,32 +5,70 @@ namespace modules\abac\src\forms;
 use modules\abac\src\AbacService;
 use Yii;
 use yii\base\Model;
+use yii\helpers\Html;
 use yii\web\UploadedFile;
 
 /**
  * This is the AbacPolicyImportForm class for table "abac_policy".
  *
  * @property UploadedFile $importFile
+ * @property int $import_type_id
+ * @property array $ids
  */
 class AbacPolicyImportForm extends Model
 {
+    public const SCENARIO_FILE = 'scenarioFile';
+
     public $importFile;
+    public $import_type_id;
+    public $ids;
+
+    public const IMPORT_TYPE_ADD_REPLACE    = 1;
+    public const IMPORT_TYPE_ADD            = 2;
+    public const IMPORT_TYPE_REPLACE        = 3;
+
+    public const IMPORT_TYPE_LIST = [
+        self::IMPORT_TYPE_ADD_REPLACE   => 'Add & Replace',
+        self::IMPORT_TYPE_ADD           => 'Only Add new',
+        self::IMPORT_TYPE_REPLACE       => 'Only Replace',
+    ];
+
+
+    public const ACT_CREATE                 = 1;
+    public const ACT_UPDATE                 = 2;
+    public const ACT_EXISTS                 = 3;
+    public const ACT_ERROR                  = 5;
+
+    public const ACT_LIST = [
+        self::ACT_CREATE    => 'Add',
+        self::ACT_UPDATE    => 'Update',
+        self::ACT_EXISTS    => 'Exists',
+        self::ACT_ERROR     => 'Error',
+    ];
+
+    public const ACT_CLASS_LIST = [
+        self::ACT_CREATE    => 'success',
+        self::ACT_UPDATE    => 'warning',
+        self::ACT_EXISTS    => 'info',
+        self::ACT_ERROR     => 'danger',
+    ];
 
     public function rules()
     {
         return [
-            [['importFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'json'],
+            [['importFile'], 'required', 'on' => self::SCENARIO_FILE],
+            [['importFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'json', 'on' => self::SCENARIO_FILE],
+            [['import_type_id'], 'integer'],
+            [['ids'], 'safe'],
         ];
     }
 
     public function upload()
     {
-        if ($this->validate()) {
-            $fileName = $this->importFile->baseName . '.' . $this->importFile->extension;
-            $filePath = Yii::getAlias('@runtime/' . $fileName);
-            if ($this->importFile->saveAs($filePath)) {
-                return $filePath;
-            }
+        $fileName = $this->importFile->baseName . '.' . $this->importFile->extension;
+        $filePath = Yii::getAlias('@runtime/' . $fileName);
+        if ($this->importFile->saveAs($filePath)) {
+            return $filePath;
         }
         return false;
     }
@@ -42,73 +80,34 @@ class AbacPolicyImportForm extends Model
     {
         return [
             'importFile' => 'Import File',
+            'import_type_id' => 'Import Type',
         ];
     }
 
     /**
-     * @return array
-     */
-    public function getActionList(): array
-    {
-        $list = Yii::$app->abac->getActionListByObject($this->ap_object);
-        return $list;
-    }
-
-    public function getObjectList(): array
-    {
-        $list = Yii::$app->abac->getObjectList();
-        return $list;
-    }
-
-    public function getObjectAttributeList()
-    {
-        $list = Yii::$app->abac->getAttributeListByObject($this->ap_object);
-        return $list;
-    }
-
-    /**
+     * @param $actionId
      * @return string
      */
-    public function getDecodeCode(): string
+    public static function getActionName($actionId): string
     {
-        $code = '';
-        $rules = @json_decode($this->ap_subject_json, true);
-        if (is_array($rules)) {
-            $code = AbacService::conditionDecode($rules, '');
-        }
-        return $code;
+        return self::ACT_LIST[$actionId] ?? '-';
     }
 
     /**
-     * @param $attribute
-     * @param $params
+     * @param $actionId
+     * @return string
      */
-    public function validateSubject($attribute, $params)
+    public static function getActionClass($actionId): string
     {
+        return self::ACT_CLASS_LIST[$actionId] ?? 'default';
+    }
 
-        //$ap->ap_action_json = \yii\helpers\Json::encode($actionData);
-        $code = $this->getDecodeCode();
-
-        if (!$code) {
-            $this->addError('ap_subject_json', 'Invalid Expression Language: "' . $code . '"');
-        }
-
-//        $expressionLanguage = new ExpressionLanguage();
-//
-//        $r = new \stdClass();
-//        $sub = new \stdClass();
-//        $env = new \stdClass();
-//        $user = new \stdClass();
-//        $user->username = 'test';
-//        $env->user = $user;
-//        $sub->env = $env;
-//        $r->sub = $sub;
-//
-//        if ($expressionLanguage->evaluate($code, ['r' => $r])) {
-//            $this->addError('ap_subject_json', 'Invalid Expression Language: "' . $code . '"');
-//        }
-
-        // var_dump($expressionLanguage->evaluate('1 + 2')); // displays 3
-        // var_dump($expressionLanguage->compile('1 + 2')); // displays (1 + 2)
+    /**
+     * @param $actionId
+     * @return string
+     */
+    public static function getActionTitle($actionId): string
+    {
+        return '<span class="badge badge-' . (self::getActionClass($actionId)) . '">' . Html::encode(self::getActionName($actionId)) . '</span>';
     }
 }

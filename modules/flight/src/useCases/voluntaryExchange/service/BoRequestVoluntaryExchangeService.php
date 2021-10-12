@@ -1,10 +1,9 @@
 <?php
 
-namespace modules\flight\src\useCases\voluntaryExchangeCreate\service;
+namespace modules\flight\src\useCases\voluntaryExchange\service;
 
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
-use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\exception\BoResponseException;
 use sales\exception\ValidationException;
@@ -36,10 +35,10 @@ class BoRequestVoluntaryExchangeService
         $this->orderContactForm = new OrderContactForm();
     }
 
-    public function getSaleData(string $bookingId, Cases $case): ?array
+    public function getSaleData(string $bookingId, Cases $case, int $type): ?array
     {
         $case->addEventLog(
-            CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+            $type,
             'START: Request getSaleFrom BackOffice, BookingID: ' . $bookingId,
             ['fr_booking_id' => $bookingId]
         );
@@ -49,7 +48,7 @@ class BoRequestVoluntaryExchangeService
             throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') from "cs/search"');
         }
         $case->addEventLog(
-            CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+            $type,
             'START: Request DetailRequestToBackOffice SaleID: ' . $saleSearch['saleId'],
             ['sale_id' => $saleSearch['saleId']]
         );
@@ -65,7 +64,7 @@ class BoRequestVoluntaryExchangeService
         if (!$this->orderContactForm->validate()) {
             throw new ValidationException(ErrorsToStringHelper::extractFromModel($this->orderContactForm));
         }
-        $case->addEventLog(CaseEventLog::VOLUNTARY_EXCHANGE_CREATE, 'Responses from BackOffice accepted successfully');
+        $case->addEventLog($type, 'Responses from BackOffice accepted successfully');
 
         return $saleData;
     }

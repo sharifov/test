@@ -2,9 +2,12 @@
 
 namespace frontend\widgets\multipleUpdate\cases;
 
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\services\cases\CasesManageService;
+use Yii;
 
 /**
  * Class MultipleUpdateService
@@ -30,12 +33,17 @@ class MultipleUpdateService
                 continue;
             }
             if ($form->isChangeStatus()) {
+                if (!Yii::$app->abac->can(new CasesAbacDto($case, $form->statusId), CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
+                    continue;
+                }
                 $this->changeStatus($form, $case);
                 continue;
             }
             if ($form->isProcessing()) {
+                if (!Yii::$app->abac->can(new CasesAbacDto($case, $form->statusId), CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
+                    continue;
+                }
                 $this->processing($form, $case);
-                continue;
             }
         }
         return $this->messages;
@@ -55,7 +63,7 @@ class MultipleUpdateService
     {
         try {
             if ($form->isPending()) {
-                $this->service->pending($case, $form->getCreatorId(), $form->message);
+                $this->service->pending($case, $form->getCreatorId(), 'Multiple Update');
                 $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
@@ -65,7 +73,7 @@ class MultipleUpdateService
                 return;
             }
             if ($form->isSolved()) {
-                $this->service->solved($case, $form->getCreatorId(), $form->message);
+                $this->service->solved($case, $form->getCreatorId(), 'Multiple Update');
                 $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
@@ -73,6 +81,22 @@ class MultipleUpdateService
                 $this->service->trash($case, $form->getCreatorId(), $form->message);
                 $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
+            }
+            if ($form->isAwaiting()) {
+                $this->service->awaiting($case, $form->getCreatorId(), 'Multiple Update');
+                $this->addSuccessMessage($this->movedStatusMessage($case));
+            }
+            if ($form->isAutoProcessing()) {
+                $this->service->autoProcessing($case, $form->getCreatorId(), 'Multiple Update');
+                $this->addSuccessMessage($this->movedStatusMessage($case));
+            }
+            if ($form->isError()) {
+                $this->service->error($case, $form->getCreatorId(), 'Multiple Update');
+                $this->addSuccessMessage($this->movedStatusMessage($case));
+            }
+            if ($form->isNew()) {
+                $this->service->new($case, $form->getCreatorId(), 'Multiple Update');
+                $this->addSuccessMessage($this->movedStatusMessage($case));
             }
         } catch (\DomainException $e) {
             $this->addErrorMessage('ID ' . $case->cs_id . ' ' . $e->getMessage());

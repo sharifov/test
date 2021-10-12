@@ -55,6 +55,7 @@ use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\emailList\entity\EmailList;
+use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\leadRedial\queue\AutoTakeJob;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
@@ -979,6 +980,10 @@ class CommunicationController extends ApiBaseController
                         if ($clientPhone && $clientPhone->client_id) {
                             $call->c_client_id = $clientPhone->client_id;
                         }
+                    }
+
+                    if ($callOriginalData['c_user_id']) {
+                        Yii::createObject(LeadRedialUnAssigner::class)->createCall((int)$callOriginalData['c_user_id']);
                     }
                 }
 

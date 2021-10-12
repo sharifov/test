@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
@@ -14,7 +15,7 @@ use yii\web\View;
 use yii\grid\ActionColumn;
 /**
  * @var $this \yii\web\View
- * @var $modelUserParams \common\models\UserParams
+ * @var $modelUserParams UserParams
  * @var $modelProfile \common\models\UserProfile
  */
 /* @var $searchModel common\models\search\UserProjectParamsSearch */
@@ -308,6 +309,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         <div class="row">
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000]) ?>
+                            </div>
+                            <div class="col-md-3">
+                                <?= $form->field($modelUserParams, 'up_call_user_level')->dropDownList(UserParams::getCallPriorityLevelList()) ?>
                             </div>
                         </div>
                     <?php endif; ?>

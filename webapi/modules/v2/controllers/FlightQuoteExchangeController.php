@@ -4,10 +4,10 @@ namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\VoluntaryExchangeCreateJob;
 use modules\flight\models\FlightRequest;
-use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
+use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
-use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCaseService as CaseService;
+use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
 use sales\helpers\app\AppHelper;
@@ -24,23 +24,21 @@ use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\web\MethodNotAllowedHttpException;
 
 /**
  * Class FlightQuoteExchangeController
  *
  * @property VoluntaryExchangeObjectCollection $objectCollection
- * @property FlightRequestRepository $flightRequestRepository
  */
 class FlightQuoteExchangeController extends BaseController
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
-    private FlightRequestRepository $flightRequestRepository;
 
     /**
      * @param $id
      * @param $module
      * @param ApiLogger $logger
-     * @param FlightRequestRepository $flightRequestRepository
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
      * @param array $config
      */
@@ -48,21 +46,18 @@ class FlightQuoteExchangeController extends BaseController
         $id,
         $module,
         ApiLogger $logger,
-        FlightRequestRepository $flightRequestRepository,
         VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
         $config = []
     ) {
-
         $this->objectCollection = $voluntaryExchangeObjectCollection;
-        $this->flightRequestRepository = $flightRequestRepository;
         parent::__construct($id, $module, $logger, $config);
     }
 
     /**
-     * @api {post} /v2/flight-quote-exchange/create Voluntary Exchange Create
+     * @api {post} /v2/flight-quote-exchange/create Flight Voluntary Exchange Create
      * @apiVersion 0.2.0
-     * @apiName Voluntary Exchange Create
-     * @apiGroup Voluntary Exchange
+     * @apiName Flight Voluntary Exchange Create
+     * @apiGroup Flight Voluntary Exchange
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -72,13 +67,8 @@ class FlightQuoteExchangeController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{7..10}}        booking_id                                      Booking ID
-     * @apiParam {object}               [flight_product_quote]                          Flight quote
-     * @apiParam {string{2}}            flight_product_quote.gds                        Gds
-     * @apiParam {string{10}}           flight_product_quote.pcc                        pcc
-     * @apiParam {string{50}}           flight_product_quote.fareType                   ValidatingCarrier
-     * @apiParam {object}               flight_product_quote.trips                      Trips
-     * @apiParam {int}                  [flight_product_quote.trips.duration]           Trip Duration
+     * @apiParam {string{7..10}}        booking_id                   Booking ID
+     * @apiParam {bool}                 [is_automate]                Is automate (default false)
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -104,32 +94,39 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {int}                  payment_request.method_data.card.exp_month       Month
      * @apiParam {int}                  payment_request.method_data.card.exp_year        Year
      * @apiParam {string{32}}           payment_request.method_data.card.cvv             CVV
-     * @apiParam {object}                      flight_product_quote.trips.segments                          Segments
-     * @apiParam {string{format Y-m-d H:i}}    flight_product_quote.trips.segments.departureTime            DepartureTime
-     * @apiParam {string{format Y-m-d H:i}}    flight_product_quote.trips.segments.arrivalTime              ArrivalTime
-     * @apiParam {string{3}}                   flight_product_quote.trips.segments.departureAirportCode     Departure Airport Code IATA
-     * @apiParam {string{3}}                   flight_product_quote.trips.segments.arrivalAirportCode       Arrival Airport Code IATA
-     * @apiParam {int}                         [flight_product_quote.trips.segments.flightNumber]           Flight Number
-     * @apiParam {string{1}}                   [flight_product_quote.trips.segments.bookingClass]           BookingClass
-     * @apiParam {int}                         [flight_product_quote.trips.segments.duration]               Segment duration
-     * @apiParam {string{3}}                   [flight_product_quote.trips.segments.departureAirportTerminal]     Departure Airport Terminal Code
-     * @apiParam {string{3}}                   [flight_product_quote.trips.segments.arrivalAirportTerminal]       Arrival Airport Terminal Code
-     * @apiParam {string{2}}                   [flight_product_quote.trips.segments.operatingAirline]       Operating Airline
-     * @apiParam {string{2}}                   [flight_product_quote.trips.segments.marketingAirline]       Marketing Airline
-     * @apiParam {string{30}}                  [flight_product_quote.trips.segments.airEquipType]          AirEquipType
-     * @apiParam {string{3}}                   [flight_product_quote.trips.segments.marriageGroup]          MarriageGroup
-     * @apiParam {int}                         [flight_product_quote.trips.segments.mileage]                Mileage
-     * @apiParam {string{2}}                   [flight_product_quote.trips.segments.meal]                   Meal
-     * @apiParam {string{50}}                  [flight_product_quote.trips.segments.fareCode]               Fare Code
+     * @apiParam {object}                      [flight_quote]                          Flight quote
+     * @apiParam {string{2}}                   flight_quote.gds                        Gds
+     * @apiParam {string{10}}                  flight_quote.pcc                        pcc
+     * @apiParam {string{50}}                  flight_quote.fareType                   ValidatingCarrier
+     * @apiParam {object}                      flight_quote.trips                      Trips
+     * @apiParam {int}                         [flight_quote.trips.duration]           Trip Duration
+     * @apiParam {object}                      flight_quote.trips.segments                          Segments
+     * @apiParam {string{format Y-m-d H:i}}    flight_quote.trips.segments.departureTime            DepartureTime
+     * @apiParam {string{format Y-m-d H:i}}    flight_quote.trips.segments.arrivalTime              ArrivalTime
+     * @apiParam {string{3}}                   flight_quote.trips.segments.departureAirportCode     Departure Airport Code IATA
+     * @apiParam {string{3}}                   flight_quote.trips.segments.arrivalAirportCode       Arrival Airport Code IATA
+     * @apiParam {int}                         [flight_quote.trips.segments.flightNumber]           Flight Number
+     * @apiParam {string{1}}                   [flight_quote.trips.segments.bookingClass]           BookingClass
+     * @apiParam {int}                         [flight_quote.trips.segments.duration]               Segment duration
+     * @apiParam {string{3}}                   [flight_quote.trips.segments.departureAirportTerminal]     Departure Airport Terminal Code
+     * @apiParam {string{3}}                   [flight_quote.trips.segments.arrivalAirportTerminal]       Arrival Airport Terminal Code
+     * @apiParam {string{2}}                   [flight_quote.trips.segments.operatingAirline]       Operating Airline
+     * @apiParam {string{2}}                   [flight_quote.trips.segments.marketingAirline]       Marketing Airline
+     * @apiParam {string{30}}                  [flight_quote.trips.segments.airEquipType]          AirEquipType
+     * @apiParam {string{3}}                   [flight_quote.trips.segments.marriageGroup]          MarriageGroup
+     * @apiParam {int}                         [flight_quote.trips.segments.mileage]                Mileage
+     * @apiParam {string{2}}                   [flight_quote.trips.segments.meal]                   Meal
+     * @apiParam {string{50}}                  [flight_quote.trips.segments.fareCode]               Fare Code
      *
      * @apiParamExample {json} Request-Example:
          {
             "booking_id":"XXXYYYZ",
+            "is_automate": false,
             "flight_quote":{
-                "gds": "S",
-                "pcc": "8KI0",
-                "validatingCarrier": "PR",
-                "fareType": "SR",
+                "gds":"S",
+                "pcc":"8KI0",
+                "validatingCarrier":"PR",
+                "fareType":"SR",
                 "trips":[
                     {
                         "duration":848,
@@ -166,7 +163,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":160,
                                 "departureAirportCode":"CDG",
@@ -182,7 +178,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             },
@@ -193,7 +188,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":88,
                                 "departureAirportCode":"LAX",
@@ -209,7 +203,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             }
@@ -225,7 +218,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":127,
                                 "departureAirportCode":"SMF",
@@ -241,7 +233,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             },
@@ -252,7 +243,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":201,
                                 "departureAirportCode":"SEA",
@@ -268,7 +258,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             },
@@ -279,7 +268,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "bookingClass":"E",
                                 "stop":0,
                                 "stops":[
-
                                 ],
                                 "duration":510,
                                 "departureAirportCode":"MSP",
@@ -295,7 +283,6 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             },
@@ -329,15 +316,13 @@ class FlightQuoteExchangeController extends BaseController
                                 "meal":null,
                                 "fareCode":null,
                                 "baggage":[
-
                                 ],
                                 "brandId":null
                             }
                         ]
                     }
                 ]
-            }
-          },
+            },
             "payment":{
                 "method_key":"cc",
                 "method_data":{
@@ -349,7 +334,7 @@ class FlightQuoteExchangeController extends BaseController
                         "cvv":"097"
                     }
                 },
-                "amount": 29.95,
+                "amount":29.95,
                 "currency":"USD"
             },
             "billing":{
@@ -375,7 +360,8 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "TODO": "todo::"
+                    "resultMessage": "FlightRequest created",
+                    "flightRequestId" : 123
                },
      *        "code": "13200",
      *        "technical": {
@@ -461,29 +447,26 @@ class FlightQuoteExchangeController extends BaseController
         }
 
         try {
-            /* TODO::  */
-            $bookingId = $voluntaryExchangeCreateForm->booking_id;
-            if ($productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($bookingId)) {
-                throw new \RuntimeException('VoluntaryExchange by BookingID(' . $bookingId . ') already processed');
-            }
+            VoluntaryExchangeCreateService::checkByPost($post);
+            VoluntaryExchangeCreateService::checkByBookingId($voluntaryExchangeCreateForm->booking_id);
 
             $flightRequest = FlightRequest::create(
-                $bookingId,
+                $voluntaryExchangeCreateForm->booking_id,
                 FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
                 $post,
                 $project->id,
                 $this->auth->getId()
             );
-            $flightRequest = $this->flightRequestRepository->save($flightRequest);
+            $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
             $job = new VoluntaryExchangeCreateJob();
             $job->flight_request_id = $flightRequest->fr_id;
             $jobId = Yii::$app->queue_job->priority(100)->push($job);
 
             $flightRequest->fr_job_id = $jobId;
-            $this->flightRequestRepository->save($flightRequest);
+            $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
-            $dataMessage['resultMessage'] = 'FlightRequest created';
+            $dataMessage['resultMessage'] = 'FlightRequest is accepted for processing';
             $dataMessage['flightRequestId'] = $flightRequest->fr_id;
 
             return new SuccessResponse(
@@ -491,20 +474,28 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
         } catch (\RuntimeException | \DomainException $throwable) {
-            \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Warning'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Throwable'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
@@ -514,10 +505,223 @@ class FlightQuoteExchangeController extends BaseController
     }
 
     /**
-     * @api {post} /v2/flight-quote-exchange/info Voluntary Exchange Info
+     * @api {post} /v2/flight-quote-exchange/confirm Flight Voluntary Exchange Confirm
      * @apiVersion 0.2.0
-     * @apiName Voluntary Exchange Info
-     * @apiGroup Voluntary Exchange
+     * @apiName Flight Voluntary Exchange Confirm
+     * @apiGroup Flight Voluntary Exchange
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{7..10}}        booking_id                   Booking ID
+     * @apiParam {string{32}}           quote_gid                    Product Quote GID
+     * @apiParam {object}               billing                      Billing
+     * @apiParam {string{30}}           billing.first_name           First name
+     * @apiParam {string{30}}           billing.last_name            Last name
+     * @apiParam {string{30}}           [billing.middle_name]        Middle name
+     * @apiParam {string{40}}           [billing.company_name]       Company
+     * @apiParam {string{50}}           billing.address_line1        Address line 1
+     * @apiParam {string{50}}           [billing.address_line2]      Address line 2
+     * @apiParam {string{30}}           billing.city                 City
+     * @apiParam {string{40}}           [billing.state]              State
+     * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
+     * @apiParam {string{10}}           [billing.zip]                Zip
+     * @apiParam {string{20}}           [billing.contact_phone]      Contact phone
+     * @apiParam {string{160}}          [billing.contact_email]      Contact email
+     * @apiParam {string{60}}           [billing.contact_name]       Contact name
+     * @apiParam {object}               payment_request                      Payment request
+     * @apiParam {number}               payment_request.amount               Amount
+     * @apiParam {string{3}}            payment_request.currency             Currency code
+     * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")
+     * @apiParam {object}               payment_request.method_data          Method data
+     * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
+     * @apiParam {string{50}}           payment_request.method_data.card.number          Number
+     * @apiParam {string{50}}           [payment_request.method_data.card.holder_name]   Holder name
+     * @apiParam {int}                  payment_request.method_data.card.exp_month       Month
+     * @apiParam {int}                  payment_request.method_data.card.exp_year        Year
+     * @apiParam {string{32}}           payment_request.method_data.card.cvv             CVV
+     *
+     * @apiParamExample {json} Request-Example:
+         {
+            "booking_id":"XXXYYYZ",
+            "quote_gid": "2f2887a061f8069f7ada8af9e062f0f4",
+            "payment":{
+                "method_key":"cc",
+                "method_data":{
+                    "card":{
+                        "number":"4111555577778888",
+                        "holder_name":"John Doe",
+                        "exp_month":10,
+                        "exp_year":2022,
+                        "cvv":"097"
+                    }
+                },
+                "amount":29.95,
+                "currency":"USD"
+            },
+            "billing":{
+                "first_name":"John",
+                "last_name":"Doe",
+                "middle_name":null,
+                "company_name":"General Motors",
+                "address_line1":"123 Main Street",
+                "address_line2":"",
+                "city":"Paris",
+                "state":"State",
+                "country":"United States",
+                "zip":"94000",
+                "contact_phone":"+137396512345",
+                "contact_email":"alex@test.com",
+                "contact_name":"Mr. Alexander"
+            }
+        }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
+                    "todo": "TODO::"
+               },
+     *        "code": "13200",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Load data error",
+     *        "errors": [
+     *           "Not found data on POST request"
+     *        ],
+     *        "code": "13106",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": 422,
+     *        "message": "Validation error",
+     *        "errors": [
+     *            "booking_id": [
+     *               "booking_id cannot be blank."
+     *             ]
+     *        ],
+     *        "code": "13107",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionConfirm()
+    {
+        try {
+            $post = Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new MessageMessage(Messages::POST_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+
+        if (!$project = $this->auth->auProject) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new ErrorsMessage('Not found Project with current user: ' . $this->auth->au_api_username),
+                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+            );
+        }
+
+        $voluntaryExchangeConfirmForm = new VoluntaryExchangeConfirmForm();
+        if (!$voluntaryExchangeConfirmForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+        if (!$voluntaryExchangeConfirmForm->validate()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($voluntaryExchangeConfirmForm->getErrors()),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            );
+        }
+
+        try {
+            $bookingId = $voluntaryExchangeConfirmForm->booking_id;
+            if ($productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($bookingId)) {
+                throw new \RuntimeException('VoluntaryExchange by BookingID(' . $bookingId . ') already processed');
+            }
+
+            /* TODO::  */
+
+            $dataMessage['resultMessage'] = 'TODO::';
+
+            return new SuccessResponse(
+                new DataMessage($dataMessage),
+                new CodeMessage(ApiCodeException::SUCCESS)
+            );
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
+        }
+    }
+
+    /**
+     * @api {post} /v2/flight-quote-exchange/info Flight Voluntary Exchange Info
+     * @apiVersion 0.2.0
+     * @apiName Flight Voluntary Exchange Info
+     * @apiGroup Flight Voluntary Exchange
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -606,7 +810,7 @@ class FlightQuoteExchangeController extends BaseController
             $post = Yii::$app->request->post();
         } catch (\Throwable $throwable) {
             return new ErrorResponse(
-                new StatusCodeMessage(400),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
                 new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
@@ -616,14 +820,14 @@ class FlightQuoteExchangeController extends BaseController
         $voluntaryExchangeInfoForm = new VoluntaryExchangeInfoForm();
         if (!$voluntaryExchangeInfoForm->load($post)) {
             return new ErrorResponse(
-                new StatusCodeMessage(400),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
                 new ErrorsMessage(Messages::LOAD_DATA_ERROR),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }
         if (!$voluntaryExchangeInfoForm->validate()) {
             return new ErrorResponse(
-                new StatusCodeMessage(422),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($voluntaryExchangeInfoForm->getErrors()),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
@@ -648,22 +852,30 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
         } catch (\RuntimeException | \DomainException $throwable) {
-            \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Warning'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+
             return new ErrorResponse(
-                new StatusCodeMessage(422),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
-                'FlightQuoteExchangeController:actionInfo:Throwable'
-            );
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+
             return new ErrorResponse(
-                new StatusCodeMessage(500),
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );

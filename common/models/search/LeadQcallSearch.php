@@ -2,10 +2,13 @@
 
 namespace common\models\search;
 
+use common\models\Project;
 use common\models\UserOnline;
 use common\models\UserProfile;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\DayTimeHours;
+use sales\helpers\setting\SettingHelper;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
 use Yii;
 use common\models\Call;
 use common\models\ClientPhone;
@@ -44,6 +47,7 @@ class LeadQcallSearch extends LeadQcall
     public $deadline;
     public $l_is_test;
     public $l_call_status_id;
+    public $agentsHasAccessToCall;
 
     /**
      * {@inheritdoc}
@@ -63,6 +67,7 @@ class LeadQcallSearch extends LeadQcall
             ['l_is_test', 'in', 'range' => [0,1]],
             ['attempts', 'integer'],
             ['l_call_status_id', 'integer'],
+            ['agentsHasAccessToCall', 'integer']
         ];
     }
 
@@ -165,9 +170,10 @@ class LeadQcallSearch extends LeadQcall
     /**
      * @param $params
      * @param Employee $user
+     * @param bool $withBusinessLogic
      * @return ActiveDataProvider
      */
-    public function searchByRedial($params, Employee $user): ActiveDataProvider
+    public function searchByRedial($params, Employee $user, bool $withBusinessLogic): ActiveDataProvider
     {
         $nowDt = date('Y-m-d H:i:s');
         $query = self::find()->select('*');
@@ -216,7 +222,7 @@ class LeadQcallSearch extends LeadQcall
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
-        if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
+        if (\Yii::$app->id === 'app-console' || (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed())) {
             $query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
         }
 
@@ -307,34 +313,36 @@ class LeadQcallSearch extends LeadQcall
             ]);
         }
 
-        if (($settingsMinute = (int)Yii::$app->params['settings']['redial_business_flight_leads_skill_priority_time']) > 0) {
-            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
+        if ($withBusinessLogic) {
+            if (($settingsMinute = (int)Yii::$app->params['settings']['redial_business_flight_leads_skill_priority_time']) > 0) {
+                $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
 
-            $query->addSelect(['redial_business_flight_leads_over_created_time' =>
-                new Expression('if (' . $expression . ' > ' . $settingsMinute . ', 1, 0) ')
-            ]);
+                $query->addSelect(['redial_business_flight_leads_over_created_time' =>
+                    new Expression('if (' . $expression . ' > ' . $settingsMinute . ', 1, 0) ')
+                ]);
 
-            $skillSettings = (int)Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'];
-            $userSkill = $user->userProfile ? (int) $user->userProfile->up_skill : 0;
+                $skillSettings = (int)Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'];
+                $userSkill = $user->userProfile ? (int) $user->userProfile->up_skill : 0;
 
-            $query->addSelect(['redial_business_flight_leads_skill_current_user' =>
-                new Expression('if (' . $userSkill . ' >= ' . $skillSettings . ', 1, 0) ')
-            ]);
+                $query->addSelect(['redial_business_flight_leads_skill_current_user' =>
+                    new Expression('if (' . $userSkill . ' >= ' . $skillSettings . ', 1, 0) ')
+                ]);
 
-            $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
-                'up_user_id' =>
-                    UserOnline::find()->select(['uo_user_id'])->indexBy('uo_user_id')
-            ])->andWhere('up_skill >= ' . $skillSettings)->count();
-            $query->addSelect(['redial_business_flight_leads_skill_online_user' =>
-                new Expression('if (' . $countUsers . ' < 1, 1, 0) ')
-            ]);
+                $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
+                    'up_user_id' =>
+                        UserOnline::find()->select(['uo_user_id'])->indexBy('uo_user_id')
+                ])->andWhere('up_skill >= ' . $skillSettings)->count();
+                $query->addSelect(['redial_business_flight_leads_skill_online_user' =>
+                    new Expression('if (' . $countUsers . ' < 1, 1, 0) ')
+                ]);
 
-            $query->andHaving(
-                new Expression(
-                    '(redial_business_flight_leads_over_created_time OR redial_business_flight_leads_skill_current_user OR redial_business_flight_leads_skill_online_user)' .
-                    'OR (' . Lead::tableName() . '.project_id <> ' . self::PROJECT_ARANGRANT . ' AND ' . Lead::tableName() . '.cabin NOT IN ("' . Lead::CABIN_BUSINESS . '", "' . Lead::CABIN_FIRST . '")) '
-                )
-            );
+                $query->andHaving(
+                    new Expression(
+                        '(redial_business_flight_leads_over_created_time OR redial_business_flight_leads_skill_current_user OR redial_business_flight_leads_skill_online_user)' .
+                        'OR (' . Lead::tableName() . '.project_id <> ' . self::PROJECT_ARANGRANT . ' AND ' . Lead::tableName() . '.cabin NOT IN ("' . Lead::CABIN_BUSINESS . '", "' . Lead::CABIN_FIRST . '")) '
+                    )
+                );
+            }
         }
 
 //        $query->addOrderBy([
@@ -442,6 +450,193 @@ class LeadQcallSearch extends LeadQcall
 //      VarDumper::dump($query->createCommand()->getRawSql());die;
 
         return $dataProvider;
+    }
+
+    public function searchRedialLeads($params)
+    {
+        $nowDt = date('Y-m-d H:i:s');
+        $query = self::find()->select('*');
+
+        $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
+
+        $query->joinWith('lqcLead');
+
+        $query->andWhere([Lead::tableName() . '.project_id' => array_keys(Project::getList())]);
+
+        $query->addSelect([
+            'is_ready' => new Expression('if (lqc_dt_from <= \'' . $nowDt . '\', 1, 0)')
+        ]);
+
+        $query->addSelect([
+            'is_reserved' => new Expression('if (lqc_reservation_time > \'' . $nowDt . '\' AND lqc_reservation_user_id IS NULL, 1, 0)')
+        ]);
+
+        $query->addSelect([
+            'is_not_empty_passengers' => new Expression('if ((' . Lead::tableName() . '.adults > 0 OR ' . Lead::tableName() . '.children > 0 OR ' . Lead::tableName() . '.infants > 0), 1, 2)')
+        ]);
+
+        $defaultOrder = [
+            'is_not_empty_passengers' => SORT_ASC,
+            'is_ready' => SORT_DESC,
+            'is_reserved' => SORT_ASC,
+        ];
+
+        $redialSame = (int)Yii::$app->params['settings']['redial_same_deadline_priority'];
+        $samePriority = "TIMESTAMPDIFF(MINUTE, '" . $nowDt . "', lqc_dt_to)";
+        $query->addSelect([
+            'same_priority' =>
+                new Expression('if (' . $samePriority . ' <= ' . $redialSame . ', 1, 0) ')
+        ]);
+
+        $query->addSelect([
+            'countClientPhones' => (new Query())
+                ->select('count(*)')
+                ->from(ClientPhone::tableName())
+                ->andWhere(ClientPhone::tableName() . '.client_id = ' . Lead::tableName() . '.client_id')
+        ]);
+        $query->andHaving(['>', 'countClientPhones', 0]);
+
+        $query->addSelect([
+            'attempts' => (new Query())
+                ->select('lf_out_calls')
+                ->from(LeadFlow::tableName())
+                ->andWhere(LeadFlow::tableName() . '.lead_id = lqc_lead_id')
+                ->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])
+                ->limit(1)
+        ]);
+
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . $nowDt . "', lqc_dt_to )/60))";
+        $query->addSelect(['deadline' =>
+            new Expression('if (' . $deadlineExpr . ' > 0, ' . $deadlineExpr . ' , 0) ')
+        ]);
+
+//        $query->addSelect(['expired' =>
+//            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
+//        ]);
+
+        if (($freshTime = (int)Yii::$app->params['settings']['redial_fresh_time']) > 0) {
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
+            $query->addSelect(['isFresh' =>
+                new Expression('if (' . $expression . ' <= ' . $freshTime . ', 1, 0) ')
+            ]);
+//            $query->addOrderBy([
+//               'isFresh' => SORT_DESC
+//            ]);
+
+            $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
+//            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+
+            $expressionNull = Lead::tableName() . '.offset_gmt IS NULL OR ' . Lead::tableName() . '.offset_gmt = "" ';
+
+            $query->addSelect(['is_in_day_time_hours' =>
+                new Expression('if ( (' . $expression . ' > ' . $freshTime . '  AND ' .
+                    $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' .
+                    $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\'), 1, 0) ')
+            ]);
+//            $query->addOrderBy([
+//                'is_in_day_time_hours' => SORT_DESC
+//            ]);
+
+            $query->addSelect(['is_in_client_current_time' =>
+                new Expression('if (' . $expressionNull . ' OR (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\'), 1, 0) ')
+            ]);
+            $query->andHaving([
+                'OR',
+                ['is_in_client_current_time' => 1],
+                ['isFresh' => 1],
+            ]);
+
+            $defaultOrder = array_merge($defaultOrder, [
+                'isFresh' => SORT_DESC,
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
+        } else {
+            $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
+//            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+            $query->addSelect(['is_in_day_time_hours' =>
+                new Expression('if (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+            ]);
+//            $query->addOrderBy([
+//                'is_in_day_time_hours' => SORT_DESC
+//            ]);
+            $query->andHaving(['is_in_day_time_hours' => 1]);
+
+            $defaultOrder = array_merge($defaultOrder, [
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
+        }
+
+        if (($settingsMinute = (int)Yii::$app->params['settings']['redial_business_flight_leads_skill_priority_time']) > 0) {
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
+
+            $query->addSelect(['redial_business_flight_leads_over_created_time' =>
+                new Expression('if (' . $expression . ' > ' . $settingsMinute . ', 1, 0) ')
+            ]);
+
+            $skillSettings = (int)Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'];
+
+            $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
+                'up_user_id' =>
+                    UserOnline::find()->select(['uo_user_id'])->indexBy('uo_user_id')
+            ])->andWhere('up_skill >= ' . $skillSettings)->count();
+            $query->addSelect(['redial_business_flight_leads_skill_online_user' =>
+                new Expression('if (' . $countUsers . ' < 1, 1, 0) ')
+            ]);
+
+            $query->andHaving(
+                new Expression(
+                    '(redial_business_flight_leads_over_created_time OR redial_business_flight_leads_skill_online_user)' .
+                    'OR (' . Lead::tableName() . '.project_id <> ' . self::PROJECT_ARANGRANT . ' AND ' . Lead::tableName() . '.cabin NOT IN ("' . Lead::CABIN_BUSINESS . '", "' . Lead::CABIN_FIRST . '")) '
+                )
+            );
+        }
+
+//        $query->addOrderBy([
+        ////            'expired' => SORT_DESC,
+//            'deadline' => SORT_ASC,
+//            'attempts' => SORT_ASC,
+//            'lqc_dt_from' => SORT_ASC
+//        ]);
+        $query->addSelect([
+            'agentsHasAccessToCall' => CallRedialUserAccess::find()
+                ->alias('crua')
+                ->select('count(crua.crua_lead_id)')
+                ->where('crua_lead_id = ' . Lead::tableName() . '.id')
+                ->andWhere('time_to_sec(TIMEDIFF(now(), crua.crua_created_dt)) < :limitTime', [
+                    'limitTime' => SettingHelper::getRedialUserAccessExpiredSecondsLimit()
+                ])
+        ]);
+
+        $defaultOrder = array_merge($defaultOrder, [
+            'same_priority' => SORT_DESC,
+            'lqc_weight' => SORT_ASC,
+            'deadline' => SORT_ASC,
+            'attempts' => SORT_ASC,
+            'lqc_dt_from' => SORT_ASC,
+            'lqc_lead_id' => SORT_ASC,
+        ]);
+
+        $query->orderBy($defaultOrder);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $query->where('0=1')->all();
+        }
+
+        $query->andFilterWhere([
+            Lead::tableName() . '.project_id' => $this->projectId,
+            Lead::tableName() . '.status' => $this->leadStatus,
+            Lead::tableName() . '.cabin' => $this->cabin,
+            Lead::tableName() . '.l_is_test' => $this->l_is_test,
+            'lqc_lead_id' => $this->lqc_lead_id,
+        ]);
+
+        $query->andHaving(['<', 'agentsHasAccessToCall', SettingHelper::getRedialGetLimitAgents()]);
+
+        return $query;
     }
 
     /**

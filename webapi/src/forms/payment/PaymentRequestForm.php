@@ -72,11 +72,6 @@ class PaymentRequestForm extends Model
         }
     }
 
-    public function formName(): string
-    {
-        return '';
-    }
-
     /**
      * @return CreditCardForm[]
      */

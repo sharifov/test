@@ -673,23 +673,16 @@ class FlightQuoteManageService implements ProductQuoteService
         Flight $flight,
         array $quote,
         int $orderId,
-        ?string $bookingId,
         Cases $case,
         ?int $userId = null,
-        ?float $productTypeServiceFee = null,
         ?ProductQuote $originProductQuote = null
     ): FlightQuote {
-        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId, $case, $originProductQuote) {
-            $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), $productTypeServiceFee);
+        return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $orderId, $case, $originProductQuote) {
+            $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), null);
             $productQuote->pq_order_id = $orderId;
             $this->productQuoteRepository->save($productQuote);
 
-            $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
-            $flightQuote->setTypeReProtection();
-            $flightQuote->setServiceFeePercent(0);
-            if (!empty($quote['itineraryDump'])) {
-                $flightQuote->fq_reservation_dump = $this->itineraryDumpToSting($quote['itineraryDump']);
-            }
+            $flightQuote = FlightQuote::createVoluntaryExchangeApi((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
             $this->flightQuoteRepository->save($flightQuote);
 
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
@@ -717,19 +710,18 @@ class FlightQuoteManageService implements ProductQuoteService
                     $flightQuote->fq_product_quote_id
                 );
                 $this->productQuoteRelationRepository->save($relation);
-                if (ProductQuoteRelationQuery::countReprotectionQuotesByOrigin($originProductQuote->pq_id) === 1) {
-                    $reprotectionQuoteData = ProductQuoteData::createRecommended($flightQuote->fq_product_quote_id);
-                    $this->productQuoteDataRepository->save($reprotectionQuoteData);
+                if (ProductQuoteRelationQuery::countVoluntaryExchangeByOrigin($originProductQuote->pq_id) === 1) {
+                    $productQuoteData = ProductQuoteData::createRecommended($flightQuote->fq_product_quote_id);
+                    $this->productQuoteDataRepository->save($productQuoteData);
                 }
 
                 $this->cloneFlightQuoteBaggage($originProductQuote->flightQuote, $flightQuote);
             }
 
-            $flightQuoteFlight = $this->createFlightQuoteFlight($flightQuote, $bookingId);
-
+            $flightQuoteFlight = $this->createFlightQuoteFlight($flightQuote, null);
             $flightQuoteBooking = FlightQuoteBooking::create(
                 $flightQuoteFlight->getId(),
-                $bookingId,
+                null,
                 null,
                 $flightQuote->fq_gds,
                 $flightQuote->fq_gds_pcc,
@@ -743,7 +735,7 @@ class FlightQuoteManageService implements ProductQuoteService
             FlightQuoteLabelService::processingQuoteLabel($quote, $flightQuote->fq_id);
 
             $case->addEventLog(
-                CaseEventLog::RE_PROTECTION_CREATE,
+                CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
                 'FlightQuote created GID: ' . ($productQuote->pq_gid ?? '-'),
                 ['pq_gid' => $productQuote->pq_gid ?? null]
             );

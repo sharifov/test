@@ -110,11 +110,11 @@ class MultipleUpdateForm extends Model
 
     public function statusList(): array
     {
-        $statusList = CasesStatus::STATUS_LIST;
+        /*$statusList = CasesStatus::STATUS_LIST;
         if (isset($statusList[CasesStatus::STATUS_PENDING])) {
             unset($statusList[CasesStatus::STATUS_PENDING]);
-        }
-        return $statusList;
+        }*/
+        return CasesStatus::STATUS_LIST;
     }
 
     public function reasonValidate(): void
@@ -181,6 +181,26 @@ class MultipleUpdateForm extends Model
     public function isTrash(): bool
     {
         return $this->statusId === CasesStatus::STATUS_TRASH;
+    }
+
+    public function isAwaiting(): bool
+    {
+        return $this->statusId === CasesStatus::STATUS_AWAITING;
+    }
+
+    public function isAutoProcessing(): bool
+    {
+        return $this->statusId === CasesStatus::STATUS_AUTO_PROCESSING;
+    }
+
+    public function isError(): bool
+    {
+        return $this->statusId === CasesStatus::STATUS_ERROR;
+    }
+
+    public function isNew(): bool
+    {
+        return $this->statusId === CasesStatus::STATUS_NEW;
     }
 
     public function attributeLabels(): array

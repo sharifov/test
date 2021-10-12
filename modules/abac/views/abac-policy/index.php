@@ -10,6 +10,7 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel modules\abac\src\entities\search\AbacPolicySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $importCount int */
 
 $this->title = 'Abac Policies';
 $this->params['breadcrumbs'][] = $this->title;
@@ -22,14 +23,18 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-plus"></i> Create Abac Policy', ['create'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('<i class="fa fa-list"></i> Policy list content', ['list-content'], ['class' => 'btn btn-default']) ?>
 
-        <?= Html::a('<i class="fa fa-upload"></i> Export', ['export'], [
-            'class' => 'btn btn-warning',
+        <?= Html::a('<i class="fa fa-upload"></i> Export File', ['export'], [
+            'class' => 'btn btn-default',
             'data' => [
                 'confirm' => 'Are you sure you want to Export all ABAC policy rules?',
             ],
         ]) ?>
 
-        <?= Html::a('<i class="fa fa-download"></i> Import', ['import'], ['class' => 'btn btn-warning']) ?>
+        <?php if ($importCount) : ?>
+            <?= Html::a('<i class="fa fa-download"></i> Continue Import (' . $importCount . ')', ['import'], ['class' => 'btn btn-warning']) ?>
+        <?php else : ?>
+            <?= Html::a('<i class="fa fa-download"></i> Import File', ['import'], ['class' => 'btn btn-default']) ?>
+        <?php endif; ?>
     </p>
 
     <?php Pjax::begin(['scrollTo' => 0]); ?>

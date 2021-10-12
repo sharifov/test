@@ -108,6 +108,13 @@
         this.isOn = true;
         this.offKey = null;
 
+        this.minimize = function () {
+            let self = this;
+            this.notifications.all().forEach(function (notification) {
+                self.hide(notification.key);
+            });
+        };
+
         this.getVisibleNotifications = function () {
             let notifications = [];
             this.notifications.all().forEach(function (notification) {

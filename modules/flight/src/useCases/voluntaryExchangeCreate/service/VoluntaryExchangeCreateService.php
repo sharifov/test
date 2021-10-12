@@ -2,81 +2,61 @@
 
 namespace modules\flight\src\useCases\voluntaryExchangeCreate\service;
 
-use common\models\CaseSale;
-use common\models\Client;
-use DomainException;
-use modules\flight\src\useCases\sale\form\OrderContactForm;
+use modules\flight\models\FlightQuote;
+use modules\flight\models\FlightQuoteFlight;
+use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
-use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\Cases;
-use sales\forms\lead\EmailCreateForm;
-use sales\forms\lead\PhoneCreateForm;
-use sales\helpers\app\AppHelper;
-use sales\services\client\ClientCreateForm;
-use Throwable;
-use Yii;
-use yii\helpers\ArrayHelper;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use webapi\src\ApiCodeException;
 
 /**
  * Class VoluntaryExchangeCreateService
  *
- * @property VoluntaryExchangeCreateForm $voluntaryExchangeCreateForm
  * @property VoluntaryExchangeObjectCollection $objectCollection
  */
 class VoluntaryExchangeCreateService
 {
-    private VoluntaryExchangeCreateForm $voluntaryExchangeCreateForm;
-    private VoluntaryExchangeObjectCollection $objectCollection;
-
-    /**
-     * @param VoluntaryExchangeCreateForm $voluntaryExchangeCreateForm
-     * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
-     */
-    public function __construct(
-        VoluntaryExchangeCreateForm $voluntaryExchangeCreateForm,
-        VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
-    ) {
-        $this->voluntaryExchangeCreateForm = $voluntaryExchangeCreateForm;
-        $this->objectCollection = $voluntaryExchangeObjectCollection;
-    }
-
-    public function createCaseSale(array $saleData, Cases $case): ?CaseSale
+    public static function checkByPost(array $post): void
     {
-        $caseSale = $this->casesSaleService->createSaleByData($case->cs_id, $saleData);
-        $case->addEventLog(
-            CaseEventLog::RE_PROTECTION_CREATE,
-            'Case Sale created by Data',
-            ['case_id' => $case->cs_id]
-        );
-        return $caseSale;
-    }
-
-    public function getOrCreateClient(int $projectId, OrderContactForm $orderContactForm): Client
-    {
-        $clientForm = new ClientCreateForm();
-        $clientForm->projectId = $projectId;
-        $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
-        $clientForm->firstName = $orderContactForm->first_name;
-        $clientForm->lastName = $orderContactForm->last_name;
-
-        return $this->objectCollection->getClientManageService()->getOrCreate(
-            [new PhoneCreateForm(['phone' => $orderContactForm->phone_number])],
-            [new EmailCreateForm(['email' => $orderContactForm->email])],
-            $clientForm
-        );
-    }
-
-    public static function writeLog(Throwable $throwable, array $data = [], string $category = 'VoluntaryExchangeCreateJob:throwable'): void
-    {
-        $message = AppHelper::throwableLog($throwable);
-        if ($data) {
-            $message = ArrayHelper::merge($message, $data);
+        $hash = FlightRequest::generateHashFromDataJson($post);
+        if ($flightRequest = FlightRequest::findOne(['fr_hash' => $hash])) {
+            throw new \RuntimeException(
+                'FlightRequest (hash: ' . $hash . ') already processed',
+                ApiCodeException::REQUEST_ALREADY_PROCESSED
+            );
         }
-        if ($throwable instanceof DomainException) {
-            Yii::warning($message, $category);
-        } else {
-            Yii::error($message, $category);
+    }
+
+    public static function checkByBookingId(
+        string $bookingId,
+        array $statuses = ProductQuoteChangeStatus::PROCESSING_LIST,
+        int $typeId = ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE
+    ): void {
+        if ($productQuoteChange = self::getProductQuoteChangeByBookingId($bookingId, $statuses, $typeId)) {
+            throw new \RuntimeException(
+                'Product Quote Change exist in status (' .
+                    ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . ')',
+                ApiCodeException::REQUEST_ALREADY_PROCESSED
+            );
         }
+    }
+
+    public static function getProductQuoteChangeByBookingId(
+        string $bookingId,
+        array $statuses = ProductQuoteChangeStatus::PROCESSING_LIST,
+        int $typeId = ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE
+    ): ?ProductQuoteChange {
+        return ProductQuoteChange::find()
+            ->select(ProductQuoteChange::tableName() . '.*')
+            ->innerJoin(ProductQuote::tableName(), 'pq_id = pqc_pq_id')
+            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pq_id')
+            ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
+            ->where(['fqf_booking_id' => $bookingId])
+            ->andWhere(['pqc_type_id' => $typeId])
+            ->andWhere(['pqc_status_id' => $statuses])
+            ->orderBy(['pqc_id' => SORT_DESC])
+            ->one();
     }
 }

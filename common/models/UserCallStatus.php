@@ -30,6 +30,15 @@ class UserCallStatus extends \yii\db\ActiveRecord
         self::STATUS_TYPE_OCCUPIED => 'Is Occupied',
     ];
 
+    public static function occupied(int $userId, \DateTimeImmutable $createdDt): self
+    {
+        $status = new self();
+        $status->us_type_id = self::STATUS_TYPE_OCCUPIED;
+        $status->us_user_id = $userId;
+        $status->us_created_dt = $createdDt->format('Y-m-d H:i:s');
+        return $status;
+    }
+
     /**
      * {@inheritdoc}
      */

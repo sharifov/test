@@ -247,7 +247,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return $model;
     }
 
-    public static function createVoluntaryExchange(int $productQuoteId, ?int $caseId, bool $isAutomate): ProductQuoteChange
+    public static function createVoluntaryExchange(int $productQuoteId, ?int $caseId, bool $isAutomate = false): ProductQuoteChange
     {
         $model = self::createNew($productQuoteId, $caseId, $isAutomate);
         $model->pqc_type_id = self::TYPE_VOLUNTARY_EXCHANGE;

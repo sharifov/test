@@ -16,7 +16,7 @@ class LeadSoldSplitListener
             $splitForm = new ProfitSplitForm($lead);
             $load = $splitForm->loadModels([
                 'ProfitSplit' => [
-                    'new'.$event->lead->id => [
+                    'new' . $event->lead->id => [
                         'ps_user_id' => $lead->employee_id ?? $event->newOwnerId,
                         'ps_percent' => '100',
                     ]

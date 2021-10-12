@@ -4,31 +4,37 @@ namespace modules\flight\src\useCases\voluntaryExchangeCreate\form;
 
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
+use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\FlightQuoteForm;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
 use yii\base\Model;
 
 /**
- * Class VoluntaryExchangeInfoForm
+ * Class VoluntaryExchangeCreateForm
  *
  * @property $booking_id
- * @property $flight_product_quote
+ * @property $flight_quote
  * @property $payment_request
  * @property $billing
+ * @property $is_automate
  *
  * @property PaymentRequestForm|null $paymentRequestForm
  * @property BillingInfoForm|null $billingInfoForm
+ * @property FlightQuoteForm|null $flightQuoteForm
  */
 class VoluntaryExchangeCreateForm extends Model
 {
     public $booking_id;
-    public $flight_product_quote;
+    public $flight_quote;
     public $payment_request;
     public $billing;
+    public $is_automate;
 
     private ?PaymentRequestForm $paymentRequestForm;
     private ?BillingInfoForm $billingInfoForm;
+    private ?FlightQuoteForm $flightQuoteForm;
 
     public function rules(): array
     {
@@ -36,10 +42,14 @@ class VoluntaryExchangeCreateForm extends Model
             [['booking_id'], 'required'],
             [['booking_id'], 'string', 'max' => 10],
 
-            [['flight_product_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
-            [['flight_product_quote'], 'filter', 'filter' => static function ($value) {
+            [['is_automate'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
+            [['is_automate'], 'default', 'value' => false],
+
+            [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
+            [['flight_quote'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);
             }],
+            [['flight_quote'], 'checkFlightQuoteForm'],
 
             [['payment_request'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['payment_request'], 'paymentRequestProcessing'],
@@ -47,6 +57,20 @@ class VoluntaryExchangeCreateForm extends Model
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['billing'], 'billingProcessing'],
         ];
+    }
+
+    public function checkFlightQuoteForm($attribute)
+    {
+        if (!empty($this->flight_quote)) {
+            $flightQuoteForm = new FlightQuoteForm();
+            if (!$flightQuoteForm->load($this->flight_quote)) {
+                $this->addError($attribute, 'FlightQuoteForm not loaded');
+            } elseif (!$flightQuoteForm->validate()) {
+                $this->addError($attribute, 'FlightQuoteForm: ' . ErrorsToStringHelper::extractFromModel($flightQuoteForm, ' '));
+            } else {
+                $this->flightQuoteForm = $flightQuoteForm;
+            }
+        }
     }
 
     public function paymentRequestProcessing(string $attribute): void
@@ -65,9 +89,9 @@ class VoluntaryExchangeCreateForm extends Model
 
     public function billingProcessing(string $attribute): void
     {
-        if (!empty($this->payment_request)) {
+        if (!empty($this->billing)) {
             $billingInfoForm = new BillingInfoForm();
-            if (!$billingInfoForm->load($this->payment_request)) {
+            if (!$billingInfoForm->load($this->billing)) {
                 $this->addError($attribute, 'BillingInfoForm is not loaded');
             } elseif (!$billingInfoForm->validate()) {
                 $this->addError($attribute, 'BillingInfoForm: ' . ErrorsToStringHelper::extractFromModel($billingInfoForm, ', '));

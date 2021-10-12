@@ -252,7 +252,8 @@ class Cases extends ActiveRecord implements Objectable
         int $departmentId,
         int $categoryId,
         string $orderUid,
-        int $projectId
+        int $projectId,
+        ?bool $is_automate
     ): self {
         $case = self::create();
         $case->cs_dep_id = $departmentId;
@@ -260,9 +261,9 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_order_uid = $orderUid;
         $case->cs_subject = 'Voluntary Change';
         $case->cs_source_type_id = CasesSourceType::API;
-        $case->cs_is_automate = null;
+        $case->cs_is_automate = $is_automate;
         $case->cs_project_id = $projectId;
-        $case->pending(null, 'Voluntary Change Create');
+        $case->pending(null, 'Voluntary Exchange Create');
         return $case;
     }
 
@@ -306,6 +307,17 @@ class Cases extends ActiveRecord implements Objectable
         //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AWAITING);
         $this->recordEvent(new CasesAwaitingStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_AWAITING);
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function new(?int $creatorId, ?string $description = ''): void
+    {
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_NEW);
+        $this->recordEvent(new CasesNewStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
+        $this->setStatus(CasesStatus::STATUS_NEW);
     }
 
     /**

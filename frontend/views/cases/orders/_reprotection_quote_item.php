@@ -176,7 +176,8 @@ if ($quote->productQuoteLastChange) {
                                   ]) ?>
                               <?php endif; ?>
                               <?php
-                              /** @abac new $caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS, Reprotection Quote send email */
+                                $caseAbacDto->pqc_status = $quote->productQuoteLastChange->pqc_status_id;
+                                /** @abac new $caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS, Reprotection Quote send email */
                                 if (!$reprotectionQuote->isDeclined() && Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                                     echo Html::a('<i class="fa fa-envelope" title="Send Email"></i> Send Schedule Change Email', null, [
                                       'class' => 'dropdown-item btn-send-reprotection-quote-email',

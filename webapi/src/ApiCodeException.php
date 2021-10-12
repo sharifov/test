@@ -4,6 +4,9 @@ namespace webapi\src;
 
 use common\CodeExceptionsModule as Module;
 
+/**
+ * Class ApiCodeException
+ */
 class ApiCodeException
 {
     public const BO_ERROR = Module::API . 100;
@@ -20,6 +23,7 @@ class ApiCodeException
     public const UNEXPECTED_ERROR = Module::API . 110;
     public const GET_DATA_NOT_LOADED = Module::API . 111;
     public const DATA_NOT_FOUND = Module::API . 112;
+    public const REQUEST_ALREADY_PROCESSED = Module::API . 113;
 
     public const COMMUNICATION_ERROR = Module::API . 120;
 

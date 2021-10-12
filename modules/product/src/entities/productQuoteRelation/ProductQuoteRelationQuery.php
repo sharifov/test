@@ -56,4 +56,9 @@ class ProductQuoteRelationQuery
     {
         return (int)ProductQuoteRelation::find()->byParentQuoteId($originQuoteId)->reprotection()->count();
     }
+
+    public static function countVoluntaryExchangeByOrigin(int $originQuoteId): int
+    {
+        return (int) ProductQuoteRelation::find()->byParentQuoteId($originQuoteId)->voluntaryExchange()->count();
+    }
 }

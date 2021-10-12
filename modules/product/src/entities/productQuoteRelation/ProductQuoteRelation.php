@@ -30,12 +30,14 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
     public const TYPE_CLONE = 2;
     public const TYPE_ALTERNATIVE = 3;
     public const TYPE_REPROTECTION = 4;
+    public const TYPE_VOLUNTARY_EXCHANGE = 5;
 
     public const TYPE_LIST = [
         self::TYPE_REPLACE => 'Replace',
         self::TYPE_CLONE => 'Clone',
         self::TYPE_ALTERNATIVE => 'Alternative',
         self::TYPE_REPROTECTION => 'ReProtection',
+        self::TYPE_VOLUNTARY_EXCHANGE => 'Voluntary Exchange',
     ];
 
     public static function tableName(): string
