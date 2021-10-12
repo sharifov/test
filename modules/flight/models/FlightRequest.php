@@ -113,11 +113,6 @@ class FlightRequest extends \yii\db\ActiveRecord
                 'class' => StringToJsonBehavior::class,
                 'jsonColumn' => 'fr_data_json',
             ],
-            'hashGenerate' => [
-                'class' => HashFromJsonBehavior::class,
-                'donorColumn' => 'fr_data_json',
-                'targetColumn' => 'fr_hash',
-            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }

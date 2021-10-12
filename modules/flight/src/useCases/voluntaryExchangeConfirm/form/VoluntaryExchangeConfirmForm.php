@@ -65,9 +65,9 @@ class VoluntaryExchangeConfirmForm extends Model
 
     public function billingProcessing(string $attribute): void
     {
-        if (!empty($this->payment_request)) {
+        if (!empty($this->billing)) {
             $billingInfoForm = new BillingInfoForm();
-            if (!$billingInfoForm->load($this->payment_request)) {
+            if (!$billingInfoForm->load($this->billing)) {
                 $this->addError($attribute, 'BillingInfoForm is not loaded');
             } elseif (!$billingInfoForm->validate()) {
                 $this->addError($attribute, 'BillingInfoForm: ' . ErrorsToStringHelper::extractFromModel($billingInfoForm, ', '));

@@ -22,6 +22,7 @@ use yii\base\Model;
  *
  * @property PaymentRequestForm|null $paymentRequestForm
  * @property BillingInfoForm|null $billingInfoForm
+ * @property FlightQuoteForm|null $flightQuoteForm
  */
 class VoluntaryExchangeCreateForm extends Model
 {
@@ -33,6 +34,7 @@ class VoluntaryExchangeCreateForm extends Model
 
     private ?PaymentRequestForm $paymentRequestForm;
     private ?BillingInfoForm $billingInfoForm;
+    private ?FlightQuoteForm $flightQuoteForm;
 
     public function rules(): array
     {
@@ -54,8 +56,6 @@ class VoluntaryExchangeCreateForm extends Model
 
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['billing'], 'billingProcessing'],
-
-            [['booking_id'], 'checkExistByHash'],
         ];
     }
 
@@ -89,23 +89,15 @@ class VoluntaryExchangeCreateForm extends Model
 
     public function billingProcessing(string $attribute): void
     {
-        if (!empty($this->payment_request)) {
+        if (!empty($this->billing)) {
             $billingInfoForm = new BillingInfoForm();
-            if (!$billingInfoForm->load($this->payment_request)) {
+            if (!$billingInfoForm->load($this->billing)) {
                 $this->addError($attribute, 'BillingInfoForm is not loaded');
             } elseif (!$billingInfoForm->validate()) {
                 $this->addError($attribute, 'BillingInfoForm: ' . ErrorsToStringHelper::extractFromModel($billingInfoForm, ', '));
             } else {
                 $this->billingInfoForm = $billingInfoForm;
             }
-        }
-    }
-
-    public function checkExistByHash($attribute)
-    {
-        $hash = FlightRequest::generateHashFromDataJson($this->getAttributes());
-        if (FlightRequest::findOne(['fr_hash' => $hash])) {
-            $this->addError($attribute, 'FlightRequest already exist. Hash(' . $hash . ')');
         }
     }
 

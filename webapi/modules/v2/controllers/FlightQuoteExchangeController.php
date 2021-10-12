@@ -7,6 +7,7 @@ use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
 use sales\helpers\app\AppHelper;
@@ -446,17 +447,11 @@ class FlightQuoteExchangeController extends BaseController
         }
 
         try {
-            /* TODO:: process restriction logic */
-            $bookingId = $voluntaryExchangeCreateForm->booking_id;
-            if ($productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($bookingId)) {
-                throw new \RuntimeException(
-                    'ProductQuoteChange(VoluntaryExchange) by BookingID(' . $bookingId . ') already processed',
-                    ApiCodeException::REQUEST_ALREADY_PROCESSED
-                );
-            }
+            VoluntaryExchangeCreateService::checkByPost($post);
+            VoluntaryExchangeCreateService::checkByBookingId($voluntaryExchangeCreateForm->booking_id);
 
             $flightRequest = FlightRequest::create(
-                $bookingId,
+                $voluntaryExchangeCreateForm->booking_id,
                 FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
                 $post,
                 $project->id,
