@@ -5,6 +5,7 @@ namespace sales\model\user\entity\userStatus;
 use common\models\Call;
 use common\models\ConferenceParticipant;
 use common\models\Employee;
+use common\models\Notifications;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -131,6 +132,11 @@ class UserStatus extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
         $this->sendFrontendData($insert ? 'insert' : 'update');
+        if ($insert || array_key_exists('us_is_on_call', $changedAttributes)) {
+            if ($this->us_is_on_call) {
+                Notifications::publish('hidePhoneNotifications', ['user_id' => $this->us_user_id], []);
+            }
+        }
     }
 
     /**

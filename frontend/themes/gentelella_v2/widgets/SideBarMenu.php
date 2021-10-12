@@ -621,6 +621,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => ['/user-model-setting-crud/index'],
                     'icon' => 'list',
                 ],
+                ['label' => 'User Stat Day', 'url' => ['/user-stat-day-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Data', 'url' => ['/user-data-crud/index'], 'icon' => 'list'],
             ]
         ];
 

@@ -42,6 +42,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \yii\queue\beanstalk\Queue $queue_job The beanstalk Queue. This property is read-only. Extended component.
  * @property \yii\queue\beanstalk\Queue $queue_email_job The beanstalk Queue. This property is read-only. Extended component.
  * @property \yii\queue\beanstalk\Queue $queue_client_chat_job The beanstalk Queue. This property is read-only. Extended component.
+ * @property \yii\queue\beanstalk\Queue $queue_lead_redial The beanstalk Queue. This property is read-only. Extended component.
  * @property \yii\caching\Cache $cacheFile FileCache.
  * @property \yii\caching\Cache $webApiCache FileCache.
  * @property \yii\caching\Cache $consoleCache FileCache.
