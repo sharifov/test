@@ -30,9 +30,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
 
-        <?php if($importCount): ?>
+        <?php if ($importCount) : ?>
             <?= Html::a('<i class="fa fa-download"></i> Continue Import (' . $importCount . ')', ['import'], ['class' => 'btn btn-warning']) ?>
-        <?php else: ?>
+        <?php else : ?>
             <?= Html::a('<i class="fa fa-download"></i> Import File', ['import'], ['class' => 'btn btn-default']) ?>
         <?php endif; ?>
     </p>
