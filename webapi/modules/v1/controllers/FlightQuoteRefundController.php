@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmForm;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
 use modules\flight\src\useCases\voluntaryRefundInfo\form\VoluntaryRefundInfoForm;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
@@ -551,22 +552,22 @@ class FlightQuoteRefundController extends ApiBaseController
             );
         }
 
-//        $voluntaryRefundCreateForm = new VoluntaryRefundCreateForm();
-//        if (!$voluntaryRefundCreateForm->load($post)) {
-//            return new ErrorResponse(
-//                new StatusCodeMessage(400),
-//                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
-//                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-//            );
-//        }
-//        if (!$voluntaryRefundCreateForm->validate()) {
-//            return new ErrorResponse(
-//                new StatusCodeMessage(422),
-//                new MessageMessage(Messages::VALIDATION_ERROR),
-//                new ErrorsMessage($voluntaryRefundCreateForm->getErrors()),
-//                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
-//            );
-//        }
+        $voluntaryRefundConfirmForm = new VoluntaryRefundConfirmForm();
+        if (!$voluntaryRefundConfirmForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+        if (!$voluntaryRefundConfirmForm->validate()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(422),
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($voluntaryRefundConfirmForm->getErrors()),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            );
+        }
 
         try {
 //            $productQuoteRefund = ProductQuoteRefundQuery::getByBookingId($voluntaryRefundCreateForm->booking_id);
