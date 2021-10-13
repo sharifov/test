@@ -167,7 +167,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParamExample {json} Request-Example:
          {
             "bookingId": "XXXYYYZ",
-            "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yzc0NzNkZjE5",
+            "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
             "prices": {
                 "totalPrice": 332.12,
                 "comm": 0,
