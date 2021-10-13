@@ -6,9 +6,9 @@ use common\components\validators\CheckJsonValidator;
 use common\models\Currency;
 use common\models\PaymentMethod;
 use frontend\helpers\JsonHelper;
-use modules\order\src\forms\api\create\CreditCardForm;
 use sales\helpers\ErrorsToStringHelper;
 use sales\traits\FormNameModelTrait;
+use webapi\src\forms\payment\creditCard\CreditCardForm;
 use yii\base\Model;
 
 /**
@@ -59,12 +59,12 @@ class PaymentRequestForm extends Model
         if (!empty($this->method_data[self::TYPE_METHOD_CARD]) && is_array($this->method_data[self::TYPE_METHOD_CARD])) {
             foreach ($this->method_data[self::TYPE_METHOD_CARD] as $key => $card) {
                 $creditCardForm = new CreditCardForm();
-                if (!$creditCardForm->load($card)) {
+                if (!$creditCardForm->load($card, '')) {
                     $this->addError($attribute, 'CreditCardForm is not loaded');
                     break;
                 }
                 if (!$creditCardForm->validate()) {
-                    $this->addError($attribute, 'BookingInfoApiForm: ' . ErrorsToStringHelper::extractFromModel($creditCardForm, ', '));
+                    $this->addError($attribute, 'CreditCardForm: ' . ErrorsToStringHelper::extractFromModel($creditCardForm, ', '));
                     break;
                 }
                 $this->creditCardForms[$key] = $creditCardForm;
