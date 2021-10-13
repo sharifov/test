@@ -47,15 +47,31 @@ class AbacPolicyController extends FController
      */
     public function actionIndex()
     {
+
+//        $currentPolicyData = [];
+//        $currentPolicyList = AbacPolicy::find()->all();
+//        if ($currentPolicyList) {
+//            foreach ($currentPolicyList as $item) {
+//                $currentPolicyData[$item->ap_object][$item->ap_action][$item->ap_effect][$item->ap_subject][$item->ap_enabled] = true;
+//            }
+//        }
+
+        $abacObjectList = Yii::$app->abac->getObjectList();
+
+        //VarDumper::dump(array_values($abacObjectList)); exit;
+
         $searchModel = new AbacPolicySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         $importCount = count($this->getImportData());
 
+
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'importCount' => $importCount
+            'importCount' => $importCount,
+            'abacObjectList' => $abacObjectList
         ]);
     }
 
