@@ -196,12 +196,13 @@ class EmployeeQuery extends \yii\db\ActiveQuery
                 ->groupBy(['id'])
         ], 'sp.id = leads.id');
         $query->where(['status' => Lead::STATUS_SOLD]);
+        $query->andWhere(['IS NOT', 'employee_id', null]);
         $query->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
 
         $complementaryQuery = new Query();
         $complementaryQuery->select([
             '(ROUND((final_profit - agents_processing_fee) * ps_percent/100, 2)) as gross_profit',
-            'employee_id'
+            'employee_id' => 'ps_user_id'
         ]);
         $complementaryQuery->from(Lead::tableName());
         $complementaryQuery->innerJoin('profit_split', 'ps_lead_id = id');
