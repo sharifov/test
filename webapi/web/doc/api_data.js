@@ -4925,13 +4925,206 @@ define({ "api": [
             "optional": true,
             "field": "meta",
             "description": "<p>Meta</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "billing",
+            "description": "<p>Billing</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.last_name",
+            "description": "<p>Last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "billing.middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.company_name",
+            "description": "<p>Company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "billing.address_line1",
+            "description": "<p>Address line 1</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "billing.address_line2",
+            "description": "<p>Address line 2</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.city",
+            "description": "<p>City</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.state",
+            "description": "<p>State</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country_id",
+            "description": "<p>Country code (for example &quot;US&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": true,
+            "field": "billing.zip",
+            "description": "<p>Zip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": true,
+            "field": "billing.contact_phone",
+            "description": "<p>Contact phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": true,
+            "field": "billing.contact_email",
+            "description": "<p>Contact email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "60",
+            "optional": true,
+            "field": "billing.contact_name",
+            "description": "<p>Contact name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "payment_request",
+            "description": "<p>Payment request</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "payment_request.amount",
+            "description": "<p>Customer must pay for initiate refund process</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payment_request.currency",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "payment_request.method_key",
+            "description": "<p>Method key (for example &quot;cc&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data",
+            "description": "<p>Method data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data.card",
+            "description": "<p>Card (for credit card)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..20",
+            "optional": false,
+            "field": "payment_request.method_data.card.number",
+            "description": "<p>Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..50",
+            "optional": true,
+            "field": "payment_request.method_data.card.holder_name",
+            "description": "<p>Holder name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_month",
+            "description": "<p>Month</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_year",
+            "description": "<p>Year</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..4",
+            "optional": false,
+            "field": "payment_request.method_data.card.cvv",
+            "description": "<p>CVV</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"bookingId\": \"XXXYYYZ\",\n    \"key\": \"51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yzc0NzNkZjE5\",\n    \"prices\": {\n        \"totalPrice\": 332.12,\n        \"comm\": 0,\n        \"isCk\": false\n    },\n    \"passengers\": {\n        \"ADT\": {\n            \"codeAs\": \"JCB\",\n            \"cnt\": 1,\n            \"baseFare\": 32.12,\n            \"pubBaseFare\": 32.12,\n            \"baseTax\": 300,\n            \"markup\": 0,\n            \"comm\": 0,\n            \"price\": 332.12,\n            \"tax\": 300,\n            \"oBaseFare\": {\n                \"amount\": 32.120003,\n                \"currency\": \"USD\"\n            },\n            \"oBaseTax\": {\n                \"amount\": 300,\n                \"currency\": \"USD\"\n            },\n            \"oExchangeFareDiff\": {\n                \"amount\": 8,\n                \"currency\": \"USD\"\n            },\n            \"oExchangeTaxDiff\": {\n                \"amount\": 24.12,\n                \"currency\": \"USD\"\n            }\n        }\n    },\n    \"trips\": [\n        {\n            \"tripId\": 1,\n            \"segments\": [\n                {\n                    \"segmentId\": 1,\n                    \"departureTime\": \"2022-01-10 20:15\",\n                    \"arrivalTime\": \"2022-01-11 21:10\",\n                    \"stop\": 1,\n                    \"stops\": [\n                        {\n                            \"locationCode\": \"LFW\",\n                            \"departureDateTime\": \"2022-01-11 12:35\",\n                            \"arrivalDateTime\": \"2022-01-11 11:35\",\n                            \"duration\": 60,\n                            \"elapsedTime\": 620,\n                            \"equipment\": \"787\"\n                        }\n                    ],\n                    \"flightNumber\": \"513\",\n                    \"bookingClass\": \"H\",\n                    \"duration\": 1015,\n                    \"departureAirportCode\": \"JFK\",\n                    \"departureAirportTerminal\": \"8\",\n                    \"arrivalAirportCode\": \"ADD\",\n                    \"arrivalAirportTerminal\": \"2\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"787\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"O\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"DL\",\n                    \"fareCode\": \"HLESUS\",\n                    \"recheckBaggage\": false\n                },\n                {\n                    \"segmentId\": 2,\n                    \"departureTime\": \"2022-01-11 23:15\",\n                    \"arrivalTime\": \"2022-01-12 01:20\",\n                    \"stop\": 0,\n                    \"stops\": null,\n                    \"flightNumber\": \"308\",\n                    \"bookingClass\": \"H\",\n                    \"duration\": 125,\n                    \"departureAirportCode\": \"ADD\",\n                    \"departureAirportTerminal\": \"2\",\n                    \"arrivalAirportCode\": \"NBO\",\n                    \"arrivalAirportTerminal\": \"1C\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"738\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"I\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"D\",\n                    \"fareCode\": \"HLESUS\",\n                    \"recheckBaggage\": false\n                }\n            ],\n            \"duration\": 1265\n        },\n        {\n            \"tripId\": 2,\n            \"segments\": [\n                {\n                    \"segmentId\": 1,\n                    \"departureTime\": \"2022-01-31 05:00\",\n                    \"arrivalTime\": \"2022-01-31 07:15\",\n                    \"stop\": 0,\n                    \"stops\": null,\n                    \"flightNumber\": \"309\",\n                    \"bookingClass\": \"E\",\n                    \"duration\": 135,\n                    \"departureAirportCode\": \"NBO\",\n                    \"departureAirportTerminal\": \"1C\",\n                    \"arrivalAirportCode\": \"ADD\",\n                    \"arrivalAirportTerminal\": \"2\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"738\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"O\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"B\",\n                    \"fareCode\": \"ELPRUS\",\n                    \"recheckBaggage\": false\n                },\n                {\n                    \"segmentId\": 2,\n                    \"departureTime\": \"2022-01-31 08:30\",\n                    \"arrivalTime\": \"2022-01-31 18:15\",\n                    \"stop\": 1,\n                    \"stops\": [\n                        {\n                            \"locationCode\": \"LFW\",\n                            \"departureDateTime\": \"2022-01-31 12:15\",\n                            \"arrivalDateTime\": \"2022-01-31 11:00\",\n                            \"duration\": 75,\n                            \"elapsedTime\": 330,\n                            \"equipment\": \"787\"\n                        }\n                    ],\n                    \"flightNumber\": \"512\",\n                    \"bookingClass\": \"E\",\n                    \"duration\": 1065,\n                    \"departureAirportCode\": \"ADD\",\n                    \"departureAirportTerminal\": \"2\",\n                    \"arrivalAirportCode\": \"JFK\",\n                    \"arrivalAirportTerminal\": \"8\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"787\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"I\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"LD\",\n                    \"fareCode\": \"ELPRUS\",\n                    \"recheckBaggage\": false\n                }\n            ],\n            \"duration\": 1275\n        }\n    ],\n    \"paxCnt\": 1,\n    \"validatingCarrier\": \"\",\n    \"gds\": \"S\",\n    \"pcc\": \"G9MJ\",\n    \"cons\": \"GTT\",\n    \"fareType\": \"SR\",\n    \"cabin\": \"Y\",\n    \"currency\": \"USD\",\n    \"currencies\": [\n        \"USD\"\n    ],\n    \"currencyRates\": {\n        \"USDUSD\": {\n            \"from\": \"USD\",\n            \"to\": \"USD\",\n            \"rate\": 1\n        }\n    },\n    \"keys\": {},\n    \"meta\": {\n        \"eip\": 0,\n        \"noavail\": false,\n        \"searchId\": \"U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx\",\n        \"lang\": \"en\",\n        \"rank\": 0,\n        \"cheapest\": false,\n        \"fastest\": false,\n        \"best\": false,\n        \"country\": \"us\"\n    }\n}",
+          "content": " {\n    \"bookingId\": \"XXXYYYZ\",\n    \"key\": \"51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yzc0NzNkZjE5\",\n    \"prices\": {\n        \"totalPrice\": 332.12,\n        \"comm\": 0,\n        \"isCk\": false\n    },\n    \"passengers\": {\n        \"ADT\": {\n            \"codeAs\": \"JCB\",\n            \"cnt\": 1,\n            \"baseFare\": 32.12,\n            \"pubBaseFare\": 32.12,\n            \"baseTax\": 300,\n            \"markup\": 0,\n            \"comm\": 0,\n            \"price\": 332.12,\n            \"tax\": 300,\n            \"oBaseFare\": {\n                \"amount\": 32.120003,\n                \"currency\": \"USD\"\n            },\n            \"oBaseTax\": {\n                \"amount\": 300,\n                \"currency\": \"USD\"\n            },\n            \"oExchangeFareDiff\": {\n                \"amount\": 8,\n                \"currency\": \"USD\"\n            },\n            \"oExchangeTaxDiff\": {\n                \"amount\": 24.12,\n                \"currency\": \"USD\"\n            }\n        }\n    },\n    \"trips\": [\n        {\n            \"tripId\": 1,\n            \"segments\": [\n                {\n                    \"segmentId\": 1,\n                    \"departureTime\": \"2022-01-10 20:15\",\n                    \"arrivalTime\": \"2022-01-11 21:10\",\n                    \"stop\": 1,\n                    \"stops\": [\n                        {\n                            \"locationCode\": \"LFW\",\n                            \"departureDateTime\": \"2022-01-11 12:35\",\n                            \"arrivalDateTime\": \"2022-01-11 11:35\",\n                            \"duration\": 60,\n                            \"elapsedTime\": 620,\n                            \"equipment\": \"787\"\n                        }\n                    ],\n                    \"flightNumber\": \"513\",\n                    \"bookingClass\": \"H\",\n                    \"duration\": 1015,\n                    \"departureAirportCode\": \"JFK\",\n                    \"departureAirportTerminal\": \"8\",\n                    \"arrivalAirportCode\": \"ADD\",\n                    \"arrivalAirportTerminal\": \"2\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"787\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"O\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"DL\",\n                    \"fareCode\": \"HLESUS\",\n                    \"recheckBaggage\": false\n                },\n                {\n                    \"segmentId\": 2,\n                    \"departureTime\": \"2022-01-11 23:15\",\n                    \"arrivalTime\": \"2022-01-12 01:20\",\n                    \"stop\": 0,\n                    \"stops\": null,\n                    \"flightNumber\": \"308\",\n                    \"bookingClass\": \"H\",\n                    \"duration\": 125,\n                    \"departureAirportCode\": \"ADD\",\n                    \"departureAirportTerminal\": \"2\",\n                    \"arrivalAirportCode\": \"NBO\",\n                    \"arrivalAirportTerminal\": \"1C\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"738\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"I\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"D\",\n                    \"fareCode\": \"HLESUS\",\n                    \"recheckBaggage\": false\n                }\n            ],\n            \"duration\": 1265\n        },\n        {\n            \"tripId\": 2,\n            \"segments\": [\n                {\n                    \"segmentId\": 1,\n                    \"departureTime\": \"2022-01-31 05:00\",\n                    \"arrivalTime\": \"2022-01-31 07:15\",\n                    \"stop\": 0,\n                    \"stops\": null,\n                    \"flightNumber\": \"309\",\n                    \"bookingClass\": \"E\",\n                    \"duration\": 135,\n                    \"departureAirportCode\": \"NBO\",\n                    \"departureAirportTerminal\": \"1C\",\n                    \"arrivalAirportCode\": \"ADD\",\n                    \"arrivalAirportTerminal\": \"2\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"738\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"O\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"B\",\n                    \"fareCode\": \"ELPRUS\",\n                    \"recheckBaggage\": false\n                },\n                {\n                    \"segmentId\": 2,\n                    \"departureTime\": \"2022-01-31 08:30\",\n                    \"arrivalTime\": \"2022-01-31 18:15\",\n                    \"stop\": 1,\n                    \"stops\": [\n                        {\n                            \"locationCode\": \"LFW\",\n                            \"departureDateTime\": \"2022-01-31 12:15\",\n                            \"arrivalDateTime\": \"2022-01-31 11:00\",\n                            \"duration\": 75,\n                            \"elapsedTime\": 330,\n                            \"equipment\": \"787\"\n                        }\n                    ],\n                    \"flightNumber\": \"512\",\n                    \"bookingClass\": \"E\",\n                    \"duration\": 1065,\n                    \"departureAirportCode\": \"ADD\",\n                    \"departureAirportTerminal\": \"2\",\n                    \"arrivalAirportCode\": \"JFK\",\n                    \"arrivalAirportTerminal\": \"8\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"787\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"I\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"LD\",\n                    \"fareCode\": \"ELPRUS\",\n                    \"recheckBaggage\": false\n                }\n            ],\n            \"duration\": 1275\n        }\n    ],\n    \"paxCnt\": 1,\n    \"validatingCarrier\": \"\",\n    \"gds\": \"S\",\n    \"pcc\": \"G9MJ\",\n    \"cons\": \"GTT\",\n    \"fareType\": \"SR\",\n    \"cabin\": \"Y\",\n    \"currency\": \"USD\",\n    \"currencies\": [\n        \"USD\"\n    ],\n    \"currencyRates\": {\n        \"USDUSD\": {\n            \"from\": \"USD\",\n            \"to\": \"USD\",\n            \"rate\": 1\n        }\n    },\n    \"keys\": {},\n    \"meta\": {\n        \"eip\": 0,\n        \"noavail\": false,\n        \"searchId\": \"U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx\",\n        \"lang\": \"en\",\n        \"rank\": 0,\n        \"cheapest\": false,\n        \"fastest\": false,\n        \"best\": false,\n        \"country\": \"us\"\n    },\n    \"billing\": {\n          \"first_name\": \"John\",\n          \"last_name\": \"Doe\",\n          \"middle_name\": \"\",\n          \"address_line1\": \"1013 Weda Cir\",\n          \"address_line2\": \"\",\n          \"country_id\": \"US\",\n          \"city\": \"Mayfield\",\n          \"state\": \"KY\",\n          \"zip\": \"99999\",\n          \"company_name\": \"\",\n          \"contact_phone\": \"+19074861000\",\n          \"contact_email\": \"test@test.com\",\n          \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n          \"method_key\": \"cc\",\n          \"currency\": \"USD\",\n          \"method_data\": {\n              \"card\": {\n                  \"number\": \"4111555577778888\",\n                  \"holder_name\": \"Test test\",\n                  \"expiration_month\": 10,\n                  \"expiration_year\": 23,\n                  \"cvv\": \"1234\"\n              }\n          },\n          \"amount\": 112.25\n    }\n}",
           "type": "json"
         }
       ]

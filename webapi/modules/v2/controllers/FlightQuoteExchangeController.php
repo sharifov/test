@@ -138,7 +138,31 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {number}                       currencyRates.USDUSD.rate               Rate
      * @apiParam {object}                       [keys]                                  Keys
      * @apiParam {object}                       [meta]                                  Meta
-     *
+     * @apiParam {object}                       [billing]                    Billing
+     * @apiParam {string{30}}                   billing.first_name           First name
+     * @apiParam {string{30}}                   billing.last_name            Last name
+     * @apiParam {string{30}}                   [billing.middle_name]        Middle name
+     * @apiParam {string{40}}                   [billing.company_name]       Company
+     * @apiParam {string{50}}                   billing.address_line1        Address line 1
+     * @apiParam {string{50}}                   [billing.address_line2]      Address line 2
+     * @apiParam {string{30}}                   billing.city                 City
+     * @apiParam {string{40}}                   [billing.state]              State
+     * @apiParam {string{2}}                    billing.country_id           Country code (for example "US")
+     * @apiParam {string{10}}                   [billing.zip]                Zip
+     * @apiParam {string{20}}                   [billing.contact_phone]      Contact phone
+     * @apiParam {string{160}}                  [billing.contact_email]      Contact email
+     * @apiParam {string{60}}                   [billing.contact_name]       Contact name
+     * @apiParam {object}                       [payment_request]                                   Payment request
+     * @apiParam {number}                       payment_request.amount                              Customer must pay for initiate refund process
+     * @apiParam {string{3}}                    payment_request.currency                            Currency code
+     * @apiParam {string{2}}                    payment_request.method_key                          Method key (for example "cc")
+     * @apiParam {object}                       payment_request.method_data                         Method data
+     * @apiParam {object}                       payment_request.method_data.card                    Card (for credit card)
+     * @apiParam {string{..20}}                 payment_request.method_data.card.number             Number
+     * @apiParam {string{..50}}                 [payment_request.method_data.card.holder_name]      Holder name
+     * @apiParam {int}                          payment_request.method_data.card.expiration_month   Month
+     * @apiParam {int}                          payment_request.method_data.card.expiration_year    Year
+     * @apiParam {string{..4}}                  payment_request.method_data.card.cvv                CVV
      *
      * @apiParamExample {json} Request-Example:
          {
@@ -327,6 +351,35 @@ class FlightQuoteExchangeController extends BaseController
                 "fastest": false,
                 "best": false,
                 "country": "us"
+            },
+            "billing": {
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "middle_name": "",
+                  "address_line1": "1013 Weda Cir",
+                  "address_line2": "",
+                  "country_id": "US",
+                  "city": "Mayfield",
+                  "state": "KY",
+                  "zip": "99999",
+                  "company_name": "",
+                  "contact_phone": "+19074861000",
+                  "contact_email": "test@test.com",
+                  "contact_name": "Test Name"
+            },
+            "payment_request": {
+                  "method_key": "cc",
+                  "currency": "USD",
+                  "method_data": {
+                      "card": {
+                          "number": "4111555577778888",
+                          "holder_name": "Test test",
+                          "expiration_month": 10,
+                          "expiration_year": 23,
+                          "cvv": "1234"
+                      }
+                  },
+                  "amount": 112.25
             }
         }
      *
