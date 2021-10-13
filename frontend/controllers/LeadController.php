@@ -2573,6 +2573,7 @@ class LeadController extends FController
             //$totalProfit = $lead->getFinalProfit() ?: $lead->getBookedQuote()->getEstimationProfit();
             $totalProfit = $lead->getFinalProfit() ?: 0;
             $splitForm = new ProfitSplitForm($lead);
+            $splitForm->setZeroPercent(true);
 
             $mainAgentProfit = $totalProfit;
 
