@@ -4,6 +4,7 @@ namespace common\components\jobs;
 
 use common\models\CaseSale;
 use DomainException;
+use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
@@ -124,7 +125,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 throw $throwable;
             }
 
-            if ($flightProductQuoteData = ArrayHelper::getValue($flightRequest, 'fr_data_json.flight_quote')) {
+            if (!empty($flightRequest->fr_data_json) && $flightProductQuoteData = JsonHelper::decode($flightRequest->fr_data_json)) {
                 try {
                     $flight = $voluntaryExchangeService->getFlightByOriginQuote($originProductQuote);
                     $flightQuote = $flightQuoteManageService->createVoluntaryExchange(

@@ -23,8 +23,6 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
-use yii\helpers\ArrayHelper;
-use yii\web\MethodNotAllowedHttpException;
 
 /**
  * Class FlightQuoteExchangeController
@@ -67,290 +65,268 @@ class FlightQuoteExchangeController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{7..10}}        booking_id                   Booking ID
-     * @apiParam {bool}                 [is_automate]                Is automate (default false)
-     * @apiParam {object}               billing                      Billing
-     * @apiParam {string{30}}           billing.first_name           First name
-     * @apiParam {string{30}}           billing.last_name            Last name
-     * @apiParam {string{30}}           [billing.middle_name]        Middle name
-     * @apiParam {string{40}}           [billing.company_name]       Company
-     * @apiParam {string{50}}           billing.address_line1        Address line 1
-     * @apiParam {string{50}}           [billing.address_line2]      Address line 2
-     * @apiParam {string{30}}           billing.city                 City
-     * @apiParam {string{40}}           [billing.state]              State
-     * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
-     * @apiParam {string{10}}           [billing.zip]                Zip
-     * @apiParam {string{20}}           [billing.contact_phone]      Contact phone
-     * @apiParam {string{160}}          [billing.contact_email]      Contact email
-     * @apiParam {string{60}}           [billing.contact_name]       Contact name
-     * @apiParam {object}               payment_request                      Payment request
-     * @apiParam {number}               payment_request.amount               Amount
-     * @apiParam {string{3}}            payment_request.currency             Currency code
-     * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")
-     * @apiParam {object}               payment_request.method_data          Method data
-     * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
-     * @apiParam {string{50}}           payment_request.method_data.card.number          Number
-     * @apiParam {string{50}}           [payment_request.method_data.card.holder_name]   Holder name
-     * @apiParam {int}                  payment_request.method_data.card.exp_month       Month
-     * @apiParam {int}                  payment_request.method_data.card.exp_year        Year
-     * @apiParam {string{32}}           payment_request.method_data.card.cvv             CVV
-     * @apiParam {object}                      [flight_quote]                          Flight quote
-     * @apiParam {string{2}}                   flight_quote.gds                        Gds
-     * @apiParam {string{10}}                  flight_quote.pcc                        pcc
-     * @apiParam {string{50}}                  flight_quote.fareType                   ValidatingCarrier
-     * @apiParam {object}                      flight_quote.trips                      Trips
-     * @apiParam {int}                         [flight_quote.trips.duration]           Trip Duration
-     * @apiParam {object}                      flight_quote.trips.segments                          Segments
-     * @apiParam {string{format Y-m-d H:i}}    flight_quote.trips.segments.departureTime            DepartureTime
-     * @apiParam {string{format Y-m-d H:i}}    flight_quote.trips.segments.arrivalTime              ArrivalTime
-     * @apiParam {string{3}}                   flight_quote.trips.segments.departureAirportCode     Departure Airport Code IATA
-     * @apiParam {string{3}}                   flight_quote.trips.segments.arrivalAirportCode       Arrival Airport Code IATA
-     * @apiParam {int}                         [flight_quote.trips.segments.flightNumber]           Flight Number
-     * @apiParam {string{1}}                   [flight_quote.trips.segments.bookingClass]           BookingClass
-     * @apiParam {int}                         [flight_quote.trips.segments.duration]               Segment duration
-     * @apiParam {string{3}}                   [flight_quote.trips.segments.departureAirportTerminal]     Departure Airport Terminal Code
-     * @apiParam {string{3}}                   [flight_quote.trips.segments.arrivalAirportTerminal]       Arrival Airport Terminal Code
-     * @apiParam {string{2}}                   [flight_quote.trips.segments.operatingAirline]       Operating Airline
-     * @apiParam {string{2}}                   [flight_quote.trips.segments.marketingAirline]       Marketing Airline
-     * @apiParam {string{30}}                  [flight_quote.trips.segments.airEquipType]          AirEquipType
-     * @apiParam {string{3}}                   [flight_quote.trips.segments.marriageGroup]          MarriageGroup
-     * @apiParam {int}                         [flight_quote.trips.segments.mileage]                Mileage
-     * @apiParam {string{2}}                   [flight_quote.trips.segments.meal]                   Meal
-     * @apiParam {string{50}}                  [flight_quote.trips.segments.fareCode]               Fare Code
+     * @apiParam {string{7..10}}                bookingId                    Booking ID
+     * @apiParam {string{150}}                  key                          Key
+     * @apiParam {object}                       prices                       Prices
+     * @apiParam {number}                       prices.totalPrice            Total Price (total for exchange pay)
+     * @apiParam {number}                       prices.comm                  Comm
+     * @apiParam {bool}                         prices.isCk                  isCk
+     * @apiParam {object}                       passengers                   Passengers
+     * @apiParam {string{3}}                    passengers.ADT               Pax Type (ADT,CHD,INF)
+     * @apiParam {string{3}}                    passengers.ADT.codeAs        Pax Type Code
+     * @apiParam {int}                          passengers.ADT.cnt           Cnt
+     * @apiParam {number}                       passengers.ADT.baseFare      Base Fare (diffFare)
+     * @apiParam {number}                       passengers.ADT.pubBaseFare   Pub Base Fare
+     * @apiParam {number}                       passengers.ADT.baseTax       Base Tax (airlinePenalty)
+     * @apiParam {number}                       passengers.ADT.markup        Markup (processingFee)
+     * @apiParam {number}                       passengers.ADT.comm          Comm
+     * @apiParam {number}                       passengers.ADT.price         Price (total for exchange pay)
+     * @apiParam {number}                       passengers.ADT.tax           Tax
+     * @apiParam {object}                       [passengers.ADT.oBaseFare]                  oBaseFare
+     * @apiParam {number}                       passengers.ADT.oBaseFare.amount             oBaseFare Amount
+     * @apiParam {string{3}}                    passengers.ADT.oBaseFare.currency           oBaseFare Currency
+     * @apiParam {object}                       [passengers.ADT.oBaseTax]                   oBaseTax
+     * @apiParam {number}                       passengers.ADT.oBaseTax.amount              oBaseTax Amount
+     * @apiParam {string{3}}                    passengers.ADT.oBaseTax.currency            oBaseTax Currency
+     * @apiParam {object}                       [passengers.ADT.oExchangeFareDiff]          oExchangeFareDiff
+     * @apiParam {number}                       passengers.ADT.oExchangeFareDiff.amount     oExchangeFareDiff Amount
+     * @apiParam {string{3}}                    passengers.ADT.oExchangeFareDiff.currency   oExchangeFareDiff Currency
+     * @apiParam {object}                       passengers.ADT.oExchangeTaxDiff             oExchangeTaxDiff
+     * @apiParam {number}                       passengers.ADT.oBaseFare.amount             oExchangeTaxDiff Amount
+     * @apiParam {string{3}}                    passengers.ADT.oBaseFare.currency           oExchangeTaxDiff Currency
+     * @apiParam {object[]}                     trips                                        Trips
+     * @apiParam {int}                          trips.tripId                                 Trip Id
+     * @apiParam {object[]}                     trips.segments                               Segments
+     * @apiParam {int}                          trips.segments.segmentId                     Segment Id
+     * @apiParam {string{format Y-m-d H:i}}     trips.segments.departureTime                 DepartureTime
+     * @apiParam {string{format Y-m-d H:i}}     trips.segments.arrivalTime                   ArrivalTime
+     * @apiParam {int}                          [trips.segments.stop]                        Stop
+     * @apiParam {object[]}                     [trips.segments.stops]                       Stops
+     * @apiParam {string{3}}                    trips.segments.stops.locationCode            Location Code
+     * @apiParam {string{format Y-m-d H:i}}     trips.segments.stops.departureDateTime       Departure DateTime
+     * @apiParam {string{format Y-m-d H:i}}     trips.segments.stops.arrivalDateTime         Departure DateTime
+     * @apiParam {int}                          trips.segments.stops.duration                Duration
+     * @apiParam {int}                          trips.segments.stops.elapsedTime             Elapsed Time
+     * @apiParam {int}                          trips.segments.stops.equipment               Equipment
+     * @apiParam {string{3}}                    trips.segments.departureAirportCode     Departure Airport Code IATA
+     * @apiParam {string{3}}                    trips.segments.arrivalAirportCode       Arrival Airport Code IATA
+     * @apiParam {string{5}}}                   trips.segments.flightNumber             Flight Number
+     * @apiParam {string{1}}                    trips.segments.bookingClass             BookingClass
+     * @apiParam {int}                          trips.segments.duration                 Segment duration
+     * @apiParam {string{3}}                    trips.segments.departureAirportTerminal]     Departure Airport Terminal Code
+     * @apiParam {string{3}}                    [trips.segments.arrivalAirportTerminal]       Arrival Airport Terminal Code
+     * @apiParam {string{2}}                    [trips.segments.operatingAirline]       Operating Airline
+     * @apiParam {string{2}}                    [trips.segments.marketingAirline]       Marketing Airline
+     * @apiParam {string{30}}                   [trips.segments.airEquipType]           AirEquipType
+     * @apiParam {string{3}}                    [trips.segments.marriageGroup]          MarriageGroup
+     * @apiParam {int}                          [trips.segments.mileage]                Mileage
+     * @apiParam {string{2}}                    [trips.segments.meal]                   Meal
+     * @apiParam {string{50}}                   [trips.segments.fareCode]               Fare Code
+     * @apiParam {bool}                         [trips.segments.recheckBaggage]         Recheck Baggage
+     * @apiParam {int}                          paxCnt                                  Pax Cnt
+     * @apiParam {string{2}}                    [validatingCarrier]                     ValidatingCarrier
+     * @apiParam {string{2}}                    gds                                     Gds
+     * @apiParam {string{10}}                   pcc                                     pcc
+     * @apiParam {string{50}}                   fareType                                Fare Type
+     * @apiParam {string{1}}                    cabin                                   Cabin
+     * @apiParam {string{3}}                    currency                                Currency
+     * @apiParam {array[]}                      currencies                              Currencies (For example [USD])
+     * @apiParam {object[]}                     [currencyRates]                         CurrencyRates
+     * @apiParam {string{6}}                    currencyRates.USDUSD                    Currency Codes
+     * @apiParam {string{3}}                    currencyRates.USDUSD.from               Currency Code
+     * @apiParam {string{3}}                    currencyRates.USDUSD.to                 Currency Code
+     * @apiParam {number}                       currencyRates.USDUSD.rate               Rate
+     * @apiParam {object}                       [keys]                                  Keys
+     * @apiParam {object}                       [meta]                                  Meta
+     *
      *
      * @apiParamExample {json} Request-Example:
          {
-            "booking_id":"XXXYYYZ",
-            "is_automate": false,
-            "flight_quote":{
-                "gds":"S",
-                "pcc":"8KI0",
-                "validatingCarrier":"PR",
-                "fareType":"SR",
-                "trips":[
-                    {
-                        "duration":848,
-                        "segments":[
-                            {
-                                "departureTime":"2021-06-10 21:30",
-                                "arrivalTime":"2021-06-11 07:30",
-                                "flightNumber":"8727",
-                                "bookingClass":"E",
-                                "stop":0,
-                                "stops":[
-                                ],
-                                "duration":600,
-                                "departureAirportCode":"ROB",
-                                "departureAirportTerminal":null,
-                                "arrivalAirportCode":"CDG",
-                                "arrivalAirportTerminal":null,
-                                "operatingAirline":null,
-                                "airEquipType":null,
-                                "marketingAirline":"DL",
-                                "marriageGroup":"",
-                                "mileage":null,
-                                "cabin":"Y",
-                                "meal":null,
-                                "fareCode":null,
-                                "baggage":[
-                                ],
-                                "brandId":null
-                            },
-                            {
-                                "departureTime":"2021-06-11 10:15",
-                                "arrivalTime":"2021-06-11 12:55",
-                                "flightNumber":"8395",
-                                "bookingClass":"E",
-                                "stop":0,
-                                "stops":[
-                                ],
-                                "duration":160,
-                                "departureAirportCode":"CDG",
-                                "departureAirportTerminal":null,
-                                "arrivalAirportCode":"LAX",
-                                "arrivalAirportTerminal":null,
-                                "operatingAirline":null,
-                                "airEquipType":null,
-                                "marketingAirline":"DL",
-                                "marriageGroup":"",
-                                "mileage":null,
-                                "cabin":"Y",
-                                "meal":null,
-                                "fareCode":null,
-                                "baggage":[
-                                ],
-                                "brandId":null
-                            },
-                            {
-                                "departureTime":"2021-06-11 17:46",
-                                "arrivalTime":"2021-06-11 19:14",
-                                "flightNumber":"3580",
-                                "bookingClass":"E",
-                                "stop":0,
-                                "stops":[
-                                ],
-                                "duration":88,
-                                "departureAirportCode":"LAX",
-                                "departureAirportTerminal":null,
-                                "arrivalAirportCode":"SMF",
-                                "arrivalAirportTerminal":null,
-                                "operatingAirline":null,
-                                "airEquipType":null,
-                                "marketingAirline":"DL",
-                                "marriageGroup":"",
-                                "mileage":null,
-                                "cabin":"Y",
-                                "meal":null,
-                                "fareCode":null,
-                                "baggage":[
-                                ],
-                                "brandId":null
-                            }
-                        ]
+            "bookingId": "XXXYYYZ",
+            "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yzc0NzNkZjE5",
+            "prices": {
+                "totalPrice": 332.12,
+                "comm": 0,
+                "isCk": false
+            },
+            "passengers": {
+                "ADT": {
+                    "codeAs": "JCB",
+                    "cnt": 1,
+                    "baseFare": 32.12,
+                    "pubBaseFare": 32.12,
+                    "baseTax": 300,
+                    "markup": 0,
+                    "comm": 0,
+                    "price": 332.12,
+                    "tax": 300,
+                    "oBaseFare": {
+                        "amount": 32.120003,
+                        "currency": "USD"
                     },
-                    {
-                        "duration":1233,
-                        "segments":[
-                            {
-                                "departureTime":"2021-09-10 10:27",
-                                "arrivalTime":"2021-09-10 12:34",
-                                "flightNumber":"3864",
-                                "bookingClass":"E",
-                                "stop":0,
-                                "stops":[
-                                ],
-                                "duration":127,
-                                "departureAirportCode":"SMF",
-                                "departureAirportTerminal":null,
-                                "arrivalAirportCode":"SEA",
-                                "arrivalAirportTerminal":null,
-                                "operatingAirline":null,
-                                "airEquipType":"E7W",
-                                "marketingAirline":"DL",
-                                "marriageGroup":"",
-                                "mileage":null,
-                                "cabin":"Y",
-                                "meal":null,
-                                "fareCode":null,
-                                "baggage":[
-                                ],
-                                "brandId":null
-                            },
-                            {
-                                "departureTime":"2021-09-10 08:13",
-                                "arrivalTime":"2021-09-10 13:34",
-                                "flightNumber":"759",
-                                "bookingClass":"E",
-                                "stop":0,
-                                "stops":[
-                                ],
-                                "duration":201,
-                                "departureAirportCode":"SEA",
-                                "departureAirportTerminal":null,
-                                "arrivalAirportCode":"MSP",
-                                "arrivalAirportTerminal":null,
-                                "operatingAirline":null,
-                                "airEquipType":"739",
-                                "marketingAirline":"DL",
-                                "marriageGroup":"",
-                                "mileage":null,
-                                "cabin":"Y",
-                                "meal":null,
-                                "fareCode":null,
-                                "baggage":[
-                                ],
-                                "brandId":null
-                            },
-                            {
-                                "departureTime":"2021-09-10 16:45",
-                                "arrivalTime":"2021-09-11 08:15",
-                                "flightNumber":"42",
-                                "bookingClass":"E",
-                                "stop":0,
-                                "stops":[
-                                ],
-                                "duration":510,
-                                "departureAirportCode":"MSP",
-                                "departureAirportTerminal":null,
-                                "arrivalAirportCode":"CDG",
-                                "arrivalAirportTerminal":null,
-                                "operatingAirline":null,
-                                "airEquipType":"333",
-                                "marketingAirline":"DL",
-                                "marriageGroup":"",
-                                "mileage":null,
-                                "cabin":"Y",
-                                "meal":null,
-                                "fareCode":null,
-                                "baggage":[
-                                ],
-                                "brandId":null
-                            },
-                            {
-                                "departureTime":"2021-09-11 10:15",
-                                "arrivalTime":"2021-09-11 16:50",
-                                "flightNumber":"7351",
-                                "bookingClass":"E",
-                                "stop":1,
-                                "stops":[
-                                    {
-                                        "locationCode":"BKO",
-                                        "departureDateTime":"2021-09-11 15:20",
-                                        "arrivalDateTime":"2021-09-11 13:55",
-                                        "duration":85,
-                                        "elapsedTime":null,
-                                        "equipment":null
-                                    }
-                                ],
-                                "duration":395,
-                                "departureAirportCode":"CDG",
-                                "departureAirportTerminal":null,
-                                "arrivalAirportCode":"ROB",
-                                "arrivalAirportTerminal":null,
-                                "operatingAirline":null,
-                                "airEquipType":"359",
-                                "marketingAirline":"DL",
-                                "marriageGroup":"",
-                                "mileage":null,
-                                "cabin":"Y",
-                                "meal":null,
-                                "fareCode":null,
-                                "baggage":[
-                                ],
-                                "brandId":null
-                            }
-                        ]
+                    "oBaseTax": {
+                        "amount": 300,
+                        "currency": "USD"
+                    },
+                    "oExchangeFareDiff": {
+                        "amount": 8,
+                        "currency": "USD"
+                    },
+                    "oExchangeTaxDiff": {
+                        "amount": 24.12,
+                        "currency": "USD"
                     }
-                ]
+                }
             },
-            "payment":{
-                "method_key":"cc",
-                "method_data":{
-                    "card":{
-                        "number":"4111555577778888",
-                        "holder_name":"John Doe",
-                        "exp_month":10,
-                        "exp_year":2022,
-                        "cvv":"097"
-                    }
+            "trips": [
+                {
+                    "tripId": 1,
+                    "segments": [
+                        {
+                            "segmentId": 1,
+                            "departureTime": "2022-01-10 20:15",
+                            "arrivalTime": "2022-01-11 21:10",
+                            "stop": 1,
+                            "stops": [
+                                {
+                                    "locationCode": "LFW",
+                                    "departureDateTime": "2022-01-11 12:35",
+                                    "arrivalDateTime": "2022-01-11 11:35",
+                                    "duration": 60,
+                                    "elapsedTime": 620,
+                                    "equipment": "787"
+                                }
+                            ],
+                            "flightNumber": "513",
+                            "bookingClass": "H",
+                            "duration": 1015,
+                            "departureAirportCode": "JFK",
+                            "departureAirportTerminal": "8",
+                            "arrivalAirportCode": "ADD",
+                            "arrivalAirportTerminal": "2",
+                            "operatingAirline": "ET",
+                            "airEquipType": "787",
+                            "marketingAirline": "ET",
+                            "marriageGroup": "O",
+                            "cabin": "Y",
+                            "meal": "DL",
+                            "fareCode": "HLESUS",
+                            "recheckBaggage": false
+                        },
+                        {
+                            "segmentId": 2,
+                            "departureTime": "2022-01-11 23:15",
+                            "arrivalTime": "2022-01-12 01:20",
+                            "stop": 0,
+                            "stops": null,
+                            "flightNumber": "308",
+                            "bookingClass": "H",
+                            "duration": 125,
+                            "departureAirportCode": "ADD",
+                            "departureAirportTerminal": "2",
+                            "arrivalAirportCode": "NBO",
+                            "arrivalAirportTerminal": "1C",
+                            "operatingAirline": "ET",
+                            "airEquipType": "738",
+                            "marketingAirline": "ET",
+                            "marriageGroup": "I",
+                            "cabin": "Y",
+                            "meal": "D",
+                            "fareCode": "HLESUS",
+                            "recheckBaggage": false
+                        }
+                    ],
+                    "duration": 1265
                 },
-                "amount":29.95,
-                "currency":"USD"
+                {
+                    "tripId": 2,
+                    "segments": [
+                        {
+                            "segmentId": 1,
+                            "departureTime": "2022-01-31 05:00",
+                            "arrivalTime": "2022-01-31 07:15",
+                            "stop": 0,
+                            "stops": null,
+                            "flightNumber": "309",
+                            "bookingClass": "E",
+                            "duration": 135,
+                            "departureAirportCode": "NBO",
+                            "departureAirportTerminal": "1C",
+                            "arrivalAirportCode": "ADD",
+                            "arrivalAirportTerminal": "2",
+                            "operatingAirline": "ET",
+                            "airEquipType": "738",
+                            "marketingAirline": "ET",
+                            "marriageGroup": "O",
+                            "cabin": "Y",
+                            "meal": "B",
+                            "fareCode": "ELPRUS",
+                            "recheckBaggage": false
+                        },
+                        {
+                            "segmentId": 2,
+                            "departureTime": "2022-01-31 08:30",
+                            "arrivalTime": "2022-01-31 18:15",
+                            "stop": 1,
+                            "stops": [
+                                {
+                                    "locationCode": "LFW",
+                                    "departureDateTime": "2022-01-31 12:15",
+                                    "arrivalDateTime": "2022-01-31 11:00",
+                                    "duration": 75,
+                                    "elapsedTime": 330,
+                                    "equipment": "787"
+                                }
+                            ],
+                            "flightNumber": "512",
+                            "bookingClass": "E",
+                            "duration": 1065,
+                            "departureAirportCode": "ADD",
+                            "departureAirportTerminal": "2",
+                            "arrivalAirportCode": "JFK",
+                            "arrivalAirportTerminal": "8",
+                            "operatingAirline": "ET",
+                            "airEquipType": "787",
+                            "marketingAirline": "ET",
+                            "marriageGroup": "I",
+                            "cabin": "Y",
+                            "meal": "LD",
+                            "fareCode": "ELPRUS",
+                            "recheckBaggage": false
+                        }
+                    ],
+                    "duration": 1275
+                }
+            ],
+            "paxCnt": 1,
+            "validatingCarrier": "",
+            "gds": "S",
+            "pcc": "G9MJ",
+            "cons": "GTT",
+            "fareType": "SR",
+            "cabin": "Y",
+            "currency": "USD",
+            "currencies": [
+                "USD"
+            ],
+            "currencyRates": {
+                "USDUSD": {
+                    "from": "USD",
+                    "to": "USD",
+                    "rate": 1
+                }
             },
-            "billing":{
-                "first_name":"John",
-                "last_name":"Doe",
-                "middle_name":null,
-                "company_name":"General Motors",
-                "address_line1":"123 Main Street",
-                "address_line2":"",
-                "city":"Paris",
-                "state":"State",
-                "country":"United States",
-                "zip":"94000",
-                "contact_phone":"+137396512345",
-                "contact_email":"alex@test.com",
-                "contact_name":"Mr. Alexander"
+            "keys": {},
+            "meta": {
+                "eip": 0,
+                "noavail": false,
+                "searchId": "U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx",
+                "lang": "en",
+                "rank": 0,
+                "cheapest": false,
+                "fastest": false,
+                "best": false,
+                "country": "us"
             }
         }
      *

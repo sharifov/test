@@ -36,7 +36,7 @@ class VoluntaryExchangeCreateService
     ): void {
         if ($productQuoteChange = self::getProductQuoteChangeByBookingId($bookingId, $statuses, $typeId)) {
             throw new \RuntimeException(
-                'Product Quote Change exist in status (' .
+                'Product Quote Change already exist in status (' .
                     ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . ')',
                 ApiCodeException::REQUEST_ALREADY_PROCESSED
             );
