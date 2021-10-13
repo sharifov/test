@@ -286,15 +286,13 @@ class FlightQuoteRefundController extends ApiBaseController
      *          "method_key": "cc",
      *          "currency": "USD",
      *          "method_data": {
-     *              "card": [
-     *                  {
-     *                      "number": "4111555577778888",
-     *                      "holder_name": "Test test",
-     *                      "expiration_month": 10,
-     *                      "expiration_year": 23,
-     *                      "cvv": "1234"
-     *                  }
-     *              ]
+     *              "card": {
+     *                  "number": "4111555577778888",
+     *                  "holder_name": "Test test",
+     *                  "expiration_month": 10,
+     *                  "expiration_year": 23,
+     *                  "cvv": "1234"
+     *              }
      *          },
      *          "amount": 112.25
      *      }
@@ -476,15 +474,13 @@ class FlightQuoteRefundController extends ApiBaseController
      *          "method_key": "cc",
      *          "currency": "USD",
      *          "method_data": {
-     *              "card": [
-     *                  {
-     *                      "number": "4111555577778888",
-     *                      "holder_name": "Test test",
-     *                      "expiration_month": 10,
-     *                      "expiration_year": 23,
-     *                      "cvv": "1234"
-     *                  }
-     *              ]
+     *              "card": {
+     *                  "number": "4111555577778888",
+     *                  "holder_name": "Test test",
+     *                  "expiration_month": 10,
+     *                  "expiration_year": 23,
+     *                  "cvv": "1234"
+     *              }
      *          },
      *          "amount": 112.25
      *      }

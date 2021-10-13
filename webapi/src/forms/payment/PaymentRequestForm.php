@@ -18,7 +18,7 @@ use yii\base\Model;
  * @property $currency
  * @property $method_data
  *
- * @property CreditCardForm[] $creditCardForms
+ * @property CreditCardForm $creditCardForm
  */
 class PaymentRequestForm extends Model
 {
@@ -30,7 +30,7 @@ class PaymentRequestForm extends Model
     public $currency;
     public $method_data;
 
-    private array $creditCardForms = [];
+    public ?CreditCardForm $creditCardForm = null;
 
     public function rules(): array
     {
@@ -54,29 +54,17 @@ class PaymentRequestForm extends Model
         ];
     }
 
-    public function methodDataProcessing($attribute)
+    public function methodDataProcessing($attribute): bool
     {
         if (!empty($this->method_data[self::TYPE_METHOD_CARD]) && is_array($this->method_data[self::TYPE_METHOD_CARD])) {
-            foreach ($this->method_data[self::TYPE_METHOD_CARD] as $key => $card) {
-                $creditCardForm = new CreditCardForm();
-                if (!$creditCardForm->load($card, '')) {
-                    $this->addError($attribute, 'CreditCardForm is not loaded');
-                    break;
-                }
-                if (!$creditCardForm->validate()) {
-                    $this->addError($attribute, 'CreditCardForm: ' . ErrorsToStringHelper::extractFromModel($creditCardForm, ', '));
-                    break;
-                }
-                $this->creditCardForms[$key] = $creditCardForm;
+            $creditCardForm = new CreditCardForm();
+            $creditCardForm->load($this->method_data, 'card');
+            if (!$creditCardForm->validate()) {
+                $this->addError($attribute, 'CreditCardForm: ' . ErrorsToStringHelper::extractFromModel($creditCardForm, ', '));
+                return false;
             }
+            $this->creditCardForm = $creditCardForm;
         }
-    }
-
-    /**
-     * @return CreditCardForm[]
-     */
-    public function getCreditCardForms(): array
-    {
-        return $this->creditCardForms;
+        return true;
     }
 }
