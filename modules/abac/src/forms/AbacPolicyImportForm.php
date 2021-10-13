@@ -18,10 +18,12 @@ use yii\web\UploadedFile;
 class AbacPolicyImportForm extends Model
 {
     public const SCENARIO_FILE = 'scenarioFile';
+    public const SCENARIO_IDS = 'scenarioIDs';
 
     public $importFile;
     public $import_type_id;
     public $ids;
+    public $import_ids;
 
     public const IMPORT_TYPE_ADD_REPLACE    = 1;
     public const IMPORT_TYPE_ADD            = 2;
@@ -57,10 +59,29 @@ class AbacPolicyImportForm extends Model
     {
         return [
             [['importFile'], 'required', 'on' => self::SCENARIO_FILE],
+            [['import_ids'], 'required', 'on' => self::SCENARIO_IDS],
             [['importFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'json', 'on' => self::SCENARIO_FILE],
             [['import_type_id'], 'integer'],
-            [['ids'], 'safe'],
+            [['import_ids'], 'validateIds'],
         ];
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     */
+    public function validateIds($attribute, $params): void
+    {
+        if ($this->import_ids) {
+            $data = @json_decode($this->import_ids, true);
+            if (empty($data) || !is_array($data)) {
+                $this->addError($attribute, 'Invalid Ids list');
+            } else {
+                $this->ids = $data;
+            }
+        } else {
+            $this->addError($attribute, 'Ids list is empty');
+        }
     }
 
     public function upload()
@@ -81,6 +102,7 @@ class AbacPolicyImportForm extends Model
         return [
             'importFile' => 'Import File',
             'import_type_id' => 'Import Type',
+            'import_ids' => 'Import IDs',
         ];
     }
 

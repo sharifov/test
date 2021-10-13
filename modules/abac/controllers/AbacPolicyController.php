@@ -3,6 +3,7 @@
 namespace modules\abac\controllers;
 
 use frontend\controllers\FController;
+use modules\abac\src\entities\search\AbacPolicyImportSearch;
 use modules\abac\src\forms\AbacPolicyForm;
 use modules\abac\src\forms\AbacPolicyImportForm;
 use sales\auth\Auth;
@@ -310,12 +311,17 @@ class AbacPolicyController extends FController
         return false;
     }
 
+    /**
+     * @return \yii\web\Response
+     */
     public function actionImportIds()
     {
+
         $cache = Yii::$app->cacheFile;
         $model = new AbacPolicyImportForm();
-        $header = [];
-        $data = [];
+        $model->scenario = AbacPolicyImportForm::SCENARIO_IDS;
+//        $header = [];
+//        $data = [];
 
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
@@ -371,7 +377,11 @@ class AbacPolicyController extends FController
                     } else {
                         Yii::$app->session->setFlash('error', 'Expired or not found Import Data cache file');
                     }
+                } else {
+                    Yii::$app->session->setFlash('warning', 'Not selected policy items');
                 }
+            } else {
+                Yii::$app->session->setFlash('error', VarDumper::dumpAsString($model->errors));
             }
         }
 
@@ -479,20 +489,12 @@ class AbacPolicyController extends FController
             }
         }
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $data,
-            'sort' => [
-                'defaultOrder' => [
-                    'action_id' => SORT_ASC,
-                    'sort_order' => SORT_ASC,
-                    'enabled' => SORT_DESC,
-                ],
-                'attributes' => ['action_id', 'sort_order', 'enabled', 'effect', 'created_dt', 'updated_dt', 'object'],
-            ],
-            'pagination' => [
-                'pageSize' => 10000,
-            ],
-        ]);
+        $searchModel = new AbacPolicyImportSearch();
+        $searchModel->setData($data);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+
+
 
         return $this->render('import', [
             'model' => $model,
@@ -502,7 +504,8 @@ class AbacPolicyController extends FController
             'filePath' => $filePath,
             'dataProvider' => $dataProvider,
             'isCache' => $isCache,
-            'abacObjectList' => $abacObjectList
+            'abacObjectList' => $abacObjectList,
+            'searchModel' => $searchModel
         ]);
     }
 

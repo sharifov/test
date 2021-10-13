@@ -304,6 +304,22 @@ class AbacComponent extends Component
     }
 
     /**
+     * @param bool|null $enabled
+     * @return int
+     */
+    final public function getPolicyListCount(?bool $enabled = null): int
+    {
+        $query = AbacPolicy::find();
+        if ($enabled !== null) {
+            $query->where(['ap_enabled' => $enabled]);
+        }
+        $count = $query->count();
+
+        return $count ? (int) $count : 0;
+    }
+
+
+    /**
      * @return string
      */
     public function getPolicyListContent(): string
