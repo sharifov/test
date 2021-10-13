@@ -86,6 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'contentOptions' => ['class' => 'text-right'],
             ],
+            'up_call_user_level',
 
             [
                 'class' => DateTimeColumn::class,
