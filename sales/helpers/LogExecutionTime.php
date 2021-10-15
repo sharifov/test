@@ -43,4 +43,18 @@ class LogExecutionTime
     {
         return $this->actionList;
     }
+
+    public function getByAction(string $action): float
+    {
+        return (float)($this->actionList[$action] ?? null);
+    }
+
+    public function calcTotalExecTime(): float
+    {
+        $total = 0.0;
+        foreach ($this->actionList as $actionTime) {
+            $total += (float)$actionTime;
+        }
+        return $total;
+    }
 }
