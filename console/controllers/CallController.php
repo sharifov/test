@@ -5,6 +5,7 @@ namespace console\controllers;
 use common\components\Metrics;
 use common\models\Call;
 use common\models\Employee;
+use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\query\EmployeeQuery;
 use common\models\search\LeadQcallSearch;
@@ -355,9 +356,7 @@ class CallController extends Controller
         $timeStart = microtime(true);
 
         $callRedialSearch = new LeadQcallSearch();
-        $leads = $callRedialSearch->searchRedialLeads([$callRedialSearch->formName() => [
-            'l_is_test' => 0
-        ]])->all();
+        $leads = $callRedialSearch->searchRedialLeadsToBeAssign([], array_keys(Project::getList()), new \DateTimeImmutable())->all();
 
         foreach ($leads as $lead) {
 //            $limitAgents = SettingHelper::getRedialGetLimitAgents() - $lead->agentsHasAccessToCall;
