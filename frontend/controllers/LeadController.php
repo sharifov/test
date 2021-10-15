@@ -1388,6 +1388,52 @@ class LeadController extends FController
      * @throws NotFoundHttpException
      * @throws \Throwable
      */
+    public function actionAjaxTake(string $gid): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if (Yii::$app->request->isAjax) {
+            $result = ['success' => false, 'message' => ''];
+            $lead = $this->findLeadByGid($gid);
+
+            try {
+                $oldStatus = $lead->status;
+
+                /** @var Employee $user */
+                $user = Yii::$app->user->identity;
+                $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
+
+                if ($oldStatus === Lead::STATUS_PENDING) {
+                    $leadUserConversion = LeadUserConversion::create(
+                        $lead->id,
+                        $user->getId(),
+                        LeadUserConversionDictionary::DESCRIPTION_TAKE
+                    );
+                    (new LeadUserConversionRepository())->save($leadUserConversion);
+                }
+
+                $result['success'] = true;
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::exception');
+                $result['message'] = stripslashes(VarDumper::dumpAsString($exception->getMessage()));
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:throwable');
+                $result['message'] = 'Internal Server Error';
+            }
+
+            return $result; // asJson
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @param string $gid
+     * @return string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     */
     public function actionTake(string $gid)
     {
         $lead = $this->findLeadByGid($gid);
