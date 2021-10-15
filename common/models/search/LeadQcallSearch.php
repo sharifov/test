@@ -171,10 +171,9 @@ class LeadQcallSearch extends LeadQcall
     /**
      * @param $params
      * @param Employee $user
-     * @param bool $withBusinessLogic
      * @return ActiveDataProvider
      */
-    public function searchByRedial($params, Employee $user, bool $withBusinessLogic): ActiveDataProvider
+    public function searchByRedial($params, Employee $user): ActiveDataProvider
     {
         $nowDt = date('Y-m-d H:i:s');
         $query = self::find()->select('*');
@@ -314,36 +313,34 @@ class LeadQcallSearch extends LeadQcall
             ]);
         }
 
-        if ($withBusinessLogic) {
-            if (($settingsMinute = (int)Yii::$app->params['settings']['redial_business_flight_leads_skill_priority_time']) > 0) {
-                $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
+        if (($settingsMinute = (int)Yii::$app->params['settings']['redial_business_flight_leads_skill_priority_time']) > 0) {
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
 
-                $query->addSelect(['redial_business_flight_leads_over_created_time' =>
-                    new Expression('if (' . $expression . ' > ' . $settingsMinute . ', 1, 0) ')
-                ]);
+            $query->addSelect(['redial_business_flight_leads_over_created_time' =>
+                new Expression('if (' . $expression . ' > ' . $settingsMinute . ', 1, 0) ')
+            ]);
 
-                $skillSettings = (int)Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'];
-                $userSkill = $user->userProfile ? (int) $user->userProfile->up_skill : 0;
+            $skillSettings = (int)Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'];
+            $userSkill = $user->userProfile ? (int) $user->userProfile->up_skill : 0;
 
-                $query->addSelect(['redial_business_flight_leads_skill_current_user' =>
-                    new Expression('if (' . $userSkill . ' >= ' . $skillSettings . ', 1, 0) ')
-                ]);
+            $query->addSelect(['redial_business_flight_leads_skill_current_user' =>
+                new Expression('if (' . $userSkill . ' >= ' . $skillSettings . ', 1, 0) ')
+            ]);
 
-                $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
-                    'up_user_id' =>
-                        UserOnline::find()->select(['uo_user_id'])->indexBy('uo_user_id')
-                ])->andWhere('up_skill >= ' . $skillSettings)->count();
-                $query->addSelect(['redial_business_flight_leads_skill_online_user' =>
-                    new Expression('if (' . $countUsers . ' < 1, 1, 0) ')
-                ]);
+            $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
+                'up_user_id' =>
+                    UserOnline::find()->select(['uo_user_id'])->indexBy('uo_user_id')
+            ])->andWhere('up_skill >= ' . $skillSettings)->count();
+            $query->addSelect(['redial_business_flight_leads_skill_online_user' =>
+                new Expression('if (' . $countUsers . ' < 1, 1, 0) ')
+            ]);
 
-                $query->andHaving(
-                    new Expression(
-                        '(redial_business_flight_leads_over_created_time OR redial_business_flight_leads_skill_current_user OR redial_business_flight_leads_skill_online_user)' .
-                        'OR (' . Lead::tableName() . '.project_id <> ' . self::PROJECT_ARANGRANT . ' AND ' . Lead::tableName() . '.cabin NOT IN ("' . Lead::CABIN_BUSINESS . '", "' . Lead::CABIN_FIRST . '")) '
-                    )
-                );
-            }
+            $query->andHaving(
+                new Expression(
+                    '(redial_business_flight_leads_over_created_time OR redial_business_flight_leads_skill_current_user OR redial_business_flight_leads_skill_online_user)' .
+                    'OR (' . Lead::tableName() . '.project_id <> ' . self::PROJECT_ARANGRANT . ' AND ' . Lead::tableName() . '.cabin NOT IN ("' . Lead::CABIN_BUSINESS . '", "' . Lead::CABIN_FIRST . '")) '
+                )
+            );
         }
 
 //        $query->addOrderBy([
@@ -570,6 +567,8 @@ class LeadQcallSearch extends LeadQcall
 
         $query = self::find()->select('*');
 
+        $query->andWhere(['IS NOT', 'lqc_call_from', null]);
+
         $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
 
         $query->joinWith('lqcLead');
@@ -692,31 +691,6 @@ class LeadQcallSearch extends LeadQcall
             $defaultOrder = array_merge($defaultOrder, [
                 'is_in_day_time_hours' => SORT_DESC
             ]);
-        }
-
-        if (($settingsMinute = (int)Yii::$app->params['settings']['redial_business_flight_leads_skill_priority_time']) > 0) {
-            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $date . "')";
-
-            $query->addSelect(['redial_business_flight_leads_over_created_time' =>
-                new Expression('if (' . $expression . ' > ' . $settingsMinute . ', 1, 0) ')
-            ]);
-
-            $skillSettings = (int)Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'];
-
-            $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
-                'up_user_id' =>
-                    UserOnline::find()->select(['uo_user_id'])->indexBy('uo_user_id')
-            ])->andWhere('up_skill >= ' . $skillSettings)->count();
-            $query->addSelect(['redial_business_flight_leads_skill_online_user' =>
-                new Expression('if (' . $countUsers . ' < 1, 1, 0) ')
-            ]);
-
-            $query->andHaving(
-                new Expression(
-                    '(redial_business_flight_leads_over_created_time OR redial_business_flight_leads_skill_online_user)' .
-                    'OR (' . Lead::tableName() . '.project_id <> ' . self::PROJECT_ARANGRANT . ' AND ' . Lead::tableName() . '.cabin NOT IN ("' . Lead::CABIN_BUSINESS . '", "' . Lead::CABIN_FIRST . '")) '
-                )
-            );
         }
 
         $defaultOrder = array_merge($defaultOrder, [
