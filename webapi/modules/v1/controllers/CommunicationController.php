@@ -55,6 +55,7 @@ use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\emailList\entity\EmailList;
+use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\leadRedial\queue\AutoTakeJob;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
@@ -430,12 +431,12 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
-                if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard() && SettingHelper::callSpamFilterEnabled()) {
+                if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
                         $logExecutionTime->start('CallFilterModel');
                         $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                         $logExecutionTime->end();
-                        if ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
+                        if (SettingHelper::callSpamFilterEnabled() && ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate()) || $callLogFilterGuard->guardTrust(SettingHelper::getCallTrustFilterRate()))) {
                             if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
                                 $logExecutionTime->start('redial');
                                 $result = Yii::$app->communication->twilioDial(
@@ -461,14 +462,6 @@ class CommunicationController extends ApiBaseController
                                     $callLogFilterGuard->setRedialStatusByTwilioStatus($redialStatus);
                                     (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
                                 }
-
-                                Yii::info([
-                                    'callId' => $callModel->c_id,
-                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                    'type' => $callLogFilterGuard->getTypeName(),
-                                    'phone' => $callModel->c_from,
-                                    'result' => $result,
-                                ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
 
                                 $redialStatus = $result['data']['result']['status'] ?? null;
                                 if ($redialStatus) {
@@ -506,7 +499,7 @@ class CommunicationController extends ApiBaseController
                         }
                     }
                 }
-                if ($logExecutionTime->getResult()) {
+                if ($type !== self::TYPE_VOIP_GATHER && $logExecutionTime->getResult()) {
                     $this->saveLogExecutionTimeToCallJson($callModel, $logExecutionTime->getResult());
                     $callModel->save(false);
                 }
@@ -580,7 +573,7 @@ class CommunicationController extends ApiBaseController
                             $logExecutionTime->start('CallFilterModel');
                             $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
                             $logExecutionTime->end();
-                            if (SettingHelper::callSpamFilterEnabled() && $callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate())) {
+                            if (SettingHelper::callSpamFilterEnabled() && ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate()) || $callLogFilterGuard->guardTrust(SettingHelper::getCallTrustFilterRate()))) {
                                 if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
                                     $logExecutionTime->start('redial');
                                     $result = Yii::$app->communication->twilioDial(
@@ -606,14 +599,6 @@ class CommunicationController extends ApiBaseController
                                         $callLogFilterGuard->setRedialStatusByTwilioStatus($redialStatus);
                                         (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
                                     }
-
-                                    Yii::info([
-                                        'callId' => $callModel->c_id,
-                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                        'type' => $callLogFilterGuard->getTypeName(),
-                                        'phone' => $callModel->c_from,
-                                        'result' => $result,
-                                    ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
 
                                     $redialStatus = $result['data']['result']['status'] ?? null;
                                     if ($redialStatus) {
@@ -652,7 +637,7 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
-                    if ($logExecutionTime->getResult()) {
+                    if ($type !== self::TYPE_VOIP_GATHER && $logExecutionTime->getResult()) {
                         $this->saveLogExecutionTimeToCallJson($callModel, $logExecutionTime->getResult());
                         $callModel->save(false);
                     }
@@ -995,6 +980,10 @@ class CommunicationController extends ApiBaseController
                         if ($clientPhone && $clientPhone->client_id) {
                             $call->c_client_id = $clientPhone->client_id;
                         }
+                    }
+
+                    if ($callOriginalData['c_user_id']) {
+                        Yii::createObject(LeadRedialUnAssigner::class)->createCall((int)$callOriginalData['c_user_id']);
                     }
                 }
 

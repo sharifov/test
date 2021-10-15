@@ -587,6 +587,33 @@ class Formatter extends \yii\i18n\Formatter
     }
 
     /**
+     * @param Employee|int|string|null $value
+     * @return string
+     */
+    public function asUserNameWithId($value): string
+    {
+        if (!$value) {
+            return $this->nullDisplay;
+        }
+
+        if (is_string($value)) {
+            $name = $value;
+        } elseif ($value instanceof Employee) {
+            $name = $value->username . ' (' . $value->id . ')';
+        } elseif (is_int($value)) {
+            if ($entity = Employee::find()->select(['username', 'id'])->where(['id' => $value])->cache(3600)->one()) {
+                $name = $entity->username . ' (' . $entity->id . ')';
+            } else {
+                return 'not found';
+            }
+        } else {
+            throw new \InvalidArgumentException('user must be Employee|int|string|null');
+        }
+
+        return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
+    }
+
+    /**
      * @param $numberOfMonth
      * @return string
      */
@@ -950,5 +977,14 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return \sales\model\client\notifications\sms\entity\Status::asFormat($value);
+    }
+
+    public function asUserDataKey($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\userData\entity\UserDataKey::asFormat($value);
     }
 }

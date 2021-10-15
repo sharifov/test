@@ -404,6 +404,8 @@ class SettingHelper
         $defaultSort = [
             'general_line_call_count' => null,
             'phone_ready_time' => $sort['ASC'],
+            'priority_level' => $sort['DESC'],
+            'gross_profit' => $sort['DESC'],
         ];
 
         $callDistributionSort = Yii::$app->params['settings']['call_distribution_sort'] ?? [
@@ -424,6 +426,14 @@ class SettingHelper
             unset($finalSort['general_line_call_count']);
         }
 
+        if (empty($finalSort['priority_level'])) {
+            unset($finalSort['priority_level']);
+        }
+
+        if (empty($finalSort['gross_profit'])) {
+            unset($finalSort['gross_profit']);
+        }
+
         return $finalSort;
     }
 
@@ -431,7 +441,6 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
-
 
     public static function getReProtectionCaseCategory(): ?string
     {
@@ -509,6 +518,30 @@ class SettingHelper
         return (int) (Yii::$app->params['settings']['limit_leads_in_phone_widget'] ?? 3);
     }
 
+    public static function getRedialGetLimitAgents(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_get_limit_agents'] ?? 5);
+    }
+
+    public static function getBusinessProjectIds(): array
+    {
+        $settings = Yii::$app->params['settings']['business_project_ids'] ?? null;
+        if ($settings) {
+            return JsonHelper::decode($settings);
+        }
+        return [7];
+    }
+
+    public static function getRedialBusinessFlightLeadsMinimumSkillLevel(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'] ?? 0);
+    }
+
+    public static function getRedialUserAccessExpiredSecondsLimit(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_user_access_expired_seconds'] ?? 20);
+    }
+
     public static function getCallSpamFilterData(): array
     {
         $settings = Yii::$app->params['settings']['call_spam_filter'] ?? null;
@@ -520,9 +553,10 @@ class SettingHelper
         }
         return self::$callSpamFilter ?? [
                 'enabled' => false,
-                'rate' => 0.3567,
+                'spam_rate' => 0.75,
                 'redialEnabled' => false,
-                'message' => ''
+                'message' => '',
+                'trust_rate' => 0.8
         ];
     }
 
@@ -533,7 +567,12 @@ class SettingHelper
 
     public static function getCallSpamFilterRate(): float
     {
-        return (float) (self::getCallSpamFilterData()['rate'] ?? 0.3567);
+        return (float) (self::getCallSpamFilterData()['spam_rate'] ?? 0.3567);
+    }
+
+    public static function getCallTrustFilterRate(): float
+    {
+        return (float) (self::getCallSpamFilterData()['trust_rate'] ?? 0.8);
     }
 
     public static function getCallSpamFilterMessage(): string
@@ -604,5 +643,25 @@ class SettingHelper
     public static function getCallbackToCallerExcludedDepartmentList(): array
     {
         return self::getCallbackToCallerData()['excludeDepartmentKeys'] ?? [];
+    }
+
+    public static function getCalculateGrossProfitInDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['calculate_gross_profit_in_days'] ?? 14);
+    }
+
+    public static function getCalculatePriorityLevelInDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['calculate_priority_level_in_days'] ?? 14);
+    }
+
+    public static function clientNotificationSuccessCallMinDuration(): int
+    {
+        return (int) (Yii::$app->params['settings']['client_notification_success_call_min_duration'] ?? 30);
+    }
+
+    public static function getVoluntaryExchangeCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
     }
 }

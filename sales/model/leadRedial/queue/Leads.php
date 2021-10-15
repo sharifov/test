@@ -2,10 +2,9 @@
 
 namespace sales\model\leadRedial\queue;
 
-class Leads
+use common\models\Employee;
+
+interface Leads
 {
-    public function getLeads(int $userId): array
-    {
-        return [513195];
-    }
+    public function getLeads(Employee $user): array;
 }

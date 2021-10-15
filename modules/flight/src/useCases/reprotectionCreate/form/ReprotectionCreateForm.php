@@ -58,7 +58,7 @@ class ReprotectionCreateForm extends Model
             if (!$flightQuoteForm->load($this->flight_quote)) {
                 $this->addError($attribute, 'FlightQuoteForm not loaded');
             } elseif (!$flightQuoteForm->validate()) {
-                $this->addError($attribute, ErrorsToStringHelper::extractFromModel($flightQuoteForm, ' '));
+                $this->addError($attribute, 'FlightQuoteForm: ' . ErrorsToStringHelper::extractFromModel($flightQuoteForm, ' '));
             } else {
                 $this->flightQuoteForm = $flightQuoteForm;
             }

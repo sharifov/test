@@ -713,7 +713,10 @@ class PhoneController extends FController
                     }
                     $userModel = \common\models\Employee::findOne($agentId);
                     if ($userModel && ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper())) {
-                        $users[] = $userModel;
+                        $users[] = [
+                            'model' => $userModel,
+                            'isBusy' => (int)$userItem['tbl_has_lead_redial_access'] > 0,
+                        ];
                     }
                 }
             }

@@ -193,6 +193,12 @@ return [
             'port' => $commonParams['queue']['port'],
             'tube' => 'queue_virtual_cron',
         ],
+        'queue_lead_redial' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
+            'tube' => 'queue_lead_redial',
+        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => '',
@@ -251,6 +257,7 @@ return [
         'queue_client_chat_job',
         'queue_system_services',
         'queue_virtual_cron',
+        'queue_lead_redial',
         \common\components\SettingsBootstrap::class,
         \common\bootstrap\SetUp::class,
         \common\bootstrap\SetUpListeners::class,

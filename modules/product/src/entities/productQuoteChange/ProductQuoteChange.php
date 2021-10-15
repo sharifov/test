@@ -28,6 +28,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $pqc_updated_dt
  * @property string|null $pqc_decision_dt
  * @property bool $pqc_is_automate [tinyint(1)]
+ * @property int|null $pqc_type_id
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
@@ -37,6 +38,14 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
 {
     use EventTrait;
     use FieldsTrait;
+
+    public const TYPE_RE_PROTECTION = 1;
+    public const TYPE_VOLUNTARY_EXCHANGE = 2;
+
+    public const TYPE_LIST = [
+        self::TYPE_RE_PROTECTION => 'ReProtection',
+        self::TYPE_VOLUNTARY_EXCHANGE => 'Voluntary Exchange',
+    ];
 
     public function behaviors(): array
     {
@@ -158,6 +167,10 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             [['pqc_pq_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqc_pq_id' => 'pq_id']],
             ['pqc_status_id', 'in', 'range' => array_keys(ProductQuoteChangeStatus::LIST)],
             ['pqc_decision_type_id', 'in', 'range' => array_keys(ProductQuoteChangeDecisionType::LIST)],
+
+            ['pqc_type_id', 'integer'],
+            ['pqc_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
+            ['pqc_type_id', 'default', 'value' => self::TYPE_RE_PROTECTION],
         ];
     }
 
@@ -176,7 +189,8 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_created_dt' => 'Created Dt',
             'pqc_updated_dt' => 'Updated Dt',
             'pqc_decision_dt' => 'Decision Dt',
-            'pqc_is_automate' => 'Is Automate'
+            'pqc_is_automate' => 'Is Automate',
+            'pqc_type_id' => 'Type ID'
         ];
     }
 
@@ -215,7 +229,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return new Scopes(static::class);
     }
 
-    public static function createNew(int $productQuoteId, ?int $caseId, bool $isAutomate): ProductQuoteChange
+    private static function createNew(int $productQuoteId, ?int $caseId, bool $isAutomate): ProductQuoteChange
     {
         $model = new self();
         $model->pqc_pq_id = $productQuoteId;
@@ -223,6 +237,20 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $model->pqc_status_id = ProductQuoteChangeStatus::NEW;
         $model->pqc_is_automate = $isAutomate;
         $model->recordEvent(new ProductQuoteChangeCreatedEvent($model, $model->pqc_pq_id, $model->pqc_case_id));
+        return $model;
+    }
+
+    public static function createReProtection(int $productQuoteId, ?int $caseId, bool $isAutomate): ProductQuoteChange
+    {
+        $model = self::createNew($productQuoteId, $caseId, $isAutomate);
+        $model->pqc_type_id = self::TYPE_RE_PROTECTION;
+        return $model;
+    }
+
+    public static function createVoluntaryExchange(int $productQuoteId, ?int $caseId, bool $isAutomate = false): ProductQuoteChange
+    {
+        $model = self::createNew($productQuoteId, $caseId, $isAutomate);
+        $model->pqc_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
         return $model;
     }
 }

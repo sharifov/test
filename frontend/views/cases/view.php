@@ -87,10 +87,10 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
         <div class="x_content" style="display: block;">
                 <?php if ($model->isTrash()) :?>
                     <?php if (Auth::can('cases/take_Trash', ['case' => $model])) :?>
-                        <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
+                        <?= CasesViewRenderHelper::renderChangeStatusButton($model)?>
                     <?php endif ?>
                 <?php else :?>
-                    <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
+                    <?= CasesViewRenderHelper::renderChangeStatusButton($model)?>
                 <?php endif; ?>
 
                 <?php
@@ -105,9 +105,15 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                         <div class="dropdown-menu">
 
                             <?php if ($canStatusLog) : ?>
-                                <?= Html::a('<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''),
+                                <?= Html::a(
+                                    '<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''),
                                     null,
-                                    ['class' => 'dropdown-item', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
+                                    [
+                                        'class' => 'dropdown-item',
+                                        'id' => 'btn-status-history',
+                                        'title' => 'Status history'
+                                    ]
+                                ) ?>
                             <?php endif;?>
 
                             <?php if ($canDataLogs) : ?>

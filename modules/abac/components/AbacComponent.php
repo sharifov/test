@@ -123,6 +123,7 @@ class AbacComponent extends Component
         $obj->req = $request;
         $obj->user = $user;
         $obj->dt = $dt;
+        $obj->available = true;
 
         return $obj;
     }
@@ -301,6 +302,22 @@ class AbacComponent extends Component
         unset($policyModel);
         return implode(PHP_EOL, $rows);
     }
+
+    /**
+     * @param bool|null $enabled
+     * @return int
+     */
+    final public function getPolicyListCount(?bool $enabled = null): int
+    {
+        $query = AbacPolicy::find();
+        if ($enabled !== null) {
+            $query->where(['ap_enabled' => $enabled]);
+        }
+        $count = $query->count();
+
+        return $count ? (int) $count : 0;
+    }
+
 
     /**
      * @return string

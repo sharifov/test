@@ -5,6 +5,7 @@ namespace sales\model\user\entity\userStatus;
 use common\models\Call;
 use common\models\ConferenceParticipant;
 use common\models\Employee;
+use common\models\Notifications;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -123,6 +124,44 @@ class UserStatus extends ActiveRecord
         }
     }
 
+    public static function isOnCallOn(int $userId): void
+    {
+        $status = self::findOne(['us_user_id' => $userId]);
+        if (!$status) {
+            $status = new self([
+                'us_user_id' => $userId,
+                'us_gl_call_count' => 0,
+            ]);
+        } elseif ($status->us_is_on_call) {
+            return;
+        }
+        $status->us_is_on_call = true;
+        try {
+            $status->save(false);
+        } catch (\Throwable $e) {
+            Yii::error(['message' => 'User status is on call(on) save error', 'e' => $e->getMessage()], 'UserStatus:isOnCallOn');
+        }
+    }
+
+    public static function isOnCallOff(int $userId): void
+    {
+        $status = self::findOne(['us_user_id' => $userId]);
+        if (!$status) {
+            $status = new self([
+                'us_user_id' => $userId,
+                'us_gl_call_count' => 0,
+            ]);
+        } elseif (!$status->us_is_on_call) {
+            return;
+        }
+        $status->us_is_on_call = false;
+        try {
+            $status->save(false);
+        } catch (\Throwable $e) {
+            Yii::error(['message' => 'User status is on call(off) save error', 'e' => $e->getMessage()], 'UserStatus:isOnCallOff');
+        }
+    }
+
     /**
      * @param bool $insert
      * @param array $changedAttributes
@@ -131,6 +170,11 @@ class UserStatus extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
         $this->sendFrontendData($insert ? 'insert' : 'update');
+        if ($insert || array_key_exists('us_is_on_call', $changedAttributes)) {
+            if ($this->us_is_on_call) {
+                Notifications::publish('hidePhoneNotifications', ['user_id' => $this->us_user_id], []);
+            }
+        }
     }
 
     /**

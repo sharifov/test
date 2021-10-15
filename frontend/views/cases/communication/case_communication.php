@@ -780,7 +780,7 @@ $js = <<<JS
             document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
         }
     });
-    
+
     $('body').on('click', '.chat__details', function () {
         
         let id = $(this).data('id');        
@@ -797,14 +797,24 @@ $js = <<<JS
         var obj = document.getElementById('object-email-view');
         obj.data = '/email/view?id='+id+'&preview=1';
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
-        
+        $(".view-mail").replaceWith( '<div id="mail_headers"><h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files + '<hr>' + $(".view-mail").html() + '</div>');
         var popup = $('#modal-email-view');
-        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files);
+        popup.find('#modal-email-view-label').replaceWith('<button class="btn btn-default" id="clipboard_button" title="Text copied!" data-toggle="mail_tooltip">Copy email to clipboard</button>');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
     });
     
+    $('body').on('click', '#clipboard_button', function () {
+        var mail = $('#object-email-view').contents()[0].body.innerText;
+        mail = mail.replace('/<(\w+)/g', '', mail);
+        navigator.clipboard.writeText($("#mail_headers").text() + mail);
+         $('[data-toggle="mail_tooltip"]').tooltip({trigger: 'manual'}).tooltip('show');
+    });
+    $('body').on('mouseleave', '#clipboard_button', function () {
+        $('[data-toggle="mail_tooltip"]').tooltip('hide');
+    });
+
     $('body').on('change', '.quotes-uid', function() {
         
         var quoteList = [];

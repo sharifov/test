@@ -42,6 +42,7 @@ class AbacBaseModel
     protected const OPTGROUP_ENV_DT    = 'ENV - DATE & TIME';
     protected const OPTGROUP_ENV_REQUEST = 'ENV - REQUEST';
     protected const OPTGROUP_ENV_PROJECT = 'ENV - PROJECT';
+    protected const OPTGROUP_ENV_DATA = 'ENV - DATA';
 
 
     public const OP_EQUAL               = 'equal';
@@ -71,6 +72,22 @@ class AbacBaseModel
     public const OP_EQUAL2              = '==';
     public const OP_NOT_EQUAL2          = '!=';
 
+
+
+    protected const ATTR_OBJ_AVAILABLE = [
+        'optgroup' => self::OPTGROUP_ENV_DATA,
+        'id' => 'env_available',
+        'field' => 'env.available',
+        'label' => 'Available for all',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'default_value' => true,
+        'vertical' => true,
+        //'validation' => ['allow_empty_value' => true],
+        'operators' =>  [self::OP_EQUAL2]
+    ];
 
     protected const ATTR_USER_USERNAME = [
         'optgroup' => self::OPTGROUP_ENV_USER,
@@ -343,6 +360,7 @@ class AbacBaseModel
     ];
 
     protected const ATTRIBUTE_LIST = [
+        self::ATTR_OBJ_AVAILABLE,
         self::ATTR_USER_USERNAME,
         // self::ATTR_USER_ROLES,
         // self::ATTR_USER_PROJECTS,

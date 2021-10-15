@@ -15,6 +15,7 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\coupon\entity\couponSend\CouponSend;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\AccessCache;
 use sales\model\user\entity\ShiftTime;
@@ -22,12 +23,15 @@ use sales\model\user\entity\StartTime;
 use sales\model\user\entity\UserCache;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userClientChatData\entity\UserClientChatData;
+use sales\model\userData\entity\UserData;
+use sales\model\userData\entity\UserDataKey;
 use sales\validators\SlugValidator;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -2312,7 +2316,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $query->select([
             'tbl_user_id' => 'user_connection.uc_user_id',
-            'tbl_call_type_id' => $subQuery1
+            'tbl_call_type_id' => $subQuery1,
         ]);
 
         $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $call->c_project_id]);
@@ -2328,8 +2332,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
 
-        $generalQuery = new Query();
+        $generalQuery = (new Query())->select([
+            '*',
+            'tbl_has_lead_redial_access' => new Expression('if ((redial.redial_count is null or redial.redial_count = 0), 0, 1)')
+        ]);
         $generalQuery->from(['tbl' => $query]);
+        $generalQuery->leftJoin([
+                'redial' => CallRedialUserAccess::find()->select([
+                    'count(*) as redial_count',
+                    'crua_user_id'
+                ])->groupBy(['crua_user_id'])
+        ], 'redial.crua_user_id = tbl_user_id');
         $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
 
         //$sqlRaw = $generalQuery->createCommand()->getRawSql();
@@ -2474,12 +2487,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
 
+        $query->leftJoin(
+            ['udata' => UserData::tableName()],
+            'udata.ud_user_id = uo.uo_user_id and udata.ud_key = :key',
+            [':key' => UserDataKey::GROSS_PROFIT]
+        );
+
+        $query->innerJoin(['uparams' => UserParams::tableName()], 'uparams.up_user_id = uo.uo_user_id');
+
         //$query->groupBy(['uo.uo_user_id']);
         $sort = self::getUsersForCallQueueSort($call);
 
         $sortAttributes = [
             'general_line_call_count' => 'us.us_gl_call_count',
-            'phone_ready_time' => 'us.us_phone_ready_time'
+            'phone_ready_time' => 'us.us_phone_ready_time',
+            'priority_level' => 'uparams.up_call_user_level',
+            'gross_profit' => 'udata.ud_value',
         ];
 
         if (!empty($sort)) {
@@ -2496,9 +2519,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $query->limit($limit);
         }
 
-        //$sqlRaw = $query->createCommand()->getRawSql();
-        //echo '<pre>'.print_r($sqlRaw, true).'</pre>';  exit;
-        //VarDumper::dump($sqlRaw, 10, true); exit;
+        $query->indexBy(['tbl_user_id']);
+
+//        $sqlRaw = $query->createCommand()->getRawSql();
+//        echo '<pre>'.print_r($sqlRaw, true).'</pre>';  exit;
+//        VarDumper::dump($sqlRaw, 10, true); exit;
 
         $users = $query->asArray()->all();
         return $users;
@@ -2820,6 +2845,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
             if ($params->queueDistribution->callDistributionSort && $params->queueDistribution->callDistributionSort->phoneReadyTime) {
                 $sort['phone_ready_time'] = $params->queueDistribution->callDistributionSort->phoneReadyTime;
+            }
+
+            if ($params->queueDistribution->callDistributionSort && $params->queueDistribution->callDistributionSort->priorityLevel) {
+                $sort['priority_level'] = $params->queueDistribution->callDistributionSort->priorityLevel;
+            }
+
+            if ($params->queueDistribution->callDistributionSort && $params->queueDistribution->callDistributionSort->grossProfit) {
+                $sort['gross_profit'] = $params->queueDistribution->callDistributionSort->grossProfit;
             }
 
             if (!empty($sort)) {

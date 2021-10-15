@@ -293,7 +293,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
                 return $model->productQuote->pq_order_id ?? null;
             },
             'orderGid' => static function (ProductQuoteRefund $model) {
-                return $model->productQuote->pq_gid ?? null;
+                return $model->productQuote->pqOrder->or_gid ?? null;
             },
             'statusId' => 'pqr_status_id',
             'statusName' => static function (ProductQuoteRefund $model) {

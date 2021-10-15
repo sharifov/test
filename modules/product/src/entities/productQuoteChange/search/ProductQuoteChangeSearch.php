@@ -17,19 +17,10 @@ class ProductQuoteChangeSearch extends ProductQuoteChange
     public function rules()
     {
         return [
-            [['pqc_id', 'pqc_pq_id', 'pqc_case_id', 'pqc_decision_user', 'pqc_status_id', 'pqc_decision_type_id'], 'integer'],
+            [['pqc_id', 'pqc_pq_id', 'pqc_case_id', 'pqc_decision_user', 'pqc_status_id', 'pqc_decision_type_id', 'pqc_type_id'], 'integer'],
             [['pqc_is_automate'], 'boolean'],
             [['pqc_created_dt', 'pqc_updated_dt', 'pqc_decision_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
     }
 
     /**
@@ -56,8 +47,7 @@ class ProductQuoteChangeSearch extends ProductQuoteChange
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -72,7 +62,8 @@ class ProductQuoteChangeSearch extends ProductQuoteChange
             'date(pqc_created_dt)' => $this->pqc_created_dt,
             'date(pqc_updated_dt)' => $this->pqc_updated_dt,
             'date(pqc_decision_dt)' => $this->pqc_decision_dt,
-            'pqc_is_automate' => $this->pqc_is_automate
+            'pqc_is_automate' => $this->pqc_is_automate,
+            'pqc_type_id' => $this->pqc_type_id,
         ]);
 
         return $dataProvider;

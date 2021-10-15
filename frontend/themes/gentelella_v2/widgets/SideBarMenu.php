@@ -68,12 +68,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
         }
         $menuLItems[] = ['label' => 'Create New Lead', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create New Lead']];
 
-
         $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
 
-        if (($profile = $user->userProfile) && $profile->up_auto_redial) {
-            $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo text"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
-        }
+        $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo text"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
 
         $menuLItems[] = ['label' => 'New', 'url' => ['/lead/new'], 'icon' => 'paste text-warning'];
 
@@ -621,6 +618,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => ['/user-model-setting-crud/index'],
                     'icon' => 'list',
                 ],
+                ['label' => 'User Stat Day', 'url' => ['/user-stat-day-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Data', 'url' => ['/user-data-crud/index'], 'icon' => 'list'],
             ]
         ];
 

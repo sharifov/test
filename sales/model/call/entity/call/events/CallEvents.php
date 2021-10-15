@@ -49,21 +49,23 @@ class CallEvents extends Component
                 $userStatus->us_gl_call_count = (int)$userStatus->us_gl_call_count + 1;
             }
 
-            $userStatus->us_is_on_call = Call::find()
-                ->andWhere(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
-                ->innerJoin(
-                    ConferenceParticipant::tableName(),
-                    'cp_call_id = c_id AND cp_status_id != :status AND cp_type_id = :type',
-                    [
-                        ':status' => ConferenceParticipant::STATUS_LEAVE,
-                        ':type' => ConferenceParticipant::TYPE_AGENT,
-                    ]
-                )
-                ->exists();
-
-            if (!$call->c_parent_id && $call->isOut() && ($call->isStatusInProgress() || $call->isStatusRinging())) {
-                $userStatus->us_is_on_call = true;
-            }
+//            $userStatus->us_is_on_call = Call::find()
+//                ->andWhere(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+//                ->innerJoin(
+//                    ConferenceParticipant::tableName(),
+//                    'cp_call_id = c_id AND cp_status_id != :status AND cp_type_id = :type',
+//                    [
+//                        ':status' => ConferenceParticipant::STATUS_LEAVE,
+//                        ':type' => ConferenceParticipant::TYPE_AGENT,
+//                    ]
+//                )
+//                ->exists();
+//
+//            if ($call->c_parent_id && $call->isIn() && ($call->isStatusInProgress() || $call->isStatusRinging())) {
+//                $userStatus->us_is_on_call = true;
+//            } elseif (!$call->c_parent_id && $call->isOut() && ($call->isStatusInProgress() || $call->isStatusRinging())) {
+//                $userStatus->us_is_on_call = true;
+//            }
 
 //            $userStatus->us_is_on_call = $onCall;
             if (!$userStatus->us_is_on_call && $userStatus->us_call_phone_status) {

@@ -39,6 +39,7 @@ use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\user\entity\userStatus\UserStatus;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -1349,12 +1350,6 @@ class Call extends \yii\db\ActiveRecord
         }
 
 
-
-        if ($isChangedStatus) {
-            NativeEventDispatcher::recordEvent(CallEvents::class, CallEvents::CHANGE_STATUS, [CallEvents::class, 'updateUserStatus'], ['call' => $this, 'changedAttributes' => $changedAttributes]);
-            NativeEventDispatcher::trigger(CallEvents::class, CallEvents::CHANGE_STATUS);
-        }
-
         if (
             $this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude)
             && (!($this->isIn() && $this->isStatusQueue()))
@@ -1385,6 +1380,11 @@ class Call extends \yii\db\ActiveRecord
 //                    //Yii::info($message, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
 //                }
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+                if ($this->isActiveTwStatus()) {
+                    UserStatus::isOnCallOn($this->c_created_user_id);
+                } else {
+                    UserStatus::isOnCallOff($this->c_created_user_id);
+                }
             }
         }
 
@@ -1394,6 +1394,9 @@ class Call extends \yii\db\ActiveRecord
             if ($this->isOut() && ($insert || $isChangedStatus) && $this->isStatusRinging()) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+                if ($this->isActiveTwStatus()) {
+                    UserStatus::isOnCallOn($this->c_created_user_id);
+                }
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusRinging()) {
@@ -1401,16 +1404,30 @@ class Call extends \yii\db\ActiveRecord
                 $internalParent->c_status_id = self::STATUS_RINGING;
                 $message = (new CallUpdateMessage())->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $message);
+                if ($internalParent->isActiveTwStatus()) {
+                    UserStatus::isOnCallOn($internalParent->c_created_user_id);
+                }
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusInProgress()) {
                 $internalParent = $this->cParent;
                 $parentMessage = (new CallUpdateMessage())->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $parentMessage);
+                if ($internalParent->isActiveTwStatus()) {
+                    UserStatus::isOnCallOn($internalParent->c_created_user_id);
+                }
 
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+                if ($this->isActiveTwStatus()) {
+                    UserStatus::isOnCallOn($this->c_created_user_id);
+                }
             }
+        }
+
+        if ($isChangedStatus) {
+            NativeEventDispatcher::recordEvent(CallEvents::class, CallEvents::CHANGE_STATUS, [CallEvents::class, 'updateUserStatus'], ['call' => $this, 'changedAttributes' => $changedAttributes]);
+            NativeEventDispatcher::trigger(CallEvents::class, CallEvents::CHANGE_STATUS);
         }
 
         if (($this->c_lead_id || $this->c_case_id) && !$this->isJoin()) {
@@ -1468,18 +1485,6 @@ class Call extends \yii\db\ActiveRecord
                 $job->callSids = [$this->c_call_sid];
                 $job->delayJob = $delayJob;
                 Yii::$app->queue_job->delay($delayJob)->priority(10)->push($job);
-            }
-        }
-
-        if ($isChangedStatus && $this->isStatusCompleted()) {
-            if ($this->c_case_id) {
-                $productQuoteChanges = ProductQuoteChange::find()->select(['pqc_id'])->byCaseId($this->c_case_id)->isNotDecided()->column();
-                if ($productQuoteChanges) {
-                    $clientNotificationCanceler = Yii::createObject(ClientNotificationCanceler::class);
-                    foreach ($productQuoteChanges as $productQuoteChangeId) {
-                        $clientNotificationCanceler->cancel(\sales\model\client\notifications\client\entity\NotificationType::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT, $productQuoteChangeId);
-                    }
-                }
             }
         }
 
@@ -2784,5 +2789,10 @@ class Call extends \yii\db\ActiveRecord
     public static function isTrustedVerstat(string $key): bool
     {
         return in_array($key, self::STIR_TRUSTED_GROUP);
+    }
+
+    public function isActiveTwStatus(): bool
+    {
+        return in_array($this->c_call_status, [self::TW_STATUS_RINGING, self::TW_STATUS_IN_PROGRESS], true);
     }
 }

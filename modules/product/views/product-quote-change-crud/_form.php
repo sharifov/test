@@ -1,5 +1,6 @@
 <?php
 
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
@@ -38,6 +39,8 @@ use sales\widgets\DateTimePicker;
         <?= $form->field($model, 'pqc_updated_dt')->widget(DateTimePicker::class, []) ?>
 
         <?= $form->field($model, 'pqc_decision_dt')->widget(DateTimePicker::class, [])?>
+
+        <?= $form->field($model, 'pqc_type_id')->dropDownList(ProductQuoteChange::TYPE_LIST, ['prompt' => '---']) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
