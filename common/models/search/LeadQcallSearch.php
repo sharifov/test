@@ -602,7 +602,7 @@ class LeadQcallSearch extends LeadQcall
             Lead::CALL_STATUS_QUEUE,
             Lead::CALL_STATUS_BUGGED,
         ]]);
-        $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
+//        $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
 
         $query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
 
