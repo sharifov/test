@@ -608,29 +608,7 @@ $(document).on('click', '#btn-client-info-details', function(e) {
         );
     });
    
-   $(document).on('click', '#take_button', function(e) {
-       $.ajax({
-            url: '/lead/ajax-take/',
-            data: { gid: $(this).data('gid') }
-       })
-           .done(function(data) {
-               if (data.success) {
-                   createNotify('Success', 'Lead taken successfully.', 'success');
-                   $('#take_button').hide();
-               } else {
-                   createNotify('Error', 'Lead was NOT taken! ' + data.message, 'error');
-               }
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) {
-                createNotify('Error', 'Lead was NOT taken! Error response from server!', 'error');
-                console.log({
-                    jqXHR : jqXHR,
-                    textStatus : textStatus,
-                    errorThrown : errorThrown
-                });
-            });
-   });
-   
+  
 JS;
 $this->registerJs($js);
 
