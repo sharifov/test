@@ -6,13 +6,16 @@
  * @var $key string|integer
  * @var $totalProfit float
  * @var $userList []
+ * @var $ownerSplit boolean
  */
 
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 
 $js = <<<JS
+
 var leadId = $leadId || null;
+
 function checkPercentageOfSplit () {
     var form = document.getElementById('split-form');
     var formData = new FormData(form);
@@ -64,15 +67,19 @@ function calcProfitByPercent(obj, total){
 JS;
 $this->registerJs($js);
 ?>
-<div class="row split-row">
+<div class="row split-row"
+    <?php if ($ownerSplit) : ?>
+        style="background-color: antiquewhite; padding-top: 10px;"
+    <?php endif; ?>
+>
     <div class="col-md-4">
         <?= $form->field($split, '[' . $key . ']ps_user_id', [
             'template' => '{input}{error}{hint}'
         ])->dropDownList(
             $userList,
             [
-            'class' => 'form-control',
-            'placeholder' => 'Percent',
+                'class' => 'form-control',
+                'placeholder' => 'Percent',
             ]
         );?>
     </div>
