@@ -78,7 +78,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 continue;
             }
 
-            $agentPhone = $leadQcall->lqc_dt_from;
+            $agentPhone = $leadQcall->lqc_call_from;
             if (!$agentPhone) {
                 $this->reserver->reset($key);
                 continue;
