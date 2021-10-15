@@ -183,6 +183,7 @@ class LeadController extends FController
                 'allowActions' => [
                     'view',
                     'take',
+                    'ajax-take',
                     'create-by-chat',
                     'ajax-create-from-phone-widget',
                     'ajax-link-to-call'
@@ -1379,6 +1380,43 @@ class LeadController extends FController
             }
         }
         return false;
+    }
+
+    /**
+     * @param string $gid
+     * @return string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     */
+    public function actionAjaxTake(string $gid)
+    {
+        $lead = $this->findLeadByGid($gid);
+
+        try {
+            $oldStatus = $lead->status;
+
+            /** @var Employee $user */
+            $user = Yii::$app->user->identity;
+            $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
+
+            if ($oldStatus === Lead::STATUS_PENDING) {
+                $leadUserConversion = LeadUserConversion::create(
+                    $lead->id,
+                    $user->getId(),
+                    LeadUserConversionDictionary::DESCRIPTION_TAKE
+                );
+                (new LeadUserConversionRepository())->save($leadUserConversion);
+            }
+
+            Yii::$app->getSession()->setFlash('success', 'Lead taken!');
+        } catch (\DomainException $e) {
+            // Yii::info($e, 'info\Lead:Take');
+            Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+        } catch (\Throwable $e) {
+            Yii::$app->errorHandler->logException($e);
+            throw $e;
+        }
     }
 
     /**

@@ -400,11 +400,24 @@ $leads = $clientChat->leads;
                                       <?php /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/ ?>
                                       <?php if (Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) : ?>
                                             <?php echo Html::a('<i class="fas fa-search"> </i> Search Quotes', null, [
-                                            'class' => 'dropdown-item search_quotes',
-                                            'title' => 'Search Quotes',
-                                            'data-link' => Url::to(['/client-chat-flight-quote/ajax-search-quotes-by-chat', 'chat_id' => $clientChat->cch_id, 'lead_id' => $lead->id]),
-                                        ]) ?>
+                                              'class' => 'dropdown-item search_quotes',
+                                              'title' => 'Search Quotes',
+                                              'data-link' => Url::to(['/client-chat-flight-quote/ajax-search-quotes-by-chat', 'chat_id' => $clientChat->cch_id, 'lead_id' => $lead->id]),
+                                            ]) ?>
                                       <?php endif; ?>
+                                        <?php
+                                         /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/
+//                                        if (Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) :
+                                        if ($lead->isAvailableToTake()) :
+                                            echo Html::a('<i class="fa fa-download"></i> Take', null, [
+                                                'class' => 'dropdown-item',
+                                                'id' => 'take_button',
+                                                'data-gid' => $lead->gid,
+                                                'data-pjax' => 0
+                                                ]);
+                                        endif;
+//                                          endif;
+                                        ?>
                                       <span data-cc-lead-info-quote="<?= $lead->id?>">
                                       <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>
                                             <?= Html::a(
@@ -595,6 +608,16 @@ $(document).on('click', '#btn-client-info-details', function(e) {
         );
     });
    
+   $(document).on('click', '#take_button', function(e) {
+       $.ajax( '/lead/ajax-take/?gid=' + $(this).data('gid') )
+           .done(function() {
+                createNotify('Success', 'Lead taken successfully', 'success');
+                $('#take_button').hide();
+            })
+            .fail(function() {
+                createNotify('Error', 'Lead was NOT taken! Internal Error!', 'error');
+            });
+   });
    
 JS;
 $this->registerJs($js);
