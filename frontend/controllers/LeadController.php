@@ -2577,6 +2577,13 @@ class LeadController extends FController
 
             $mainAgentProfit = $totalProfit;
 
+            $mainAgentPercent = 0;
+            foreach ($lead->profitSplits as $split) {
+                if ($split->ps_user_id === $lead->employee_id) {
+                    $mainAgentPercent = $split->ps_percent;
+                }
+            }
+
             if (Yii::$app->request->isPost) {
                 $data = Yii::$app->request->post();
 
@@ -2597,6 +2604,9 @@ class LeadController extends FController
                 if (!empty($splitProfit)) {
                     $percentSum = 0;
                     foreach ($splitProfit as $entry) {
+                        if ($entry->ps_user_id === $lead->employee_id) {
+                            $mainAgentPercent = $entry->ps_percent;
+                        }
                         if (!empty($entry->ps_percent)) {
                             $percentSum += $entry->ps_percent;
                         }
@@ -2610,6 +2620,7 @@ class LeadController extends FController
                         'splitForm' => $splitForm,
                         'totalProfit' => $totalProfit,
                         'mainAgentProfit' => $mainAgentProfit,
+                        'mainAgentPercent' => $mainAgentPercent,
                         'errors' => $errors,
                     ]);
                 }
@@ -2619,6 +2630,7 @@ class LeadController extends FController
                     'splitForm' => $splitForm,
                     'totalProfit' => $totalProfit,
                     'mainAgentProfit' => $mainAgentProfit,
+                    'mainAgentPercent' => $mainAgentPercent,
                     'errors' => $errors,
                 ]);
             }
