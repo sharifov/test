@@ -394,8 +394,7 @@ class LeadController extends FController
             throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
         }
         $leadForm = new LeadForm($lead);
-        if (
-            $leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
+        if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
             $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
         ) {
             $leadForm->mode = $leadForm::VIEW_MODE;
@@ -1389,34 +1388,43 @@ class LeadController extends FController
      * @throws NotFoundHttpException
      * @throws \Throwable
      */
-    public function actionAjaxTake(string $gid)
+    public function actionAjaxTake(string $gid): array
     {
-        $lead = $this->findLeadByGid($gid);
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
-        try {
-            $oldStatus = $lead->status;
+        if (Yii::$app->request->isAjax) {
+            $result = ['success' => false, 'message' => ''];
+            $lead = $this->findLeadByGid($gid);
 
-            /** @var Employee $user */
-            $user = Yii::$app->user->identity;
-            $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
+            try {
+                $oldStatus = $lead->status;
 
-            if ($oldStatus === Lead::STATUS_PENDING) {
-                $leadUserConversion = LeadUserConversion::create(
-                    $lead->id,
-                    $user->getId(),
-                    LeadUserConversionDictionary::DESCRIPTION_TAKE
-                );
-                (new LeadUserConversionRepository())->save($leadUserConversion);
+                /** @var Employee $user */
+                $user = Yii::$app->user->identity;
+                $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
+
+                if ($oldStatus === Lead::STATUS_PENDING) {
+                    $leadUserConversion = LeadUserConversion::create(
+                        $lead->id,
+                        $user->getId(),
+                        LeadUserConversionDictionary::DESCRIPTION_TAKE
+                    );
+                    (new LeadUserConversionRepository())->save($leadUserConversion);
+                }
+
+                $result['success'] = true;
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::exception');
+                $result['message'] = stripslashes(VarDumper::dumpAsString($exception->getMessage()));
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:throwable');
+                $result['message'] = 'Internal Server Error';
             }
 
-            Yii::$app->getSession()->setFlash('success', 'Lead taken!');
-        } catch (\DomainException $e) {
-            // Yii::info($e, 'info\Lead:Take');
-            Yii::$app->getSession()->setFlash('warning', $e->getMessage());
-        } catch (\Throwable $e) {
-            Yii::$app->errorHandler->logException($e);
-            throw $e;
+            return $result; // asJson
         }
+
+        throw new BadRequestHttpException();
     }
 
     /**
