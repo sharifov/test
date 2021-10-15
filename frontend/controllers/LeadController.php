@@ -183,7 +183,6 @@ class LeadController extends FController
                 'allowActions' => [
                     'view',
                     'take',
-                    'ajax-take',
                     'create-by-chat',
                     'ajax-create-from-phone-widget',
                     'ajax-link-to-call'
