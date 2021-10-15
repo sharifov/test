@@ -617,8 +617,7 @@ $(document).on('click', '#btn-client-info-details', function(e) {
                if (data.success) {
                    createNotify('Success', 'Lead taken successfully.', 'success');
                    $('#take_button').hide();
-               }
-               else{
+               } else {
                    createNotify('Error', 'Lead was NOT taken! ' + data.message, 'error');
                }
             })
