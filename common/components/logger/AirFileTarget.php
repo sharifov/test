@@ -42,8 +42,6 @@ class AirFileTarget extends \yii\log\FileTarget
         $this->appVersion = Yii::$app->params['release']['version'] ?? '';
         $this->gitBranch = Yii::$app->params['release']['git_branch'] ?? '';
         $this->gitHash = Yii::$app->params['release']['git_hash'] ?? '';
-
-
     }
 
     /**
