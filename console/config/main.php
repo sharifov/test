@@ -1,5 +1,6 @@
 <?php
 
+use common\helpers\LogHelper;
 use modules\hotel\HotelModule;
 use modules\rentCar\RentCarModule;
 
@@ -66,9 +67,7 @@ return [
                     ],
                     'logVars' => [],
                     'prefix' => static function () {
-                        //$ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][console]";
+                        return LogHelper::getConsolePrefixDB();
                     },
                     'db' => 'db_postgres',
                 ],
@@ -81,8 +80,7 @@ return [
                     'logVars' => [],
                     'categories' => ['info\*'],
                     'prefix' => static function () {
-                        $hostname = php_uname('n');
-                        return "[$hostname][console]";
+                        return LogHelper::getConsolePrefixDB();
                     },
                     'db' => 'db_postgres',
                 ],
@@ -92,6 +90,9 @@ return [
                     'except' => [
                         'yii\web\HttpException:404',
                     ],
+                    'prefix' => static function () {
+                        return LogHelper::getConsolePrefixData();
+                    },
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
                     'logFile' => '@runtime/logs/stash.log',
