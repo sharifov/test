@@ -374,10 +374,16 @@ class LeadSearch extends Lead
         ]);
 
         if (!$user->isOnlyAdmin() && !$user->isSuperAdmin()) {
-            $projectIds = array_keys(EmployeeProjectAccess::getProjects($user));
-            $departmentIds = array_keys(EmployeeDepartmentAccess::getDepartments($user));
-            $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
-            $query->andWhere(['IN', Lead::tableName() . '.l_dep_id', $departmentIds]);
+            $query->andWhere([
+                Lead::tableName() . '.project_id' => ProjectEmployeeAccess::find()
+                    ->select(ProjectEmployeeAccess::tableName() . '.project_id')
+                    ->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $user->id])
+            ]);
+            $query->andWhere([
+                Lead::tableName() . '.l_dep_id' => UserDepartment::find()
+                    ->select(UserDepartment::tableName() . '.ud_dep_id')
+                    ->andWhere([UserDepartment::tableName() . '.ud_user_id' => $user->id])
+            ]);
         }
 
         $dataProvider = new ActiveDataProvider([
@@ -1605,15 +1611,22 @@ class LeadSearch extends Lead
         return $command->queryAll();
     }
 
-    public function searchAgent($params)
+    public function searchAgent($params, Employee $user)
     {
-        $projectIds = array_keys(EmployeeProjectAccess::getProjects());
-        $departmentIds = array_keys(EmployeeDepartmentAccess::getDepartments());
         $query = Lead::find();
         $query->with(['project', 'lDep', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select([Lead::tableName() . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
-        $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
-        $query->andWhere(['IN', Lead::tableName() . '.l_dep_id', $departmentIds]);
+
+        $query->andWhere([
+            Lead::tableName() . '.project_id' => ProjectEmployeeAccess::find()
+                ->select(ProjectEmployeeAccess::tableName() . '.project_id')
+                ->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $user->id])
+        ]);
+        $query->andWhere([
+            Lead::tableName() . '.l_dep_id' => UserDepartment::find()
+                ->select(UserDepartment::tableName() . '.ud_dep_id')
+                ->andWhere([UserDepartment::tableName() . '.ud_user_id' => $user->id])
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

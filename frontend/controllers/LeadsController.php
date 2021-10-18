@@ -128,7 +128,7 @@ class LeadsController extends FController
         }
 
         if ($isAgent) {
-            $dataProvider = $searchModel->searchAgent($params);
+            $dataProvider = $searchModel->searchAgent($params, Auth::user());
         } else {
             $dataProvider = $searchModel->search($params, Auth::user());
             if (
