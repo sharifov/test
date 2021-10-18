@@ -665,7 +665,7 @@ class SettingHelper
         return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
     }
 
-    public static function getPproductQuoteChangeableStatuses(): array
+    public static function getProductQuoteChangeableStatuses(): array
     {
         return Yii::$app->params['settings']['product_quote_changeable_statuses'] ?? [];
     }
