@@ -11,6 +11,7 @@ use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
 use common\models\Project;
+use common\models\ProjectEmployeeAccess;
 use common\models\QuotePrice;
 use common\models\Sms;
 use common\models\Sources;
@@ -383,6 +384,7 @@ class LeadSearch extends Lead
                 'username' => $user->username,
                 'projectAccess' => $projectIds,
                 'departmentAccess' => $departmentIds,
+                'ProjectEmployeeAccess' => ProjectEmployeeAccess::find()->andWhere(['employee_id' => $user->id])->asArray()->all()
 
             ], 'info\LeadSearchDebug');
         }
