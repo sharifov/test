@@ -19,6 +19,7 @@ use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use Faker\Provider\DateTime;
 use modules\fileStorage\src\entity\fileLead\FileLead;
+use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -364,13 +365,20 @@ class LeadSearch extends Lead
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, Employee $user)
     {
-        $query = static::find()->with('project', 'source', 'employee', 'client');
+        $query = static::find()->with('project', 'lDep', 'source', 'employee', 'client');
         $query->select([
             Lead::tableName() . '.*',
             'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")
         ]);
+
+        if (!$user->isOnlyAdmin() && !$user->isSuperAdmin()) {
+            $projectIds = array_keys(EmployeeProjectAccess::getProjects($user));
+            $departmentIds = array_keys(EmployeeDepartmentAccess::getDepartments($user));
+            $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
+            $query->andWhere(['IN', Lead::tableName() . '.l_dep_id', $departmentIds]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -1600,9 +1608,12 @@ class LeadSearch extends Lead
     public function searchAgent($params)
     {
         $projectIds = array_keys(EmployeeProjectAccess::getProjects());
+        $departmentIds = array_keys(EmployeeDepartmentAccess::getDepartments());
         $query = Lead::find();
-        $query->with(['project', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
+        $query->with(['project', 'lDep', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select([Lead::tableName() . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
+        $query->andWhere(['IN', Lead::tableName() . '.l_dep_id', $departmentIds]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -1636,7 +1647,7 @@ class LeadSearch extends Lead
 
         if (!$additionalRestriction) {
             $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
-            $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
+//            $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
             $this->employee_id = Yii::$app->user->id;
         }
 
