@@ -378,6 +378,13 @@ class LeadSearch extends Lead
             $departmentIds = array_keys(EmployeeDepartmentAccess::getDepartments($user));
             $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
             $query->andWhere(['IN', Lead::tableName() . '.l_dep_id', $departmentIds]);
+            Yii::info([
+                'userId' => $user->id,
+                'username' => $user->username,
+                'projectAccess' => $projectIds,
+                'departmentAccess' => $departmentIds,
+
+            ], 'info\LeadSearchDebug');
         }
 
         $dataProvider = new ActiveDataProvider([
