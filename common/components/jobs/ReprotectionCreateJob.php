@@ -226,6 +226,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 throw new DomainException('ProductQuoteChange not found');
             }
 
+            $reProtectionCreateService->setProductQuoteChangeIsAutomate($productQuoteChange, (bool) $this->flight_request_is_automate);
+
             if ($productQuoteChange->isStatusNew() || $productQuoteChange->isDecisionPending()) {
                 if ($case->isError() || $case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
                     if (!$case->cs_user_id) {
@@ -296,14 +298,10 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     } catch (\Throwable $throwable) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Quote(' . $reProtectionQuote->pq_gid . ') not set recommended');
                     }
-
-                    $reProtectionCreateService->setProductQuoteChangeIsAutomate($productQuoteChange, true);
                     return;
                 }
 
                 if (!$this->flight_request_is_automate) {
-                    $reProtectionCreateService->setProductQuoteChangeIsAutomate($productQuoteChange, false);
-
                     if ($case->cs_user_id && $case->isProcessing()) {
                         $caseReProtectionService->caseNeedAction();
                         $linkToCase = Purifier::createCaseShortLink($case);
