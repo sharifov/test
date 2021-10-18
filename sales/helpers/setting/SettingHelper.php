@@ -665,8 +665,28 @@ class SettingHelper
         return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
     }
 
-    public static function getVoluntaryExchangeProcessingStatusList(): array
+    public static function getPproductQuoteChangeableStatuses(): array
     {
-        return Yii::$app->params['settings']['voluntary_exchange_processing_status_list'] ?? [];
+        return Yii::$app->params['settings']['product_quote_changeable_statuses'] ?? [];
+    }
+
+    public static function getActiveQuoteChangeStatuses(): array
+    {
+        return Yii::$app->params['settings']['active_quote_change_statuses'] ?? [];
+    }
+
+    public static function getActiveQuoteRefundStatuses(): array
+    {
+        return Yii::$app->params['settings']['active_quote_refund_statuses'] ?? [];
+    }
+
+    public static function getFinishedQuoteChangeStatuses(): array
+    {
+        return Yii::$app->params['settings']['finished_quote_change_statuses'] ?? [];
+    }
+
+    public static function getFinishedQuoteRefundStatuses(): array
+    {
+        return Yii::$app->params['settings']['finished_quote_refund_statuses'] ?? [];
     }
 }
