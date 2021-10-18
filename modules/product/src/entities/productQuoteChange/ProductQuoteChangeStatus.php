@@ -14,6 +14,7 @@ class ProductQuoteChangeStatus
     public const ERROR = 6;
     public const DECLINED = 7;
     public const DECIDED = 8;
+    public const PENDING = 9;
 
     public const LIST = [
         self::NEW => 'New',

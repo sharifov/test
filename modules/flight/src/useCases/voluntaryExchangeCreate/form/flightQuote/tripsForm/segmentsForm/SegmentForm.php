@@ -2,34 +2,21 @@
 
 namespace modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\segmentsForm;
 
+use common\components\validators\CheckAndConvertToJsonValidator;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\segmentsForm\stops\StopForm;
+use sales\helpers\ErrorsToStringHelper;
+use sales\traits\FormNameModelTrait;
 use yii\base\Model;
 
 /**
  * Class ReProtectionFlightQuoteForm
  *
- * @property $departureTime
- * @property $arrivalTime
- * @property $flightNumber
- * @property $bookingClass
- * @property $stop
- * @property $stops
- * @property $duration
- * @property $departureAirportCode
- * @property $departureAirportTerminal
- * @property $arrivalAirportCode
- * @property $arrivalAirportTerminal
- * @property $operatingAirline
- * @property $airEquipType
- * @property $marketingAirline
- * @property $marriageGroup
- * @property $mileage
- * @property $meal
- * @property $fareCode
- * @property $baggage
- * @property $brandId
+ * @property StopForm[]|null $stopForms
  */
 class SegmentForm extends Model
 {
+    use FormNameModelTrait;
+
     public $departureTime;
     public $arrivalTime;
     public $flightNumber;
@@ -49,7 +36,10 @@ class SegmentForm extends Model
     public $meal;
     public $fareCode;
     public $baggage;
-    public $brandId;
+    public $cabin;
+    public $recheckBaggage;
+
+    private array $stopForms;
 
     public function rules(): array
     {
@@ -57,7 +47,6 @@ class SegmentForm extends Model
             [['departureTime', 'arrivalTime', 'departureAirportCode', 'arrivalAirportCode'], 'required'],
 
             [['departureTime', 'arrivalTime'], 'datetime', 'format' => 'php:Y-m-d H:i'],
-            //[['departureTime', 'arrivalTime'], 'safe'],
 
             [['departureAirportCode', 'arrivalAirportCode'], 'string', 'max' => 3],
 
@@ -65,8 +54,10 @@ class SegmentForm extends Model
 
             ['bookingClass', 'string', 'max' => 1],
 
-            ['stop', 'safe'],
-            ['stops', 'safe'], /* TODO::  */
+            ['stop', 'integer'],
+
+            [['stops'], CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true],
+            [['stops'], 'stopsProcessing'],
 
             ['duration', 'integer'],
 
@@ -84,14 +75,31 @@ class SegmentForm extends Model
 
             ['fareCode', 'string', 'max' => 50],
 
-            ['baggage', 'safe'], /* TODO::  */
+            ['recheckBaggage', 'boolean'],
 
-            ['brandId', 'safe'],
+            ['cabin', 'string'],
         ];
     }
 
-    public function formName(): string
+    public function stopsProcessing(string $attribute): void
     {
-        return '';
+        if (!empty($this->stops)) {
+            foreach ($this->stops as $key => $value) {
+                $form = new StopForm();
+                $form->setFormName('');
+                if (!$form->load($value)) {
+                    $this->addError($attribute, 'StopForm not loaded');
+                } elseif (!$form->validate()) {
+                    $this->addError($attribute, 'StopForm.' . $key . '.' . ErrorsToStringHelper::extractFromModel($form, ', '));
+                } else {
+                    $this->stopForms[] = $form;
+                }
+            }
+        }
+    }
+
+    public function getStopForms(): array
+    {
+        return $this->stopForms;
     }
 }

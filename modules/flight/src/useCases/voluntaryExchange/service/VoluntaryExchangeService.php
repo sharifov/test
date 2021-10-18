@@ -92,6 +92,7 @@ class VoluntaryExchangeService
             'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
             ['pq_gid' => $originProductQuote->pq_gid]
         );
+        // $originProductQuote->booked(); /* TODO::  */
         return $originProductQuote;
     }
 
@@ -105,6 +106,15 @@ class VoluntaryExchangeService
     public function createProductQuoteChange(int $originProductQuoteId, int $caseId): ProductQuoteChange
     {
         $productQuoteChange = ProductQuoteChange::createVoluntaryExchange($originProductQuoteId, $caseId);
+        $this->objectCollection->getProductQuoteChangeRepository()->save($productQuoteChange);
+        return $productQuoteChange;
+    }
+
+    public function addQuoteGidToDataJson(ProductQuoteChange $productQuoteChange, string $exchangeQuoteGid): ProductQuoteChange
+    {
+        $dataJson = $productQuoteChange->pqc_data_json;
+        $dataJson['quote_gid'] = $exchangeQuoteGid;
+        $productQuoteChange->pqc_data_json = $dataJson;
         $this->objectCollection->getProductQuoteChangeRepository()->save($productQuoteChange);
         return $productQuoteChange;
     }

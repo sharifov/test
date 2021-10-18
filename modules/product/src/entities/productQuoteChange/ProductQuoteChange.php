@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
+use common\components\validators\CheckAndConvertToJsonValidator;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionConfirmEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
@@ -29,6 +30,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $pqc_decision_dt
  * @property bool $pqc_is_automate [tinyint(1)]
  * @property int|null $pqc_type_id
+ * @property array|null $pqc_data_json
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
@@ -171,6 +173,8 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             ['pqc_type_id', 'integer'],
             ['pqc_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
             ['pqc_type_id', 'default', 'value' => self::TYPE_RE_PROTECTION],
+
+            ['pqc_data_json', CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true],
         ];
     }
 
@@ -190,7 +194,8 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_updated_dt' => 'Updated Dt',
             'pqc_decision_dt' => 'Decision Dt',
             'pqc_is_automate' => 'Is Automate',
-            'pqc_type_id' => 'Type ID'
+            'pqc_type_id' => 'Type ID',
+            'pqc_data_json' => 'Data Json',
         ];
     }
 
@@ -252,6 +257,12 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $model = self::createNew($productQuoteId, $caseId, $isAutomate);
         $model->pqc_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
         return $model;
+    }
+
+    public function setDataJson(array $data): ProductQuoteChange
+    {
+        $this->pqc_data_json = $data;
+        return $this;
     }
 
     public function onIsAutomate(): ProductQuoteChange

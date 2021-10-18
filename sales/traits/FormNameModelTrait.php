@@ -11,7 +11,7 @@ trait FormNameModelTrait
 
     public function formName()
     {
-        return $this->_formName ?: parent::formName();
+        return $this->_formName ?? parent::formName();
     }
 
     public function setFormName($name)

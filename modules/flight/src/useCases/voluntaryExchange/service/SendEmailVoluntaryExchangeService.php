@@ -29,7 +29,7 @@ class SendEmailVoluntaryExchangeService
 
     /**
      * @param Cases $case
-     * @param Order $order
+     * @param Order|null $order
      * @param ProductQuote $voluntaryExchangeQuote
      * @param ProductQuote $originProductQuote
      * @param string $bookingId
@@ -37,7 +37,7 @@ class SendEmailVoluntaryExchangeService
      */
     public function __construct(
         Cases $case,
-        Order $order,
+        ?Order $order,
         ProductQuote $voluntaryExchangeQuote,
         ProductQuote $originProductQuote,
         string $bookingId,

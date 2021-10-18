@@ -664,4 +664,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
     }
+
+    public static function getVoluntaryExchangeProcessingStatusList(): array
+    {
+        return Yii::$app->params['settings']['voluntary_exchange_processing_status_list'] ?? [];
+    }
 }

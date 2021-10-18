@@ -705,7 +705,7 @@ class FlightQuoteManageService implements ProductQuoteService
                         $this->productQuoteOptionRepository->save($productQuoteOption);
                     }
                 }
-                $relation = ProductQuoteRelation::createReProtection(
+                $relation = ProductQuoteRelation::createVoluntaryExchange(
                     $originProductQuote->pq_id,
                     $flightQuote->fq_product_quote_id
                 );
