@@ -30,6 +30,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_CLIENT_ADD_EMAIL  = self::NS . 'act/client-add-email';
     public const ACT_CLIENT_EDIT_EMAIL  = self::NS . 'act/client-edit-email';
     public const ACT_USER_SAME_EMAIL_INFO  = self::NS . 'act/user-same-email-info';
+    public const ACT_TAKE_LEAD_FROM_CLIENT_CHAT = self::NS . 'act/take-lead-from-client-chat';
     public const ACT_CLIENT_UPDATE  = self::NS . 'act/client-update';
     public const ACT_CLIENT_SUBSCRIBE  = self::NS . 'act/client-subscribe';
     public const ACT_CLIENT_UNSUBSCRIBE  = self::NS . 'act/client-unsubscribe';
@@ -74,6 +75,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CLIENT_UPDATE    => self::ACT_CLIENT_UPDATE,
         self::ACT_CLIENT_SUBSCRIBE    => self::ACT_CLIENT_SUBSCRIBE,
         self::ACT_CLIENT_UNSUBSCRIBE    => self::ACT_CLIENT_UNSUBSCRIBE,
+        self::ACT_TAKE_LEAD_FROM_CLIENT_CHAT => self::ACT_TAKE_LEAD_FROM_CLIENT_CHAT,
         self::UI_BLOCK_CLIENT_INFO  => self::UI_BLOCK_CLIENT_INFO,
         self::UI_MENU_CLIENT_INFO   => self::UI_MENU_CLIENT_INFO,
         self::ACT_SEARCH_LEADS_BY_IP   => self::ACT_SEARCH_LEADS_BY_IP,
@@ -121,6 +123,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CLIENT_SUBSCRIBE => [self::ACTION_ACCESS],
         self::ACT_CLIENT_UNSUBSCRIBE => [self::ACTION_ACCESS],
         self::ACT_SEARCH_LEADS_BY_IP => [self::ACTION_ACCESS],
+        self::ACT_TAKE_LEAD_FROM_CLIENT_CHAT => [self::ACTION_ACCESS],
         self::LOGIC_CLIENT_DATA  => [self::ACTION_UNMASK],
         self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ACTION_CREATE, self::ACTION_UPDATE],
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ACTION_CREATE, self::ACTION_UPDATE],
@@ -183,6 +186,45 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'id' => self::NS . 'is_common_group',
         'field' => 'is_common_group',
         'label' => 'Is Common Group',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_IS_LEAD_SHIFT_TIME = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'is_lead_shift_time',
+        'field' => 'is_lead_shift_time',
+        'label' => 'Is Lead Shift Time',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_CAN_TAKE_NEW_LEAD = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'can_take_new_lead',
+        'field' => 'can_take_new_lead',
+        'label' => 'Can Take new Lead',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_HAS_APPLIED_QUOTE = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'has_applied_quote',
+        'field' => 'has_applied_quote',
+        'label' => 'Has Applied Quote',
 
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
@@ -271,6 +313,11 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_LEAD_HAS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+        self::ACT_TAKE_LEAD_FROM_CLIENT_CHAT    => [
+            self::ATTR_IS_LEAD_SHIFT_TIME,
+            self::ATTR_CAN_TAKE_NEW_LEAD,
+            self::ATTR_HAS_APPLIED_QUOTE,
+        ],
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ATTR_LEAD_IS_OWNER],
@@ -307,6 +354,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::UI_BLOCK_CLIENT_INFO][] = $attrStatus;
         $attributeList[self::UI_MENU_CLIENT_INFO][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_DETAILS][] = $attrStatus;
+        $attributeList[self::ACT_TAKE_LEAD_FROM_CLIENT_CHAT][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_ADD_PHONE][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_ADD_EMAIL][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_UPDATE][] = $attrStatus;

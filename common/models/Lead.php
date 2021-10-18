@@ -3464,6 +3464,11 @@ Reason: {reason}',
         );
     }
 
+    public function hasAppliedQuote(): bool
+    {
+        return ($this->appliedQuote !== null);
+    }
+
     public function getFirstFlightSegment()
     {
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
