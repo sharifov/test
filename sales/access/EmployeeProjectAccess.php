@@ -53,30 +53,9 @@ class EmployeeProjectAccess
         $projects = null;
 
         if ($roles = EmployeeAccessHelper::getRoles($roles, self::$defaultRolesForViewAllProjects, $excludeRoles, $includeRoles)) {
-            \Yii::info([
-                'userId' => $user->id,
-                'step' => 1,
-                'roles' => $roles
-            ], 'info\LeadSearch');
             $userRoles = $user->getRoles(true);
-            \Yii::info([
-                'userId' => $user->id,
-                'step' => 11,
-                'userRoles' => $userRoles
-            ], 'info\LeadSearch');
             foreach ($userRoles as $role) {
-                \Yii::info([
-                    'userId' => $user->id,
-                    'step' => 2,
-                    'role' => $role
-                ], 'info\LeadSearch');
                 if (in_array($role, $roles, false)) {
-                    \Yii::info([
-                        'userId' => $user->id,
-                        'step' => 3,
-                        'role' => $role,
-                        'roles' => $roles
-                    ], 'info\LeadSearch');
                     $projects = Project::find()->select(['name', 'id'])->active()
                         ->orderBy('name')->indexBy('id')->asArray()->column();
                     break;
@@ -85,10 +64,6 @@ class EmployeeProjectAccess
         }
 
         if ($projects === null) {
-            \Yii::info([
-                'userId' => $user->id,
-                'step' => 4,
-            ], 'info\LeadSearch');
             $projects = Project::find()->select(['name', 'id'])
                 ->andWhere(['id' => self::getProjectsSubQuery($user->id)])
                 ->orderBy('name')->indexBy('id')->asArray()->column();
