@@ -10,6 +10,7 @@ use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCr
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
@@ -478,9 +479,17 @@ class FlightQuoteExchangeController extends BaseController
         }
 
         try {
-            $processingStatusList = array_keys(SettingHelper::getVoluntaryExchangeProcessingStatusList());
+            $changeProcessingStatusList = array_keys(SettingHelper::getActiveQuoteChangeStatuses());
+            $quoteChangeableStatuses = array_keys(SettingHelper::getProductQuoteChangeableStatuses());
+            $typeIds = [ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE, ProductQuoteChange::TYPE_RE_PROTECTION];
+
             VoluntaryExchangeCreateService::checkByPost($post);
-            VoluntaryExchangeCreateService::checkByBookingId($voluntaryExchangeCreateForm->booking_id, $processingStatusList);
+            VoluntaryExchangeCreateService::checkByBookingId(
+                $voluntaryExchangeCreateForm->booking_id,
+                $changeProcessingStatusList,
+                $quoteChangeableStatuses,
+                $typeIds
+            );
 
             $flightRequest = FlightRequest::create(
                 $voluntaryExchangeCreateForm->booking_id,
@@ -753,6 +762,154 @@ class FlightQuoteExchangeController extends BaseController
      * @api {post} /v2/flight-quote-exchange/info Flight Voluntary Exchange Info
      * @apiVersion 0.2.0
      * @apiName Flight Voluntary Exchange Info
+     * @apiGroup Flight Voluntary Exchange
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{7..10}}    booking_id          Booking ID
+     *
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *      "booking_id": "XXXYYYZ"
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
+                    "TODO::" : "TODO::"
+               },
+     *        "code": "13200",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Load data error",
+     *        "errors": [
+     *           "Not found data on POST request"
+     *        ],
+     *        "code": "13106",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": 422,
+     *        "message": "Validation error",
+     *        "errors": [
+     *            "booking_id": [
+     *               "booking_id cannot be blank."
+     *             ]
+     *        ],
+     *        "code": "13107",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionInfo()
+    {
+        try {
+            $post = Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new MessageMessage(Messages::POST_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+
+        $voluntaryExchangeInfoForm = new VoluntaryExchangeInfoForm();
+        if (!$voluntaryExchangeInfoForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+        if (!$voluntaryExchangeInfoForm->validate()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($voluntaryExchangeInfoForm->getErrors()),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            );
+        }
+
+        try {
+            $productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($voluntaryExchangeInfoForm->booking_id);
+            if (!$productQuoteChange) {
+                throw new \RuntimeException(
+                    'ProductQuoteChange not found by BookingId(' . $voluntaryExchangeInfoForm->booking_id . ')',
+                    ApiCodeException::DATA_NOT_FOUND
+                );
+            }
+
+            return new SuccessResponse(
+                new DataMessage(ArrayHelper::toArray($productQuoteChange->pqc_data_json)),
+                new CodeMessage(ApiCodeException::SUCCESS)
+            );
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
+        }
+    }
+
+    /**
+     * @api {post} /v2/flight-quote-exchange/view Flight Voluntary Exchange View
+     * @apiVersion 0.2.0
+     * @apiName Flight Voluntary Exchange View
      * @apiGroup Flight Voluntary Exchange
      * @apiPermission Authorized User
      *

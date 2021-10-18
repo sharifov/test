@@ -33,10 +33,10 @@ class VoluntaryExchangeCreateService
     public static function checkByBookingId(
         string $bookingId,
         array $statuses,
-        array $notQuoteStatuses = [ProductQuoteStatus::BOOKED, ProductQuoteStatus::SOLD],
-        int $typeId = ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE /* TODO:: to array */
+        array $notQuoteStatuses,
+        array $typeIds
     ): void {
-        if ($productQuoteCheck = self::getProductQuoteChangeByBookingId($bookingId, $statuses, $notQuoteStatuses, $typeId)) {
+        if ($productQuoteCheck = self::getProductQuoteChangeByBookingId($bookingId, $statuses, $notQuoteStatuses, $typeIds)) {
             throw new \RuntimeException(
                 'Quote not available for exchange.
                     Product Quote status (' . ProductQuoteStatus::getName($productQuoteCheck['pq_status_id']) . ') 
@@ -49,8 +49,8 @@ class VoluntaryExchangeCreateService
     public static function getProductQuoteChangeByBookingId(
         string $bookingId,
         array $changeStatuses,
-        array $notQuoteStatuses = [ProductQuoteStatus::BOOKED, ProductQuoteStatus::SOLD],
-        int $typeId = ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE
+        array $notQuoteStatuses,
+        array $typeIds
     ): array {
         return ProductQuoteChange::find()
             ->select(ProductQuoteChange::tableName() . '.pqc_status_id')
@@ -59,7 +59,7 @@ class VoluntaryExchangeCreateService
             ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pq_id')
             ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
             ->where(['fqf_booking_id' => $bookingId])
-            ->andWhere(['pqc_type_id' => $typeId])
+            ->andWhere(['IN', 'pqc_type_id', $typeIds])
             ->andWhere(['pqc_status_id' => $changeStatuses])
             ->andWhere(['NOT IN', 'pq_status_id', $notQuoteStatuses])
             ->orderBy(['pqc_id' => SORT_DESC])
