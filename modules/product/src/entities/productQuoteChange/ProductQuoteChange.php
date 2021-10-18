@@ -253,4 +253,21 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $model->pqc_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
         return $model;
     }
+
+    public function onIsAutomate(): ProductQuoteChange
+    {
+        $this->pqc_is_automate = true;
+        return $this;
+    }
+
+    public function offIsAutomate(): ProductQuoteChange
+    {
+        $this->pqc_is_automate = false;
+        return $this;
+    }
+
+    public function isAutomate(): bool
+    {
+        return $this->pqc_is_automate;
+    }
 }

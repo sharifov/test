@@ -310,6 +310,17 @@ class ReprotectionCreateService
         return $this->clientManageService->create($clientForm, null);
     }
 
+    public function setProductQuoteChangeIsAutomate(ProductQuoteChange $productQuoteChange, bool $isAutomate): ProductQuoteChange
+    {
+        if ($isAutomate) {
+            $productQuoteChange->onIsAutomate();
+        } else {
+            $productQuoteChange->offIsAutomate();
+        }
+        $this->productQuoteChangeRepository->save($productQuoteChange);
+        return $productQuoteChange;
+    }
+
     public static function writeLog(Throwable $throwable, array $data = [], string $category = 'ReprotectionCreateJob:throwable'): void
     {
         $message = AppHelper::throwableLog($throwable);
