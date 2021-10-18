@@ -103,17 +103,15 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                     </button>
                     <div class="dropdown-menu">
 
-                        <?php if ($canStatusLog) : ?>
-                            <?= Html::a(
-                                '<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''),
-                                null,
-                                [
-                                    'class' => 'dropdown-item',
-                                    'id' => 'btn-status-history',
-                                    'title' => 'Status history'
-                                ]
-                            ) ?>
-                        <?php endif;?>
+                        <?= Html::a(
+                            '<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''),
+                            null,
+                            [
+                                'class' => 'dropdown-item',
+                                'id' => 'btn-status-history',
+                                'title' => 'Status history'
+                            ]
+                        ) ?>
 
                         <?php if ($canDataLogs) : ?>
                             <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
