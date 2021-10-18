@@ -26,6 +26,8 @@ class LeadRedialExpiredAccessJob extends BaseJob implements JobInterface
     {
         $this->executionTimeRegister();
 
+        $timeStart = microtime(true);
+
         try {
             $unAssigner = \Yii::createObject(LeadRedialUnAssigner::class);
             $unAssigner->unAssignByLeadWithTimeExpired($this->leadId, new \DateTimeImmutable());
@@ -36,5 +38,13 @@ class LeadRedialExpiredAccessJob extends BaseJob implements JobInterface
                 'exception' => AppHelper::throwableLog($e, false),
             ], 'LeadRedialExpiredAccessJob');
         }
+
+        \Yii::info([
+            'timePushToQueue' => $this->timeStart,
+            'timeRunJob' => $timeStart,
+            'timeDiffPushAndRun' => round($timeStart - $this->timeStart, 1),
+            'timeExecuteJob' => round(microtime(true) - $timeStart, 1),
+            'leadId' => $this->leadId,
+        ], 'info\LeadRedialExpiredAccessJob');
     }
 }
