@@ -57,7 +57,12 @@ class EmployeeProjectAccess
                 'step' => 1,
                 'roles' => $roles
             ], 'info\LeadSearch');
-            foreach ($user->getRoles(true) as $role) {
+            $userRoles = $user->getRoles(true);
+            \Yii::info([
+                'step' => 11,
+                'userRoles' => $userRoles
+            ], 'info\LeadSearch');
+            foreach ($userRoles as $role) {
                 \Yii::info([
                     'step' => 2,
                     'role' => $role
