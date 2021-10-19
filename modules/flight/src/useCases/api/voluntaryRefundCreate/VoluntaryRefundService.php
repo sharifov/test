@@ -13,6 +13,7 @@ use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
@@ -215,7 +216,11 @@ class VoluntaryRefundService
             }
         }
 
-        $relatedProductQuotes = ProductQuoteQuery::getRelatedQuoteByOriginAndTypes($productQuote->pq_id, [ProductQuoteRelation::TYPE_REPROTECTION, ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE]);
+        $relatedProductQuotes = ProductQuoteQuery::getRelatedQuoteByOriginTypesStatuses(
+            $productQuote->pq_id,
+            [ProductQuoteRelation::TYPE_REPROTECTION, ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE],
+            ProductQuoteStatus::PROCESSING_LIST
+        );
         foreach ($relatedProductQuotes as $relatedProductQuote) {
             $relatedProductQuote->declined();
             $this->productQuoteRepository->save($relatedProductQuote);

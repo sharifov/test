@@ -437,7 +437,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest = $this->flightRequestRepository->save($flightRequest);
 
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->booking_id)) {
-                if ($productQuote->isInChangeableStatus()) {
+                if ($productQuote->isChangeable()) {
                     if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
                         throw new \DomainException('Quote not available for refund');
                     }

@@ -1067,9 +1067,4 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return array_key_exists($this->pq_status_id, SettingHelper::getProductQuoteChangeableStatuses());
     }
-
-    public function isInChangeableStatus(): bool
-    {
-        return in_array($this->pq_status_id, ProductQuoteStatus::getChangeableStatusList(), true);
-    }
 }

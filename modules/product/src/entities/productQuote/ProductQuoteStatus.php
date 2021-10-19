@@ -121,9 +121,11 @@ class ProductQuoteStatus
         self::CANCELED,
     ];
 
-    private const CHANGEABLE_GROUP = [
-        self::BOOKED,
-        self::SOLD
+    public const PROCESSING_LIST = [
+        self::NEW,
+        self::PENDING,
+        self::APPLIED,
+        self::IN_PROGRESS
     ];
 
     public static function getList(): array
