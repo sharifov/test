@@ -327,7 +327,7 @@ class CaseController extends Controller
         $report = [];
         $casesQuery = Cases::find()
             ->andWhere(['!=', 'cs_status', CasesStatus::STATUS_PENDING])
-            ->andWhere(['!=', 'cs_is_automate', 'true'])
+            ->andWhere(['!=', 'cs_is_automate', 1])
             ->andWhere(['<', 'cs_deadline_dt', $now->format('Y-m-d H:i:s')])
             ->groupBy('cs_id');
         $count = $casesQuery->count();
