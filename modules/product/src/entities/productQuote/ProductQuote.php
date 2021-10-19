@@ -103,8 +103,10 @@ use yii\db\ActiveRecord;
  * @property ProductQuote|null $relateParent
  * @property ProductQuoteChange|null $productQuoteLastChange
  * @property ProductQuoteChange[] $productQuoteChanges
+ * @property ProductQuoteChange[] $productQuoteChangesActive
  * @property ProductQuoteRefund|null $productQuoteLastRefund
  * @property ProductQuoteRefund[] $productQuoteRefunds
+ * @property ProductQuoteRefund[] $productQuoteRefundsActive
  * @property ProductQuoteData|null $productQuoteDataRecommended
  *
  * @property Quotable|null $childQuote
@@ -280,6 +282,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id']);
     }
 
+    /**
+     * Gets query for [[ProductQuoteChanges]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteChangesActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id', 'pqc_status_id' => SettingHelper::getActiveQuoteChangeStatuses()]);
+    }
+
     public function getProductQuoteLastRefund(): ActiveQuery
     {
         return $this->hasOne(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])
@@ -294,6 +306,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteRefunds(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id']);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteRefunds]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteRefundsActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id', 'pqr_status_id' => SettingHelper::getActiveQuoteRefundStatuses()]);
     }
 
     /**

@@ -689,4 +689,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['finished_quote_refund_statuses'] ?? [];
     }
+
+    public static function getVoluntaryRefundCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_refund_case_category'] ?? null;
+    }
 }

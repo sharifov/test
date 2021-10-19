@@ -4,6 +4,7 @@ namespace modules\product\src\entities\productQuoteRefund;
 
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteFlight;
+use sales\helpers\setting\SettingHelper;
 
 class ProductQuoteRefundQuery
 {
@@ -16,5 +17,14 @@ class ProductQuoteRefundQuery
             ->orderBy(['pqr_id' => SORT_DESC])
             ->cache($cacheDuration)
             ->one();
+    }
+
+    /**
+     * @param int $productQuoteId
+     * @return ProductQuoteRefund[]
+     */
+    public static function findAllNotFinishedByProductQuoteId(int $productQuoteId): array
+    {
+        return ProductQuoteRefund::find()->byProductQuoteId($productQuoteId)->excludeStatuses(SettingHelper::getFinishedQuoteRefundStatuses())->all();
     }
 }

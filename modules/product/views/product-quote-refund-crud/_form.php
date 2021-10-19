@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Currency;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -62,6 +63,10 @@ use yii\widgets\ActiveForm;
         ]) ?>
 
         <?= $form->field($model, 'pqr_case_id')->textInput() ?>
+
+        <?= $form->field($model, 'pqr_type_id')->dropDownList(ProductQuoteRefund::getTypeList(), [
+            'prompt' => '---'
+        ]) ?>
 
     </div>
 

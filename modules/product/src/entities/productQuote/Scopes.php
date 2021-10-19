@@ -35,6 +35,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['pq_status_id' => ProductQuoteStatus::BOOKED]);
     }
 
+    public function byStatuses(array $statuses): self
+    {
+        return $this->andWhere(['pq_status_id' => $statuses]);
+    }
+
     public function flightQuotes(): self
     {
         return $this->innerJoin(Product::tableName(), 'pq_product_id = pr_id and pr_type_id = :productTypeId', ['productTypeId' => ProductType::PRODUCT_FLIGHT]);

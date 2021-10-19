@@ -7,6 +7,7 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderData\OrderData;
 use sales\entities\cases\CaseCategory;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\forms\cases\CasesCreateByChatForm;
 use sales\forms\cases\CasesCreateByWebForm;
@@ -19,6 +20,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatCase\entity\ClientChatCaseRepository;
 use sales\repositories\cases\CasesRepository;
+use sales\repositories\NotFoundException;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
@@ -243,5 +245,29 @@ class CasesCreateService
                 \Yii::error(VarDumper::dumpAsString(AppHelper::throwableLog($e, true)), 'CasesCreateService:createByCancelFailedOrder:Throwable');
             }
         }
+    }
+
+    public function createRefund(string $bookingId, int $projectId, string $categoryKey): Cases
+    {
+        if (!$caseCategory = CaseCategory::findOne(['cc_key' => $categoryKey])) {
+            throw new NotFoundException('CaseCategory (' . $categoryKey . ') not found');
+        }
+
+        $case = Cases::createByApiVoluntaryRefund(
+            $caseCategory->cc_dep_id,
+            $caseCategory->cc_id,
+            $bookingId,
+            $projectId,
+            true
+        );
+        $this->casesRepository->save($case);
+
+        $case->addEventLog(
+            CaseEventLog::CASE_CREATED,
+            'Voluntary Refund Create, BookingID: ' . $bookingId,
+            ['case_gid' => $case->cs_gid, 'fr_booking_id' => $bookingId]
+        );
+
+        return $case;
     }
 }
