@@ -1,5 +1,6 @@
 <?php
 
+use common\models\ProfitSplit;
 use sales\access\ListsAccess;
 use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
@@ -241,7 +242,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 $splitProfitTxt = '';
                 $splitProfit = $model->getAllProfitSplits();
                 $return = [];
-                foreach ($splitProfit as $split) {
+                /** @var ProfitSplit $split */
+                foreach ($splitProfit as $key => $split) {
+                    if ($model->employee_id && $split->ps_user_id === $model->employee_id) {
+                        unset($splitProfit[$key]);
+                        continue;
+                    }
+
                     $model->splitProfitPercentSum += $split->ps_percent;
                     $return[] = '<b>' . $split->psUser->username . '</b> (' . $split->ps_percent . '%) $' . number_format($split->countProfit($model->totalProfit), 2);
                 }

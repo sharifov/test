@@ -2,33 +2,27 @@
 
 namespace sales\listeners\lead;
 
-use frontend\models\ProfitSplitForm;
+use modules\lead\src\services\LeadProfitSplit;
 use sales\events\lead\LeadSoldEvent;
 use Yii;
 
 class LeadSoldSplitListener
 {
+    /**
+     * @var LeadProfitSplit
+     */
+    protected $leadProfitSplitService;
+
+    public function __construct(LeadProfitSplit $leadProfitSplitService)
+    {
+        $this->leadProfitSplitService = $leadProfitSplitService;
+    }
+
     public function handle(LeadSoldEvent $event): void
     {
         try {
-            $errors = [];
             $lead = $event->lead;
-            $splitForm = new ProfitSplitForm($lead);
-            $load = $splitForm->loadModels([
-                'ProfitSplit' => [
-                    'new' . $event->lead->id => [
-                        'ps_user_id' => $lead->employee_id ?? $event->newOwnerId,
-                        'ps_percent' => '100',
-                    ]
-                ],
-            ]);
-
-            if ($load) {
-                $splitForm->save($errors);
-            }
-            if (!empty($errors)) {
-                Yii::error($errors, 'Listeners:LeadSoldSplitListener');
-            }
+            $this->leadProfitSplitService->save($lead, $lead->employee_id ?? $event->newOwnerId);
         } catch (\Throwable $exception) {
             Yii::error($exception, 'Listeners:LeadSoldSplitListener');
         }
