@@ -36,6 +36,7 @@ use yii\db\ActiveRecord;
  * @property string|null $pqr_created_dt
  * @property string|null $pqr_updated_dt
  * @property int|null $pqr_case_id
+ * @property string $pqr_type_id [tinyint unsigned]
  *
  * @property Currency $clientCurrency
  * @property Employee $createdUser
@@ -49,6 +50,14 @@ use yii\db\ActiveRecord;
 class ProductQuoteRefund extends \yii\db\ActiveRecord
 {
     use FieldsTrait;
+
+    private const TYPE_RE_PROTECTION = 1;
+    private const TYPE_VOLUNTARY_REFUND = 2;
+
+    private const TYPE_LIST = [
+        self::TYPE_RE_PROTECTION => 'Re Protection',
+        self::TYPE_VOLUNTARY_REFUND => 'Voluntary Refund'
+    ];
 
     public static function create(
         $orderRefundId,
@@ -90,6 +99,39 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             $caseId
         );
         $refund->pqr_status_id = ProductQuoteRefundStatus::PENDING;
+        $refund->pqr_type_id = self::TYPE_RE_PROTECTION;
+        $refund->detachBehavior('user');
+        return $refund;
+    }
+
+    public static function createByVoluntaryRefund(
+        $orderRefundId,
+        $productQuoteId,
+        $sellingPrice,
+        $processingFee,
+        $refundAmount,
+        $penaltyAmount,
+        $clientCurrency,
+        $clientCurrencyRate,
+        $clientSelling,
+        $clientRefundAmount,
+        $caseId
+    ): self {
+        $refund = self::create(
+            $orderRefundId,
+            $productQuoteId,
+            $sellingPrice,
+            $clientCurrency,
+            $clientCurrencyRate,
+            $caseId
+        );
+        $refund->pqr_status_id = ProductQuoteRefundStatus::PENDING;
+        $refund->pqr_type_id = self::TYPE_VOLUNTARY_REFUND;
+        $refund->pqr_processing_fee_amount = $processingFee;
+        $refund->pqr_refund_amount = $refundAmount;
+        $refund->pqr_penalty_amount = $penaltyAmount;
+        $refund->pqr_client_selling_price = $clientSelling;
+        $refund->pqr_client_refund_amount = $clientRefundAmount;
         $refund->detachBehavior('user');
         return $refund;
     }
@@ -310,5 +352,20 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             'createdDt' => 'pqr_created_dt',
             'updatedDt' => 'pqr_updated_dt',
         ];
+    }
+
+    public static function getTypeList(): array
+    {
+        return self::TYPE_LIST;
+    }
+
+    public function getTypeName(): ?string
+    {
+        return self::getTypeList()[$this->pqr_status_id] ?? null;
+    }
+
+    public function cancel(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::CANCEL;
     }
 }

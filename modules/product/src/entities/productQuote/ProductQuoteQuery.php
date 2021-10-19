@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuote;
 
+use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteFlight;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -94,5 +95,20 @@ class ProductQuoteQuery
                 'typeId' => ProductQuoteRelation::TYPE_REPROTECTION,
                 'parentQuoteId' => $id
             ])->all();
+    }
+
+    /**
+     * @param int $quoteId
+     * @param array $types
+     * @return ProductQuote[]
+     */
+    public static function getRelatedQuoteByOriginAndTypes(int $quoteId, array $types): array
+    {
+        return ProductQuote::find()
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
+                'typeId' => $types,
+                'parentQuoteId' => $quoteId
+            ])
+            ->all();
     }
 }

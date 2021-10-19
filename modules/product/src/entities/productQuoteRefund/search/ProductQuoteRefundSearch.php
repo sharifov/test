@@ -17,7 +17,7 @@ class ProductQuoteRefundSearch extends ProductQuoteRefund
     public function rules()
     {
         return [
-            [['pqr_id', 'pqr_order_refund_id', 'pqr_status_id', 'pqr_created_user_id', 'pqr_updated_user_id'], 'integer'],
+            [['pqr_id', 'pqr_order_refund_id', 'pqr_status_id', 'pqr_created_user_id', 'pqr_updated_user_id', 'pqr_type_id'], 'integer'],
             [['pqr_selling_price', 'pqr_penalty_amount', 'pqr_processing_fee_amount', 'pqr_refund_amount', 'pqr_client_currency_rate', 'pqr_client_selling_price', 'pqr_client_refund_amount'], 'number'],
             [['pqr_client_currency', 'pqr_created_dt', 'pqr_updated_dt'], 'safe'],
             ['pqr_case_id', 'integer'],
@@ -75,6 +75,7 @@ class ProductQuoteRefundSearch extends ProductQuoteRefund
             'pqr_updated_user_id' => $this->pqr_updated_user_id,
             'date(pqr_created_dt)' => $this->pqr_created_dt,
             'date(pqr_updated_dt)' => $this->pqr_updated_dt,
+            'pqr_type_id' => $this->pqr_type_id,
         ]);
 
         $query->andFilterWhere(['like', 'pqr_client_currency', $this->pqr_client_currency]);

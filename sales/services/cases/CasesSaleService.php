@@ -7,7 +7,6 @@ use common\models\CaseSale;
 use Exception;
 use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
-use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
 use sales\exception\BoResponseException;
 use sales\forms\caseSale\CaseSaleRequestBoForm;
@@ -678,5 +677,14 @@ class CasesSaleService
         $result['message'] = Json::decode($response->content)['message'] ?? 'Unknown error message from B/O';
 
         return $result;
+    }
+
+    public function getSaleData(string $bookingId): array
+    {
+        $saleSearch = $this->getSaleFromBo($bookingId);
+        if (empty($saleSearch['saleId'])) {
+            throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') from "cs/search"');
+        }
+        return $this->detailRequestToBackOffice($saleSearch['saleId'], 0, 120, 1);
     }
 }

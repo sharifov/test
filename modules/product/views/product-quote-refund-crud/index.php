@@ -51,6 +51,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'pqr_client_currency',
                 'filter' => Currency::getList()
             ],
+            [
+                'attribute' => 'pqr_type_id',
+                'value' => static function (ProductQuoteRefund $model) {
+                    return $model->getTypeName();
+                },
+                'format' => 'raw',
+                'filter' => ProductQuoteRefund::getTypeList()
+            ],
             'pqr_client_currency_rate',
             'pqr_client_selling_price',
             'pqr_client_refund_amount',

@@ -192,12 +192,12 @@ class EmployeeQuery extends \yii\db\ActiveQuery
                 ->from(Lead::tableName())
                 ->innerJoin('profit_split', 'ps_lead_id = id')
                 ->where(['status' => Lead::STATUS_SOLD])
-                ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+                ->andWhere(['BETWEEN', 'l_status_dt', $from, $to])
                 ->groupBy(['id'])
         ], 'sp.id = leads.id');
         $query->where(['status' => Lead::STATUS_SOLD]);
         $query->andWhere(['IS NOT', 'employee_id', null]);
-        $query->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
+        $query->andWhere(['BETWEEN', 'l_status_dt', $from, $to]);
 
         $complementaryQuery = new Query();
         $complementaryQuery->select([
@@ -207,7 +207,7 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         $complementaryQuery->from(Lead::tableName());
         $complementaryQuery->innerJoin('profit_split', 'ps_lead_id = id');
         $complementaryQuery->where(['status' => Lead::STATUS_SOLD]);
-        $complementaryQuery->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
+        $complementaryQuery->andWhere(['BETWEEN', 'l_status_dt', $from, $to]);
         $query->union($complementaryQuery, true);
         return $query;
     }
