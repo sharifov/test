@@ -785,8 +785,223 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "TODO::" : "TODO::"
-               },
+                "bookingId": "XXXYYYZ",
+                "quote_gid" : "48c82774ead469ad311c1e6112562726",
+                "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
+                "prices": {
+                    "totalPrice": 332.12,
+                    "comm": 0,
+                    "isCk": false
+                },
+                "passengers": {
+                    "ADT": {
+                        "codeAs": "JCB",
+                        "cnt": 1,
+                        "baseFare": 32.12,
+                        "pubBaseFare": 32.12,
+                        "baseTax": 300,
+                        "markup": 0,
+                        "comm": 0,
+                        "price": 332.12,
+                        "tax": 300,
+                        "oBaseFare": {
+                            "amount": 32.120003,
+                            "currency": "USD"
+                        },
+                        "oBaseTax": {
+                            "amount": 300,
+                            "currency": "USD"
+                        },
+                        "oExchangeFareDiff": {
+                            "amount": 8,
+                            "currency": "USD"
+                        },
+                        "oExchangeTaxDiff": {
+                            "amount": 24.12,
+                            "currency": "USD"
+                        }
+                    }
+                },
+                "trips": [
+                    {
+                        "tripId": 1,
+                        "segments": [
+                            {
+                                "segmentId": 1,
+                                "departureTime": "2022-01-10 20:15",
+                                "arrivalTime": "2022-01-11 21:10",
+                                "stop": 1,
+                                "stops": [
+                                    {
+                                        "locationCode": "LFW",
+                                        "departureDateTime": "2022-01-11 12:35",
+                                        "arrivalDateTime": "2022-01-11 11:35",
+                                        "duration": 60,
+                                        "elapsedTime": 620,
+                                        "equipment": "787"
+                                    }
+                                ],
+                                "flightNumber": "513",
+                                "bookingClass": "H",
+                                "duration": 1015,
+                                "departureAirportCode": "JFK",
+                                "departureAirportTerminal": "8",
+                                "arrivalAirportCode": "ADD",
+                                "arrivalAirportTerminal": "2",
+                                "operatingAirline": "ET",
+                                "airEquipType": "787",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "O",
+                                "cabin": "Y",
+                                "meal": "DL",
+                                "fareCode": "HLESUS",
+                                "recheckBaggage": false
+                            },
+                            {
+                                "segmentId": 2,
+                                "departureTime": "2022-01-11 23:15",
+                                "arrivalTime": "2022-01-12 01:20",
+                                "stop": 0,
+                                "stops": null,
+                                "flightNumber": "308",
+                                "bookingClass": "H",
+                                "duration": 125,
+                                "departureAirportCode": "ADD",
+                                "departureAirportTerminal": "2",
+                                "arrivalAirportCode": "NBO",
+                                "arrivalAirportTerminal": "1C",
+                                "operatingAirline": "ET",
+                                "airEquipType": "738",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "I",
+                                "cabin": "Y",
+                                "meal": "D",
+                                "fareCode": "HLESUS",
+                                "recheckBaggage": false
+                            }
+                        ],
+                        "duration": 1265
+                    },
+                    {
+                        "tripId": 2,
+                        "segments": [
+                            {
+                                "segmentId": 1,
+                                "departureTime": "2022-01-31 05:00",
+                                "arrivalTime": "2022-01-31 07:15",
+                                "stop": 0,
+                                "stops": null,
+                                "flightNumber": "309",
+                                "bookingClass": "E",
+                                "duration": 135,
+                                "departureAirportCode": "NBO",
+                                "departureAirportTerminal": "1C",
+                                "arrivalAirportCode": "ADD",
+                                "arrivalAirportTerminal": "2",
+                                "operatingAirline": "ET",
+                                "airEquipType": "738",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "O",
+                                "cabin": "Y",
+                                "meal": "B",
+                                "fareCode": "ELPRUS",
+                                "recheckBaggage": false
+                            },
+                            {
+                                "segmentId": 2,
+                                "departureTime": "2022-01-31 08:30",
+                                "arrivalTime": "2022-01-31 18:15",
+                                "stop": 1,
+                                "stops": [
+                                    {
+                                        "locationCode": "LFW",
+                                        "departureDateTime": "2022-01-31 12:15",
+                                        "arrivalDateTime": "2022-01-31 11:00",
+                                        "duration": 75,
+                                        "elapsedTime": 330,
+                                        "equipment": "787"
+                                    }
+                                ],
+                                "flightNumber": "512",
+                                "bookingClass": "E",
+                                "duration": 1065,
+                                "departureAirportCode": "ADD",
+                                "departureAirportTerminal": "2",
+                                "arrivalAirportCode": "JFK",
+                                "arrivalAirportTerminal": "8",
+                                "operatingAirline": "ET",
+                                "airEquipType": "787",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "I",
+                                "cabin": "Y",
+                                "meal": "LD",
+                                "fareCode": "ELPRUS",
+                                "recheckBaggage": false
+                            }
+                        ],
+                        "duration": 1275
+                    }
+                ],
+                "paxCnt": 1,
+                "validatingCarrier": "",
+                "gds": "S",
+                "pcc": "G9MJ",
+                "cons": "GTT",
+                "fareType": "SR",
+                "cabin": "Y",
+                "currency": "USD",
+                "currencies": [
+                    "USD"
+                ],
+                "currencyRates": {
+                    "USDUSD": {
+                        "from": "USD",
+                        "to": "USD",
+                        "rate": 1
+                    }
+                },
+                "keys": {},
+                "meta": {
+                    "eip": 0,
+                    "noavail": false,
+                    "searchId": "U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx",
+                    "lang": "en",
+                    "rank": 0,
+                    "cheapest": false,
+                    "fastest": false,
+                    "best": false,
+                    "country": "us"
+                },
+                "billing": {
+                      "first_name": "John",
+                      "last_name": "Doe",
+                      "middle_name": "",
+                      "address_line1": "1013 Weda Cir",
+                      "address_line2": "",
+                      "country_id": "US",
+                      "city": "Mayfield",
+                      "state": "KY",
+                      "zip": "99999",
+                      "company_name": "",
+                      "contact_phone": "+19074861000",
+                      "contact_email": "test@test.com",
+                      "contact_name": "Test Name"
+                },
+                "payment_request": {
+                      "method_key": "cc",
+                      "currency": "USD",
+                      "method_data": {
+                          "card": {
+                              "number": "4111555577778888",
+                              "holder_name": "Test test",
+                              "expiration_month": 10,
+                              "expiration_year": 23,
+                              "cvv": "1234"
+                          }
+                      },
+                      "amount": 112.25
+                }
+            },
      *        "code": "13200",
      *        "technical": {
      *           ...
