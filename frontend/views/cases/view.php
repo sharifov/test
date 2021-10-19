@@ -97,38 +97,35 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                     $canStatusLog = Auth::can('/lead/flow-transition');
                     $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
                 ?>
-                <?php if ($canStatusLog || $canDataLogs) : ?>
-                    <div class="dropdown" style="float: left; padding-right: 10px;">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-bars"> </i> Logs
-                        </button>
-                        <div class="dropdown-menu">
+                <div class="dropdown" style="float: left; padding-right: 10px;">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-bars"> </i> Logs
+                    </button>
+                    <div class="dropdown-menu">
 
-                            <?php if ($canStatusLog) : ?>
-                                <?= Html::a(
-                                    '<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''),
-                                    null,
-                                    [
-                                        'class' => 'dropdown-item',
-                                        'id' => 'btn-status-history',
-                                        'title' => 'Status history'
-                                    ]
-                                ) ?>
-                            <?php endif;?>
+                        <?= Html::a(
+                            '<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''),
+                            null,
+                            [
+                                'class' => 'dropdown-item',
+                                'id' => 'btn-status-history',
+                                'title' => 'Status history'
+                            ]
+                        ) ?>
 
-                            <?php if ($canDataLogs) : ?>
-                                <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
-                                    'id' => 'btn-general-case-log',
-                                    'class' => 'dropdown-item showModalButton',
-                                    'data-modal_id' => 'lg',
-                                    'title' => 'General Case Log #' . $model->cs_id,
-                                    'data-content-url' => Url::to(['global-log/ajax-view-general-case-log', 'cid' => $model->cs_id])
-                                ]) ?>
-                            <?php endif; ?>
+                        <?php if ($canDataLogs) : ?>
+                            <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
+                                'id' => 'btn-general-case-log',
+                                'class' => 'dropdown-item showModalButton',
+                                'data-modal_id' => 'lg',
+                                'title' => 'General Case Log #' . $model->cs_id,
+                                'data-content-url' => Url::to(['global-log/ajax-view-general-case-log', 'cid' => $model->cs_id])
+                            ]) ?>
+                        <?php endif; ?>
 
-                        </div>
                     </div>
-                <?php endif; ?>
+                </div>
+
                 <?= CasesViewRenderHelper::renderTakeButton($model, $user) ?>
                 <?php if (Auth::can('cases/view_Checked', ['case' => $model])) : ?>
                     <?= CasesViewRenderHelper::renderCheckedButton($model) ?>
