@@ -97,6 +97,16 @@ class ProductQuoteQuery
             ])->all();
     }
 
+    public static function getVoluntaryExchangeQuotesByOriginQuote(int $id): array
+    {
+        return ProductQuote::find()
+            ->with('productQuoteDataRecommended')
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
+                'typeId' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE,
+                'parentQuoteId' => $id
+            ])->all();
+    }
+
     /**
      * @param int $quoteId
      * @param array $types

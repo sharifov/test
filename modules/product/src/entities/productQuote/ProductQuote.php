@@ -748,12 +748,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     /**
      * @param int|null $creatorId
      * @param string|null $description
+     * @param bool $addEvent
      */
-    public function booked(?int $creatorId = null, ?string $description = null): void
+    public function booked(?int $creatorId = null, ?string $description = null, bool $addEvent = true): void
     {
-        $this->recordEvent(
-            new ProductQuoteBookedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
-        );
+        if ($addEvent) {
+            $this->recordEvent(
+                new ProductQuoteBookedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+            );
+        }
+
         if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
             $this->setStatus(ProductQuoteStatus::BOOKED);
 //            $this->recordEvent((new OrderChangeStatusProcessingEvent($this)));
@@ -1057,6 +1061,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isRecommended(): bool
     {
         return $this->productQuoteDataRecommended ? $this->productQuoteDataRecommended->isRecommended() : false;
+    }
+
+    public function isChangeable(): bool
+    {
+        return array_key_exists($this->pq_status_id, SettingHelper::getProductQuoteChangeableStatuses());
     }
 
     public function isInChangeableStatus(): bool

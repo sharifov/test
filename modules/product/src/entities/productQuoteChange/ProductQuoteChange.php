@@ -11,6 +11,7 @@ use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
 use sales\entities\EventTrait;
+use sales\helpers\setting\SettingHelper;
 use sales\traits\FieldsTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -119,6 +120,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function statusToNew(): void
     {
         $this->pqc_status_id = ProductQuoteChangeStatus::NEW;
+    }
+
+    public function statusToPending(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::PENDING;
     }
 
     public function inProgress(): void
@@ -252,7 +258,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return $model;
     }
 
-    public static function createVoluntaryExchange(int $productQuoteId, ?int $caseId, bool $isAutomate = false): ProductQuoteChange
+    public static function createVoluntaryExchange(int $productQuoteId, ?int $caseId, ?bool $isAutomate = null): ProductQuoteChange
     {
         $model = self::createNew($productQuoteId, $caseId, $isAutomate);
         $model->pqc_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
@@ -280,5 +286,15 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function isAutomate(): bool
     {
         return $this->pqc_is_automate;
+    }
+
+    public function isActiveStatus(): bool
+    {
+        return array_key_exists($this->pqc_status_id, SettingHelper::getActiveQuoteChangeStatuses());
+    }
+
+    public function isFinishedStatus(): bool
+    {
+        return array_key_exists($this->pqc_status_id, SettingHelper::getFinishedQuoteChangeStatuses());
     }
 }

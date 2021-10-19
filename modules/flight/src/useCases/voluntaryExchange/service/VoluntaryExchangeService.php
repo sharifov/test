@@ -2,14 +2,18 @@
 
 namespace modules\flight\src\useCases\voluntaryExchange\service;
 
+use common\components\purifier\Purifier;
 use common\models\CaseSale;
 use common\models\Client;
+use common\models\Notifications;
 use DomainException;
 use modules\flight\models\Flight;
+use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use sales\entities\cases\CaseEventLog;
@@ -18,6 +22,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\services\client\ClientCreateForm;
 use Throwable;
 use Yii;
@@ -92,7 +97,8 @@ class VoluntaryExchangeService
             'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
             ['pq_gid' => $originProductQuote->pq_gid]
         );
-        // $originProductQuote->booked(); /* TODO::  */
+        $originProductQuote->booked(null, null, false);
+        $this->objectCollection->getProductQuoteRepository()->save($originProductQuote);
         return $originProductQuote;
     }
 
@@ -103,9 +109,11 @@ class VoluntaryExchangeService
             ->updateRecommendedReprotectionQuote($originProductQuoteId, $exchangeQuoteId);
     }
 
-    public function createProductQuoteChange(int $originProductQuoteId, int $caseId): ProductQuoteChange
+    public function createProductQuoteChange(int $originProductQuoteId, int $caseId, array $dataJson): ProductQuoteChange
     {
         $productQuoteChange = ProductQuoteChange::createVoluntaryExchange($originProductQuoteId, $caseId);
+        $productQuoteChange->setDataJson($dataJson);
+        $productQuoteChange->statusToPending();
         $this->objectCollection->getProductQuoteChangeRepository()->save($productQuoteChange);
         return $productQuoteChange;
     }
@@ -159,6 +167,110 @@ class VoluntaryExchangeService
             [new EmailCreateForm(['email' => $orderContactForm->email])],
             $clientForm
         );
+    }
+
+    public function declineProductQuoteChange(ProductQuoteChange $productQuoteChange): ProductQuoteChange
+    {
+        $finishedQuoteChangeStatuses = array_keys(SettingHelper::getFinishedQuoteChangeStatuses());
+        if (!in_array($productQuoteChange->pqc_status_id, $finishedQuoteChangeStatuses, false)) {
+            $productQuoteChange->declined();
+            $this->objectCollection->getProductQuoteChangeRepository()->save($productQuoteChange);
+        }
+        return $productQuoteChange;
+    }
+
+    public function declineVoluntaryExchangeQuotes(ProductQuote $originProductQuote, Cases $case, ?int $userId = null): array
+    {
+        $declinedIds = [];
+        if ($voluntaryQuotes = ProductQuoteQuery::getVoluntaryExchangeQuotesByOriginQuote($originProductQuote->pq_id)) {
+            foreach ($voluntaryQuotes as $voluntaryExchangeQuote) {
+                if (!$voluntaryExchangeQuote->isDeclined()) {
+                    $voluntaryExchangeQuote->declined($userId, 'Declined from Voluntary Exchange process');
+                    $this->objectCollection->getProductQuoteRepository()->save($voluntaryExchangeQuote);
+                    $declinedIds[] = $voluntaryExchangeQuote->pq_id;
+                }
+            }
+            if ($declinedIds) {
+                $case->addEventLog(
+                    CaseEventLog::RE_PROTECTION_CREATE,
+                    'Old Voluntary Exchange Quotes declined',
+                    ['originProductQuoteGid' => $originProductQuote->pq_gid]
+                );
+            }
+        }
+        return $declinedIds;
+    }
+
+    public function doneProcess(
+        ProductQuote $voluntaryExchangeQuote,
+        Cases $case,
+        ProductQuoteChange $productQuoteChange,
+        FlightRequestService $flightRequestService
+    ): void {
+        $case->awaiting(null, 'Voluntary Exchange api processing');
+        $this->objectCollection->getCasesRepository()->save($case);
+
+        $voluntaryExchangeQuote->inProgress(null, 'Voluntary Exchange api processing');
+        $this->objectCollection->getProductQuoteRepository()->save($voluntaryExchangeQuote);
+
+        $productQuoteChange->inProgress();
+        $this->objectCollection->getProductQuoteChangeRepository()->save($productQuoteChange);
+
+        $flightRequestService->done('FlightRequest successfully processed');
+
+        if ($case->cs_user_id) {
+            $linkToCase = Purifier::createCaseShortLink($case);
+            Notifications::createAndPublish(
+                $case->cs_user_id,
+                'New VoluntaryExchange request',
+                'New VoluntaryExchange request. Case: (' . $linkToCase . ')',
+                Notifications::TYPE_INFO,
+                true
+            );
+        }
+    }
+
+    public function failProcess(
+        string $description,
+        ?Cases $case,
+        ?ProductQuoteChange $productQuoteChange,
+        ?FlightRequestService $flightRequestService
+    ): void {
+        if ($case) {
+            $case->error(null, 'Voluntary Exchange api processing fail');
+            if ($case->isAutomate()) {
+                $case->offIsAutomate();
+            }
+            $this->objectCollection->getCasesRepository()->save($case);
+
+            if ($case->cs_user_id) {
+                $linkToCase = Purifier::createCaseShortLink($case);
+                Notifications::createAndPublish(
+                    $case->cs_user_id,
+                    'New VoluntaryExchange request',
+                    'Error in VoluntaryExchange request. Case: (' . $linkToCase . ')',
+                    Notifications::TYPE_DANGER,
+                    true
+                );
+            }
+        }
+
+        if ($productQuoteChange) {
+            $productQuoteChange->error();
+            $this->objectCollection->getProductQuoteChangeRepository()->save($productQuoteChange);
+        }
+
+        if ($flightRequestService) {
+            $flightRequestService->error($description);
+
+            if ($flightRequest = $flightRequestService->getFlightRequest()) {
+                try {
+                    OtaRequestVoluntaryRequestService::fail($flightRequest, null);
+                } catch (\Throwable $throwable) {
+                    Yii::error(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:OtaRequest:Fail');
+                }
+            }
+        }
     }
 
     public static function writeLog(Throwable $throwable, string $category, array $data = []): void
