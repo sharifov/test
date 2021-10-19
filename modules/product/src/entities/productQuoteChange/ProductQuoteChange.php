@@ -335,6 +335,4 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     {
         return $this->pqc_decision_type_id ? ProductQuoteChangeDecisionType::asFormat($this->pqc_decision_type_id) : '-';
     }
-
-
 }

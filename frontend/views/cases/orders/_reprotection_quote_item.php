@@ -139,8 +139,8 @@ if ($quote->productQuoteLastChange) {
               <thead>
                 <tr>
                   <th style="width: 40px;">Nr</th>
+                    <th style="width: 50px" title="Recommended">Rec</th>
                   <th>Status</th>
-                  <th style="width: 50px" title="Recommended">Rec</th>
                   <th style="width: 180px">Created</th>
                   <th>Owner</th>
                   <th style="width: 60px;">Action</th>
@@ -148,21 +148,21 @@ if ($quote->productQuoteLastChange) {
               </thead>
               <tbody>
                 <?php foreach ($reprotectionQuotes as $nr => $reprotectionQuote) : ?>
+                    <?php
+                    $isRecommended = $reprotectionQuote->isRecommended();
+                    $productQuoteAbacDto = new ProductQuoteAbacDto($reprotectionQuote);
+                    /*
+                    <td style="padding:5px;" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>">
+                        <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
+                        <?=Html::encode($quote->pqProduct->prType->pt_name)?>
+                        <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
+                    </td>
+                    <td style="padding:5px;"><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
+                    */ ?>
                     <tr>
-                        <?php
-                        $isRecommended = $reprotectionQuote->isRecommended();
-                        $productQuoteAbacDto = new ProductQuoteAbacDto($reprotectionQuote);
-                        /*
-                        <td style="padding:5px;" title="Product Quote ID: <?=Html::encode($quote->pq_id)?>, GID: <?=Html::encode($quote->pq_gid)?>">
-                            <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
-                            <?=Html::encode($quote->pqProduct->prType->pt_name)?>
-                            <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
-                        </td>
-                        <td style="padding:5px;"><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-                        */ ?>
                       <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($reprotectionQuote->pq_id)?>, GID: <?=Html::encode($reprotectionQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($reprotectionQuote->pq_id)?>, GID: <?=Html::encode($reprotectionQuote->pq_gid)?>"><?=($nr + 1)?></td>
+                        <td><?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star warning', 'title' => 'Recommended']) : '-' ?></td>
                       <td><?= ProductQuoteStatus::asFormat($reprotectionQuote->pq_status_id)?></td>
-                      <td><?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star', 'title' => 'Recommended']) : '-' ?></td>
                       <td><small><?=$reprotectionQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($reprotectionQuote->pq_created_dt)) : '-'?></small></td>
                       <td>
                           <?php if ($reprotectionQuote->pqOwnerUser) : ?>
@@ -281,7 +281,7 @@ if ($quote->productQuoteLastChange) {
                     <thead>
                     <tr>
                         <th style="width: 30px;">Nr</th>
-                        <th style="width: 80px;">Type</th>
+                        <th style="width: 60px;">Type</th>
                         <th>Status</th>
                         <th style="width: 140px">Created</th>
 
@@ -297,11 +297,8 @@ if ($quote->productQuoteLastChange) {
                             <td data-toggle="tooltip" data-original-title="ProductQuoteChange ID: <?=Html::encode($changeItem->pqc_id)?>" title="ProductQuoteChangeID: <?=Html::encode($changeItem->pqc_id)?>">
                                 <?=($nr + 1)?>
                             </td>
-                            <td><?= Html::tag(
-                                      'span',
-                                      $changeItem->getShortTypeName(),
-                                      ['class' => 'badge badge-light', 'title' => $changeItem->getTypeName()]
-                                  ); ?>
+                            <td>
+                                <?= Html::tag('span', $changeItem->getShortTypeName(), ['class' => 'badge badge-light', 'title' => $changeItem->getTypeName()]); ?>
                             </td>
                             <td><?= $changeItem->getStatusLabel()?></td>
                             <td><small><?=$changeItem->pqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_created_dt)) : '-'?></small></td>
@@ -343,8 +340,10 @@ if ($quote->productQuoteLastChange) {
                             <td data-toggle="tooltip" data-original-title="ProductQuoteRefund ID: <?=Html::encode($refundItem->pqr_id)?>" title="ProductQuoteChangeID: <?=Html::encode($refundItem->pqr_id)?>">
                                 <?=($nr + 1)?>
                             </td>
-                            <td><?= $refundItem->pqr_status_id ? ProductQuoteRefundStatus::asFormat($refundItem->pqr_status_id) : '-'?></td>
-                            <td><?= $refundItem->pqr_status_id ? ProductQuoteRefundStatus::asFormat($refundItem->pqr_status_id) : '-'?></td>
+                            <td>
+                                <?= Html::tag('span', $refundItem->getShortTypeName(), ['class' => 'badge badge-light', 'title' => $refundItem->getTypeName()]); ?>
+                            </td>
+                            <td><?= $refundItem->getStatusLabel()?></td>
                             <td><?= $refundItem->pqr_client_selling_price ? number_format($refundItem->pqr_client_selling_price, 2) : '-'?></td>
                             <td><?= $refundItem->pqr_client_refund_amount ? number_format($refundItem->pqr_client_refund_amount, 2) : '-'?></td>
                             <td><?= $refundItem->pqr_client_currency ? Html::encode($refundItem->pqr_client_currency) : '-'?></td>
