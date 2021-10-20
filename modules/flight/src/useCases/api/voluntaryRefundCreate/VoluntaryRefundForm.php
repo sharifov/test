@@ -14,6 +14,10 @@ use yii\base\Model;
  * @property string $currency
  * @property array $tickets
  * @property array $auxiliaryOptions
+ * @property float $processingFee
+ * @property float $penaltyAmount
+ * @property float $totalRefundAmount
+ * @property float $totalPaid
  *
  * @property TicketForm[] $ticketForms
  * @property AuxiliaryOptionForm[] $auxiliaryOptionsForms
@@ -21,6 +25,10 @@ use yii\base\Model;
 class VoluntaryRefundForm extends Model
 {
     public $currency;
+    public $processingFee;
+    public $penaltyAmount;
+    public $totalRefundAmount;
+    public $totalPaid;
     public $tickets;
     public $auxiliaryOptions;
 
@@ -37,9 +45,11 @@ class VoluntaryRefundForm extends Model
     public function rules(): array
     {
         return [
-            ['currency', 'required'],
+            [['currency', 'processingFee', 'penaltyAmount', 'totalRefundAmount', 'totalPaid'], 'required'],
             ['currency', 'string', 'max' => 3],
             ['currency', 'exist', 'targetClass' => Currency::class, 'targetAttribute' => 'cur_code'],
+
+            [['processingFee', 'penaltyAmount', 'totalRefundAmount', 'totalPaid'], 'number'],
 
             ['tickets', IsArrayValidator::class, 'skipOnEmpty' => false],
             ['tickets', 'ticketsValidation', 'skipOnEmpty' => false],

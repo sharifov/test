@@ -196,14 +196,14 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
         int $orderRefundId,
         int $productQuoteRefundId,
         ?int $productQuoteOptionId,
-        float $sellingPrice,
-        float $penaltyAmount,
-        float $processingFeeAmount,
-        float $refundAmount,
+        ?float $sellingPrice,
+        ?float $penaltyAmount,
+        ?float $processingFeeAmount,
+        ?float $refundAmount,
         string $clientCurrency,
         float $clientCurrencyRate,
-        float $clientSellingPrice,
-        float $clientRefundAmount,
+        ?float $clientSellingPrice,
+        ?float $clientRefundAmount,
         bool $refundAllow
     ): self {
         $self = new self();

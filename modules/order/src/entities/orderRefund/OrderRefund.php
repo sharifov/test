@@ -75,9 +75,13 @@ class OrderRefund extends \yii\db\ActiveRecord
         $uuid,
         $orderId,
         $sellingPrice,
+        $penaltyAmount,
+        $processingFeeAmount,
+        $refundAmount,
         $clientCurrency,
         $clientCurrencyRate,
         $clientSellingPrice,
+        $clientRefundAmount,
         $caseId
     ): self {
         $refund = self::create(
@@ -89,9 +93,13 @@ class OrderRefund extends \yii\db\ActiveRecord
             $clientSellingPrice,
             $caseId
         );
+        $refund->orr_penalty_amount = $penaltyAmount;
+        $refund->orr_processing_fee_amount = $processingFeeAmount;
+        $refund->orr_refund_amount = $refundAmount;
         $refund->orr_client_status_id = OrderRefundClientStatus::PROCESSING;
         $refund->orr_status_id = OrderRefundStatus::PENDING;
         $refund->orr_description = 'Voluntary refund request';
+        $refund->orr_client_refund_amount = $clientRefundAmount;
         $refund->detachBehavior('user');
         return $refund;
     }

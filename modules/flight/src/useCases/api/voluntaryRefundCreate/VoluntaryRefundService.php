@@ -44,6 +44,7 @@ use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
+use sales\services\CurrencyHelper;
 
 /**
  * Class VoluntaryRefundService
@@ -189,6 +190,12 @@ class VoluntaryRefundService
                     ['order_gid' => $order->or_gid]
                 );
             }
+
+            if (!$order->or_client_currency_rate) {
+                $order->or_client_currency = $voluntaryRefundCreateForm->refundForm->currency;
+                $order->or_client_currency_rate = $order->orClientCurrency->cur_app_rate;
+                $this->orderRepository->save($order);
+            }
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Order creation failed');
             throw new VoluntaryRefundException('Order creation failed', VoluntaryRefundException::ORDER_CREATION_FAILED);
@@ -213,27 +220,31 @@ class VoluntaryRefundService
                 OrderRefund::generateUid(),
                 $originProductQuote->pq_id,
                 $order->or_app_total,
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->penaltyAmount, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->processingFee, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->totalRefundAmount, $order->orClientCurrency->cur_base_rate),
                 $order->or_client_currency,
                 $order->or_client_currency_rate,
                 $order->or_client_total,
+                $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
                 $case->cs_id
             );
             $this->orderRefundRepository->save($orderRefund);
 
-            $totalCalculatedTickets = $this->calculateTotalTicketsAmount($voluntaryRefundCreateForm->refundForm->ticketForms);
             $productQuoteRefund = ProductQuoteRefund::createByVoluntaryRefund(
                 $orderRefund->orr_id,
                 $originProductQuote->pq_id,
-                0,
-                $totalCalculatedTickets->processingFee,
-                $totalCalculatedTickets->refundAmount,
-                $totalCalculatedTickets->airlinePenalty,
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->totalPaid, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->processingFee, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->totalRefundAmount, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->penaltyAmount, $order->orClientCurrency->cur_base_rate),
                 $voluntaryRefundCreateForm->refundForm->currency,
                 $order->or_client_currency_rate,
-                $totalCalculatedTickets->refundAmount,
-                $totalCalculatedTickets->refundAmount,
+                $voluntaryRefundCreateForm->refundForm->totalPaid,
+                $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
                 $case->cs_id
             );
+            $this->productQuoteRefundRepository->save($productQuoteRefund);
 
             foreach ($voluntaryRefundCreateForm->refundForm->ticketForms as $ticketForm) {
                 $flightQuoteTicketRefund = FlightQuoteTicketRefund::create($ticketForm->number, null);
@@ -242,10 +253,10 @@ class VoluntaryRefundService
                 $productQuoteObjectRefund = ProductQuoteObjectRefund::create(
                     $productQuoteRefund->pqr_id,
                     $flightQuoteTicketRefund->fqtr_id,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->sellingPrice, $order->orClientCurrency),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->airlinePenalty, $order->orClientCurrency),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->processingFee, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->refundAmount, $order->orClientCurrency->cur_base_rate),
                     $voluntaryRefundCreateForm->refundForm->currency,
                     $order->or_client_currency_rate,
                     $ticketForm->sellingPrice,
@@ -263,13 +274,13 @@ class VoluntaryRefundService
                     $orderRefund->orr_id,
                     $productQuoteRefund->pqr_id,
                     $productQuoteOption->pqo_id ?? null,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
+                    CurrencyHelper::convertToBaseCurrency($auxiliaryOptionsForm->amount, $order->orClientCurrency->cur_base_rate),
+                    null,
+                    null,
+                    $auxiliaryOptionsForm->amount,
                     $voluntaryRefundCreateForm->refundForm->currency,
                     $order->or_client_currency_rate,
-                    0.0,
+                    $auxiliaryOptionsForm->amount,
                     $auxiliaryOptionsForm->refundable,
                     $auxiliaryOptionsForm->refundAllow
                 );
@@ -389,21 +400,6 @@ class VoluntaryRefundService
             ['pq_gid' => $originProductQuote->pq_gid]
         );
         return $originProductQuote;
-    }
-
-    /**
-     * @param TicketForm[] $ticketForms
-     * @return TotalTicketCalculatedValuesDTO
-     */
-    private function calculateTotalTicketsAmount(array $ticketForms): TotalTicketCalculatedValuesDTO
-    {
-        $dto = new TotalTicketCalculatedValuesDTO();
-        foreach ($ticketForms as $ticketForm) {
-            $dto->processingFee += $ticketForm->processingFee;
-            $dto->airlinePenalty += $ticketForm->airlinePenalty;
-            $dto->refundAmount += $ticketForm->refundAmount;
-        }
-        return $dto;
     }
 
     private static function getCategoryKey(): string
