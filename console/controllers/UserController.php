@@ -98,6 +98,7 @@ class UserController extends Controller
 
         $result = $query->all();
         $userStatDayErrors = [];
+        \Yii::info(VarDumper::dumpAsString($result), 'info\console:UserController:actionCalculateGrossProfit');
         foreach ($result as $userGrossProfit) {
             $userStatDay = UserStatDay::createGrossProfit(
                 $userGrossProfit['gross_profit'],
@@ -106,7 +107,7 @@ class UserController extends Controller
                 (int)$date->format('m'),
                 (int)$date->format('Y')
             );
-            if (!$userStatDay->validate() && !$userStatDay->save()) {
+            if (!$userStatDay->validate() || !$userStatDay->save()) {
                 $userStatDayErrors[] = $userStatDay->getErrorSummary(true)[0];
             }
             $processedUserStatDay++;
