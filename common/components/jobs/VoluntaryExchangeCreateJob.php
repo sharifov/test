@@ -61,7 +61,6 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 throw new \RuntimeException('Case not found by ID(' . $this->case_id . ')');
             }
             $caseHandler = new CaseVoluntaryExchangeHandler($case, $objectCollection);
-
             $originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($flightRequest->fr_booking_id);
 
             if ($originProductQuote && ($productQuoteChange = $originProductQuote->productQuoteLastChange)) {
@@ -222,26 +221,20 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
             }
 
             try {
-                if (!$boRequestService->sendVoluntaryExchange($productQuoteChange)) {
-                    throw new \RuntimeException('Request to Back Office is failed');
-                }
-            } catch (\Throwable $throwable) {
-                $caseHandler->caseToPendingManual('Request to Back Office is failed');
-                throw $throwable;
-            }
-
-            try {
                 (new CleanDataVoluntaryExchangeService($flightRequest, $productQuoteChange, $objectCollection));
             } catch (\Throwable $throwable) {
                 Yii::error(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:CleanDataVoluntaryExchangeService');
             }
 
+            /* TODO:: temporary disable */
+            /*
             try {
                 OtaRequestVoluntaryRequestService::success($flightRequest, $voluntaryExchangeQuote, $originProductQuote, $case);
             } catch (\Throwable $throwable) {
                 $caseHandler->caseToPendingManual('OTA site is not informed');
                 throw $throwable;
             }
+            */
 
             $voluntaryExchangeService->doneProcess(
                 $voluntaryExchangeQuote,
@@ -250,7 +243,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 $flightRequestService
             );
         } catch (Throwable $throwable) {
-            if (isset($case, $flightRequest, $voluntaryExchangeService, $caseHandler) && !isset($client)) {
+            if (isset($case, $flightRequest, $caseHandler) && !isset($client)) {
                 $client = $voluntaryExchangeService->createSimpleClient($flightRequest->fr_project_id);
                 $caseHandler->addClient($client->id);
             }

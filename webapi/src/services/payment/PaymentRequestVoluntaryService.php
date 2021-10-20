@@ -44,8 +44,8 @@ class PaymentRequestVoluntaryService
 
     public function processing(PaymentRequestForm $paymentRequestForm, ?Order $order, ?string $description): bool
     {
-        if (!$paymentMethod = PaymentMethod::findOne(['pm_key' => $paymentRequestForm->method_key])) {
-            throw new \RuntimeException('PaymentMethod not found by key (' . $paymentRequestForm->method_key . ')');
+        if (!$paymentMethod = PaymentMethod::findOne(['pm_short_name' => $paymentRequestForm->method_key])) {
+            throw new \RuntimeException('PaymentMethod not found by short name (' . $paymentRequestForm->method_key . ')');
         }
         $this->paymentMethod = $paymentMethod;
 

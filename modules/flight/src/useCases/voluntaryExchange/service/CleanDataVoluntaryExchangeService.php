@@ -30,7 +30,7 @@ class CleanDataVoluntaryExchangeService
      */
     public function __construct(
         FlightRequest $flightRequest,
-        ProductQuoteChange $productQuoteChange,
+        ?ProductQuoteChange $productQuoteChange,
         VoluntaryExchangeObjectCollection $objectCollection
     ) {
         $this->objectCollection = $objectCollection;
@@ -56,9 +56,11 @@ class CleanDataVoluntaryExchangeService
 
     private function cleanProductQuoteChange(): CleanDataVoluntaryExchangeService
     {
-        $pqcDataJson = $this->creditCardFilter->filterData($this->productQuoteChange->pqc_data_json);
-        $this->productQuoteChange->pqc_data_json = $pqcDataJson;
-        $this->objectCollection->getProductQuoteChangeRepository()->save($this->productQuoteChange);
+        if (!empty($this->productQuoteChange)) {
+            $pqcDataJson = $this->creditCardFilter->filterData($this->productQuoteChange->pqc_data_json);
+            $this->productQuoteChange->pqc_data_json = $pqcDataJson;
+            $this->objectCollection->getProductQuoteChangeRepository()->save($this->productQuoteChange);
+        }
         return $this;
     }
 }

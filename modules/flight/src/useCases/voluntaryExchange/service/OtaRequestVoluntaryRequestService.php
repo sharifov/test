@@ -7,7 +7,6 @@ use modules\flight\models\FlightRequest;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
-use sales\exception\CheckRestrictionException;
 use Yii;
 
 /**

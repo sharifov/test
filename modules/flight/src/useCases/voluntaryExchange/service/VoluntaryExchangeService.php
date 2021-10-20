@@ -8,7 +8,6 @@ use common\models\Client;
 use common\models\Notifications;
 use DomainException;
 use modules\flight\models\Flight;
-use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
@@ -192,7 +191,7 @@ class VoluntaryExchangeService
             }
             if ($declinedIds) {
                 $case->addEventLog(
-                    CaseEventLog::RE_PROTECTION_CREATE, /* TODO::  */
+                    CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
                     'Old Voluntary Exchange Quotes declined',
                     ['originProductQuoteGid' => $originProductQuote->pq_gid]
                 );
@@ -264,18 +263,23 @@ class VoluntaryExchangeService
             $flightRequestService->error($description);
 
             if ($flightRequest = $flightRequestService->getFlightRequest()) {
+                (new CleanDataVoluntaryExchangeService($flightRequest, $productQuoteChange, $this->objectCollection));
+
+                /* TODO:: temporary disable */
+                /*
                 try {
                     OtaRequestVoluntaryRequestService::fail($flightRequest, null);
                 } catch (\Throwable $throwable) {
                     Yii::error(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:OtaRequest:Fail');
                 }
+                */
             }
         }
     }
 
     public static function writeLog(Throwable $throwable, string $category, array $data = []): void
     {
-        $message = AppHelper::throwableLog($throwable);
+        $message = AppHelper::throwableLog($throwable, YII_DEBUG);
         if ($data) {
             $message = ArrayHelper::merge($message, $data);
         }

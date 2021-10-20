@@ -4,6 +4,7 @@ namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\VoluntaryExchangeCreateJob;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
@@ -34,16 +35,19 @@ use yii\helpers\ArrayHelper;
  * Class FlightQuoteExchangeController
  *
  * @property VoluntaryExchangeObjectCollection $objectCollection
+ * @property BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
  */
 class FlightQuoteExchangeController extends BaseController
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
+    private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
 
     /**
      * @param $id
      * @param $module
      * @param ApiLogger $logger
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
+     * @param BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
      * @param array $config
      */
     public function __construct(
@@ -51,9 +55,11 @@ class FlightQuoteExchangeController extends BaseController
         $module,
         ApiLogger $logger,
         VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
+        BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService,
         $config = []
     ) {
         $this->objectCollection = $voluntaryExchangeObjectCollection;
+        $this->boRequestVoluntaryExchangeService = $boRequestVoluntaryExchangeService;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -407,7 +413,8 @@ class FlightQuoteExchangeController extends BaseController
      *        "message": "OK",
      *        "data": {
                     "resultMessage": "FlightRequest created",
-                    "flightRequestId" : 123
+                    "flightRequestId" : 123,
+                    "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
                },
      *        "code": "13200",
      *        "technical": {
@@ -527,12 +534,23 @@ class FlightQuoteExchangeController extends BaseController
             $job->flight_request_id = $flightRequest->fr_id;
             $job->case_id = $case->cs_id;
             $jobId = Yii::$app->queue_job->priority(100)->push($job);
-
             $flightRequest->fr_job_id = $jobId;
             $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
+            if (!empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
+                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post)) {
+                    throw new \RuntimeException('Request to Back Office is failed');
+                }
+            } else {
+                \Yii::warning(
+                    'Setting VoluntaryExchangeBoEndpoint is empty. Request not sent.',
+                    'FlightQuoteExchangeController:SettingVoluntaryExchangeBoEndpoint'
+                );
+            }
+
             $dataMessage['resultMessage'] = 'FlightRequest is accepted for processing';
             $dataMessage['flightRequestId'] = $flightRequest->fr_id;
+            $dataMessage['caseGid'] = $case->cs_gid;
 
             return new SuccessResponse(
                 new DataMessage($dataMessage),
@@ -540,7 +558,7 @@ class FlightQuoteExchangeController extends BaseController
             );
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message['booking_id'] = $post['booking_id'] ?? null;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
@@ -554,7 +572,7 @@ class FlightQuoteExchangeController extends BaseController
             );
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message['booking_id'] = $post['booking_id'] ?? null;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,

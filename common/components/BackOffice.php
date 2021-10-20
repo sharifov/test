@@ -369,20 +369,10 @@ class BackOffice
         }
     }
 
-    public static function voluntaryExchange(ProductQuoteChange $productQuoteChange): bool
+    public static function voluntaryExchange(array $request): bool
     {
         if (empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
             throw new \DomainException('BO endpoint is empty');
-        }
-        if (empty($productQuoteChange->pqc_data_json)) {
-            throw new \DomainException('Booking ID is empty');
-        }
-
-        try {
-            $request = JsonHelper::decode($productQuoteChange->pqc_data_json);
-        } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'BackOffice:voluntaryExchange:Json:Decode');
-            throw new \DomainException('Json Data is corrupted');
         }
 
         try {
