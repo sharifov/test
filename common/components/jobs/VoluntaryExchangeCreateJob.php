@@ -7,37 +7,38 @@ use DomainException;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
 use modules\flight\src\useCases\voluntaryExchange\service\OtaRequestVoluntaryRequestService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
-use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
-use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\entities\cases\CaseEventLog;
+use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use Throwable;
-use webapi\src\services\payment\BillingInfoApiService;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
 use webapi\src\services\payment\PaymentRequestVoluntaryService;
 use Yii;
-use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
 
 /**
  * @property int|null $flight_request_id
+ * @property int|null $case_id
  */
 class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
 {
     public $flight_request_id;
+    public $case_id;
 
     /**
-     * @param Queue $queues
+     * @param $queue
+     * @throws \yii\base\InvalidConfigException
      */
     public function execute($queue): void
     {
@@ -56,13 +57,8 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
 
             $flightRequestService = new FlightRequestService($flightRequest, $objectCollection);
 
-            if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
-                $case = CaseService::createCase(
-                    $flightRequest->fr_booking_id,
-                    $flightRequest->fr_project_id,
-                    true,
-                    $objectCollection
-                );
+            if (!$case = Cases::findOne(['cs_id' => $this->case_id])) {
+                throw new \RuntimeException('Case not found by ID(' . $this->case_id . ')');
             }
             $caseHandler = new CaseVoluntaryExchangeHandler($case, $objectCollection);
 
@@ -234,7 +230,11 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 throw $throwable;
             }
 
-            /* TODO:: cut payment and billing info after request to BO. from FlightRequest and ProductQuoteChange */
+            try {
+                (new CleanDataVoluntaryExchangeService($flightRequest, $productQuoteChange, $objectCollection));
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:CleanDataVoluntaryExchangeService');
+            }
 
             try {
                 OtaRequestVoluntaryRequestService::success($flightRequest, $voluntaryExchangeQuote, $originProductQuote, $case);

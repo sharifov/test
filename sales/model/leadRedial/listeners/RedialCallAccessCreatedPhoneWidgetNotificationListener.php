@@ -7,7 +7,7 @@ use common\models\Lead;
 use common\models\Notifications;
 use sales\model\leadRedial\entity\events\CallRedialAccessCreatedEvent;
 
-class RedialCallUserNotificationListener
+class RedialCallAccessCreatedPhoneWidgetNotificationListener
 {
     public function handle(CallRedialAccessCreatedEvent $event)
     {

@@ -4,6 +4,7 @@ namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\VoluntaryExchangeCreateJob;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
@@ -16,6 +17,8 @@ use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
+use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
@@ -52,6 +55,17 @@ class FlightQuoteExchangeController extends BaseController
     ) {
         $this->objectCollection = $voluntaryExchangeObjectCollection;
         parent::__construct($id, $module, $logger, $config);
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['logger'] = [
+            'class' => SimpleLoggerBehavior::class,
+            'filter' => CreditCardFilter::class,
+            'except' => [],
+        ];
+        return $behaviors;
     }
 
     /**
@@ -500,8 +514,18 @@ class FlightQuoteExchangeController extends BaseController
             );
             $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
+            if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
+                $case = CaseService::createCase(
+                    $flightRequest->fr_booking_id,
+                    $flightRequest->fr_project_id,
+                    true,
+                    $this->objectCollection
+                );
+            }
+
             $job = new VoluntaryExchangeCreateJob();
             $job->flight_request_id = $flightRequest->fr_id;
+            $job->case_id = $case->cs_id;
             $jobId = Yii::$app->queue_job->priority(100)->push($job);
 
             $flightRequest->fr_job_id = $jobId;
