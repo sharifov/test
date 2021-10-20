@@ -46,8 +46,13 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public const TYPE_VOLUNTARY_EXCHANGE = 2;
 
     public const TYPE_LIST = [
-        self::TYPE_RE_PROTECTION => 'ReProtection',
+        self::TYPE_RE_PROTECTION => 'Schedule Change',
         self::TYPE_VOLUNTARY_EXCHANGE => 'Voluntary Exchange',
+    ];
+
+    public const SHORT_TYPE_LIST = [
+        self::TYPE_RE_PROTECTION => 'SC',
+        self::TYPE_VOLUNTARY_EXCHANGE => 'Vol',
     ];
 
     public function behaviors(): array
@@ -288,6 +293,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return $this->pqc_is_automate;
     }
 
+
     public function isActiveStatus(): bool
     {
         return array_key_exists($this->pqc_status_id, SettingHelper::getActiveQuoteChangeStatuses());
@@ -296,5 +302,37 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function isFinishedStatus(): bool
     {
         return array_key_exists($this->pqc_status_id, SettingHelper::getFinishedQuoteChangeStatuses());
+    }
+
+    /**
+     * @return string
+     */
+    public function getShortTypeName(): string
+    {
+        return self::SHORT_TYPE_LIST[$this->pqc_type_id] ?? '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getTypeName(): string
+    {
+        return self::TYPE_LIST[$this->pqc_type_id] ?? '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return $this->pqc_status_id ? ProductQuoteChangeStatus::asFormat($this->pqc_status_id) : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDecisionTypeLabel(): string
+    {
+        return $this->pqc_decision_type_id ? ProductQuoteChangeDecisionType::asFormat($this->pqc_decision_type_id) : '-';
     }
 }
