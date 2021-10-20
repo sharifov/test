@@ -2,8 +2,10 @@
 
 return [
     'serviceName' => 'crm',
-    'serviceVersion' => '1.0.0',
-    'appName' => 'Sales',
+    'serviceApp' => 'yii2',
+    'serviceVersion' => '1.1.0',
+    'serviceEndpoint' => '',
+    'appName' => 'CRM',
     'appHostname' => php_uname('n'),
     'appInstance' => '1',
     'appEnv' => '',
