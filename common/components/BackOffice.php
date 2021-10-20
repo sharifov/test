@@ -3,8 +3,10 @@
 namespace common\components;
 
 use common\models\Project;
+use frontend\helpers\JsonHelper;
 use http\Client\Request;
 use http\Client\Response;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use Yii;
@@ -363,6 +365,73 @@ class BackOffice
             return true;
         } catch (\Throwable $exception) {
             \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:reprotectionCustomerDecision');
+            return false;
+        }
+    }
+
+    public static function voluntaryExchange(ProductQuoteChange $productQuoteChange): bool
+    {
+        if (empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
+            throw new \DomainException('BO endpoint is empty');
+        }
+        if (empty($productQuoteChange->pqc_data_json)) {
+            throw new \DomainException('Booking ID is empty');
+        }
+
+        try {
+            $request = JsonHelper::decode($productQuoteChange->pqc_data_json);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'BackOffice:voluntaryExchange:Json:Decode');
+            throw new \DomainException('Json Data is corrupted');
+        }
+
+        try {
+            $response = self::sendRequest2(
+                SettingHelper::getVoluntaryExchangeBoEndpoint(),
+                $request,
+                'POST',
+                30,
+                Yii::$app->params['backOffice']['serverUrlV3']
+            );
+
+            if (!$response->isOk) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange server error',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:serverError');
+                return false;
+            }
+
+            $data = $response->data;
+            if (!$data) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange data is empty',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:dataIsEmpty');
+                return false;
+            }
+            if (!is_array($data)) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange response Data type is invalid',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:dataIsInvalid');
+                return false;
+            }
+            if (!isset($data['success']) || $data['success'] !== true) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange is not success response',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:dataObjectInvalid');
+                return false;
+            }
+
+            return true;
+        } catch (\Throwable $exception) {
+            \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryExchange');
             return false;
         }
     }

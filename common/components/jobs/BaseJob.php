@@ -53,8 +53,8 @@ class BaseJob extends BaseObject
 
             if ($seconds > $limitExecution) {
                 \Yii::warning(
-                    'Warning: (' . self::runInClass() . ') exceeded execution time limit. Execution time (' . $seconds . ') sec',
-                    'BaseJob:executionTimeRegister:TimeLimitExceeded'
+                    'Warning: (' . self::runInClass() . ') timeout exceeded. Time (' . $seconds . ') sec',
+                    'BaseJob:ExecutionTimeRegister:TimeoutExceeded'
                 );
             }
         } catch (\Throwable $throwable) {

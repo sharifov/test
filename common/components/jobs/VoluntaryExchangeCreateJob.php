@@ -21,6 +21,9 @@ use sales\entities\cases\CaseEventLog;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use Throwable;
+use webapi\src\services\payment\BillingInfoApiService;
+use webapi\src\services\payment\BillingInfoApiVoluntaryService;
+use webapi\src\services\payment\PaymentRequestVoluntaryService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
@@ -43,6 +46,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
         $objectCollection = Yii::createObject(VoluntaryExchangeObjectCollection::class);
         $boRequestService = Yii::createObject(BoRequestVoluntaryExchangeService::class);
         $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
+        $paymentRequestVoluntaryService = Yii::createObject(PaymentRequestVoluntaryService::class);
         $voluntaryExchangeService =  new VoluntaryExchangeService($objectCollection);
 
         try {
@@ -121,6 +125,8 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 } catch (\Throwable $throwable) {
                     \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:setCaseDeadline');
                 }
+            } else {
+                $order = $originProductQuote->pqOrder;
             }
 
             try {
@@ -170,16 +176,12 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 throw $throwable;
             }
 
-            /* TODO:: paymentRequest processing */
-
-            /* TODO:: billingInfo processing */
-
             try {
                 $voluntaryExchangeCreateForm = new VoluntaryExchangeCreateForm();
                 if (!$voluntaryExchangeCreateForm->load($flightProductQuoteData)) {
                     throw new \RuntimeException('VoluntaryExchangeCreateForm not loaded');
                 }
-                if (!$voluntaryExchangeCreateForm->validate()) {
+                if (!$voluntaryExchangeCreateForm->validate(['billing', 'payment_request'])) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($voluntaryExchangeCreateForm));
                 }
             } catch (\Throwable $throwable) {
@@ -187,7 +189,52 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 throw $throwable;
             }
 
-            /* TODO:: send request to BO */
+            if (
+                !empty($voluntaryExchangeCreateForm->payment_request) &&
+                $paymentRequestForm = $voluntaryExchangeCreateForm->getPaymentRequestForm()
+            ) {
+                try {
+                    $paymentRequestVoluntaryService->processing(
+                        $paymentRequestForm,
+                        $order,
+                        'Create by Voluntary Exchange API processing'
+                    );
+                } catch (\Throwable $throwable) {
+                    $caseHandler->caseToPendingManual('PaymentRequest processing is failed');
+                    throw $throwable;
+                }
+            }
+
+            if (
+                !empty($voluntaryExchangeCreateForm->billing) &&
+                ($billingInfoForm = $voluntaryExchangeCreateForm->getBillingInfoForm())
+            ) {
+                try {
+                    $paymentMethodId = $paymentRequestVoluntaryService->getPaymentMethod()->pm_id ?? null;
+                    $creditCardId = $paymentRequestVoluntaryService->getCreditCard()->cc_id ?? null;
+
+                    BillingInfoApiVoluntaryService::getOrCreateBillingInfo(
+                        $billingInfoForm,
+                        $order->getId(),
+                        $creditCardId,
+                        $paymentMethodId
+                    );
+                } catch (\Throwable $throwable) {
+                    $caseHandler->caseToPendingManual('BillingInfo create is failed');
+                    throw $throwable;
+                }
+            }
+
+            try {
+                if (!$boRequestService->sendVoluntaryExchange($productQuoteChange)) {
+                    throw new \RuntimeException('Request to Back Office is failed');
+                }
+            } catch (\Throwable $throwable) {
+                $caseHandler->caseToPendingManual('Request to Back Office is failed');
+                throw $throwable;
+            }
+
+            /* TODO:: cut payment and billing info after request to BO. from FlightRequest and ProductQuoteChange */
 
             try {
                 OtaRequestVoluntaryRequestService::success($flightRequest, $voluntaryExchangeQuote, $originProductQuote, $case);

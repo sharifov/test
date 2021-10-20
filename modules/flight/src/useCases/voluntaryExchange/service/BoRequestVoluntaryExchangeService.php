@@ -2,8 +2,10 @@
 
 namespace modules\flight\src\useCases\voluntaryExchange\service;
 
+use common\components\BackOffice;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\entities\cases\Cases;
 use sales\exception\BoResponseException;
 use sales\exception\ValidationException;
@@ -77,5 +79,10 @@ class BoRequestVoluntaryExchangeService
     public function getOrderContactForm(): OrderContactForm
     {
         return $this->orderContactForm;
+    }
+
+    public function sendVoluntaryExchange(ProductQuoteChange $productQuoteChange): bool
+    {
+        return BackOffice::voluntaryExchange($productQuoteChange);
     }
 }
