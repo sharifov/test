@@ -46,6 +46,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
         $objectCollection = Yii::createObject(VoluntaryExchangeObjectCollection::class);
         $boRequestService = Yii::createObject(BoRequestVoluntaryExchangeService::class);
         $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
+        $paymentRequestVoluntaryService = Yii::createObject(PaymentRequestVoluntaryService::class);
         $voluntaryExchangeService =  new VoluntaryExchangeService($objectCollection);
 
         try {
@@ -193,8 +194,11 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 $paymentRequestForm = $voluntaryExchangeCreateForm->getPaymentRequestForm()
             ) {
                 try {
-                    $paymentService = new PaymentRequestVoluntaryService($paymentRequestForm, $objectCollection, $order);
-                    $paymentService->processing();
+                    $paymentRequestVoluntaryService->processing(
+                        $paymentRequestForm,
+                        $order,
+                        'Create by Voluntary Exchange API processing'
+                    );
                 } catch (\Throwable $throwable) {
                     $caseHandler->caseToPendingManual('PaymentRequest processing is failed');
                     throw $throwable;
@@ -206,10 +210,8 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 ($billingInfoForm = $voluntaryExchangeCreateForm->getBillingInfoForm())
             ) {
                 try {
-                    $paymentMethodId = (isset($paymentService) && ($paymentService->getPaymentMethod())) ?
-                        $paymentService->getPaymentMethod()->pm_id : null;
-                    $creditCardId = (isset($paymentService) && ($paymentService->getCreditCard())) ?
-                        $paymentService->getCreditCard()->cc_id : null;
+                    $paymentMethodId = $paymentRequestVoluntaryService->getPaymentMethod()->pm_id ?? null;
+                    $creditCardId = $paymentRequestVoluntaryService->getCreditCard()->cc_id ?? null;
 
                     BillingInfoApiVoluntaryService::getOrCreateBillingInfo(
                         $billingInfoForm,

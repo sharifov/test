@@ -4,18 +4,18 @@ namespace webapi\src\services\payment;
 
 use common\models\CreditCard;
 use common\models\PaymentMethod;
-use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\invoice\src\entities\invoice\Invoice;
+use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\Order;
 use sales\helpers\ErrorsToStringHelper;
+use sales\repositories\creditCard\CreditCardRepository;
 use webapi\src\forms\payment\PaymentRequestForm;
 
 /**
  * Class PaymentRequestVoluntaryService
  *
- * @property PaymentRequestForm $paymentRequestForm
- * @property VoluntaryExchangeObjectCollection $objectCollection
- * @property Order $order
+ * @property CreditCardRepository $creditCardRepository
+ * @property InvoiceRepository $invoiceRepository;
  *
  * @property PaymentMethod|null $paymentMethod
  * @property Invoice|null $invoice
@@ -23,50 +23,46 @@ use webapi\src\forms\payment\PaymentRequestForm;
  */
 class PaymentRequestVoluntaryService
 {
-    private PaymentRequestForm $paymentRequestForm;
-    private VoluntaryExchangeObjectCollection $objectCollection;
-    private Order $order;
+    private CreditCardRepository $creditCardRepository;
+    private InvoiceRepository $invoiceRepository;
 
     private ?PaymentMethod $paymentMethod;
     private ?Invoice $invoice;
     private ?CreditCard $creditCard;
 
     /**
-     * @param PaymentRequestForm $paymentRequestForm
-     * @param VoluntaryExchangeObjectCollection $objectCollection
-     * @param Order $order
+     * @param CreditCardRepository $creditCardRepository
+     * @param InvoiceRepository $invoiceRepository
      */
     public function __construct(
-        PaymentRequestForm $paymentRequestForm,
-        VoluntaryExchangeObjectCollection $objectCollection,
-        Order $order
+        CreditCardRepository $creditCardRepository,
+        InvoiceRepository $invoiceRepository
     ) {
-        $this->paymentRequestForm = $paymentRequestForm;
-        $this->objectCollection = $objectCollection;
-        $this->order = $order;
+        $this->creditCardRepository = $creditCardRepository;
+        $this->invoiceRepository = $invoiceRepository;
     }
 
-    public function processing(): bool
+    public function processing(PaymentRequestForm $paymentRequestForm, ?Order $order, ?string $description): bool
     {
-        if (!$paymentMethod = PaymentMethod::findOne(['pm_key' => $this->paymentRequestForm->method_key])) {
-            throw new \RuntimeException('PaymentMethod not found by key (' . $this->paymentRequestForm->method_key . ')');
+        if (!$paymentMethod = PaymentMethod::findOne(['pm_key' => $paymentRequestForm->method_key])) {
+            throw new \RuntimeException('PaymentMethod not found by key (' . $paymentRequestForm->method_key . ')');
         }
         $this->paymentMethod = $paymentMethod;
 
         $invoice = Invoice::create(
-            $this->order->getId(),
-            (float) $this->paymentRequestForm->amount,
-            $this->paymentRequestForm->currency,
-            'Create by Voluntary Exchange API processing',
+            $order ? $order->getId() : null,
+            (float) $paymentRequestForm->amount,
+            $paymentRequestForm->currency,
+            $description,
             null
         );
         if (!$invoice->validate()) {
             throw new \RuntimeException('Invoice not saved. ' . ErrorsToStringHelper::extractFromModel($invoice));
         }
-        $this->objectCollection->getInvoiceRepository()->save($invoice);
+        $this->invoiceRepository->save($invoice);
         $this->invoice = $invoice;
 
-        if ($creditCardForm = $this->paymentRequestForm->getCreditCardForm()) {
+        if ($creditCardForm = $paymentRequestForm->getCreditCardForm()) {
             $creditCard = CreditCard::create(
                 $creditCardForm->number,
                 $creditCardForm->holder_name,
@@ -80,26 +76,15 @@ class PaymentRequestVoluntaryService
             if (!$creditCard->validate()) {
                 throw new \RuntimeException('CreditCard not saved. ' . ErrorsToStringHelper::extractFromModel($creditCard));
             }
-            $this->objectCollection->getCreditCardRepository()->save($creditCard);
+            $this->creditCardRepository->save($creditCard);
             $this->creditCard = $creditCard;
         }
         return true;
     }
 
-    private function creditCardProcessing()
-    {
-
-        /* TODO::  */
-    }
-
     public function getPaymentMethod(): PaymentMethod
     {
         return $this->paymentMethod;
-    }
-
-    public function setPaymentMethod(PaymentMethod $paymentMethod): void
-    {
-        $this->paymentMethod = $paymentMethod;
     }
 
     public function getInvoice(): ?Invoice
