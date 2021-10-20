@@ -2,8 +2,8 @@
 
 /**
  * Created by Alexandr.
- * User: alexandr
- * Date: 2/8/19
+ * User: alex.connor
+ * Date: 20/10/2021
  * Time: 6:52 PM
  */
 
@@ -20,7 +20,7 @@ use Yii;
  * @property mixed $gitBranch
  * @property mixed $gitHash
  */
-class AirFileTarget extends \yii\log\FileTarget
+class FilebeatTarget extends \yii\log\FileTarget
 {
     use TargetTrait;
 
@@ -32,9 +32,6 @@ class AirFileTarget extends \yii\log\FileTarget
     private string $gitBranch      = '';
     private string $gitHash        = '';
 
-    /**
-     *
-     */
     public function init()
     {
         parent::init();
@@ -52,18 +49,13 @@ class AirFileTarget extends \yii\log\FileTarget
      */
     protected function getContextMessage(): array
     {
-//        if (is_array($this->context)) {
-//            $context = $this->context;
-//        }
         $context = $this->context;
         $context['service.name'] = $this->serviceName;
-        $context['service.version'] = $this->appVersion; //$this->serviceVersion;
         $context['service.type'] = $this->serviceType;
+        $context['service.version'] = $this->appVersion; //$this->serviceVersion;
         $context['service.env'] = YII_ENV;
         $context['service.git_branch'] = str_replace('refs/heads/', '', $this->gitBranch);
         $context['service.git_hash'] = substr($this->gitHash, 7);
-
-        //$context['log.level'] = $this->;
 
         $prefix = $this->getMessagePrefix($this->context);
         if ($prefix && is_array($prefix)) {

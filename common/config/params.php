@@ -1,10 +1,9 @@
 <?php
 
 return [
-    'serviceName' => 'crm',
-    'serviceApp' => 'yii2',
+    'serviceName' => 'app',
     'serviceVersion' => '1.1.0',
-    'serviceEndpoint' => '',
+    'serviceType' => '',
     'appName' => 'CRM',
     'appHostname' => php_uname('n'),
     'appInstance' => '1',

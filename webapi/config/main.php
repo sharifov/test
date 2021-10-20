@@ -128,7 +128,7 @@ return [
                     'db' => 'db_postgres'
                 ],
                 [
-                    'class' => \common\components\logger\AirFileTarget::class,
+                    'class' => \common\components\logger\FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
