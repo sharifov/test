@@ -209,12 +209,12 @@ class HybridService extends Component
 
     public function whVoluntaryExchangeSuccess(int $projectId, array $data): ?array
     {
-        return $this->wh($projectId, 'flight/voluntary-change/success', $data);
+        return $this->wh($projectId, 'flight/voluntary-change/create/success', $data);
     }
 
     public function whVoluntaryExchangeFail(int $projectId, array $data): ?array
     {
-        return $this->wh($projectId, 'flight/voluntary-change/fail', $data);
+        return $this->wh($projectId, 'flight/voluntary-change/create/fail', $data);
     }
 
     private function getProjectUrls(int $projectId): array
