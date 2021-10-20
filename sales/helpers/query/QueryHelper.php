@@ -71,7 +71,7 @@ class QueryHelper
         $query->andWhere(['<=', $dateFieldName, $date->format('Y-m-d H:i:s')]);
     }
 
-    private static function getDateFromUserTZToUtc(string $value, ?string $userTimeZone): \DateTimeImmutable
+    public static function getDateFromUserTZToUtc(string $value, ?string $userTimeZone): \DateTimeImmutable
     {
         if (!$userTimeZone) {
             $userTimeZone = 'UTC';
