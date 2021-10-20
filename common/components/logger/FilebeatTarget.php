@@ -50,12 +50,12 @@ class FilebeatTarget extends \yii\log\FileTarget
     protected function getContextMessage(): array
     {
         $context = $this->context;
-        $context['service.name'] = $this->serviceName;
-        $context['service.type'] = $this->serviceType;
-        $context['service.version'] = $this->appVersion; //$this->serviceVersion;
-        $context['service.env'] = YII_ENV;
-        $context['service.git_branch'] = str_replace('refs/heads/', '', $this->gitBranch);
-        $context['service.git_hash'] = substr($this->gitHash, 7);
+        $context['srv_name'] = $this->serviceName;
+        $context['srv_type'] = $this->serviceType;
+        $context['srv_version'] = $this->appVersion; //$this->serviceVersion;
+        $context['srv_env'] = YII_ENV;
+        $context['srv_git_branch'] = str_replace('refs/heads/', '', $this->gitBranch);
+        $context['srv_git_hash'] = substr($this->gitHash, 7);
 
         $prefix = $this->getMessagePrefix($this->context);
         if ($prefix && is_array($prefix)) {
