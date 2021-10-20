@@ -192,7 +192,7 @@ class VoluntaryExchangeService
             }
             if ($declinedIds) {
                 $case->addEventLog(
-                    CaseEventLog::RE_PROTECTION_CREATE,
+                    CaseEventLog::RE_PROTECTION_CREATE, /* TODO::  */
                     'Old Voluntary Exchange Quotes declined',
                     ['originProductQuoteGid' => $originProductQuote->pq_gid]
                 );

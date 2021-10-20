@@ -4,6 +4,7 @@ namespace common\models;
 
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
+use sales\dto\billingInfo\BillingInfoDTO;
 use sales\entities\serializer\Serializable;
 use sales\model\billingInfo\entity\serializer\BillingInfoSerializer;
 use Yii;
@@ -204,6 +205,26 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
         $billing->bi_payment_method_id = $paymentMethodId;
         $billing->bi_cc_id = $creditCardId;
         $billing->bi_order_id = $orderId;
+        return $billing;
+    }
+
+    public static function createByDto(BillingInfoDTO $dto): self
+    {
+        $billing = new self();
+        $billing->bi_first_name = $dto->first_name;
+        $billing->bi_last_name = $dto->last_name;
+        $billing->bi_middle_name = $dto->middle_name;
+        $billing->bi_address_line1 = $dto->address_line1;
+        $billing->bi_address_line2 = $dto->address_line2;
+        $billing->bi_city = $dto->city;
+        $billing->bi_state = $dto->state;
+        $billing->bi_country = $dto->country_id;
+        $billing->bi_zip = $dto->zip;
+        $billing->bi_contact_phone = $dto->contact_phone;
+        $billing->bi_contact_email = $dto->contact_email;
+        $billing->bi_payment_method_id = $dto->paymentMethodId;
+        $billing->bi_cc_id = $dto->creditCardId;
+        $billing->bi_order_id = $dto->orderId;
         return $billing;
     }
 

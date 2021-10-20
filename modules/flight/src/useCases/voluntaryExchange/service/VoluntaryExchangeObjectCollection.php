@@ -5,11 +5,13 @@ namespace modules\flight\src\useCases\voluntaryExchange\service;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\repositories\flightRequestLog\FlightRequestLogRepository;
 use modules\flight\src\useCases\sale\FlightFromSaleService;
+use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use sales\repositories\cases\CasesRepository;
+use sales\repositories\creditCard\CreditCardRepository;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
@@ -33,6 +35,22 @@ class VoluntaryExchangeObjectCollection
     private ?ProductQuoteRepository $productQuoteRepository;
     private ?ProductQuoteDataManageService $productQuoteDataManageService;
     private ?CasesCommunicationService $casesCommunicationService;
+    private ?InvoiceRepository $invoiceRepository;
+    private ?CreditCardRepository $creditCardRepository;
+
+    public function getCreditCardRepository(): CreditCardRepository
+    {
+        return $this->creditCardRepository ?? ($this->creditCardRepository = Yii::createObject(
+            CreditCardRepository::class
+        ));
+    }
+
+    public function getInvoiceRepository(): InvoiceRepository
+    {
+        return $this->invoiceRepository ?? ($this->invoiceRepository = Yii::createObject(
+            InvoiceRepository::class
+        ));
+    }
 
     public function getCasesCommunicationService(): CasesCommunicationService
     {
