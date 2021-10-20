@@ -18,6 +18,8 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use webapi\src\ApiCodeException;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
+use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
@@ -51,6 +53,17 @@ class FlightQuoteRefundController extends ApiBaseController
         parent::__construct($id, $module, $config);
         $this->flightRequestRepository = $flightRequestRepository;
         $this->voluntaryRefundService = $voluntaryRefundService;
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['logger'] = [
+            'class' => SimpleLoggerBehavior::class,
+            'filter' => CreditCardFilter::class,
+            'except' => [],
+        ];
+        return $behaviors;
     }
 
     /**
