@@ -37,7 +37,7 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
 
         $callRedialSearch = new LeadQcallSearch();
         $leadQcall = $callRedialSearch

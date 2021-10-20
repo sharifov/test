@@ -16,7 +16,7 @@ class SmsPriceJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             (\Yii::createObject(UpdateSmsPrice::class))->update($this->smsSids);
         } catch (\Throwable $e) {

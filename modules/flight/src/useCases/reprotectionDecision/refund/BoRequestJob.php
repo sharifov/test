@@ -23,7 +23,7 @@ class BoRequestJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             $requestBo = \Yii::createObject(BoRequest::class);
             $requestBo->refund($this->bookingId, $this->orderRefundId, $this->productQuoteRefundId, $this->userId);
