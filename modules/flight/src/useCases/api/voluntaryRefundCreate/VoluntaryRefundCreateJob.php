@@ -50,7 +50,7 @@ class VoluntaryRefundCreateJob extends \common\components\jobs\BaseJob implement
      */
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
 
         $voluntaryRefundService = \Yii::createObject(VoluntaryRefundService::class);
 

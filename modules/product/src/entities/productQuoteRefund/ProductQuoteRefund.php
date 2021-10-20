@@ -55,8 +55,13 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     private const TYPE_VOLUNTARY_REFUND = 2;
 
     private const TYPE_LIST = [
-        self::TYPE_RE_PROTECTION => 'Re Protection',
+        self::TYPE_RE_PROTECTION => 'Schedule Change',
         self::TYPE_VOLUNTARY_REFUND => 'Voluntary Refund'
+    ];
+
+    private const SHORT_TYPE_LIST = [
+        self::TYPE_RE_PROTECTION => 'SC',
+        self::TYPE_VOLUNTARY_REFUND => 'Vol'
     ];
 
     public static function create(
@@ -354,18 +359,48 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return string[]
+     */
     public static function getTypeList(): array
     {
         return self::TYPE_LIST;
     }
 
-    public function getTypeName(): ?string
+    /**
+     * @return string[]
+     */
+    public static function getShortTypeList(): array
     {
-        return self::getTypeList()[$this->pqr_status_id] ?? null;
+        return self::SHORT_TYPE_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTypeName(): string
+    {
+        return self::getTypeList()[$this->pqr_status_id] ?? '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getShortTypeName(): string
+    {
+        return self::getTypeName()[$this->pqr_status_id] ?? '-';
     }
 
     public function cancel(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::CANCEL;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return $this->pqr_status_id ? ProductQuoteRefundStatus::asFormat($this->pqr_status_id) : '-';
     }
 }

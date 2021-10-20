@@ -24,7 +24,7 @@ class LeadRedialExpiredAccessJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
 
         $timeStart = microtime(true);
 

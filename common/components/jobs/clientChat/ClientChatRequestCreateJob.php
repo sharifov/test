@@ -22,7 +22,7 @@ class ClientChatRequestCreateJob extends BaseJob implements JobInterface
 
     public function execute($queue): void
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             if (!$request = ClientChatRequest::find()->andWhere(['ccr_id' => $this->requestId])->one()) {
                 throw new NotFoundException('Not found ClientChatRequest ID: ' . $this->requestId);

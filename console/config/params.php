@@ -2,7 +2,7 @@
 
 return [
     'adminEmail' => 'admin@example.com',
-    'serviceName' => 'sales-console',
+    'serviceEndpoint' => 'console',
     'webSocketServer' => [
         'host' => 'localhost',
         'port' => 8080,

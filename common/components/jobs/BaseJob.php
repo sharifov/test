@@ -31,9 +31,9 @@ class BaseJob extends BaseObject
         parent::__construct($config);
     }
 
-    public function executionTimeRegister(?array $buckets = null): bool
+    public function waitingTimeRegister(?array $buckets = null): bool
     {
-        if (!$limitExecution = SettingHelper::getMetricJobTimeExecution()) {
+        if (!$limitWaiting = SettingHelper::getMetricJobTimeWaiting()) {
             return false;
         }
 
@@ -51,7 +51,7 @@ class BaseJob extends BaseObject
                 $buckets
             );
 
-            if ($seconds > $limitExecution) {
+            if ($seconds > $limitWaiting) {
                 \Yii::warning(
                     'Warning: (' . self::runInClass() . ') timeout exceeded. Time (' . $seconds . ') sec',
                     'BaseJob:ExecutionTimeRegister:TimeoutExceeded'

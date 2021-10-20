@@ -24,12 +24,14 @@ class AirFileTarget extends \yii\log\FileTarget
 {
     use TargetTrait;
 
-    private $serviceName = 'project';
-    private $serviceVersion = '1.0.0';
+    private $serviceName        = 'project';
+    private $serviceVersion     = '1.0.0';
+    private $serviceEndpoint    = 'frontend';
+    private $serviceApp         = 'yii2';
 
-    private $appVersion = '';
-    private $gitBranch = '';
-    private $gitHash = '';
+    private $appVersion     = '';
+    private $gitBranch      = '';
+    private $gitHash        = '';
 
     /**
      *
@@ -39,22 +41,27 @@ class AirFileTarget extends \yii\log\FileTarget
         parent::init();
         $this->serviceName = Yii::$app->params['serviceName'] ?? '';
         $this->serviceVersion = Yii::$app->params['serviceVersion'] ?? '';
+        $this->serviceEndpoint = Yii::$app->params['serviceEndpoint'] ?? '';
+        $this->serviceApp = Yii::$app->params['serviceApp'] ?? '';
+
         $this->appVersion = Yii::$app->params['release']['version'] ?? '';
         $this->gitBranch = Yii::$app->params['release']['git_branch'] ?? '';
         $this->gitHash = Yii::$app->params['release']['git_hash'] ?? '';
     }
 
     /**
-     * @return array|string
+     * @return array
      */
-    protected function getContextMessage()
+    protected function getContextMessage(): array
     {
 //        if (is_array($this->context)) {
 //            $context = $this->context;
 //        }
         $context = $this->context;
-        $context['service.name'] = $this->serviceName;
-        $context['service.version'] = $this->serviceVersion;
+        $context['srv.name'] = $this->serviceName;
+        $context['srv.ver'] = $this->serviceVersion;
+        $context['srv.ept'] = $this->serviceEndpoint;
+        $context['srv.app'] = $this->serviceApp;
 
         //$context['log.level'] = $this->;
 
@@ -65,12 +72,11 @@ class AirFileTarget extends \yii\log\FileTarget
             }
         }
 
-        $context['app.version'] = $this->appVersion;
-        $context['app.name'] = Yii::$app->name;
-        $context['app.env'] = YII_ENV;
-        $context['git.branch'] = $this->gitBranch;
-        $context['git.hash'] = $this->gitHash;
-
+        $context['app.ver']         = $this->appVersion;
+        $context['app.name']        = Yii::$app->name;
+        $context['app.env']         = YII_ENV;
+        $context['git.branch']      = $this->gitBranch;
+        $context['git.hash']        = $this->gitHash;
 
         return $context;
     }
