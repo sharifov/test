@@ -13,18 +13,26 @@ use yii\base\Model;
  *
  * @property string $currency
  * @property array $tickets
+ * @property array $auxiliaryOptions
  *
  * @property TicketForm[] $ticketForms
+ * @property AuxiliaryOptionForm[] $auxiliaryOptionsForms
  */
 class VoluntaryRefundForm extends Model
 {
     public $currency;
     public $tickets;
+    public $auxiliaryOptions;
 
     /**
      * @var TicketForm[] $ticketForms
      */
     public array $ticketForms = [];
+
+    /**
+     * @var AuxiliaryOptionForm[] $auxiliaryOptionsForms
+     */
+    public array $auxiliaryOptionsForms = [];
 
     public function rules(): array
     {
@@ -34,7 +42,10 @@ class VoluntaryRefundForm extends Model
             ['currency', 'exist', 'targetClass' => Currency::class, 'targetAttribute' => 'cur_code'],
 
             ['tickets', IsArrayValidator::class, 'skipOnEmpty' => false],
-            ['tickets', 'ticketsValidation', 'skipOnEmpty' => false]
+            ['tickets', 'ticketsValidation', 'skipOnEmpty' => false],
+
+            ['auxiliaryOptions', IsArrayValidator::class, 'skipOnEmpty' => false],
+            ['auxiliaryOptions', 'auxiliaryOptionsValidation', 'skipOnEmpty' => false],
         ];
     }
 
@@ -54,11 +65,32 @@ class VoluntaryRefundForm extends Model
             $ticketForm = new TicketForm();
             $ticketForm->load($ticket, '');
             if (!$ticketForm->validate()) {
-                $this->addError('sss' . '.' . $key, 'Refund.tickets.' . $key . ': ' . ErrorsToStringHelper::extractFromModel($ticketForm, ', '));
+                $this->addError('tickets' . '.' . $key, 'Refund.tickets.' . $key . ': ' . ErrorsToStringHelper::extractFromModel($ticketForm, ', '));
                 return false;
             }
 
             $this->ticketForms[] = $ticketForm;
+        }
+
+        return true;
+    }
+
+    public function auxiliaryOptionsValidation(string $attribute): bool
+    {
+        if (empty($this->auxiliaryOptions)) {
+            $this->addError($attribute, 'Tickets data not provided');
+            return false;
+        }
+
+        foreach ($this->auxiliaryOptions as $key => $auxiliaryOption) {
+            $auxiliaryOptionForm = new AuxiliaryOptionForm();
+            $auxiliaryOptionForm->load($auxiliaryOption, '');
+            if (!$auxiliaryOptionForm->validate()) {
+                $this->addError('auxiliaryOptions' . '.' . $key, 'Refund.auxiliaryOptions.' . $key . ': ' . ErrorsToStringHelper::extractFromModel($auxiliaryOptionForm, ', '));
+                return false;
+            }
+
+            $this->auxiliaryOptionsForms[] = $auxiliaryOptionForm;
         }
 
         return true;

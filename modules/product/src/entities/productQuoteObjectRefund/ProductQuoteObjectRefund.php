@@ -183,4 +183,37 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
             }
         ];
     }
+
+    public static function create(
+        int $productQuoteRefundId,
+        ?int $productQuoteObjectId,
+        float $sellingPrice,
+        float $penaltyAmount,
+        float $processingFeeAmount,
+        float $refundAmount,
+        string $clientCurrency,
+        float $clientCurrencyRate,
+        float $clientSellingPrice,
+        float $clientRefundAmount,
+        ?string $title
+    ): self {
+        $self = new self();
+        $self->pqor_product_quote_refund_id = $productQuoteRefundId;
+        $self->pqor_quote_object_id = $productQuoteObjectId;
+        $self->pqor_selling_price = $sellingPrice;
+        $self->pqor_penalty_amount = $penaltyAmount;
+        $self->pqor_processing_fee_amount = $processingFeeAmount;
+        $self->pqor_refund_amount = $refundAmount;
+        $self->pqor_client_currency = $clientCurrency;
+        $self->pqor_client_currency_rate = $clientCurrencyRate;
+        $self->pqor_client_selling_price = $clientSellingPrice;
+        $self->pqor_refund_amount = $clientRefundAmount;
+        $self->pqor_title = $title;
+        return $self;
+    }
+
+    public function pending(): void
+    {
+        $this->pqor_status_id = ProductQuoteObjectRefundStatus::PENDING;
+    }
 }

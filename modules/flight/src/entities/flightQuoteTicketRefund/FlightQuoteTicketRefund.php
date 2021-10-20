@@ -89,4 +89,14 @@ class FlightQuoteTicketRefund extends \yii\db\ActiveRecord
     {
         return new Scopes(get_called_class());
     }
+
+    public static function create(
+        string $ticketNumber,
+        ?int $flightQuoteBookingId
+    ): self {
+        $self = new self();
+        $self->fqtr_ticket_number = $ticketNumber;
+        $self->fqtr_fqb_id = $flightQuoteBookingId;
+        return $self;
+    }
 }

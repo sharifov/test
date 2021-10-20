@@ -51,6 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqor_client_currency_rate',
             'pqor_client_selling_price',
             'pqor_client_refund_amount',
+            'pqor_refund_allow:booleanByLabel',
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'pqor_created_user_id',

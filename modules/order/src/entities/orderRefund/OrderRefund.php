@@ -71,6 +71,31 @@ class OrderRefund extends \yii\db\ActiveRecord
         return $refund;
     }
 
+    public static function createByVoluntaryRefund(
+        $uuid,
+        $orderId,
+        $sellingPrice,
+        $clientCurrency,
+        $clientCurrencyRate,
+        $clientSellingPrice,
+        $caseId
+    ): self {
+        $refund = self::create(
+            $uuid,
+            $orderId,
+            $sellingPrice,
+            $clientCurrency,
+            $clientCurrencyRate,
+            $clientSellingPrice,
+            $caseId
+        );
+        $refund->orr_client_status_id = OrderRefundClientStatus::PROCESSING;
+        $refund->orr_status_id = OrderRefundStatus::PENDING;
+        $refund->orr_description = 'Voluntary refund request';
+        $refund->detachBehavior('user');
+        return $refund;
+    }
+
     public static function create(
         $uuid,
         $orderId,

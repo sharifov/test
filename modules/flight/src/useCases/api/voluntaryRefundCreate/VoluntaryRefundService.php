@@ -4,10 +4,15 @@ namespace modules\flight\src\useCases\api\voluntaryRefundCreate;
 
 use common\models\CaseSale;
 use common\models\Client;
+use modules\flight\models\FlightQuoteBooking;
+use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
+use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefundRepository;
 use modules\flight\src\useCases\sale\FlightFromSaleService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderRefund\OrderRefund;
+use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -16,6 +21,11 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
+use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefundRepository;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionsQuery;
+use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
+use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefundRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
@@ -49,6 +59,10 @@ use sales\services\client\ClientManageService;
  * @property ProductQuoteRefundRepository $productQuoteRefundRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property OrderRefundRepository $orderRefundRepository
+ * @property FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository
+ * @property ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository
+ * @property ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository
  */
 class VoluntaryRefundService
 {
@@ -64,6 +78,10 @@ class VoluntaryRefundService
     private ProductQuoteRefundRepository $productQuoteRefundRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
     private ProductQuoteRepository $productQuoteRepository;
+    private OrderRefundRepository $orderRefundRepository;
+    private FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository;
+    private ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository;
+    private ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository;
 
     public function __construct(
         CasesSaleService $casesSaleService,
@@ -75,7 +93,11 @@ class VoluntaryRefundService
         CasesRepository $casesRepository,
         ProductQuoteRefundRepository $productQuoteRefundRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        ProductQuoteRepository $productQuoteRepository
+        ProductQuoteRepository $productQuoteRepository,
+        OrderRefundRepository $orderRefundRepository,
+        FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository,
+        ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository,
+        ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository
     ) {
         $this->casesSaleService = $casesSaleService;
         $this->clientManageService = $clientManageService;
@@ -87,6 +109,10 @@ class VoluntaryRefundService
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->orderRefundRepository = $orderRefundRepository;
+        $this->flightQuoteTicketRefundRepository = $flightQuoteTicketRefundRepository;
+        $this->productQuoteObjectRefundRepository = $productQuoteObjectRefundRepository;
+        $this->productQuoteOptionRefundRepository = $productQuoteOptionRefundRepository;
     }
 
     public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, int $projectId, ?int $originProductQuoteId): void
@@ -173,9 +199,20 @@ class VoluntaryRefundService
         }
 
         try {
+            $orderRefund = OrderRefund::createByVoluntaryRefund(
+                OrderRefund::generateUid(),
+                $originProductQuoteId,
+                $order->or_app_total,
+                $order->or_client_currency,
+                $order->or_client_currency_rate,
+                $order->or_client_total,
+                $case->cs_id
+            );
+            $this->orderRefundRepository->save($orderRefund);
+
             $totalCalculatedTickets = $this->calculateTotalTicketsAmount($voluntaryRefundCreateForm->refundForm->ticketForms);
             $productQuoteRefund = ProductQuoteRefund::createByVoluntaryRefund(
-                1,
+                $orderRefund->orr_id,
                 $originProductQuoteId,
                 0,
                 $totalCalculatedTickets->processingFee,
@@ -187,6 +224,48 @@ class VoluntaryRefundService
                 $totalCalculatedTickets->refundAmount,
                 $case->cs_id
             );
+
+            foreach ($voluntaryRefundCreateForm->refundForm->ticketForms as $ticketForm) {
+                $flightQuoteTicketRefund = FlightQuoteTicketRefund::create($ticketForm->number, null);
+                $this->flightQuoteTicketRefundRepository->save($flightQuoteTicketRefund);
+
+                $productQuoteObjectRefund = ProductQuoteObjectRefund::create(
+                    $productQuoteRefund->pqr_id,
+                    $flightQuoteTicketRefund->fqtr_id,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    $voluntaryRefundCreateForm->refundForm->currency,
+                    $order->or_client_currency_rate,
+                    $ticketForm->sellingPrice,
+                    $ticketForm->refundAmount,
+                    null
+                );
+                $productQuoteObjectRefund->pending();
+                $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);
+            }
+
+            foreach ($voluntaryRefundCreateForm->refundForm->auxiliaryOptionsForms as $auxiliaryOptionsForm) {
+                $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuoteId, $auxiliaryOptionsForm->type);
+
+                $productQuoteOptionRefund = ProductQuoteOptionRefund::create(
+                    $orderRefund->orr_id,
+                    $productQuoteRefund->pqr_id,
+                    $productQuoteOption->pqo_id ?? null,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    $voluntaryRefundCreateForm->refundForm->currency,
+                    $order->or_client_currency_rate,
+                    0.0,
+                    $auxiliaryOptionsForm->refundable,
+                    $auxiliaryOptionsForm->refundAllow
+                );
+                $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
+            }
+
             $this->productQuoteRefundRepository->save($productQuoteRefund);
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Product Quote Refund creation failed');

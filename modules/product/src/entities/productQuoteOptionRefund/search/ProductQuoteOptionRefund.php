@@ -20,6 +20,7 @@ class ProductQuoteOptionRefund extends ProductQuoteOptionRefundModel
             [['pqor_id', 'pqor_product_quote_refund_id', 'pqor_product_quote_option_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id'], 'integer'],
             [['pqor_selling_price', 'pqor_penalty_amount', 'pqor_processing_fee_amount', 'pqor_refund_amount', 'pqor_client_currency_rate', 'pqor_client_selling_price', 'pqor_client_refund_amount'], 'number'],
             [['pqor_client_currency', 'pqor_created_dt', 'pqor_updated_dt'], 'safe'],
+            [['pqor_refund_allow'], 'boolean']
         ];
     }
 
@@ -74,6 +75,7 @@ class ProductQuoteOptionRefund extends ProductQuoteOptionRefundModel
             'pqor_updated_user_id' => $this->pqor_updated_user_id,
             'date(pqor_created_dt)' => $this->pqor_created_dt,
             'date(pqor_updated_dt)' => $this->pqor_updated_dt,
+            'pqor_refund_allow' => $this->pqor_refund_allow,
         ]);
 
         $query->andFilterWhere(['like', 'pqor_client_currency', $this->pqor_client_currency]);
