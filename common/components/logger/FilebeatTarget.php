@@ -24,14 +24,13 @@ class AirFileTarget extends \yii\log\FileTarget
 {
     use TargetTrait;
 
-    private $serviceName        = 'project';
-    private $serviceVersion     = '1.0.0';
-    private $serviceEndpoint    = 'frontend';
-    private $serviceApp         = 'yii2';
+    private string $serviceName        = 'app';
+    private string $serviceVersion     = '1.0.0';
+    private string $serviceType        = 'frontend';
 
-    private $appVersion     = '';
-    private $gitBranch      = '';
-    private $gitHash        = '';
+    private string $appVersion     = '';
+    private string $gitBranch      = '';
+    private string $gitHash        = '';
 
     /**
      *
@@ -41,8 +40,7 @@ class AirFileTarget extends \yii\log\FileTarget
         parent::init();
         $this->serviceName = Yii::$app->params['serviceName'] ?? '';
         $this->serviceVersion = Yii::$app->params['serviceVersion'] ?? '';
-        $this->serviceEndpoint = Yii::$app->params['serviceEndpoint'] ?? '';
-        $this->serviceApp = Yii::$app->params['serviceApp'] ?? '';
+        $this->serviceType = Yii::$app->params['serviceType'] ?? '';
 
         $this->appVersion = Yii::$app->params['release']['version'] ?? '';
         $this->gitBranch = Yii::$app->params['release']['git_branch'] ?? '';
@@ -58,10 +56,12 @@ class AirFileTarget extends \yii\log\FileTarget
 //            $context = $this->context;
 //        }
         $context = $this->context;
-        $context['srv.name'] = $this->serviceName;
-        $context['srv.ver'] = $this->serviceVersion;
-        $context['srv.ept'] = $this->serviceEndpoint;
-        $context['srv.app'] = $this->serviceApp;
+        $context['service.name'] = $this->serviceName;
+        $context['service.version'] = $this->appVersion; //$this->serviceVersion;
+        $context['service.type'] = $this->serviceType;
+        $context['service.env'] = YII_ENV;
+        $context['service.git_branch'] = str_replace('refs/heads/', '', $this->gitBranch);
+        $context['service.git_hash'] = substr($this->gitHash, 7);
 
         //$context['log.level'] = $this->;
 
@@ -71,12 +71,6 @@ class AirFileTarget extends \yii\log\FileTarget
                 $context['app.' . $pkey] = $pval;
             }
         }
-
-        $context['app.ver']         = $this->appVersion;
-        $context['app.name']        = Yii::$app->name;
-        $context['app.env']         = YII_ENV;
-        $context['git.branch']      = $this->gitBranch;
-        $context['git.hash']        = $this->gitHash;
 
         return $context;
     }
