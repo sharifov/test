@@ -115,7 +115,7 @@ class VoluntaryRefundService
         $this->productQuoteOptionRefundRepository = $productQuoteOptionRefundRepository;
     }
 
-    public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, int $projectId, ?int $originProductQuoteId): void
+    public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, int $projectId, ?ProductQuote $originProductQuote): void
     {
         try {
             $caseCategoryKey = self::getCategoryKey();
@@ -172,26 +172,36 @@ class VoluntaryRefundService
         }
 
         try {
-            $order = $this->createOrder(
-                $orderCreateSaleForm,
-                $orderContactForm,
-                $case,
-                $projectId
-            );
+            if (!$originProductQuote || !$order = $originProductQuote->pqOrder) {
+                $order = $this->createOrder(
+                    $orderCreateSaleForm,
+                    $orderContactForm,
+                    $case,
+                    $projectId
+                );
+            } else {
+                $this->orderCreateFromSaleService->caseOrderRelation($order->or_id, $case->cs_id);
+                $this->orderCreateFromSaleService->orderContactCreate($order, $orderContactForm);
+
+                $case->addEventLog(
+                    CaseEventLog::VOLUNTARY_REFUND_CREATE,
+                    'Order related with case GID: ' . $order->or_gid,
+                    ['order_gid' => $order->or_gid]
+                );
+            }
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Order creation failed');
             throw new VoluntaryRefundException('Order creation failed', VoluntaryRefundException::ORDER_CREATION_FAILED);
         }
 
         try {
-            if (!$originProductQuoteId) {
+            if (!$originProductQuote) {
                 $originProductQuote = $this->createOriginProductQuoteInfrastructure(
                     $orderCreateSaleForm,
                     $saleData,
                     $order,
                     $case
                 );
-                $originProductQuoteId = $originProductQuote->pq_id;
             }
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Origin Product Quote creation failed');
@@ -201,7 +211,7 @@ class VoluntaryRefundService
         try {
             $orderRefund = OrderRefund::createByVoluntaryRefund(
                 OrderRefund::generateUid(),
-                $originProductQuoteId,
+                $originProductQuote->pq_id,
                 $order->or_app_total,
                 $order->or_client_currency,
                 $order->or_client_currency_rate,
@@ -213,7 +223,7 @@ class VoluntaryRefundService
             $totalCalculatedTickets = $this->calculateTotalTicketsAmount($voluntaryRefundCreateForm->refundForm->ticketForms);
             $productQuoteRefund = ProductQuoteRefund::createByVoluntaryRefund(
                 $orderRefund->orr_id,
-                $originProductQuoteId,
+                $originProductQuote->pq_id,
                 0,
                 $totalCalculatedTickets->processingFee,
                 $totalCalculatedTickets->refundAmount,
@@ -247,7 +257,7 @@ class VoluntaryRefundService
             }
 
             foreach ($voluntaryRefundCreateForm->refundForm->auxiliaryOptionsForms as $auxiliaryOptionsForm) {
-                $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuoteId, $auxiliaryOptionsForm->type);
+                $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuote->pq_id, $auxiliaryOptionsForm->type);
 
                 $productQuoteOptionRefund = ProductQuoteOptionRefund::create(
                     $orderRefund->orr_id,
@@ -305,7 +315,7 @@ class VoluntaryRefundService
             $this->productQuoteRepository->save($relatedProductQuote);
         }
 
-        $this->startRefundAutoProcess($form, $projectId, $productQuote->pq_id);
+        $this->startRefundAutoProcess($form, $projectId, $productQuote);
     }
 
     private function getCaseSaleData(string $bookingId, Cases $case, int $caseEventLogType): array
