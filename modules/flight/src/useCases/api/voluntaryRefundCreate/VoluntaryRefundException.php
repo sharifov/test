@@ -13,4 +13,6 @@ class VoluntaryRefundException extends \RuntimeException
     public const ORIGIN_PRODUCT_QUOTE_CREATION_FAILED = Module::FLIGHT . 105;
     public const PRODUCT_QUOTE_REFUND_CREATION_FAILED = Module::FLIGHT . 106;
     public const PRODUCT_QUOTE_NOT_AVAILABLE_FOR_REFUND = Module::FLIGHT . 107;
+    public const PAYMENT_DATA_PROCESSED_FAILED = Module::FLIGHT . 108;
+    public const BILLING_INFO_PROCESSED_FAILED = Module::FLIGHT . 108;
 }

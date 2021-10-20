@@ -45,6 +45,8 @@ use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\CurrencyHelper;
+use webapi\src\services\payment\BillingInfoApiVoluntaryService;
+use webapi\src\services\payment\PaymentRequestVoluntaryService;
 
 /**
  * Class VoluntaryRefundService
@@ -64,6 +66,7 @@ use sales\services\CurrencyHelper;
  * @property FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository
  * @property ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository
  * @property ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository
+ * @property PaymentRequestVoluntaryService $paymentRequestVoluntaryService
  */
 class VoluntaryRefundService
 {
@@ -83,6 +86,7 @@ class VoluntaryRefundService
     private FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository;
     private ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository;
     private ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository;
+    private PaymentRequestVoluntaryService $paymentRequestVoluntaryService;
 
     public function __construct(
         CasesSaleService $casesSaleService,
@@ -98,7 +102,8 @@ class VoluntaryRefundService
         OrderRefundRepository $orderRefundRepository,
         FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository,
         ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository,
-        ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository
+        ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository,
+        PaymentRequestVoluntaryService $paymentRequestVoluntaryService
     ) {
         $this->casesSaleService = $casesSaleService;
         $this->clientManageService = $clientManageService;
@@ -114,6 +119,7 @@ class VoluntaryRefundService
         $this->flightQuoteTicketRefundRepository = $flightQuoteTicketRefundRepository;
         $this->productQuoteObjectRefundRepository = $productQuoteObjectRefundRepository;
         $this->productQuoteOptionRefundRepository = $productQuoteOptionRefundRepository;
+        $this->paymentRequestVoluntaryService = $paymentRequestVoluntaryService;
     }
 
     public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, int $projectId, ?ProductQuote $originProductQuote): void
@@ -290,8 +296,38 @@ class VoluntaryRefundService
 
             $this->productQuoteRefundRepository->save($productQuoteRefund);
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Product Quote Refund creation failed');
-            throw new VoluntaryRefundException('Product Quote Refund creation failed', VoluntaryRefundException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
+            $this->errorHandler($case, null, 'Product Quote Refund structure creation failed');
+            throw new VoluntaryRefundException('Product Quote Refund structure creation failed', VoluntaryRefundException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
+        }
+
+        try {
+            if ($voluntaryRefundCreateForm->paymentRequestForm) {
+                $this->paymentRequestVoluntaryService->processing(
+                    $voluntaryRefundCreateForm->paymentRequestForm,
+                    $order,
+                    'Create by Voluntary Refund API processing'
+                );
+            }
+        } catch (\Throwable $e) {
+            $this->errorHandler($case, null, 'PaymentRequest processing is failed');
+            throw new VoluntaryRefundException('PaymentRequest processing is failed', VoluntaryRefundException::PAYMENT_DATA_PROCESSED_FAILED);
+        }
+
+        try {
+            if ($voluntaryRefundCreateForm->billingInfoForm) {
+                $paymentMethodId = $this->paymentRequestVoluntaryService->getPaymentMethod()->pm_id ?? null;
+                $creditCardId = $this->paymentRequestVoluntaryService->getCreditCard()->cc_id ?? null;
+
+                BillingInfoApiVoluntaryService::getOrCreateBillingInfo(
+                    $voluntaryRefundCreateForm->billingInfoForm,
+                    $order->getId(),
+                    $creditCardId,
+                    $paymentMethodId
+                );
+            }
+        } catch (\Throwable $e) {
+            $this->errorHandler($case, null, 'BillingInfo processing is failed');
+            throw new VoluntaryRefundException('BillingInfo processing is failed', VoluntaryRefundException::BILLING_INFO_PROCESSED_FAILED);
         }
 
         $productQuoteRefund->processing();
