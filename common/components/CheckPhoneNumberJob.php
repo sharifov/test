@@ -28,7 +28,7 @@ class CheckPhoneNumberJob extends BaseJob implements \yii\queue\JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
 
         try {
             if (!$this->client_id || !$this->client_phone_id) {

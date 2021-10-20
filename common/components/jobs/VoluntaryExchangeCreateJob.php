@@ -42,7 +42,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
      */
     public function execute($queue): void
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
 
         $objectCollection = Yii::createObject(VoluntaryExchangeObjectCollection::class);
         $boRequestService = Yii::createObject(BoRequestVoluntaryExchangeService::class);

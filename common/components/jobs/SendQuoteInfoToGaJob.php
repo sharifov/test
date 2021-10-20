@@ -25,7 +25,7 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             if (!$quote = Quote::findOne(['id' => $this->quoteId])) {
                 throw new \DomainException('Quote not found');

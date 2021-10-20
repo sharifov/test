@@ -22,7 +22,7 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
      */
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         $service = \Yii::createObject(ClientChatService::class);
 
         try {
