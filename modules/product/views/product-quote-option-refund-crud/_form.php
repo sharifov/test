@@ -1,5 +1,7 @@
 <?php
 
+use frontend\helpers\JsonHelper;
+use kdn\yii2\JsonEditor;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefundStatus;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -45,6 +47,27 @@ use yii\widgets\ActiveForm;
       <?= $form->field($model, 'pqor_client_refund_amount')->input('number', ['step' => 'any']) ?>
 
       <?= $form->field($model, 'pqor_refund_allow')->checkbox() ?>
+  </div>
+
+  <div class="col-md-6">
+      <?php
+        try {
+            $model->pqor_details = JsonHelper::encode($model->pqor_details);
+            echo $form->field($model, 'pqor_details')->widget(
+                JsonEditor::class,
+                [
+                  'clientOptions' => [
+                      'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                      'mode' => $model->isNewRecord ? 'code' : 'form'
+                  ],
+                  //'collapseAll' => ['view'],
+                  'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'pqor_details')->textarea(['rows' => 6]);
+        }
+        ?>
   </div>
 
 

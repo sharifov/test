@@ -282,7 +282,8 @@ class VoluntaryRefundService
                     $order->or_client_currency_rate,
                     $auxiliaryOptionsForm->amount,
                     $auxiliaryOptionsForm->refundable,
-                    $auxiliaryOptionsForm->refundAllow
+                    $auxiliaryOptionsForm->refundAllow,
+                    $auxiliaryOptionsForm->details
                 );
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
             }
