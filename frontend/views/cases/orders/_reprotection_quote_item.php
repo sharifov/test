@@ -27,7 +27,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionTy
 $hasReprotection = false;
 $reprotectionQuotes = [];
 
-if ($nr && $reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($quote->pq_id)) {
+if ($nr && $reprotectionQuotes = ProductQuoteQuery::getChangeQuotesByOriginQuote($quote->pq_id)) {
     $hasReprotection = true;
 }
 

@@ -227,6 +227,10 @@ class VoluntaryExchangeService
                 true
             );
         }
+        $case->addEventLog(
+            CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+            'Voluntary Exchange process completed successfully'
+        );
     }
 
     public function failProcess(

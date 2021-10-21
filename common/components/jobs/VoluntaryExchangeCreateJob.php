@@ -235,6 +235,10 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 throw $throwable;
             }
             */
+            \Yii::warning(/* TODO:: FOR DEBUG:: must by remove  */
+                'WH to OTA temporary disabled',
+                'VoluntaryExchangeCreateJob:OtaRequestVoluntaryRequestService'
+            );
 
             $voluntaryExchangeService->doneProcess(
                 $voluntaryExchangeQuote,
