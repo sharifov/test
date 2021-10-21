@@ -1,10 +1,10 @@
 <?php
 
 use kartik\export\ExportMenu;
+use kartik\grid\GridView;
 use sales\model\user\reports\stats\Metrics;
 use sales\model\user\reports\stats\UserStatsReport;
 use yii\bootstrap4\Html;
-use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\web\View;
 
@@ -120,8 +120,6 @@ if ($searchModel->isValid) {
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php Pjax::begin(['id' => 'pjax-user-report', 'timeout' => 7000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
-
     <div class="x_panel">
         <div class="x_title">
             <h2><i class="fa fa-search"></i> Search</h2>
@@ -142,7 +140,8 @@ if ($searchModel->isValid) {
     </div>
 
     <div class="d-flex">
-        <?php echo ExportMenu::widget([
+        <?php
+        $exportMenu = ExportMenu::widget([
             'dataProvider' => $dataProvider,
             'columns' => $columns,
             'exportConfig' => [
@@ -166,18 +165,54 @@ if ($searchModel->isValid) {
             'options' => [
                 'id' => 'export-links'
             ],
-        ]); ?>
+        ]);
+        ?>
+
     </div>
 
     <br>
 
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => null,
-        'columns' => $columns,
-    ]) ?>
+    <?php if ($searchModel->isValid) : ?>
+        <div class="row">
+            <div class="col-md-12">
+                <?= GridView::widget([
+                    'dataProvider' => $dataProvider,
+                    'filterModel' => null,
+                    'columns' => $columns,
+                    'responsive' => true,
+                    'hover' => true,
+                    'panel' => [
+                        'type' => GridView::TYPE_PRIMARY,
+                        'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Report</h3>',
+                    ],
+                    'export' => [
+                        'label' => 'Page'
+                    ],
+                    'exportConfig' => [
+                        'html' => [],
+                        'csv' => [],
+                        'txt' => [],
+                        'xls' => [],
+                        'pdf' => [
+                            'config' => [
+                                'mode' => 'c',
+                                'format' => 'A4-L',
+                            ]
+                        ],
+                        'json' => [],
+                    ],
+                    'toolbar' => [
+                        //'content' => '<div class="btn-group">' . \yii\helpers\Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/leads-report'], ['class' => 'btn btn-outline-secondary', 'title' => 'Reset Grid']) . '</div>',
+                        '{export}',
+                        $exportMenu,
+                    ],
+                ]) ?>
 
-    <?php Pjax::end(); ?>
+            </div>
+        </div>
+
+    <?php endif; ?>
+
 </div>
 
 <?php

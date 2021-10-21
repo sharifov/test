@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
         'id' => 'UserStatsReportForm',
         'action' => ['report'],
         'options' => [
-            'data-pjax' => 1
+          //  'data-pjax' => 1
         ],
         'method' => 'get',
         'enableClientValidation' => true,
@@ -137,7 +137,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-12">
             <div class="form-group">
                 <?= Html::submitButton('Generate report', ['class' => 'btn btn-primary js-user-stats-btn']) ?>
-                <?= Html::a('Reset', ['report'], ['class' => 'btn btn-default']) ?>
+                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['report'], ['class' => 'btn btn-warning']) ?>
             </div>
         </div>
     </div>
