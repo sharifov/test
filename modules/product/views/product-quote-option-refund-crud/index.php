@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\product\src\entities\productQuoteOptionRefund\search\ProductQuoteOptionRefund */
+/* @var $searchModel modules\product\src\entities\productQuoteOptionRefund\search\ProductQuoteOptionRefundSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Product Quote Option Refunds';

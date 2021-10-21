@@ -334,6 +334,7 @@ if ($quote->productQuoteLastChange) {
                         <th>Refund amount</th>
                         <th>Client currency</th>
                         <th style="width: 140px">Created</th>
+                        <th style="width: 60px">Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -350,6 +351,26 @@ if ($quote->productQuoteLastChange) {
                             <td><?= $refundItem->pqr_client_refund_amount ? number_format($refundItem->pqr_client_refund_amount, 2) : '-'?></td>
                             <td><?= $refundItem->pqr_client_currency ? Html::encode($refundItem->pqr_client_currency) : '-'?></td>
                             <td><small><?=$refundItem->pqr_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($refundItem->pqr_created_dt)) : '-'?></small></td>
+                            <td>
+                              <div class="btn-group">
+                                <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <i class="fa fa-bars"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                  <?php /** @abac ProductQuoteAbacObject::ACT_VIEW_DETAILS_REFUND_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS, Product quote refund view details */ ?>
+                                  <?php if (Yii::$app->abac->can(null, ProductQuoteAbacObject::ACT_VIEW_DETAILS_REFUND_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+                                        <?= Html::a('<i class="fas fa-info-circle"></i> View Details', null, [
+                                        'data-refund-quote-id' => $refundItem->pqr_id,
+                                        'class' => 'dropdown-item btn-show-refund-quote-details',
+                                        'data-url' => Url::to(['/product/product-quote-refund/ajax-view-details', 'id' => $refundItem->pqr_id]),
+                                        'data-toggle' => 'tooltip',
+                                        'data-placement' => 'right',
+                                        'title' => 'View Details'
+                                    ]) ?>
+                                  <?php endif; ?>
+                                </div>
+                              </div>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
