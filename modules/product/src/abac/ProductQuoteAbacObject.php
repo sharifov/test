@@ -15,9 +15,11 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
 
     /** ACTION PERMISSION */
     public const ACT_DECLINE_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/decline';
+    public const ACT_VIEW_DETAILS_REFUND_QUOTE = self::NS . 'act/refund_quote/details';
 
     public const OBJECT_LIST = [
-        self::ACT_DECLINE_REPROTECTION_QUOTE => self::ACT_DECLINE_REPROTECTION_QUOTE
+        self::ACT_DECLINE_REPROTECTION_QUOTE => self::ACT_DECLINE_REPROTECTION_QUOTE,
+        self::ACT_VIEW_DETAILS_REFUND_QUOTE => self::ACT_VIEW_DETAILS_REFUND_QUOTE
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -30,6 +32,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ACT_DECLINE_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
+        self::ACT_VIEW_DETAILS_REFUND_QUOTE => [self::ACTION_ACCESS],
     ];
 
     protected const ATTR_REPROTECTION_QUOTE_IS_NEW = [
