@@ -28,10 +28,6 @@ use yii\validators\DateValidator;
  * @property $dateRange
  * @property $dateFrom
  * @property $dateTo
- * @property $availableDepartments
- * @property $availableRoles
- * @property $availableGroups
- * @property $availableUsers
  * @property $departments
  * @property $roles
  * @property $groups
@@ -39,6 +35,7 @@ use yii\validators\DateValidator;
  * @property $groupBy
  * @property $metrics
  * @property $isValid
+ * @property Access $access
  */
 class UserStatsReport extends Model
 {
@@ -66,10 +63,7 @@ class UserStatsReport extends Model
 
     public $isValid = false;
 
-    private $availableDepartments;
-    private $availableRoles;
-    private $availableGroups;
-    private $availableUsers;
+    private Access $access;
 
     public function rules(): array
     {
@@ -108,19 +102,13 @@ class UserStatsReport extends Model
     public function __construct(
         string $defaultTimeZone,
         string $defaultDateRange,
-        array $availableDepartments,
-        array $availableRoles,
-        array $availableGroups,
-        array $availableUsers,
+        Access $access,
         $config = []
     ) {
         parent::__construct($config);
         $this->timeZone = $defaultTimeZone;
         $this->dateRange = $defaultDateRange;
-        $this->availableDepartments = $availableDepartments;
-        $this->availableRoles = $availableRoles;
-        $this->availableGroups = $availableGroups;
-        $this->availableUsers = $availableUsers;
+        $this->access = $access;
     }
 
     public function search(array $params)
@@ -463,25 +451,27 @@ class UserStatsReport extends Model
 
         $query->andWhere(['users.status' => Employee::STATUS_ACTIVE]);
 
-        if ($this->departments) {
+        if ($this->departments || $this->access->departmentsLimitedAccess) {
+            $departments = $this->departments ?: array_keys($this->access->departments);
             $query->addSelect([
                 'departmentAvailable' =>
                     (new Query())
                         ->select(['count(*)'])
                         ->from(UserDepartment::tableName())
-                        ->andWhere(['ud_dep_id' => $this->departments])
+                        ->andWhere(['ud_dep_id' => $departments])
                         ->andWhere('ud_user_id = users.id')
             ]);
             $query->andHaving(['>', 'departmentAvailable', 0]);
         }
 
-        if ($this->groups) {
+        if ($this->groups || $this->access->groupsLimitedAccess) {
+            $groups = $this->groups ?: array_keys($this->access->groups);
             $query->addSelect([
                 'groupAvailable' =>
                     (new Query())
                         ->select(['count(*)'])
                         ->from(UserGroupAssign::tableName())
-                        ->andWhere(['ugs_group_id' => $this->groups])
+                        ->andWhere(['ugs_group_id' => $groups])
                         ->andWhere('ugs_user_id = users.id')
             ]);
             $query->andHaving(['>', 'groupAvailable', 0]);
@@ -499,8 +489,9 @@ class UserStatsReport extends Model
             $query->andHaving(['>', 'roleAvailable', 0]);
         }
 
-        if ($this->user) {
-            $query->andWhere(['users.id' => $this->user]);
+        if ($this->user || $this->access->usersLimitedAccess) {
+            $users = $this->user ?: array_keys($this->access->users);
+            $query->andWhere(['users.id' => $users]);
         }
 
         if ($this->isGroupByUserGroup()) {
@@ -514,7 +505,10 @@ class UserStatsReport extends Model
                 ->leftJoin(UserGroupAssign::tableName(), 'ugs_user_id = id')
                 ->leftJoin(UserGroup::tableName(), 'ug_id = ugs_group_id')
                 ->groupBy(['ugs_group_id']);
-            $groupQuery->andFilterWhere(['ugs_group_id' => $this->groups]);
+            if ($this->groups || $this->access->groupsLimitedAccess) {
+                $groups = $this->groups ?: $this->access->groups;
+                $groupQuery->andWhere(['ugs_group_id' => $groups]);
+            }
             $dataProvider->query = $groupQuery;
             $dataProvider->sort->defaultOrder = ['group_name' => SORT_ASC];
         } elseif ($this->isGroupByUserRole()) {
@@ -577,7 +571,7 @@ class UserStatsReport extends Model
 
     public function getDepartmentList(): array
     {
-        return $this->availableDepartments;
+        return $this->access->departments;
     }
 
     public function getMetricsList(): array
@@ -587,17 +581,17 @@ class UserStatsReport extends Model
 
     public function getRolesList(): array
     {
-        return $this->availableRoles;
+        return $this->access->roles;
     }
 
     public function getGroupList(): array
     {
-        return $this->availableGroups;
+        return $this->access->groups;
     }
 
     public function getUsersList(): array
     {
-        return $this->availableUsers;
+        return $this->access->users;
     }
 
     public function isGroupByUserName(): bool

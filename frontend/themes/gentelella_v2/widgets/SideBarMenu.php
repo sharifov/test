@@ -763,6 +763,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
+                ['label' => 'User Stats Report', 'url' => ['/user-stats/report'], 'icon' => 'users'],
             ]
         ];
 

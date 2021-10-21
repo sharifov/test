@@ -2,28 +2,23 @@
 
 namespace frontend\controllers;
 
-use common\models\Department;
-use common\models\Employee;
-use common\models\UserGroup;
 use sales\auth\Auth;
 use sales\model\user\entity\userStats\UserStatsSearch;
+use sales\model\user\reports\stats\Access;
 use sales\model\user\reports\stats\SessionFilterStorage;
 use sales\model\user\reports\stats\UserStatsReport;
 use sales\model\userModelSetting\service\UserModelSettingService;
 use Yii;
-use yii\helpers\VarDumper;
-use yii\rbac\Role;
-use yii\web\Controller;
 
 /**
  * Class UserStatsController
  */
-class UserStatsController extends Controller
+class UserStatsController extends FController
 {
     public function init(): void
     {
         parent::init();
-//        $this->layoutCrud();
+        $this->layoutCrud();
     }
 
     public function actionIndex()
@@ -40,13 +35,12 @@ class UserStatsController extends Controller
 
     public function actionReport()
     {
+        $user = Auth::user();
+
         $searchModel = new UserStatsReport(
             \Yii::$app->user->identity->timezone,
             date('Y-m') . '-01 00:00 - ' . date('Y-m-d') . ' 23:59',
-            Department::getList(),
-            array_map(fn (Role $item) => $item->description, Yii::$app->authManager->getRoles()),
-            UserGroup::getList(),
-            Employee::getActiveUsersList()
+            (new Access($user))
         );
 
         $savedFilters = [];
@@ -55,31 +49,15 @@ class UserStatsController extends Controller
         $needResetFilters = (bool)Yii::$app->request->get('reset');
 
         if ($needResetFilters) {
-            $filterStorage->remove(
-                Auth::id(),
-                UserStatsReport::class
-            );
+            $filterStorage->remove($user->id, UserStatsReport::class);
         } else {
-            $savedFilters = $filterStorage->find(
-                Auth::id(),
-                UserStatsReport::class
-            );
+            $savedFilters = $filterStorage->find($user->id, UserStatsReport::class);
         }
 
-        $dataProvider = $searchModel->search(
-            array_merge(
-                $savedFilters,
-                $needResetFilters ? [] : Yii::$app->request->queryParams
-            )
-        );
+        $dataProvider = $searchModel->search(array_merge($savedFilters, $needResetFilters ? [] : Yii::$app->request->queryParams));
 
         if ($searchModel->isValid) {
-            $filterStorage = new SessionFilterStorage();
-            $filterStorage->add(
-                Auth::id(),
-                UserStatsReport::class,
-                $searchModel->getFilters()
-            );
+            $filterStorage->add($user->id, UserStatsReport::class, $searchModel->getFilters());
         }
 
         return $this->render('report', [
