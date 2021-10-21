@@ -8,6 +8,7 @@ use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmForm;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateJob;
+use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCodeException;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundService;
 use modules\flight\src\useCases\voluntaryRefundInfo\form\VoluntaryRefundInfoForm;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
@@ -24,13 +25,17 @@ use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
+use webapi\src\response\messages\ErrorName;
 use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
+use webapi\src\response\messages\TypeMessage;
 use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\MethodNotAllowedHttpException;
 
 /**
@@ -55,6 +60,16 @@ class FlightQuoteRefundController extends ApiBaseController
         parent::__construct($id, $module, $config);
         $this->flightRequestRepository = $flightRequestRepository;
         $this->voluntaryRefundService = $voluntaryRefundService;
+    }
+
+    public function behaviors()
+    {
+        try {
+            \Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            throw new BadRequestHttpException($throwable->getMessage(), ApiCodeException::REQUEST_DATA_INVALID);
+        }
+        return parent::behaviors();
     }
 
     /**
@@ -131,21 +146,12 @@ class FlightQuoteRefundController extends ApiBaseController
     public function actionInfo()
     {
         if (!$this->request->isPost) {
-            throw new MethodNotAllowedHttpException();
+            throw new MethodNotAllowedHttpException('Method not allowed', ApiCodeException::REQUEST_IS_NOT_POST);
         }
 
         $this->startApiLog($this->action->uniqueId);
 
-        try {
-            $post = \Yii::$app->request->post();
-        } catch (\Throwable $throwable) {
-            return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage(Messages::POST_DATA_ERROR),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-            ));
-        }
+        $post = \Yii::$app->request->post();
 
         $voluntaryRefundInfoForm = new VoluntaryRefundInfoForm();
         if (!$voluntaryRefundInfoForm->load($post)) {
@@ -386,45 +392,43 @@ class FlightQuoteRefundController extends ApiBaseController
     public function actionCreate()
     {
         if (!$this->request->isPost) {
-            throw new MethodNotAllowedHttpException();
+            throw new MethodNotAllowedHttpException('Method not allowed', ApiCodeException::REQUEST_IS_NOT_POST);
         }
 
         $this->startApiLog($this->action->uniqueId, true);
 
-        try {
-            $post = \Yii::$app->request->post();
-        } catch (\Throwable $throwable) {
-            return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage(Messages::POST_DATA_ERROR),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-            ));
-        }
+        $post = \Yii::$app->request->post();
 
         if (!$project = $this->apiProject) {
             return $this->endApiLog(new ErrorResponse(
+                new MessageMessage('Not found Project with current user: ' . $this->apiUser->au_api_username),
                 new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
                 new ErrorsMessage('Not found Project with current user: ' . $this->apiUser->au_api_username),
-                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+                new CodeMessage((int)ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER),
+                new ErrorName('Not found Project'),
+                new TypeMessage('app')
             ));
         }
 
         $voluntaryRefundCreateForm = new VoluntaryRefundCreateForm();
         if (!$voluntaryRefundCreateForm->load($post)) {
             return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(400),
-                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
-                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::BAD_REQUEST)),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new CodeMessage((int)ApiCodeException::POST_DATA_NOT_LOADED),
+                new TypeMessage('app')
             ));
         }
 
         if (!$voluntaryRefundCreateForm->validate()) {
             return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(422),
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($voluntaryRefundCreateForm->getErrors()),
-                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+                new CodeMessage((int)ApiCodeException::FAILED_FORM_VALIDATE),
+                new TypeMessage('app')
             ));
         }
 
@@ -446,10 +450,10 @@ class FlightQuoteRefundController extends ApiBaseController
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->booking_id)) {
                 if ($productQuote->isChangeable()) {
                     if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
-                        throw new \DomainException('Quote not available for refund');
+                        throw new \DomainException('Quote not available for refund', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
                     }
                 } else {
-                    throw new \DomainException('Quote not available for refund');
+                    throw new \DomainException('Quote not available for refund', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
                 }
             }
 
@@ -460,30 +464,31 @@ class FlightQuoteRefundController extends ApiBaseController
             $this->flightRequestRepository->save($flightRequest);
 
             return $this->endApiLog(new SuccessResponse(
-//                new DataMessage([
-//                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),
-//                ]),
                 new CodeMessage(ApiCodeException::SUCCESS)
             ));
-        } catch (\RuntimeException | \DomainException $throwable) {
+        } catch (\RuntimeException | \DomainException $e) {
             \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                ArrayHelper::merge(AppHelper::throwableLog($e), $post),
                 'FlightQuoteRefundController:actionCreate:Warning'
             );
             return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(422),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage($throwable->getCode())
+                new MessageMessage($e->getMessage()),
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new CodeMessage((int)$e->getCode()),
+                new TypeMessage('app')
             ));
-        } catch (\Throwable $throwable) {
+        } catch (\Throwable $e) {
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                ArrayHelper::merge(AppHelper::throwableLog($e), $post),
                 'FlightQuoteRefundController:actionCreate:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(500),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage($throwable->getCode())
+                new MessageMessage(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR)),
+                new ErrorName('Server Error'),
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
+                new CodeMessage((int)$e->getCode()),
+                new TypeMessage('app')
             ));
         }
     }
@@ -615,19 +620,10 @@ class FlightQuoteRefundController extends ApiBaseController
     public function actionConfirm()
     {
         if (!$this->request->isPost) {
-            throw new MethodNotAllowedHttpException();
+            throw new MethodNotAllowedHttpException('Method not allowed', ApiCodeException::REQUEST_IS_NOT_POST);
         }
 
-        try {
-            $post = \Yii::$app->request->post();
-        } catch (\Throwable $throwable) {
-            return new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage(Messages::POST_DATA_ERROR),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-            );
-        }
+        $post = \Yii::$app->request->post();
 
         $voluntaryRefundConfirmForm = new VoluntaryRefundConfirmForm();
         if (!$voluntaryRefundConfirmForm->load($post)) {

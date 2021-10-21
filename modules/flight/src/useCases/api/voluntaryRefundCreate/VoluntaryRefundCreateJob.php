@@ -71,7 +71,7 @@ class VoluntaryRefundCreateJob extends \common\components\jobs\BaseJob implement
             } else {
                 $voluntaryRefundService->startRefundAutoProcess($voluntaryRefundCreateForm, $flightRequest->fr_project_id, null);
             }
-        } catch (VoluntaryRefundException $e) {
+        } catch (VoluntaryRefundCodeException $e) {
             $flightRequest->statusToError();
             $flightRequest->save();
         } catch (\Throwable $e) {

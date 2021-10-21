@@ -135,7 +135,7 @@ class VoluntaryRefundService
             }
         } catch (\Throwable $e) {
             $this->errorHandler(null, null, 'Case Sale creation failed', $e);
-            throw new VoluntaryRefundException('Case creation Failed', VoluntaryRefundException::CASE_CREATION_FAILED);
+            throw new VoluntaryRefundCodeException('Case creation Failed', VoluntaryRefundCodeException::CASE_CREATION_FAILED);
         }
 
         try {
@@ -164,7 +164,7 @@ class VoluntaryRefundService
             );
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Case Sale creation failed', $e);
-            throw new VoluntaryRefundException('Case Sale creation failed', VoluntaryRefundException::CASE_SALE_CREATION_FAILED);
+            throw new VoluntaryRefundCodeException('Case Sale creation failed', VoluntaryRefundCodeException::CASE_SALE_CREATION_FAILED);
         }
 
         try {
@@ -176,7 +176,7 @@ class VoluntaryRefundService
             $this->casesRepository->save($case);
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Client creation failed', $e);
-            throw new VoluntaryRefundException('Client creation failed', VoluntaryRefundException::CLIENT_CREATION_FAILED);
+            throw new VoluntaryRefundCodeException('Client creation failed', VoluntaryRefundCodeException::CLIENT_CREATION_FAILED);
         }
 
         try {
@@ -205,7 +205,7 @@ class VoluntaryRefundService
             }
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Order creation failed', $e);
-            throw new VoluntaryRefundException('Order creation failed', VoluntaryRefundException::ORDER_CREATION_FAILED);
+            throw new VoluntaryRefundCodeException('Order creation failed', VoluntaryRefundCodeException::ORDER_CREATION_FAILED);
         }
 
         try {
@@ -219,7 +219,7 @@ class VoluntaryRefundService
             }
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Origin Product Quote creation failed', $e);
-            throw new VoluntaryRefundException('Origin Product Quote creation failed', VoluntaryRefundException::ORIGIN_PRODUCT_QUOTE_CREATION_FAILED);
+            throw new VoluntaryRefundCodeException('Origin Product Quote creation failed', VoluntaryRefundCodeException::ORIGIN_PRODUCT_QUOTE_CREATION_FAILED);
         }
 
         try {
@@ -298,7 +298,7 @@ class VoluntaryRefundService
             $this->productQuoteRefundRepository->save($productQuoteRefund);
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Product Quote Refund structure creation failed', $e);
-            throw new VoluntaryRefundException('Product Quote Refund structure creation failed', VoluntaryRefundException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
+            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
         }
 
         try {
@@ -311,7 +311,7 @@ class VoluntaryRefundService
             }
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'PaymentRequest processing is failed', $e);
-            throw new VoluntaryRefundException('PaymentRequest processing is failed', VoluntaryRefundException::PAYMENT_DATA_PROCESSED_FAILED);
+            throw new VoluntaryRefundCodeException('PaymentRequest processing is failed', VoluntaryRefundCodeException::PAYMENT_DATA_PROCESSED_FAILED);
         }
 
         try {
@@ -328,7 +328,7 @@ class VoluntaryRefundService
             }
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'BillingInfo processing is failed', $e);
-            throw new VoluntaryRefundException('BillingInfo processing is failed', VoluntaryRefundException::BILLING_INFO_PROCESSED_FAILED);
+            throw new VoluntaryRefundCodeException('BillingInfo processing is failed', VoluntaryRefundCodeException::BILLING_INFO_PROCESSED_FAILED);
         }
 
         $productQuoteRefund->processing();
