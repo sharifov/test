@@ -763,7 +763,7 @@ class FlightQuoteController extends FController
                 Yii::$app->log->targets['debug']->enabled = false;
             }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'HotelQuoteController:increaseLimits');
+            Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:increaseLimits');
         }
     }
 
@@ -851,7 +851,7 @@ class FlightQuoteController extends FController
                     });
                 }
 
-                $response['message'] = 'Success. FlightQuote ID( ' . $flightQuote->getId() . ') created';
+                $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {
                 Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionAjaxPrepareDump:Exception');

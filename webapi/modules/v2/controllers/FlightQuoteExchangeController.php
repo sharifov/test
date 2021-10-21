@@ -443,6 +443,23 @@ class FlightQuoteExchangeController extends BaseController
      * }
      *
      * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Error",
+     *        "errors": [
+     *           "Not found Project with current user: xxx"
+     *        ],
+     *        "code": "13101",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
      * HTTP/1.1 422 Unprocessable entity
      * {
      *        "status": 422,
@@ -459,6 +476,74 @@ class FlightQuoteExchangeController extends BaseController
      *        "request": {
      *           ...
      *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *      "status": 422,
+     *      "message": "Error",
+     *      "errors": [
+     *          "FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed"
+     *      ],
+     *      "code": 13113,
+     *      "technical": {
+     *         ...
+     *      },
+     *      "request": {
+     *         ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *      "status": 422,
+     *      "message": "Error",
+     *      "errors": [
+     *          "Quote not available for exchange"
+     *      ],
+     *      "code": 13113,
+     *      "technical": {
+     *         ...
+     *      },
+     *      "request": {
+     *         ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *      "status": 422,
+     *      "message": "Error",
+     *      "errors": [
+     *          "Case saving error"
+     *      ],
+     *      "code": 21101,
+     *      "technical": {
+     *         ...
+     *      },
+     *      "request": {
+     *         ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 500 Internal Server Error
+     * {
+     *      "status": 500,
+     *      "message": "Error",
+     *      "errors": [
+     *          "Server Error"
+     *      ],
+     *      "code": 0,
+     *      "technical": {
+     *         ...
+     *      },
+     *      "request": {
+     *         ...
+     *      }
      * }
      */
     public function actionCreate()
@@ -490,6 +575,7 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }
+
         if (!$voluntaryExchangeCreateForm->validate()) {
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
@@ -511,6 +597,17 @@ class FlightQuoteExchangeController extends BaseController
                 $quoteChangeableStatuses,
                 $typeIds
             );
+
+            if (!empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
+                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post)) {
+                    throw new \RuntimeException('Request to Back Office is failed');
+                }
+            } else {
+                \Yii::warning(
+                    'Setting VoluntaryExchangeBoEndpoint is empty. Request not sent.',
+                    'FlightQuoteExchangeController:SettingVoluntaryExchangeBoEndpoint'
+                );
+            }
 
             $flightRequest = FlightRequest::create(
                 $voluntaryExchangeCreateForm->booking_id,
@@ -537,18 +634,7 @@ class FlightQuoteExchangeController extends BaseController
             $flightRequest->fr_job_id = $jobId;
             $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
-            if (!empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
-                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post)) {
-                    throw new \RuntimeException('Request to Back Office is failed');
-                }
-            } else {
-                \Yii::warning(
-                    'Setting VoluntaryExchangeBoEndpoint is empty. Request not sent.',
-                    'FlightQuoteExchangeController:SettingVoluntaryExchangeBoEndpoint'
-                );
-            }
-
-            $dataMessage['resultMessage'] = 'FlightRequest is accepted for processing';
+            $dataMessage['resultMessage'] = 'Processing was successful';
             $dataMessage['flightRequestId'] = $flightRequest->fr_id;
             $dataMessage['caseGid'] = $case->cs_gid;
 
