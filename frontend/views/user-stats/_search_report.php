@@ -120,16 +120,15 @@ use yii\widgets\ActiveForm;
         </div>
 
         <div class="col-md-4">
-            <?= $form->field($model, 'users', [
+            <?= $form->field($model, 'user', [
                 'options' => ['class' => 'form-group']
             ])->widget(Select2::class, [
                 'data' => $model->getUsersList(),
                 'size' => Select2::SMALL,
-                'options' => ['placeholder' => 'Select Users', 'multiple' => true],
+                'options' => ['placeholder' => 'Select User', 'multiple' => false],
                 'pluginOptions' => ['allowClear' => true],
             ])->label('Users') ?>
         </div>
-
 
     </div>
     <br>
@@ -137,7 +136,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-12">
             <div class="form-group">
                 <?= Html::submitButton('Generate report', ['class' => 'btn btn-primary js-user-stats-btn']) ?>
-                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['report'], ['class' => 'btn btn-warning']) ?>
+                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['report?reset=1'], ['class' => 'btn btn-warning']) ?>
             </div>
         </div>
     </div>

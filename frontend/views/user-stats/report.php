@@ -5,19 +5,19 @@ use kartik\grid\GridView;
 use sales\model\user\reports\stats\Metrics;
 use sales\model\user\reports\stats\UserStatsReport;
 use yii\bootstrap4\Html;
-use yii\widgets\Pjax;
 use yii\web\View;
 
 /* @var yii\web\View $this */
 /* @var UserStatsReport $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
+/* @var bool $showReport */
 
 $this->title = 'User Stats Report';
 $this->params['breadcrumbs'][] = $this->title;
 
 $columns = [];
 
-if ($searchModel->isValid) {
+if ($showReport) {
     if ($searchModel->isGroupByUserGroup()) {
         $columns[] = [
             'attribute' => 'group_name',
@@ -172,7 +172,7 @@ if ($searchModel->isValid) {
 
     <br>
 
-    <?php if ($searchModel->isValid) : ?>
+    <?php if ($showReport) : ?>
         <div class="row">
             <div class="col-md-12">
                 <?= GridView::widget([

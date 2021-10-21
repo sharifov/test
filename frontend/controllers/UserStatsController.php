@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\UserGroup;
 use sales\auth\Auth;
 use sales\model\user\entity\userStats\UserStatsSearch;
+use sales\model\user\reports\stats\SessionFilterStorage;
 use sales\model\user\reports\stats\UserStatsReport;
 use sales\model\userModelSetting\service\UserModelSettingService;
 use Yii;
@@ -47,11 +48,44 @@ class UserStatsController extends Controller
             UserGroup::getList(),
             Employee::getActiveUsersList()
         );
-        $dataProvider = $searchModel->search(array_merge(Yii::$app->request->queryParams, Yii::$app->request->post()));
+
+        $savedFilters = [];
+        $filterStorage = new SessionFilterStorage();
+
+        $needResetFilters = (bool)Yii::$app->request->get('reset');
+
+        if ($needResetFilters) {
+            $filterStorage->remove(
+                Auth::id(),
+                UserStatsReport::class
+            );
+        } else {
+            $savedFilters = $filterStorage->find(
+                Auth::id(),
+                UserStatsReport::class
+            );
+        }
+
+        $dataProvider = $searchModel->search(
+            array_merge(
+                $savedFilters,
+                $needResetFilters ? [] : Yii::$app->request->queryParams
+            )
+        );
+
+        if ($searchModel->isValid) {
+            $filterStorage = new SessionFilterStorage();
+            $filterStorage->add(
+                Auth::id(),
+                UserStatsReport::class,
+                $searchModel->getFilters()
+            );
+        }
 
         return $this->render('report', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'showReport' => $searchModel->isValid && !$needResetFilters && Yii::$app->request->queryParams
         ]);
     }
 }

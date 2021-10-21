@@ -35,7 +35,7 @@ use yii\validators\DateValidator;
  * @property $departments
  * @property $roles
  * @property $groups
- * @property $users
+ * @property $user
  * @property $groupBy
  * @property $metrics
  * @property $isValid
@@ -60,7 +60,7 @@ class UserStatsReport extends Model
     public $departments;
     public $roles;
     public $groups;
-    public $users;
+    public $user;
     public $groupBy;
     public $metrics;
 
@@ -96,8 +96,8 @@ class UserStatsReport extends Model
             ['groups', IsArrayValidator::class],
             ['groups', 'each', 'rule' => ['in', 'range' => array_keys($this->getGroupList())], 'skipOnError' => true, 'skipOnEmpty' => true],
 
-            ['users', IsArrayValidator::class],
-            ['users', 'each', 'rule' => ['in', 'range' => array_keys($this->getUsersList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['user', 'integer'],
+            ['user', 'in', 'range' => array_keys($this->getUsersList())],
 
             ['metrics', 'required'],
             ['metrics', IsArrayValidator::class],
@@ -499,8 +499,8 @@ class UserStatsReport extends Model
             $query->andHaving(['>', 'roleAvailable', 0]);
         }
 
-        if ($this->users) {
-            $query->andWhere(['users.id' => $this->users]);
+        if ($this->user) {
+            $query->andWhere(['users.id' => $this->user]);
         }
 
         if ($this->isGroupByUserGroup()) {
@@ -670,5 +670,21 @@ class UserStatsReport extends Model
 
         $this->dateFrom = $from->format('Y-m-d H:i');
         $this->dateTo = $to->format('Y-m-d H:i');
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            $this->formName() => [
+                'groupBy' => $this->groupBy,
+                'timeZone' => $this->timeZone,
+                'dateRange' => $this->dateRange,
+                'departments' => $this->departments,
+                'roles' => $this->roles,
+                'groups' => $this->groups,
+                'user' => $this->user,
+                'metrics' => $this->metrics,
+            ]
+        ];
     }
 }
