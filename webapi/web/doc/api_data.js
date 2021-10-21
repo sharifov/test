@@ -5141,37 +5141,37 @@ define({ "api": [
     "error": {
       "examples": [
         {
-          "title": "Error-Response:",
+          "title": "Error-Response (Bad Request):",
           "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": 13106,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
-          "title": "Error-Response:",
+          "title": "Error-Response (Bad Request):",
           "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Error\",\n       \"errors\": [\n          \"Not found Project with current user: xxx\"\n       ],\n       \"code\": 13101,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
-          "title": "Error-Response:",
+          "title": "Error-Response (Unprocessable entity):",
           "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": 13107,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
-          "title": "Error-Response:",
+          "title": "Error-Response (Unprocessable entity):",
           "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed\"\n     ],\n     \"code\": 13113,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
         },
         {
-          "title": "Error-Response:",
+          "title": "Error-Response (Unprocessable entity):",
           "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Quote not available for exchange\"\n     ],\n     \"code\": 13113,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
         },
         {
-          "title": "Error-Response:",
+          "title": "Error-Response (Unprocessable entity):",
           "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Case saving error\"\n     ],\n     \"code\": 21101,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
         },
         {
-          "title": "Error-Response:",
+          "title": "Error-Response (Internal Server Error):",
           "content": "HTTP/1.1 500 Internal Server Error\n{\n     \"status\": 500,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Server Error\"\n     ],\n     \"code\": 0,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
         }

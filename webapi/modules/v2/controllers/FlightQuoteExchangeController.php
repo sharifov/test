@@ -425,7 +425,7 @@ class FlightQuoteExchangeController extends BaseController
      *        }
      * }
      *
-     * @apiErrorExample {json} Error-Response:
+     * @apiErrorExample {json} Error-Response (Bad Request):
      * HTTP/1.1 400 Bad Request
      * {
      *        "status": 400,
@@ -442,7 +442,7 @@ class FlightQuoteExchangeController extends BaseController
      *        }
      * }
      *
-     * @apiErrorExample {json} Error-Response:
+     * @apiErrorExample {json} Error-Response (Bad Request):
      * HTTP/1.1 400 Bad Request
      * {
      *        "status": 400,
@@ -459,7 +459,7 @@ class FlightQuoteExchangeController extends BaseController
      *        }
      * }
      *
-     * @apiErrorExample {json} Error-Response:
+     * @apiErrorExample {json} Error-Response (Unprocessable entity):
      * HTTP/1.1 422 Unprocessable entity
      * {
      *        "status": 422,
@@ -478,7 +478,7 @@ class FlightQuoteExchangeController extends BaseController
      *        }
      * }
      *
-     * @apiErrorExample {json} Error-Response:
+     * @apiErrorExample {json} Error-Response (Unprocessable entity):
      * HTTP/1.1 422 Unprocessable entity
      * {
      *      "status": 422,
@@ -495,7 +495,7 @@ class FlightQuoteExchangeController extends BaseController
      *      }
      * }
      *
-     * @apiErrorExample {json} Error-Response:
+     * @apiErrorExample {json} Error-Response (Unprocessable entity):
      * HTTP/1.1 422 Unprocessable entity
      * {
      *      "status": 422,
@@ -512,7 +512,7 @@ class FlightQuoteExchangeController extends BaseController
      *      }
      * }
      *
-     * @apiErrorExample {json} Error-Response:
+     * @apiErrorExample {json} Error-Response (Unprocessable entity):
      * HTTP/1.1 422 Unprocessable entity
      * {
      *      "status": 422,
@@ -529,7 +529,7 @@ class FlightQuoteExchangeController extends BaseController
      *      }
      * }
      *
-     * @apiErrorExample {json} Error-Response:
+     * @apiErrorExample {json} Error-Response (Internal Server Error):
      * HTTP/1.1 500 Internal Server Error
      * {
      *      "status": 500,
