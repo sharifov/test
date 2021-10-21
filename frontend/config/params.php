@@ -2,7 +2,7 @@
 
 return [
     'adminEmail' => 'admin@example.com',
-    'serviceEndpoint' => 'frontend',
+    'serviceType' => 'frontend',
     'limitUserConnections' => 0,   // WebSocket Limit user Connections
     'bsVersion' => '4.x',
     'minifiedAssetsEnabled' => false,
