@@ -37,13 +37,7 @@ $(function(){
     mainAgentProfit();
 });
 function mainAgentProfit(){
-    var total = $totalProfit;
-    var agentProfit = 0;
-    var sum = 0;
-    $.each($('.profit-amount'), function( key, obj ) {
-      sum += parseFloat($(obj).html());
-    });
-    $('#main-agent-profit').html((total-sum).toFixed(4));
+    $('#main-agent-profit').html($('.owner-amound').text().trim());
 }
 JS;
 $this->registerJs($js);?>
@@ -67,7 +61,7 @@ $this->registerJs($js);?>
     <div class="col-md-4">Total profit: $<?= number_format($totalProfit, 2)?></div>
     <div class="col-md-4">
         <?php if ($lead->employee) : ?>
-            Profit for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-profit"><?= $mainAgentProfit?></span> (<?=$mainAgentPercent?>%)
+            Profit for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-profit"><?= number_format($mainAgentProfit, 2)?></span> (<?=$mainAgentPercent?>%)
         <?php else : ?>
             <i class="fa fa-exclamation-triangle"></i> Main agent not found.
         <?php endif; ?>
