@@ -96,7 +96,12 @@ $this->registerJs($js);
     ]);?>
     </div>
     <div class="col-md-1">
-        <div class="profit-amount" style="display: flex; width: 70px; border: 1px solid #e4e9ee; justify-content: center; align-items: center; height: 30px;">
+        <div class="profit-amount
+            <?php if ($ownerSplit) : ?>
+                owner-amound
+            <?php endif;?>"
+             style="display: flex; width: 70px; border: 1px solid #e4e9ee;
+              justify-content: center; align-items: center; height: 30px;">
             <?= (!empty($split->ps_percent)) ? $totalProfit * $split->ps_percent / 100 : '0'?>
         </div>
     </div>
