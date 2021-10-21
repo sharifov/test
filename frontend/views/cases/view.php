@@ -95,7 +95,6 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
 
                 <?php
                     $canStatusLog = Auth::can('/lead/flow-transition');
-                    $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
                 ?>
                 <div class="dropdown" style="float: left; padding-right: 10px;">
                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -113,7 +112,7 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                             ]
                         ) ?>
 
-                        <?php if ($canDataLogs) : ?>
+                        <?php if (Auth::can('/global-log/ajax-view-general-case-log')) : ?>
                             <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
                                 'id' => 'btn-general-case-log',
                                 'class' => 'dropdown-item showModalButton',
