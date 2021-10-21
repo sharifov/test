@@ -416,7 +416,7 @@ class FlightQuoteExchangeController extends BaseController
                     "flightRequestId" : 123,
                     "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
                },
-     *        "code": 13200,
+     *        "code": "13200",
      *        "technical": {
      *           ...
      *        },
@@ -433,7 +433,7 @@ class FlightQuoteExchangeController extends BaseController
      *        "errors": [
      *           "Not found data on POST request"
      *        ],
-     *        "code": 13106,
+     *        "code": "13106",
      *        "technical": {
      *           ...
      *        },
@@ -450,7 +450,7 @@ class FlightQuoteExchangeController extends BaseController
      *        "errors": [
      *           "Not found Project with current user: xxx"
      *        ],
-     *        "code": 13101,
+     *        "code": "13101",
      *        "technical": {
      *           ...
      *        },
@@ -469,7 +469,7 @@ class FlightQuoteExchangeController extends BaseController
      *               "booking_id cannot be blank."
      *             ]
      *        ],
-     *        "code": 13107,
+     *        "code": "13107",
      *        "technical": {
      *           ...
      *        },
@@ -486,7 +486,7 @@ class FlightQuoteExchangeController extends BaseController
      *      "errors": [
      *          "FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed"
      *      ],
-     *      "code": 13113,
+     *      "code": "13113",
      *      "technical": {
      *         ...
      *      },
@@ -503,7 +503,7 @@ class FlightQuoteExchangeController extends BaseController
      *      "errors": [
      *          "Quote not available for exchange"
      *      ],
-     *      "code": 13113,
+     *      "code": "13113",
      *      "technical": {
      *         ...
      *      },
@@ -520,7 +520,7 @@ class FlightQuoteExchangeController extends BaseController
      *      "errors": [
      *          "Case saving error"
      *      ],
-     *      "code": 21101,
+     *      "code": "21101",
      *      "technical": {
      *         ...
      *      },
