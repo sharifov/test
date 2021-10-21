@@ -105,7 +105,7 @@ class VoluntaryExchangeService
     {
         return $this->objectCollection
             ->getProductQuoteDataManageService()
-            ->updateRecommendedReprotectionQuote($originProductQuoteId, $exchangeQuoteId);
+            ->updateRecommendedChangeQuote($originProductQuoteId, $exchangeQuoteId);
     }
 
     public function createProductQuoteChange(int $originProductQuoteId, int $caseId, array $dataJson): ProductQuoteChange

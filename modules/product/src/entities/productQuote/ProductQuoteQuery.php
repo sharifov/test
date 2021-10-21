@@ -113,10 +113,11 @@ class ProductQuoteQuery
     ): array {
         return ProductQuote::find()
             ->with('productQuoteDataRecommended')
-            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
-                'typeId' => $typeIds,
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId', [
                 'parentQuoteId' => $id
-            ])->all();
+            ])
+            ->andWhere(['IN', 'pqr_type_id', $typeIds])
+            ->all();
     }
 
     /**

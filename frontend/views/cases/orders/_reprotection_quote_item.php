@@ -109,7 +109,7 @@ if ($quote->productQuoteLastChange) {
                         'data-url' => Url::to(['/flight/flight-quote/create-re-protection-quote', 'flight_id' => $flight->getId()]),
                         'data-toggle' => 'tooltip',
                         'data-placement' => 'right',
-                        'title' => 'Add ReProtection Quote'
+                        'title' => 'Add Change Quote'
                     ]) ?>
                 <?php endif ?>
             <?php endif ?>

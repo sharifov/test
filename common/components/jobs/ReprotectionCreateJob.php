@@ -293,7 +293,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     }
 
                     try {
-                        $productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuote->pq_id, $reProtectionQuote->pq_id);
+                        $productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuote->pq_id, $reProtectionQuote->pq_id);
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set recommended quote(' . $reProtectionQuote->pq_gid . ')');
                     } catch (\Throwable $throwable) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Quote(' . $reProtectionQuote->pq_gid . ') not set recommended');

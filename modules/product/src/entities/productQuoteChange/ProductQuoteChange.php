@@ -335,4 +335,14 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     {
         return $this->pqc_decision_type_id ? ProductQuoteChangeDecisionType::asFormat($this->pqc_decision_type_id) : '-';
     }
+
+    public function isTypeReProtection(): string
+    {
+        return (int) $this->pqc_type_id === self::TYPE_RE_PROTECTION;
+    }
+
+    public function isTypeVoluntary(): string
+    {
+        return (int) $this->pqc_type_id === self::TYPE_VOLUNTARY_EXCHANGE;
+    }
 }

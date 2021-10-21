@@ -515,7 +515,7 @@ class ProductQuoteController extends FController
                 throw new NotFoundException('Origin Quote Not Found');
             }
 
-            $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originQuote->pq_id, $reprotectionQuote->pq_id);
+            $this->productQuoteDataManageService->updateRecommendedChangeQuote($originQuote->pq_id, $reprotectionQuote->pq_id);
         } catch (NotFoundException | \RuntimeException | \DomainException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();
@@ -565,7 +565,7 @@ class ProductQuoteController extends FController
                 ->one();
 
             if ($lastReProtectionQuote) {
-                $this->productQuoteDataManageService->updateRecommendedReprotectionQuote(
+                $this->productQuoteDataManageService->updateRecommendedChangeQuote(
                     $originQuote->pq_id,
                     $lastReProtectionQuote->pq_id
                 );
