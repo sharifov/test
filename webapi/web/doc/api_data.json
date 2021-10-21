@@ -5133,7 +5133,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"FlightRequest created\",\n                    \"flightRequestId\" : 123,\n                    \"caseGid\" : \"e7dce13b4e6a5f3ccc2cec9c21fa3255\"\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"FlightRequest created\",\n                    \"flightRequestId\" : 123,\n                    \"caseGid\" : \"e7dce13b4e6a5f3ccc2cec9c21fa3255\"\n               },\n       \"code\": 13200,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
@@ -5142,17 +5142,17 @@
       "examples": [
         {
           "title": "Error-Response:",
-          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": 13106,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
           "title": "Error-Response:",
-          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Error\",\n       \"errors\": [\n          \"Not found Project with current user: xxx\"\n       ],\n       \"code\": \"13101\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Error\",\n       \"errors\": [\n          \"Not found Project with current user: xxx\"\n       ],\n       \"code\": 13101,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
           "title": "Error-Response:",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": 13107,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
