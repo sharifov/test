@@ -711,8 +711,8 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
      * @apiParam {string{50}}           payment_request.method_data.card.number          Number
      * @apiParam {string{50}}           [payment_request.method_data.card.holder_name]   Holder name
-     * @apiParam {int}                  payment_request.method_data.card.exp_month       Month
-     * @apiParam {int}                  payment_request.method_data.card.exp_year        Year
+     * @apiParam {int}                  payment_request.method_data.card.expiration_month       Month
+     * @apiParam {int}                  payment_request.method_data.card.expiration_year        Year
      * @apiParam {string{32}}           payment_request.method_data.card.cvv             CVV
      *
      * @apiParamExample {json} Request-Example:
@@ -725,8 +725,8 @@ class FlightQuoteExchangeController extends BaseController
                     "card":{
                         "number":"4111555577778888",
                         "holder_name":"John Doe",
-                        "exp_month":10,
-                        "exp_year":2022,
+                        "expiration_month":10,
+                        "expiration_year":2022,
                         "cvv":"097"
                     }
                 },

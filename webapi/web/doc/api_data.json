@@ -4307,14 +4307,14 @@
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "payment_request.method_data.card.exp_month",
+            "field": "payment_request.method_data.card.expiration_month",
             "description": "<p>Month</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "payment_request.method_data.card.exp_year",
+            "field": "payment_request.method_data.card.expiration_year",
             "description": "<p>Year</p>"
           },
           {
@@ -4330,7 +4330,7 @@
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"booking_id\":\"XXXYYYZ\",\n    \"quote_gid\": \"2f2887a061f8069f7ada8af9e062f0f4\",\n    \"payment\":{\n        \"method_key\":\"cc\",\n        \"method_data\":{\n            \"card\":{\n                \"number\":\"4111555577778888\",\n                \"holder_name\":\"John Doe\",\n                \"exp_month\":10,\n                \"exp_year\":2022,\n                \"cvv\":\"097\"\n            }\n        },\n        \"amount\":29.95,\n        \"currency\":\"USD\"\n    },\n    \"billing\":{\n        \"first_name\":\"John\",\n        \"last_name\":\"Doe\",\n        \"middle_name\":null,\n        \"company_name\":\"General Motors\",\n        \"address_line1\":\"123 Main Street\",\n        \"address_line2\":\"\",\n        \"city\":\"Paris\",\n        \"state\":\"State\",\n        \"country\":\"United States\",\n        \"zip\":\"94000\",\n        \"contact_phone\":\"+137396512345\",\n        \"contact_email\":\"alex@test.com\",\n        \"contact_name\":\"Mr. Alexander\"\n    }\n}",
+          "content": " {\n    \"booking_id\":\"XXXYYYZ\",\n    \"quote_gid\": \"2f2887a061f8069f7ada8af9e062f0f4\",\n    \"payment\":{\n        \"method_key\":\"cc\",\n        \"method_data\":{\n            \"card\":{\n                \"number\":\"4111555577778888\",\n                \"holder_name\":\"John Doe\",\n                \"expiration_month\":10,\n                \"expiration_year\":2022,\n                \"cvv\":\"097\"\n            }\n        },\n        \"amount\":29.95,\n        \"currency\":\"USD\"\n    },\n    \"billing\":{\n        \"first_name\":\"John\",\n        \"last_name\":\"Doe\",\n        \"middle_name\":null,\n        \"company_name\":\"General Motors\",\n        \"address_line1\":\"123 Main Street\",\n        \"address_line2\":\"\",\n        \"city\":\"Paris\",\n        \"state\":\"State\",\n        \"country\":\"United States\",\n        \"zip\":\"94000\",\n        \"contact_phone\":\"+137396512345\",\n        \"contact_email\":\"alex@test.com\",\n        \"contact_name\":\"Mr. Alexander\"\n    }\n}",
           "type": "json"
         }
       ]
