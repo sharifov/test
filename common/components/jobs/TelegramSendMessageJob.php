@@ -27,7 +27,7 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             if ($this->user_id && $telegramChatId = TelegramService::getTelegramChatIdByUserId($this->user_id)) {
                 $tgm = Yii::$app->telegram;

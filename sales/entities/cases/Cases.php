@@ -11,6 +11,7 @@ use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
+use kartik\select2\ThemeDefaultAsset;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCasesCounterBehavior;
 use sales\behaviors\metric\MetricLeadCounterBehavior;
@@ -35,6 +36,8 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use Yii;
+
+use function Amp\Promise\timeoutWithDefault;
 
 /**
  * Class Cases
@@ -263,7 +266,26 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_source_type_id = CasesSourceType::API;
         $case->cs_is_automate = $is_automate;
         $case->cs_project_id = $projectId;
-        $case->pending(null, 'Voluntary Exchange Create');
+        $case->new(null, 'Voluntary Exchange Create');
+        return $case;
+    }
+
+    public static function createByApiVoluntaryRefund(
+        int $departmentId,
+        int $categoryId,
+        string $orderUid,
+        int $projectId,
+        ?bool $is_automate
+    ): self {
+        $case = self::create();
+        $case->cs_dep_id = $departmentId;
+        $case->cs_category_id = $categoryId;
+        $case->cs_order_uid = $orderUid;
+        $case->cs_project_id = $projectId;
+        $case->cs_subject = 'Voluntary Refund';
+        $case->cs_source_type_id = CasesSourceType::API;
+        $case->cs_is_automate = $is_automate;
+        $case->new(null, 'Voluntary Refund Create');
         return $case;
     }
 

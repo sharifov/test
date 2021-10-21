@@ -23,7 +23,6 @@ use sales\services\TransactionManager;
  * @property LeadQcallRepository $leadQcallRepository
  * @property LeadRepository $leadRepository
  * @property ClientPhones $clientPhones
- * @property AgentPhone $agentPhone
  * @property TransactionManager $transactionManager
  */
 class SimpleLeadRedialQueue implements LeadRedialQueue
@@ -37,7 +36,6 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
     private LeadQcallRepository $leadQcallRepository;
     private LeadRepository $leadRepository;
     private ClientPhones $clientPhones;
-    private AgentPhone $agentPhone;
     private TransactionManager $transactionManager;
 
     public function __construct(
@@ -48,7 +46,6 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
         LeadQcallRepository $leadQcallRepository,
         LeadRepository $leadRepository,
         ClientPhones $clientPhones,
-        AgentPhone $agentPhone,
         TransactionManager $transactionManager
     ) {
         $this->leads = $leads;
@@ -58,7 +55,6 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
         $this->leadQcallRepository = $leadQcallRepository;
         $this->leadRepository = $leadRepository;
         $this->clientPhones = $clientPhones;
-        $this->agentPhone = $agentPhone;
         $this->transactionManager = $transactionManager;
     }
 
@@ -82,7 +78,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 continue;
             }
 
-            $agentPhone = $this->agentPhone->findOrUpdatePhone($lead);
+            $agentPhone = $leadQcall->lqc_call_from;
             if (!$agentPhone) {
                 $this->reserver->reset($key);
                 continue;

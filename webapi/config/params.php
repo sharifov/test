@@ -2,7 +2,7 @@
 
 return [
     'client.passwordResetTokenExpire'  => 3600,
-    'serviceName' => 'sales-api',
+    'serviceType' => 'api',
     'apiHealthCheck' => [
         'user' => '',
         'password' => ''

@@ -23,6 +23,8 @@ use yii\db\ActiveRecord;
  */
 class ProfitSplit extends \yii\db\ActiveRecord
 {
+    public const SCENARIO_ADD_OWNER = 'scenario_add_owner';
+
     /**
      * {@inheritdoc}
      */
@@ -40,10 +42,10 @@ class ProfitSplit extends \yii\db\ActiveRecord
             [['ps_lead_id', 'ps_user_id'], 'required'],
             ['ps_percent', 'required', 'when' => function ($model) {
                 return empty($model->ps_amount);
-            }],
+            }, 'except' => self::SCENARIO_ADD_OWNER],
             ['ps_amount', 'required', 'when' => function ($model) {
                 return empty($model->ps_percent);
-            }],
+            }, 'except' => self::SCENARIO_ADD_OWNER],
             ['ps_percent', 'integer', 'max' => 100 , 'min' => 0],
             [['ps_lead_id', 'ps_user_id', 'ps_percent', 'ps_amount', 'ps_updated_user_id'], 'integer'],
             [['ps_updated_dt','ps_percent','ps_amount'], 'safe'],

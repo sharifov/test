@@ -5,6 +5,7 @@
  * @var $errors []
  * @var $totalProfit float
  * @var $mainAgentProfit float
+ * @var $mainAgentPercent int
  * @var $splitForm ProfitSplitForm
  */
 
@@ -66,7 +67,7 @@ $this->registerJs($js);?>
     <div class="col-md-4">Total profit: $<?= number_format($totalProfit, 2)?></div>
     <div class="col-md-4">
         <?php if ($lead->employee) : ?>
-            Profit for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-profit"><?= $mainAgentProfit?></span>
+            Profit for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-profit"><?= $mainAgentProfit?></span> (<?=$mainAgentPercent?>%)
         <?php else : ?>
             <i class="fa fa-exclamation-triangle"></i> Main agent not found.
         <?php endif; ?>
@@ -86,6 +87,7 @@ $this->registerJs($js);?>
 <div id="profit-splits">
     <?php
     if (!empty($splitForm->getProfitSplit())) {
+        /** @var ProfitSplit $_split */
         foreach ($splitForm->getProfitSplit() as $key => $_split) {
             echo $this->render('partial/_formSplitProfit', [
                 'key' => $_split->isNewRecord
@@ -93,6 +95,7 @@ $this->registerJs($js);?>
                 : $_split->ps_id,
                 'form' => $form,
                 'split' => $_split,
+                'ownerSplit' => $_split->ps_user_id === $lead->employee_id,
                 'userList' => $userList,
                 'totalProfit' => $totalProfit,
                 'leadId' => $lead->id
@@ -106,6 +109,7 @@ $this->registerJs($js);?>
             'key' => '__id__',
             'form' => $form,
             'split' => $newSplit,
+            'ownerSplit' => false,
             'userList' => $userList,
             'totalProfit' => $totalProfit,
             'leadId' => $lead->id
@@ -129,7 +133,7 @@ $this->registerJs($js);?>
     });
 </script>
 <?php $this->registerJs(str_replace(['<script>', '</script>'], '', ob_get_clean())); ?>
-<div class="btn-wrapper">
+<div class="btn-wrapper" style="padding-top: 10px;">
     <?=Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', ['id' => 'cancel-btn','class' => 'btn btn-danger'])?>
     <?=Html::submitButton('<i class="fa fa-save"></i> Confirm', ['id' => 'save-btn','class' => 'btn btn-primary'])?>
 </div>

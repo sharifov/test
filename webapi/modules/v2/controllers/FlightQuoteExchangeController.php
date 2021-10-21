@@ -4,16 +4,22 @@ namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\VoluntaryExchangeCreateJob;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
+use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
+use sales\helpers\setting\SettingHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
+use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
@@ -23,21 +29,25 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightQuoteExchangeController
  *
  * @property VoluntaryExchangeObjectCollection $objectCollection
+ * @property BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
  */
 class FlightQuoteExchangeController extends BaseController
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
+    private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
 
     /**
      * @param $id
      * @param $module
      * @param ApiLogger $logger
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
+     * @param BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
      * @param array $config
      */
     public function __construct(
@@ -45,10 +55,23 @@ class FlightQuoteExchangeController extends BaseController
         $module,
         ApiLogger $logger,
         VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
+        BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService,
         $config = []
     ) {
         $this->objectCollection = $voluntaryExchangeObjectCollection;
+        $this->boRequestVoluntaryExchangeService = $boRequestVoluntaryExchangeService;
         parent::__construct($id, $module, $logger, $config);
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['logger'] = [
+            'class' => SimpleLoggerBehavior::class,
+            'filter' => CreditCardFilter::class,
+            'except' => [],
+        ];
+        return $behaviors;
     }
 
     /**
@@ -390,7 +413,8 @@ class FlightQuoteExchangeController extends BaseController
      *        "message": "OK",
      *        "data": {
                     "resultMessage": "FlightRequest created",
-                    "flightRequestId" : 123
+                    "flightRequestId" : 123,
+                    "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
                },
      *        "code": "13200",
      *        "technical": {
@@ -419,6 +443,23 @@ class FlightQuoteExchangeController extends BaseController
      * }
      *
      * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Error",
+     *        "errors": [
+     *           "Not found Project with current user: xxx"
+     *        ],
+     *        "code": "13101",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
      * HTTP/1.1 422 Unprocessable entity
      * {
      *        "status": 422,
@@ -435,6 +476,74 @@ class FlightQuoteExchangeController extends BaseController
      *        "request": {
      *           ...
      *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *      "status": 422,
+     *      "message": "Error",
+     *      "errors": [
+     *          "FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed"
+     *      ],
+     *      "code": 13113,
+     *      "technical": {
+     *         ...
+     *      },
+     *      "request": {
+     *         ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *      "status": 422,
+     *      "message": "Error",
+     *      "errors": [
+     *          "Quote not available for exchange"
+     *      ],
+     *      "code": 13113,
+     *      "technical": {
+     *         ...
+     *      },
+     *      "request": {
+     *         ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *      "status": 422,
+     *      "message": "Error",
+     *      "errors": [
+     *          "Case saving error"
+     *      ],
+     *      "code": 21101,
+     *      "technical": {
+     *         ...
+     *      },
+     *      "request": {
+     *         ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 500 Internal Server Error
+     * {
+     *      "status": 500,
+     *      "message": "Error",
+     *      "errors": [
+     *          "Server Error"
+     *      ],
+     *      "code": 0,
+     *      "technical": {
+     *         ...
+     *      },
+     *      "request": {
+     *         ...
+     *      }
      * }
      */
     public function actionCreate()
@@ -466,6 +575,7 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }
+
         if (!$voluntaryExchangeCreateForm->validate()) {
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
@@ -476,8 +586,28 @@ class FlightQuoteExchangeController extends BaseController
         }
 
         try {
+            $changeProcessingStatusList = array_keys(SettingHelper::getActiveQuoteChangeStatuses());
+            $quoteChangeableStatuses = array_keys(SettingHelper::getProductQuoteChangeableStatuses());
+            $typeIds = [ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE, ProductQuoteChange::TYPE_RE_PROTECTION];
+
             VoluntaryExchangeCreateService::checkByPost($post);
-            VoluntaryExchangeCreateService::checkByBookingId($voluntaryExchangeCreateForm->booking_id);
+            VoluntaryExchangeCreateService::checkByBookingId(
+                $voluntaryExchangeCreateForm->booking_id,
+                $changeProcessingStatusList,
+                $quoteChangeableStatuses,
+                $typeIds
+            );
+
+            if (!empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
+                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post)) {
+                    throw new \RuntimeException('Request to Back Office is failed');
+                }
+            } else {
+                \Yii::warning(
+                    'Setting VoluntaryExchangeBoEndpoint is empty. Request not sent.',
+                    'FlightQuoteExchangeController:SettingVoluntaryExchangeBoEndpoint'
+                );
+            }
 
             $flightRequest = FlightRequest::create(
                 $voluntaryExchangeCreateForm->booking_id,
@@ -488,15 +618,25 @@ class FlightQuoteExchangeController extends BaseController
             );
             $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
+            if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
+                $case = CaseService::createCase(
+                    $flightRequest->fr_booking_id,
+                    $flightRequest->fr_project_id,
+                    true,
+                    $this->objectCollection
+                );
+            }
+
             $job = new VoluntaryExchangeCreateJob();
             $job->flight_request_id = $flightRequest->fr_id;
+            $job->case_id = $case->cs_id;
             $jobId = Yii::$app->queue_job->priority(100)->push($job);
-
             $flightRequest->fr_job_id = $jobId;
             $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
-            $dataMessage['resultMessage'] = 'FlightRequest is accepted for processing';
+            $dataMessage['resultMessage'] = 'Processing was successful';
             $dataMessage['flightRequestId'] = $flightRequest->fr_id;
+            $dataMessage['caseGid'] = $case->cs_gid;
 
             return new SuccessResponse(
                 new DataMessage($dataMessage),
@@ -504,7 +644,7 @@ class FlightQuoteExchangeController extends BaseController
             );
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message['booking_id'] = $post['booking_id'] ?? null;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
@@ -518,7 +658,7 @@ class FlightQuoteExchangeController extends BaseController
             );
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message['booking_id'] = $post['booking_id'] ?? null;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
@@ -773,6 +913,369 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
+                "bookingId": "XXXYYYZ",
+                "quote_gid" : "48c82774ead469ad311c1e6112562726",
+                "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
+                "prices": {
+                    "totalPrice": 332.12,
+                    "comm": 0,
+                    "isCk": false
+                },
+                "passengers": {
+                    "ADT": {
+                        "codeAs": "JCB",
+                        "cnt": 1,
+                        "baseFare": 32.12,
+                        "pubBaseFare": 32.12,
+                        "baseTax": 300,
+                        "markup": 0,
+                        "comm": 0,
+                        "price": 332.12,
+                        "tax": 300,
+                        "oBaseFare": {
+                            "amount": 32.120003,
+                            "currency": "USD"
+                        },
+                        "oBaseTax": {
+                            "amount": 300,
+                            "currency": "USD"
+                        },
+                        "oExchangeFareDiff": {
+                            "amount": 8,
+                            "currency": "USD"
+                        },
+                        "oExchangeTaxDiff": {
+                            "amount": 24.12,
+                            "currency": "USD"
+                        }
+                    }
+                },
+                "trips": [
+                    {
+                        "tripId": 1,
+                        "segments": [
+                            {
+                                "segmentId": 1,
+                                "departureTime": "2022-01-10 20:15",
+                                "arrivalTime": "2022-01-11 21:10",
+                                "stop": 1,
+                                "stops": [
+                                    {
+                                        "locationCode": "LFW",
+                                        "departureDateTime": "2022-01-11 12:35",
+                                        "arrivalDateTime": "2022-01-11 11:35",
+                                        "duration": 60,
+                                        "elapsedTime": 620,
+                                        "equipment": "787"
+                                    }
+                                ],
+                                "flightNumber": "513",
+                                "bookingClass": "H",
+                                "duration": 1015,
+                                "departureAirportCode": "JFK",
+                                "departureAirportTerminal": "8",
+                                "arrivalAirportCode": "ADD",
+                                "arrivalAirportTerminal": "2",
+                                "operatingAirline": "ET",
+                                "airEquipType": "787",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "O",
+                                "cabin": "Y",
+                                "meal": "DL",
+                                "fareCode": "HLESUS",
+                                "recheckBaggage": false
+                            },
+                            {
+                                "segmentId": 2,
+                                "departureTime": "2022-01-11 23:15",
+                                "arrivalTime": "2022-01-12 01:20",
+                                "stop": 0,
+                                "stops": null,
+                                "flightNumber": "308",
+                                "bookingClass": "H",
+                                "duration": 125,
+                                "departureAirportCode": "ADD",
+                                "departureAirportTerminal": "2",
+                                "arrivalAirportCode": "NBO",
+                                "arrivalAirportTerminal": "1C",
+                                "operatingAirline": "ET",
+                                "airEquipType": "738",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "I",
+                                "cabin": "Y",
+                                "meal": "D",
+                                "fareCode": "HLESUS",
+                                "recheckBaggage": false
+                            }
+                        ],
+                        "duration": 1265
+                    },
+                    {
+                        "tripId": 2,
+                        "segments": [
+                            {
+                                "segmentId": 1,
+                                "departureTime": "2022-01-31 05:00",
+                                "arrivalTime": "2022-01-31 07:15",
+                                "stop": 0,
+                                "stops": null,
+                                "flightNumber": "309",
+                                "bookingClass": "E",
+                                "duration": 135,
+                                "departureAirportCode": "NBO",
+                                "departureAirportTerminal": "1C",
+                                "arrivalAirportCode": "ADD",
+                                "arrivalAirportTerminal": "2",
+                                "operatingAirline": "ET",
+                                "airEquipType": "738",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "O",
+                                "cabin": "Y",
+                                "meal": "B",
+                                "fareCode": "ELPRUS",
+                                "recheckBaggage": false
+                            },
+                            {
+                                "segmentId": 2,
+                                "departureTime": "2022-01-31 08:30",
+                                "arrivalTime": "2022-01-31 18:15",
+                                "stop": 1,
+                                "stops": [
+                                    {
+                                        "locationCode": "LFW",
+                                        "departureDateTime": "2022-01-31 12:15",
+                                        "arrivalDateTime": "2022-01-31 11:00",
+                                        "duration": 75,
+                                        "elapsedTime": 330,
+                                        "equipment": "787"
+                                    }
+                                ],
+                                "flightNumber": "512",
+                                "bookingClass": "E",
+                                "duration": 1065,
+                                "departureAirportCode": "ADD",
+                                "departureAirportTerminal": "2",
+                                "arrivalAirportCode": "JFK",
+                                "arrivalAirportTerminal": "8",
+                                "operatingAirline": "ET",
+                                "airEquipType": "787",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "I",
+                                "cabin": "Y",
+                                "meal": "LD",
+                                "fareCode": "ELPRUS",
+                                "recheckBaggage": false
+                            }
+                        ],
+                        "duration": 1275
+                    }
+                ],
+                "paxCnt": 1,
+                "validatingCarrier": "",
+                "gds": "S",
+                "pcc": "G9MJ",
+                "cons": "GTT",
+                "fareType": "SR",
+                "cabin": "Y",
+                "currency": "USD",
+                "currencies": [
+                    "USD"
+                ],
+                "currencyRates": {
+                    "USDUSD": {
+                        "from": "USD",
+                        "to": "USD",
+                        "rate": 1
+                    }
+                },
+                "keys": {},
+                "meta": {
+                    "eip": 0,
+                    "noavail": false,
+                    "searchId": "U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx",
+                    "lang": "en",
+                    "rank": 0,
+                    "cheapest": false,
+                    "fastest": false,
+                    "best": false,
+                    "country": "us"
+                },
+                "billing": {
+                      "first_name": "John",
+                      "last_name": "Doe",
+                      "middle_name": "",
+                      "address_line1": "1013 Weda Cir",
+                      "address_line2": "",
+                      "country_id": "US",
+                      "city": "Mayfield",
+                      "state": "KY",
+                      "zip": "99999",
+                      "company_name": "",
+                      "contact_phone": "+19074861000",
+                      "contact_email": "test@test.com",
+                      "contact_name": "Test Name"
+                },
+                "payment_request": {
+                      "method_key": "cc",
+                      "currency": "USD",
+                      "method_data": {
+                          "card": {
+                              "number": "4111555577778888",
+                              "holder_name": "Test test",
+                              "expiration_month": 10,
+                              "expiration_year": 23,
+                              "cvv": "1234"
+                          }
+                      },
+                      "amount": 112.25
+                }
+            },
+     *        "code": "13200",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Load data error",
+     *        "errors": [
+     *           "Not found data on POST request"
+     *        ],
+     *        "code": "13106",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": 422,
+     *        "message": "Validation error",
+     *        "errors": [
+     *            "booking_id": [
+     *               "booking_id cannot be blank."
+     *             ]
+     *        ],
+     *        "code": "13107",
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionInfo()
+    {
+        try {
+            $post = Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new MessageMessage(Messages::POST_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+
+        $voluntaryExchangeInfoForm = new VoluntaryExchangeInfoForm();
+        if (!$voluntaryExchangeInfoForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
+                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+            );
+        }
+        if (!$voluntaryExchangeInfoForm->validate()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($voluntaryExchangeInfoForm->getErrors()),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            );
+        }
+
+        try {
+            $productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($voluntaryExchangeInfoForm->booking_id);
+            if (!$productQuoteChange) {
+                throw new \RuntimeException(
+                    'ProductQuoteChange not found by BookingId(' . $voluntaryExchangeInfoForm->booking_id . ')',
+                    ApiCodeException::DATA_NOT_FOUND
+                );
+            }
+
+            return new SuccessResponse(
+                new DataMessage(ArrayHelper::toArray($productQuoteChange->pqc_data_json)),
+                new CodeMessage(ApiCodeException::SUCCESS)
+            );
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['post'] = $post;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
+        }
+    }
+
+    /**
+     * @api {post} /v2/flight-quote-exchange/view Flight Voluntary Exchange View
+     * @apiVersion 0.2.0
+     * @apiName Flight Voluntary Exchange View
+     * @apiGroup Flight Voluntary Exchange
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{7..10}}    booking_id          Booking ID
+     *
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *      "booking_id": "XXXYYYZ"
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
                     "productQuoteChange": {
                         "id": 950326,
                         "productQuoteId": 950326,
@@ -833,7 +1336,7 @@ class FlightQuoteExchangeController extends BaseController
      *        }
      * }
      */
-    public function actionInfo()
+    public function actionView()
     {
         try {
             $post = Yii::$app->request->post();

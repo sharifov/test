@@ -1,5 +1,6 @@
 <?php
 
+use kartik\select2\Select2;
 use sales\auth\Auth;
 use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
@@ -72,18 +73,48 @@ $pjaxListId = 'pjax-log';
                             \yii\log\Logger::LEVEL_WARNING          => 'warning',
                             \yii\log\Logger::LEVEL_INFO             => 'info',
                             \yii\log\Logger::LEVEL_TRACE            => 'trace',
-                            \yii\log\Logger::LEVEL_PROFILE_BEGIN    => 'profile begin',
-                            \yii\log\Logger::LEVEL_PROFILE_END      => 'profile end'
+                            \yii\log\Logger::LEVEL_PROFILE_BEGIN    => 'prof begin',
+                            \yii\log\Logger::LEVEL_PROFILE_END      => 'prof end'
                         ],
-                        'contentOptions' => ['style' => 'width: 120px;text-align:center;']
+                        'contentOptions' => ['style' => 'width: 100px;text-align:center;']
                     ],
 
                     //'category',
+
                     [
                         'attribute' => 'category',
-                        'filter' => \frontend\models\Log::getCategoryFilter(is_numeric($searchModel->level) ? $searchModel->level : null, Yii::$app->request->isPjax),
-                        'contentOptions' => ['style' => 'width: 200px;text-align:center;']
+                        'filter' =>  Select2::widget([
+                            'model' => $searchModel,
+                            'attribute' => 'category',
+                            'data' => \frontend\models\Log::getCategoryFilter(is_numeric($searchModel->level) ? $searchModel->level : null, Yii::$app->request->isPjax),
+                            //'value' => 'category',
+
+                            //'name' => Html::getInputName($filter, 'channelId'),
+                            'size' => Select2::SIZE_SMALL,
+
+                            'options' => [
+                                'class' => 'form-control',
+                                'placeholder' => 'Select category'
+                            ],
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'selectOnClose' => false,
+                            ]
+                        ]),
+
+                        //'format' => 'username',
+                        'options' => [
+                            'width' => '300px'
+                        ]
                     ],
+
+
+
+//                    [
+//                        'attribute' => 'category',
+//                        'filter' => \frontend\models\Log::getCategoryFilter(is_numeric($searchModel->level) ? $searchModel->level : null, Yii::$app->request->isPjax),
+//                        'contentOptions' => ['style' => 'width: 200px;text-align:center;']
+//                    ],
                     [
                         'attribute' => 'message',
                         'format' => 'raw',

@@ -175,6 +175,16 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
         return $model;
     }
 
+    public static function createVoluntaryExchange(int $parentId, int $relatedId, ?int $userId = null): self
+    {
+        $model = new self();
+        $model->pqr_parent_pq_id = $parentId;
+        $model->pqr_related_pq_id = $relatedId;
+        $model->pqr_created_user_id = $userId;
+        $model->pqr_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
+        return $model;
+    }
+
     public static function isReplace(int $productQuoteId): bool
     {
         return self::find()

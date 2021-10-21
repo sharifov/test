@@ -1,5 +1,6 @@
 <?php
 
+use common\helpers\LogHelper;
 use modules\hotel\HotelModule;
 use yii\log\FileTarget;
 use yii\log\DbTarget;
@@ -109,10 +110,7 @@ return [
                     'logVars' => [],
 //                    'logVars' => ['_POST', '_GET'],
                     'prefix' => static function () {
-                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
-                        $ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][webapi][$ip][$userID]";
+                        return LogHelper::getWebapiPrefixDB();
                     },
                     'db' => 'db_postgres'
                 ],
@@ -125,20 +123,20 @@ return [
                     'logVars' => [],
                     'categories' => ['info\*'],
                     'prefix' => static function () {
-                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
-                        $ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][webapi][$ip][$userID]";
+                        return LogHelper::getWebapiPrefixDB();
                     },
                     'db' => 'db_postgres'
                 ],
                 [
-                    'class' => \common\components\logger\AirFileTarget::class,
+                    'class' => \common\components\logger\FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
                         'yii\web\HttpException:401'
                     ],
+                    'prefix' => static function () {
+                        return LogHelper::getWebapiPrefixData();
+                    },
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
                     'logFile' => '@runtime/logs/stash.log'

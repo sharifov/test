@@ -195,29 +195,20 @@ class SalesSearch extends Model
 
         $query = new Query();
         $query->select([
-            Lead::tableName() . '.id',
-            Lead::tableName() . '.gid',
-            '(ROUND(if(sp.`owner_share` is null, 1, sp.`owner_share`) * (final_profit - agents_processing_fee), 2)) as gross_profit',
-            'if(sp.`owner_share` is null, 1, ROUND(sp.owner_share, 2)) as share',
+            'id',
+            'gid',
+            '(ROUND((final_profit - agents_processing_fee) * ps_percent/100, 2)) as gross_profit',
+            'ROUND((ps_percent / 100), 2) as share',
             'l_status_dt',
             'created'
         ]);
         $query->from(Lead::tableName());
-        $query->leftJoin([
-            'sp' => (new Query())->select(['id', '(100 - sum(ps_percent)) / 100 as owner_share'])
-                ->from(Lead::tableName())
-                ->innerJoin('profit_split', 'ps_lead_id = id')
-                ->where(['status' => Lead::STATUS_SOLD])
-                ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
-                ->andWhere(['employee_id' => $this->currentUser->getId()])
-                ->groupBy(['id'])
-        ], 'sp.id = leads.id');
+        $query->innerJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . $this->currentUser->getId());
         $query->where(['status' => Lead::STATUS_SOLD]);
         $query->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
-        $query->andWhere(['employee_id' => $this->currentUser->getId()]);
 
         if ($this->id) {
-            $query->andWhere(['=', Lead::tableName() . '.id', $this->id]);
+            $query->andWhere(['=', 'id', $this->id]);
         }
 
         if ($this->final_profit) {
@@ -231,38 +222,6 @@ class SalesSearch extends Model
         if ($this->created) {
             $query->andWhere(['=', 'DATE(created)', $this->created]);
         }
-
-        $complementaryQuery = new Query();
-        $complementaryQuery->select([
-            'id',
-            'gid',
-            '(ROUND((final_profit - agents_processing_fee) * ps_percent/100, 2)) as gross_profit',
-            'ROUND((ps_percent / 100), 2) as share',
-            'l_status_dt',
-            'created'
-        ]);
-        $complementaryQuery->from(Lead::tableName());
-        $complementaryQuery->innerJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . $this->currentUser->getId());
-        $complementaryQuery->where(['status' => Lead::STATUS_SOLD]);
-        $complementaryQuery->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
-
-        if ($this->id) {
-            $complementaryQuery->andWhere(['=', 'id', $this->id]);
-        }
-
-        if ($this->final_profit) {
-            $complementaryQuery->andWhere(['=', 'gross_profit', $this->final_profit]);
-        }
-
-        if ($this->l_status_dt) {
-            $complementaryQuery->andWhere(['=', 'DATE(l_status_dt)', $this->l_status_dt]);
-        }
-
-        if ($this->created) {
-            $complementaryQuery->andWhere(['=', 'DATE(created)', $this->created]);
-        }
-
-        $query->union($complementaryQuery, true);
 
         $query->cache($cacheDuration);
 

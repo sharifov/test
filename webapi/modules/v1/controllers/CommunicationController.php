@@ -325,6 +325,7 @@ class CommunicationController extends ApiBaseController
      */
     private function voiceIncoming(array $post, string $type): array
     {
+        $logExecutionTime = new LogExecutionTime();
         $response = [];
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
@@ -336,6 +337,7 @@ class CommunicationController extends ApiBaseController
         // $ciscoPhoneNumber = \Yii::$app->params['global_phone'];
 
         if ($postCall) {
+            $logExecutionTime->start('voiceIncoming');
             $client_phone_number = null;
             $incoming_phone_number = null;
 
@@ -376,8 +378,6 @@ class CommunicationController extends ApiBaseController
             if ($conferenceRoom) {
                 return $this->startConference($conferenceRoom, $postCall);
             }
-
-            $logExecutionTime = new LogExecutionTime();
 
 //            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
@@ -463,12 +463,6 @@ class CommunicationController extends ApiBaseController
                                     (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
                                 }
 
-                                $redialStatus = $result['data']['result']['status'] ?? null;
-                                if ($redialStatus) {
-                                    $callLogFilterGuard->setRedialStatusByTwilioStatus($redialStatus);
-                                    (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
-                                }
-
                                 if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
                                     Yii::error([
                                         'callId' => $callModel->c_id,
@@ -490,7 +484,10 @@ class CommunicationController extends ApiBaseController
                         }
                     } catch (\Throwable $throwable) {
                         $logExecutionTime->end();
-                        $message = AppHelper::throwableLog($throwable);
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                            'phoneFrom' => $callModel->c_from,
+                            'phoneTo' => $callModel->c_to
+                        ]);
                         $category = 'CommunicationController:CallLogFilterGuard:generalLine';
                         if ($throwable instanceof DomainException) {
                             Yii::warning($message, $category);
@@ -600,12 +597,6 @@ class CommunicationController extends ApiBaseController
                                         (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
                                     }
 
-                                    $redialStatus = $result['data']['result']['status'] ?? null;
-                                    if ($redialStatus) {
-                                        $callLogFilterGuard->setRedialStatusByTwilioStatus($redialStatus);
-                                        (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
-                                    }
-
                                     if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
                                         Yii::error([
                                             'callId' => $callModel->c_id,
@@ -627,7 +618,10 @@ class CommunicationController extends ApiBaseController
                             }
                         } catch (\Throwable $throwable) {
                             $logExecutionTime->end();
-                            $message = AppHelper::throwableLog($throwable);
+                            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                                'phoneFrom' => $callModel->c_from,
+                                'phoneTo' => $callModel->c_to
+                            ]);
                             $category = 'CommunicationController:CallLogFilterGuard:directCall';
                             if ($throwable instanceof DomainException) {
                                 Yii::warning($message, $category);

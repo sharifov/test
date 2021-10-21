@@ -2390,4 +2390,17 @@ class TestController extends FController
             echo 'No';
         }
     }
+
+    public function actionErrorTest()
+    {
+        $message = [
+            'message' => 'Test message',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+        ];
+        Yii::error($message, 'test/error');
+        Yii::warning($message, 'test/warning');
+        Yii::info($message, 'info\test/info');
+    }
 }

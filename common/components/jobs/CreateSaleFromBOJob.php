@@ -33,7 +33,7 @@ class CreateSaleFromBOJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             if ($this->checkParams()) {
                 $this->casesSaleService = Yii::createObject(CasesSaleService::class);

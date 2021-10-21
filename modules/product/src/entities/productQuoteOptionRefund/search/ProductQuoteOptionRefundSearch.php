@@ -9,7 +9,7 @@ use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefu
 /**
  * ProductQuoteOptionRefund represents the model behind the search form of `modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund`.
  */
-class ProductQuoteOptionRefund extends ProductQuoteOptionRefundModel
+class ProductQuoteOptionRefundSearch extends ProductQuoteOptionRefundModel
 {
     /**
      * {@inheritdoc}

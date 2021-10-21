@@ -73,7 +73,7 @@ class Modify
             return $quote;
         });
 
-        $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originalProductQuote->pq_id, $quote->pq_id);
+        $this->productQuoteDataManageService->updateRecommendedChangeQuote($originalProductQuote->pq_id, $quote->pq_id);
 
         $this->createBoRequestJob($quote, $userId);
     }

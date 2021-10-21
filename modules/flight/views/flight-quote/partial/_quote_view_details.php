@@ -18,6 +18,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
             <?php if ($flightQuote) : ?>
                 <?php foreach ($flightQuote->flightQuoteTrips as $tripKey => $trip) :?>
                     <?php $segments = $trip->flightQuoteSegments;?>
+                    <?php if ($segments) : ?>
                 <div class="trip__leg">
                     <h4 class="trip__subtitle">
                         <span class="trip__leg-type"><?php if (count($flightQuote->flightQuoteTrips) < 3 && $tripKey == 0) :
@@ -162,7 +163,8 @@ if ($airline) {
                             <?php endforeach;?>
                         </div>
                     </div>
-                </div>
+                </div>Change List:
+                    <?php endif; ?>
                 <?php endforeach;?>
             <?php else : ?>
                 <p>Not found details</p>

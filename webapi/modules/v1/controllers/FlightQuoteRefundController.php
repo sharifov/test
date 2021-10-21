@@ -2,13 +2,21 @@
 
 namespace webapi\modules\v1\controllers;
 
+use modules\flight\models\FlightRequest;
+use modules\flight\models\query\FlightRequestQuery;
+use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmForm;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
+use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateJob;
+use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundService;
 use modules\flight\src\useCases\voluntaryRefundInfo\form\VoluntaryRefundInfoForm;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use sales\helpers\app\AppHelper;
+use sales\helpers\app\HttpStatusCodeHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
@@ -21,8 +29,30 @@ use webapi\src\response\SuccessResponse;
 use yii\helpers\ArrayHelper;
 use yii\web\MethodNotAllowedHttpException;
 
+/**
+ * Class FlightQuoteRefundController
+ * @package webapi\modules\v1\controllers
+ *
+ * @property FlightRequestRepository $flightRequestRepository
+ * @property VoluntaryRefundService $voluntaryRefundService
+ */
 class FlightQuoteRefundController extends ApiBaseController
 {
+    private FlightRequestRepository $flightRequestRepository;
+    private VoluntaryRefundService $voluntaryRefundService;
+
+    public function __construct(
+        $id,
+        $module,
+        FlightRequestRepository $flightRequestRepository,
+        VoluntaryRefundService $voluntaryRefundService,
+        $config = []
+    ) {
+        parent::__construct($id, $module, $config);
+        $this->flightRequestRepository = $flightRequestRepository;
+        $this->voluntaryRefundService = $voluntaryRefundService;
+    }
+
     /**
      * @api {post} /v1/flight-quote-refund/info Voluntary Refund Info
      * @apiVersion 1.0.0
@@ -364,6 +394,14 @@ class FlightQuoteRefundController extends ApiBaseController
             );
         }
 
+        if (!$project = $this->apiProject) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new ErrorsMessage('Not found Project with current user: ' . $this->apiUser->au_api_username),
+                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+            );
+        }
+
         $voluntaryRefundCreateForm = new VoluntaryRefundCreateForm();
         if (!$voluntaryRefundCreateForm->load($post)) {
             return new ErrorResponse(
@@ -372,6 +410,7 @@ class FlightQuoteRefundController extends ApiBaseController
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }
+
         if (!$voluntaryRefundCreateForm->validate()) {
             return new ErrorResponse(
                 new StatusCodeMessage(422),
@@ -381,7 +420,38 @@ class FlightQuoteRefundController extends ApiBaseController
             );
         }
 
+
         try {
+            $hash = FlightRequest::generateHashFromDataJson($post);
+            if (FlightRequestQuery::existRequestByHash($hash)) {
+                throw new \DomainException('FlightRequest (hash: ' . $hash . ') already processing', ApiCodeException::REQUEST_ALREADY_PROCESSED);
+            }
+
+            $flightRequest = FlightRequest::create(
+                $voluntaryRefundCreateForm->booking_id,
+                FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
+                $post,
+                $project->id,
+                $this->apiUser->au_id
+            );
+            $flightRequest = $this->flightRequestRepository->save($flightRequest);
+
+            if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->booking_id)) {
+                if ($productQuote->isChangeable()) {
+                    if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
+                        throw new \DomainException('Quote not available for refund');
+                    }
+                } else {
+                    throw new \DomainException('Quote not available for refund');
+                }
+            }
+
+            $job = new VoluntaryRefundCreateJob($flightRequest->fr_id, $productQuote->pq_id ?? null);
+            $jobId = \Yii::$app->queue_job->priority(100)->push($job);
+
+            $flightRequest->fr_job_id = $jobId;
+            $this->flightRequestRepository->save($flightRequest);
+
             return new SuccessResponse(
 //                new DataMessage([
 //                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),

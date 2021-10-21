@@ -32,7 +32,7 @@ class UpdateConferenceParticipantCallIdJob extends BaseJob implements JobInterfa
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             $call = $this->getCall($this->callSid);
             if ($call->c_conference_id !== $this->conferenceId) {

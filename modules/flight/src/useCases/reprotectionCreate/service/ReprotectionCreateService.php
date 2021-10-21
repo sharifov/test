@@ -191,7 +191,7 @@ class ReprotectionCreateService
 
     public function recommendedReProtection(int $originProductQuoteId, int $reProtectionQuoteId): ProductQuoteData
     {
-        return $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuoteId, $reProtectionQuoteId);
+        return $this->productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuoteId, $reProtectionQuoteId);
     }
 
     public function originProductQuoteDecline(ProductQuote $originProductQuote, Cases $case): ProductQuote
@@ -308,6 +308,17 @@ class ReprotectionCreateService
         $clientForm->projectId = $projectId;
         $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
         return $this->clientManageService->create($clientForm, null);
+    }
+
+    public function setProductQuoteChangeIsAutomate(ProductQuoteChange $productQuoteChange, bool $isAutomate): ProductQuoteChange
+    {
+        if ($isAutomate) {
+            $productQuoteChange->onIsAutomate();
+        } else {
+            $productQuoteChange->offIsAutomate();
+        }
+        $this->productQuoteChangeRepository->save($productQuoteChange);
+        return $productQuoteChange;
     }
 
     public static function writeLog(Throwable $throwable, array $data = [], string $category = 'ReprotectionCreateJob:throwable'): void

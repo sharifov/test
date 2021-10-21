@@ -28,15 +28,15 @@ class CheckPhoneNumberJob extends BaseJob implements \yii\queue\JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
 
         try {
             if (!$this->client_id || !$this->client_phone_id) {
                 throw new \Exception('Error CheckPhoneNumberJob: (client_id < 1 || client_phone_id < 1)');
             }
-            $clientPhone = ClientPhone::findOne(['client_id' => $this->client_id, 'id' => $this->client_phone_id ]);
+            $clientPhone = ClientPhone::findOne(['id' => $this->client_phone_id]);
             if (!$clientPhone) {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone not found in db (client_id: ' . $this->client_id . ', phone_id: ' . $this->client_phone_id . ')');
+                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone not found in db (id: ' . $this->client_phone_id . ')');
             }
             if (strlen($clientPhone->phone) < 8) {
                 throw new \Exception('Error CheckPhoneNumberJob: ClientPhone is < 8 (' . $clientPhone->phone . ', clientId: ' . $clientPhone->client_id . ')');
@@ -47,14 +47,16 @@ class CheckPhoneNumberJob extends BaseJob implements \yii\queue\JobInterface
                 foreach ($numbers as $phoneNumber => $phoneData) {
                     $phone = CheckPhoneService::cleanPhone($phoneNumber);
 
-                    if (isset($phoneData['internationalNumber'], $phoneData['numberType'])) {
-                        if (($phone === $clientPhone->phone) && !count($phoneData['errors'])) {
-                            $clientPhone->updateAttributes([
-                                'is_sms' => ($phoneData['numberType'] === 'mobile') ? 1 : 0,
-                                'validate_dt' => date('Y-m-d H:i:s'),
-                                'cp_cpl_uid' => CheckPhoneService::uidGenerator($phone)
-                            ]);
-                        }
+                    if (
+                        isset($phoneData['internationalNumber'], $phoneData['numberType']) &&
+                        ($phone === $clientPhone->phone) &&
+                        !count($phoneData['errors'])
+                    ) {
+                        $clientPhone->updateAttributes([
+                            'is_sms' => ($phoneData['numberType'] === 'mobile') ? 1 : 0,
+                            'validate_dt' => date('Y-m-d H:i:s'),
+                            'cp_cpl_uid' => CheckPhoneService::uidGenerator($phone)
+                        ]);
                     }
 
                     $contactPhoneList = ContactPhoneListService::getOrCreate($phone);

@@ -1,5 +1,6 @@
 <?php
 
+use common\helpers\LogHelper;
 use frontend\assets\groups\BootstrapGroupAsset;
 use kartik\daterange\MomentAsset;
 use kivork\rbacExportImport\src\rbac\DbManager;
@@ -95,10 +96,7 @@ return [
 //                    'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
                     'prefix' => static function () {
-                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
-                        $ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][frontend][$ip][$userID]";
+                        return LogHelper::getFrontendPrefixDB();
                     },
                     'db' => 'db_postgres'
                 ],
@@ -108,15 +106,12 @@ return [
                     'logVars' => [],
                     'categories' => ['info\*'],
                     'prefix' => static function () {
-                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
-                        $ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][frontend][$ip][$userID]";
+                        return LogHelper::getFrontendPrefixDB();
                     },
                     'db' => 'db_postgres'
                 ],
                 [
-                    'class' => \common\components\logger\AirFileTarget::class,
+                    'class' => \common\components\logger\FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -124,6 +119,9 @@ return [
                     ],
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getFrontendPrefixData();
+                    },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
             ],

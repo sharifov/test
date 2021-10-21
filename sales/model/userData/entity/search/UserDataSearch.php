@@ -27,6 +27,11 @@ class UserDataSearch extends UserData
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'ud_updated_dt' => SORT_DESC,
+                ]
+            ]
         ]);
 
         $this->load($params);

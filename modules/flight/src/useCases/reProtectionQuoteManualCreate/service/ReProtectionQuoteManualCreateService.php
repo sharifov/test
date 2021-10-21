@@ -148,7 +148,7 @@ class ReProtectionQuoteManualCreateService
         $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
 
         $quoteData = self::prepareFlightQuoteData($form);
-        $flightQuoteCreateDTO = FlightQuoteCreateDTO::fillReProtectionManual($flight, $productQuote, $quoteData, Auth::id(), $form);
+        $flightQuoteCreateDTO = FlightQuoteCreateDTO::fillChangeQuoteManual($flight, $productQuote, $quoteData, Auth::id(), $form);
         $flightQuote = FlightQuote::createReProtectionManual($flightQuoteCreateDTO);
         $this->flightQuoteRepository->save($flightQuote);
 
@@ -271,7 +271,7 @@ class ReProtectionQuoteManualCreateService
             }
         }
 
-        $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
+        $this->productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
 
         return $flightQuote;
     }

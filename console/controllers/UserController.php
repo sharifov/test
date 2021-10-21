@@ -14,6 +14,7 @@ use sales\model\userData\entity\UserDataKey;
 use sales\model\userData\entity\UserDataQuery;
 use sales\model\userStatDay\entity\UserStatDay;
 use yii\console\Controller;
+use yii\db\IntegrityException;
 use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
@@ -105,14 +106,14 @@ class UserController extends Controller
                 (int)$date->format('m'),
                 (int)$date->format('Y')
             );
-            if (!$userStatDay->save()) {
+            if (!$userStatDay->validate() || !$userStatDay->save()) {
                 $userStatDayErrors[] = $userStatDay->getErrorSummary(true)[0];
             }
             $processedUserStatDay++;
         }
 
         if ($userStatDayErrors) {
-            \Yii::error('Saving user_stat_day row failed while calculating users gross profit: ' . PHP_EOL . VarDumper::dumpAsString($userStatDayErrors), 'console:UserController:actionCalculateGrossProfit:userStatDay:save');
+            \Yii::warning('Saving user_stat_day row failed while calculating users gross profit: ' . PHP_EOL . VarDumper::dumpAsString($userStatDayErrors), 'console:UserController:actionCalculateGrossProfit:userStatDay:save');
         }
 
         $dateNow = new \DateTimeImmutable();
@@ -131,8 +132,18 @@ class UserController extends Controller
 
         $userGrossProfitPeriodErrors = [];
         foreach ($result as $userGrossProfit) {
-            $insertOrUpdateResult = UserDataQuery::insertOrUpdate((int)$userGrossProfit['employee_id'], UserDataKey::GROSS_PROFIT, (string)$userGrossProfit['gross_profit'], $dateNow);
-            if (!$insertOrUpdateResult) {
+            try {
+                $insertOrUpdateResult = UserDataQuery::insertOrUpdate((int)$userGrossProfit['employee_id'], UserDataKey::GROSS_PROFIT, (string)$userGrossProfit['gross_profit'], $dateNow);
+                if (!$insertOrUpdateResult) {
+                    $userGrossProfitPeriodErrors[] = 'Save user data failed with data: ' . VarDumper::dumpAsString([
+                        'employeeId' => $userGrossProfit['employee_id'],
+                        'key' => UserDataKey::GROSS_PROFIT,
+                        'gross_profit' => $userGrossProfit['gross_profit'],
+                        'updatedDt' => $dateNow->format('Y-m-d H:i:s')
+                    ]);
+                }
+                $processedUserData++;
+            } catch (\Throwable $e) {
                 $userGrossProfitPeriodErrors[] = 'Save user data failed with data: ' . VarDumper::dumpAsString([
                     'employeeId' => $userGrossProfit['employee_id'],
                     'key' => UserDataKey::GROSS_PROFIT,
@@ -140,7 +151,6 @@ class UserController extends Controller
                     'updatedDt' => $dateNow->format('Y-m-d H:i:s')
                 ]);
             }
-            $processedUserData++;
         }
         if ($userGrossProfitPeriodErrors) {
             \Yii::error('Saving user_data row failed while calculating users gross profit: ' . PHP_EOL . VarDumper::dumpAsString($userGrossProfitPeriodErrors), 'console:UserController:actionCalculateGrossProfit:userStatDay:save');

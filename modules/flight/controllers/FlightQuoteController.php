@@ -27,6 +27,7 @@ use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePa
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\service\ReProtectionQuoteManualCreateService;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryQuoteManualCreateService;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -76,6 +77,7 @@ use yii\widgets\ActiveForm;
  * @property ApiFlightQuoteSearchService $apiFlightQuoteSearchService
  * @property ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService
  * @property ProductQuoteCloneService $productQuoteCloneService
+ * @property VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService
  */
 class FlightQuoteController extends FController
 {
@@ -113,6 +115,7 @@ class FlightQuoteController extends FController
     private ApiFlightQuoteSearchService $apiFlightQuoteSearchService;
     private ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService;
     private ProductQuoteCloneService $productQuoteCloneService;
+    private VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService;
 
     /**
      * FlightQuoteController constructor.
@@ -128,6 +131,7 @@ class FlightQuoteController extends FController
      * @param ApiFlightQuoteSearchService $apiFlightQuoteSearchService
      * @param ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService
      * @param ProductQuoteCloneService $productQuoteCloneService
+     * @param VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService
      * @param array $config
      */
     public function __construct(
@@ -143,6 +147,7 @@ class FlightQuoteController extends FController
         ApiFlightQuoteSearchService $apiFlightQuoteSearchService,
         ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService,
         ProductQuoteCloneService $productQuoteCloneService,
+        VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -156,6 +161,7 @@ class FlightQuoteController extends FController
         $this->apiFlightQuoteSearchService = $apiFlightQuoteSearchService;
         $this->reProtectionQuoteManualCreateService = $reProtectionQuoteManualCreateService;
         $this->productQuoteCloneService = $productQuoteCloneService;
+        $this->voluntaryQuoteManualCreateService = $voluntaryQuoteManualCreateService;
     }
 
     /**
@@ -757,7 +763,7 @@ class FlightQuoteController extends FController
                 Yii::$app->log->targets['debug']->enabled = false;
             }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'HotelQuoteController:increaseLimits');
+            Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:increaseLimits');
         }
     }
 
@@ -835,11 +841,17 @@ class FlightQuoteController extends FController
                 }
 
                 $userId = Auth::id();
-                $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments) {
-                    return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId, $segments);
-                });
+                if ($originProductQuote->productQuoteLastChange->isTypeVoluntary()) {
+                    $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments) {
+                        return $this->voluntaryQuoteManualCreateService->createProcessing($flight, $originProductQuote, $form, $userId, $segments);
+                    });
+                } else {
+                    $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments) {
+                        return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId, $segments);
+                    });
+                }
 
-                $response['message'] = 'Success. FlightQuote ID( ' . $flightQuote->getId() . ') created';
+                $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {
                 Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionAjaxPrepareDump:Exception');

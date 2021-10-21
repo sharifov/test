@@ -31,9 +31,9 @@ class BaseJob extends BaseObject
         parent::__construct($config);
     }
 
-    public function executionTimeRegister(?array $buckets = null): bool
+    public function waitingTimeRegister(?array $buckets = null): bool
     {
-        if (!$limitExecution = SettingHelper::getMetricJobTimeExecution()) {
+        if (!$limitWaiting = SettingHelper::getMetricJobTimeWaiting()) {
             return false;
         }
 
@@ -51,14 +51,14 @@ class BaseJob extends BaseObject
                 $buckets
             );
 
-            if ($seconds > $limitExecution) {
+            if ($seconds > $limitWaiting) {
                 \Yii::warning(
-                    'Warning: (' . self::runInClass() . ') exceeded execution time limit. Execution time (' . $seconds . ') sec',
-                    'BaseJob:executionTimeRegister:TimeLimitExceeded'
+                    'Warning: (' . self::runInClass() . ') timeout exceeded. Time (' . $seconds . ') sec',
+                    'BaseJob:WaitingTimeRegister:TimeoutExceeded'
                 );
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable), 'BaseJob:executionTimeRegister:Throwable');
+            \Yii::error(AppHelper::throwableLog($throwable), 'BaseJob:WaitingTimeRegister:Throwable');
             return false;
         }
         return true;

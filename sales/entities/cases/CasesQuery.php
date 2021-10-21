@@ -249,4 +249,15 @@ class CasesQuery extends ActiveQuery
     {
         return parent::one($db);
     }
+
+    public static function getLastActiveCaseByBookingId(string $bookingId, string $categoryKey): ?Cases
+    {
+        return Cases::find()->where(['cs_order_uid' => $bookingId])
+            ->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH]])
+            ->innerJoin(CaseCategory::tableName(), 'cs_category_id = cc_id and cc_key = :categoryKey', [
+                'categoryKey' => $categoryKey
+            ])
+            ->orderBy(['cs_id' => SORT_DESC])
+            ->one();
+    }
 }

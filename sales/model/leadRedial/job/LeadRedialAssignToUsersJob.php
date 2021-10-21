@@ -5,6 +5,7 @@ namespace sales\model\leadRedial\job;
 use common\components\jobs\BaseJob;
 use common\models\Lead;
 use common\models\LeadQcall;
+use common\models\Project;
 use common\models\search\LeadQcallSearch;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
@@ -36,13 +37,21 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
 
         $callRedialSearch = new LeadQcallSearch();
-        $leadQcall = $callRedialSearch->searchRedialLeads([$callRedialSearch->formName() => [
-            'l_is_test' => 0,
-            'lqc_lead_id' => $this->leadId,
-        ]])->asArray()->one();
+        $leadQcall = $callRedialSearch
+            ->searchRedialLeadsToBeAssign(
+                [
+                    $callRedialSearch->formName() => [
+                        'lqc_lead_id' => $this->leadId,
+                    ]
+                ],
+                array_keys(Project::getList()),
+                new \DateTimeImmutable()
+            )
+            ->asArray()
+            ->one();
 
         if (!$leadQcall) {
             return;

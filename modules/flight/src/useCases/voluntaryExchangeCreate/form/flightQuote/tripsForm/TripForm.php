@@ -5,18 +5,19 @@ namespace modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\t
 use common\components\validators\CheckJsonValidator;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\segmentsForm\SegmentForm;
 use sales\helpers\ErrorsToStringHelper;
+use sales\traits\FormNameModelTrait;
 use yii\base\Model;
 
 /**
  * Class TripForm
  *
- * @property $duration
- * @property $segments
- *
  * @property SegmentForm[] $segmentForms
  */
 class TripForm extends Model
 {
+    use FormNameModelTrait;
+
+    public $tripId;
     public $duration;
     public $segments;
 
@@ -29,26 +30,28 @@ class TripForm extends Model
             [['segments'], CheckJsonValidator::class, 'skipOnError' => true],
             [['segments'], 'checkSegmentForms'],
 
+            [['tripId'], 'integer'],
             [['duration'], 'integer'],
         ];
     }
 
-    public function checkSegmentForms($attribute)
+    public function checkSegmentForms(string $attribute): void
     {
         foreach ($this->segments as $key => $segment) {
             $segmentForm = new SegmentForm();
+            $segmentForm->setFormName('');
             if (!$segmentForm->load($segment)) {
                 $this->addError($attribute, 'SegmentForm not loaded');
             } elseif (!$segmentForm->validate()) {
-                $this->addError($attribute, 'SegmentForm: ' . ErrorsToStringHelper::extractFromModel($segmentForm, ' '));
+                $this->addError($attribute, 'SegmentForm.' . $key . '.' . ErrorsToStringHelper::extractFromModel($segmentForm, ', '));
             } else {
                 $this->segmentForms[] = $segmentForm;
             }
         }
     }
 
-    public function formName(): string
+    public function getSegmentForms(): array
     {
-        return '';
+        return $this->segmentForms;
     }
 }

@@ -149,7 +149,7 @@ class CasesRepository
         $case->cs_updated_dt = $now;
         $case->cs_last_action_dt = $now;
         if (!$case->save(false)) {
-            throw new \RuntimeException('Saving error', CaseCodeException::CASE_SAVE);
+            throw new \RuntimeException('Case saving error', CaseCodeException::CASE_SAVE);
         }
         $this->eventDispatcher->dispatchAll($case->releaseEvents());
         return $case->cs_id;

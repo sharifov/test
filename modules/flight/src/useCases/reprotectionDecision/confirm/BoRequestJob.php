@@ -19,7 +19,7 @@ class BoRequestJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             $requestBo = \Yii::createObject(BoRequest::class);
             $requestBo->appliedQuote($this->quoteGid, $this->userId);

@@ -4,6 +4,7 @@ namespace sales\dto\searchService;
 
 use common\components\SearchService;
 use common\models\Lead;
+use common\models\LeadFlightSegment;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -70,7 +71,9 @@ class SearchServiceQuoteDTO
             $this->inf = $lead->infants;
 
 
-            foreach ($lead->leadFlightSegments as $flightSegment) {
+            $flightSegments = $lead->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->all();
+            /** @var LeadFlightSegment $flightSegment */
+            foreach ($flightSegments as $flightSegment) {
                 $segment = [
                     'o' => $flightSegment->origin,
                     'd' => $flightSegment->destination,

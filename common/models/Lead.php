@@ -10,6 +10,7 @@ use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
+use common\models\query\SourcesQuery;
 use DateTime;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
@@ -3485,13 +3486,20 @@ Reason: {reason}',
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
+            if (!$this->gid) {
+                $this->gid = self::generateGid();
+            }
+
             if ($insert) {
                 //$this->created = date('Y-m-d H:i:s');
-                if (!empty($this->project_id) && empty($this->source_id) && $this->l_type_create !== self::TYPE_CREATE_CLIENT_CHAT) {
-                    $project = Project::findOne(['id' => $this->project_id]);
-                    if ($project !== null) {
-                        $this->source_id = $project->sources[0]->id;
-                    }
+                if (!empty($this->project_id) && empty($this->source_id)) {
+                    Yii::info([
+                        'gid' => $this->gid,
+                        'projectId' => $this->project_id,
+                        'typeCreate' => $this->getTypeCreateName()
+                    ], 'info\Lead:beforeSave:emptySourceIdOnLeadCreation');
+                    $source = SourcesQuery::getDefaultSourceByProjectId($this->project_id) ?? SourcesQuery::getFirstSourceByProjectId($this->project_id);
+                    $this->source_id = $source->id ?? null;
                 }
 
                 $leadExistByUID = Lead::findOne([
@@ -3511,9 +3519,6 @@ Reason: {reason}',
 
             if (!$this->uid) {
                 $this->uid = self::generateUid();
-            }
-            if (!$this->gid) {
-                $this->gid = self::generateGid();
             }
 
             $this->adults = (int) $this->adults;

@@ -53,7 +53,8 @@ class EmployeeProjectAccess
         $projects = null;
 
         if ($roles = EmployeeAccessHelper::getRoles($roles, self::$defaultRolesForViewAllProjects, $excludeRoles, $includeRoles)) {
-            foreach ($user->getRoles(true) as $role) {
+            $userRoles = $user->getRoles(true);
+            foreach ($userRoles as $role) {
                 if (in_array($role, $roles, false)) {
                     $projects = Project::find()->select(['name', 'id'])->active()
                         ->orderBy('name')->indexBy('id')->asArray()->column();
