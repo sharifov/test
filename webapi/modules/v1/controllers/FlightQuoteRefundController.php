@@ -27,8 +27,10 @@ use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
+use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\MethodNotAllowedHttpException;
 
 /**
@@ -53,17 +55,6 @@ class FlightQuoteRefundController extends ApiBaseController
         parent::__construct($id, $module, $config);
         $this->flightRequestRepository = $flightRequestRepository;
         $this->voluntaryRefundService = $voluntaryRefundService;
-    }
-
-    public function behaviors(): array
-    {
-        $behaviors = parent::behaviors();
-        $behaviors['logger'] = [
-            'class' => SimpleLoggerBehavior::class,
-            'filter' => CreditCardFilter::class,
-            'except' => [],
-        ];
-        return $behaviors;
     }
 
     /**
@@ -143,32 +134,34 @@ class FlightQuoteRefundController extends ApiBaseController
             throw new MethodNotAllowedHttpException();
         }
 
+        $this->startApiLog($this->action->uniqueId);
+
         try {
             $post = \Yii::$app->request->post();
         } catch (\Throwable $throwable) {
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-            );
+            ));
         }
 
         $voluntaryRefundInfoForm = new VoluntaryRefundInfoForm();
         if (!$voluntaryRefundInfoForm->load($post)) {
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new ErrorsMessage(Messages::LOAD_DATA_ERROR),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-            );
+            ));
         }
         if (!$voluntaryRefundInfoForm->validate()) {
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(422),
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($voluntaryRefundInfoForm->getErrors()),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
-            );
+            ));
         }
 
         try {
@@ -184,7 +177,7 @@ class FlightQuoteRefundController extends ApiBaseController
 
             $auxiliaryOptions = $productQuoteRefund->productQuoteOptionRefunds;
 
-            return new SuccessResponse(
+            return $this->endApiLog(new SuccessResponse(
                 new DataMessage([
                 //                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),
                     'tickets' => array_map(static function (ProductQuoteObjectRefund $model) {
@@ -195,27 +188,27 @@ class FlightQuoteRefundController extends ApiBaseController
                     }, $auxiliaryOptions),
                 ]),
                 new CodeMessage(ApiCodeException::SUCCESS)
-            );
+            ));
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
                 'FlightQuoteRefundController:actionInfo:Warning'
             );
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(422),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
-            );
+            ));
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
                 'FlightQuoteRefundController:actionInfo:Throwable'
             );
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(500),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
-            );
+            ));
         }
     }
 
@@ -396,47 +389,48 @@ class FlightQuoteRefundController extends ApiBaseController
             throw new MethodNotAllowedHttpException();
         }
 
+        $this->startApiLog($this->action->uniqueId, true);
+
         try {
             $post = \Yii::$app->request->post();
         } catch (\Throwable $throwable) {
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-            );
+            ));
         }
 
         if (!$project = $this->apiProject) {
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
                 new ErrorsMessage('Not found Project with current user: ' . $this->apiUser->au_api_username),
                 new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
-            );
+            ));
         }
 
         $voluntaryRefundCreateForm = new VoluntaryRefundCreateForm();
         if (!$voluntaryRefundCreateForm->load($post)) {
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new ErrorsMessage(Messages::LOAD_DATA_ERROR),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-            );
+            ));
         }
 
         if (!$voluntaryRefundCreateForm->validate()) {
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(422),
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($voluntaryRefundCreateForm->getErrors()),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
-            );
+            ));
         }
-
 
         try {
             $hash = FlightRequest::generateHashFromDataJson($post);
-            if (FlightRequestQuery::existRequestByHash($hash)) {
+            if (FlightRequestQuery::existActiveRequestByHash($hash)) {
                 throw new \DomainException('FlightRequest (hash: ' . $hash . ') already processing', ApiCodeException::REQUEST_ALREADY_PROCESSED);
             }
 
@@ -465,32 +459,32 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->fr_job_id = $jobId;
             $this->flightRequestRepository->save($flightRequest);
 
-            return new SuccessResponse(
+            return $this->endApiLog(new SuccessResponse(
 //                new DataMessage([
 //                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),
 //                ]),
                 new CodeMessage(ApiCodeException::SUCCESS)
-            );
+            ));
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
                 'FlightQuoteRefundController:actionCreate:Warning'
             );
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(422),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
-            );
+            ));
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
                 'FlightQuoteRefundController:actionCreate:Throwable'
             );
-            return new ErrorResponse(
+            return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(500),
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
-            );
+            ));
         }
     }
 
@@ -688,5 +682,11 @@ class FlightQuoteRefundController extends ApiBaseController
                 new CodeMessage($throwable->getCode())
             );
         }
+    }
+
+    private function endApiLog(Response $response): Response
+    {
+        $this->apiLog->endApiLog(ArrayHelper::toArray($response));
+        return $response;
     }
 }

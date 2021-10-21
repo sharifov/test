@@ -4,7 +4,6 @@ namespace modules\flight\src\useCases\api\voluntaryRefundCreate;
 
 use common\models\CaseSale;
 use common\models\Client;
-use modules\flight\models\FlightQuoteBooking;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefundRepository;
 use modules\flight\src\useCases\sale\FlightFromSaleService;
@@ -37,6 +36,7 @@ use sales\exception\BoResponseException;
 use sales\exception\ValidationException;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\repositories\cases\CasesRepository;
@@ -125,7 +125,7 @@ class VoluntaryRefundService
     public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, int $projectId, ?ProductQuote $originProductQuote): void
     {
         try {
-            $caseCategoryKey = self::getCategoryKey();
+            $caseCategoryKey = self::getCaseCategoryKey();
             if (!$case = CasesQuery::getLastActiveCaseByBookingId($voluntaryRefundCreateForm->booking_id, $caseCategoryKey)) {
                 $case = $this->casesCreateService->createRefund(
                     $voluntaryRefundCreateForm->booking_id,
@@ -134,6 +134,7 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
+            $this->errorHandler(null, null, 'Case Sale creation failed', $e);
             throw new VoluntaryRefundException('Case creation Failed', VoluntaryRefundException::CASE_CREATION_FAILED);
         }
 
@@ -162,7 +163,7 @@ class VoluntaryRefundService
                 ['case_id' => $case->cs_id]
             );
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Case Sale creation failed');
+            $this->errorHandler($case, null, 'Case Sale creation failed', $e);
             throw new VoluntaryRefundException('Case Sale creation failed', VoluntaryRefundException::CASE_SALE_CREATION_FAILED);
         }
 
@@ -174,7 +175,7 @@ class VoluntaryRefundService
             $case->cs_client_id = $client->id;
             $this->casesRepository->save($case);
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Client creation failed');
+            $this->errorHandler($case, null, 'Client creation failed', $e);
             throw new VoluntaryRefundException('Client creation failed', VoluntaryRefundException::CLIENT_CREATION_FAILED);
         }
 
@@ -203,7 +204,7 @@ class VoluntaryRefundService
                 $this->orderRepository->save($order);
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Order creation failed');
+            $this->errorHandler($case, null, 'Order creation failed', $e);
             throw new VoluntaryRefundException('Order creation failed', VoluntaryRefundException::ORDER_CREATION_FAILED);
         }
 
@@ -217,7 +218,7 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Origin Product Quote creation failed');
+            $this->errorHandler($case, null, 'Origin Product Quote creation failed', $e);
             throw new VoluntaryRefundException('Origin Product Quote creation failed', VoluntaryRefundException::ORIGIN_PRODUCT_QUOTE_CREATION_FAILED);
         }
 
@@ -296,7 +297,7 @@ class VoluntaryRefundService
 
             $this->productQuoteRefundRepository->save($productQuoteRefund);
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Product Quote Refund structure creation failed');
+            $this->errorHandler($case, null, 'Product Quote Refund structure creation failed', $e);
             throw new VoluntaryRefundException('Product Quote Refund structure creation failed', VoluntaryRefundException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
         }
 
@@ -309,7 +310,7 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'PaymentRequest processing is failed');
+            $this->errorHandler($case, null, 'PaymentRequest processing is failed', $e);
             throw new VoluntaryRefundException('PaymentRequest processing is failed', VoluntaryRefundException::PAYMENT_DATA_PROCESSED_FAILED);
         }
 
@@ -326,7 +327,7 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'BillingInfo processing is failed');
+            $this->errorHandler($case, null, 'BillingInfo processing is failed', $e);
             throw new VoluntaryRefundException('BillingInfo processing is failed', VoluntaryRefundException::BILLING_INFO_PROCESSED_FAILED);
         }
 
@@ -439,7 +440,7 @@ class VoluntaryRefundService
         return $originProductQuote;
     }
 
-    private static function getCategoryKey(): string
+    private static function getCaseCategoryKey(): string
     {
         if (!empty(SettingHelper::getVoluntaryRefundCaseCategory())) {
             return SettingHelper::getVoluntaryRefundCaseCategory();
@@ -447,8 +448,12 @@ class VoluntaryRefundService
         return self::CASE_CREATE_CATEGORY_KEY;
     }
 
-    private function errorHandler(?Cases $case, ?ProductQuoteRefund $productQuoteRefund, string $description): void
-    {
+    private function errorHandler(
+        ?Cases $case,
+        ?ProductQuoteRefund $productQuoteRefund,
+        string $description,
+        \Throwable $exception
+    ): void {
         if ($case) {
             $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, $description);
             $case->offIsAutomate()->error(null, $description);
@@ -459,5 +464,7 @@ class VoluntaryRefundService
             $productQuoteRefund->error();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
         }
+
+        \Yii::error(AppHelper::throwableLog($exception, true), 'VoluntaryRefundService:errorHandler');
     }
 }

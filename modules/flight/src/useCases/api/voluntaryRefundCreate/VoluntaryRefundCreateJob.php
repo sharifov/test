@@ -18,12 +18,14 @@ use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\CasesQuery;
 use sales\exception\BoResponseException;
 use sales\exception\ValidationException;
+use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesSaleService;
 use webapi\src\ApiCodeException;
+use yii\helpers\ArrayHelper;
 use yii\queue\Queue;
 
 /**
@@ -60,7 +62,7 @@ class VoluntaryRefundCreateJob extends \common\components\jobs\BaseJob implement
             }
 
             $voluntaryRefundCreateForm = new VoluntaryRefundCreateForm();
-            if (!$voluntaryRefundCreateForm->load(JsonHelper::decode($flightRequest->fr_data_json, true))) {
+            if (!$voluntaryRefundCreateForm->load(JsonHelper::decode($flightRequest->fr_data_json, true)) || !$voluntaryRefundCreateForm->validate()) {
                 throw new \RuntimeException('Invalid FlightRequest data json');
             }
 
@@ -69,11 +71,13 @@ class VoluntaryRefundCreateJob extends \common\components\jobs\BaseJob implement
             } else {
                 $voluntaryRefundService->startRefundAutoProcess($voluntaryRefundCreateForm, $flightRequest->fr_project_id, null);
             }
-
-//        } catch (\RuntimeException | \DomainException $e) {
-//            \Yii::warning($e->getMessage(), 'VoluntaryRefundCreateJob:RuntimeException:DomainException:warning');
+        } catch (VoluntaryRefundException $e) {
+            $flightRequest->statusToError();
+            $flightRequest->save();
         } catch (\Throwable $e) {
-            \Yii::error($e->getMessage(), 'VoluntaryRefundCreateJob:RuntimeException:DomainException:');
+            $flightRequest->statusToError();
+            $flightRequest->save();
+            \Yii::error(AppHelper::throwableLog($e, true), 'VoluntaryRefundCreateJob:RuntimeException:DomainException:');
         }
     }
 }
