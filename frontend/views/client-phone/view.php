@@ -67,6 +67,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'validate_dt',
                 'value' => static function (\common\models\ClientPhone $model) {
+                    if (empty($model->validate_dt)) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->validate_dt));
                 },
                 'format' => 'raw'
