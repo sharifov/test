@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Department;
 use common\models\Project;
+use common\models\UserGroup;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\helpers\setting\SettingHelper;
 use sales\model\client\notifications\client\entity\NotificationType;
@@ -71,6 +72,7 @@ use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\leadRedial\priorityLevel\ConversionFetcher;
 use sales\model\leadRedial\queue\CallNextLeads;
 use sales\model\project\entity\params\Params;
+use sales\model\user\reports\stats\UserStatsReport;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\sms\incoming\SmsIncomingForm;
@@ -83,11 +85,34 @@ use yii\console\ExitCode;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
+use yii\rbac\Role;
 
 class TestController extends Controller
 {
     public function actionMmm()
     {
+        $user = Employee::findOne(295);
+        $report = new UserStatsReport(
+            $user->timezone,
+            date('Y-m') . '-01 00:00 - ' . date('Y-m-d') . ' 23:59',
+            Department::getList(),
+            array_map(fn (Role $item) => $item->description, \Yii::$app->authManager->getRoles()),
+            UserGroup::getList(),
+            Employee::getActiveUsersList()
+        );
+        $params['UserStatsReport']['departments'] = [
+            1, 2, 3
+        ];
+        $params['UserStatsReport']['groups'] = [
+            1
+        ];
+        $params['UserStatsReport']['users'] = [
+            295, 294
+        ];
+
+        $report->search($params);
+        VarDumper::dump($report->getErrors());
+        die;
         $users = \Yii::createObject(Users::class);
         $lead = Lead::findOne(513195);
         $r = $users->getUsers($lead, 4, false);
