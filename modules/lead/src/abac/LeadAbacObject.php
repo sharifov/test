@@ -207,11 +207,11 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_CAN_TAKE_NEW_LEAD = [
+    protected const ATTR_WITHIN_PERSONAL_TAKE_LIMITS = [
         'optgroup' => 'Lead',
-        'id' => self::NS . 'canTakeNewLead',
-        'field' => 'canTakeNewLead',
-        'label' => 'Can Take new Lead',
+        'id' => self::NS . 'withinPersonalTakeLimits',
+        'field' => 'withinPersonalTakeLimits',
+        'label' => 'Within Personal Take Limits',
 
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
@@ -220,11 +220,11 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_WITHIN_PERSONAL_TAKE_LIMITS = [
+    protected const ATTR_HAS_APPLIED_QUOTE = [
         'optgroup' => 'Lead',
-        'id' => self::NS . 'withinPersonalTakeLimits',
-        'field' => 'withinPersonalTakeLimits',
-        'label' => 'Within Personal Take Limits',
+        'id' => self::NS . 'hasAppliedQuote',
+        'field' => 'hasAppliedQuote',
+        'label' => 'Has Applied Quote',
 
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
@@ -343,7 +343,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_EMPLOYEE_SHIFT_TIME,
             self::ATTR_IS_IN_PROJECT,
             self::ATTR_IS_IN_DEPARTMENT,
-            self::ATTR_CAN_TAKE_NEW_LEAD,
+            self::ATTR_HAS_APPLIED_QUOTE,
             self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
             self::ATTR_LEAD_IS_OWNER,
         ],
