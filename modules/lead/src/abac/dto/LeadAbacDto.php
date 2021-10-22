@@ -15,7 +15,7 @@ use yii\helpers\VarDumper;
  * @property bool $has_owner_query
  * @property bool $is_common_group
  * @property bool $isShiftTime
- * @property bool $canTakeNewLead
+ * @property bool $withinPersonalTakeLimits
  * @property bool $hasAppliedQuote
  * @property int|null $status_id
  */
@@ -27,7 +27,7 @@ class LeadAbacDto extends \stdClass
     public bool $is_common_group = false;
     public ?int $status_id = null;
     public bool $isShiftTime;
-    public bool $canTakeNewLead;
+    public bool $withinPersonalTakeLimits;
     public bool $hasAppliedQuote;
     public bool $isInProject;
     public bool $isInDepartment;
@@ -58,7 +58,7 @@ class LeadAbacDto extends \stdClass
             if ($user) {
                 $this->hasAppliedQuote = $lead->hasAppliedQuote();
                 $this->isShiftTime = $user->checkShiftTime();
-                $this->canTakeNewLead = $user->accessTakeNewLead();
+                $this->withinPersonalTakeLimits = $user->accessTakeNewLead();
             }
 
             $this->status_id = $lead->status;
