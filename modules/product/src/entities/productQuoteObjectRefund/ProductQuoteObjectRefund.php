@@ -4,6 +4,7 @@ namespace modules\product\src\entities\productQuoteObjectRefund;
 
 use common\models\Currency;
 use common\models\Employee;
+use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\interfaces\ProductQuoteObjectRefundStructure;
 use sales\repositories\NotFoundException;
@@ -171,7 +172,7 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
     {
         return [
             "number" => static function (self $model) {
-                return null;
+                return FlightQuoteTicketRefund::findOne(['fqtr_id' => $model->pqor_quote_object_id])->fqtr_ticket_number ?? '';
             },
             "airlinePenalty" => 'pqor_penalty_amount',
             "processingFee" => 'pqor_processing_fee_amount',

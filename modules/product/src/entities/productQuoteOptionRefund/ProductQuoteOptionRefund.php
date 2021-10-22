@@ -5,6 +5,7 @@ namespace modules\product\src\entities\productQuoteOptionRefund;
 use common\components\validators\CheckJsonValidator;
 use common\models\Currency;
 use common\models\Employee;
+use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use sales\behaviors\StringToJsonBehavior;
@@ -193,12 +194,20 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
     {
         return [
             "type" => static function (self $model) {
+                return $model->productQuoteOption->pqoProductOption->po_key;
+            },
+            "amount" => static function (self $model) {
+                return (float)$model->pqor_client_selling_price;
+            },
+            "refundable" => 'pqor_client_refund_amount',
+            "details" => static function (self $model) {
+                return JsonHelper::decode($model->pqor_details);
+            },
+            "status" => static function (self $model) {
                 return null;
             },
-            "airlinePenalty" => 'pqor_penalty_amount',
-            "refundAmount" => 'pqor_client_refund_amount',
-            "status" => static function (self $model) {
-                return ProductQuoteOptionRefundStatus::getName($model->pqor_status_id);
+            "refundAllow" => static function (self $model) {
+                return (bool)$model->pqor_refund_allow;
             }
         ];
     }

@@ -20,6 +20,7 @@ use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\services\CurrencyHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\Messages;
 use webapi\src\request\BoRequestDataHelper;
@@ -162,9 +163,9 @@ class FlightQuoteRefundController extends ApiBaseController
             throw new MethodNotAllowedHttpException('Method not allowed', ApiCodeException::REQUEST_IS_NOT_POST);
         }
 
-        $this->startApiLog($this->action->uniqueId);
-
         $post = \Yii::$app->request->post();
+
+        $this->startApiLog($this->action->uniqueId);
 
         $voluntaryRefundInfoForm = new VoluntaryRefundInfoForm();
         if (!$voluntaryRefundInfoForm->load($post)) {
@@ -198,13 +199,20 @@ class FlightQuoteRefundController extends ApiBaseController
 
             return $this->endApiLog(new SuccessResponse(
                 new DataMessage([
-                //                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),
-                    'tickets' => array_map(static function (ProductQuoteObjectRefund $model) {
-                        return $model->setFields($model->getApiDataMapped())->toArray();
-                    }, $tickets),
-                    'auxiliaryOptions' => array_map(static function (ProductQuoteOptionRefund $model) {
-                        return $model->setFields($model->getApiDataMapped())->toArray();
-                    }, $auxiliaryOptions),
+                    'refund' => [
+                        'totalPaid' => (float)$productQuoteRefund->pqr_client_selling_price,
+                        'totalAirlinePenalty' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_penalty_amount, $productQuoteRefund->pqr_client_currency_rate),
+                        'totalProcessingFee' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_processing_fee_amount, $productQuoteRefund->pqr_client_currency_rate),
+                        'totalRefundable' => (float)$productQuoteRefund->pqr_client_refund_amount,
+                        'refundCost' => 0.0,
+                        'currency' => $productQuoteRefund->pqr_client_currency,
+                        'tickets' => array_map(static function (ProductQuoteObjectRefund $model) {
+                            return $model->setFields($model->getApiDataMapped())->toArray();
+                        }, $tickets),
+                        'auxiliaryOptions' => array_map(static function (ProductQuoteOptionRefund $model) {
+                            return $model->setFields($model->getApiDataMapped())->toArray();
+                        }, $auxiliaryOptions),
+                    ]
                 ]),
                 new CodeMessage(ApiCodeException::SUCCESS)
             ));
