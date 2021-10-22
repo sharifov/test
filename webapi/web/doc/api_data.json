@@ -11103,7 +11103,7 @@
       "examples": [
         {
           "title": "Error-Response Load Data:",
-          "content": "HTTP/1.1 200 OK\n {\n    \"status\": 400,\n    \"message\": \"Error\",\n    \"errors\": [\n        \"Load data error\"\n    ],\n    \"code\": \"13106\"\n }",
+          "content": "HTTP/1.1 200 OK\n {\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"name\": \"Client Error: Bad Request\",\n     \"code\": 13106,\n     \"type\": \"app\",\n     \"errors\": []\n }",
           "type": "json"
         },
         {
@@ -11178,7 +11178,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": {\n         \"tickets\": [\n             {\n                 \"number\": \"25346346\",\n                 \"airlinePenalty\": 47.54,\n                 \"processingFee\": 85.65,\n                 \"refundable\": 81.25,\n                 \"selling\": 200.54,\n                 \"status\": \"paid\"\n             }\n         ],\n         \"auxiliaryOptions\": [\n             {\n                 \"type\": \"package\",\n                 \"selling\": 45.59,\n                 \"refundAmount\": 25.25,\n                 \"status\": \"paid\"\n             }\n         ]\n    },\n    \"code\": \"13200\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"refund\": {\n         \"totalPaid\": 500.00,\n         \"totalAirlinePenalty\": 30.00,\n         \"totalProcessingFee\": 25.00,\n         \"totalRefundable\": 55.00,\n         \"refundCost\": 0.0,\n         \"currency\": \"USD\",\n         \"tickets\": [\n             {\n                 \"number\": \"25346346\",\n                 \"airlinePenalty\": 47.54,\n                 \"processingFee\": 85.65,\n                 \"refundable\": 81.25,\n                 \"selling\": 200.54,\n                 \"status\": \"paid\"\n             }\n         ],\n         \"auxiliaryOptions\": [\n             {\n                 \"type\": \"package\",\n                 \"amount\": 45.59,\n                 \"refundable\": 25.25,\n                 \"details\": {},\n                 \"status\": \"paid\",\n                 \"refundAllow\": false\n             }\n         ]\n    },\n    \"code\": \"13200\"\n}",
           "type": "json"
         }
       ]
@@ -11187,12 +11187,12 @@
       "examples": [
         {
           "title": "Error-Response Load Data:",
-          "content": "HTTP/1.1 200 OK\n {\n    \"status\": 400,\n    \"message\": \"Error\",\n    \"errors\": [\n        \"Load data error\"\n    ],\n    \"code\": \"13106\"\n }",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 400,\n    \"message\": \"Load data error\",\n    \"name\": \"Client Error: Bad Request\",\n    \"code\": 13106,\n    \"type\": \"app\",\n    \"errors\": []\n}",
           "type": "json"
         },
         {
           "title": "Error-Response Validation:",
-          "content": "HTTP/1.1 200 OK\n {\n    \"status\": 422,\n    \"message\": \"Error\",\n    \"errors\": [\n        \"ProductQuoteRefund not found by BookingId(ASDAsSF)\"\n    ],\n    \"code\": 13112\n }",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n  \"booking_id\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
           "type": "json"
         }
       ]

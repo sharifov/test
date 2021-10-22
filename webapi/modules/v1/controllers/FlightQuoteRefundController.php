@@ -99,7 +99,13 @@ class FlightQuoteRefundController extends ApiBaseController
      * {
      *     "status": 200,
      *     "message": "OK",
-     *     "data": {
+     *     "refund": {
+     *          "totalPaid": 500.00,
+     *          "totalAirlinePenalty": 30.00,
+     *          "totalProcessingFee": 25.00,
+     *          "totalRefundable": 55.00,
+     *          "refundCost": 0.0,
+     *          "currency": "USD",
      *          "tickets": [
      *              {
      *                  "number": "25346346",
@@ -113,9 +119,11 @@ class FlightQuoteRefundController extends ApiBaseController
      *          "auxiliaryOptions": [
      *              {
      *                  "type": "package",
-     *                  "selling": 45.59,
-     *                  "refundAmount": 25.25,
-     *                  "status": "paid"
+     *                  "amount": 45.59,
+     *                  "refundable": 25.25,
+     *                  "details": {},
+     *                  "status": "paid",
+     *                  "refundAllow": false
      *              }
      *          ]
      *     },
@@ -124,25 +132,29 @@ class FlightQuoteRefundController extends ApiBaseController
      *
      * @apiErrorExample {json} Error-Response Load Data:
      * HTTP/1.1 200 OK
-     *  {
+     * {
      *     "status": 400,
-     *     "message": "Error",
-     *     "errors": [
-     *         "Load data error"
-     *     ],
-     *     "code": "13106"
-     *  }
+     *     "message": "Load data error",
+     *     "name": "Client Error: Bad Request",
+     *     "code": 13106,
+     *     "type": "app",
+     *     "errors": []
+     * }
      *
      * @apiErrorExample {json} Error-Response Validation:
      * HTTP/1.1 200 OK
-     *  {
-     *     "status": 422,
-     *     "message": "Error",
-     *     "errors": [
-     *         "ProductQuoteRefund not found by BookingId(ASDAsSF)"
-     *     ],
-     *     "code": 13112
-     *  }
+     * {
+     *   "status": 422,
+     *   "message": "Validation error",
+     *   "name": "Client Error: Unprocessable Entity",
+     *   "errors": {
+     *   "booking_id": [
+     *          "Booking Id should contain at most 10 characters."
+     *      ]
+     *   },
+     *   "code": 13107,
+     *   "type": "app"
+     * }
      */
     public function actionInfo()
     {
@@ -364,12 +376,12 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiErrorExample {json} Error-Response Load Data:
      * HTTP/1.1 200 OK
      *  {
-     *     "status": 400,
-     *     "message": "Error",
-     *     "errors": [
-     *         "Load data error"
-     *     ],
-     *     "code": "13106"
+     *      "status": 400,
+     *      "message": "Load data error",
+     *      "name": "Client Error: Bad Request",
+     *      "code": 13106,
+     *      "type": "app",
+     *      "errors": []
      *  }
      *
      * @apiErrorExample {json} Error-Response Validation:
@@ -379,7 +391,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *   "message": "Validation error",
      *   "name": "Client Error: Unprocessable Entity",
      *   "errors": {
-     *   "booking_id": [
+     *      "booking_id": [
      *          "Booking Id should contain at most 10 characters."
      *      ]
      *   },
