@@ -311,7 +311,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 <?= $form->field($modelUserParams, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000]) ?>
                             </div>
                             <div class="col-md-3">
-                                <?= $form->field($modelUserParams, 'up_call_user_level')->dropDownList(UserParams::getCallPriorityLevelList()) ?>
+                                <?= $form->field($modelUserParams, 'up_call_user_level')->input('number', ['step' => 1, 'min' => -128, 'max' => 127]) ?>
                             </div>
                         </div>
                     <?php endif; ?>
