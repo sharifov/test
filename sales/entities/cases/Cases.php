@@ -270,6 +270,25 @@ class Cases extends ActiveRecord implements Objectable
         return $case;
     }
 
+    public static function createByApiVoluntaryRefund(
+        int $departmentId,
+        int $categoryId,
+        string $orderUid,
+        int $projectId,
+        ?bool $is_automate
+    ): self {
+        $case = self::create();
+        $case->cs_dep_id = $departmentId;
+        $case->cs_category_id = $categoryId;
+        $case->cs_order_uid = $orderUid;
+        $case->cs_project_id = $projectId;
+        $case->cs_subject = 'Voluntary Refund';
+        $case->cs_source_type_id = CasesSourceType::API;
+        $case->cs_is_automate = $is_automate;
+        $case->new(null, 'Voluntary Refund Create');
+        return $case;
+    }
+
     /**
      * @return string
      */

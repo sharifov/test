@@ -7,62 +7,65 @@ use DomainException;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
-use modules\flight\src\useCases\voluntaryExchange\service\SendEmailVoluntaryExchangeService;
+use modules\flight\src\useCases\voluntaryExchange\service\OtaRequestVoluntaryRequestService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
-use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use sales\entities\cases\CaseEventLog;
+use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use Throwable;
+use webapi\src\services\payment\BillingInfoApiVoluntaryService;
+use webapi\src\services\payment\PaymentRequestVoluntaryService;
 use Yii;
-use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
 
 /**
  * @property int|null $flight_request_id
+ * @property int|null $case_id
  */
 class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
 {
     public $flight_request_id;
+    public $case_id;
 
     /**
-     * @param Queue $queue
-     * @return bool
-     *
+     * @param $queue
+     * @throws \yii\base\InvalidConfigException
      */
     public function execute($queue): void
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
+
+        $objectCollection = Yii::createObject(VoluntaryExchangeObjectCollection::class);
+        $boRequestService = Yii::createObject(BoRequestVoluntaryExchangeService::class);
+        $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
+        $paymentRequestVoluntaryService = Yii::createObject(PaymentRequestVoluntaryService::class);
+        $voluntaryExchangeService =  new VoluntaryExchangeService($objectCollection);
 
         try {
-            $objectCollection = Yii::createObject(VoluntaryExchangeObjectCollection::class);
-            $boRequestService = Yii::createObject(BoRequestVoluntaryExchangeService::class);
-            $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
-
             if (!$flightRequest = FlightRequest::findOne($this->flight_request_id)) {
                 throw new DomainException('FlightRequest not found, ID (' . $this->flight_request_id . ')');
             }
-            $voluntaryExchangeService =  new VoluntaryExchangeService($objectCollection);
+
             $flightRequestService = new FlightRequestService($flightRequest, $objectCollection);
 
-            if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
-                $case = CaseService::createCase(
-                    $flightRequest->fr_booking_id,
-                    $flightRequest->fr_project_id,
-                    true,
-                    $objectCollection
-                );
+            if (!$case = Cases::findOne(['cs_id' => $this->case_id])) {
+                throw new \RuntimeException('Case not found by ID(' . $this->case_id . ')');
             }
             $caseHandler = new CaseVoluntaryExchangeHandler($case, $objectCollection);
-
             $originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($flightRequest->fr_booking_id);
+
+            if ($originProductQuote && ($productQuoteChange = $originProductQuote->productQuoteLastChange)) {
+                $voluntaryExchangeService->declineProductQuoteChange($productQuoteChange);
+            }
 
             if (!$originProductQuote) {
                 try {
@@ -106,7 +109,7 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                         $saleData,
                         $order,
                         $case
-                    ); /* TODO:: to BOOK */
+                    );
                 } catch (\Throwable $throwable) {
                     $caseHandler->caseToPendingManual('OriginProductQuote not created');
                     throw $throwable;
@@ -117,21 +120,8 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 } catch (\Throwable $throwable) {
                     \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:setCaseDeadline');
                 }
-            }
-
-            try {
-                $productQuoteChange = $voluntaryExchangeService->createProductQuoteChange($originProductQuote->pq_id, $case->cs_id);
-                /* TODO:: to pending */
-            } catch (\Throwable $throwable) {
-                $caseHandler->caseToPendingManual('ProductQuoteChange not created');
-                throw $throwable;
-            }
-
-            try {
-                $voluntaryExchangeService->originProductQuoteDecline($originProductQuote, $case);
-            } catch (Throwable $throwable) {
-                $caseHandler->caseToPendingManual('OriginProductQuote not declined');
-                throw $throwable;
+            } else {
+                $order = $originProductQuote->pqOrder;
             }
 
             try {
@@ -141,6 +131,24 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 $flightProductQuoteData = JsonHelper::decode($flightRequest->fr_data_json);
             } catch (\Throwable $throwable) {
                 $caseHandler->caseToPendingManual('FlightRequest data_json is empty or corrupted');
+                throw $throwable;
+            }
+
+            try {
+                $productQuoteChange = $voluntaryExchangeService->createProductQuoteChange(
+                    $originProductQuote->pq_id,
+                    $case->cs_id,
+                    $flightProductQuoteData
+                );
+            } catch (\Throwable $throwable) {
+                $caseHandler->caseToPendingManual('ProductQuoteChange not created');
+                throw $throwable;
+            }
+
+            try {
+                $voluntaryExchangeService->declineVoluntaryExchangeQuotes($originProductQuote, $case);
+            } catch (\Throwable $throwable) {
+                $caseHandler->caseToPendingManual('VoluntaryExchangeQuotes not declined');
                 throw $throwable;
             }
 
@@ -163,16 +171,12 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 throw $throwable;
             }
 
-            /* TODO:: paymentRequest processing */
-
-            /* TODO:: billingInfo processing */
-
             try {
                 $voluntaryExchangeCreateForm = new VoluntaryExchangeCreateForm();
-                if (!$voluntaryExchangeCreateForm->load(ArrayHelper::toArray($flightRequest->fr_data_json))) {
+                if (!$voluntaryExchangeCreateForm->load($flightProductQuoteData)) {
                     throw new \RuntimeException('VoluntaryExchangeCreateForm not loaded');
                 }
-                if (!$voluntaryExchangeCreateForm->validate()) {
+                if (!$voluntaryExchangeCreateForm->validate(['billing', 'payment_request'])) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($voluntaryExchangeCreateForm));
                 }
             } catch (\Throwable $throwable) {
@@ -180,21 +184,80 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 throw $throwable;
             }
 
-            $caseHandler->caseToAutoProcessing();
-            $productQuoteChange->decisionPending();
-            $objectCollection->getProductQuoteChangeRepository()->save($productQuoteChange);
-            $flightRequestService->done('FlightRequest successfully processed');
-        } catch (Throwable $throwable) {
-            if (isset($flightRequestService)) {
-                $flightRequestService->error($throwable->getMessage());
+            if (
+                !empty($voluntaryExchangeCreateForm->payment_request) &&
+                $paymentRequestForm = $voluntaryExchangeCreateForm->getPaymentRequestForm()
+            ) {
+                try {
+                    $paymentRequestVoluntaryService->processing(
+                        $paymentRequestForm,
+                        $order,
+                        'Create by Voluntary Exchange API processing'
+                    );
+                } catch (\Throwable $throwable) {
+                    $caseHandler->caseToPendingManual('PaymentRequest processing is failed');
+                    throw $throwable;
+                }
             }
 
-            if (isset($case, $flightRequest, $voluntaryExchangeService, $caseHandler) && !isset($client)) {
+            if (
+                !empty($voluntaryExchangeCreateForm->billing) &&
+                ($billingInfoForm = $voluntaryExchangeCreateForm->getBillingInfoForm())
+            ) {
+                try {
+                    $paymentMethodId = $paymentRequestVoluntaryService->getPaymentMethod()->pm_id ?? null;
+                    $creditCardId = $paymentRequestVoluntaryService->getCreditCard()->cc_id ?? null;
+
+                    BillingInfoApiVoluntaryService::getOrCreateBillingInfo(
+                        $billingInfoForm,
+                        $order->getId(),
+                        $creditCardId,
+                        $paymentMethodId
+                    );
+                } catch (\Throwable $throwable) {
+                    $caseHandler->caseToPendingManual('BillingInfo create is failed');
+                    throw $throwable;
+                }
+            }
+
+            try {
+                (new CleanDataVoluntaryExchangeService($flightRequest, $productQuoteChange, $objectCollection));
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:CleanDataVoluntaryExchangeService');
+            }
+
+            /* TODO:: temporary disable */
+            /*
+            try {
+                OtaRequestVoluntaryRequestService::success($flightRequest, $voluntaryExchangeQuote, $originProductQuote, $case);
+            } catch (\Throwable $throwable) {
+                $caseHandler->caseToPendingManual('OTA site is not informed');
+                throw $throwable;
+            }
+            */
+            \Yii::warning(/* TODO:: FOR DEBUG:: must by remove  */
+                'WH to OTA temporary disabled',
+                'VoluntaryExchangeCreateJob:OtaRequestVoluntaryRequestService'
+            );
+
+            $voluntaryExchangeService->doneProcess(
+                $voluntaryExchangeQuote,
+                $case,
+                $productQuoteChange,
+                $flightRequestService
+            );
+        } catch (Throwable $throwable) {
+            if (isset($case, $flightRequest, $caseHandler) && !isset($client)) {
                 $client = $voluntaryExchangeService->createSimpleClient($flightRequest->fr_project_id);
                 $caseHandler->addClient($client->id);
             }
 
-            /* TODO:: Case to Error + PQC to Error */
+            $voluntaryExchangeService->failProcess(
+                $throwable->getMessage(),
+                $case ?? null,
+                $productQuoteChange ?? null,
+                $flightRequestService ?? null
+            );
 
             $data['flightRequest'] = $this->flight_request_id;
             VoluntaryExchangeService::writeLog($throwable, 'VoluntaryExchangeCreateJob:throwable', $data);

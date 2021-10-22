@@ -1,9 +1,10 @@
 <?php
 
 return [
-    'serviceName' => 'crm',
-    'serviceVersion' => '1.0.0',
-    'appName' => 'Sales',
+    'serviceName' => 'app',
+    'serviceVersion' => '1.1.0',
+    'serviceType' => '',
+    'appName' => 'CRM',
     'appHostname' => php_uname('n'),
     'appInstance' => '1',
     'appEnv' => '',

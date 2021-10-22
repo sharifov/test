@@ -480,6 +480,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         return self::create($dto);
     }
 
+    public static function createVoluntaryChangeManual(FlightQuoteCreateDTO $dto): FlightQuote
+    {
+        return self::create($dto);
+    }
+
     public static function createVoluntaryExchangeApi(FlightQuoteCreateDTO $dto): FlightQuote
     {
         $model = self::create($dto);

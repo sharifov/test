@@ -5,7 +5,7 @@ namespace modules\product\src\entities\productQuoteOptionRefund;
 /**
  * This is the ActiveQuery class for [[ProductQuoteOptionRefund]].
  *
- * @see ProductQuoteOptionRefund
+ * @see ProductQuoteOptionRefundSearch
  */
 class Scopes extends \yii\db\ActiveQuery
 {

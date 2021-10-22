@@ -88,7 +88,7 @@ class FlightQuoteCreateDTO
         $this->requestHash = $flight->fl_request_hash_key;
     }
 
-    public static function fillReProtectionManual(
+    public static function fillChangeQuoteManual(
         Flight $flight,
         ProductQuote $productQuote,
         array $quote,

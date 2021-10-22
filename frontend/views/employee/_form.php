@@ -409,6 +409,7 @@ JS;
                 </div>
             <?php endif; ?>
 
+    <?php if ($user->isAdmin()) : ?>
     <h5>Profile Settings</h5>
     <div class="well">
         <div class="form-group">
@@ -451,6 +452,7 @@ JS;
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
             <div class="form-group text-center">
                 <?= Html::submitButton(($model->isNewRecord ? '<i class="fa fa-plus"></i> Create User' : '<i class="fa fa-save"></i> Update & Save User data'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-warning']) ?>

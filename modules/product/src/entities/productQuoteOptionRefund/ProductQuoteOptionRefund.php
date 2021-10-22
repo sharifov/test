@@ -2,10 +2,12 @@
 
 namespace modules\product\src\entities\productQuoteOptionRefund;
 
+use common\components\validators\CheckJsonValidator;
 use common\models\Currency;
 use common\models\Employee;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use sales\behaviors\StringToJsonBehavior;
 use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -37,6 +39,8 @@ use yii\db\ActiveRecord;
  * @property Employee $updatedUser
  * @property Currency $clientCurrency
  * @property int $pqor_order_refund_id [int]
+ * @property bool $pqor_refund_allow [tinyint(1)]
+ * @property string $pqor_details [json]
  */
 class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
 {
@@ -61,6 +65,10 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
                 'createdByAttribute' => 'pqor_created_user_id',
                 'updatedByAttribute' => 'pqor_updated_user_id',
             ],
+            'stringToJson' => [
+                'class' => StringToJsonBehavior::class,
+                'jsonColumn' => 'pqor_details',
+            ],
         ];
     }
 
@@ -84,11 +92,15 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             [['pqor_created_dt', 'pqor_updated_dt'], 'safe'],
             [['pqor_client_currency'], 'string', 'max' => 3],
             [['pqor_client_currency'], 'default', 'value' => null],
+            [['pqor_refund_allow'], 'boolean'],
             [['pqor_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_created_user_id' => 'id']],
             [['pqor_product_quote_option_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteOption::class, 'targetAttribute' => ['pqor_product_quote_option_id' => 'pqo_id']],
             [['pqor_product_quote_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteRefund::class, 'targetAttribute' => ['pqor_product_quote_refund_id' => 'pqr_id']],
             [['pqor_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_updated_user_id' => 'id']],
             [['pqor_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pqor_client_currency' => 'cur_code']],
+            ['pqor_details', 'safe'],
+            ['pqor_details', 'trim'],
+            ['pqor_details', CheckJsonValidator::class],
         ];
     }
 
@@ -114,6 +126,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             'pqor_updated_user_id' => 'Updated User ID',
             'pqor_created_dt' => 'Created Dt',
             'pqor_updated_dt' => 'Updated Dt',
+            'pqor_details' => 'Details',
         ];
     }
 
@@ -188,5 +201,37 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
                 return ProductQuoteOptionRefundStatus::getName($model->pqor_status_id);
             }
         ];
+    }
+
+    public static function create(
+        int $orderRefundId,
+        int $productQuoteRefundId,
+        ?int $productQuoteOptionId,
+        ?float $sellingPrice,
+        ?float $penaltyAmount,
+        ?float $processingFeeAmount,
+        ?float $refundAmount,
+        string $clientCurrency,
+        float $clientCurrencyRate,
+        ?float $clientSellingPrice,
+        ?float $clientRefundAmount,
+        bool $refundAllow,
+        array $details
+    ): self {
+        $self = new self();
+        $self->pqor_order_refund_id = $orderRefundId;
+        $self->pqor_product_quote_refund_id = $productQuoteRefundId;
+        $self->pqor_product_quote_option_id = $productQuoteOptionId;
+        $self->pqor_selling_price = $sellingPrice;
+        $self->pqor_penalty_amount = $penaltyAmount;
+        $self->pqor_processing_fee_amount = $processingFeeAmount;
+        $self->pqor_refund_amount = $refundAmount;
+        $self->pqor_client_currency = $clientCurrency;
+        $self->pqor_client_currency_rate = $clientCurrencyRate;
+        $self->pqor_client_selling_price = $clientSellingPrice;
+        $self->pqor_client_refund_amount = $clientRefundAmount;
+        $self->pqor_refund_allow = $refundAllow;
+        $self->pqor_details = $details;
+        return $self;
     }
 }

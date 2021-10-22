@@ -104,8 +104,10 @@ $pjaxId = 'pjax-container-prices';
                     <?php echo $form->errorSummary($createQuoteForm)?>
                 </div>
 
-                <?= Html::hiddenInput('flightId', $flight->fl_id, ['id' => 'flightId']) ?>
+                <?php // echo Html::hiddenInput('flightId', $flight->fl_id, ['id' => 'flightId'])?>
                 <?= Html::hiddenInput('keyTripList', null, ['id' => 'keyTripList']) ?>
+
+                <?php echo $form->field($createQuoteForm, 'flightId')->hiddenInput()->label(false) ?>
 
                 <div class="row">
                     <div class="col-md-12">
@@ -183,11 +185,11 @@ $pjaxId = 'pjax-container-prices';
     </div>
 
     <?php
-    $urlPrepareDump = \yii\helpers\Url::to(['/flight/flight-quote/ajax-prepare-dump']);
+    $urlPrepareDump = \yii\helpers\Url::to(['/flight/flight-quote/ajax-prepare-dump', 'flight_id' => $flight->getId()]);
     $urlSave = \yii\helpers\Url::to(['/flight/flight-quote/ajax-save-re-protection', 'flight_id' => $flight->getId()]);
     $js = <<<JS
     var addRPQuoteForm = $('#add-quote-form');
-    
+
     $(document).on('beforeSubmit', '#add-quote-form', function(event) {
         let baggageData = $('.segment_baggage_forms').serialize();
         $('#baggage_data').val(baggageData);        
@@ -257,6 +259,7 @@ $pjaxId = 'pjax-container-prices';
         let dump = $('#reservationdump').val();
         let gds = $('#gds').val();
         let flight_id = $('#flightId').val();
+        let tripType = $('#triptype').val();
 
         if (dump.length && gds.length) {
             loadingBtn($(this), true);
@@ -264,16 +267,13 @@ $pjaxId = 'pjax-container-prices';
             $.ajax({
                 url: '{$urlPrepareDump}',
                 type: 'POST',
-                data: {dump: dump, gds: gds, flight_id: flight_id},
+                data: {reservationDump: dump, gds: gds, flight_id: flight_id, tripType: tripType},
                 dataType: 'json'
             })
             .done(function(dataResponse) {
                 loadingBtn($('#prepare_dump_btn'), false);
                 
-                console.log(dataResponse); // TODO:: for debug
-    
                 if (dataResponse.status === 1) {
-                
                     if (dataResponse.segments.length) {
                        $('#box_segments').html(dataResponse.segments); 
                     }

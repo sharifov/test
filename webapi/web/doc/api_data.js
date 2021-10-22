@@ -1,6 +1,156 @@
 define({ "api": [
   {
     "type": "get, post",
+    "url": "/health-check",
+    "title": "Get health check",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>components health check passed statuses (&quot;true&quot; or &quot;false&quot;)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
+    "url": "/health-check/metrics",
+    "title": "Get health check metrics text",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales_Metrics",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "metrics",
+            "description": "<p>in plain text format containing components health statuses (&quot;1&quot; for OK, &quot;0&quot; for failed)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 1\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 0\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
     "version": "0.1.0",
@@ -4307,14 +4457,14 @@ define({ "api": [
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "payment_request.method_data.card.exp_month",
+            "field": "payment_request.method_data.card.expiration_month",
             "description": "<p>Month</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "payment_request.method_data.card.exp_year",
+            "field": "payment_request.method_data.card.expiration_year",
             "description": "<p>Year</p>"
           },
           {
@@ -4330,7 +4480,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"booking_id\":\"XXXYYYZ\",\n    \"quote_gid\": \"2f2887a061f8069f7ada8af9e062f0f4\",\n    \"payment\":{\n        \"method_key\":\"cc\",\n        \"method_data\":{\n            \"card\":{\n                \"number\":\"4111555577778888\",\n                \"holder_name\":\"John Doe\",\n                \"exp_month\":10,\n                \"exp_year\":2022,\n                \"cvv\":\"097\"\n            }\n        },\n        \"amount\":29.95,\n        \"currency\":\"USD\"\n    },\n    \"billing\":{\n        \"first_name\":\"John\",\n        \"last_name\":\"Doe\",\n        \"middle_name\":null,\n        \"company_name\":\"General Motors\",\n        \"address_line1\":\"123 Main Street\",\n        \"address_line2\":\"\",\n        \"city\":\"Paris\",\n        \"state\":\"State\",\n        \"country\":\"United States\",\n        \"zip\":\"94000\",\n        \"contact_phone\":\"+137396512345\",\n        \"contact_email\":\"alex@test.com\",\n        \"contact_name\":\"Mr. Alexander\"\n    }\n}",
+          "content": " {\n    \"booking_id\":\"XXXYYYZ\",\n    \"quote_gid\": \"2f2887a061f8069f7ada8af9e062f0f4\",\n    \"payment\":{\n        \"method_key\":\"cc\",\n        \"method_data\":{\n            \"card\":{\n                \"number\":\"4111555577778888\",\n                \"holder_name\":\"John Doe\",\n                \"expiration_month\":10,\n                \"expiration_year\":2022,\n                \"cvv\":\"097\"\n            }\n        },\n        \"amount\":29.95,\n        \"currency\":\"USD\"\n    },\n    \"billing\":{\n        \"first_name\":\"John\",\n        \"last_name\":\"Doe\",\n        \"middle_name\":null,\n        \"company_name\":\"General Motors\",\n        \"address_line1\":\"123 Main Street\",\n        \"address_line2\":\"\",\n        \"city\":\"Paris\",\n        \"state\":\"State\",\n        \"country\":\"United States\",\n        \"zip\":\"94000\",\n        \"contact_phone\":\"+137396512345\",\n        \"contact_email\":\"alex@test.com\",\n        \"contact_name\":\"Mr. Alexander\"\n    }\n}",
           "type": "json"
         }
       ]
@@ -5133,7 +5283,111 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"FlightRequest created\",\n                    \"flightRequestId\" : 123\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"FlightRequest created\",\n                    \"flightRequestId\" : 123,\n                    \"caseGid\" : \"e7dce13b4e6a5f3ccc2cec9c21fa3255\"\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (Bad Request):",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Bad Request):",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Error\",\n       \"errors\": [\n          \"Not found Project with current user: xxx\"\n       ],\n       \"code\": \"13101\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Unprocessable entity):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Unprocessable entity):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed\"\n     ],\n     \"code\": \"13113\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Unprocessable entity):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Quote not available for exchange\"\n     ],\n     \"code\": \"13113\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Unprocessable entity):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Case saving error\"\n     ],\n     \"code\": \"21101\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Internal Server Error):",
+          "content": "HTTP/1.1 500 Internal Server Error\n{\n     \"status\": 500,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Server Error\"\n     ],\n     \"code\": 0,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
+    "groupTitle": "Flight_Voluntary_Exchange"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight-quote-exchange/info",
+    "title": "Flight Voluntary Exchange Info",
+    "version": "0.2.0",
+    "name": "Flight_Voluntary_Exchange_Info",
+    "group": "Flight_Voluntary_Exchange",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"booking_id\": \"XXXYYYZ\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                \"bookingId\": \"XXXYYYZ\",\n                \"quote_gid\" : \"48c82774ead469ad311c1e6112562726\",\n                \"key\": \"51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789\",\n                \"prices\": {\n                    \"totalPrice\": 332.12,\n                    \"comm\": 0,\n                    \"isCk\": false\n                },\n                \"passengers\": {\n                    \"ADT\": {\n                        \"codeAs\": \"JCB\",\n                        \"cnt\": 1,\n                        \"baseFare\": 32.12,\n                        \"pubBaseFare\": 32.12,\n                        \"baseTax\": 300,\n                        \"markup\": 0,\n                        \"comm\": 0,\n                        \"price\": 332.12,\n                        \"tax\": 300,\n                        \"oBaseFare\": {\n                            \"amount\": 32.120003,\n                            \"currency\": \"USD\"\n                        },\n                        \"oBaseTax\": {\n                            \"amount\": 300,\n                            \"currency\": \"USD\"\n                        },\n                        \"oExchangeFareDiff\": {\n                            \"amount\": 8,\n                            \"currency\": \"USD\"\n                        },\n                        \"oExchangeTaxDiff\": {\n                            \"amount\": 24.12,\n                            \"currency\": \"USD\"\n                        }\n                    }\n                },\n                \"trips\": [\n                    {\n                        \"tripId\": 1,\n                        \"segments\": [\n                            {\n                                \"segmentId\": 1,\n                                \"departureTime\": \"2022-01-10 20:15\",\n                                \"arrivalTime\": \"2022-01-11 21:10\",\n                                \"stop\": 1,\n                                \"stops\": [\n                                    {\n                                        \"locationCode\": \"LFW\",\n                                        \"departureDateTime\": \"2022-01-11 12:35\",\n                                        \"arrivalDateTime\": \"2022-01-11 11:35\",\n                                        \"duration\": 60,\n                                        \"elapsedTime\": 620,\n                                        \"equipment\": \"787\"\n                                    }\n                                ],\n                                \"flightNumber\": \"513\",\n                                \"bookingClass\": \"H\",\n                                \"duration\": 1015,\n                                \"departureAirportCode\": \"JFK\",\n                                \"departureAirportTerminal\": \"8\",\n                                \"arrivalAirportCode\": \"ADD\",\n                                \"arrivalAirportTerminal\": \"2\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"787\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"O\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"DL\",\n                                \"fareCode\": \"HLESUS\",\n                                \"recheckBaggage\": false\n                            },\n                            {\n                                \"segmentId\": 2,\n                                \"departureTime\": \"2022-01-11 23:15\",\n                                \"arrivalTime\": \"2022-01-12 01:20\",\n                                \"stop\": 0,\n                                \"stops\": null,\n                                \"flightNumber\": \"308\",\n                                \"bookingClass\": \"H\",\n                                \"duration\": 125,\n                                \"departureAirportCode\": \"ADD\",\n                                \"departureAirportTerminal\": \"2\",\n                                \"arrivalAirportCode\": \"NBO\",\n                                \"arrivalAirportTerminal\": \"1C\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"738\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"I\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"D\",\n                                \"fareCode\": \"HLESUS\",\n                                \"recheckBaggage\": false\n                            }\n                        ],\n                        \"duration\": 1265\n                    },\n                    {\n                        \"tripId\": 2,\n                        \"segments\": [\n                            {\n                                \"segmentId\": 1,\n                                \"departureTime\": \"2022-01-31 05:00\",\n                                \"arrivalTime\": \"2022-01-31 07:15\",\n                                \"stop\": 0,\n                                \"stops\": null,\n                                \"flightNumber\": \"309\",\n                                \"bookingClass\": \"E\",\n                                \"duration\": 135,\n                                \"departureAirportCode\": \"NBO\",\n                                \"departureAirportTerminal\": \"1C\",\n                                \"arrivalAirportCode\": \"ADD\",\n                                \"arrivalAirportTerminal\": \"2\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"738\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"O\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"B\",\n                                \"fareCode\": \"ELPRUS\",\n                                \"recheckBaggage\": false\n                            },\n                            {\n                                \"segmentId\": 2,\n                                \"departureTime\": \"2022-01-31 08:30\",\n                                \"arrivalTime\": \"2022-01-31 18:15\",\n                                \"stop\": 1,\n                                \"stops\": [\n                                    {\n                                        \"locationCode\": \"LFW\",\n                                        \"departureDateTime\": \"2022-01-31 12:15\",\n                                        \"arrivalDateTime\": \"2022-01-31 11:00\",\n                                        \"duration\": 75,\n                                        \"elapsedTime\": 330,\n                                        \"equipment\": \"787\"\n                                    }\n                                ],\n                                \"flightNumber\": \"512\",\n                                \"bookingClass\": \"E\",\n                                \"duration\": 1065,\n                                \"departureAirportCode\": \"ADD\",\n                                \"departureAirportTerminal\": \"2\",\n                                \"arrivalAirportCode\": \"JFK\",\n                                \"arrivalAirportTerminal\": \"8\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"787\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"I\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"LD\",\n                                \"fareCode\": \"ELPRUS\",\n                                \"recheckBaggage\": false\n                            }\n                        ],\n                        \"duration\": 1275\n                    }\n                ],\n                \"paxCnt\": 1,\n                \"validatingCarrier\": \"\",\n                \"gds\": \"S\",\n                \"pcc\": \"G9MJ\",\n                \"cons\": \"GTT\",\n                \"fareType\": \"SR\",\n                \"cabin\": \"Y\",\n                \"currency\": \"USD\",\n                \"currencies\": [\n                    \"USD\"\n                ],\n                \"currencyRates\": {\n                    \"USDUSD\": {\n                        \"from\": \"USD\",\n                        \"to\": \"USD\",\n                        \"rate\": 1\n                    }\n                },\n                \"keys\": {},\n                \"meta\": {\n                    \"eip\": 0,\n                    \"noavail\": false,\n                    \"searchId\": \"U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx\",\n                    \"lang\": \"en\",\n                    \"rank\": 0,\n                    \"cheapest\": false,\n                    \"fastest\": false,\n                    \"best\": false,\n                    \"country\": \"us\"\n                },\n                \"billing\": {\n                      \"first_name\": \"John\",\n                      \"last_name\": \"Doe\",\n                      \"middle_name\": \"\",\n                      \"address_line1\": \"1013 Weda Cir\",\n                      \"address_line2\": \"\",\n                      \"country_id\": \"US\",\n                      \"city\": \"Mayfield\",\n                      \"state\": \"KY\",\n                      \"zip\": \"99999\",\n                      \"company_name\": \"\",\n                      \"contact_phone\": \"+19074861000\",\n                      \"contact_email\": \"test@test.com\",\n                      \"contact_name\": \"Test Name\"\n                },\n                \"payment_request\": {\n                      \"method_key\": \"cc\",\n                      \"currency\": \"USD\",\n                      \"method_data\": {\n                          \"card\": {\n                              \"number\": \"4111555577778888\",\n                              \"holder_name\": \"Test test\",\n                              \"expiration_month\": 10,\n                              \"expiration_year\": 23,\n                              \"cvv\": \"1234\"\n                          }\n                      },\n                      \"amount\": 112.25\n                }\n            },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
@@ -5157,10 +5411,10 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/v2/flight-quote-exchange/info",
-    "title": "Flight Voluntary Exchange Info",
+    "url": "/v2/flight-quote-exchange/view",
+    "title": "Flight Voluntary Exchange View",
     "version": "0.2.0",
-    "name": "Flight_Voluntary_Exchange_Info",
+    "name": "Flight_Voluntary_Exchange_View",
     "group": "Flight_Voluntary_Exchange",
     "permission": [
       {
@@ -10484,6 +10738,13 @@ define({ "api": [
           },
           {
             "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "refund.orderId",
+            "description": "<p>OTA Order Id</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "number",
             "optional": false,
             "field": "refund.processingFee",
@@ -10700,8 +10961,16 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country",
+            "description": "<p>Country (for example &quot;United States&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
             "size": "10",
-            "optional": true,
+            "optional": false,
             "field": "billing.zip",
             "description": "<p>Zip</p>"
           },
@@ -10709,7 +10978,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "string",
             "size": "20",
-            "optional": true,
+            "optional": false,
             "field": "billing.contact_phone",
             "description": "<p>Contact phone</p>"
           },
@@ -10717,7 +10986,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "string",
             "size": "160",
-            "optional": true,
+            "optional": false,
             "field": "billing.contact_email",
             "description": "<p>Contact email</p>"
           },
@@ -10754,10 +11023,10 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "2",
+            "size": "50",
             "optional": false,
             "field": "payment_request.method_key",
-            "description": "<p>Method key (for example &quot;cc&quot;)</p>"
+            "description": "<p>Method key (for example &quot;card&quot;)</p>"
           },
           {
             "group": "Parameter",
@@ -10785,7 +11054,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "string",
             "size": "..50",
-            "optional": true,
+            "optional": false,
             "field": "payment_request.method_data.card.holder_name",
             "description": "<p>Holder name</p>"
           },
@@ -10816,7 +11085,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"booking_id\": \"XXXXXXX\",\n    \"refund\": {\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"totalPaid\": 305.50,\n        \"currency\": \"USD\",\n        \"tickets\": [\n            {\n                \"number\": \"465723459\",\n                \"airlinePenalty\": 25.36,\n                \"processingFee\": 25,\n                \"refundAmount\": 52.65,\n                \"sellingPrice\": 150,\n                \"status\": \"issued\"\n            }\n        ],\n        \"auxiliaryOptions\": [\n            {\n                \"type\": \"package\",\n                \"amount\": 25.00,\n                \"refundable\": 15.00,\n                \"status\": \"paid\",\n                \"refundAllow\": true,\n                \"details\": {}\n            }\n        ]\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"cc\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
+          "content": "{\n    \"booking_id\": \"XXXXXXX\",\n    \"refund\": {\n        \"orderId\": \"RET-12321AD\",\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"totalPaid\": 305.50,\n        \"currency\": \"USD\",\n        \"tickets\": [\n            {\n                \"number\": \"465723459\",\n                \"airlinePenalty\": 25.36,\n                \"processingFee\": 25,\n                \"refundAmount\": 52.65,\n                \"sellingPrice\": 150,\n                \"status\": \"issued\"\n            }\n        ],\n        \"auxiliaryOptions\": [\n            {\n                \"type\": \"package\",\n                \"amount\": 25.00,\n                \"refundable\": 15.00,\n                \"status\": \"paid\",\n                \"refundAllow\": true,\n                \"details\": {}\n            }\n        ]\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"country\": \"United States\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"card\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
           "type": "json"
         }
       ]
@@ -10825,7 +11094,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"code\": \"13200\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"code\": \"13200\",\n    \"saleData\": {\n         \"id\": 12345,\n         \"bookingId\": \"P12OJ12\"\n    },\n    \"refund\": {\n        \"id\": 54321,\n        \"orderId\": \"RET-12321AD\"\n    }\n}",
           "type": "json"
         }
       ]
@@ -10839,7 +11108,12 @@ define({ "api": [
         },
         {
           "title": "Error-Response Validation:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"billing.first_name\": [\n            \"First Name cannot be blank.\"\n        ],\n        \"billing.last_name\": [\n            \"Last Name cannot be blank.\"\n        ],\n        \"billing.address_line1\": [\n            \"Address Line1 cannot be blank.\"\n        ],\n        \"billing.city\": [\n            \"City cannot be blank.\"\n        ],\n        \"billing.country_id\": [\n            \"Country Id cannot be blank.\"\n        ],\n        \"payment_request.method_key\": [\n            \"Method Key cannot be blank.\"\n        ],\n        \"payment_request.currency\": [\n            \"Currency cannot be blank.\"\n        ]\n    }\n}",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n  \"booking_id\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response Error From BO:",
+          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 422,\n     \"message\": \"FlightRequest is not found.\",\n     \"name\": \"BO Request Failed\",\n     \"code\": \"15411\",\n     \"errors\": [],\n     \"type\": \"app_bo\"\n}",
           "type": "json"
         }
       ]

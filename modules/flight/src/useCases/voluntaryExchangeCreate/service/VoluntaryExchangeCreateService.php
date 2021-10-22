@@ -51,7 +51,7 @@ class VoluntaryExchangeCreateService
         array $changeStatuses,
         array $notQuoteStatuses,
         array $typeIds
-    ): array {
+    ): ?array {
         return ProductQuoteChange::find()
             ->select(ProductQuoteChange::tableName() . '.pqc_status_id')
             ->addSelect(ProductQuote::tableName() . '.pq_status_id')
@@ -73,7 +73,7 @@ class VoluntaryExchangeCreateService
     ): ?ProductQuote {
         return ProductQuote::find()
             ->select(ProductQuote::tableName() . '.*')
-            ->innerJoin(ProductQuote::tableName(), 'pq_id = pqc_pq_id')
+            ->innerJoin(ProductQuoteChange::tableName(), 'pq_id = pqc_pq_id')
             ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pq_id')
             ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
             ->where(['fqf_booking_id' => $bookingId])

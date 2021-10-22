@@ -2,8 +2,11 @@
 
 namespace modules\flight\src\useCases\voluntaryExchange\service;
 
+use common\components\BackOffice;
+use frontend\helpers\JsonHelper;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\entities\cases\Cases;
 use sales\exception\BoResponseException;
 use sales\exception\ValidationException;
@@ -77,5 +80,11 @@ class BoRequestVoluntaryExchangeService
     public function getOrderContactForm(): OrderContactForm
     {
         return $this->orderContactForm;
+    }
+
+    public function sendVoluntaryExchange(ProductQuoteChange $productQuoteChange): bool
+    {
+        $dataJson = JsonHelper::decode($productQuoteChange->pqc_data_json);
+        return BackOffice::voluntaryExchange($dataJson);
     }
 }

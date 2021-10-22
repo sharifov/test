@@ -35,7 +35,8 @@ use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetListener;
 use sales\model\leadRedial\entity\events\CallRedialAccessCreatedEvent;
 use sales\model\leadRedial\entity\events\CallRedialAccessRemovedEvent;
-use sales\model\leadRedial\listeners\RedialCallUserNotificationListener;
+use sales\model\leadRedial\listeners\RedialCallAccessCreatedPhoneWidgetNotificationListener;
+use sales\model\leadRedial\listeners\RedialCallAccessCreatedUserNotificationListener;
 use sales\model\leadRedial\listeners\RemoveRedialCallUserNotificationListener;
 use sales\model\user\entity\profit\event\UserProfitCalculateByOrderTipsUserProfitsEvent;
 use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderTipsUserProfitsEventListener;
@@ -98,7 +99,8 @@ return [
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
 
     CallRedialAccessCreatedEvent::class => [
-        RedialCallUserNotificationListener::class,
+        RedialCallAccessCreatedPhoneWidgetNotificationListener::class,
+        RedialCallAccessCreatedUserNotificationListener::class,
     ],
 
     CallRedialAccessRemovedEvent::class => [

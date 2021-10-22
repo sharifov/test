@@ -72,4 +72,9 @@ class FlightRequestService
     {
         return (bool) ArrayHelper::getValue($this->flightRequest, 'fr_data_json.is_automate', false);
     }
+
+    public function getFlightRequest(): FlightRequest
+    {
+        return $this->flightRequest;
+    }
 }

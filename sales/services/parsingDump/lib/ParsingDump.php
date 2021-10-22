@@ -26,17 +26,20 @@ class ParsingDump
     public const GDS_TYPE_WORLDSPAN = 'worldSpan';
     public const GDS_TYPE_SABRE = 'sabre';
     public const GDS_TYPE_AMADEUS = 'amadeus';
+    public const GDS_TYPE_TRAVELPORT = 'travelPort';
 
     public const GDS_TYPE_MAP = [
         self::GDS_TYPE_AMADEUS => 'Amadeus',
         self::GDS_TYPE_SABRE => 'Sabre',
         self::GDS_TYPE_WORLDSPAN => 'WorldSpan',
+        self::GDS_TYPE_TRAVELPORT => 'TravelPort',
     ];
 
     public const QUOTE_GDS_TYPE_MAP = [
         SearchService::GDS_AMADEUS => self::GDS_TYPE_AMADEUS,
         SearchService::GDS_SABRE => self::GDS_TYPE_SABRE,
         SearchService::GDS_WORLDSPAN => self::GDS_TYPE_WORLDSPAN,
+        SearchService::GDS_TRAVELPORT => self::GDS_TYPE_TRAVELPORT,
     ];
 
     /**

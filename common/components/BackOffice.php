@@ -3,8 +3,9 @@
 namespace common\components;
 
 use common\models\Project;
-use http\Client\Request;
-use http\Client\Response;
+use frontend\helpers\JsonHelper;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use Yii;
@@ -365,5 +366,97 @@ class BackOffice
             \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:reprotectionCustomerDecision');
             return false;
         }
+    }
+
+    public static function voluntaryExchange(array $request): bool
+    {
+        if (empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
+            throw new \DomainException('BO endpoint is empty');
+        }
+
+        try {
+            $response = self::sendRequest2(
+                SettingHelper::getVoluntaryExchangeBoEndpoint(),
+                $request,
+                'POST',
+                30,
+                Yii::$app->params['backOffice']['serverUrlV3']
+            );
+
+            if (!$response->isOk) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange server error',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:serverError');
+                return false;
+            }
+
+            $data = $response->data;
+            if (!$data) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange data is empty',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:dataIsEmpty');
+                return false;
+            }
+            if (!is_array($data)) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange response Data type is invalid',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:dataIsInvalid');
+                return false;
+            }
+            if (!isset($data['success']) || $data['success'] !== true) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange is not success response',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:dataObjectInvalid');
+                return false;
+            }
+
+            return true;
+        } catch (\Throwable $exception) {
+            \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryExchange');
+            return false;
+        }
+    }
+
+    public static function voluntaryRefund(array $requestData, string $endpoint): array
+    {
+        try {
+            $response = self::sendRequest2(
+                $endpoint,
+                $requestData,
+                'POST',
+                30,
+                Yii::$app->params['backOffice']['serverUrlV3']
+            );
+        } catch (\Throwable $exception) {
+            \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryRefund');
+            throw new BoResponseException('BO voluntaryRefund server error', BoResponseException::BO_SERVER_ERROR);
+        }
+
+        $data = $response->data;
+        if (!$data) {
+            \Yii::error([
+                    'message' => 'BO voluntaryRefund data is empty',
+                    'request' => $requestData,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryRefund:dataIsEmpty');
+            throw new BoResponseException('BO voluntaryRefund data is empty', BoResponseException::BO_DATA_IS_EMPTY);
+        }
+        if (!is_array($data)) {
+            \Yii::error([
+                    'message' => 'BO voluntaryRefund response Data type is invalid',
+                    'request' => $requestData,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryRefund:dataIsInvalid');
+            throw new BoResponseException('BO voluntaryRefund response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
+        }
+        return $data;
     }
 }

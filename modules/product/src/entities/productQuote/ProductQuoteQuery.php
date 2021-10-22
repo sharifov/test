@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuote;
 
+use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteFlight;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -94,5 +95,45 @@ class ProductQuoteQuery
                 'typeId' => ProductQuoteRelation::TYPE_REPROTECTION,
                 'parentQuoteId' => $id
             ])->all();
+    }
+
+    public static function getVoluntaryExchangeQuotesByOriginQuote(int $id): array
+    {
+        return ProductQuote::find()
+            ->with('productQuoteDataRecommended')
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
+                'typeId' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE,
+                'parentQuoteId' => $id
+            ])->all();
+    }
+
+    public static function getChangeQuotesByOriginQuote(
+        int $id,
+        array $typeIds = [ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE, ProductQuoteRelation::TYPE_REPROTECTION]
+    ): array {
+        return ProductQuote::find()
+            ->with('productQuoteDataRecommended')
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId', [
+                'parentQuoteId' => $id
+            ])
+            ->andWhere(['IN', 'pqr_type_id', $typeIds])
+            ->all();
+    }
+
+    /**
+     * @param int $quoteId
+     * @param array $types
+     * @param array $statuses
+     * @return ProductQuote[]
+     */
+    public static function getRelatedQuoteByOriginTypesStatuses(int $quoteId, array $types, array $statuses): array
+    {
+        return ProductQuote::find()
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
+                'typeId' => $types,
+                'parentQuoteId' => $quoteId,
+            ])
+            ->byStatuses($statuses)
+            ->all();
     }
 }

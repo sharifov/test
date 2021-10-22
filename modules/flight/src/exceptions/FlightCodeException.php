@@ -36,4 +36,6 @@ class FlightCodeException
     public const API_FLIGHT_REPLACE_FAILED = Module::FLIGHT . 804;
 
     public const API_C2B_HANDLE = Module::FLIGHT . 901;
+
+    public const FLIGHT_REQUEST_ENTITY_SAVING_FAILED = Module::FLIGHT . 1001;
 }

@@ -25,7 +25,7 @@ class SendLeadInfoToGaJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             if ($this->checkParams() && $gaLead = new GaLead($this->lead)) {
                 $response = $gaLead->send();

@@ -438,6 +438,30 @@ $js = <<<JS
         });
     });
     
+    $(document).on('click', '.btn-show-refund-quote-details', function(e){        
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let id = btn.data('refund-quote-id');
+        let modal = $('#modal-lg');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Product Quote Refund [' + id + '] Details');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
+    
     $(document).on('click', '.btn_create_from_dump', function(e) {
         e.preventDefault();
         let btn = $(this);

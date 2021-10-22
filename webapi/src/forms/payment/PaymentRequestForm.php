@@ -17,6 +17,7 @@ use yii\base\Model;
  * @property $method_key
  * @property $currency
  * @property $method_data
+ * @property $amount
  *
  * @property CreditCardForm $creditCardForm
  */
@@ -29,17 +30,21 @@ class PaymentRequestForm extends Model
     public $method_key;
     public $currency;
     public $method_data;
+    public $amount;
 
-    public ?CreditCardForm $creditCardForm = null;
+    private ?CreditCardForm $creditCardForm = null;
 
     public function rules(): array
     {
         return [
+            [['amount'], 'required'],
+            [['amount'], 'number'],
+
             [['method_key'], 'required'],
-            [['method_key'], 'string', 'max' => 2],
+            [['method_key'], 'string', 'max' => 50],
             [['method_key'], 'filter', 'filter' => 'strtoupper'],
             [['method_key'], 'exist', 'skipOnError' => true,
-                'targetClass' => PaymentMethod::class, 'targetAttribute' => ['method_key' => 'pm_short_name']],
+                'targetClass' => PaymentMethod::class, 'targetAttribute' => ['method_key' => 'pm_key']],
 
             [['currency'], 'required'],
             [['currency'], 'string', 'max' => 3],
@@ -54,7 +59,7 @@ class PaymentRequestForm extends Model
         ];
     }
 
-    public function methodDataProcessing($attribute): bool
+    public function methodDataProcessing(string $attribute): bool
     {
         if (!empty($this->method_data[self::TYPE_METHOD_CARD]) && is_array($this->method_data[self::TYPE_METHOD_CARD])) {
             $creditCardForm = new CreditCardForm();
@@ -66,5 +71,10 @@ class PaymentRequestForm extends Model
             $this->creditCardForm = $creditCardForm;
         }
         return true;
+    }
+
+    public function getCreditCardForm(): ?CreditCardForm
+    {
+        return $this->creditCardForm;
     }
 }

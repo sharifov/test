@@ -31,4 +31,19 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byProductQuoteId(int $id): self
+    {
+        return $this->andWhere(['pqr_product_quote_id' => $id]);
+    }
+
+    public function byStatuses(array $statuses): self
+    {
+        return $this->andWhere(['pqr_status_id' => $statuses]);
+    }
+
+    public function excludeStatuses(array $statuses): self
+    {
+        return $this->andWhere(['NOT IN', 'pqr_status_id', $statuses]);
+    }
 }

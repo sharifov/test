@@ -38,11 +38,13 @@ class FlightRequest extends \yii\db\ActiveRecord
     public const TYPE_RE_PROTECTION_CREATE = 1;
     public const TYPE_VOLUNTARY_EXCHANGE_CREATE = 2;
     public const TYPE_VOLUNTARY_EXCHANGE_CONFIRM = 3;
+    public const TYPE_VOLUNTARY_REFUND_CREATE = 4;
 
     public const TYPE_LIST = [
         self::TYPE_RE_PROTECTION_CREATE => 'reprotection/create',
         self::TYPE_VOLUNTARY_EXCHANGE_CREATE => 'flight-quote-exchange/create',
         self::TYPE_VOLUNTARY_EXCHANGE_CONFIRM => 'flight-quote-exchange/confirm',
+        self::TYPE_VOLUNTARY_REFUND_CREATE => 'flight-quote-refund/create'
     ];
 
     public const STATUS_NEW = 1;
@@ -55,6 +57,11 @@ class FlightRequest extends \yii\db\ActiveRecord
         self::STATUS_PENDING => 'pending',
         self::STATUS_ERROR => 'error',
         self::STATUS_DONE => 'done',
+    ];
+
+    private const ACTIVE_STATUSES_LIST = [
+        self::STATUS_NEW,
+        self::STATUS_PENDING
     ];
 
     public function rules(): array
@@ -243,5 +250,10 @@ class FlightRequest extends \yii\db\ActiveRecord
     public function getIsAutomateDataJson(): bool
     {
         return (bool) ArrayHelper::getValue($this, 'fr_data_json.flight_quote', false);
+    }
+
+    public static function getActiveStatusesList(): array
+    {
+        return self::ACTIVE_STATUSES_LIST;
     }
 }

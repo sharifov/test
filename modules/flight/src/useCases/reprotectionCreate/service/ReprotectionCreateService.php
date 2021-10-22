@@ -191,7 +191,7 @@ class ReprotectionCreateService
 
     public function recommendedReProtection(int $originProductQuoteId, int $reProtectionQuoteId): ProductQuoteData
     {
-        return $this->productQuoteDataManageService->updateRecommendedReprotectionQuote($originProductQuoteId, $reProtectionQuoteId);
+        return $this->productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuoteId, $reProtectionQuoteId);
     }
 
     public function originProductQuoteDecline(ProductQuote $originProductQuote, Cases $case): ProductQuote
