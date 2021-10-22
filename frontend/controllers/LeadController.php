@@ -1385,18 +1385,18 @@ class LeadController extends FController
     }
 
     /**
-     * @param string $gid
-     * @return string|Response
-     * @throws ForbiddenHttpException
+     * @return array
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
-    public function actionTakeAjax(string $gid): array
+    public function actionTakeAjax(): array
     {
+        $result = ['success' => false, 'message' => 'gid parameter not found'];
         Yii::$app->response->format = Response::FORMAT_JSON;
-
-        if (Yii::$app->request->isAjax && Yii::$app->request->get('gid')) {
-            $result = ['success' => false, 'message' => ''];
+        $gid = Yii::$app->request->get('gid');
+        if (Yii::$app->request->isAjax && $gid) {
             $lead = $this->findLeadByGid($gid);
 
             try {
@@ -1455,7 +1455,7 @@ class LeadController extends FController
             return $result;
         }
 
-        throw new BadRequestHttpException();
+        return $result;
     }
 
     /**

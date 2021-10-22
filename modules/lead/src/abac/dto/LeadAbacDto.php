@@ -50,8 +50,8 @@ class LeadAbacDto extends \stdClass
             }
 
             if ($this->has_owner) {
-                $this->isInProject = EmployeeProjectAccess::isInProject($userId, $lead->employee_id);
-                $this->isInDepartment = EmployeeDepartmentAccess::isInDepartment($userId, $lead->employee_id);
+                $this->isInProject = EmployeeProjectAccess::isInProject($lead->project_id, $userId);
+                $this->isInDepartment = EmployeeDepartmentAccess::isInDepartment($lead->l_dep_id, $userId);
             }
 
             $user = Employee::findOne(['id' => $userId]);

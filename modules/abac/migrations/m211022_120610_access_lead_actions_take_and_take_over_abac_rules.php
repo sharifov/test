@@ -26,7 +26,7 @@ class m211022_120610_access_lead_actions_take_and_take_over_abac_rules extends M
             'ap_action' => '(access)',
             'ap_action_json' => "[\"access\"]",
             'ap_effect' => 1,
-            'ap_title' => 'Take Lead',
+            'ap_title' => 'Take Lead action',
             'ap_sort_order' => 50,
             'ap_enabled' => 1,
             'ap_created_dt' => date('Y-m-d H:i:s'),
@@ -38,7 +38,7 @@ class m211022_120610_access_lead_actions_take_and_take_over_abac_rules extends M
      */
     public function safeDown()
     {
-        echo "m211022_120610_Access_Lead_Actions_Take_and_Take_Over_ABAC_rules cannot be reverted.\n";
+        echo "m211022_120610_access_lead_actions_take_and_take_over_abac_rules cannot be reverted.\n";
 
         return false;
     }

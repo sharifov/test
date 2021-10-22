@@ -4303,7 +4303,7 @@ Reason: {reason}',
      * @param Employee $user
      * @return array
      */
-    public static function getAllStatuses(Employee $user = null): array
+    public static function getAllStatuses(): array
     {
         return self::STATUS_LIST;
     }
