@@ -18,6 +18,7 @@ use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
 use common\models\LeadFlow;
 //use common\models\LeadLog;
+use common\models\LeadQcall;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
@@ -45,6 +46,7 @@ use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
+use sales\access\EmployeeAccess;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
@@ -1389,11 +1391,11 @@ class LeadController extends FController
      * @throws NotFoundHttpException
      * @throws \Throwable
      */
-    public function actionAjaxTake(string $gid): array
+    public function actionTakeAjax(string $gid): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        if (Yii::$app->request->isAjax) {
+        if (Yii::$app->request->isAjax && Yii::$app->request->get('gid')) {
             $result = ['success' => false, 'message' => ''];
             $lead = $this->findLeadByGid($gid);
 
@@ -1402,7 +1404,35 @@ class LeadController extends FController
 
                 /** @var Employee $user */
                 $user = Yii::$app->user->identity;
-                $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
+
+                EmployeeAccess::leadAccess($lead, $user);
+
+                if ($lead->isCompleted()) {
+                    throw new \DomainException('Lead is completed!');
+                }
+
+                if (!$lead->isAvailableToTake()) {
+                    throw new \DomainException('Lead is unavailable to "Take" now!');
+                }
+
+                $fromStatuses = [];
+                if ($lead->isBookFailed()) {
+                    $fromStatuses = [Lead::STATUS_BOOK_FAILED];
+                }
+
+                $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], $fromStatuses);
+                if (!$isAccessNewLeadByFrequency['access']) {
+                    throw new \DomainException('Access is denied (frequency)');
+                }
+
+                $lead->processing($user->id, Yii::$app->user->id, 'Take');
+
+                $this->transaction->wrap(function () use ($lead) {
+                    if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                        $qCall->delete();
+                    }
+                    $this->leadRepository->save($lead);
+                });
 
                 if ($oldStatus === Lead::STATUS_PENDING) {
                     $leadUserConversion = LeadUserConversion::create(
@@ -1412,17 +1442,17 @@ class LeadController extends FController
                     );
                     (new LeadUserConversionRepository())->save($leadUserConversion);
                 }
-
                 $result['success'] = true;
             } catch (\RuntimeException | \DomainException $exception) {
-                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::exception');
+                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionTakeAjax::exception');
                 $result['message'] = stripslashes(VarDumper::dumpAsString($exception->getMessage()));
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:throwable');
+                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionTakeAjax:throwable');
                 $result['message'] = 'Internal Server Error';
+                throw $throwable;
             }
 
-            return $result; // asJson
+            return $result;
         }
 
         throw new BadRequestHttpException();

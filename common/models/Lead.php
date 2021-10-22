@@ -3467,7 +3467,7 @@ Reason: {reason}',
 
     public function hasAppliedQuote(): bool
     {
-        return ($this->appliedQuote !== null);
+        return Quote::find()->where(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED])->exists();
     }
 
     public function getFirstFlightSegment()
@@ -4299,8 +4299,16 @@ Reason: {reason}',
         return $out;
     }
 
-
     /**
+     * @param Employee $user
+     * @return array
+     */
+    public static function getAllStatuses(Employee $user = null): array
+    {
+        return self::STATUS_LIST;
+    }
+
+        /**
      * @param Employee $user
      * @return array
      */

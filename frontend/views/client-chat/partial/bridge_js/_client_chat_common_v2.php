@@ -1572,7 +1572,7 @@ refreshUserSelectedState();
 
 $(document).on('click', '#take_button', function(e) {
    $.ajax({
-        url: '/lead/ajax-take/',
+        url: '/lead/take-ajax/',
         data: { gid: $(this).data('gid') }
    })
        .done(function(data) {
