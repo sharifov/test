@@ -296,12 +296,12 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
 
     public function isActiveStatus(): bool
     {
-        return array_key_exists($this->pqc_status_id, SettingHelper::getActiveQuoteChangeStatuses());
+        return in_array($this->pqc_status_id, SettingHelper::getActiveQuoteChangeStatuses(), false);
     }
 
     public function isFinishedStatus(): bool
     {
-        return array_key_exists($this->pqc_status_id, SettingHelper::getFinishedQuoteChangeStatuses());
+        return in_array($this->pqc_status_id, SettingHelper::getFinishedQuoteChangeStatuses(), false);
     }
 
     /**

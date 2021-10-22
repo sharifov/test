@@ -665,29 +665,37 @@ class SettingHelper
         return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
     }
 
+    private static function prePareStatusIds($setting): array
+    {
+        if (($statuses = $setting ?? null) && is_array($statuses)) {
+            return array_keys($statuses);
+        }
+        return [];
+    }
+
     public static function getProductQuoteChangeableStatuses(): array
     {
-        return Yii::$app->params['settings']['product_quote_changeable_statuses'] ?? [];
+        return self::prePareStatusIds(Yii::$app->params['settings']['product_quote_changeable_statuses']);
     }
 
     public static function getActiveQuoteChangeStatuses(): array
     {
-        return Yii::$app->params['settings']['active_quote_change_statuses'] ?? [];
+        return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_change_statuses']);
     }
 
     public static function getActiveQuoteRefundStatuses(): array
     {
-        return Yii::$app->params['settings']['active_quote_refund_statuses'] ?? [];
+        return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_refund_statuses']);
     }
 
     public static function getFinishedQuoteChangeStatuses(): array
     {
-        return Yii::$app->params['settings']['finished_quote_change_statuses'] ?? [];
+        return self::prePareStatusIds(Yii::$app->params['settings']['finished_quote_change_statuses']);
     }
 
     public static function getFinishedQuoteRefundStatuses(): array
     {
-        return Yii::$app->params['settings']['finished_quote_refund_statuses'] ?? [];
+        return self::prePareStatusIds(Yii::$app->params['settings']['finished_quote_refund_statuses']);
     }
 
     public static function getVoluntaryExchangeBoEndpoint(): ?string

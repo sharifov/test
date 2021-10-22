@@ -12,6 +12,7 @@ use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCr
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
@@ -586,17 +587,15 @@ class FlightQuoteExchangeController extends BaseController
         }
 
         try {
-            $changeProcessingStatusList = array_keys(SettingHelper::getActiveQuoteChangeStatuses());
-            $quoteChangeableStatuses = array_keys(SettingHelper::getProductQuoteChangeableStatuses());
-            $typeIds = [ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE, ProductQuoteChange::TYPE_RE_PROTECTION];
-
-            VoluntaryExchangeCreateService::checkByPost($post);
-            VoluntaryExchangeCreateService::checkByBookingId(
-                $voluntaryExchangeCreateForm->booking_id,
-                $changeProcessingStatusList,
-                $quoteChangeableStatuses,
-                $typeIds
-            );
+            if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryExchangeCreateForm->booking_id)) {
+                if ($productQuote->isChangeable()) {
+                    if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
+                        throw new \DomainException('Quote not available for exchange');
+                    }
+                } else {
+                    throw new \DomainException('Quote not available for exchange');
+                }
+            }
 
             if (!empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
                 if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post)) {

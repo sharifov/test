@@ -16,7 +16,6 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function changeable(): self
     {
-        $quoteChangeableStatuses = array_keys(SettingHelper::getProductQuoteChangeableStatuses());
-        return $this->andWhere(['IN', 'pq_status_id', $quoteChangeableStatuses]);
+        return $this->andWhere(['IN', 'pq_status_id', SettingHelper::getProductQuoteChangeableStatuses()]);
     }
 }
