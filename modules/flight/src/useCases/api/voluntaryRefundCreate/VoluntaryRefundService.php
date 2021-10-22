@@ -268,7 +268,8 @@ class VoluntaryRefundService
                     $order->or_client_currency_rate,
                     $ticketForm->sellingPrice,
                     $ticketForm->refundAmount,
-                    null
+                    null,
+                    $ticketForm->toArray()
                 );
                 $productQuoteObjectRefund->pending();
                 $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);

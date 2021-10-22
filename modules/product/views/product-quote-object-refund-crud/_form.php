@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Currency;
+use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefundStatus;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -46,6 +47,27 @@ use yii\widgets\ActiveForm;
         <?= $form->field($model, 'pqor_client_selling_price')->input('number', ['step' => 'any']) ?>
 
         <?= $form->field($model, 'pqor_client_refund_amount')->input('number', ['step' => 'any']) ?>
+    </div>
+
+    <div class="col-md-6">
+        <?php
+        try {
+            $model->pqor_data_json = JsonHelper::encode($model->pqor_data_json);
+            echo $form->field($model, 'pqor_data_json')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                        'mode' => $model->isNewRecord ? 'code' : 'form'
+                    ],
+                    //'collapseAll' => ['view'],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'pqor_data_json')->textarea(['rows' => 6]);
+        }
+        ?>
     </div>
 
     <?php ActiveForm::end(); ?>

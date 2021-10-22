@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqor_client_refund_amount',
             'pqor_refund_allow:booleanByLabel',
             [
-                'attribute' => 'ccdr_data_json',
+                'attribute' => 'pqor_details',
                 'value' => static function (ProductQuoteOptionRefund $model) {
                     $content = '<p>' . StringHelper::truncate(JsonHelper::encode($model->pqor_details), 216, '...', null, true) . '</p>';
                     $content .= Html::a(

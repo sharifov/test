@@ -1,8 +1,10 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefundStatus;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -57,9 +59,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqor_created_dt:byUserDateTime',
             'pqor_updated_dt:byUserDateTime',
             [
-                'attribute' => 'ccf_dataform_json',
+                'attribute' => 'pqor_details',
                 'value' => static function (ProductQuoteOptionRefund $model) {
-                    return '<pre>' . \yii\helpers\VarDumper::dumpAsString($model->pqor_details, 10, true) . '</pre>';
+                    return '<pre>' . VarDumper::dumpAsString(JsonHelper::decode($model->pqor_details), 10, true) . '</pre>';
                 },
                 'format' => 'raw',
             ],

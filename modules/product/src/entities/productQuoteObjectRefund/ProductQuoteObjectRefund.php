@@ -2,8 +2,10 @@
 
 namespace modules\product\src\entities\productQuoteObjectRefund;
 
+use common\components\validators\CheckJsonValidator;
 use common\models\Currency;
 use common\models\Employee;
+use frontend\helpers\JsonHelper;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\interfaces\ProductQuoteObjectRefundStructure;
@@ -38,6 +40,7 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property ProductQuoteRefund $productQuoteRefund
  * @property Employee $updatedUser
+ * @property string $pqor_data_json [json]
  */
 class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
 {
@@ -90,6 +93,8 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
             [['pqor_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_created_user_id' => 'id']],
             [['pqor_product_quote_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteRefund::class, 'targetAttribute' => ['pqor_product_quote_refund_id' => 'pqr_id']],
             [['pqor_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_updated_user_id' => 'id']],
+            [['pqor_data_json'], 'safe'],
+            [['pqor_data_json'], CheckJsonValidator::class],
         ];
     }
 
@@ -116,6 +121,7 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
             'pqor_updated_user_id' => 'Updated User ID',
             'pqor_created_dt' => 'Created Dt',
             'pqor_updated_dt' => 'Updated Dt',
+            'pqor_data_json' => 'Data',
         ];
     }
 
@@ -180,7 +186,7 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
             "selling" => 'pqor_client_selling_price',
             "clientCurrency" => 'pqor_client_currency',
             "status" => static function (self $model) {
-                return ProductQuoteObjectRefundStatus::getName($model->pqor_status_id);
+                return JsonHelper::decode($model->pqor_data_json)['status'] ?? '';
             }
         ];
     }
@@ -196,7 +202,8 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
         float $clientCurrencyRate,
         float $clientSellingPrice,
         float $clientRefundAmount,
-        ?string $title
+        ?string $title,
+        array $dataJson
     ): self {
         $self = new self();
         $self->pqor_product_quote_refund_id = $productQuoteRefundId;
@@ -210,6 +217,7 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
         $self->pqor_client_selling_price = $clientSellingPrice;
         $self->pqor_refund_amount = $clientRefundAmount;
         $self->pqor_title = $title;
+        $self->pqor_data_json = $dataJson;
         return $self;
     }
 
