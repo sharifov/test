@@ -5283,7 +5283,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"FlightRequest created\",\n                    \"flightRequestId\" : 123,\n                    \"caseGid\" : \"e7dce13b4e6a5f3ccc2cec9c21fa3255\"\n               },\n       \"code\": 13200,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"FlightRequest created\",\n                    \"flightRequestId\" : 123,\n                    \"caseGid\" : \"e7dce13b4e6a5f3ccc2cec9c21fa3255\"\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
@@ -5292,32 +5292,32 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response (Bad Request):",
-          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": 13106,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
           "title": "Error-Response (Bad Request):",
-          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Error\",\n       \"errors\": [\n          \"Not found Project with current user: xxx\"\n       ],\n       \"code\": 13101,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Error\",\n       \"errors\": [\n          \"Not found Project with current user: xxx\"\n       ],\n       \"code\": \"13101\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
           "title": "Error-Response (Unprocessable entity):",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": 13107,\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
           "title": "Error-Response (Unprocessable entity):",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed\"\n     ],\n     \"code\": 13113,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed\"\n     ],\n     \"code\": \"13113\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
         },
         {
           "title": "Error-Response (Unprocessable entity):",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Quote not available for exchange\"\n     ],\n     \"code\": 13113,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Quote not available for exchange\"\n     ],\n     \"code\": \"13113\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
         },
         {
           "title": "Error-Response (Unprocessable entity):",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Case saving error\"\n     ],\n     \"code\": 21101,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Case saving error\"\n     ],\n     \"code\": \"21101\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
         },
         {
@@ -5336,85 +5336,6 @@ define({ "api": [
     "title": "Flight Voluntary Exchange Info",
     "version": "0.2.0",
     "name": "Flight_Voluntary_Exchange_Info",
-    "group": "Flight_Voluntary_Exchange",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "7..10",
-            "optional": false,
-            "field": "booking_id",
-            "description": "<p>Booking ID</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Request-Example:",
-          "content": "{\n    \"booking_id\": \"XXXYYYZ\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                \"bookingId\": \"XXXYYYZ\",\n                \"quote_gid\" : \"48c82774ead469ad311c1e6112562726\",\n                \"key\": \"51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789\",\n                \"prices\": {\n                    \"totalPrice\": 332.12,\n                    \"comm\": 0,\n                    \"isCk\": false\n                },\n                \"passengers\": {\n                    \"ADT\": {\n                        \"codeAs\": \"JCB\",\n                        \"cnt\": 1,\n                        \"baseFare\": 32.12,\n                        \"pubBaseFare\": 32.12,\n                        \"baseTax\": 300,\n                        \"markup\": 0,\n                        \"comm\": 0,\n                        \"price\": 332.12,\n                        \"tax\": 300,\n                        \"oBaseFare\": {\n                            \"amount\": 32.120003,\n                            \"currency\": \"USD\"\n                        },\n                        \"oBaseTax\": {\n                            \"amount\": 300,\n                            \"currency\": \"USD\"\n                        },\n                        \"oExchangeFareDiff\": {\n                            \"amount\": 8,\n                            \"currency\": \"USD\"\n                        },\n                        \"oExchangeTaxDiff\": {\n                            \"amount\": 24.12,\n                            \"currency\": \"USD\"\n                        }\n                    }\n                },\n                \"trips\": [\n                    {\n                        \"tripId\": 1,\n                        \"segments\": [\n                            {\n                                \"segmentId\": 1,\n                                \"departureTime\": \"2022-01-10 20:15\",\n                                \"arrivalTime\": \"2022-01-11 21:10\",\n                                \"stop\": 1,\n                                \"stops\": [\n                                    {\n                                        \"locationCode\": \"LFW\",\n                                        \"departureDateTime\": \"2022-01-11 12:35\",\n                                        \"arrivalDateTime\": \"2022-01-11 11:35\",\n                                        \"duration\": 60,\n                                        \"elapsedTime\": 620,\n                                        \"equipment\": \"787\"\n                                    }\n                                ],\n                                \"flightNumber\": \"513\",\n                                \"bookingClass\": \"H\",\n                                \"duration\": 1015,\n                                \"departureAirportCode\": \"JFK\",\n                                \"departureAirportTerminal\": \"8\",\n                                \"arrivalAirportCode\": \"ADD\",\n                                \"arrivalAirportTerminal\": \"2\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"787\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"O\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"DL\",\n                                \"fareCode\": \"HLESUS\",\n                                \"recheckBaggage\": false\n                            },\n                            {\n                                \"segmentId\": 2,\n                                \"departureTime\": \"2022-01-11 23:15\",\n                                \"arrivalTime\": \"2022-01-12 01:20\",\n                                \"stop\": 0,\n                                \"stops\": null,\n                                \"flightNumber\": \"308\",\n                                \"bookingClass\": \"H\",\n                                \"duration\": 125,\n                                \"departureAirportCode\": \"ADD\",\n                                \"departureAirportTerminal\": \"2\",\n                                \"arrivalAirportCode\": \"NBO\",\n                                \"arrivalAirportTerminal\": \"1C\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"738\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"I\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"D\",\n                                \"fareCode\": \"HLESUS\",\n                                \"recheckBaggage\": false\n                            }\n                        ],\n                        \"duration\": 1265\n                    },\n                    {\n                        \"tripId\": 2,\n                        \"segments\": [\n                            {\n                                \"segmentId\": 1,\n                                \"departureTime\": \"2022-01-31 05:00\",\n                                \"arrivalTime\": \"2022-01-31 07:15\",\n                                \"stop\": 0,\n                                \"stops\": null,\n                                \"flightNumber\": \"309\",\n                                \"bookingClass\": \"E\",\n                                \"duration\": 135,\n                                \"departureAirportCode\": \"NBO\",\n                                \"departureAirportTerminal\": \"1C\",\n                                \"arrivalAirportCode\": \"ADD\",\n                                \"arrivalAirportTerminal\": \"2\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"738\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"O\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"B\",\n                                \"fareCode\": \"ELPRUS\",\n                                \"recheckBaggage\": false\n                            },\n                            {\n                                \"segmentId\": 2,\n                                \"departureTime\": \"2022-01-31 08:30\",\n                                \"arrivalTime\": \"2022-01-31 18:15\",\n                                \"stop\": 1,\n                                \"stops\": [\n                                    {\n                                        \"locationCode\": \"LFW\",\n                                        \"departureDateTime\": \"2022-01-31 12:15\",\n                                        \"arrivalDateTime\": \"2022-01-31 11:00\",\n                                        \"duration\": 75,\n                                        \"elapsedTime\": 330,\n                                        \"equipment\": \"787\"\n                                    }\n                                ],\n                                \"flightNumber\": \"512\",\n                                \"bookingClass\": \"E\",\n                                \"duration\": 1065,\n                                \"departureAirportCode\": \"ADD\",\n                                \"departureAirportTerminal\": \"2\",\n                                \"arrivalAirportCode\": \"JFK\",\n                                \"arrivalAirportTerminal\": \"8\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"787\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"I\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"LD\",\n                                \"fareCode\": \"ELPRUS\",\n                                \"recheckBaggage\": false\n                            }\n                        ],\n                        \"duration\": 1275\n                    }\n                ],\n                \"paxCnt\": 1,\n                \"validatingCarrier\": \"\",\n                \"gds\": \"S\",\n                \"pcc\": \"G9MJ\",\n                \"cons\": \"GTT\",\n                \"fareType\": \"SR\",\n                \"cabin\": \"Y\",\n                \"currency\": \"USD\",\n                \"currencies\": [\n                    \"USD\"\n                ],\n                \"currencyRates\": {\n                    \"USDUSD\": {\n                        \"from\": \"USD\",\n                        \"to\": \"USD\",\n                        \"rate\": 1\n                    }\n                },\n                \"keys\": {},\n                \"meta\": {\n                    \"eip\": 0,\n                    \"noavail\": false,\n                    \"searchId\": \"U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx\",\n                    \"lang\": \"en\",\n                    \"rank\": 0,\n                    \"cheapest\": false,\n                    \"fastest\": false,\n                    \"best\": false,\n                    \"country\": \"us\"\n                },\n                \"billing\": {\n                      \"first_name\": \"John\",\n                      \"last_name\": \"Doe\",\n                      \"middle_name\": \"\",\n                      \"address_line1\": \"1013 Weda Cir\",\n                      \"address_line2\": \"\",\n                      \"country_id\": \"US\",\n                      \"city\": \"Mayfield\",\n                      \"state\": \"KY\",\n                      \"zip\": \"99999\",\n                      \"company_name\": \"\",\n                      \"contact_phone\": \"+19074861000\",\n                      \"contact_email\": \"test@test.com\",\n                      \"contact_name\": \"Test Name\"\n                },\n                \"payment_request\": {\n                      \"method_key\": \"cc\",\n                      \"currency\": \"USD\",\n                      \"method_data\": {\n                          \"card\": {\n                              \"number\": \"4111555577778888\",\n                              \"holder_name\": \"Test test\",\n                              \"expiration_month\": 10,\n                              \"expiration_year\": 23,\n                              \"cvv\": \"1234\"\n                          }\n                      },\n                      \"amount\": 112.25\n                }\n            },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "examples": [
-        {
-          "title": "Error-Response:",
-          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
-          "type": "json"
-        },
-        {
-          "title": "Error-Response:",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
-    "groupTitle": "Flight_Voluntary_Exchange"
-  },
-  {
-    "type": "post",
-    "url": "/v2/flight-quote-exchange/view",
-    "title": "Flight Voluntary Exchange View",
-    "version": "0.2.0",
-    "name": "Flight_Voluntary_Exchange_View",
     "group": "Flight_Voluntary_Exchange",
     "permission": [
       {
