@@ -220,11 +220,11 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_HAS_APPLIED_QUOTE = [
+    protected const ATTR_WITHIN_PERSONAL_TAKE_LIMITS = [
         'optgroup' => 'Lead',
-        'id' => self::NS . 'hasAppliedQuote',
-        'field' => 'hasAppliedQuote',
-        'label' => 'Has Applied Quote',
+        'id' => self::NS . 'withinPersonalTakeLimits',
+        'field' => 'withinPersonalTakeLimits',
+        'label' => 'Within Personal Take Limits',
 
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
@@ -344,7 +344,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_IN_PROJECT,
             self::ATTR_IS_IN_DEPARTMENT,
             self::ATTR_CAN_TAKE_NEW_LEAD,
-            self::ATTR_HAS_APPLIED_QUOTE,
+            self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
             self::ATTR_LEAD_IS_OWNER,
         ],
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
