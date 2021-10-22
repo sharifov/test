@@ -11,6 +11,7 @@
 use common\models\Airports;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\forms\segment\SegmentTripForm;
+use sales\helpers\quote\ImageHelper;
 use sales\services\parsingDump\BaggageService;
 use unclead\multipleinput\components\BaseColumn;
 use unclead\multipleinput\MultipleInput;
@@ -59,6 +60,12 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
                 <?php echo $segment['airlineName'] ?>
             </div>
             <div class="col-1 border p-1">
+                <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $segment['carrier'] . '.png' ?>
+                <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                    <span class="quote__vc-logo" style="margin-right: 2px;">
+                        <img src="<?php echo $airlineLogo ?>" alt="<?= $segment['airlineName']?>" class="quote__airline-logo">
+                    </span>
+                <?php endif ?>
                 <?php echo $segment['carrier'] ?>&nbsp;
                 <?php echo $segment['flightNumber'] ?>
             </div>
@@ -66,13 +73,13 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
                 <?php echo $segment['departureDateTime']->format('g:i A M d') ?>&nbsp;
                 <?php echo ($departureAirport = Airports::findOne($segment['departureAirport'])) ?
                     $departureAirport->getCityName() : $segment['departureAirport'] ?>&nbsp;
-                <?php echo $segment['departureAirport'] ?>
+                <b><?php echo $segment['departureAirport'] ?></b>
             </div>
             <div class="col-3 border p-1">
                 <?php echo $segment['arrivalDateTime']->format('g:i A M d') ?>&nbsp;
                 <?php echo ($arrivalAirport = Airports::findOne($segment['arrivalAirport'])) ?
                     $arrivalAirport->getCityName() : $segment['arrivalAirport'] ?>&nbsp;
-                <?php echo $segment['arrivalAirport'] ?>
+                <b><?php echo $segment['arrivalAirport'] ?></b>
             </div>
         </div>
 

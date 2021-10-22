@@ -29,8 +29,9 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
 
-use function Amp\Promise\timeoutWithDefault;
-
+/**
+ * Class FlightQuoteHelper
+ */
 class FlightQuoteHelper
 {
     /**
@@ -1236,14 +1237,38 @@ class FlightQuoteHelper
         return $result;
     }
 
-    /**
-     * @param DateTime $departureDateTime
-     * @param DateTime $arrivalDateTime
-     * @return int
-     */
-    private static function isMoreOneDay(DateTime $departureDateTime, DateTime $arrivalDateTime): int
+    public static function isNextTrip(array $prevSegment, array $curSegment): bool
+    {
+        if ((!$prevArrivalDateTime = $prevSegment['arrivalDateTime'] ?? null) || !($prevArrivalDateTime instanceof DateTime)) {
+            throw new \RuntimeException('ArrivalDateTime is corrupted');
+        }
+        if ((!$departureDateTime = $curSegment['departureDateTime'] ?? null) || !($departureDateTime instanceof DateTime)) {
+            throw new \RuntimeException('DepartureDateTime is corrupted');
+        }
+        if (self::isMoreOneDay($prevArrivalDateTime, $departureDateTime)) {
+            return true;
+        }
+
+        if ((!$prevArrivalAirport = $prevSegment['arrivalAirport'] ?? null) || !is_string($prevArrivalAirport)) {
+            throw new \RuntimeException('ArrivalAirport is corrupted');
+        }
+        if ((!$departureAirport = $curSegment['departureAirport'] ?? null) || !is_string($departureAirport)) {
+            throw new \RuntimeException('DepartureAirport is corrupted');
+        }
+        if (!self::isEqualLocation($prevArrivalAirport, $departureAirport)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static function isEqualLocation(string $prevArrivalAirport, string $departureAirport): bool
+    {
+        return $prevArrivalAirport === $departureAirport;
+    }
+
+    private static function isMoreOneDay(DateTime $departureDateTime, DateTime $arrivalDateTime): bool
     {
         $diff = $departureDateTime->diff($arrivalDateTime);
-        return (int)sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
+        return (int) sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
     }
 }

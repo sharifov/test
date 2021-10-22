@@ -789,7 +789,7 @@ class FlightQuoteController extends FController
                 throw new ForbiddenHttpException('You do not have access to perform this action.');
             }
 
-            $form = new ReProtectionQuoteCreateForm(Auth::id());
+            $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
         } catch (\Throwable $throwable) {
             Yii::warning(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateReProtectionQuote:Throwable');
             return $throwable->getMessage();
@@ -824,7 +824,7 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException('Sorry, reProtection quote could not be created because originalQuote does not pricing');
                 }
 
-                $form = new ReProtectionQuoteCreateForm(Auth::id());
+                $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
                 if (!$form->load(Yii::$app->request->post())) {
                     throw new \RuntimeException('ReProtectionQuoteCreateForm not loaded');
                 }
@@ -867,21 +867,20 @@ class FlightQuoteController extends FController
 
     public function actionAjaxPrepareDump(): array
     {
-        if (Yii::$app->request->isAjax) {
+        if (Yii::$app->request->isAjax) { /* TODO::  */
             Yii::$app->response->format = Response::FORMAT_JSON;
             $response = ['message' => '', 'status' => 0, 'reservation_dump' => [], 'segments' => '', 'key_trip_list' => ''];
             $originSegmentsBaggage = [];
             $defaultBaggage = null;
+            $flightId = Yii::$app->request->get('flight_id', 0);
+            $tripType = (int) Yii::$app->request->post('tripType', 0);
 
             try {
-                if (!$dump = Yii::$app->request->post('dump')) {
+                if (!$dump = Yii::$app->request->post('reservationDump')) {
                     throw new \RuntimeException('Param dump is required');
                 }
                 if (!$gds = Yii::$app->request->post('gds')) {
                     throw new \RuntimeException('Param gds is required');
-                }
-                if (!$flightId = Yii::$app->request->post('flight_id')) {
-                    throw new \RuntimeException('Param flight_id is required');
                 }
                 if (!$originProductQuote = $this->reProtectionQuoteManualCreateService::getOriginQuoteByFlight($flightId)) {
                     throw new \RuntimeException('OriginProductQuote not found');
@@ -901,51 +900,70 @@ class FlightQuoteController extends FController
                 $itinerary = [];
                 $reservationService = new ReservationService($gds);
                 $reservationService->parseReservation($dump, true, $itinerary);
-                if ($reservationService->parseStatus && $reservationService->parseResult) {
-                    $segments = $reservationService->parseResult;
-                    $trips = [];
-                    $tripIndex = 1;
+                if (!$reservationService->parseStatus || empty($reservationService->parseResult)) {
+                    throw new \RuntimeException('Parsing dump is failed');
+                }
 
-                    foreach ($segments as $key => $segment) {
-                        $keyIata = $segment['segmentIata'];
-                        if (array_key_exists($keyIata, $originSegmentsBaggage)) {
-                            $segments[$key]['baggage'] = $originSegmentsBaggage[$keyIata];
-                            $defaultBaggage = $defaultBaggage ?? $originSegmentsBaggage[$keyIata];
-                        }
+                $segments = $reservationService->parseResult;
+                $trips = [];
+                $tripIndex = 1;
 
-                        if ($key === 0) {
-                            $trips[$tripIndex]['duration'] = $segment['flightDuration'];
-                            $segment['tripIndex'] = $tripIndex;
-                            $trips[$tripIndex]['segments'][] = $segment;
-                        } else {
-                            $prevSegment = $segments[$key - 1] ?? $segments[$key];
-                            $isMoreOneDay = ReProtectionQuoteManualCreateService::isMoreOneDay($prevSegment['arrivalDateTime'], $segment['departureDateTime']);
-                            if ($isMoreOneDay) {
-                                ++$tripIndex;
-                                $trips[$tripIndex]['duration'] = $segment['flightDuration'];
-                            } else {
-                                $trips[$tripIndex]['duration'] += $segment['flightDuration'];
-                            }
-                            $segment['tripIndex'] = $tripIndex;
-                            $trips[$tripIndex]['segments'][] = $segment;
-                        }
+                foreach ($segments as $key => $segment) {
+                    $keyIata = $segment['segmentIata'];
+                    if (array_key_exists($keyIata, $originSegmentsBaggage)) {
+                        $segments[$key]['baggage'] = $originSegmentsBaggage[$keyIata];
+                        $defaultBaggage = $defaultBaggage ?? $originSegmentsBaggage[$keyIata];
                     }
 
-                    $response['segments'] = $this->renderAjax('partial/_segment_rows', [
-                        'trips' => $trips,
-                        'segments' => $segments,
-                        'sourceHeight' => BaggageHelper::getBaggageHeightValuesCombine(),
-                        'sourceWeight' => BaggageHelper::getBaggageWeightValuesCombine(),
-                        'defaultBaggage' => $defaultBaggage,
-                    ]);
+                    if ($key === 0) {
+                        $trips[$tripIndex]['duration'] = $segment['flightDuration'];
+                        $segment['tripIndex'] = $tripIndex;
+                        $trips[$tripIndex]['segments'][] = $segment;
+                    } else {
+                        $prevSegment = $segments[$key - 1] ?? $segments[$key];
+                        $isNextTrip = false;
 
-                    $response['key_trip_list'] = implode(',', array_keys($trips));
+                        if ($tripType === Flight::TRIP_TYPE_MULTI_DESTINATION) {
+                            try {
+                                $isNextTrip = FlightQuoteHelper::isNextTrip($prevSegment, $segment);
+                            } catch (\Throwable $throwable) {
+                                \Yii::warning(
+                                    AppHelper::throwableLog($throwable),
+                                    'FlightQuoteController:actionAjaxPrepareDump:isNextTrip'
+                                );
+                            }
+                        }
+
+                        if ($isNextTrip) {
+                            ++$tripIndex;
+                            $trips[$tripIndex]['duration'] = $segment['flightDuration'];
+                        } else {
+                            $trips[$tripIndex]['duration'] += $segment['flightDuration'];
+                        }
+                        $segment['tripIndex'] = $tripIndex;
+                        $trips[$tripIndex]['segments'][] = $segment;
+                    }
                 }
+
+                if (empty($trips)) {
+                    throw new \RuntimeException('Trips processing failed');
+                }
+
+                $response['segments'] = $this->renderAjax('partial/_segment_rows', [
+                    'trips' => $trips,
+                    'segments' => $segments,
+                    'sourceHeight' => BaggageHelper::getBaggageHeightValuesCombine(),
+                    'sourceWeight' => BaggageHelper::getBaggageWeightValuesCombine(),
+                    'defaultBaggage' => $defaultBaggage,
+                ]);
+
+                $response['key_trip_list'] = implode(',', array_keys($trips));
 
                 $response['message'] = 'Success';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {
                 $response['message'] = VarDumper::dumpAsString($exception->getMessage());
+                Yii::warning(AppHelper::throwableLog($exception), 'FlightQuoteController:actionAjaxPrepareDump:exception');
             } catch (\Throwable $throwable) {
                 Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxPrepareDump:throwable');
                 $response['message'] = 'Internal Server Error';

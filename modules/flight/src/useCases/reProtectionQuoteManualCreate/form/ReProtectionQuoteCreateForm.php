@@ -27,6 +27,7 @@ use yii\helpers\Html;
  * @property $baggage_data
  * @property $segment_trip_data
  * @property $keyTripList
+ * @property $flightId
  *
  * @property ItineraryDumpDTO[] $itinerary
  * @property array $baggageFormsData
@@ -46,14 +47,16 @@ class ReProtectionQuoteCreateForm extends Model
     public $baggage_data;
     public $segment_trip_data;
     public $keyTripList;
+    public $flightId;
 
     private array $itinerary = [];
     private array $baggageFormsData = [];
     private array $segmentTripFormsData = [];
 
-    public function __construct(?int $creatorId = null, $config = [])
+    public function __construct(?int $creatorId = null, ?int $flightId = null, $config = [])
     {
         $this->quoteCreator = $creatorId;
+        $this->flightId = $flightId;
         parent::__construct($config);
     }
 
@@ -79,6 +82,9 @@ class ReProtectionQuoteCreateForm extends Model
             [['segment_trip_data'], 'safe'],
             [['segment_trip_data'], 'segmentTripPrepare'],
             [['keyTripList'], 'string'],
+
+            [['flightId'], 'integer'],
+            [['flightId'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['flightId' => 'fl_id']],
         ];
     }
 
