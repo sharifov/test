@@ -64,7 +64,7 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
             }
 
             $locker = new AssignUserLocker();
-            if (!$locker->lock()) {
+            if (!$locker->lock($this->leadId, new \DateTimeImmutable())) {
                 if ($this->retryNumber > self::RETRY_COUNT) {
                     Yii::error([
                         'message' => 'Count retry > ' . self::RETRY_COUNT,
@@ -72,6 +72,11 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
                     ], 'LeadRedialAssignToUsersJob');
                     return;
                 }
+                Yii::info([
+                    'message' => 'Restart job after lock',
+                    'leadId' => $lead->id,
+                    'retryNumber' => $this->retryNumber,
+                ], 'info\LeadRedialAssignToUsersJob');
                 Yii::$app->queue_lead_redial->delay(self::LOCK_DELAY)->push(new self($this->leadId, $this->retryNumber + 1));
                 return;
             }
