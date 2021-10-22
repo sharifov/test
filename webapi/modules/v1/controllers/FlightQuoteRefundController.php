@@ -76,8 +76,8 @@ class FlightQuoteRefundController extends ApiBaseController
     /**
      * @api {post} /v1/flight-quote-refund/info Voluntary Refund Info
      * @apiVersion 1.0.0
-     * @apiName Voluntary Refund Info
-     * @apiGroup Voluntary Refund
+     * @apiName Flight Voluntary Refund Info
+     * @apiGroup Flight Voluntary Refund
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -232,10 +232,10 @@ class FlightQuoteRefundController extends ApiBaseController
     }
 
     /**
-     * @api {post} /v1/flight-quote-refund/create Voluntary Refund Create
+     * @api {post} /v1/flight-quote-refund/create Flight Voluntary Refund Create
      * @apiVersion 1.0.0
-     * @apiName Voluntary Refund Create
-     * @apiGroup Voluntary Refund
+     * @apiName Flight Voluntary Refund Create
+     * @apiGroup Flight Voluntary Refund
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -557,10 +557,10 @@ class FlightQuoteRefundController extends ApiBaseController
     }
 
     /**
-     * @api {post} /v1/flight-quote-refund/confirm Voluntary Refund Confirm
+     * @api {post} /v1/flight-quote-refund/confirm Flight Voluntary Refund Confirm
      * @apiVersion 1.0.0
-     * @apiName Voluntary Refund Confirm
-     * @apiGroup Voluntary Refund
+     * @apiName Flight Voluntary Refund Confirm
+     * @apiGroup Flight Voluntary Refund
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
