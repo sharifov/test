@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\components\BackOffice;
 use modules\flight\models\FlightRequest;
 use modules\flight\models\query\FlightRequestQuery;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
@@ -16,12 +17,15 @@ use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefu
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
+use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
+use sales\helpers\setting\SettingHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\Messages;
+use webapi\src\request\BoRequestDataHelper;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
@@ -235,6 +239,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{0..10}}        booking_id          Booking ID
      * @apiParam {object}               refund                            Refund Data
      * @apiParam {string{..3}}          refund.currency                   Currency
+     * @apiParam {string}               refund.orderId                    OTA Order Id
      * @apiParam {number}               refund.processingFee              Processing fee
      * @apiParam {number}               refund.penaltyAmount              Airline penalty amount
      * @apiParam {number}               refund.totalRefundAmount          Total refund amount
@@ -263,18 +268,18 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{30}}           billing.city                 City
      * @apiParam {string{40}}           [billing.state]              State
      * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
-     * @apiParam {string{10}}           [billing.zip]                Zip
-     * @apiParam {string{20}}           [billing.contact_phone]      Contact phone
-     * @apiParam {string{160}}          [billing.contact_email]      Contact email
+     * @apiParam {string{10}}           billing.zip                Zip
+     * @apiParam {string{20}}           billing.contact_phone      Contact phone
+     * @apiParam {string{160}}          billing.contact_email      Contact email
      * @apiParam {string{60}}           [billing.contact_name]       Contact name
      * @apiParam {object}               payment_request                      Payment request
      * @apiParam {number}               payment_request.amount               Customer must pay for initiate refund process
      * @apiParam {string{3}}            payment_request.currency             Currency code
-     * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")
+     * @apiParam {string{2}}            payment_request.method_key           Method key (for example "card")
      * @apiParam {object}               payment_request.method_data          Method data
      * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
      * @apiParam {string{..20}}           payment_request.method_data.card.number          Number
-     * @apiParam {string{..50}}           [payment_request.method_data.card.holder_name]   Holder name
+     * @apiParam {string{..50}}           payment_request.method_data.card.holder_name   Holder name
      * @apiParam {int}                  payment_request.method_data.card.expiration_month       Month
      * @apiParam {int}                  payment_request.method_data.card.expiration_year        Year
      * @apiParam {string{..4}}           payment_request.method_data.card.cvv             CVV
@@ -283,6 +288,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *  {
      *      "booking_id": "XXXXXXX",
      *      "refund": {
+     *          "orderId": "RET-12321AD",
      *          "processingFee": 12.5,
      *          "penaltyAmount": 100.00,
      *          "totalRefundAmount": 112.5,
@@ -316,6 +322,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *          "address_line1": "1013 Weda Cir",
      *          "address_line2": "",
      *          "country_id": "US",
+     *          "country": "United States",
      *          "city": "Mayfield",
      *          "state": "KY",
      *          "zip": "99999",
@@ -457,6 +464,23 @@ class FlightQuoteRefundController extends ApiBaseController
                 }
             }
 
+            if (!$boRequestEndpoint = SettingHelper::getVoluntaryRefundBoEndpoint()) {
+                throw new \RuntimeException('BO endpoint is not set', VoluntaryRefundCodeException::BO_REQUEST_IS_NO_SET);
+            }
+
+            $boDataRequest = BoRequestDataHelper::getDataForVoluntaryCreateByForm($project->api_key, $voluntaryRefundCreateForm);
+            $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+            if ($result['status'] === 'Failed') {
+                return $this->endApiLog(new ErrorResponse(
+                    new ErrorName('BO Request Failed'),
+                    new MessageMessage($result['message'] ?? 'Unknown message from BO'),
+                    new CodeMessage(VoluntaryRefundCodeException::BO_REQUEST_FAILED),
+                    new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                    new ErrorsMessage($result['errors'] ?? []),
+                    new TypeMessage('app_bo')
+                ));
+            }
+
             $job = new VoluntaryRefundCreateJob($flightRequest->fr_id, $productQuote->pq_id ?? null);
             $jobId = \Yii::$app->queue_job->priority(100)->push($job);
 
@@ -466,10 +490,22 @@ class FlightQuoteRefundController extends ApiBaseController
             return $this->endApiLog(new SuccessResponse(
                 new CodeMessage(ApiCodeException::SUCCESS)
             ));
-        } catch (\RuntimeException | \DomainException $e) {
-            \Yii::warning(
+        } catch (BoResponseException $e) {
+            \Yii::error(
                 ArrayHelper::merge(AppHelper::throwableLog($e), $post),
-                'FlightQuoteRefundController:actionCreate:Warning'
+                'FlightQuoteRefundController:actionCreate:BoResponseException'
+            );
+            return $this->endApiLog(new ErrorResponse(
+                new MessageMessage($e->getMessage()),
+                new ErrorName('BO Error'),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new CodeMessage((int)$e->getCode()),
+                new TypeMessage('app')
+            ));
+        } catch (\RuntimeException | \DomainException $e) {
+            \Yii::error(
+                ArrayHelper::merge(AppHelper::throwableLog($e), $post),
+                'FlightQuoteRefundController:actionCreate:RuntimeException|DomainException'
             );
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage($e->getMessage()),

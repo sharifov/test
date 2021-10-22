@@ -21,7 +21,7 @@ class CreditCardForm extends Model
     public function rules()
     {
         return [
-            [['number', 'expiration_month', 'expiration_year', 'cvv'], 'required'],
+            [['number', 'expiration_month', 'expiration_year', 'cvv', 'holder_name'], 'required'],
 
             [['expiration_month', 'expiration_year'], 'integer'],
 

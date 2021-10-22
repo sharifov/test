@@ -19,6 +19,7 @@ class BillingInfoForm extends \yii\base\Model
     public $address_line1;
     public $address_line2;
     public $country_id;
+    public $country;
     public $city;
     public $state;
     public $zip;
@@ -30,10 +31,10 @@ class BillingInfoForm extends \yii\base\Model
     public function rules()
     {
         return [
-            [['first_name', 'last_name', 'address_line1', 'city', 'country_id'], 'required'],
+            [['first_name', 'last_name', 'address_line1', 'city', 'country_id', 'country', 'zip', 'contact_phone', 'contact_email'], 'required'],
             [
                 ['first_name', 'middle_name', 'last_name', 'address_line1', 'address_line2', 'company_name',
-                'country_id', 'city', 'state', 'zip', 'contact_phone', 'contact_email', 'contact_name'],
+                'country_id', 'city', 'state', 'zip', 'contact_phone', 'contact_email', 'contact_name', 'country'],
                 'string'
             ],
             [['first_name', 'last_name', 'middle_name', 'city'], 'string', 'max' => 30],

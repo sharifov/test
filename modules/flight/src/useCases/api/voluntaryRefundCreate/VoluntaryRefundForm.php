@@ -18,6 +18,7 @@ use yii\base\Model;
  * @property float $penaltyAmount
  * @property float $totalRefundAmount
  * @property float $totalPaid
+ * @property string $orderId
  *
  * @property TicketForm[] $ticketForms
  * @property AuxiliaryOptionForm[] $auxiliaryOptionsForms
@@ -31,6 +32,7 @@ class VoluntaryRefundForm extends Model
     public $totalPaid;
     public $tickets;
     public $auxiliaryOptions;
+    public $orderId;
 
     /**
      * @var TicketForm[] $ticketForms
@@ -45,7 +47,7 @@ class VoluntaryRefundForm extends Model
     public function rules(): array
     {
         return [
-            [['currency', 'processingFee', 'penaltyAmount', 'totalRefundAmount', 'totalPaid'], 'required'],
+            [['currency', 'processingFee', 'penaltyAmount', 'totalRefundAmount', 'totalPaid', 'orderId'], 'required'],
             ['currency', 'string', 'max' => 3],
             ['currency', 'exist', 'targetClass' => Currency::class, 'targetAttribute' => 'cur_code'],
 
@@ -56,6 +58,8 @@ class VoluntaryRefundForm extends Model
 
             ['auxiliaryOptions', IsArrayValidator::class, 'skipOnEmpty' => false],
             ['auxiliaryOptions', 'auxiliaryOptionsValidation', 'skipOnEmpty' => false],
+
+            ['orderId', 'string']
         ];
     }
 
