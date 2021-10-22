@@ -16,14 +16,11 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
-use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
 use webapi\src\ApiCodeException;
-use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
-use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\Messages;
 use webapi\src\request\BoRequestDataHelper;
 use webapi\src\response\ErrorResponse;
@@ -268,6 +265,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{30}}           billing.city                 City
      * @apiParam {string{40}}           [billing.state]              State
      * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
+     * @apiParam {string{2}}            billing.country             Country (for example "United States")
      * @apiParam {string{10}}           billing.zip                Zip
      * @apiParam {string{20}}           billing.contact_phone      Contact phone
      * @apiParam {string{160}}          billing.contact_email      Contact email
@@ -275,7 +273,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {object}               payment_request                      Payment request
      * @apiParam {number}               payment_request.amount               Customer must pay for initiate refund process
      * @apiParam {string{3}}            payment_request.currency             Currency code
-     * @apiParam {string{2}}            payment_request.method_key           Method key (for example "card")
+     * @apiParam {string{50}}            payment_request.method_key           Method key (for example "card")
      * @apiParam {object}               payment_request.method_data          Method data
      * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
      * @apiParam {string{..20}}           payment_request.method_data.card.number          Number
@@ -332,7 +330,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *          "contact_name": "Test Name"
      *      },
      *      "payment_request": {
-     *          "method_key": "cc",
+     *          "method_key": "card",
      *          "currency": "USD",
      *          "method_data": {
      *              "card": {
@@ -352,7 +350,15 @@ class FlightQuoteRefundController extends ApiBaseController
      * {
      *     "status": 200,
      *     "message": "OK",
-     *     "code": "13200"
+     *     "code": "13200",
+     *     "saleData": {
+     *          "id": 12345,
+     *          "bookingId": "P12OJ12"
+     *     },
+     *     "refund": {
+     *         "id": 54321,
+     *         "orderId": "RET-12321AD"
+     *     }
      * }
      *
      * @apiErrorExample {json} Error-Response Load Data:
@@ -369,31 +375,26 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiErrorExample {json} Error-Response Validation:
      * HTTP/1.1 200 OK
      * {
-     *     "status": 422,
-     *     "message": "Validation error",
-     *     "errors": {
-     *         "billing.first_name": [
-     *             "First Name cannot be blank."
-     *         ],
-     *         "billing.last_name": [
-     *             "Last Name cannot be blank."
-     *         ],
-     *         "billing.address_line1": [
-     *             "Address Line1 cannot be blank."
-     *         ],
-     *         "billing.city": [
-     *             "City cannot be blank."
-     *         ],
-     *         "billing.country_id": [
-     *             "Country Id cannot be blank."
-     *         ],
-     *         "payment_request.method_key": [
-     *             "Method Key cannot be blank."
-     *         ],
-     *         "payment_request.currency": [
-     *             "Currency cannot be blank."
-     *         ]
-     *     }
+     *   "status": 422,
+     *   "message": "Validation error",
+     *   "name": "Client Error: Unprocessable Entity",
+     *   "errors": {
+     *   "booking_id": [
+     *          "Booking Id should contain at most 10 characters."
+     *      ]
+     *   },
+     *   "code": 13107,
+     *   "type": "app"
+     * }
+     * @apiErrorExample {json} Error-Response Error From BO:
+     * HTTP/1.1 200 OK
+     * {
+     *      "status": 422,
+     *      "message": "FlightRequest is not found.",
+     *      "name": "BO Request Failed",
+     *      "code": "15411",
+     *      "errors": [],
+     *      "type": "app_bo"
      * }
      */
     public function actionCreate()
@@ -470,7 +471,13 @@ class FlightQuoteRefundController extends ApiBaseController
 
             $boDataRequest = BoRequestDataHelper::getDataForVoluntaryCreateByForm($project->api_key, $voluntaryRefundCreateForm);
             $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+            \Yii::info([
+                'requestData' => $boDataRequest,
+                'response' => $result
+            ], 'info\VoluntaryRefund::BO::Response');
             if ($result['status'] === 'Failed') {
+                $flightRequest->statusToError();
+                $flightRequest->save();
                 return $this->endApiLog(new ErrorResponse(
                     new ErrorName('BO Request Failed'),
                     new MessageMessage($result['message'] ?? 'Unknown message from BO'),
@@ -488,11 +495,15 @@ class FlightQuoteRefundController extends ApiBaseController
             $this->flightRequestRepository->save($flightRequest);
 
             return $this->endApiLog(new SuccessResponse(
-                new CodeMessage(ApiCodeException::SUCCESS)
+                new CodeMessage(ApiCodeException::SUCCESS),
+                new Message('saleData', $result['saleData'] ?? []),
+                new Message('refundData', $result['refundData'] ?? [])
             ));
         } catch (BoResponseException $e) {
+            $flightRequest->statusToError();
+            $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($e), $post),
+                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
                 'FlightQuoteRefundController:actionCreate:BoResponseException'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -503,8 +514,10 @@ class FlightQuoteRefundController extends ApiBaseController
                 new TypeMessage('app')
             ));
         } catch (\RuntimeException | \DomainException $e) {
+            $flightRequest->statusToError();
+            $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($e), $post),
+                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
                 'FlightQuoteRefundController:actionCreate:RuntimeException|DomainException'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -515,8 +528,10 @@ class FlightQuoteRefundController extends ApiBaseController
                 new TypeMessage('app')
             ));
         } catch (\Throwable $e) {
+            $flightRequest->statusToError();
+            $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($e), $post),
+                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
                 'FlightQuoteRefundController:actionCreate:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(

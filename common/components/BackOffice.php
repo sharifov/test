@@ -450,14 +450,6 @@ class BackOffice
             throw new BoResponseException('BO voluntaryRefund server error', BoResponseException::BO_SERVER_ERROR);
         }
 
-        if (!$response->isOk) {
-            \Yii::error([
-                    'message' => 'BO voluntaryRefund server error',
-                    'request' => $requestData,
-                    'content' => VarDumper::dumpAsString($response->content),
-                ], 'BackOffice:voluntaryRefund:serverError');
-            throw new BoResponseException('BO voluntaryRefund server error', BoResponseException::BO_SERVER_ERROR);
-        }
         $data = $response->data;
         if (!$data) {
             \Yii::error([
