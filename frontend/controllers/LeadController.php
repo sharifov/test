@@ -1408,11 +1408,11 @@ class LeadController extends FController
                 EmployeeAccess::leadAccess($lead, $user);
 
                 if ($lead->isCompleted()) {
-                    throw new \DomainException('Lead is completed!');
+                    $result['message'] = 'Lead is completed!';
                 }
 
                 if (!$lead->isAvailableToTake()) {
-                    throw new \DomainException('Lead is unavailable to "Take" now!');
+                    $result['message'] = 'Lead is unavailable to "Take" now!';
                 }
 
                 $fromStatuses = [];
@@ -1422,7 +1422,7 @@ class LeadController extends FController
 
                 $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], $fromStatuses);
                 if (!$isAccessNewLeadByFrequency['access']) {
-                    throw new \DomainException('Access is denied (frequency)');
+                    $result['message'] = 'Access is denied (frequency)';
                 }
 
                 $lead->processing($user->id, Yii::$app->user->id, 'Take');
