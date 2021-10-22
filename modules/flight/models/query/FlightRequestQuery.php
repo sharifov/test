@@ -9,8 +9,13 @@ use modules\flight\models\FlightRequest;
 */
 class FlightRequestQuery extends \yii\db\ActiveQuery
 {
-    public static function existRequestByHash(string $hash): bool
+    public static function existActiveRequestByHash(string $hash): bool
     {
-        return FlightRequest::find()->where(['fr_hash' => $hash])->exists();
+        return FlightRequest::find()->where(['fr_hash' => $hash])->active()->exists();
+    }
+
+    public function active(): self
+    {
+        return $this->andWhere(['fr_status_id' => FlightRequest::getActiveStatusesList()]);
     }
 }

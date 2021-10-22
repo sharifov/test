@@ -703,6 +703,11 @@ class SettingHelper
         return Yii::$app->params['settings']['voluntary_exchange_bo_endpoint'] ?? null;
     }
 
+    public static function getVoluntaryRefundBoEndpoint(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_refund_bo_endpoint'] ?? null;
+    }
+
     public static function getVoluntaryRefundCaseCategory(): ?string
     {
         return Yii::$app->params['settings']['voluntary_refund_case_category'] ?? null;

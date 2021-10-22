@@ -11,12 +11,15 @@ class Message
     public const STATUS_MESSAGE = 'status';
     public const STATUS_CODE_MESSAGE = 'statusCode';
     public const ERRORS_MESSAGE = 'errors';
+    public const ERROR_MESSAGE = 'error';
     public const CODE_MESSAGE = 'code';
     public const TECHNICAL_MESSAGE = 'technical';
     public const REQUEST_MESSAGE = 'request';
     public const DATA_MESSAGE = 'data';
     public const SOURCE_MESSAGE = 'source';
     public const DETAIL_ERROR_MESSAGE = 'detailError';
+    public const NAME_MESSAGE = 'name';
+    public const TYPE_MESSAGE = 'type';
 
     private $key;
     private $value;

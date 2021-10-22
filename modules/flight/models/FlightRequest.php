@@ -59,6 +59,11 @@ class FlightRequest extends \yii\db\ActiveRecord
         self::STATUS_DONE => 'done',
     ];
 
+    private const ACTIVE_STATUSES_LIST = [
+        self::STATUS_NEW,
+        self::STATUS_PENDING
+    ];
+
     public function rules(): array
     {
         return [
@@ -245,5 +250,10 @@ class FlightRequest extends \yii\db\ActiveRecord
     public function getIsAutomateDataJson(): bool
     {
         return (bool) ArrayHelper::getValue($this, 'fr_data_json.flight_quote', false);
+    }
+
+    public static function getActiveStatusesList(): array
+    {
+        return self::ACTIVE_STATUSES_LIST;
     }
 }

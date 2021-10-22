@@ -43,9 +43,11 @@ class VoluntaryRefundCreateForm extends Model
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['payment_request'], 'paymentRequestProcessing', 'skipOnEmpty' => false],
 
+            [['billing'], 'safe'],
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['billing'], 'billingProcessing', 'skipOnEmpty' => false],
 
+            [['refund'], 'safe'],
             [['refund'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['refund'], 'refundProcessing', 'skipOnEmpty' => false],
         ];

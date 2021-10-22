@@ -4,10 +4,14 @@ namespace modules\flight\src\useCases\api\voluntaryRefundCreate;
 
 use common\models\CaseSale;
 use common\models\Client;
+use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
+use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefundRepository;
 use modules\flight\src\useCases\sale\FlightFromSaleService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderRefund\OrderRefund;
+use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -16,6 +20,11 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
+use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefundRepository;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionsQuery;
+use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
+use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefundRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
@@ -27,6 +36,7 @@ use sales\exception\BoResponseException;
 use sales\exception\ValidationException;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\repositories\cases\CasesRepository;
@@ -34,6 +44,9 @@ use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
+use sales\services\CurrencyHelper;
+use webapi\src\services\payment\BillingInfoApiVoluntaryService;
+use webapi\src\services\payment\PaymentRequestVoluntaryService;
 
 /**
  * Class VoluntaryRefundService
@@ -49,6 +62,11 @@ use sales\services\client\ClientManageService;
  * @property ProductQuoteRefundRepository $productQuoteRefundRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property OrderRefundRepository $orderRefundRepository
+ * @property FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository
+ * @property ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository
+ * @property ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository
+ * @property PaymentRequestVoluntaryService $paymentRequestVoluntaryService
  */
 class VoluntaryRefundService
 {
@@ -64,6 +82,11 @@ class VoluntaryRefundService
     private ProductQuoteRefundRepository $productQuoteRefundRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
     private ProductQuoteRepository $productQuoteRepository;
+    private OrderRefundRepository $orderRefundRepository;
+    private FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository;
+    private ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository;
+    private ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository;
+    private PaymentRequestVoluntaryService $paymentRequestVoluntaryService;
 
     public function __construct(
         CasesSaleService $casesSaleService,
@@ -75,7 +98,12 @@ class VoluntaryRefundService
         CasesRepository $casesRepository,
         ProductQuoteRefundRepository $productQuoteRefundRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        ProductQuoteRepository $productQuoteRepository
+        ProductQuoteRepository $productQuoteRepository,
+        OrderRefundRepository $orderRefundRepository,
+        FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository,
+        ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository,
+        ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository,
+        PaymentRequestVoluntaryService $paymentRequestVoluntaryService
     ) {
         $this->casesSaleService = $casesSaleService;
         $this->clientManageService = $clientManageService;
@@ -87,12 +115,17 @@ class VoluntaryRefundService
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->orderRefundRepository = $orderRefundRepository;
+        $this->flightQuoteTicketRefundRepository = $flightQuoteTicketRefundRepository;
+        $this->productQuoteObjectRefundRepository = $productQuoteObjectRefundRepository;
+        $this->productQuoteOptionRefundRepository = $productQuoteOptionRefundRepository;
+        $this->paymentRequestVoluntaryService = $paymentRequestVoluntaryService;
     }
 
-    public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, int $projectId, ?int $originProductQuoteId): void
+    public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, int $projectId, ?ProductQuote $originProductQuote): void
     {
         try {
-            $caseCategoryKey = self::getCategoryKey();
+            $caseCategoryKey = self::getCaseCategoryKey();
             if (!$case = CasesQuery::getLastActiveCaseByBookingId($voluntaryRefundCreateForm->booking_id, $caseCategoryKey)) {
                 $case = $this->casesCreateService->createRefund(
                     $voluntaryRefundCreateForm->booking_id,
@@ -101,7 +134,8 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            throw new VoluntaryRefundException('Case creation Failed', VoluntaryRefundException::CASE_CREATION_FAILED);
+            $this->errorHandler(null, null, 'Case Sale creation failed', $e);
+            throw new VoluntaryRefundCodeException('Case creation Failed', VoluntaryRefundCodeException::CASE_CREATION_FAILED);
         }
 
         try {
@@ -129,8 +163,8 @@ class VoluntaryRefundService
                 ['case_id' => $case->cs_id]
             );
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Case Sale creation failed');
-            throw new VoluntaryRefundException('Case Sale creation failed', VoluntaryRefundException::CASE_SALE_CREATION_FAILED);
+            $this->errorHandler($case, null, 'Case Sale creation failed', $e);
+            throw new VoluntaryRefundCodeException('Case Sale creation failed', VoluntaryRefundCodeException::CASE_SALE_CREATION_FAILED);
         }
 
         try {
@@ -141,56 +175,160 @@ class VoluntaryRefundService
             $case->cs_client_id = $client->id;
             $this->casesRepository->save($case);
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Client creation failed');
-            throw new VoluntaryRefundException('Client creation failed', VoluntaryRefundException::CLIENT_CREATION_FAILED);
+            $this->errorHandler($case, null, 'Client creation failed', $e);
+            throw new VoluntaryRefundCodeException('Client creation failed', VoluntaryRefundCodeException::CLIENT_CREATION_FAILED);
         }
 
         try {
-            $order = $this->createOrder(
-                $orderCreateSaleForm,
-                $orderContactForm,
-                $case,
-                $projectId
-            );
+            if (!$originProductQuote || !$order = $originProductQuote->pqOrder) {
+                $order = $this->createOrder(
+                    $orderCreateSaleForm,
+                    $orderContactForm,
+                    $case,
+                    $projectId
+                );
+            } else {
+                $this->orderCreateFromSaleService->caseOrderRelation($order->or_id, $case->cs_id);
+                $this->orderCreateFromSaleService->orderContactCreate($order, $orderContactForm);
+
+                $case->addEventLog(
+                    CaseEventLog::VOLUNTARY_REFUND_CREATE,
+                    'Order related with case GID: ' . $order->or_gid,
+                    ['order_gid' => $order->or_gid]
+                );
+            }
+
+            if (!$order->or_client_currency_rate) {
+                $order->or_client_currency = $voluntaryRefundCreateForm->refundForm->currency;
+                $order->or_client_currency_rate = $order->orClientCurrency->cur_app_rate;
+                $this->orderRepository->save($order);
+            }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Order creation failed');
-            throw new VoluntaryRefundException('Order creation failed', VoluntaryRefundException::ORDER_CREATION_FAILED);
+            $this->errorHandler($case, null, 'Order creation failed', $e);
+            throw new VoluntaryRefundCodeException('Order creation failed', VoluntaryRefundCodeException::ORDER_CREATION_FAILED);
         }
 
         try {
-            if (!$originProductQuoteId) {
+            if (!$originProductQuote) {
                 $originProductQuote = $this->createOriginProductQuoteInfrastructure(
                     $orderCreateSaleForm,
                     $saleData,
                     $order,
                     $case
                 );
-                $originProductQuoteId = $originProductQuote->pq_id;
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Origin Product Quote creation failed');
-            throw new VoluntaryRefundException('Origin Product Quote creation failed', VoluntaryRefundException::ORIGIN_PRODUCT_QUOTE_CREATION_FAILED);
+            $this->errorHandler($case, null, 'Origin Product Quote creation failed', $e);
+            throw new VoluntaryRefundCodeException('Origin Product Quote creation failed', VoluntaryRefundCodeException::ORIGIN_PRODUCT_QUOTE_CREATION_FAILED);
         }
 
         try {
-            $totalCalculatedTickets = $this->calculateTotalTicketsAmount($voluntaryRefundCreateForm->refundForm->ticketForms);
+            $orderRefund = OrderRefund::createByVoluntaryRefund(
+                OrderRefund::generateUid(),
+                $originProductQuote->pq_id,
+                $order->or_app_total,
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->penaltyAmount, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->processingFee, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->totalRefundAmount, $order->orClientCurrency->cur_base_rate),
+                $order->or_client_currency,
+                $order->or_client_currency_rate,
+                $order->or_client_total,
+                $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
+                $case->cs_id
+            );
+            $this->orderRefundRepository->save($orderRefund);
+
             $productQuoteRefund = ProductQuoteRefund::createByVoluntaryRefund(
-                1,
-                $originProductQuoteId,
-                0,
-                $totalCalculatedTickets->processingFee,
-                $totalCalculatedTickets->refundAmount,
-                $totalCalculatedTickets->airlinePenalty,
+                $orderRefund->orr_id,
+                $originProductQuote->pq_id,
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->totalPaid, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->processingFee, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->totalRefundAmount, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->penaltyAmount, $order->orClientCurrency->cur_base_rate),
                 $voluntaryRefundCreateForm->refundForm->currency,
                 $order->or_client_currency_rate,
-                $totalCalculatedTickets->refundAmount,
-                $totalCalculatedTickets->refundAmount,
+                $voluntaryRefundCreateForm->refundForm->totalPaid,
+                $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
                 $case->cs_id
             );
             $this->productQuoteRefundRepository->save($productQuoteRefund);
+
+            foreach ($voluntaryRefundCreateForm->refundForm->ticketForms as $ticketForm) {
+                $flightQuoteTicketRefund = FlightQuoteTicketRefund::create($ticketForm->number, null);
+                $this->flightQuoteTicketRefundRepository->save($flightQuoteTicketRefund);
+
+                $productQuoteObjectRefund = ProductQuoteObjectRefund::create(
+                    $productQuoteRefund->pqr_id,
+                    $flightQuoteTicketRefund->fqtr_id,
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->sellingPrice, $order->orClientCurrency),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->airlinePenalty, $order->orClientCurrency),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->processingFee, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->refundAmount, $order->orClientCurrency->cur_base_rate),
+                    $voluntaryRefundCreateForm->refundForm->currency,
+                    $order->or_client_currency_rate,
+                    $ticketForm->sellingPrice,
+                    $ticketForm->refundAmount,
+                    null
+                );
+                $productQuoteObjectRefund->pending();
+                $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);
+            }
+
+            foreach ($voluntaryRefundCreateForm->refundForm->auxiliaryOptionsForms as $auxiliaryOptionsForm) {
+                $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuote->pq_id, $auxiliaryOptionsForm->type);
+
+                $productQuoteOptionRefund = ProductQuoteOptionRefund::create(
+                    $orderRefund->orr_id,
+                    $productQuoteRefund->pqr_id,
+                    $productQuoteOption->pqo_id ?? null,
+                    CurrencyHelper::convertToBaseCurrency($auxiliaryOptionsForm->amount, $order->orClientCurrency->cur_base_rate),
+                    null,
+                    null,
+                    $auxiliaryOptionsForm->amount,
+                    $voluntaryRefundCreateForm->refundForm->currency,
+                    $order->or_client_currency_rate,
+                    $auxiliaryOptionsForm->amount,
+                    $auxiliaryOptionsForm->refundable,
+                    $auxiliaryOptionsForm->refundAllow,
+                    $auxiliaryOptionsForm->details
+                );
+                $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
+            }
+
+            $this->productQuoteRefundRepository->save($productQuoteRefund);
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Product Quote Refund creation failed');
-            throw new VoluntaryRefundException('Product Quote Refund creation failed', VoluntaryRefundException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
+            $this->errorHandler($case, null, 'Product Quote Refund structure creation failed', $e);
+            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
+        }
+
+        try {
+            if ($voluntaryRefundCreateForm->paymentRequestForm) {
+                $this->paymentRequestVoluntaryService->processing(
+                    $voluntaryRefundCreateForm->paymentRequestForm,
+                    $order,
+                    'Create by Voluntary Refund API processing'
+                );
+            }
+        } catch (\Throwable $e) {
+            $this->errorHandler($case, null, 'PaymentRequest processing is failed', $e);
+            throw new VoluntaryRefundCodeException('PaymentRequest processing is failed', VoluntaryRefundCodeException::PAYMENT_DATA_PROCESSED_FAILED);
+        }
+
+        try {
+            if ($voluntaryRefundCreateForm->billingInfoForm) {
+                $paymentMethodId = $this->paymentRequestVoluntaryService->getPaymentMethod()->pm_id ?? null;
+                $creditCardId = $this->paymentRequestVoluntaryService->getCreditCard()->cc_id ?? null;
+
+                BillingInfoApiVoluntaryService::getOrCreateBillingInfo(
+                    $voluntaryRefundCreateForm->billingInfoForm,
+                    $order->getId(),
+                    $creditCardId,
+                    $paymentMethodId
+                );
+            }
+        } catch (\Throwable $e) {
+            $this->errorHandler($case, null, 'BillingInfo processing is failed', $e);
+            throw new VoluntaryRefundCodeException('BillingInfo processing is failed', VoluntaryRefundCodeException::BILLING_INFO_PROCESSED_FAILED);
         }
 
         $productQuoteRefund->processing();
@@ -226,7 +364,7 @@ class VoluntaryRefundService
             $this->productQuoteRepository->save($relatedProductQuote);
         }
 
-        $this->startRefundAutoProcess($form, $projectId, $productQuote->pq_id);
+        $this->startRefundAutoProcess($form, $projectId, $productQuote);
     }
 
     private function getCaseSaleData(string $bookingId, Cases $case, int $caseEventLogType): array
@@ -302,22 +440,7 @@ class VoluntaryRefundService
         return $originProductQuote;
     }
 
-    /**
-     * @param TicketForm[] $ticketForms
-     * @return TotalTicketCalculatedValuesDTO
-     */
-    private function calculateTotalTicketsAmount(array $ticketForms): TotalTicketCalculatedValuesDTO
-    {
-        $dto = new TotalTicketCalculatedValuesDTO();
-        foreach ($ticketForms as $ticketForm) {
-            $dto->processingFee += $ticketForm->processingFee;
-            $dto->airlinePenalty += $ticketForm->airlinePenalty;
-            $dto->refundAmount += $ticketForm->refundAmount;
-        }
-        return $dto;
-    }
-
-    private static function getCategoryKey(): string
+    private static function getCaseCategoryKey(): string
     {
         if (!empty(SettingHelper::getVoluntaryRefundCaseCategory())) {
             return SettingHelper::getVoluntaryRefundCaseCategory();
@@ -325,8 +448,12 @@ class VoluntaryRefundService
         return self::CASE_CREATE_CATEGORY_KEY;
     }
 
-    private function errorHandler(?Cases $case, ?ProductQuoteRefund $productQuoteRefund, string $description): void
-    {
+    private function errorHandler(
+        ?Cases $case,
+        ?ProductQuoteRefund $productQuoteRefund,
+        string $description,
+        \Throwable $exception
+    ): void {
         if ($case) {
             $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, $description);
             $case->offIsAutomate()->error(null, $description);
@@ -337,5 +464,7 @@ class VoluntaryRefundService
             $productQuoteRefund->error();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
         }
+
+        \Yii::error(AppHelper::throwableLog($exception, true), 'VoluntaryRefundService:errorHandler');
     }
 }

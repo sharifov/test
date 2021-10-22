@@ -4,9 +4,8 @@ namespace common\components;
 
 use common\models\Project;
 use frontend\helpers\JsonHelper;
-use http\Client\Request;
-use http\Client\Response;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use Yii;
@@ -424,5 +423,40 @@ class BackOffice
             \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryExchange');
             return false;
         }
+    }
+
+    public static function voluntaryRefund(array $requestData, string $endpoint): array
+    {
+        try {
+            $response = self::sendRequest2(
+                $endpoint,
+                $requestData,
+                'POST',
+                30,
+                Yii::$app->params['backOffice']['serverUrlV3']
+            );
+        } catch (\Throwable $exception) {
+            \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryRefund');
+            throw new BoResponseException('BO voluntaryRefund server error', BoResponseException::BO_SERVER_ERROR);
+        }
+
+        $data = $response->data;
+        if (!$data) {
+            \Yii::error([
+                    'message' => 'BO voluntaryRefund data is empty',
+                    'request' => $requestData,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryRefund:dataIsEmpty');
+            throw new BoResponseException('BO voluntaryRefund data is empty', BoResponseException::BO_DATA_IS_EMPTY);
+        }
+        if (!is_array($data)) {
+            \Yii::error([
+                    'message' => 'BO voluntaryRefund response Data type is invalid',
+                    'request' => $requestData,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryRefund:dataIsInvalid');
+            throw new BoResponseException('BO voluntaryRefund response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
+        }
+        return $data;
     }
 }

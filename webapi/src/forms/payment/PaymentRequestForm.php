@@ -41,10 +41,10 @@ class PaymentRequestForm extends Model
             [['amount'], 'number'],
 
             [['method_key'], 'required'],
-            [['method_key'], 'string', 'max' => 2],
+            [['method_key'], 'string', 'max' => 50],
             [['method_key'], 'filter', 'filter' => 'strtoupper'],
             [['method_key'], 'exist', 'skipOnError' => true,
-                'targetClass' => PaymentMethod::class, 'targetAttribute' => ['method_key' => 'pm_short_name']],
+                'targetClass' => PaymentMethod::class, 'targetAttribute' => ['method_key' => 'pm_key']],
 
             [['currency'], 'required'],
             [['currency'], 'string', 'max' => 3],
