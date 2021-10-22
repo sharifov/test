@@ -58,10 +58,20 @@ function delay(callback, ms) {
 }
 
 function calcProfitByPercent(obj, total){
-    var amount;
+    var preValue = obj.defaultValue;
     var percent = parseInt($(obj).val());
-    amount = (+(total * percent / 100).toFixed(4));
+    var diffValue = preValue - percent;
+    var amount = (+(total * percent / 100).toFixed(4));
     $(obj).parents('.split-row').find('.profit-amount').html(amount);
+
+    var otherPercent = 0;
+    $('.profit-percent', '#profit-splits').not('#profitsplit-__id__-ps_percent').each(function() {
+      otherPercent = otherPercent + parseInt($(this).val());
+    })
+
+    mainAgentPercentVal = 100 - otherPercent;
+    mainAgentProfitVal = total * mainAgentPercentVal / 100;
+    
     mainAgentProfit();
 }
 JS;
@@ -69,7 +79,7 @@ $this->registerJs($js);
 ?>
 <div class="row split-row"
     <?php if ($ownerSplit) : ?>
-        style="background-color: antiquewhite; padding-top: 10px;"
+        style="background-color: antiquewhite; padding-top: 10px; margin-bottom: 10px;"
     <?php endif; ?>
 >
     <div class="col-md-4">
@@ -89,7 +99,7 @@ $this->registerJs($js);
     ])->input('number', [
         'min' => 0,
         'max' => 100,
-        'class' => 'form-control',
+        'class' => "form-control" . ($ownerSplit ? " owner-percent" : " profit-percent"),
         'placeholder' => 'Percent',
         'onchange' => "calcProfitByPercent(this, $totalProfit);",
         'onkeydown' => "delay(checkPercentageOfSplit, 500)();"
@@ -106,14 +116,15 @@ $this->registerJs($js);
         </div>
     </div>
     <div class="col-md-3">
-        <?= Html::button('<i class="fa fa-trash"></i>', [
-            'class' => 'btn btn-danger pull-right remove-split-button' ,
-        ]); ?>
-        <?= $form->field($split, '[' . $key . ']ps_id', [
-            'options' => [
-                'tag' => false
-            ],
-        ])->hiddenInput()->label(false);
-?>
+        <?php if (!$ownerSplit) : ?>
+            <?= Html::button('<i class="fa fa-trash"></i>', [
+                'class' => 'btn btn-danger pull-right remove-split-button' ,
+            ]); ?>
+            <?= $form->field($split, '[' . $key . ']ps_id', [
+                'options' => [
+                    'tag' => false
+                ],
+            ])->hiddenInput()->label(false);?>
+        <?php endif;?>
     </div>
 </div>
