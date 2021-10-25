@@ -21,6 +21,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserOnline;
+use common\models\UserProfile;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
@@ -1272,7 +1273,8 @@ class CallController extends FController
             }
 
             if (!$isReserved) {
-                if (Yii::createObject(LeadRedialAccessChecker::class)->exist($userId)) {
+                $autoRedialIsEnabled = (bool)UserProfile::find()->select(['up_auto_redial'])->andWhere(['up_user_id' => Auth::id()])->scalar();
+                if ($autoRedialIsEnabled && Yii::createObject(LeadRedialAccessChecker::class)->exist($userId)) {
                     $leadRedialQueue = Yii::createObject(\sales\model\leadRedial\queue\LeadRedialQueue::class);
                     $redialCall = $leadRedialQueue->getCall(Auth::user());
                     if ($redialCall) {

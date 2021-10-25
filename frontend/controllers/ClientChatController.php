@@ -895,7 +895,7 @@ class ClientChatController extends FController
             $leadSearch = new LeadSearch();
             $data[$leadSearch->formName()]['client_id'] = $clientChat->cchClient->id;
             $data[$leadSearch->formName()]['project_id'] = $clientChat->cch_project_id;
-            $leadDataProvider = $leadSearch->search($data);
+            $leadDataProvider = $leadSearch->search($data, Auth::user());
             $leadDataProvider->pagination->params = array_merge(Yii::$app->request->get(), ['cchId' => $cchId]);
 
             $casesSearch = new CasesSearch();

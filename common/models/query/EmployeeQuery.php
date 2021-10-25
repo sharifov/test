@@ -154,14 +154,15 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         ], 'ud.ud_dep_id = d.dep_id and d.dep_id = :departmentId', [
             'departmentId' => $departmentId
         ]);
+
         $query->leftJoin([
             'crua' => CallRedialUserAccess::tableName()
         ], $joinedField . ' = crua.crua_user_id');
-
-        $query->andWhere('(crua.crua_created_dt is null or time_to_sec(TIMEDIFF(:now, crua.crua_created_dt)) > :redialUserAccessExpiredSeconds)', [
-            'now' => (new \DateTime())->format('Y-m-d H:i:s'),
-            'redialUserAccessExpiredSeconds' => $redialUserAccessExpiredSeconds
-        ]);
+        $query->andWhere(['IS', 'crua.crua_created_dt', null]);
+//        $query->andWhere('(crua.crua_created_dt is null or time_to_sec(TIMEDIFF(:now, crua.crua_created_dt)) > :redialUserAccessExpiredSeconds)', [
+//            'now' => (new \DateTime())->format('Y-m-d H:i:s'),
+//            'redialUserAccessExpiredSeconds' => $redialUserAccessExpiredSeconds
+//        ]);
 
         if ($leadIsBusiness) {
             $query->orderBy([

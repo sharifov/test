@@ -4,6 +4,7 @@ namespace sales\model\leadRedial\entity;
 
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use yii\helpers\VarDumper;
 
 /**
  * Class CallRedialUserAccessRepository
@@ -47,8 +48,9 @@ class CallRedialUserAccessRepository
 
     public function remove(CallRedialUserAccess $access): void
     {
-        if (!$access->remove()) {
-            throw new \RuntimeException('Removing error.');
+        $result = $access->remove();
+        if (!$result) {
+            throw new \RuntimeException('Removing error. Result = ' . VarDumper::dumpAsString($result));
         }
         $this->eventDispatcher->dispatchAll($access->releaseEvents());
     }

@@ -120,8 +120,10 @@ class LeadRedialUnAssigner
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Cant remove Call Redial User Access',
+                'leadId' => $access->crua_lead_id,
+                'userId' => $access->crua_user_id,
                 'exception' => $e->getMessage(),
-            ], 'LeadRedialUnAssigner');
+            ], 'LeadRedialUnAssigner:unAssign');
         }
     }
 }
