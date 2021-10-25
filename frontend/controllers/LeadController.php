@@ -396,7 +396,8 @@ class LeadController extends FController
             throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
         }
         $leadForm = new LeadForm($lead);
-        if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
+        if (
+            $leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
             $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
         ) {
             $leadForm->mode = $leadForm::VIEW_MODE;
