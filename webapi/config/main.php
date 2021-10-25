@@ -121,7 +121,7 @@ return [
                         'yii\web\HttpException:404',
                     ],
                     'logVars' => [],
-                    'categories' => ['info\*'],
+                    'categories' => ['info\*', 'log\*'],
                     'prefix' => static function () {
                         return LogHelper::getWebapiPrefixDB();
                     },
@@ -139,6 +139,16 @@ return [
                     },
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+                'file-fb-log' => [
+                    'class' => \common\components\logger\FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['log\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getWebapiPrefixData();
+                    },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
                 /*[

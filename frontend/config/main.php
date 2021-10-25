@@ -104,7 +104,7 @@ return [
                     'class' => 'yii\log\DbTarget',
                     'levels' => ['info'],
                     'logVars' => [],
-                    'categories' => ['info\*'],
+                    'categories' => ['info\*', 'log\*'],
                     'prefix' => static function () {
                         return LogHelper::getFrontendPrefixDB();
                     },
@@ -118,6 +118,16 @@ return [
                         'yii\web\HttpException:403'
                     ],
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getFrontendPrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+                [
+                    'class' => \common\components\logger\FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['log\*'],
                     'logVars' => [],
                     'prefix' => static function () {
                         return LogHelper::getFrontendPrefixData();

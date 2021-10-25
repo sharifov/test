@@ -21,8 +21,8 @@ class LogHelper
             return [
                 'hostname' => self::getHostname(),
                 'version' => self::getReleaseVersion(),
-                'git.branch' => self::getGitBranch(),
-                'endpoint'   => 'frontend',
+                'gitBranch' => self::getShortGitBranch(),
+                'type'   => 'frontend',
                 'ip' => self::getIp(),
                 'userId' => self::getUserId(),
                 //'sessionId' => self::getSessionId()
@@ -41,8 +41,8 @@ class LogHelper
             return [
                 'hostname' => self::getHostname(),
                 'version' => self::getReleaseVersion(),
-                'git.branch' => self::getGitBranch(),
-                'endpoint'   => 'console',
+                'gitBranch' => self::getShortGitBranch(),
+                'type'   => 'console',
             ];
         } catch (\Throwable $throwable) {
             return [];
@@ -58,8 +58,8 @@ class LogHelper
             return [
                 'hostname' => self::getHostname(),
                 'version' => self::getReleaseVersion(),
-                'git.branch' => self::getGitBranch(),
-                'endpoint'   => 'webapi',
+                'gitBranch' => self::getShortGitBranch(),
+                'type'   => 'webapi',
                 'ip' => self::getIp(),
                 'userId' => self::getUserId(),
             ];
@@ -123,12 +123,21 @@ class LogHelper
         return Yii::$app->params['release']['version'] ?? '';
     }
 
+
     /**
      * @return mixed|string
      */
     public static function getGitBranch()
     {
         return Yii::$app->params['release']['git_branch'] ?? '';
+    }
+
+    /**
+     * @return array|mixed|string|string[]
+     */
+    public static function getShortGitBranch()
+    {
+        return str_replace('refs/heads/', '', self::getGitBranch());
     }
 
     /**

@@ -9,7 +9,7 @@
 
 namespace common\components\logger;
 
-use index0h\log\base\TargetTrait;
+use common\components\logger\traits\TargetTrait;
 use Yii;
 
 /**

@@ -2383,7 +2383,6 @@ class TestController extends FController
 
     public function actionAbac()
     {
-
         if (Yii::$app->abac->can(null, OrderAbacObject::ACT_READ, OrderAbacObject::ACTION_READ)) {
             echo 'Yes';
         } else {
@@ -2393,8 +2392,8 @@ class TestController extends FController
 
     public function actionErrorTest()
     {
-        $message = [
-            'message' => 'Test message',
+        /*$message = [
+            'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
             'a1' => '1111',
             'b2' => '222',
@@ -2402,5 +2401,34 @@ class TestController extends FController
         Yii::error($message, 'test/error');
         Yii::warning($message, 'test/warning');
         Yii::info($message, 'info\test/info');
+        Yii::info($message, 'log\test/log');
+
+        $message = 'Test message 2';
+
+        Yii::error($message, 'test/error');
+        Yii::warning($message, 'test/warning');
+        Yii::info($message, 'info\test/info');
+        Yii::info($message, 'log\test/log');
+
+
+        $message = json_encode([
+            'message' => 'Test message 3',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a3' => '1111',
+            'b4' => '222',
+        ]);
+
+        Yii::error($message, 'test/error');
+        Yii::warning($message, 'test/warning');
+        Yii::info($message, 'info\test/info');
+        Yii::info($message, 'log\test/log');
+*/
+
+        try {
+            $a = 3 / 0;
+        } catch (\Throwable $throwable) {
+            VarDumper::dump($throwable, 10, true);
+            Yii::error($throwable, 'error:Throwable');
+        }
     }
 }
