@@ -3,6 +3,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
+use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
 use modules\flight\models\query\FlightRequestQuery;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
@@ -218,7 +219,7 @@ class FlightQuoteRefundController extends ApiBaseController
                     'totalAirlinePenalty' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_penalty_amount, $productQuoteRefund->pqr_client_currency_rate),
                     'totalProcessingFee' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_processing_fee_amount, $productQuoteRefund->pqr_client_currency_rate),
                     'totalRefundable' => (float)$productQuoteRefund->pqr_client_refund_amount,
-                    'refundCost' => 0.0,
+                    'refundCost' => (float)ArrayHelper::getValue(JsonHelper::decode($productQuoteRefund->pqr_data_json, true), 'payment_request.amount'),
                     'currency' => $productQuoteRefund->pqr_client_currency,
                     'tickets' => array_map(static function (ProductQuoteObjectRefund $model) {
                         return $model->setFields($model->getApiDataMapped())->toArray();

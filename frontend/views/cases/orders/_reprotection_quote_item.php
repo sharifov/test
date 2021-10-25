@@ -278,7 +278,7 @@ if ($quote->productQuoteLastChange) {
         <tr>
             <td></td>
             <td colspan="7">
-                <p><h4>Change List:</h4></p>
+                <p><b>Change List:</b></p>
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
                     <tr>

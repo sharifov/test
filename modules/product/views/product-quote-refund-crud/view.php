@@ -1,8 +1,10 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -62,6 +64,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'filter' => ProductQuoteRefund::getTypeList()
+            ],
+            [
+                'attribute' => 'pqr_data_json',
+                'value' => static function (ProductQuoteRefund $model) {
+                    return '<pre>' . VarDumper::dumpAsString(JsonHelper::decode($model->pqr_data_json), 10, true) . '</pre>';
+                },
+                'format' => 'raw',
             ],
         ],
     ]) ?>

@@ -249,7 +249,8 @@ class VoluntaryRefundService
                 $order->or_client_currency_rate,
                 $voluntaryRefundCreateForm->refundForm->totalPaid,
                 $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
-                $case->cs_id
+                $case->cs_id,
+                $voluntaryRefundCreateForm->toArray()
             );
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 

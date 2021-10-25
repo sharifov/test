@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteRefund;
 
+use common\components\validators\CheckJsonValidator;
 use common\models\Currency;
 use common\models\Employee;
 use common\models\query\CurrencyQuery;
@@ -46,6 +47,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteObjectRefund[] $productQuoteObjectRefunds
  * @property ProductQuoteOptionRefund[] $productQuoteOptionRefunds
  * @property Cases $case
+ * @property string $pqr_data_json [json]
  */
 class ProductQuoteRefund extends \yii\db\ActiveRecord
 {
@@ -120,7 +122,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $clientCurrencyRate,
         $clientSelling,
         $clientRefundAmount,
-        $caseId
+        $caseId,
+        $data
     ): self {
         $refund = self::create(
             $orderRefundId,
@@ -137,6 +140,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $refund->pqr_penalty_amount = $penaltyAmount;
         $refund->pqr_client_selling_price = $clientSelling;
         $refund->pqr_client_refund_amount = $clientRefundAmount;
+        $refund->pqr_data_json = $data;
         $refund->detachBehavior('user');
         return $refund;
     }
@@ -212,6 +216,10 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
 
             ['pqr_case_id', 'integer'],
             ['pqr_case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['pqr_case_id' => 'cs_id']],
+
+            ['pqr_data_json', 'safe'],
+            ['pqr_data_json', 'trim'],
+            ['pqr_data_json', CheckJsonValidator::class],
         ];
     }
 
@@ -238,6 +246,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             'pqr_created_dt' => 'Created Dt',
             'pqr_updated_dt' => 'Updated Dt',
             'pqr_case_id' => 'Case ID',
+            'pqr_data_json' => 'Data',
         ];
     }
 
@@ -388,7 +397,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
      */
     public function getShortTypeName(): string
     {
-        return self::getTypeName()[$this->pqr_status_id] ?? '-';
+        return $this->getTypeName()[$this->pqr_status_id] ?? '-';
     }
 
     public function cancel(): void

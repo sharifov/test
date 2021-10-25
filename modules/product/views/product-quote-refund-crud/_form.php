@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Currency;
+use frontend\helpers\JsonHelper;
+use kdn\yii2\JsonEditor;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use yii\helpers\Html;
@@ -69,6 +71,27 @@ use yii\widgets\ActiveForm;
         ]) ?>
 
     </div>
+
+  <div class="col-md-6">
+      <?php
+        try {
+            $model->pqr_data_json = JsonHelper::encode($model->pqr_data_json);
+            echo $form->field($model, 'pqr_data_json')->widget(
+                JsonEditor::class,
+                [
+                  'clientOptions' => [
+                      'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                      'mode' => $model->isNewRecord ? 'code' : 'form'
+                  ],
+                  //'collapseAll' => ['view'],
+                  'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'pqr_data_json')->textarea(['rows' => 6]);
+        }
+        ?>
+  </div>
 
     <?php ActiveForm::end(); ?>
 </div>
