@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqc_id',
             'pqc_pq_id',
             'pqc_case_id',
+            'pqc_gid',
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'pqc_decision_user',

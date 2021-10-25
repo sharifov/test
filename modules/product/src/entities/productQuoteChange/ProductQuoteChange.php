@@ -7,6 +7,7 @@ use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCre
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionConfirmEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionRefundEvent;
+use sales\behaviors\GidBehavior;
 use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
@@ -32,6 +33,7 @@ use yii\helpers\ArrayHelper;
  * @property bool $pqc_is_automate [tinyint(1)]
  * @property int|null $pqc_type_id
  * @property array|null $pqc_data_json
+ * @property atring $pqc_gid
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
@@ -65,6 +67,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['pqc_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s')
+            ],
+            'generateGid' => [
+                'class' => GidBehavior::class,
+                'targetColumn' => 'pqc_gid',
+                'value' => self::generateGid(),
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -186,6 +193,8 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             ['pqc_type_id', 'default', 'value' => self::TYPE_RE_PROTECTION],
 
             ['pqc_data_json', CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true],
+
+            ['pqc_gid', 'string', 'max' => 32],
         ];
     }
 
@@ -207,6 +216,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_is_automate' => 'Is Automate',
             'pqc_type_id' => 'Type ID',
             'pqc_data_json' => 'Data Json',
+            'pqc_gid' => 'Gid',
         ];
     }
 
@@ -344,5 +354,10 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function isTypeVoluntary(): string
     {
         return (int) $this->pqc_type_id === self::TYPE_VOLUNTARY_EXCHANGE;
+    }
+
+    public static function generateGid(): string
+    {
+        return md5(uniqid('pqc', false));
     }
 }

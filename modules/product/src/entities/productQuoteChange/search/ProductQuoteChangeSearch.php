@@ -20,6 +20,7 @@ class ProductQuoteChangeSearch extends ProductQuoteChange
             [['pqc_id', 'pqc_pq_id', 'pqc_case_id', 'pqc_decision_user', 'pqc_status_id', 'pqc_decision_type_id', 'pqc_type_id'], 'integer'],
             [['pqc_is_automate'], 'boolean'],
             [['pqc_created_dt', 'pqc_updated_dt', 'pqc_decision_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['pqc_gid'], 'string'],
         ];
     }
 
@@ -64,6 +65,7 @@ class ProductQuoteChangeSearch extends ProductQuoteChange
             'date(pqc_decision_dt)' => $this->pqc_decision_dt,
             'pqc_is_automate' => $this->pqc_is_automate,
             'pqc_type_id' => $this->pqc_type_id,
+            'pqc_gid' => $this->pqc_gid,
         ]);
 
         return $dataProvider;

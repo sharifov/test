@@ -5,6 +5,7 @@ namespace modules\flight\src\useCases\voluntaryExchangeConfirm\form;
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
@@ -16,7 +17,7 @@ use yii\base\Model;
  * @property $booking_id
  * @property $payment_request
  * @property $billing
- * @property $quote_gid
+ * @property $change_gid
  *
  * @property PaymentRequestForm|null $paymentRequestForm
  * @property BillingInfoForm|null $billingInfoForm
@@ -26,7 +27,7 @@ class VoluntaryExchangeConfirmForm extends Model
     public $booking_id;
     public $payment_request;
     public $billing;
-    public $quote_gid;
+    public $change_gid;
 
     private ?PaymentRequestForm $paymentRequestForm;
     private ?BillingInfoForm $billingInfoForm;
@@ -37,9 +38,9 @@ class VoluntaryExchangeConfirmForm extends Model
             [['booking_id'], 'required'],
             [['booking_id'], 'string', 'max' => 10],
 
-            [['quote_gid'], 'required'],
-            [['quote_gid'], 'string', 'max' => 32],
-            [['quote_gid'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['quote_gid' => 'pq_gid']],
+            [['change_gid'], 'required'],
+            [['change_gid'], 'string', 'max' => 32],
+            [['change_gid'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteChange::class, 'targetAttribute' => ['change_gid' => 'pqc_gid']],
 
             [['payment_request'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['payment_request'], 'paymentRequestProcessing'],

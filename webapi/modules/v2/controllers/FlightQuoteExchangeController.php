@@ -687,7 +687,7 @@ class FlightQuoteExchangeController extends BaseController
      *  }
      *
      * @apiParam {string{7..10}}        booking_id                   Booking ID
-     * @apiParam {string{32}}           quote_gid                    Product Quote GID
+     * @apiParam {string{32}}           change_gid                   Product Quote Quote GID
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
