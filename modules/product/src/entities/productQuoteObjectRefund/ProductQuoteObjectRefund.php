@@ -180,10 +180,18 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
             "number" => static function (self $model) {
                 return FlightQuoteTicketRefund::findOne(['fqtr_id' => $model->pqor_quote_object_id])->fqtr_ticket_number ?? '';
             },
-            "airlinePenalty" => 'pqor_penalty_amount',
-            "processingFee" => 'pqor_processing_fee_amount',
-            "refundable" => 'pqor_client_refund_amount',
-            "selling" => 'pqor_client_selling_price',
+            "airlinePenalty" => static function (self $model) {
+                return (float)$model->pqor_penalty_amount;
+            },
+            "processingFee" => static function (self $model) {
+                return (float)$model->pqor_processing_fee_amount;
+            },
+            "refundable" => static function (self $model) {
+                return (float)$model->pqor_client_refund_amount;
+            },
+            "selling" => static function (self $model) {
+                return (float)$model->pqor_client_selling_price;
+            },
             "clientCurrency" => 'pqor_client_currency',
             "status" => static function (self $model) {
                 return JsonHelper::decode($model->pqor_data_json)['status'] ?? '';

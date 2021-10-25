@@ -188,7 +188,7 @@ if ($quote->productQuoteLastChange) {
                                   ]) ?>
                               <?php endif; ?>
                               <?php
-                                $caseAbacDto->pqc_status = $quote->productQuoteLastChange->pqc_status_id;
+                                $caseAbacDto->pqc_status = $quote->productQuoteLastChange->pqc_status_id ?? null;
                                 /** @abac new $caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS, Action Reprotection Quote send email */
                                 if (!$reprotectionQuote->isDeclined() && Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                                     echo Html::a('<i class="fa fa-envelope"></i> send SC Email', null, [

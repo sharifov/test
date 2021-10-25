@@ -97,39 +97,50 @@ class FlightQuoteRefundController extends ApiBaseController
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
-     * {
-     *     "status": 200,
-     *     "message": "OK",
-     *     "refund": {
-     *          "totalPaid": 500.00,
-     *          "totalAirlinePenalty": 30.00,
-     *          "totalProcessingFee": 25.00,
-     *          "totalRefundable": 55.00,
-     *          "refundCost": 0.0,
-     *          "currency": "USD",
-     *          "tickets": [
-     *              {
-     *                  "number": "25346346",
-     *                  "airlinePenalty": 47.54,
-     *                  "processingFee": 85.65,
-     *                  "refundable": 81.25,
-     *                  "selling": 200.54,
-     *                  "status": "paid"
-     *              }
-     *          ],
-     *          "auxiliaryOptions": [
-     *              {
-     *                  "type": "package",
-     *                  "amount": 45.59,
-     *                  "refundable": 25.25,
-     *                  "details": {},
-     *                  "status": "paid",
-     *                  "refundAllow": false
-     *              }
-     *          ]
-     *     },
-     *     "code": "13200"
-     * }
+     *  {
+     *       "status": 200,
+     *       "message": "OK",
+     *       "data": {
+     *           "refund": {
+     *               "totalPaid": 300,
+     *               "totalAirlinePenalty": 150,
+     *               "totalProcessingFee": 30,
+     *               "totalRefundable": 150,
+     *               "refundCost": 0,
+     *               "currency": "USD",
+     *               "tickets": [
+     *                   {
+     *                       "number": "",
+     *                       "airlinePenalty": 70.4,
+     *                       "processingFee": 0,
+     *                       "refundable": 115,
+     *                       "selling": 115,
+     *                       "clientCurrency": "USD",
+     *                       "status": ""
+     *                   }
+     *               ],
+     *               "auxiliaryOptions": [
+     *                   {
+     *                       "type": "",
+     *                       "amount": 50,
+     *                       "refundable": 20,
+     *                       "details": [],
+     *                       "status": "",
+     *                       "refundAllow": false
+     *                   },
+     *                   {
+     *                       "type": "",
+     *                       "amount": 25,
+     *                       "refundable": 25,
+     *                       "details": [],
+     *                       "status": "",
+     *                       "refundAllow": false
+     *                   }
+     *               ]
+     *           }
+     *       },
+     *       "code": "13200"
+     *   }
      *
      * @apiErrorExample {json} Error-Response Load Data:
      * HTTP/1.1 200 OK
