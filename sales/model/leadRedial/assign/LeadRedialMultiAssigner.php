@@ -59,7 +59,7 @@ class LeadRedialMultiAssigner
                     'message' => 'Lead redial assign user error',
                     'leadId' => $lead->id,
                     'userId' => $user['id'],
-                    'exception' => AppHelper::throwableLog($e, false),
+                    'Throwable' => AppHelper::throwableLog($e, false),
                 ], 'LeadRedialMultiAssigner:assign:Throwable');
             }
         }

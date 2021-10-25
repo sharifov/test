@@ -72,11 +72,11 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
                     ], 'LeadRedialAssignToUsersJob');
                     return;
                 }
-                Yii::info([
-                    'message' => 'Restart job after lock',
-                    'leadId' => $lead->id,
-                    'retryNumber' => $this->retryNumber,
-                ], 'info\LeadRedialAssignToUsersJob');
+//                Yii::info([
+//                    'message' => 'Restart job after lock',
+//                    'leadId' => $lead->id,
+//                    'retryNumber' => $this->retryNumber,
+//                ], 'info\LeadRedialAssignToUsersJob');
                 Yii::$app->queue_lead_redial->delay(self::LOCK_DELAY)->push(new self($this->leadId, $this->retryNumber + 1));
                 return;
             }

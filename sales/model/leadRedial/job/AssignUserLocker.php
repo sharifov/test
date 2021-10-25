@@ -28,13 +28,13 @@ class AssignUserLocker
 
         $result = (bool)$this->connection->setnx(self::KEY, $microtime);
 
-        \Yii::info([
-            'message' => 'Try to lock for assign users',
-            'result' => $result,
-            'leadId' => $leadId,
-            'microtime' => $microtime,
-            'time' => $time->format('Y-m-d H:i:s'),
-        ], 'info\AssignUserLocker:lock');
+//        \Yii::info([
+//            'message' => 'Try to lock for assign users',
+//            'result' => $result,
+//            'leadId' => $leadId,
+//            'microtime' => $microtime,
+//            'time' => $time->format('Y-m-d H:i:s'),
+//        ], 'info\AssignUserLocker:lock');
 
         if ($result === false) {
             $value = $this->connection->get(self::KEY);
