@@ -52,8 +52,8 @@ use yii\widgets\ActiveForm;
   <div class="col-md-6">
       <?php
         try {
-            $model->pqor_details = JsonHelper::encode($model->pqor_details);
-            echo $form->field($model, 'pqor_details')->widget(
+            $model->pqor_data_json = JsonHelper::encode($model->pqor_data_json);
+            echo $form->field($model, 'pqor_data_json')->widget(
                 JsonEditor::class,
                 [
                   'clientOptions' => [
@@ -65,7 +65,7 @@ use yii\widgets\ActiveForm;
                 ]
             );
         } catch (Exception $exception) {
-            echo $form->field($model, 'pqor_details')->textarea(['rows' => 6]);
+            echo $form->field($model, 'pqor_data_json')->textarea(['rows' => 6]);
         }
         ?>
   </div>

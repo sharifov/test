@@ -291,7 +291,7 @@ class VoluntaryRefundService
                     $auxiliaryOptionsForm->amount,
                     $auxiliaryOptionsForm->refundable,
                     $auxiliaryOptionsForm->refundAllow,
-                    $auxiliaryOptionsForm->details
+                    $auxiliaryOptionsForm->toArray()
                 );
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
             }

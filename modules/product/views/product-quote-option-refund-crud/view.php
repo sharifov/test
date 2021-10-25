@@ -59,9 +59,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqor_created_dt:byUserDateTime',
             'pqor_updated_dt:byUserDateTime',
             [
-                'attribute' => 'pqor_details',
+                'attribute' => 'pqor_data_json',
                 'value' => static function (ProductQuoteOptionRefund $model) {
-                    return '<pre>' . VarDumper::dumpAsString(JsonHelper::decode($model->pqor_details), 10, true) . '</pre>';
+                    return '<pre>' . VarDumper::dumpAsString(JsonHelper::decode($model->pqor_data_json), 10, true) . '</pre>';
                 },
                 'format' => 'raw',
             ],

@@ -41,7 +41,7 @@ use yii\db\ActiveRecord;
  * @property Currency $clientCurrency
  * @property int $pqor_order_refund_id [int]
  * @property bool $pqor_refund_allow [tinyint(1)]
- * @property string $pqor_details [json]
+ * @property string $pqor_data_json [json]
  */
 class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
 {
@@ -68,7 +68,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             ],
             'stringToJson' => [
                 'class' => StringToJsonBehavior::class,
-                'jsonColumn' => 'pqor_details',
+                'jsonColumn' => 'pqor_data_json',
             ],
         ];
     }
@@ -99,9 +99,9 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             [['pqor_product_quote_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteRefund::class, 'targetAttribute' => ['pqor_product_quote_refund_id' => 'pqr_id']],
             [['pqor_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_updated_user_id' => 'id']],
             [['pqor_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pqor_client_currency' => 'cur_code']],
-            ['pqor_details', 'safe'],
-            ['pqor_details', 'trim'],
-            ['pqor_details', CheckJsonValidator::class],
+            ['pqor_data_json', 'safe'],
+            ['pqor_data_json', 'trim'],
+            ['pqor_data_json', CheckJsonValidator::class],
         ];
     }
 
@@ -127,7 +127,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             'pqor_updated_user_id' => 'Updated User ID',
             'pqor_created_dt' => 'Created Dt',
             'pqor_updated_dt' => 'Updated Dt',
-            'pqor_details' => 'Details',
+            'pqor_data_json' => 'Data',
         ];
     }
 
@@ -201,7 +201,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             },
             "refundable" => 'pqor_client_refund_amount',
             "details" => static function (self $model) {
-                return JsonHelper::decode($model->pqor_details);
+                return JsonHelper::decode($model->pqor_data_json)['details'] ?? [];
             },
             "status" => static function (self $model) {
                 return null;
@@ -225,7 +225,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
         ?float $clientSellingPrice,
         ?float $clientRefundAmount,
         bool $refundAllow,
-        array $details
+        array $data
     ): self {
         $self = new self();
         $self->pqor_order_refund_id = $orderRefundId;
@@ -240,7 +240,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
         $self->pqor_client_selling_price = $clientSellingPrice;
         $self->pqor_client_refund_amount = $clientRefundAmount;
         $self->pqor_refund_allow = $refundAllow;
-        $self->pqor_details = $details;
+        $self->pqor_data_json = $data;
         return $self;
     }
 }

@@ -56,9 +56,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqor_client_refund_amount',
             'pqor_refund_allow:booleanByLabel',
             [
-                'attribute' => 'pqor_details',
+                'attribute' => 'pqor_data_json',
                 'value' => static function (ProductQuoteOptionRefund $model) {
-                    $content = '<p>' . StringHelper::truncate(JsonHelper::encode($model->pqor_details), 216, '...', null, true) . '</p>';
+                    $content = '<p>' . StringHelper::truncate(JsonHelper::encode($model->pqor_data_json), 216, '...', null, true) . '</p>';
                     $content .= Html::a(
                         '<i class="fas fa-eye"></i> details</a>',
                         null,
@@ -68,9 +68,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             'onclick' => '(function ( $event ) { $("#data_' . $model->pqor_id . '").toggle(); })();',
                         ]
                     );
-                    $content .= $model->pqor_details ?
+                    $content .= $model->pqor_data_json ?
                         '<pre id="data_' . $model->pqor_id . '" style="display: none;">' .
-                        VarDumper::dumpAsString(JsonHelper::decode($model->pqor_details), 10, true) . '</pre>' : '-';
+                        VarDumper::dumpAsString(JsonHelper::decode($model->pqor_data_json), 10, true) . '</pre>' : '-';
 
                     return $content;
                 },
