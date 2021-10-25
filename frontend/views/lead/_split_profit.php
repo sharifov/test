@@ -39,14 +39,8 @@ $(function(){
     });
     mainAgentProfitVal = $mainAgentProfit
     mainAgentPercentVal = $mainAgentPercent
-// console.log(mainAgentProfitVal);
-// console.log(mainAgentPercentVal);
-
-    //mainAgentProfit();
 });
 function mainAgentProfit() {
-console.log(mainAgentProfitVal);    
-console.log(mainAgentPercentVal);    
     $('#main-agent-profit').html(mainAgentProfitVal);
     $('#main-agent-percent').html(mainAgentPercentVal);
     $('.owner-amound').html(mainAgentProfitVal);
@@ -134,14 +128,13 @@ $this->registerJs($js);?>
     });
 
     // remove split button
-    $(document).on('click', '.remove-split-button', function (e) {
+    $('body').off('click', '.remove-split-button').on('click', '.remove-split-button', function (e) {
         e.preventDefault();
         var amoundDiv = $(this).parent('div').prev();
         var percentDiv = $('input', amoundDiv.prev());
 
         mainAgentProfitVal = mainAgentProfitVal + parseFloat(amoundDiv.text().trim());
         mainAgentPercentVal = mainAgentPercentVal + parseFloat(percentDiv.val());
-console.log('tut', mainAgentPercentVal);
         $(this).closest('div.split-row').remove();
         split_k -= 1;
         mainAgentProfit();
