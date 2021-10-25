@@ -308,6 +308,7 @@ class ClientChatController extends FController
     public function actionDetail(int $id): string
     {
         try {
+            $memory = memory_get_usage();
             $employee = Auth::user();
             $chatsRestriction = ClientChat::find()
                 ->select(['cch_id'])
@@ -352,6 +353,16 @@ class ClientChatController extends FController
             $data[$searchModelFeedback->formName()]['ccf_client_chat_id'] = $id;
             $dataProviderFeedback = $searchModelFeedback->search($data);
             $dataProviderFeedback->setPagination(['pageSize' => 20]);
+
+            $memory = memory_get_usage() - $memory;
+            $name = array('bite', 'K', 'M', 'G');
+            $i = 0;
+            while (floor($memory / 1024) > 0) {
+                $i++;
+                $memory /= 1024;
+            }
+            $message = 'Used memory: ' . round($memory, 2) . ' ' . $name[$i];
+            Yii::info($message, 'info\ClientChatController::actionDetail');
 
             return $this->render('detail', [
                 'model' => $clientChat,
