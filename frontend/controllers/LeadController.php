@@ -396,8 +396,7 @@ class LeadController extends FController
             throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
         }
         $leadForm = new LeadForm($lead);
-        if (
-            $leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
+        if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
             $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
         ) {
             $leadForm->mode = $leadForm::VIEW_MODE;
@@ -1391,68 +1390,47 @@ class LeadController extends FController
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function actionTakeAjax(): array
+    public function actionAjaxTake(): array
     {
-        $result = ['success' => false, 'message' => 'gid parameter not found'];
+        $result = ['success' => false, 'error' => 'GID parameter not found'];
         Yii::$app->response->format = Response::FORMAT_JSON;
         $gid = Yii::$app->request->get('gid');
         if (Yii::$app->request->isAjax && $gid) {
-            $lead = $this->findLeadByGid($gid);
+            if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                $result = ['success' => false, 'error' => 'GID parameter not found'];
 
-            try {
-                $oldStatus = $lead->status;
+                try {
+                    $lead = $this->findLeadByGid($gid);
+                    $oldStatus = $lead->status;
+                    $user = Auth::user();
 
-                /** @var Employee $user */
-                $user = Yii::$app->user->identity;
+                    $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
-                EmployeeAccess::leadAccess($lead, $user);
+                    $this->transaction->wrap(function () use ($lead) {
+                        if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                            $qCall->delete();
+                        }
+                        $this->leadRepository->save($lead);
+                    });
 
-                if ($lead->isCompleted()) {
-                    $result['message'] = 'Lead is completed!';
-                }
-
-                if (!$lead->isAvailableToTake()) {
-                    $result['message'] = 'Lead is unavailable to "Take" now!';
-                }
-
-                $fromStatuses = [];
-                if ($lead->isBookFailed()) {
-                    $fromStatuses = [Lead::STATUS_BOOK_FAILED];
-                }
-
-                $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], $fromStatuses);
-                if (!$isAccessNewLeadByFrequency['access']) {
-                    $result['message'] = 'Access is denied (frequency)';
-                }
-
-                $lead->processing($user->id, Yii::$app->user->id, 'Take');
-
-                $this->transaction->wrap(function () use ($lead) {
-                    if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
-                        $qCall->delete();
+                    if ($oldStatus === Lead::STATUS_PENDING) {
+                        $leadUserConversion = LeadUserConversion::create(
+                            $lead->id,
+                            $user->getId(),
+                            LeadUserConversionDictionary::DESCRIPTION_TAKE
+                        );
+                        (new LeadUserConversionRepository())->save($leadUserConversion);
                     }
-                    $this->leadRepository->save($lead);
-                });
-
-                if ($oldStatus === Lead::STATUS_PENDING) {
-                    $leadUserConversion = LeadUserConversion::create(
-                        $lead->id,
-                        $user->getId(),
-                        LeadUserConversionDictionary::DESCRIPTION_TAKE
-                    );
-                    (new LeadUserConversionRepository())->save($leadUserConversion);
+                } catch (\RuntimeException | \DomainException $exception) {
+                    Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::DomainException');
+                    $result['error'] = $exception->getMessage();
+                } catch (\Throwable $throwable) {
+                    Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:Throwable');
+                    $result['error'] = $throwable->getMessage();
                 }
-                $result['success'] = true;
-            } catch (\RuntimeException | \DomainException $exception) {
-                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionTakeAjax::exception');
-                $result['message'] = stripslashes(VarDumper::dumpAsString($exception->getMessage()));
-            } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionTakeAjax:throwable');
-                $result['message'] = 'Internal Server Error';
-                throw $throwable;
+            } else {
+                $result = ['success' => false, 'error' => 'Access Denied!'];
             }
-
-            return $result;
         }
 
         return $result;

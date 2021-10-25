@@ -1572,7 +1572,7 @@ refreshUserSelectedState();
 
 $(document).on('click', '#take_button', function(e) {
    $.ajax({
-        url: '/lead/take-ajax/',
+        url: '/lead/ajax-take/',
         data: { gid: $(this).data('gid') }
    })
        .done(function(data) {
@@ -1580,7 +1580,7 @@ $(document).on('click', '#take_button', function(e) {
                createNotify('Success', 'Lead taken successfully.', 'success');
                $('#take_button').hide();
            } else {
-               createNotify('Error', 'Lead was NOT taken! ' + data.message, 'error');
+               createNotify('Error', 'Lead was NOT taken! ' + data.error, 'error');
            }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {

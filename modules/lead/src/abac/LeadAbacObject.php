@@ -233,6 +233,19 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES = [
+        'optgroup' => self::OPTGROUP_ENV_USER,
+        'id' => self::NS . 'canTakeByFrequencyMinutes',
+        'field' => 'canTakeByFrequencyMinutes',
+        'label' => 'Can Take By Frequency Minutes',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_IS_IN_DEPARTMENT = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => self::NS . 'isInDepartment',
@@ -346,6 +359,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_APPLIED_QUOTE,
             self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
             self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES
         ],
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ATTR_LEAD_IS_OWNER],

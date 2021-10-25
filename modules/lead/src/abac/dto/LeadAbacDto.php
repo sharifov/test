@@ -17,6 +17,7 @@ use yii\helpers\VarDumper;
  * @property bool $isShiftTime
  * @property bool $withinPersonalTakeLimits
  * @property bool $hasAppliedQuote
+ * @property bool $canTakeByFrequencyMinutes
  * @property int|null $status_id
  */
 class LeadAbacDto extends \stdClass
@@ -31,6 +32,7 @@ class LeadAbacDto extends \stdClass
     public bool $hasAppliedQuote;
     public bool $isInProject;
     public bool $isInDepartment;
+    public bool $canTakeByFrequencyMinutes;
 
 
     /**
@@ -59,6 +61,13 @@ class LeadAbacDto extends \stdClass
                 $this->hasAppliedQuote = $lead->hasAppliedQuote();
                 $this->isShiftTime = $user->checkShiftTime();
                 $this->withinPersonalTakeLimits = $user->accessTakeNewLead();
+
+                $fromStatuses = [];
+                if ($lead->isBookFailed()) {
+                    $fromStatuses = [Lead::STATUS_BOOK_FAILED];
+                }
+                $isAccessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], $fromStatuses);
+                $this->canTakeByFrequencyMinutes = $isAccessLeadByFrequency['access'];
             }
 
             $this->status_id = $lead->status;

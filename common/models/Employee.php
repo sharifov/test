@@ -2153,8 +2153,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $access = true;
         $takeDt = new \DateTime();
 
-        if (
-            ($params = $this->userParams)
+        if (($params = $this->userParams)
             && ($frequencyMinutes = $params->up_frequency_minutes)
             && ($lastTakenDt = $this->getLastTakenLeadDt($flowDescriptions, $fromStatuses))
         ) {
