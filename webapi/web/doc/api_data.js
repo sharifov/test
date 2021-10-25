@@ -5378,8 +5378,16 @@ define({ "api": [
             "type": "string",
             "size": "0..10",
             "optional": false,
-            "field": "booking_id",
+            "field": "bookingId",
             "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..32",
+            "optional": false,
+            "field": "refundRequestGid",
+            "description": "<p>Refund Request Gid</p>"
           },
           {
             "group": "Parameter",
@@ -5463,8 +5471,16 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country",
+            "description": "<p>Country (for example &quot;United States&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
             "size": "10",
-            "optional": true,
+            "optional": false,
             "field": "billing.zip",
             "description": "<p>Zip</p>"
           },
@@ -5472,7 +5488,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "string",
             "size": "20",
-            "optional": true,
+            "optional": false,
             "field": "billing.contact_phone",
             "description": "<p>Contact phone</p>"
           },
@@ -5480,7 +5496,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "string",
             "size": "160",
-            "optional": true,
+            "optional": false,
             "field": "billing.contact_email",
             "description": "<p>Contact email</p>"
           },
@@ -5517,10 +5533,10 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "2",
+            "size": "50",
             "optional": false,
             "field": "payment_request.method_key",
-            "description": "<p>Method key (for example &quot;cc&quot;)</p>"
+            "description": "<p>Method key (for example &quot;card&quot;)</p>"
           },
           {
             "group": "Parameter",
@@ -5548,7 +5564,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "string",
             "size": "..50",
-            "optional": true,
+            "optional": false,
             "field": "payment_request.method_data.card.holder_name",
             "description": "<p>Holder name</p>"
           },
@@ -5579,7 +5595,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"booking_id\": \"XXXXXXX\",\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"cc\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
+          "content": "{\n    \"bookingId\": \"XXXXXXX\",\n    \"refundGid\": \"6fcb275a1cd60b3a1e93bdda093e383b\",\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"country\": \"United States\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"card\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
           "type": "json"
         }
       ]
@@ -5588,7 +5604,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"code\": \"13200\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"code\": \"13200\",\n    \"saleData\": {\n         \"id\": 12345,\n         \"bookingId\": \"P12OJ12\"\n    },\n    \"refund\": {\n        \"id\": 54321,\n        \"orderId\": \"RET-12321AD\"\n    }\n}",
           "type": "json"
         }
       ]
@@ -5597,12 +5613,17 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response Load Data:",
-          "content": "HTTP/1.1 200 OK\n {\n    \"status\": 400,\n    \"message\": \"Error\",\n    \"errors\": [\n        \"Load data error\"\n    ],\n    \"code\": \"13106\"\n }",
+          "content": "HTTP/1.1 200 OK\n {\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"name\": \"Client Error: Bad Request\",\n     \"code\": 13106,\n     \"type\": \"app\",\n     \"errors\": []\n }",
           "type": "json"
         },
         {
           "title": "Error-Response Validation:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"billing.first_name\": [\n            \"First Name cannot be blank.\"\n        ],\n        \"billing.last_name\": [\n            \"Last Name cannot be blank.\"\n        ],\n        \"billing.address_line1\": [\n            \"Address Line1 cannot be blank.\"\n        ],\n        \"billing.city\": [\n            \"City cannot be blank.\"\n        ],\n        \"billing.country_id\": [\n            \"Country Id cannot be blank.\"\n        ],\n        \"payment_request.method_key\": [\n            \"Method Key cannot be blank.\"\n        ],\n        \"payment_request.currency\": [\n            \"Currency cannot be blank.\"\n        ]\n    }\n}",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n     \"bookingId\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response Error From BO:",
+          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 422,\n     \"message\": \"FlightRequest is not found.\",\n     \"name\": \"BO Request Failed\",\n     \"code\": \"15411\",\n     \"errors\": [],\n     \"type\": \"app_bo\"\n}",
           "type": "json"
         }
       ]
@@ -5650,7 +5671,7 @@ define({ "api": [
             "type": "string",
             "size": "0..10",
             "optional": false,
-            "field": "booking_id",
+            "field": "bookingId",
             "description": "<p>Booking ID</p>"
           },
           {
@@ -6017,7 +6038,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"booking_id\": \"XXXXXXX\",\n    \"refund\": {\n        \"orderId\": \"RET-12321AD\",\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"totalPaid\": 305.50,\n        \"currency\": \"USD\",\n        \"tickets\": [\n            {\n                \"number\": \"465723459\",\n                \"airlinePenalty\": 25.36,\n                \"processingFee\": 25,\n                \"refundAmount\": 52.65,\n                \"sellingPrice\": 150,\n                \"status\": \"issued\"\n            }\n        ],\n        \"auxiliaryOptions\": [\n            {\n                \"type\": \"package\",\n                \"amount\": 25.00,\n                \"refundable\": 15.00,\n                \"status\": \"paid\",\n                \"refundAllow\": true,\n                \"details\": {}\n            }\n        ]\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"country\": \"United States\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"card\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
+          "content": "{\n    \"bookingId\": \"XXXXXXX\",\n    \"refund\": {\n        \"orderId\": \"RET-12321AD\",\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"totalPaid\": 305.50,\n        \"currency\": \"USD\",\n        \"tickets\": [\n            {\n                \"number\": \"465723459\",\n                \"airlinePenalty\": 25.36,\n                \"processingFee\": 25,\n                \"refundAmount\": 52.65,\n                \"sellingPrice\": 150,\n                \"status\": \"issued\"\n            }\n        ],\n        \"auxiliaryOptions\": [\n            {\n                \"type\": \"package\",\n                \"amount\": 25.00,\n                \"refundable\": 15.00,\n                \"status\": \"paid\",\n                \"refundAllow\": true,\n                \"details\": {}\n            }\n        ]\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"country\": \"United States\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"card\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
           "type": "json"
         }
       ]
@@ -6040,7 +6061,7 @@ define({ "api": [
         },
         {
           "title": "Error-Response Validation:",
-          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n     \"booking_id\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n     \"bookingId\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
           "type": "json"
         },
         {
@@ -6093,7 +6114,7 @@ define({ "api": [
             "type": "string",
             "size": "0..10",
             "optional": false,
-            "field": "booking_id",
+            "field": "bookingId",
             "description": "<p>Booking ID</p>"
           }
         ]
@@ -6101,7 +6122,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"booking_id\": \"XXXXXXX\"\n}",
+          "content": "{\n    \"bookingId\": \"XXXXXXX\"\n}",
           "type": "json"
         }
       ]
@@ -6124,7 +6145,7 @@ define({ "api": [
         },
         {
           "title": "Error-Response Validation:",
-          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n  \"booking_id\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n  \"bookingId\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
           "type": "json"
         }
       ]

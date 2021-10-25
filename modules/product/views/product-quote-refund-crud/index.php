@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'pqr_id',
+            'pqr_gid',
             'pqr_order_refund_id',
             'pqr_case_id',
             'pqr_product_quote_id',

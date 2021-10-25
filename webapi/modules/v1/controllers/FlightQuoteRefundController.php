@@ -89,11 +89,11 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{0..10}}    booking_id          Booking ID
+     * @apiParam {string{0..10}}    bookingId          Booking ID
      *
      * @apiParamExample {json} Request-Example:
      *  {
-     *      "booking_id": "XXXXXXX"
+     *      "bookingId": "XXXXXXX"
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -161,7 +161,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *   "message": "Validation error",
      *   "name": "Client Error: Unprocessable Entity",
      *   "errors": {
-     *   "booking_id": [
+     *   "bookingId": [
      *          "Booking Id should contain at most 10 characters."
      *      ]
      *   },
@@ -201,10 +201,10 @@ class FlightQuoteRefundController extends ApiBaseController
         }
 
         try {
-            $productQuoteRefund = ProductQuoteRefundQuery::getByBookingId($voluntaryRefundInfoForm->booking_id);
+            $productQuoteRefund = ProductQuoteRefundQuery::getByBookingId($voluntaryRefundInfoForm->bookingId);
             if (!$productQuoteRefund) {
                 throw new \RuntimeException(
-                    'ProductQuoteRefund not found by BookingId(' . $voluntaryRefundInfoForm->booking_id . ')',
+                    'ProductQuoteRefund not found by BookingId(' . $voluntaryRefundInfoForm->bookingId . ')',
                     ApiCodeException::DATA_NOT_FOUND
                 );
             }
@@ -271,7 +271,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{0..10}}        booking_id          Booking ID
+     * @apiParam {string{0..10}}        bookingId          Booking ID
      * @apiParam {object}               refund                            Refund Data
      * @apiParam {string{..3}}          refund.currency                   Currency
      * @apiParam {string}               refund.orderId                    OTA Order Id
@@ -322,7 +322,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example:
      *  {
-     *      "booking_id": "XXXXXXX",
+     *      "bookingId": "XXXXXXX",
      *      "refund": {
      *          "orderId": "RET-12321AD",
      *          "processingFee": 12.5,
@@ -417,7 +417,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *   "message": "Validation error",
      *   "name": "Client Error: Unprocessable Entity",
      *   "errors": {
-     *      "booking_id": [
+     *      "bookingId": [
      *          "Booking Id should contain at most 10 characters."
      *      ]
      *   },
@@ -485,7 +485,7 @@ class FlightQuoteRefundController extends ApiBaseController
             }
 
             $flightRequest = FlightRequest::create(
-                $voluntaryRefundCreateForm->booking_id,
+                $voluntaryRefundCreateForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
                 $post,
                 $project->id,
@@ -493,7 +493,7 @@ class FlightQuoteRefundController extends ApiBaseController
             );
             $flightRequest = $this->flightRequestRepository->save($flightRequest);
 
-            if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->booking_id)) {
+            if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->bookingId)) {
                 if ($productQuote->isChangeable()) {
                     if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
                         throw new \DomainException('Quote not available for refund', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
@@ -596,7 +596,8 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{0..10}}        booking_id          Booking ID
+     * @apiParam {string{0..10}}        bookingId          Booking ID
+     * @apiParam {string{..32}}         refundRequestGid          Refund Request Gid
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -607,25 +608,27 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{30}}           billing.city                 City
      * @apiParam {string{40}}           [billing.state]              State
      * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
-     * @apiParam {string{10}}           [billing.zip]                Zip
-     * @apiParam {string{20}}           [billing.contact_phone]      Contact phone
-     * @apiParam {string{160}}          [billing.contact_email]      Contact email
+     * @apiParam {string{2}}            billing.country             Country (for example "United States")
+     * @apiParam {string{10}}           billing.zip                Zip
+     * @apiParam {string{20}}           billing.contact_phone      Contact phone
+     * @apiParam {string{160}}          billing.contact_email      Contact email
      * @apiParam {string{60}}           [billing.contact_name]       Contact name
      * @apiParam {object}               payment_request                      Payment request
      * @apiParam {number}               payment_request.amount               Customer must pay for initiate refund process
      * @apiParam {string{3}}            payment_request.currency             Currency code
-     * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")
+     * @apiParam {string{50}}            payment_request.method_key           Method key (for example "card")
      * @apiParam {object}               payment_request.method_data          Method data
      * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
      * @apiParam {string{..20}}           payment_request.method_data.card.number          Number
-     * @apiParam {string{..50}}           [payment_request.method_data.card.holder_name]   Holder name
+     * @apiParam {string{..50}}           payment_request.method_data.card.holder_name   Holder name
      * @apiParam {int}                  payment_request.method_data.card.expiration_month       Month
      * @apiParam {int}                  payment_request.method_data.card.expiration_year        Year
      * @apiParam {string{..4}}           payment_request.method_data.card.cvv             CVV
      *
      * @apiParamExample {json} Request-Example:
      *  {
-     *      "booking_id": "XXXXXXX",
+     *      "bookingId": "XXXXXXX",
+     *      "refundGid": "6fcb275a1cd60b3a1e93bdda093e383b",
      *      "billing": {
      *          "first_name": "John",
      *          "last_name": "Doe",
@@ -633,6 +636,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *          "address_line1": "1013 Weda Cir",
      *          "address_line2": "",
      *          "country_id": "US",
+     *          "country": "United States",
      *          "city": "Mayfield",
      *          "state": "KY",
      *          "zip": "99999",
@@ -642,7 +646,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *          "contact_name": "Test Name"
      *      },
      *      "payment_request": {
-     *          "method_key": "cc",
+     *          "method_key": "card",
      *          "currency": "USD",
      *          "method_data": {
      *              "card": {
@@ -662,48 +666,51 @@ class FlightQuoteRefundController extends ApiBaseController
      * {
      *     "status": 200,
      *     "message": "OK",
-     *     "code": "13200"
+     *     "code": "13200",
+     *     "saleData": {
+     *          "id": 12345,
+     *          "bookingId": "P12OJ12"
+     *     },
+     *     "refund": {
+     *         "id": 54321,
+     *         "orderId": "RET-12321AD"
+     *     }
      * }
      *
      * @apiErrorExample {json} Error-Response Load Data:
      * HTTP/1.1 200 OK
      *  {
-     *     "status": 400,
-     *     "message": "Error",
-     *     "errors": [
-     *         "Load data error"
-     *     ],
-     *     "code": "13106"
+     *      "status": 400,
+     *      "message": "Load data error",
+     *      "name": "Client Error: Bad Request",
+     *      "code": 13106,
+     *      "type": "app",
+     *      "errors": []
      *  }
      *
      * @apiErrorExample {json} Error-Response Validation:
      * HTTP/1.1 200 OK
      * {
-     *     "status": 422,
-     *     "message": "Validation error",
-     *     "errors": {
-     *         "billing.first_name": [
-     *             "First Name cannot be blank."
-     *         ],
-     *         "billing.last_name": [
-     *             "Last Name cannot be blank."
-     *         ],
-     *         "billing.address_line1": [
-     *             "Address Line1 cannot be blank."
-     *         ],
-     *         "billing.city": [
-     *             "City cannot be blank."
-     *         ],
-     *         "billing.country_id": [
-     *             "Country Id cannot be blank."
-     *         ],
-     *         "payment_request.method_key": [
-     *             "Method Key cannot be blank."
-     *         ],
-     *         "payment_request.currency": [
-     *             "Currency cannot be blank."
-     *         ]
-     *     }
+     *   "status": 422,
+     *   "message": "Validation error",
+     *   "name": "Client Error: Unprocessable Entity",
+     *   "errors": {
+     *      "bookingId": [
+     *          "Booking Id should contain at most 10 characters."
+     *      ]
+     *   },
+     *   "code": 13107,
+     *   "type": "app"
+     * }
+     * @apiErrorExample {json} Error-Response Error From BO:
+     * HTTP/1.1 200 OK
+     * {
+     *      "status": 422,
+     *      "message": "FlightRequest is not found.",
+     *      "name": "BO Request Failed",
+     *      "code": "15411",
+     *      "errors": [],
+     *      "type": "app_bo"
      * }
      */
     public function actionConfirm()
@@ -712,23 +719,40 @@ class FlightQuoteRefundController extends ApiBaseController
             throw new MethodNotAllowedHttpException('Method not allowed', ApiCodeException::REQUEST_IS_NOT_POST);
         }
 
+        $this->startApiLog($this->action->uniqueId, true);
+
         $post = \Yii::$app->request->post();
+
+        if (!$project = $this->apiProject) {
+            return $this->endApiLog(new ErrorResponse(
+                new MessageMessage('Not found Project with current user: ' . $this->apiUser->au_api_username),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new ErrorsMessage('Not found Project with current user: ' . $this->apiUser->au_api_username),
+                new CodeMessage((int)ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER),
+                new ErrorName('Not found Project'),
+                new TypeMessage('app')
+            ));
+        }
 
         $voluntaryRefundConfirmForm = new VoluntaryRefundConfirmForm();
         if (!$voluntaryRefundConfirmForm->load($post)) {
-            return new ErrorResponse(
-                new StatusCodeMessage(400),
-                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
-                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
-            );
+            return $this->endApiLog(new ErrorResponse(
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::BAD_REQUEST)),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new CodeMessage((int)ApiCodeException::POST_DATA_NOT_LOADED),
+                new TypeMessage('app')
+            ));
         }
         if (!$voluntaryRefundConfirmForm->validate()) {
-            return new ErrorResponse(
-                new StatusCodeMessage(422),
+            return $this->endApiLog(new ErrorResponse(
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($voluntaryRefundConfirmForm->getErrors()),
-                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
-            );
+                new CodeMessage((int)ApiCodeException::FAILED_FORM_VALIDATE),
+                new TypeMessage('app')
+            ));
         }
 
         try {
@@ -740,32 +764,35 @@ class FlightQuoteRefundController extends ApiBaseController
 //                );
 //            }
 
-            return new SuccessResponse(
-//                new DataMessage([
-//                    'productQuoteRefund' => $productQuoteRefund->setFields($productQuoteRefund->getApiDataMapped())->toArray(),
-//                ]),
-                new CodeMessage(ApiCodeException::SUCCESS)
-            );
+            return $this->endApiLog(new SuccessResponse(
+                new CodeMessage(ApiCodeException::SUCCESS),
+                new Message('saleData', []),
+                new Message('refundData', [])
+            ));
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
                 'FlightQuoteRefundController:actionConfirm:Warning'
             );
-            return new ErrorResponse(
-                new StatusCodeMessage(422),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage($throwable->getCode())
-            );
+            return $this->endApiLog(new ErrorResponse(
+                new MessageMessage($throwable->getMessage()),
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new CodeMessage((int)$throwable->getCode()),
+                new TypeMessage('app')
+            ));
         } catch (\Throwable $throwable) {
             \Yii::error(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
                 'FlightQuoteRefundController:actionConfirm:Throwable'
             );
-            return new ErrorResponse(
-                new StatusCodeMessage(500),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage($throwable->getCode())
-            );
+            return $this->endApiLog(new ErrorResponse(
+                new MessageMessage(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR)),
+                new ErrorName('Server Error'),
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
+                new CodeMessage((int)$throwable->getCode()),
+                new TypeMessage('app')
+            ));
         }
     }
 

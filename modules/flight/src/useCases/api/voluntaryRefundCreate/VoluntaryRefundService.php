@@ -126,9 +126,9 @@ class VoluntaryRefundService
     {
         try {
             $caseCategoryKey = self::getCaseCategoryKey();
-            if (!$case = CasesQuery::getLastActiveCaseByBookingId($voluntaryRefundCreateForm->booking_id, $caseCategoryKey)) {
+            if (!$case = CasesQuery::getLastActiveCaseByBookingId($voluntaryRefundCreateForm->bookingId, $caseCategoryKey)) {
                 $case = $this->casesCreateService->createRefund(
-                    $voluntaryRefundCreateForm->booking_id,
+                    $voluntaryRefundCreateForm->bookingId,
                     $projectId,
                     $caseCategoryKey
                 );
@@ -139,7 +139,7 @@ class VoluntaryRefundService
         }
 
         try {
-            $saleData = $this->getCaseSaleData($voluntaryRefundCreateForm->booking_id, $case, CaseEventLog::VOLUNTARY_REFUND_CREATE);
+            $saleData = $this->getCaseSaleData($voluntaryRefundCreateForm->bookingId, $case, CaseEventLog::VOLUNTARY_REFUND_CREATE);
 
             $orderCreateSaleForm = new OrderCreateFromSaleForm();
             if (!$orderCreateSaleForm->load($saleData)) {
