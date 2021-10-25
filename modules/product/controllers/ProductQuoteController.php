@@ -223,7 +223,7 @@ class ProductQuoteController extends FController
                 $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
                 $emailData['reprotection_quote'] = $quote->serialize();
                 $emailData['original_quote'] = $originalQuote->serialize();
-                $bookingId = ArrayHelper::getValue($emailData, 'original_quote.data.flights.0.fqf_booking_id', '');
+                $bookingId = ArrayHelper::getValue($emailData, 'original_quote.data.flights.0.fqf_booking_id', '') ?? '';
                 $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
                 if (!empty($emailData['reprotection_quote']['data'])) {
                     ArrayHelper::remove($emailData['reprotection_quote']['data'], 'fq_origin_search_data');
