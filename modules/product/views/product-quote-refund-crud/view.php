@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'pqr_id',
+            'pqr_gid',
             'pqr_order_refund_id',
             'pqr_product_quote_id',
             'pqr_selling_price',

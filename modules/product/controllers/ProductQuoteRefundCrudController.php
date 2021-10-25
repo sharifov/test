@@ -69,8 +69,11 @@ class ProductQuoteRefundCrudController extends FController
         $model = new ProductQuoteRefund();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->pqr_id]);
+            if ($model->load($this->request->post())) {
+                $model->pqr_gid = ProductQuoteRefund::generateGid();
+                if ($model->save()) {
+                    return $this->redirect(['view', 'id' => $model->pqr_id]);
+                }
             }
         } else {
             $model->loadDefaultValues();

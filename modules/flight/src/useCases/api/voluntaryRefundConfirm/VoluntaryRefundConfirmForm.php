@@ -13,7 +13,7 @@ use yii\helpers\ArrayHelper;
  * Class VoluntaryRefundCreateForm
  * @package modules\flight\src\useCases\api\voluntaryRefundCreate
  *
- * @property $booking_id
+ * @property $bookingId
  * @property $payment_request
  * @property $refund
  * @property $billing
@@ -23,7 +23,7 @@ use yii\helpers\ArrayHelper;
  */
 class VoluntaryRefundConfirmForm extends Model
 {
-    public $booking_id;
+    public $bookingId;
     public $payment_request;
     public $billing;
 
@@ -33,8 +33,8 @@ class VoluntaryRefundConfirmForm extends Model
     public function rules(): array
     {
         return [
-            [['booking_id'], 'required'],
-            [['booking_id'], 'string', 'max' => 10],
+            [['bookingId'], 'required'],
+            [['bookingId'], 'string', 'max' => 10],
 
             [['payment_request'], 'safe'],
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],

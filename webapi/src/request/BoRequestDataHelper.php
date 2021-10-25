@@ -10,7 +10,7 @@ class BoRequestDataHelper
     {
         $data = [
             'apiKey' => $projectApikey,
-            'bookingId' => $form->booking_id,
+            'bookingId' => $form->bookingId,
         ];
         $data['refund'] = [
             'orderId' => $form->refundForm->orderId,

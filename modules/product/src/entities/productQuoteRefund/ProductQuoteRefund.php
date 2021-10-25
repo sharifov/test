@@ -48,6 +48,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteOptionRefund[] $productQuoteOptionRefunds
  * @property Cases $case
  * @property string $pqr_data_json [json]
+ * @property string $pqr_gid [varchar(32)]
  */
 class ProductQuoteRefund extends \yii\db\ActiveRecord
 {
@@ -65,6 +66,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         self::TYPE_RE_PROTECTION => 'SC',
         self::TYPE_VOLUNTARY_REFUND => 'Vol'
     ];
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+    }
 
     public static function create(
         $orderRefundId,
@@ -86,6 +92,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $refund->pqr_client_selling_price = CurrencyHelper::roundUp($refund->pqr_selling_price * $refund->pqr_client_currency_rate);
         $refund->pqr_client_refund_amount = CurrencyHelper::roundUp($refund->pqr_refund_amount * $refund->pqr_client_currency_rate);
         $refund->pqr_case_id = $caseId;
+        $refund->pqr_gid = self::generateGid();
         return $refund;
     }
 
@@ -411,5 +418,13 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public function getStatusLabel(): string
     {
         return $this->pqr_status_id ? ProductQuoteRefundStatus::asFormat($this->pqr_status_id) : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateGid(): string
+    {
+        return md5(uniqid('pqr', true));
     }
 }
