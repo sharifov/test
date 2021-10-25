@@ -181,17 +181,21 @@ class FlightQuoteRefundController extends ApiBaseController
         $voluntaryRefundInfoForm = new VoluntaryRefundInfoForm();
         if (!$voluntaryRefundInfoForm->load($post)) {
             return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(400),
-                new ErrorsMessage(Messages::LOAD_DATA_ERROR),
-                new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::BAD_REQUEST)),
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new CodeMessage((int)ApiCodeException::POST_DATA_NOT_LOADED),
+                new TypeMessage('app')
             ));
         }
         if (!$voluntaryRefundInfoForm->validate()) {
             return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(422),
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($voluntaryRefundInfoForm->getErrors()),
-                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+                new CodeMessage((int)ApiCodeException::FAILED_FORM_VALIDATE),
+                new TypeMessage('app')
             ));
         }
 
@@ -209,21 +213,19 @@ class FlightQuoteRefundController extends ApiBaseController
             $auxiliaryOptions = $productQuoteRefund->productQuoteOptionRefunds;
 
             return $this->endApiLog(new SuccessResponse(
-                new DataMessage([
-                    'refund' => [
-                        'totalPaid' => (float)$productQuoteRefund->pqr_client_selling_price,
-                        'totalAirlinePenalty' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_penalty_amount, $productQuoteRefund->pqr_client_currency_rate),
-                        'totalProcessingFee' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_processing_fee_amount, $productQuoteRefund->pqr_client_currency_rate),
-                        'totalRefundable' => (float)$productQuoteRefund->pqr_client_refund_amount,
-                        'refundCost' => 0.0,
-                        'currency' => $productQuoteRefund->pqr_client_currency,
-                        'tickets' => array_map(static function (ProductQuoteObjectRefund $model) {
-                            return $model->setFields($model->getApiDataMapped())->toArray();
-                        }, $tickets),
-                        'auxiliaryOptions' => array_map(static function (ProductQuoteOptionRefund $model) {
-                            return $model->setFields($model->getApiDataMapped())->toArray();
-                        }, $auxiliaryOptions),
-                    ]
+                new Message('refund', [
+                    'totalPaid' => (float)$productQuoteRefund->pqr_client_selling_price,
+                    'totalAirlinePenalty' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_penalty_amount, $productQuoteRefund->pqr_client_currency_rate),
+                    'totalProcessingFee' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_processing_fee_amount, $productQuoteRefund->pqr_client_currency_rate),
+                    'totalRefundable' => (float)$productQuoteRefund->pqr_client_refund_amount,
+                    'refundCost' => 0.0,
+                    'currency' => $productQuoteRefund->pqr_client_currency,
+                    'tickets' => array_map(static function (ProductQuoteObjectRefund $model) {
+                        return $model->setFields($model->getApiDataMapped())->toArray();
+                    }, $tickets),
+                    'auxiliaryOptions' => array_map(static function (ProductQuoteOptionRefund $model) {
+                        return $model->setFields($model->getApiDataMapped())->toArray();
+                    }, $auxiliaryOptions),
                 ]),
                 new CodeMessage(ApiCodeException::SUCCESS)
             ));
@@ -233,9 +235,11 @@ class FlightQuoteRefundController extends ApiBaseController
                 'FlightQuoteRefundController:actionInfo:Warning'
             );
             return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(422),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage($throwable->getCode())
+                new MessageMessage($throwable->getMessage()),
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new CodeMessage((int)$throwable->getCode()),
+                new TypeMessage('app')
             ));
         } catch (\Throwable $throwable) {
             \Yii::error(
@@ -243,9 +247,11 @@ class FlightQuoteRefundController extends ApiBaseController
                 'FlightQuoteRefundController:actionInfo:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(500),
-                new ErrorsMessage($throwable->getMessage()),
-                new CodeMessage($throwable->getCode())
+                new MessageMessage(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR)),
+                new ErrorName('Server Error'),
+                new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
+                new CodeMessage((int)$throwable->getCode()),
+                new TypeMessage('app')
             ));
         }
     }
