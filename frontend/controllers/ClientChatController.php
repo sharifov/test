@@ -307,61 +307,69 @@ class ClientChatController extends FController
 
     public function actionDetail(int $id): string
     {
-        $employee = Auth::user();
-        $chatsRestriction = ClientChat::find()
-            ->select(['cch_id'])
-            ->andProjectEmployee($employee)
-            ->andChannelEmployee($employee)
-            ->orOwner($employee)
-            ->column();
-        $clientChat = ClientChat::find()->byId($id)->andWhere(['IN', 'cch_id', $chatsRestriction])->one();
+        try {
+            $employee = Auth::user();
+            $chatsRestriction = ClientChat::find()
+                ->select(['cch_id'])
+                ->andProjectEmployee($employee)
+                ->andChannelEmployee($employee)
+                ->orOwner($employee)
+                ->column();
+            $clientChat = ClientChat::find()->byId($id)->andWhere(['IN', 'cch_id', $chatsRestriction])->one();
 
-        if (!$clientChat) {
-            throw new NotFoundHttpException('Client chat not found.');
+            if (!$clientChat) {
+                throw new NotFoundHttpException('Client chat not found.');
+            }
+
+            if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
+            $searchModel = new ClientChatMessageSearch();
+            $data[$searchModel->formName()]['ccm_cch_id'] = $id;
+            $dataProvider = $searchModel->search($data);
+
+            $searchModelNotes = new ClientChatNoteSearch();
+            $data[$searchModelNotes->formName()]['ccn_chat_id'] = $id;
+            $dataProviderNotes = $searchModelNotes->search($data);
+            $dataProviderNotes->setPagination(['pageSize' => 20]);
+
+            if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
+                $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
+            }
+
+            $requestSearch = new ClientChatRequestSearch();
+            $visitorId = '';
+            if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+                $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+            }
+            $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
+            $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
+            $dataProviderRequest = $requestSearch->search($data);
+            $dataProviderRequest->setPagination(['pageSize' => 10]);
+
+            $searchModelFeedback = new ClientChatFeedbackSearch();
+            $data[$searchModelFeedback->formName()]['ccf_client_chat_id'] = $id;
+            $dataProviderFeedback = $searchModelFeedback->search($data);
+            $dataProviderFeedback->setPagination(['pageSize' => 20]);
+
+            return $this->render('detail', [
+                'model' => $clientChat,
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'dataProviderNotes' => $dataProviderNotes,
+                'visitorLog' => $visitorLog ?? null,
+                'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
+                'dataProviderRequest' => $dataProviderRequest,
+                'dataProviderFeedback' => $dataProviderFeedback,
+            ]);
+        } catch (\Exception $exception) {
+            Yii::error(
+                AppHelper::throwableFormatter($exception),
+                'ClientChatController::actionDetail'
+            );
+            return false;
         }
-
-        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
-            throw new ForbiddenHttpException('Access denied.');
-        }
-
-        $searchModel = new ClientChatMessageSearch();
-        $data[$searchModel->formName()]['ccm_cch_id'] = $id;
-        $dataProvider = $searchModel->search($data);
-
-        $searchModelNotes = new ClientChatNoteSearch();
-        $data[$searchModelNotes->formName()]['ccn_chat_id'] = $id;
-        $dataProviderNotes = $searchModelNotes->search($data);
-        $dataProviderNotes->setPagination(['pageSize' => 20]);
-
-        if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
-            $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
-        }
-
-        $requestSearch = new ClientChatRequestSearch();
-        $visitorId = '';
-        if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
-            $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
-        }
-        $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
-        $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
-        $dataProviderRequest = $requestSearch->search($data);
-        $dataProviderRequest->setPagination(['pageSize' => 10]);
-
-        $searchModelFeedback = new ClientChatFeedbackSearch();
-        $data[$searchModelFeedback->formName()]['ccf_client_chat_id'] = $id;
-        $dataProviderFeedback = $searchModelFeedback->search($data);
-        $dataProviderFeedback->setPagination(['pageSize' => 20]);
-
-        return $this->render('detail', [
-            'model' => $clientChat,
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'dataProviderNotes' => $dataProviderNotes,
-            'visitorLog' => $visitorLog ?? null,
-            'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
-            'dataProviderRequest' => $dataProviderRequest,
-            'dataProviderFeedback' => $dataProviderFeedback,
-        ]);
     }
 
     public function actionRoom(int $id): string
