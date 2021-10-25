@@ -23,7 +23,6 @@ class GidBehavior extends Behavior
     {
         return [
             ActiveRecord::EVENT_BEFORE_INSERT => 'gidGenerate',
-            ActiveRecord::EVENT_BEFORE_UPDATE => 'gidGenerate',
         ];
     }
 

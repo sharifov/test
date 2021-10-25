@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'pqc_id',
             'pqc_pq_id',
+            'pqc_pq_related_id',
             'pqc_case_id',
             'pqc_gid',
             [

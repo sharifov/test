@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     'pqc_id',
                     'pqc_pq_id',
+                    'pqc_pq_related_id',
                     'pqc_case_id',
                     'pqc_gid',
                     'pqc_decision_user:username',

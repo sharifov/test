@@ -33,11 +33,13 @@ use yii\helpers\ArrayHelper;
  * @property bool $pqc_is_automate [tinyint(1)]
  * @property int|null $pqc_type_id
  * @property array|null $pqc_data_json
- * @property atring $pqc_gid
+ * @property string $pqc_gid
+ * @property int|null $pqc_pq_related_id
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
  * @property ProductQuote $pqcPq
+ * @property ProductQuote|null $relatedProductQuote
  */
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
@@ -195,6 +197,9 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             ['pqc_data_json', CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true],
 
             ['pqc_gid', 'string', 'max' => 32],
+
+            [['pqc_pq_related_id'], 'integer', ],
+            [['pqc_pq_related_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqc_pq_related_id' => 'pq_id']],
         ];
     }
 
@@ -205,7 +210,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     {
         return [
             'pqc_id' => 'ID',
-            'pqc_pq_id' => 'Product Quote ID',
+            'pqc_pq_id' => 'Origin Product Quote ID',
             'pqc_case_id' => 'Case ID',
             'pqc_decision_user' => 'Decision User',
             'pqc_status_id' => 'Status',
@@ -217,6 +222,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_type_id' => 'Type ID',
             'pqc_data_json' => 'Data Json',
             'pqc_gid' => 'Gid',
+            'pqc_pq_related_id' => 'Related Product Quote ID',
         ];
     }
 
@@ -248,6 +254,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function getPqcPq()
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqc_pq_id']);
+    }
+
+    public function getRelatedProductQuote(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqc_pq_related_id']);
     }
 
     public static function find(): Scopes
