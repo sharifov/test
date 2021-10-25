@@ -9,6 +9,7 @@ use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\Lead;
 use common\models\ProjectWeight;
 use common\models\StatusWeight;
+use sales\model\leadRedial\job\LeadRedialAssignToUsersJob;
 use sales\repositories\lead\LeadFlowRepository;
 use sales\repositories\lead\LeadQcallRepository;
 use Yii;
@@ -118,6 +119,8 @@ class QCallService
         $qCall = LeadQcall::create($leadId, $weight, $interval, $phone);
 
         $this->leadQcallRepository->save($qCall);
+
+        \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($qCall->lqc_lead_id, 0));
 
         return $qCall->lqc_lead_id;
     }
