@@ -2620,15 +2620,15 @@ class LeadController extends FController
             $totalProfit = $lead->getFinalProfit() ?: 0;
             $splitForm = new ProfitSplitForm($lead);
             $splitForm->setZeroPercent(true);
-
-            $mainAgentProfit = $totalProfit;
-
             $mainAgentPercent = 0;
+
             foreach ($lead->profitSplits as $split) {
                 if ($split->ps_user_id === $lead->employee_id) {
                     $mainAgentPercent = $split->ps_percent;
                 }
             }
+
+            $mainAgentProfit = $totalProfit * $mainAgentPercent / 100;
 
             if (Yii::$app->request->isPost) {
                 $data = Yii::$app->request->post();
