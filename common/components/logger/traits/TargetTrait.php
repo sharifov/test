@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/index0h/yii2-log
  */
