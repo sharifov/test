@@ -1,11 +1,13 @@
 <?php
 
+namespace modules\product\migrations;
+
 use yii\db\Migration;
 
 /**
- * Class m211022_143715_alter_tbl_product_quote_refund_object_add_new_column
+ * Class m211025_060645_alter_tbl_product_quote_refund_object_add_new_column
  */
-class m211022_143715_alter_tbl_product_quote_refund_object_add_new_column extends Migration
+class m211025_060645_alter_tbl_product_quote_refund_object_add_new_column extends Migration
 {
     /**
      * {@inheritdoc}
