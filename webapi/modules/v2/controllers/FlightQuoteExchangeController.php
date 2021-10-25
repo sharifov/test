@@ -717,7 +717,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParamExample {json} Request-Example:
          {
             "booking_id":"XXXYYYZ",
-            "quote_gid": "2f2887a061f8069f7ada8af9e062f0f4",
+            "change_gid": "2f2887a061f8069f7ada8af9e062f0f4",
             "payment":{
                 "method_key":"cc",
                 "method_data":{
