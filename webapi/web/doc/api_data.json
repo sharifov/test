@@ -5905,7 +5905,7 @@
           {
             "group": "Parameter",
             "type": "string",
-            "size": "0..10",
+            "size": "0..50",
             "optional": false,
             "field": "bookingId",
             "description": "<p>Booking ID</p>"
@@ -6005,14 +6005,9 @@
           {
             "group": "Parameter",
             "type": "string",
-            "allowedValues": [
-              "\"refunded\"",
-              "\"request-refund\"",
-              "\"issued\""
-            ],
             "optional": false,
             "field": "refund.tickets.status",
-            "description": "<p>Status</p>"
+            "description": "<p>Status For BO</p>"
           },
           {
             "group": "Parameter",
@@ -6045,14 +6040,9 @@
           {
             "group": "Parameter",
             "type": "string",
-            "allowedValues": [
-              "\"refunded\"",
-              "\"used\"",
-              "\"unpaid\""
-            ],
             "optional": false,
             "field": "refund.auxiliaryOptions.status",
-            "description": "<p>Status</p>"
+            "description": "<p>Status For BO</p>"
           },
           {
             "group": "Parameter",
