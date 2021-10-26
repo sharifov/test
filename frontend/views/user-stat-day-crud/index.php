@@ -37,7 +37,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => UserStatDayKey::getList()
             ],
             'usd_value',
-            'usd_user_id:userName',
+            [
+                'label' => 'User',
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'usd_user_id',
+                'relation' => 'user',
+                'placeholder' => 'Select User',
+                'headerOptions' => ['style' => 'width:10%'],
+            ],
             'usd_day',
             'usd_month',
             'usd_year',
