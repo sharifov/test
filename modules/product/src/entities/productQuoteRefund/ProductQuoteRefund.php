@@ -227,6 +227,9 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             ['pqr_data_json', 'safe'],
             ['pqr_data_json', 'trim'],
             ['pqr_data_json', CheckJsonValidator::class],
+
+            [['pqr_type_id'], 'integer'],
+            [['pqr_type_id'], 'in', 'range' => array_keys(self::TYPE_LIST)],
         ];
     }
 
@@ -254,6 +257,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             'pqr_updated_dt' => 'Updated Dt',
             'pqr_case_id' => 'Case ID',
             'pqr_data_json' => 'Data',
+            'pqr_type_id' => 'Type',
         ];
     }
 
