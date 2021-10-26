@@ -25,15 +25,15 @@ class HybridWhData
         self::WH_TYPE_VOLUNTARY_CHANGE_UPDATE => [
             'booking_id'                => '',
             'product_quote_gid'         => '',
-            'change_id'                 => '',
-            'status_name'               => '',
+            'change_quote_gid'          => '',
+            'change_status_id'          => '',
         ],
 
         self::WH_TYPE_VOLUNTARY_REFUND_UPDATE => [
             'booking_id'                => '',
             'product_quote_gid'         => '',
-            'refund_id'                 => '',
-            'status_name'               => '',
+            'refund_gid'                => '',
+            'refund_status_id'          => '',
         ],
     ];
 
