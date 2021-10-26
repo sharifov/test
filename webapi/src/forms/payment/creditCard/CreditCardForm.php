@@ -23,7 +23,8 @@ class CreditCardForm extends Model
         return [
             [['number', 'expiration_month', 'expiration_year', 'cvv', 'holder_name'], 'required'],
 
-            [['expiration_month', 'expiration_year'], 'integer'],
+            [['expiration_month'], 'integer', 'min' => 1, 'max' => 12],
+            [['expiration_year'], 'integer', 'min' => 0],
 
             [['number'], 'string', 'max' => 20],
             [['number'], 'filter', 'filter' => static function ($value) {
