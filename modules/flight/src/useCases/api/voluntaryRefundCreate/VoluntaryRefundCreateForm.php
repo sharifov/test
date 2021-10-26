@@ -37,7 +37,7 @@ class VoluntaryRefundCreateForm extends Model
     {
         return [
             [['bookingId'], 'required'],
-            [['bookingId'], 'string', 'max' => 10],
+            [['bookingId'], 'string', 'max' => 50],
 
             [['payment_request'], 'safe'],
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],

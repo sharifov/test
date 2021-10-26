@@ -276,7 +276,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{0..10}}        bookingId          Booking ID
+     * @apiParam {string{0..50}}        bookingId          Booking ID
      * @apiParam {object}               refund                            Refund Data
      * @apiParam {string{..3}}          refund.currency                   Currency
      * @apiParam {string}               refund.orderId                    OTA Order Id
@@ -290,12 +290,12 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {number}               refund.tickets.processingFee      Processing fee
      * @apiParam {number}               refund.tickets.refundAmount       Refund amount
      * @apiParam {number}               refund.tickets.sellingPrice       Selling price
-     * @apiParam {string="refunded","request-refund","issued"}              refund.tickets.status             Status
+     * @apiParam {string}               refund.tickets.status             Status For BO
      * @apiParam {object}               refund.auxiliaryOptions             Auxiliary Options Array
      * @apiParam {string}               refund.auxiliaryOptions.type        Auxiliary Options Type
      * @apiParam {number}               refund.auxiliaryOptions.amount      Selling price
      * @apiParam {number}               refund.auxiliaryOptions.refundable  Refundable price
-     * @apiParam {string="refunded","used","unpaid"}               refund.auxiliaryOptions.status  Status
+     * @apiParam {string}               refund.auxiliaryOptions.status     Status For BO
      * @apiParam {bool}                 refund.auxiliaryOptions.refundAllow  Refund Allowed
      * @apiParam {object}                 [refund.auxiliaryOptions.details]  Details
      * @apiParam {object}               billing                      Billing

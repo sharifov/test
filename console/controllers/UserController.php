@@ -100,7 +100,7 @@ class UserController extends Controller
         $userStatDayErrors = [];
         foreach ($result as $userGrossProfit) {
             $userStatDay = UserStatDay::createGrossProfit(
-                $userGrossProfit['gross_profit'],
+                (float)$userGrossProfit['gross_profit'],
                 $userGrossProfit['employee_id'],
                 (int)$date->format('d'),
                 (int)$date->format('m'),

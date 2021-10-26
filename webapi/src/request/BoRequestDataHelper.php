@@ -42,7 +42,7 @@ class BoRequestDataHelper
         }
         if ($form->paymentRequestForm) {
             $data['payment'] = [
-                'type' => $form->paymentRequestForm->method_key,
+                'type' => mb_strtoupper($form->paymentRequestForm->method_key),
                 'card' => [
                     'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
                     'number' => $form->paymentRequestForm->creditCardForm->number,

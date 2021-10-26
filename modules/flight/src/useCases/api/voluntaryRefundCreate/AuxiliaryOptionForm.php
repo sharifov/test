@@ -2,7 +2,9 @@
 
 namespace modules\flight\src\useCases\api\voluntaryRefundCreate;
 
+use common\components\validators\CheckIsNumberValidator;
 use common\components\validators\IsArrayValidator;
+use common\components\validators\CheckIsBooleanValidator;
 
 /**
  * Class AuxiliaryOptionForm
@@ -34,8 +36,8 @@ class AuxiliaryOptionForm extends \yii\base\Model
         return [
             [['type', 'amount', 'refundable', 'status', 'refundAllow'], 'required'],
             [['type', 'status'], 'string', 'max' => 50],
-            [['refundAllow'], 'boolean'],
-            [['refundable', 'amount'], 'number'],
+            [['refundAllow'], CheckIsBooleanValidator::class],
+            [['refundable', 'amount'], CheckIsNumberValidator::class, 'allowInt' => true],
             [['details'], IsArrayValidator::class]
         ];
     }
