@@ -8,6 +8,7 @@ use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use modules\product\src\entities\productQuoteLead\ProductQuoteLead;
@@ -108,6 +109,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteRefund[] $productQuoteRefunds
  * @property ProductQuoteRefund[] $productQuoteRefundsActive
  * @property ProductQuoteData|null $productQuoteDataRecommended
+ * @property ProductQuoteChangeRelation[]|null $productQuoteChangeRelations
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
@@ -440,6 +442,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id'])
             ->where(['not', ['pqo_status_id' => ProductQuoteOptionStatus::CANCEL_GROUP]]);
+    }
+
+    public function getProductQuoteChangeRelations(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pqc_id']);
     }
 
     public static function find(): Scopes

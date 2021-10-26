@@ -25,6 +25,9 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationQueryScopes;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
@@ -224,6 +227,18 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if (!isset($productQuoteChange) && !$productQuoteChange = $originProductQuote->productQuoteLastChange) {
                 throw new DomainException('ProductQuoteChange not found');
+            }
+
+            try {
+                if (!ProductQuoteChangeRelationRepository::exist($productQuoteChange->pqc_id, $reProtectionQuote->pq_id)) {
+                    $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
+                        $productQuoteChange->pqc_id,
+                        $reProtectionQuote->pq_id
+                    );
+                    (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
+                }
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'ReprotectionCreateJob:ProductQuoteChangeRelation');
             }
 
             $reProtectionCreateService->setProductQuoteChangeIsAutomate($productQuoteChange, (bool) $this->flight_request_is_automate);

@@ -7,6 +7,7 @@ use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCre
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionConfirmEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionRefundEvent;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use sales\behaviors\GidBehavior;
 use sales\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -38,6 +39,7 @@ use yii\helpers\ArrayHelper;
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
  * @property ProductQuote $pqcPq
+ * @property ProductQuoteChangeRelation[]|null $productQuoteChangeRelations
  */
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
@@ -248,6 +250,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function getPqcPq()
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqc_pq_id']);
+    }
+
+    public function getProductQuoteChangeRelations(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pqc_id' => 'pqc_id']);
     }
 
     public static function find(): Scopes
