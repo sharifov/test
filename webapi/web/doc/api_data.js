@@ -1,6 +1,156 @@
 define({ "api": [
   {
     "type": "get, post",
+    "url": "/health-check",
+    "title": "Get health check",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>components health check passed statuses (&quot;true&quot; or &quot;false&quot;)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
+    "url": "/health-check/metrics",
+    "title": "Get health check metrics text",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales_Metrics",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "metrics",
+            "description": "<p>in plain text format containing components health statuses (&quot;1&quot; for OK, &quot;0&quot; for failed)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 1\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 0\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
     "version": "0.1.0",
@@ -5470,6 +5620,13 @@ define({ "api": [
           },
           {
             "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "orderId",
+            "description": "<p>OTA Order Id</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "object",
             "optional": false,
             "field": "billing",
@@ -5674,7 +5831,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"bookingId\": \"XXXXXXX\",\n    \"refundGid\": \"6fcb275a1cd60b3a1e93bdda093e383b\",\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"country\": \"United States\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"card\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
+          "content": "{\n    \"bookingId\": \"XXXXXXX\",\n    \"refundGid\": \"6fcb275a1cd60b3a1e93bdda093e383b\",\n    \"orderId\": \"RET-12321AD\",\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"country\": \"United States\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"card\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
           "type": "json"
         }
       ]
