@@ -1,5 +1,6 @@
 <?php
 
+use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\components\grid\DateTimeColumn;
@@ -32,7 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'pqc_id',
             'pqc_pq_id',
-            'pqc_pq_related_id',
             'pqc_case_id',
             'pqc_gid',
             [
@@ -69,6 +69,24 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'pqc_is_automate:boolean',
             [
+                'label' => 'ProductQuote Relations',
+                'value' => static function (ProductQuoteChange $model) {
+                    if (empty($model->productQuoteChangeRelations)) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+                    $result = '';
+                    foreach ($model->productQuoteChangeRelations as $productQuoteChangeRelation) {
+                        $result .= Html::a(
+                            $productQuoteChangeRelation->pqcr_pq_id,
+                            ['/product/product-quote-crud/view', 'id' => $productQuoteChangeRelation->pqcr_pq_id],
+                            ['target' => '_blank', 'data-pjax' => 0],
+                        ) . '<br />';
+                    }
+                    return $result;
+                },
+                'format' => 'raw',
+            ],
+            [
                 'attribute' => 'pqc_created_dt',
                 'class' => DateTimeColumn::class
             ],
@@ -81,7 +99,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => DateTimeColumn::class
             ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
 

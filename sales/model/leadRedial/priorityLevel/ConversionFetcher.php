@@ -14,8 +14,8 @@ class ConversionFetcher
 {
     public function fetch(\DateTimeImmutable $fromDt, \DateTimeImmutable $toDt): array
     {
-        $from = $fromDt->format('Y-m-d H:i:s');
-        $to = $toDt->format('Y-m-d H:i:s');
+        $from = $fromDt->format('Y-m-d 00:00:00');
+        $to = $toDt->format('Y-m-d 23:59:59');
 
         $query = new Query();
 

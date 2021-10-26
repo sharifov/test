@@ -30,7 +30,7 @@ class TicketForm extends \yii\base\Model
     public function rules(): array
     {
         return [
-            [['number', 'airlinePenalty', 'processingFee', 'refundAmount', 'sellingPrice'], 'required'],
+            [['number', 'airlinePenalty', 'processingFee', 'refundAmount', 'sellingPrice', 'status'], 'required'],
             [['number'], 'string', 'max' => 50],
             [['airlinePenalty', 'processingFee', 'refundAmount', 'sellingPrice'], 'number'],
             [['status'], 'string', 'max' => 20]

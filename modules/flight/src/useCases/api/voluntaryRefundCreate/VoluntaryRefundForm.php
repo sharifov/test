@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\api\voluntaryRefundCreate;
 
+use common\components\validators\CheckIsNumberValidator;
 use common\components\validators\IsArrayValidator;
 use common\models\Currency;
 use sales\helpers\ErrorsToStringHelper;
@@ -52,6 +53,7 @@ class VoluntaryRefundForm extends Model
             ['currency', 'exist', 'targetClass' => Currency::class, 'targetAttribute' => 'cur_code'],
 
             [['processingFee', 'penaltyAmount', 'totalRefundAmount', 'totalPaid'], 'number'],
+            [['processingFee', 'penaltyAmount', 'totalRefundAmount', 'totalPaid'], CheckIsNumberValidator::class, 'allowInt' => true],
 
             ['tickets', IsArrayValidator::class, 'skipOnEmpty' => false],
             ['tickets', 'ticketsValidation', 'skipOnEmpty' => false],

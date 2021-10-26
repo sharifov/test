@@ -687,7 +687,7 @@ class FlightQuoteExchangeController extends BaseController
      *  }
      *
      * @apiParam {string{7..10}}        booking_id                   Booking ID
-     * @apiParam {string{32}}           change_gid                   Product Quote Quote GID
+     * @apiParam {string{32}}           quote_gid                    Product Quote GID
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -717,7 +717,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParamExample {json} Request-Example:
          {
             "booking_id":"XXXYYYZ",
-            "change_gid": "2f2887a061f8069f7ada8af9e062f0f4",
+            "quote_gid": "2f2887a061f8069f7ada8af9e062f0f4",
             "payment":{
                 "method_key":"cc",
                 "method_data":{

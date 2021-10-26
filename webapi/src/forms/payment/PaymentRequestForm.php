@@ -10,6 +10,7 @@ use sales\helpers\ErrorsToStringHelper;
 use sales\traits\FormNameModelTrait;
 use webapi\src\forms\payment\creditCard\CreditCardForm;
 use yii\base\Model;
+use common\components\validators\CheckIsNumberValidator;
 
 /**
  * Class PaymentRequestForm
@@ -34,11 +35,15 @@ class PaymentRequestForm extends Model
 
     private ?CreditCardForm $creditCardForm = null;
 
+    private const REQUIRED_METHOD_DATA_BY_TYPES = [
+        self::TYPE_METHOD_CARD
+    ];
+
     public function rules(): array
     {
         return [
             [['amount'], 'required'],
-            [['amount'], 'number'],
+            [['amount'], CheckIsNumberValidator::class, 'allowInt' => true],
 
             [['method_key'], 'required'],
             [['method_key'], 'string', 'max' => 50],
@@ -50,6 +55,9 @@ class PaymentRequestForm extends Model
             [['currency'], 'filter', 'filter' => 'strtoupper'],
             [['currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['currency' => 'cur_code']],
 
+            [['method_data'], 'required', 'when' => static function (self $model) {
+                return in_array($model->method_key, self::REQUIRED_METHOD_DATA_BY_TYPES, true);
+            }],
             [['method_data'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['method_data'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);

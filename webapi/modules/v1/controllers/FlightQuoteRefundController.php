@@ -8,6 +8,7 @@ use modules\flight\models\FlightRequest;
 use modules\flight\models\query\FlightRequestQuery;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmForm;
+use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmJob;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateJob;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCodeException;
@@ -17,6 +18,8 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
@@ -27,7 +30,6 @@ use webapi\src\Messages;
 use webapi\src\request\BoRequestDataHelper;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
-use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\ErrorName;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\Message;
@@ -37,7 +39,6 @@ use webapi\src\response\messages\TypeMessage;
 use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\MethodNotAllowedHttpException;
 
@@ -47,22 +48,26 @@ use yii\web\MethodNotAllowedHttpException;
  *
  * @property FlightRequestRepository $flightRequestRepository
  * @property VoluntaryRefundService $voluntaryRefundService
+ * @property ProductQuoteRefundRepository $productQuoteRefundRepository
  */
 class FlightQuoteRefundController extends ApiBaseController
 {
     private FlightRequestRepository $flightRequestRepository;
     private VoluntaryRefundService $voluntaryRefundService;
+    private ProductQuoteRefundRepository $productQuoteRefundRepository;
 
     public function __construct(
         $id,
         $module,
         FlightRequestRepository $flightRequestRepository,
         VoluntaryRefundService $voluntaryRefundService,
+        ProductQuoteRefundRepository $productQuoteRefundRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->flightRequestRepository = $flightRequestRepository;
         $this->voluntaryRefundService = $voluntaryRefundService;
+        $this->productQuoteRefundRepository = $productQuoteRefundRepository;
     }
 
     public function behaviors()
@@ -244,7 +249,7 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         } catch (\Throwable $throwable) {
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $post),
                 'FlightQuoteRefundController:actionInfo:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -271,7 +276,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{0..10}}        bookingId          Booking ID
+     * @apiParam {string{0..50}}        bookingId          Booking ID
      * @apiParam {object}               refund                            Refund Data
      * @apiParam {string{..3}}          refund.currency                   Currency
      * @apiParam {string}               refund.orderId                    OTA Order Id
@@ -285,12 +290,12 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {number}               refund.tickets.processingFee      Processing fee
      * @apiParam {number}               refund.tickets.refundAmount       Refund amount
      * @apiParam {number}               refund.tickets.sellingPrice       Selling price
-     * @apiParam {string="refunded","request-refund","issued"}              refund.tickets.status             Status
+     * @apiParam {string}               refund.tickets.status             Status For BO
      * @apiParam {object}               refund.auxiliaryOptions             Auxiliary Options Array
      * @apiParam {string}               refund.auxiliaryOptions.type        Auxiliary Options Type
      * @apiParam {number}               refund.auxiliaryOptions.amount      Selling price
      * @apiParam {number}               refund.auxiliaryOptions.refundable  Refundable price
-     * @apiParam {string="refunded","used","unpaid"}               refund.auxiliaryOptions.status  Status
+     * @apiParam {string}               refund.auxiliaryOptions.status     Status For BO
      * @apiParam {bool}                 refund.auxiliaryOptions.refundAllow  Refund Allowed
      * @apiParam {object}                 [refund.auxiliaryOptions.details]  Details
      * @apiParam {object}               billing                      Billing
@@ -486,7 +491,7 @@ class FlightQuoteRefundController extends ApiBaseController
 
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundCreateForm->bookingId,
-                FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
+                FlightRequest::TYPE_VOLUNTARY_REFUND_CREATE,
                 $post,
                 $project->id,
                 $this->apiUser->au_id
@@ -513,7 +518,7 @@ class FlightQuoteRefundController extends ApiBaseController
                 'requestData' => $boDataRequest,
                 'response' => $result
             ], 'info\VoluntaryRefund::BO::Response');
-            if ($result['status'] === 'Failed') {
+            if (mb_strtolower($result['status']) === 'failed') {
                 $flightRequest->statusToError();
                 $flightRequest->save();
                 return $this->endApiLog(new ErrorResponse(
@@ -598,6 +603,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *
      * @apiParam {string{0..10}}        bookingId          Booking ID
      * @apiParam {string{..32}}         refundRequestGid          Refund Request Gid
+     * @apiParam {string}               orderId                    OTA Order Id
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -629,6 +635,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *  {
      *      "bookingId": "XXXXXXX",
      *      "refundGid": "6fcb275a1cd60b3a1e93bdda093e383b",
+     *      "orderId": "RET-12321AD",
      *      "billing": {
      *          "first_name": "John",
      *          "last_name": "Doe",
@@ -756,20 +763,91 @@ class FlightQuoteRefundController extends ApiBaseController
         }
 
         try {
-//            $productQuoteRefund = ProductQuoteRefundQuery::getByBookingId($voluntaryRefundCreateForm->booking_id);
-//            if (!$productQuoteRefund) {
-//                throw new \RuntimeException(
-//                    'ProductQuoteRefund not found by BookingId(' . $voluntaryRefundCreateForm->booking_id . ')',
-//                    ApiCodeException::DATA_NOT_FOUND
-//                );
-//            }
+            $hash = FlightRequest::generateHashFromDataJson($post);
+            if (FlightRequestQuery::existActiveRequestByHash($hash)) {
+                throw new \DomainException('FlightRequest (hash: ' . $hash . ') already processing', ApiCodeException::REQUEST_ALREADY_PROCESSED);
+            }
+
+            $flightRequest = FlightRequest::create(
+                $voluntaryRefundConfirmForm->bookingId,
+                FlightRequest::TYPE_VOLUNTARY_REFUND_CONFIRM,
+                $post,
+                $project->id,
+                $this->apiUser->au_id
+            );
+            $flightRequest = $this->flightRequestRepository->save($flightRequest);
+
+            $productQuoteRefund = ProductQuoteRefundQuery::getByBookingIdGidStatuses($voluntaryRefundConfirmForm->bookingId, $voluntaryRefundConfirmForm->refundGid, [ProductQuoteRefundStatus::PENDING]);
+            if (!$productQuoteRefund) {
+                throw new \RuntimeException(
+                    'Not found pending product quote refund by bookingId(' . $voluntaryRefundConfirmForm->bookingId . ') and refund gid (' . $voluntaryRefundConfirmForm->refundGid . ')',
+                    ApiCodeException::DATA_NOT_FOUND
+                );
+            }
+
+            if (!$boRequestEndpoint = SettingHelper::getVoluntaryRefundBoEndpoint()) {
+                throw new \RuntimeException('BO endpoint is not set', VoluntaryRefundCodeException::BO_REQUEST_IS_NO_SET);
+            }
+
+            $productQuoteRefund->processing();
+            $this->productQuoteRefundRepository->save($productQuoteRefund);
+
+            $boDataRequest = BoRequestDataHelper::getDataForVoluntaryRefundConfirm($project->api_key, $voluntaryRefundConfirmForm, $productQuoteRefund);
+            $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+            \Yii::info([
+                'requestData' => $boDataRequest,
+                'response' => $result
+            ], 'info\VoluntaryRefund::BO::Response');
+            $boRequestConfirmResult = true;
+            if (mb_strtolower($result['status']) === 'failed') {
+                $productQuoteRefund->error();
+                $this->productQuoteRefundRepository->save($productQuoteRefund);
+
+                $flightRequest->statusToError();
+                $flightRequest->save();
+
+                return $this->endApiLog(new ErrorResponse(
+                    new ErrorName('BO Request Failed'),
+                    new MessageMessage($result['message'] ?? 'Unknown message from BO'),
+                    new CodeMessage(VoluntaryRefundCodeException::BO_REQUEST_FAILED),
+                    new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                    new ErrorsMessage($result['errors'] ?? []),
+                    new TypeMessage('app_bo')
+                ));
+            }
+
+            $job = new VoluntaryRefundConfirmJob(
+                $flightRequest->fr_id,
+                $productQuoteRefund->pqr_id,
+                $boRequestConfirmResult
+            );
+            $jobId = \Yii::$app->queue_job->priority(100)->push($job);
+
+            $flightRequest->fr_job_id = $jobId;
+            $this->flightRequestRepository->save($flightRequest);
 
             return $this->endApiLog(new SuccessResponse(
                 new CodeMessage(ApiCodeException::SUCCESS),
-                new Message('saleData', []),
-                new Message('refundData', [])
+                new Message('saleData', $result['saleData'] ?? []),
+                new Message('refundData', $result['refundData'] ?? [])
+            ));
+        } catch (BoResponseException $e) {
+            $flightRequest->statusToError();
+            $flightRequest->save();
+            \Yii::error(
+                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
+                'FlightQuoteRefundController:actionCreate:BoResponseException'
+            );
+            return $this->endApiLog(new ErrorResponse(
+                new MessageMessage($e->getMessage()),
+                new ErrorName('BO Error'),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new CodeMessage((int)$e->getCode()),
+                new TypeMessage('app')
             ));
         } catch (\RuntimeException | \DomainException $throwable) {
+            $flightRequest->statusToError();
+            $flightRequest->save();
             \Yii::warning(
                 ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
                 'FlightQuoteRefundController:actionConfirm:Warning'
@@ -782,8 +860,10 @@ class FlightQuoteRefundController extends ApiBaseController
                 new TypeMessage('app')
             ));
         } catch (\Throwable $throwable) {
+            $flightRequest->statusToError();
+            $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $post),
                 'FlightQuoteRefundController:actionConfirm:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(

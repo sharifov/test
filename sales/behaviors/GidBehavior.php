@@ -28,6 +28,8 @@ class GidBehavior extends Behavior
 
     public function gidGenerate(): void
     {
-        $this->owner->{$this->targetColumn} = $this->value;
+        if (empty($this->owner->{$this->targetColumn})) {
+            $this->owner->{$this->targetColumn} = $this->value;
+        }
     }
 }
