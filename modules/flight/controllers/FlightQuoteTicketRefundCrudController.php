@@ -52,10 +52,10 @@ class FlightQuoteTicketRefundCrudController extends FController
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($fqtr_id)
+    public function actionView($id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($fqtr_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -124,7 +124,7 @@ class FlightQuoteTicketRefundCrudController extends FController
      */
     protected function findModel($fqtr_id)
     {
-        if (($model = FlightQuoteTicketRefund::findOne($id)) !== null) {
+        if (($model = FlightQuoteTicketRefund::findOne($fqtr_id)) !== null) {
             return $model;
         }
 

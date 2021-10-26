@@ -46,4 +46,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['NOT IN', 'pqr_status_id', $statuses]);
     }
+
+    public function byGid(string $gid): self
+    {
+        return $this->andWhere(['pqr_gid' => $gid]);
+    }
 }

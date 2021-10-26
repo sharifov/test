@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\api\voluntaryRefundConfirm;
 
 use common\components\validators\CheckJsonValidator;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
@@ -14,9 +15,10 @@ use yii\helpers\ArrayHelper;
  * @package modules\flight\src\useCases\api\voluntaryRefundCreate
  *
  * @property $bookingId
+ * @property $refundGid
  * @property $payment_request
- * @property $refund
  * @property $billing
+ * @property $orderId
  *
  * @property PaymentRequestForm|null $paymentRequestForm
  * @property BillingInfoForm|null $billingInfoForm
@@ -26,6 +28,8 @@ class VoluntaryRefundConfirmForm extends Model
     public $bookingId;
     public $payment_request;
     public $billing;
+    public $refundGid;
+    public $orderId;
 
     public ?PaymentRequestForm $paymentRequestForm = null;
     public ?BillingInfoForm $billingInfoForm = null;
@@ -33,8 +37,10 @@ class VoluntaryRefundConfirmForm extends Model
     public function rules(): array
     {
         return [
-            [['bookingId'], 'required'],
+            [['bookingId', 'refundGid', 'orderId'], 'required'],
             [['bookingId'], 'string', 'max' => 10],
+            [['refundGid'], 'string', 'max' => 32],
+            [['orderId'], 'string'],
 
             [['payment_request'], 'safe'],
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],
@@ -42,6 +48,8 @@ class VoluntaryRefundConfirmForm extends Model
 
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['billing'], 'billingProcessing', 'skipOnEmpty' => false],
+
+            [['refundGid'], 'exist', 'targetClass' => ProductQuoteRefund::class, 'targetAttribute' => ['refundGid' => 'pqr_gid'], 'skipOnError' => true, 'message' => 'Refund not found by gid']
         ];
     }
 
