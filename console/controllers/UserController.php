@@ -117,10 +117,11 @@ class UserController extends Controller
         }
 
         $dateNow = new \DateTimeImmutable();
-        $datePeriod = $dateNow->modify('-' . SettingHelper::getCalculateGrossProfitInDays() . ' days');
+        $to = $dateNow->modify('-1 day');
+        $from = $to->modify('-' . SettingHelper::getCalculateGrossProfitInDays() . ' days');
 
         $query = new Query();
-        $subQuery = EmployeeQuery::getSalesQuery($datePeriod->format('Y-m-d 00:00:00'), $date->format('Y-m-d 23:59:59'));
+        $subQuery = EmployeeQuery::getSalesQuery($from->format('Y-m-d 00:00:00'), $to->format('Y-m-d 23:59:59'));
         $query->from(['gross_profit_query' => $subQuery]);
         $query->select([
             'gross_profit' => 'sum(gross_profit)',
@@ -173,8 +174,9 @@ class UserController extends Controller
         $timeStart = microtime(true);
 
         $dateNow = new \DateTimeImmutable();
-        $dateFrom = $dateNow->modify('-' . SettingHelper::getCalculatePriorityLevelInDays() . ' days');
-        $conversions = (new ConversionFetcher())->fetch($dateFrom, $dateNow);
+        $to = $dateNow->modify('-1 day');
+        $from = $to->modify('-' . SettingHelper::getCalculatePriorityLevelInDays() . ' days');
+        $conversions = (new ConversionFetcher())->fetch($from, $to);
         $priorityLevelCalculator = \Yii::createObject(PriorityLevelCalculator::class);
         $userDataErrors = [];
 
