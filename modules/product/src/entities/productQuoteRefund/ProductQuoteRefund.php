@@ -400,7 +400,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
      */
     public function getTypeName(): string
     {
-        return self::getTypeList()[$this->pqr_status_id] ?? '-';
+        return self::getTypeList()[$this->pqr_type_id] ?? '-';
     }
 
     /**
@@ -408,7 +408,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
      */
     public function getShortTypeName(): string
     {
-        return $this->getTypeName()[$this->pqr_status_id] ?? '-';
+        return self::getShortTypeList()[$this->pqr_type_id] ?? '-';
     }
 
     public function cancel(): void
