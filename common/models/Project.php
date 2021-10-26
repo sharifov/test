@@ -326,10 +326,7 @@ class Project extends \yii\db\ActiveRecord
                     $pr->project_key = $projectItem['project_key'];
                     $pr->link = $projectItem['link'];
                     $pr->closed = (bool)$projectItem['closed'];
-                    /* $pr->last_update = date('Y-m-d H:i:s');
-                     if (isset(Yii::$app->user) && Yii::$app->user->id) {
-                         $pr->p_update_user_id = Yii::$app->user->id;
-                     }*/
+
                     if (!$pr->save()) {
                         Yii::error(
                             VarDumper::dumpAsString($pr->errors),
@@ -353,6 +350,14 @@ class Project extends \yii\db\ActiveRecord
                                     VarDumper::dumpAsString($source->errors),
                                     'Project:synchronizationProjects:Sources:save'
                                 );
+                            }
+                        }
+
+                        $sources = Sources::findAll(['project_id' => $pr->id]);
+
+                        foreach ($sources as $sourceObj) {
+                            if (!array_key_exists($sourceObj->id, $projectItem['sources'])) {
+                                $sourceObj->delete();
                             }
                         }
                     }
