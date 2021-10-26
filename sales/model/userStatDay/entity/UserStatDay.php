@@ -58,7 +58,8 @@ class UserStatDay extends \yii\db\ActiveRecord
 
             ['usd_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['usd_user_id' => 'id']],
 
-            [['usd_key', 'usd_user_id', 'usd_month', 'usd_year'], 'unique', 'targetAttribute' => ['usd_key', 'usd_user_id', 'usd_month', 'usd_year']]
+            [['usd_key', 'usd_user_id', 'usd_month', 'usd_year'], 'unique', 'targetAttribute' => ['usd_key', 'usd_user_id', 'usd_month', 'usd_year']],
+            [['usd_key', 'usd_user_id', 'usd_day', 'usd_month', 'usd_year'], 'unique', 'targetAttribute' => ['usd_key', 'usd_user_id', 'usd_day', 'usd_month', 'usd_year']],
         ];
     }
 
@@ -106,8 +107,30 @@ class UserStatDay extends \yii\db\ActiveRecord
         return $self;
     }
 
-    public static function createGrossProfit(float $value, int $userId, int $day, int $month, int $year): self
-    {
-        return self::create($value, $userId, $day, $month, $year, UserStatDayKey::GROSS_PROFIT);
+    public static function saveGrossProfit(
+        float $value,
+        int $userId,
+        int $day,
+        int $month,
+        int $year,
+        int $key = UserStatDayKey::GROSS_PROFIT
+    ): ?UserStatDay {
+        $userStat = self::findOne([
+            'usd_user_id' => $userId,
+            'usd_day' => $day,
+            'usd_month' => $month,
+            'usd_year' => $year,
+            'usd_key' => $key,
+        ]);
+
+        if ($userStat) {
+            $userStat->setAttributes([
+                'usd_value' => $value,
+            ]);
+        } else {
+            $userStat = self::create($value, $userId, $day, $month, $year, $key);
+        }
+
+        return $userStat;
     }
 }
