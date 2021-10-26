@@ -19,6 +19,18 @@ class ProductQuoteRefundQuery
             ->one();
     }
 
+    public static function getByBookingIdGidStatuses(string $bookingId, string $gid, array $statuses)
+    {
+        return ProductQuoteRefund::find()
+            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pqr_product_quote_id')
+            ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
+            ->where(['fqf_booking_id' => $bookingId])
+            ->byGid($gid)
+            ->byStatuses($statuses)
+            ->orderBy(['pqr_id' => SORT_DESC])
+            ->one();
+    }
+
     /**
      * @param int $productQuoteId
      * @return ProductQuoteRefund[]
