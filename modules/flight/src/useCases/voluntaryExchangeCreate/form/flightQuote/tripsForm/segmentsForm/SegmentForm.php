@@ -39,7 +39,7 @@ class SegmentForm extends Model
     public $cabin;
     public $recheckBaggage;
 
-    private array $stopForms;
+    private array $stopForms = [];
 
     public function rules(): array
     {
