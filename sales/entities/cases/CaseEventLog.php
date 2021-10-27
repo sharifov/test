@@ -31,6 +31,7 @@ class CaseEventLog extends ActiveRecord
     public const VOLUNTARY_EXCHANGE_CREATE  = 8;
     public const VOLUNTARY_EXCHANGE_CONFIRM = 9;
     public const VOLUNTARY_REFUND_CREATE    = 10;
+    public const VOLUNTARY_REFUND_WH_UPDATE    = 11;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',
@@ -43,6 +44,7 @@ class CaseEventLog extends ActiveRecord
         self::VOLUNTARY_EXCHANGE_CREATE => 'Voluntary Exchange Create',
         self::VOLUNTARY_EXCHANGE_CONFIRM => 'Voluntary Exchange Confirm',
         self::VOLUNTARY_REFUND_CREATE => 'Voluntary Refund Create',
+        self::VOLUNTARY_REFUND_WH_UPDATE => 'Voluntary Refund Update by Webhook BO',
     ];
 
     /**

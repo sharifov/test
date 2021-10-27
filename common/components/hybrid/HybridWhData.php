@@ -41,7 +41,7 @@ class HybridWhData
      * @param string $whType
      * @return array|string[]
      */
-    public function getData(string $whType): array
+    public static function getData(string $whType): array
     {
         return self::WH_DATA[$whType] ?? [];
     }

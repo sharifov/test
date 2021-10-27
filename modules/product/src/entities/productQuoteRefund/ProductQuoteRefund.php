@@ -172,6 +172,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $this->pqr_status_id = ProductQuoteRefundStatus::DONE;
     }
 
+    public function isDone(): bool
+    {
+        return $this->pqr_status_id === ProductQuoteRefundStatus::DONE;
+    }
+
     /**
      * @return array
      */
