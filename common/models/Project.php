@@ -353,13 +353,13 @@ class Project extends \yii\db\ActiveRecord
                             }
                         }
 
-                        $sources = Sources::findAll(['project_id' => $pr->id]);
+                        /*$sources = Sources::findAll(['project_id' => $pr->id]);
 
                         foreach ($sources as $sourceObj) {
                             if (!array_key_exists($sourceObj->id, $projectItem['sources'])) {
                                 $sourceObj->delete();
                             }
-                        }
+                        }*/
                     }
                 }
             }
