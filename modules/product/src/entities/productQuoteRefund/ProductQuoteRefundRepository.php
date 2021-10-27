@@ -18,7 +18,7 @@ class ProductQuoteRefundRepository
     public function save(ProductQuoteRefund $refund): void
     {
         if (!$refund->save()) {
-            throw new \RuntimeException('Order Refund save failed');
+            throw new \RuntimeException('Product Quote Refund save failed: ' . $refund->getErrorSummary(true)[0]);
         }
     }
 }

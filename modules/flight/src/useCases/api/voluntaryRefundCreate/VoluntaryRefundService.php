@@ -297,8 +297,6 @@ class VoluntaryRefundService
                 );
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
             }
-
-            $this->productQuoteRefundRepository->save($productQuoteRefund);
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Product Quote Refund structure creation failed', $e);
             throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
