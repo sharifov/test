@@ -99,7 +99,7 @@ class UserController extends Controller
         $result = $query->all();
         $userStatDayErrors = [];
         foreach ($result as $userGrossProfit) {
-            $userStatDay = UserStatDay::saveGrossProfit(
+            $userStatDay = UserStatDay::craeteOrUpdateGrossProfit(
                 (float)$userGrossProfit['gross_profit'],
                 $userGrossProfit['employee_id'],
                 (int)$date->format('d'),
