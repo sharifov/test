@@ -107,7 +107,7 @@ class UserStatDay extends \yii\db\ActiveRecord
         return $self;
     }
 
-    public static function saveGrossProfit(
+    public static function craeteOrUpdateGrossProfit(
         float $value,
         int $userId,
         int $day,
