@@ -3,6 +3,7 @@
 namespace webapi\src\forms\payment;
 
 use common\components\validators\CheckJsonValidator;
+use common\components\validators\IsArrayValidator;
 use common\models\Currency;
 use common\models\PaymentMethod;
 use frontend\helpers\JsonHelper;
@@ -58,17 +59,19 @@ class PaymentRequestForm extends Model
             [['method_data'], 'required', 'when' => static function (self $model) {
                 return in_array($model->method_key, self::REQUIRED_METHOD_DATA_BY_TYPES, true);
             }],
-            [['method_data'], CheckJsonValidator::class, 'skipOnEmpty' => true],
-            [['method_data'], 'filter', 'filter' => static function ($value) {
-                return JsonHelper::decode($value);
-            }],
+            [['method_data'], IsArrayValidator::class, 'skipOnEmpty' => true],
             [['method_data'], 'methodDataProcessing'],
         ];
     }
 
     public function methodDataProcessing(string $attribute): bool
     {
-        if (isset($this->method_data[self::TYPE_METHOD_CARD]) && is_array($this->method_data[self::TYPE_METHOD_CARD])) {
+        if (empty($this->method_data[$this->method_key]) && in_array($this->method_key, self::REQUIRED_METHOD_DATA_BY_TYPES, true)) {
+            $this->addError($attribute, $this->method_key . ' data is not provided');
+            return false;
+        }
+
+        if (!empty($this->method_data[$this->method_key]) && is_array($this->method_data[$this->method_key])) {
             $creditCardForm = new CreditCardForm();
             $creditCardForm->load($this->method_data, self::TYPE_METHOD_CARD);
             if (!$creditCardForm->validate()) {
