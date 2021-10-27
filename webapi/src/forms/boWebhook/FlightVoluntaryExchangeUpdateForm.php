@@ -38,6 +38,7 @@ class FlightVoluntaryExchangeUpdateForm extends \yii\base\Model
 
             [['status'], 'required'],
             [['status'], 'string'],
+            [['status'], 'filter', 'filter' => 'strtolower', 'skipOnError' => true],
             [['status'], 'in', 'range' => self::STATUS_LIST],
         ];
     }
