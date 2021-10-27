@@ -140,7 +140,6 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
             $clientCurrencyRate,
             $caseId
         );
-        $refund->pqr_status_id = ProductQuoteRefundStatus::PENDING;
         $refund->pqr_type_id = self::TYPE_VOLUNTARY_REFUND;
         $refund->pqr_processing_fee_amount = $processingFee;
         $refund->pqr_refund_amount = $refundAmount;
@@ -155,6 +154,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public function error(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::ERROR;
+    }
+
+    public function inProgress(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::IN_PROGRESS;
     }
 
     public function processing(): void

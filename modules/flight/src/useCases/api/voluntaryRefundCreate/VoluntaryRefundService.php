@@ -252,6 +252,7 @@ class VoluntaryRefundService
                 $case->cs_id,
                 $voluntaryRefundCreateForm->toArray()
             );
+            $productQuoteRefund->inProgress();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 
             foreach ($voluntaryRefundCreateForm->refundForm->ticketForms as $ticketForm) {

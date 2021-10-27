@@ -60,13 +60,7 @@ class VoluntaryRefundService implements BoWebhookService
             if (!$productQuoteRefund->isInProcessing() && !$productQuoteRefund->isCompleted()) {
                 $productQuoteRefund->processing();
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
-                $description = 'Refund set to processing on wh by bo with status processing';
-                \Yii::warning([
-                    'message' => $description,
-                    'inputData' => $form->toArray(),
-                    'productQuoteRefundGid' => $productQuoteRefund->pqr_gid,
-                    'productQuoteGid' => $productQuote->pq_gid
-                ], 'VoluntaryRefundService::processRequest');
+                $description = 'Refund set to processing (WH BO)';
                 if ($case) {
                     $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, $description);
                 }
@@ -98,7 +92,7 @@ class VoluntaryRefundService implements BoWebhookService
         $whData['booking_id'] = $form->booking_id;
         $whData['product_quote_gid'] = $productQuote->pq_gid;
         $whData['refund_gid'] = $productQuoteRefund->pqr_gid;
-        $whData['refund_status_id'] = $productQuoteRefund->pqr_status_id;
+        $whData['refund_status_key'] = ProductQuoteRefundStatus::getKeyById($productQuoteRefund->pqr_status_id);
         \Yii::$app->hybrid->wh($project->id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
 
         if ($case) {
