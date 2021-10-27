@@ -337,9 +337,14 @@ class Project extends \yii\db\ActiveRecord
                             $source = Sources::findOne(['id' => $sourceId]);
 
                             if (!$source) {
-                                $source = new Sources();
-                                $source->id = $sourceId;
-                                $source->project_id = $pr->id;
+                                $source = Sources::find()->where(['project_id' => $sourceAttr['project_id'], 'cid' => $sourceAttr['cid']])->orderBy(['id' => SORT_DESC])->one();
+                                if (!$source) {
+                                    $source = new Sources();
+                                    $source->id = $sourceId;
+                                    $source->project_id = $pr->id;
+                                } else {
+                                    $source->id = $sourceId;
+                                }
                             }
 
                             $source->scenario = Sources::SCENARIO_SYNCH;
@@ -352,14 +357,6 @@ class Project extends \yii\db\ActiveRecord
                                 );
                             }
                         }
-
-                        /*$sources = Sources::findAll(['project_id' => $pr->id]);
-
-                        foreach ($sources as $sourceObj) {
-                            if (!array_key_exists($sourceObj->id, $projectItem['sources'])) {
-                                $sourceObj->delete();
-                            }
-                        }*/
                     }
                 }
             }
