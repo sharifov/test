@@ -58,7 +58,6 @@ class UserStatDay extends \yii\db\ActiveRecord
 
             ['usd_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['usd_user_id' => 'id']],
 
-            [['usd_key', 'usd_user_id', 'usd_month', 'usd_year'], 'unique', 'targetAttribute' => ['usd_key', 'usd_user_id', 'usd_month', 'usd_year']],
             [['usd_key', 'usd_user_id', 'usd_day', 'usd_month', 'usd_year'], 'unique', 'targetAttribute' => ['usd_key', 'usd_user_id', 'usd_day', 'usd_month', 'usd_year']],
         ];
     }
@@ -107,7 +106,7 @@ class UserStatDay extends \yii\db\ActiveRecord
         return $self;
     }
 
-    public static function craeteOrUpdateGrossProfit(
+    public static function createOrUpdateGrossProfit(
         float $value,
         int $userId,
         int $day,
