@@ -68,7 +68,7 @@ class PaymentRequestForm extends Model
 
     public function methodDataProcessing(string $attribute): bool
     {
-        if (!empty($this->method_data[self::TYPE_METHOD_CARD]) && is_array($this->method_data[self::TYPE_METHOD_CARD])) {
+        if (isset($this->method_data[self::TYPE_METHOD_CARD]) && is_array($this->method_data[self::TYPE_METHOD_CARD])) {
             $creditCardForm = new CreditCardForm();
             $creditCardForm->load($this->method_data, self::TYPE_METHOD_CARD);
             if (!$creditCardForm->validate()) {
