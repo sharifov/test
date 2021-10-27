@@ -50,12 +50,12 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
 
-    private ?FlightVoluntaryExchangeUpdateForm $form;
-    private ?ProductQuote $originProductQuote;
-    private ?ProductQuote $voluntaryQuote;
-    private ?ProductQuoteChange $productQuoteChange;
-    private ?Cases $case;
-    private ?Project $project;
+    private ?FlightVoluntaryExchangeUpdateForm $form = null;
+    private ?ProductQuote $originProductQuote = null;
+    private ?ProductQuote $voluntaryQuote = null;
+    private ?ProductQuoteChange $productQuoteChange = null;
+    private ?Cases $case = null;
+    private ?Project $project = null;
 
     /**
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
