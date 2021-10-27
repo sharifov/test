@@ -373,6 +373,8 @@ class ClientChatController extends FController
             $dataProviderFeedback->setPagination(['pageSize' => 20]);
 
             $message .= $this->prepareLog($memory, 'ClientChatFeedbackSearch');
+            $message .= '<br>Pick: ' . round(memory_get_peak_usage() / (1024 * 1024), 2) . 'MB';
+            $message .= '<br>Total: ' . round(memory_get_usage() / (1024 * 1024), 2) . 'MB';
             Yii::info($message, 'info\ClientChatController::actionDetail');
 
             return $this->render('detail', [
@@ -404,7 +406,7 @@ class ClientChatController extends FController
             $memory /= 1024;
         }
 
-        return '<br>' . $placeName . ' - Used memory: ' . round($memory, 2) . ' ' . $name[$i];
+        return '<br>' . $placeName . ' - Used memory: ' . round($memory, 2) . $name[$i];
     }
 
     public function actionRoom(int $id): string
