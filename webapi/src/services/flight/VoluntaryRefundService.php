@@ -57,7 +57,7 @@ class VoluntaryRefundService implements BoWebhookService
         $productQuote = $productQuoteRefund->productQuote;
         $case = $productQuoteRefund->case;
         if ($form->isProcessing()) {
-            if (!$productQuoteRefund->isInProcessing() && !$productQuoteRefund->isDone()) {
+            if (!$productQuoteRefund->isInProcessing() && !$productQuoteRefund->isCompleted()) {
                 $productQuoteRefund->processing();
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
                 $description = 'Refund set to processing on wh by bo with status processing';
@@ -72,7 +72,7 @@ class VoluntaryRefundService implements BoWebhookService
                 }
             }
         } elseif ($form->isRefunded()) {
-            $productQuoteRefund->done();
+            $productQuoteRefund->complete();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 
             if ($case) {

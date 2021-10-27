@@ -167,14 +167,14 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         return $this->pqr_status_id === ProductQuoteRefundStatus::PROCESSING;
     }
 
-    public function done(): void
+    public function complete(): void
     {
-        $this->pqr_status_id = ProductQuoteRefundStatus::DONE;
+        $this->pqr_status_id = ProductQuoteRefundStatus::COMPLETED;
     }
 
-    public function isDone(): bool
+    public function isCompleted(): bool
     {
-        return $this->pqr_status_id === ProductQuoteRefundStatus::DONE;
+        return $this->pqr_status_id === ProductQuoteRefundStatus::COMPLETED;
     }
 
     /**
@@ -418,7 +418,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
 
     public function cancel(): void
     {
-        $this->pqr_status_id = ProductQuoteRefundStatus::CANCEL;
+        $this->pqr_status_id = ProductQuoteRefundStatus::CANCELED;
     }
 
     /**

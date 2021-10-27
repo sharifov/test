@@ -67,8 +67,8 @@ class m211018_133539_add_setting_to_voluntary_excange extends Migration
                 's_type' => Setting::TYPE_ARRAY,
                 's_value' => json_encode([
                     ProductQuoteRefundStatus::PENDING => 'PENDING',
-                    ProductQuoteRefundStatus::ACCEPT => 'ACCEPT',
-                    ProductQuoteRefundStatus::DONE => 'DONE',
+                    ProductQuoteRefundStatus::CONFIRMED => 'CONFIRMED',
+                    ProductQuoteRefundStatus::COMPLETED => 'COMPLETED',
                     ProductQuoteRefundStatus::ERROR => 'ERROR',
                     ProductQuoteRefundStatus::PROCESSING => 'PROCESSING',
                 ]),
@@ -103,7 +103,7 @@ class m211018_133539_add_setting_to_voluntary_excange extends Migration
                 's_name' => 'Finished Product quote refund statuses',
                 's_type' => Setting::TYPE_ARRAY,
                 's_value' => json_encode([
-                    ProductQuoteRefundStatus::CANCEL => 'CANCEL',
+                    ProductQuoteRefundStatus::CANCELED => 'CANCELED',
                 ]),
                 's_updated_dt' => date('Y-m-d H:i:s'),
                 's_category_id' => $settingCategory->sc_id,

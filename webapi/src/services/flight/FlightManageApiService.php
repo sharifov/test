@@ -513,7 +513,7 @@ class FlightManageApiService implements BoWebhookService
                         $orderRefund->done();
                         $this->orderRefundRepository->save($orderRefund);
                     }
-                    $productQuoteRefund->done();
+                    $productQuoteRefund->complete();
                     $this->productQuoteRefundRepository->save($productQuoteRefund);
                     if ($case) {
                         $case->solved(null, 'Refund request approved');
@@ -565,7 +565,7 @@ class FlightManageApiService implements BoWebhookService
                     $productQuote->pqOrder->or_client_currency_rate,
                     $case->cs_id ?? null
                 );
-                $productQuoteRefund->done();
+                $productQuoteRefund->complete();
                 $productQuoteRefund->detachBehavior('user');
 
                 try {
