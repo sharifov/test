@@ -483,12 +483,17 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         }
 
+        $hash = FlightRequest::generateHashFromDataJson($post);
+        if (FlightRequestQuery::existActiveRequestByHash($hash)) {
+            return $this->endApiLog(new ErrorResponse(
+                new MessageMessage('FlightRequest (hash: ' . $hash . ') already processing'),
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new CodeMessage((int)ApiCodeException::REQUEST_ALREADY_PROCESSED),
+                new TypeMessage('app')
+            ));
+        }
         try {
-            $hash = FlightRequest::generateHashFromDataJson($post);
-            if (FlightRequestQuery::existActiveRequestByHash($hash)) {
-                throw new \DomainException('FlightRequest (hash: ' . $hash . ') already processing', ApiCodeException::REQUEST_ALREADY_PROCESSED);
-            }
-
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundCreateForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_REFUND_CREATE,
@@ -514,6 +519,7 @@ class FlightQuoteRefundController extends ApiBaseController
 
             $boDataRequest = BoRequestDataHelper::getDataForVoluntaryCreateByForm($project->api_key, $voluntaryRefundCreateForm);
             $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+            // ToDo: remove debug before deploy in prod
             \Yii::info([
                 'requestData' => $boDataRequest,
                 'response' => $result
@@ -794,6 +800,7 @@ class FlightQuoteRefundController extends ApiBaseController
 
             $boDataRequest = BoRequestDataHelper::getDataForVoluntaryRefundConfirm($project->api_key, $voluntaryRefundConfirmForm, $productQuoteRefund);
             $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+            // ToDo: remove debug before deploy in prod
             \Yii::info([
                 'requestData' => $boDataRequest,
                 'response' => $result
