@@ -14,6 +14,7 @@ use yii\bootstrap4\Html;
  * @var $maxTotalDuration int
  * @var $airlines array
  * @var $searchFrom FlightQuoteSearchForm
+ * @var $lead \common\models\Lead
  */
 ?>
 
@@ -58,7 +59,7 @@ use yii\bootstrap4\Html;
                 ]) ?>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <?php /*$form->field($searchFrom, 'price', [
                     'labelOptions' => [
                         'class' => 'control-label'
@@ -132,66 +133,11 @@ use yii\bootstrap4\Html;
                 ])->dropDownList(Quote::getBaggageList()) ?>
             </div>
 
-            <div class="col-md-2">
-                <div class="form-group">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <label for="" class="control-label">Max Trip Duration</label>
-                        <span id="search-quote-current-duration-value"></span>
-                    </div>
-                    <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
-                        <div class="search-filters__slider" id="search-quote-duration-slider-filter"></div>
-                    </div>
-                    <?= $form->field($searchFrom, 'tripDuration')->hiddenInput()->label(false) ?>
-                    <script>
-                        var min = <?= $minTotalDuration ?? 0 ?>;
-                        var max = <?= $maxTotalDuration ?? 0 ?>;
-
-                        var start = '<?= $searchFrom->tripDuration ?>' || max;
-                        var sliderDuration = $('#search-quote-duration-slider-filter')[0];
-                        noUiSlider.create(sliderDuration, {
-                            start: [start],
-                            connect: [true, false],
-                            tooltips: {
-                                to: function(value){
-                                    return window.helper.toHHMM(value * 60);
-                                }
-                            },
-                            step: 15,
-                            range: {
-                                'min': min,
-                                'max': max
-                            }
-                        });
-
-                        sliderDuration.noUiSlider.on('update', function (values, handle) {
-                            $('#search-quote-duration-slider-filter').closest('.form-group').find('input').val(values[handle]);
-                            $('#search-quote-duration-slider-filter').closest('.form-group').find('#search-quote-current-duration-value').html(window.helper.toHHMM(values[handle] * 60));
-                        });
-                    </script>
-                </div>
-            </div>
-
-            <div class="col-md-2">
-                <?= $form->field($searchFrom, 'sortBy', [
-                    'labelOptions' => [
-                        'class' => 'control-label'
-                    ]
-                ])->dropDownList(Quote::getSortList(), ['prompt' => '--']) ?>
-            </div>
         </div>
 
         <div class="row">
-            <div class="col-md-2">
-                <?= $form->field($searchFrom, 'topCriteria', [
-                    'labelOptions' => [
-                        'class' => 'control-label'
-                    ]
-                ])->dropDownList(QuoteHelper::TOP_META_LIST, [
-                    'prompt' => '--'
-                ]) ?>
-            </div>
 
-            <div class="col-md-2" id="search-quote-rank-slider-filter">
+            <div class="col-md-5" id="search-quote-rank-slider-filter">
                 <div class="form-group">
                     <div class="d-flex align-items-center justify-content-between">
                         <label for="" class="control-label">Rank</label>
@@ -234,14 +180,55 @@ use yii\bootstrap4\Html;
                     });
                 </script>
             </div>
+
+            <div class="col-md-2">
+                <?= $form->field($searchFrom, 'topCriteria', [
+                    'labelOptions' => [
+                        'class' => 'control-label'
+                    ]
+                ])->dropDownList(QuoteHelper::TOP_META_LIST, [
+                                 'prompt' => '--'
+                ]) ?>
+            </div>
+
+            <div class="col-md-2">
+                <?= $form->field($searchFrom, 'sortBy', [
+                    'labelOptions' => [
+                        'class' => 'control-label'
+                    ]
+                ])->dropDownList(Quote::getSortList(), ['prompt' => '--']) ?>
+            </div>
+
+        </div>
+
+        <?php foreach ($lead->leadFlightSegments as $segment) : ?>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <label for="" class="control-label">Max Trip Duration</label>
+                        <span id="search-quote-current-duration-value<?= $segment->id ?>"></span>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
+                        <div class="search-filters__slider" id="search-quote-duration-slider-filter<?= $segment->id ?>"></div>
+                    </div>
+
+                    <script>
+                        var min = <?= $minTotalDuration ?? 0 ?>;
+                        var max = <?= $maxTotalDuration ?? 0 ?>;
+                        var start = '<?= $searchFrom->tripDuration[$segment->id] ?? 0 ?>' || max;
+                        durationFilter(<?=$segment->id ?>, min, max, start);
+                    </script>
+                </div>
+            </div>
           <div class="col-md-3">
             <div class="form-group">
               <div class="d-flex align-items-center justify-content-between">
                 <label for="" class="control-label">Departure</label>
-                <span id="search-quote-departure-value"></span>
+                <span id="search-quote-departure-value<?= $segment->id ?>"></span>
               </div>
               <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
-                <div class="search-filters__slider" id="search-quote-departure-filter"></div>
+                <div class="search-filters__slider" id="search-quote-departure-filter<?= $segment->id ?>"></div>
               </div>
                 <?= $form->field($searchFrom, 'departure')->hiddenInput()->label(false) ?>
               <script>
@@ -250,31 +237,7 @@ use yii\bootstrap4\Html;
 
                   var end = '<?= $searchFrom->arrivalEnd ?>' || max;
                   var start = '<?= $searchFrom->arrivalStart ?>' || min;
-                  var sliderDuration = $('#search-quote-arrival-filter')[0];
-                  noUiSlider.create(sliderDuration, {
-                      start: [start, end],
-                      connect: [false, true, false],
-                      tooltips: [{
-                          to: function(value){
-                              return window.helper.toHHMM(value * 60);
-                          }
-                      },  {
-                          to: function(value){
-                              return window.helper.toHHMM(value * 60);
-                          }
-                      }
-                      ],
-                      step: 15,
-                      range: {
-                          'min': min,
-                          'max': max
-                      }
-                  });
-
-                  sliderDuration.noUiSlider.on('update', function (values, handle) {
-                      $('#search-quote-arrival-filter').closest('.form-group').find('input').val(values[0] + ' - ' + values[1]);
-                      $('#search-quote-arrival-filter').closest('.form-group').find('#search-quote-arrival-value').html(window.helper.toHHMM(values[0] * 60) + ' - ' + window.helper.toHHMM(values[1] * 60));
-                  });
+                  departureFilter(<?=$segment->id ?>, min, max, start, end);
               </script>
             </div>
           </div>
@@ -283,10 +246,10 @@ use yii\bootstrap4\Html;
             <div class="form-group">
               <div class="d-flex align-items-center justify-content-between">
                 <label for="" class="control-label">Arrival</label>
-                <span id="search-quote-arrival-value"></span>
+                <span id="search-quote-arrival-value<?= $segment->id ?>"></span>
               </div>
               <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
-                <div class="search-filters__slider" id="search-quote-arrival-filter"></div>
+                <div class="search-filters__slider" id="search-quote-arrival-filter<?= $segment->id ?>"></div>
               </div>
                 <?= $form->field($searchFrom, 'arrival')->hiddenInput()->label(false) ?>
               <script>
@@ -295,35 +258,15 @@ use yii\bootstrap4\Html;
 
                   var end = '<?= $searchFrom->departureEnd ?>' || max;
                   var start = '<?= $searchFrom->departureStart ?>' || min;
-                  var sliderDuration = $('#search-quote-departure-filter')[0];
-                  noUiSlider.create(sliderDuration, {
-                      start: [start, end],
-                      connect: [false, true, false],
-                      tooltips: [{
-                          to: function(value){
-                              return window.helper.toHHMM(value * 60);
-                          }
-                      },  {
-                          to: function(value){
-                              return window.helper.toHHMM(value * 60);
-                          }
-                      }
-                      ],
-                      step: 15,
-                      range: {
-                          'min': min,
-                          'max': max
-                      }
-                  });
-
-                  sliderDuration.noUiSlider.on('update', function (values, handle) {
-                      $('#search-quote-departure-filter').closest('.form-group').find('input').val(values[0] + ' - ' + values[1]);
-                      $('#search-quote-departure-filter').closest('.form-group').find('#search-quote-departure-value').html(window.helper.toHHMM(values[0] * 60) + ' - ' + window.helper.toHHMM(values[1] * 60));
-                  });
+                  arrivalFilter(<?=$segment->id ?>, min, max, start, end);
               </script>
             </div>
           </div>
+          <div class="col-md-3">
+              <p style="padding-top: 24px;"><?= $segment->origin . '-' . $segment->destination;?></p>
+          </div>
         </div>
+        <?php endforeach; ?>
 
         <div class="row">
             <div class="col-md-12 d-flex align-items-center justify-content-center">

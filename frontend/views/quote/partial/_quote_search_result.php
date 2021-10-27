@@ -81,10 +81,96 @@ JS;
         pjaxOffFormSubmit('#pjax-search-quote-filter');
     </script>
     <?php Pjax::begin(['timeout' => 20000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false, 'id' => 'pjax-search-quote-filter']); ?>
+
+    <?php
+        $js = <<<JS
+        function durationFilter(segmentId, min, max, start) {
+            console.log(segmentId, min, max, start);
+            noUiSlider.create($('#search-quote-duration-slider-filter'+segmentId)[0], {
+                start: [start],
+                connect: [true, false],
+                tooltips: {
+                    to: function(value){
+                        return window.helper.toHHMM(value * 60);
+                    }
+                },
+                step: 15,
+                range: {
+                    'min': min,
+                    'max': max
+                }
+            });
+    
+            $('#search-quote-duration-slider-filter'+segmentId)[0].noUiSlider.on('update', function (values, handle) {
+                $('#search-quote-duration-slider-filter'+segmentId).closest('.form-group').find('input').val(values[handle]);
+                $('#search-quote-duration-slider-filter'+segmentId).closest('.form-group').find('#search-quote-current-duration-value'+segmentId).html(window.helper.toHHMM(values[handle] * 60));
+            });
+        }
+        function departureFilter(segmentId, min, max, start, end) {
+            console.log(segmentId, min, max, start, end);
+            var sliderDuration = $('#search-quote-arrival-filter'+segmentId)[0];
+                  noUiSlider.create(sliderDuration, {
+                      start: [start, end],
+                      connect: [false, true, false],
+                      tooltips: [{
+                          to: function(value){
+                              return window.helper.toHHMM(value * 60);
+                          }
+                      },  {
+                          to: function(value){
+                              return window.helper.toHHMM(value * 60);
+                          }
+                      }
+                      ],
+                      step: 15,
+                      range: {
+                          'min': min,
+                          'max': max
+                      }
+                  });
+
+                  sliderDuration.noUiSlider.on('update', function (values, handle) {
+                      $('#search-quote-arrival-filter'+segmentId).closest('.form-group').find('input').val(values[0] + ' - ' + values[1]);
+                      $('#search-quote-arrival-filter'+segmentId).closest('.form-group').find('#search-quote-arrival-value'+segmentId).html(window.helper.toHHMM(values[0] * 60) + ' - ' + window.helper.toHHMM(values[1] * 60));
+                  });
+        }
+        function arrivalFilter(segmentId, min, max, start, end) {
+            console.log(segmentId, min, max, start, end);
+            var sliderDuration = $('#search-quote-departure-filter'+segmentId)[0];
+              noUiSlider.create(sliderDuration, {
+                  start: [start, end],
+                  connect: [false, true, false],
+                  tooltips: [{
+                      to: function(value){
+                          return window.helper.toHHMM(value * 60);
+                      }
+                  },  {
+                      to: function(value){
+                          return window.helper.toHHMM(value * 60);
+                      }
+                  }
+                  ],
+                  step: 15,
+                  range: {
+                      'min': min,
+                      'max': max
+                  }
+              });
+
+              sliderDuration.noUiSlider.on('update', function (values, handle) {
+                  $('#search-quote-departure-filter'+segmentId).closest('.form-group').find('input').val(values[0] + ' - ' + values[1]);
+                  $('#search-quote-departure-filter'+segmentId).closest('.form-group').find('#search-quote-departure-value'+segmentId).html(window.helper.toHHMM(values[0] * 60) + ' - ' + window.helper.toHHMM(values[1] * 60));
+              });
+        }
+    JS;
+    $this->registerJs($js, View::POS_BEGIN);
+    ?>
+
     <?= $this->render('_quote_filters', [
     'minPrice' => $quotes['minPrice'],
     'maxPrice' => $quotes['maxPrice'],
     'airlines' => $airlines,
+    'lead' => $lead,
     'searchFrom' => $searchForm,
     'minTotalDuration' => min($quotes['totalDuration']),
     'maxTotalDuration' => max($quotes['totalDuration'])
