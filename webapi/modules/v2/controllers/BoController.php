@@ -114,6 +114,17 @@ class BoController extends BaseController
      *      }
      *  }
      *
+     * @apiParamExample {json} Request-Example Voluntary Flight Refund:
+     *  {
+     *      "type": "voluntary_flight_refund",
+     *      "data": {
+     *          "booking_id": "C4RB44",
+     *          "project_key": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *          "status": "Refunded", // allowed values Processing, Refunded, Canceled
+     *          "orderId": "RT-SHCN37D" // OTA order id
+     *      }
+     *  }
+     *
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK

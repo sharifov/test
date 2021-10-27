@@ -11384,6 +11384,11 @@
           "title": "Request-Example Flight Refund:",
           "content": "{\n    \"type\": \"flight_refund\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n    }\n}",
           "type": "json"
+        },
+        {
+          "title": "Request-Example Voluntary Flight Refund:",
+          "content": "{\n    \"type\": \"voluntary_flight_refund\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826\",\n        \"status\": \"Refunded\", // allowed values Processing, Refunded, Canceled\n        \"orderId\": \"RT-SHCN37D\" // OTA order id\n    }\n}",
+          "type": "json"
         }
       ]
     },
