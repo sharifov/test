@@ -3,6 +3,7 @@
 namespace webapi\src\services\flight;
 
 use common\components\hybrid\HybridWhData;
+use common\components\purifier\Purifier;
 use common\models\Notifications;
 use common\models\Project;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
@@ -60,7 +61,7 @@ class VoluntaryRefundService implements BoWebhookService
             if (!$productQuoteRefund->isInProcessing() && !$productQuoteRefund->isCompleted()) {
                 $productQuoteRefund->processing();
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
-                $description = 'Refund set to processing (WH BO)';
+                $description = 'Refund set to processing ';
                 if ($case) {
                     $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, $description);
                 }
@@ -82,7 +83,7 @@ class VoluntaryRefundService implements BoWebhookService
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 
             if ($case) {
-                $case->error(null, 'Refund canctypeeled (WH BO)');
+                $case->error(null, 'Refund canceled (WH BO)');
                 $this->casesRepository->save($case);
                 $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is canceled (WH BO)');
             }
@@ -95,11 +96,11 @@ class VoluntaryRefundService implements BoWebhookService
         $whData['refund_status_key'] = ProductQuoteRefundStatus::getKeyById($productQuoteRefund->pqr_status_id);
         \Yii::$app->hybrid->wh($project->id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
 
-        if ($case) {
+        if ($case && $case->cs_user_id) {
             Notifications::createAndPublish(
                 $case->cs_user_id,
                 'Refund update',
-                'Refund(' . $productQuoteRefund->pqr_gid . ') for Case(' . $case->cs_gid . ') has been updated. Status: ' . ProductQuoteRefundStatus::getName($productQuoteRefund->pqr_status_id),
+                'Refund(' . $productQuoteRefund->pqr_gid . ') for Case(' . Purifier::createCaseShortLink($case) . ') has been updated. Status: ' . ProductQuoteRefundStatus::getName($productQuoteRefund->pqr_status_id),
                 Notifications::TYPE_INFO,
                 true
             );
