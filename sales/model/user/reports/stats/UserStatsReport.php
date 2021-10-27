@@ -506,7 +506,7 @@ class UserStatsReport extends Model
                 ->leftJoin(UserGroup::tableName(), 'ug_id = ugs_group_id')
                 ->groupBy(['ugs_group_id']);
             if ($this->groups || $this->access->groupsLimitedAccess) {
-                $groups = $this->groups ?: $this->access->groups;
+                $groups = $this->groups ?: array_keys($this->access->groups);
                 $groupQuery->andWhere(['ugs_group_id' => $groups]);
             }
             $dataProvider->query = $groupQuery;
