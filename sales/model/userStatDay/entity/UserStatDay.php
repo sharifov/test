@@ -114,7 +114,7 @@ class UserStatDay extends \yii\db\ActiveRecord
         int $month,
         int $year,
         int $key = UserStatDayKey::GROSS_PROFIT
-    ): ?UserStatDay {
+    ): UserStatDay {
         $userStat = self::findOne([
             'usd_user_id' => $userId,
             'usd_day' => $day,
