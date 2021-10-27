@@ -408,7 +408,7 @@ $leads = $clientChat->leads;
                                             ]) ?>
                                       <?php endif; ?>
                                         <?php
-                                         /** @abac LeadAbacObject::ACT_TAKE_LEAD_FROM_CLIENT_CHAT, LeadAbacObject::ACTION_ACCESS, Access To Take Lead*/
+                                         /** @abac LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS, Access To Take Lead*/
                                         $leadAbacDto = new LeadAbacDto($lead, Auth::id());
                                         if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) :
                                             echo Html::a('<i class="fa fa-download"></i> Take', null, [
