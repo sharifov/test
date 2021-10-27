@@ -37,6 +37,7 @@ use modules\product\src\entities\productType\ProductType;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
+use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\app\AppHelper;
@@ -765,6 +766,51 @@ class FlightQuoteController extends FController
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:increaseLimits');
         }
+    }
+
+    public function actionCreateVoluntaryQuote() /* TODO:: */
+    {
+        $flightId = Yii::$app->request->get('flight_id', 0);
+        $caseId = Yii::$app->request->get('case_id', 0);
+        $originQuoteId = Yii::$app->request->get('origin_quote_id', 0);
+
+        $flight = $this->flightRepository->find($flightId);
+
+        try {
+            if (!$case = Cases::findOne(['cs_id' => $caseId])) {
+                throw new \RuntimeException('Case not found');
+            }
+            if (!$originProductQuote = ProductQuote::findOne(['pq_id' => $originQuoteId])) {
+                throw new \RuntimeException('OriginProductQuote not found');
+            }
+            if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
+                throw new \RuntimeException('Sorry, Change quote could not be created because originalQuote does not pricing');
+            }
+
+            /* TODO:: find or create PQC */
+
+
+            //$productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findByProductQuoteId($originProductQuote->pq_id);
+
+            $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
+        } catch (\RuntimeException | \DomainException $exception) {
+            Yii::warning(AppHelper::throwableLog($exception), 'FlightQuoteController:actionCreateReProtectionQuote:Exception');
+            return $exception->getMessage();
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateReProtectionQuote:Throwable');
+            return $throwable->getMessage();
+        }
+
+        $params = [
+            'createQuoteForm' => $form,
+            'flight' => $flight,
+            'flightQuotePaxPrices' => $flightQuotePaxPrices,
+            'originProductQuote' => $originProductQuote,
+        ];
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('partial/_add_re_protection_manual', $params);
+        }
+        return $this->render('partial/_add_re_protection_manual', $params);
     }
 
     public function actionCreateReProtectionQuote()

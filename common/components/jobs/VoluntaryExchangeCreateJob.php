@@ -226,20 +226,6 @@ class VoluntaryExchangeCreateJob extends BaseJob implements JobInterface
                 Yii::error(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:CleanDataVoluntaryExchangeService');
             }
 
-            /* TODO:: temporary disable */
-            /*
-            try {
-                OtaRequestVoluntaryRequestService::success($flightRequest, $voluntaryExchangeQuote, $originProductQuote, $case);
-            } catch (\Throwable $throwable) {
-                $caseHandler->caseToPendingManual('OTA site is not informed');
-                throw $throwable;
-            }
-            */
-            \Yii::warning(/* TODO:: FOR DEBUG:: must by remove  */
-                'WH to OTA temporary disabled',
-                'VoluntaryExchangeCreateJob:OtaRequestVoluntaryRequestService'
-            );
-
             $voluntaryExchangeService->doneProcess(
                 $voluntaryExchangeQuote,
                 $case,

@@ -10,6 +10,8 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use webapi\src\ApiCodeException;
 
 /**
@@ -67,6 +69,18 @@ class VoluntaryExchangeCreateService
             ->one();
     }
 
+    public static function getLastProductQuoteChangeByPqId(
+        string $productQuoteId,
+        array $typeIds = [ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE]
+    ): ?ProductQuoteChange {
+        return ProductQuoteChange::find()
+            ->select(ProductQuoteChange::tableName() . '.pqc_status_id')
+            ->where(['pqc_pq_id' => $productQuoteId])
+            ->andWhere(['IN', 'pqc_type_id', $typeIds])
+            ->orderBy(['pqc_id' => SORT_DESC])
+            ->one();
+    }
+
     public static function getOriginProductQuote(
         string $bookingId,
         int $typeId = ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE
@@ -78,7 +92,28 @@ class VoluntaryExchangeCreateService
             ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
             ->where(['fqf_booking_id' => $bookingId])
             ->andWhere(['pqc_type_id' => $typeId])
-            ->orderBy(['pqc_id' => SORT_DESC])
+            ->orderBy(['pq_id' => SORT_DESC])
             ->one();
+    }
+
+    public static function getProductQuoteByProductQuoteChange(
+        int $productQuoteChangeId
+    ): ?ProductQuote {
+        return ProductQuote::find()
+            ->select(ProductQuote::tableName() . '.*')
+            ->innerJoin(ProductQuoteChangeRelation::tableName(), 'pq_id = pqcr_pq_id')
+            ->where(['pqcr_pqc_id' => $productQuoteChangeId])
+            ->orderBy(['pq_id' => SORT_DESC])
+            ->one();
+    }
+
+    public static function bookingProductQuotePostProcessing(ProductQuote $voluntaryQuote): void
+    {
+        ProductQuoteRelation::deleteAll([
+            'pqr_related_pq_id' => $voluntaryQuote->pq_id,
+            'pqr_type_id' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
+        ]);
+
+        ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $voluntaryQuote->pq_id]);
     }
 }

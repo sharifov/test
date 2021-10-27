@@ -166,6 +166,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::ERROR;
     }
 
+    public function statusToComplete(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::COMPLETE;
+    }
+
     /**
      * {@inheritdoc}
      */

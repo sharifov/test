@@ -13,6 +13,7 @@ use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchang
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
@@ -25,9 +26,11 @@ use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
+use webapi\src\response\messages\ErrorName;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
+use webapi\src\response\messages\TypeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -549,6 +552,8 @@ class FlightQuoteExchangeController extends BaseController
      */
     public function actionCreate()
     {
+        /* TODO:: add - ErrorName + TypeMessage */
+
         try {
             $post = Yii::$app->request->post();
         } catch (\Throwable $throwable) {
@@ -593,7 +598,8 @@ class FlightQuoteExchangeController extends BaseController
                         throw new \DomainException('Quote not available for exchange');
                     }
                 } else {
-                    throw new \DomainException('Quote not available for exchange');
+                    throw new \DomainException('Quote not available for exchange. Status(' .
+                        ProductQuoteStatus::getName($productQuote->pq_status_id) . ')');
                 }
             }
 

@@ -100,6 +100,23 @@ if ($quote->productQuoteLastChange) {
                 ]) ?>
             <?php endif; ?>
 
+            <?php /* // TODO::
+            <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
+
+                <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Change Quote', null, [
+                    'data-flight-id' => $flight->getId(),
+                    'class' => 'dropdown-item btn_create_voluntary',
+                    'data-url' => Url::to([
+                        '/flight/flight-quote/create-voluntary-quote',
+                        'flight_id' => $flight->getId(),
+                        'case_id' => $caseId,
+                        'origin_quote_id' => $quote->pq_id,
+                    ]),
+                    'title' => 'Add Voluntary Change Quote'
+                ]) ?>
+            <?php endif ?>
+            */ ?>
+
             <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
             <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
                 <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>

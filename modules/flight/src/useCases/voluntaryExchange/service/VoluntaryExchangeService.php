@@ -96,7 +96,7 @@ class VoluntaryExchangeService
             'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
             ['pq_gid' => $originProductQuote->pq_gid]
         );
-        $originProductQuote->booked(null, null, false);
+        $originProductQuote->bookedChangeFlow();
         $this->objectCollection->getProductQuoteRepository()->save($originProductQuote);
         return $originProductQuote;
     }
