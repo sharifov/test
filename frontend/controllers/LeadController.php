@@ -1398,8 +1398,6 @@ class LeadController extends FController
         $gid = Yii::$app->request->get('gid');
         if (Yii::$app->request->isAjax && $gid) {
             if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
-                $result = ['success' => false, 'error' => 'GID parameter not found'];
-
                 try {
                     $lead = $this->findLeadByGid($gid);
                     $oldStatus = $lead->status;
@@ -1430,7 +1428,7 @@ class LeadController extends FController
                     $result['error'] = $throwable->getMessage();
                 }
             } else {
-                $result = ['success' => false, 'error' => 'Access Denied!'];
+                $result ['error'] = 'Access Denied!';
             }
         }
 

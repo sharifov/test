@@ -17,6 +17,8 @@ use yii\helpers\VarDumper;
  * @property bool $isShiftTime
  * @property bool $withinPersonalTakeLimits
  * @property bool $hasAppliedQuote
+ * @property bool $isInProject
+ * @property bool $isInDepartment
  * @property bool $canTakeByFrequencyMinutes
  * @property int|null $status_id
  */

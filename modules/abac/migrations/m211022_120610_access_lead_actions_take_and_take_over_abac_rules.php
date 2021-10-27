@@ -5,7 +5,7 @@ namespace modules\abac\migrations;
 use yii\db\Migration;
 
 /**
- * Class m211022_120610_Access_Lead_Actions_Take_and_Take_Over_ABAC_rules
+ * Class m211022_120610_access_lead_actions_take_and_take_over_abac_rules
  */
 class m211022_120610_access_lead_actions_take_and_take_over_abac_rules extends Migration
 {
@@ -14,10 +14,6 @@ class m211022_120610_access_lead_actions_take_and_take_over_abac_rules extends M
      */
     public function safeUp()
     {
-        $this->delete('{{%abac_policy}}', ['IN', 'ap_object', [
-            'lead/lead/act/take-lead',
-        ]]);
-
         $this->insert('{{%abac_policy}}', [
             'ap_rule_type' => 'p',
             'ap_subject' => '((r.sub.status_id == 16) || (r.sub.status_id == 1) || (r.sub.status_id == 5) || (r.sub.status_id == 8)) && ((r.sub.is_owner == false) && (("admin" in r.sub.env.user.roles) || ((r.sub.isInProject == true) && (r.sub.isInDepartment == true) && (r.sub.canTakeByFrequencyMinutes == true))))',
@@ -38,8 +34,9 @@ class m211022_120610_access_lead_actions_take_and_take_over_abac_rules extends M
      */
     public function safeDown()
     {
-        echo "m211022_120610_access_lead_actions_take_and_take_over_abac_rules cannot be reverted.\n";
-
+        $this->delete('{{%abac_policy}}', ['IN', 'ap_object', [
+            'lead/lead/act/take-lead',
+        ]]);
         return false;
     }
 
@@ -52,7 +49,7 @@ class m211022_120610_access_lead_actions_take_and_take_over_abac_rules extends M
 
     public function down()
     {
-        echo "m211022_120610_Access_Lead_Actions_Take_and_Take_Over_ABAC_rules cannot be reverted.\n";
+        echo "m211022_120610_access_lead_actions_take_and_take_over_abac_rules cannot be reverted.\n";
 
         return false;
     }
