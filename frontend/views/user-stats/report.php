@@ -123,7 +123,7 @@ if ($showReport) {
     <div class="x_panel">
         <div class="x_title">
             <h2><i class="fa fa-search"></i> Search</h2>
-            <ul class="nav navbar-right panel_toolbox">
+            <ul class="nav navbar-right panel_toolbox" style="min-width: 0;">
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
