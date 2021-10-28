@@ -712,4 +712,14 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['voluntary_refund_case_category'] ?? null;
     }
+
+    public static function getProductQuoteChangeClientStatusMapping(): array
+    {
+        return Yii::$app->params['settings']['product_quote_change_client_status_mapping'] ?? [];
+    }
+
+    public static function getProductQuoteRefundClientStatusMapping(): array
+    {
+        return Yii::$app->params['settings']['product_quote_refund_client_status_mapping'] ?? [];
+    }
 }

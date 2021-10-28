@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
+use sales\helpers\setting\SettingHelper;
 use yii\bootstrap4\Html;
 
 class ProductQuoteChangeStatus
@@ -116,6 +117,8 @@ class ProductQuoteChangeStatus
 
     public static function getBoKeyStatusById(int $id): ?string
     {
-        return self::getBoStatusesList()[$id] ?? null;
+        $key = self::getKeyById($id);
+        $statusMap = SettingHelper::getProductQuoteChangeClientStatusMapping();
+        return $statusMap[$key] ?? self::getBoStatusesList()[$id] ?? null;
     }
 }

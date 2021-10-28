@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteRefund;
 
+use sales\helpers\setting\SettingHelper;
 use yii\helpers\Html;
 
 class ProductQuoteRefundStatus
@@ -105,6 +106,8 @@ class ProductQuoteRefundStatus
 
     public static function getBoKeyStatusById(int $id): ?string
     {
-        return self::getBoStatusesList()[$id] ?? null;
+        $key = self::getKeyById($id);
+        $statusMap = SettingHelper::getProductQuoteRefundClientStatusMapping();
+        return $statusMap[$key] ?? self::getBoStatusesList()[$id] ?? null;
     }
 }
