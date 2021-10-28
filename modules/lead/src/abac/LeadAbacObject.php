@@ -143,7 +143,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
-        'optgroup' => self::OPTGROUP_ENV_USER,
+        'optgroup' => 'User',
         'id' => self::NS . 'is_owner',
         'field' => 'is_owner',
         'label' => 'Is Lead`s Owner',
@@ -195,7 +195,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     protected const ATTR_IS_EMPLOYEE_SHIFT_TIME = [
-        'optgroup' => self::OPTGROUP_ENV_USER,
+        'optgroup' => 'User',
         'id' => self::NS . 'isShiftTime',
         'field' => 'isShiftTime',
         'label' => 'Is Shift Time',
@@ -234,7 +234,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     protected const ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES = [
-        'optgroup' => self::OPTGROUP_ENV_USER,
+        'optgroup' => 'User',
         'id' => self::NS . 'canTakeByFrequencyMinutes',
         'field' => 'canTakeByFrequencyMinutes',
         'label' => 'Can Take By Frequency Minutes',
@@ -247,7 +247,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     protected const ATTR_IS_IN_DEPARTMENT = [
-        'optgroup' => self::OPTGROUP_ENV_USER,
+        'optgroup' => 'User',
         'id' => self::NS . 'isInDepartment',
         'field' => 'isInDepartment',
         'label' => 'Has Access to Lead`s Department',
@@ -260,7 +260,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     protected const ATTR_IS_IN_PROJECT = [
-        'optgroup' => self::OPTGROUP_ENV_USER,
+        'optgroup' => 'User',
         'id' => self::NS . 'isInProject',
         'field' => 'isInProject',
         'label' => 'Has Access to Lead`s Project',
