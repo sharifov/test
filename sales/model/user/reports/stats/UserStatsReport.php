@@ -206,6 +206,11 @@ class UserStatsReport extends Model
         if (!$this->validate()) {
             $this->isValid = false;
             $query->where('0=1');
+
+            if (!\Yii::$app->request->isPost) {
+                $this->clearErrors();
+            }
+
             return $dataProvider;
         }
         $this->isValid = true;
