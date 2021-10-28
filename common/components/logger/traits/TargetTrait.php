@@ -75,9 +75,12 @@ trait TargetTrait
             return;
         }
 
+        //VarDumper::dump($this->messages, 10, true);// exit;
+
         foreach ($this->messages as &$message) {
-            $message[0] = ArrayHelper::merge($context, $this->parseText($message[0]));
+            $message[0] = ArrayHelper::merge($context, $this->preParseText($message[0]));
         }
+        //VarDumper::dump($message, 10, true); exit;
     }
 
     /**
@@ -113,13 +116,66 @@ trait TargetTrait
     protected function parseText($text)
     {
         $type = gettype($text);
+
         switch ($type) {
             case 'array':
-                return $text;
+            {
+                $data = [];
+                if ($text) {
+                    foreach ($text as $key => $value) {
+                        $data[$key] = $value;
+                    }
+                }
+                if (!empty($text['message']) && empty($data['@message'])) {
+                    $data['@message'] = $text['message'];
+                }
+                if (!empty($text['trace']) && empty($data['@trace'])) {
+                    $data['@trace'] = $text['trace'];
+                }
+                return $data;
+            }
             case 'string':
                 return ['@message' => $text];
             case 'object':
-                return get_object_vars($text);
+            {
+                $data = get_object_vars($text);
+                $data['@message'] = var_export($data, true);
+                return $data;
+            }
+            default:
+                return ['@message' => \Yii::t('log', "Warning, wrong log message type '{$type}'")];
+        }
+    }
+
+    protected function preParseText($text)
+    {
+        $type = gettype($text);
+
+        switch ($type) {
+            case 'array':
+            {
+                $data = [];
+                if ($text) {
+                    foreach ($text as $key => $value) {
+                        $data['@app.data'][$key] = $value;
+                    }
+                }
+                if (!empty($text['message']) && empty($data['@message'])) {
+                    $data['@message'] = $text['message'];
+                }
+                if (!empty($text['trace']) && empty($data['@trace'])) {
+                    $data['@trace'] = $text['trace'];
+                }
+                return $data;
+            }
+            case 'string':
+                return ['@message' => $text];
+            case 'object':
+            {
+                $data = get_object_vars($text);
+                $data['@message'] = var_export($data, true);
+                return $data;
+            }
             default:
                 return ['@message' => \Yii::t('log', "Warning, wrong log message type '{$type}'")];
         }
@@ -139,18 +195,22 @@ trait TargetTrait
         $level = Logger::getLevelName($level);
         $timestamp = date('c', $timestamp);
 
+        //$txt = $this->parseText($text);
+        //чVarDumper::dump($text, 10, true); exit;
+
         $result = ArrayHelper::merge(
             $this->parseText($text),
-            ['level' => $level, 'category' => $category, '@timestamp' => $timestamp]
+            ['@level' => $level, '@category' => $category, '@timestamp' => $timestamp]
         );
 
-        if (isset($message[4]) === true) {
-            $result['trace'] = $message[4];
+        if (!empty($message[4])) {
+            $result['@trace'] = $message[4];
         }
 
-        //VarDumper::dump($text);
-//        VarDumper::dump($message, 10, true); exit;
-//        VarDumper::dump($result, 10, true); exit;
+        if (!empty($message[5])) {
+            $result['@memory'] = $message[5];
+        }
+
         return $result;
     }
 }

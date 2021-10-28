@@ -218,6 +218,7 @@ use sales\temp\LeadFlowUpdate;
 use sales\widgets\PhoneSelect2Widget;
 use Twilio\TwiML\VoiceResponse;
 use webapi\models\ApiLead;
+use webapi\src\logger\StartDTO;
 use webapi\src\response\messages\DataMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
@@ -2392,7 +2393,7 @@ class TestController extends FController
 
     public function actionErrorTest()
     {
-        /*$message = [
+        $message = [
             'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
             'a1' => '1111',
@@ -2422,13 +2423,25 @@ class TestController extends FController
         Yii::warning($message, 'test/warning');
         Yii::info($message, 'info\test/info');
         Yii::info($message, 'log\test/log');
-*/
+
+//        $a = new StartDTO();
+//        $a->ip = 'asdasdasd';
+//
+//        VarDumper::dump($a);
+//        Yii::error($a, 'error:Throwable2');
+//        exit;
 
         try {
             $a = 3 / 0;
         } catch (\Throwable $throwable) {
-            VarDumper::dump($throwable, 10, true);
-            Yii::error($throwable, 'error:Throwable');
+            //VarDumper::dump(get_object_vars($throwable), 10, true);
+            //VarDumper::dump(AppHelper::throwableLog($throwable, true), 10, true);
+            //Yii::error(AppHelper::throwableLog($throwable, false), 'error:Throwable');
         }
+
+//        Yii::error(111, 'error:Throwable');
+        Yii::error(AppHelper::throwableLog($throwable, false), 'error:Throwable');
+
+        return 123;
     }
 }

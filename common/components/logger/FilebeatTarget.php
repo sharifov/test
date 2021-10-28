@@ -11,6 +11,7 @@ namespace common\components\logger;
 
 use common\components\logger\traits\TargetTrait;
 use Yii;
+use yii\helpers\VarDumper;
 
 /**
  *
@@ -49,21 +50,30 @@ class FilebeatTarget extends \yii\log\FileTarget
      */
     protected function getContextMessage(): array
     {
-        $context = $this->context;
-        $context['srv_name'] = $this->serviceName;
-        $context['srv_type'] = $this->serviceType;
-        $context['srv_version'] = $this->appVersion; //$this->serviceVersion;
-        $context['srv_env'] = YII_ENV;
-        $context['srv_git_branch'] = str_replace('refs/heads/', '', $this->gitBranch);
-        $context['srv_git_hash'] = substr($this->gitHash, 7);
+        $data = [];
 
-        $prefix = $this->getMessagePrefix($this->context);
-        if ($prefix && is_array($prefix)) {
-            foreach ($prefix as $pkey => $pval) {
-                $context['app.' . $pkey] = $pval;
+        $data['srv_name'] = $this->serviceName;
+        $data['srv_type'] = $this->serviceType;
+        $data['srv_version'] = $this->appVersion; //$this->serviceVersion;
+        $data['srv_env'] = YII_ENV;
+        $data['srv_git_branch'] = str_replace('refs/heads/', '', $this->gitBranch);
+        $data['srv_git_hash'] = substr($this->gitHash, 0, 7);
+
+
+        $context = $this->context;
+        if ($context) {
+            foreach ($context as $key => $value) {
+                $data['@f.' . $key] = $value;
             }
         }
 
-        return $context;
+        $prefix = $this->getMessagePrefix($context);
+        if ($prefix && is_array($prefix)) {
+            foreach ($prefix as $pkey => $pval) {
+                $data['@app.' . $pkey] = $pval;
+            }
+        }
+
+        return $data;
     }
 }
