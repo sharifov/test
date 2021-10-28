@@ -66,6 +66,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pqr_case_id')->textInput() ?>
 
+        <?= $form->field($model, 'pqr_cid')->textInput() ?>
+
         <?= $form->field($model, 'pqr_type_id')->dropDownList(ProductQuoteRefund::getTypeList(), [
             'prompt' => '---'
         ]) ?>

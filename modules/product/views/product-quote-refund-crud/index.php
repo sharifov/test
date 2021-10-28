@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqr_gid',
             'pqr_order_refund_id',
             'pqr_case_id',
+            'pqr_cid',
             'pqr_product_quote_id',
             'pqr_selling_price',
             'pqr_penalty_amount',

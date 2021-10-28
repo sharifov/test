@@ -254,6 +254,7 @@ class VoluntaryRefundService
                 $voluntaryRefundCreateForm->refundForm->totalPaid,
                 $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
                 $case->cs_id,
+                $voluntaryRefundCreateForm->refundForm->orderId,
                 $voluntaryRefundCreateForm->toArray()
             );
             $productQuoteRefund->inProgress();
