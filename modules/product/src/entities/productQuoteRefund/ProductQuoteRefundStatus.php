@@ -52,6 +52,18 @@ class ProductQuoteRefundStatus
         self::DECLINED => 'declined'
     ];
 
+    private const BO_STATUSES_LIST = [
+        self::NEW => '',
+        self::PENDING => '',
+        self::CONFIRMED => 'requested',
+        self::CANCELED => '',
+        self::COMPLETED => 'refunded',
+        self::ERROR => '',
+        self::PROCESSING => 'processing',
+        self::IN_PROGRESS => 'requested',
+        self::DECLINED => 'canceled'
+    ];
+
     public static function getList(): array
     {
         return self::LIST;
@@ -81,8 +93,18 @@ class ProductQuoteRefundStatus
         return self::UNIQUE_KEY_LIST;
     }
 
+    public static function getBoStatusesList(): array
+    {
+        return self::BO_STATUSES_LIST;
+    }
+
     public static function getKeyById(int $id): ?string
     {
         return self::getKeyList()[$id] ?? null;
+    }
+
+    public static function getBoKeyStatusById(int $id): ?string
+    {
+        return self::getBoStatusesList()[$id] ?? null;
     }
 }

@@ -159,6 +159,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $this->pqr_status_id = ProductQuoteRefundStatus::ERROR;
     }
 
+    public function declined(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::DECLINED;
+    }
+
     public function inProgress(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::IN_PROGRESS;
