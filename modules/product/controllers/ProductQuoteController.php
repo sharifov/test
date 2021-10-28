@@ -351,7 +351,7 @@ class ProductQuoteController extends FController
 
                         $productQuoteChange = ProductQuoteChange::find()->byProductQuote($originQuote->pq_id)->one();
                         if ($productQuoteChange) {
-                            $productQuoteChange->decisionPending();
+                            $productQuoteChange->statusToPending();
                             if (!$productQuoteChange->save()) {
                                 Yii::warning('ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0], 'ProductQuoteController::actionReprotectionQuoteSendEmail::ProductQuoteChange::save');
                             }

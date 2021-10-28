@@ -64,7 +64,7 @@ class SendEmailReProtectionService
         }
 
         if ($originProductQuote && isset($productQuoteChange)) {
-            $productQuoteChange->decisionPending();
+            $productQuoteChange->statusToPending();
             $this->productQuoteChangeRepository->save($productQuoteChange);
         }
         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Email sent successfully');

@@ -25,10 +25,10 @@ class m211013_131925_add_column_pqc_data_json extends Migration
                 's_name' => 'Voluntary Exchange Processing Status List',
                 's_type' => Setting::TYPE_ARRAY,
                 's_value' => json_encode([
-                    ProductQuoteChangeStatus::DECISION_PENDING => 'DECISION_PENDING',
+                    ProductQuoteChangeStatus::PENDING => 'PENDING',
                     ProductQuoteChangeStatus::IN_PROGRESS => 'IN_PROGRESS',
                     ProductQuoteChangeStatus::ERROR => 'ERROR',
-                    ProductQuoteChangeStatus::DECIDED => 'DECIDED',
+                    ProductQuoteChangeStatus::PROCESSING => 'PROCESSING',
                 ]),
                 's_updated_dt' => date('Y-m-d H:i:s'),
                 's_category_id' => $settingCategory->sc_id,

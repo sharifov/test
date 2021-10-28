@@ -82,7 +82,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function customerDecisionConfirm(?int $userId, \DateTimeImmutable $date): void
     {
         $this->pqc_decision_user = $userId;
-        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_status_id = ProductQuoteChangeStatus::PROCESSING;
         $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::CONFIRM;
         $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
         $this->recordEvent(new ProductQuoteChangeDecisionConfirmEvent($this->pqc_id, $this->pqc_pq_id));
@@ -91,7 +91,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function customerDecisionRefund(?int $userId, \DateTimeImmutable $date): void
     {
         $this->pqc_decision_user = $userId;
-        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_status_id = ProductQuoteChangeStatus::PROCESSING;
         $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::REFUND;
         $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
         $this->recordEvent(new ProductQuoteChangeDecisionRefundEvent($this->pqc_id, $this->pqc_pq_id));
@@ -100,7 +100,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function customerDecisionModify(?int $userId, \DateTimeImmutable $date): void
     {
         $this->pqc_decision_user = $userId;
-        $this->pqc_status_id = ProductQuoteChangeStatus::DECIDED;
+        $this->pqc_status_id = ProductQuoteChangeStatus::PROCESSING;
         $this->pqc_decision_type_id = ProductQuoteChangeDecisionType::MODIFY;
         $this->pqc_decision_dt = $date->format('Y-m-d H:i:s');
         $this->recordEvent(new ProductQuoteChangeDecisionModifyEvent($this->pqc_id, $this->pqc_pq_id));
@@ -108,22 +108,22 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
 
     public function isCustomerDecisionConfirm(): bool
     {
-        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::CONFIRM;
+        return $this->pqc_status_id === ProductQuoteChangeStatus::PROCESSING && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::CONFIRM;
     }
 
     public function isCustomerDecisionModify(): bool
     {
-        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::MODIFY;
+        return $this->pqc_status_id === ProductQuoteChangeStatus::PROCESSING && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::MODIFY;
     }
 
     public function isCustomerDecisionRefund(): bool
     {
-        return $this->pqc_status_id === ProductQuoteChangeStatus::DECIDED && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::REFUND;
+        return $this->pqc_status_id === ProductQuoteChangeStatus::PROCESSING && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::REFUND;
     }
 
-    public function isDecisionPending(): bool
+    public function isPending(): bool
     {
-        return $this->pqc_status_id === ProductQuoteChangeStatus::DECISION_PENDING;
+        return $this->pqc_status_id === ProductQuoteChangeStatus::PENDING;
     }
 
     public function isStatusNew(): bool
@@ -134,11 +134,6 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function statusToNew(): void
     {
         $this->pqc_status_id = ProductQuoteChangeStatus::NEW;
-    }
-
-    public function statusToPending(): void
-    {
-        $this->pqc_status_id = ProductQuoteChangeStatus::PENDING;
     }
 
     public function inProgress(): void
@@ -156,9 +151,9 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::DECLINED;
     }
 
-    public function decisionPending(): void
+    public function statusToPending(): void
     {
-        $this->pqc_status_id = ProductQuoteChangeStatus::DECISION_PENDING;
+        $this->pqc_status_id = ProductQuoteChangeStatus::PENDING;
     }
 
     public function error(): void
@@ -168,7 +163,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
 
     public function statusToComplete(): void
     {
-        $this->pqc_status_id = ProductQuoteChangeStatus::COMPLETE;
+        $this->pqc_status_id = ProductQuoteChangeStatus::COMPLETED;
     }
 
     /**
