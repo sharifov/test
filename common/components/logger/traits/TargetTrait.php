@@ -107,6 +107,42 @@ trait TargetTrait
     }
 
     /**
+     * @param $text
+     * @return array
+     */
+    protected function parseTextArray($text, $isData = false): array
+    {
+        $data = [];
+        if ($text) {
+            foreach ($text as $key => $value) {
+                if ($isData) {
+                    $data['@app.data'][$key] = $value;
+                } else {
+                    $data[$key] = $value;
+                }
+            }
+        }
+        if (!empty($text['message']) && empty($data['@message'])) {
+            $data['@message'] = $text['message'];
+        }
+        if (!empty($text['trace']) && empty($data['@trace'])) {
+            $data['@trace'] = $text['trace'];
+        }
+        return $data;
+    }
+
+    /**
+     * @param $text
+     * @return array
+     */
+    protected function parseTextObject($text): array
+    {
+        $data = get_object_vars($text);
+        $data['@message'] = var_export($data, true);
+        return $data;
+    }
+
+    /**
      * Convert's any type of log message to array.
      *
      * @param mixed $text Input log message.
@@ -119,29 +155,11 @@ trait TargetTrait
 
         switch ($type) {
             case 'array':
-            {
-                $data = [];
-                if ($text) {
-                    foreach ($text as $key => $value) {
-                        $data[$key] = $value;
-                    }
-                }
-                if (!empty($text['message']) && empty($data['@message'])) {
-                    $data['@message'] = $text['message'];
-                }
-                if (!empty($text['trace']) && empty($data['@trace'])) {
-                    $data['@trace'] = $text['trace'];
-                }
-                return $data;
-            }
+                return $this->parseTextArray($text);
             case 'string':
                 return ['@message' => $text];
             case 'object':
-            {
-                $data = get_object_vars($text);
-                $data['@message'] = var_export($data, true);
-                return $data;
-            }
+                return $this->parseTextObject($text);
             default:
                 return ['@message' => \Yii::t('log', "Warning, wrong log message type '{$type}'")];
         }
@@ -153,29 +171,11 @@ trait TargetTrait
 
         switch ($type) {
             case 'array':
-            {
-                $data = [];
-                if ($text) {
-                    foreach ($text as $key => $value) {
-                        $data['@app.data'][$key] = $value;
-                    }
-                }
-                if (!empty($text['message']) && empty($data['@message'])) {
-                    $data['@message'] = $text['message'];
-                }
-                if (!empty($text['trace']) && empty($data['@trace'])) {
-                    $data['@trace'] = $text['trace'];
-                }
-                return $data;
-            }
+                return $this->parseTextArray($text, true);
             case 'string':
                 return ['@message' => $text];
             case 'object':
-            {
-                $data = get_object_vars($text);
-                $data['@message'] = var_export($data, true);
-                return $data;
-            }
+                return $this->parseTextObject($text);
             default:
                 return ['@message' => \Yii::t('log', "Warning, wrong log message type '{$type}'")];
         }
