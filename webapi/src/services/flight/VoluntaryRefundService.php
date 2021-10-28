@@ -93,6 +93,7 @@ class VoluntaryRefundService implements BoWebhookService
         $whData['booking_id'] = $form->booking_id;
         $whData['product_quote_gid'] = $productQuote->pq_gid;
         $whData['refund_gid'] = $productQuoteRefund->pqr_gid;
+        $whData['refund_order_id'] = $productQuoteRefund->pqr_cid;
         $whData['refund_status_key'] = ProductQuoteRefundStatus::getKeyById($productQuoteRefund->pqr_status_id);
         \Yii::$app->hybrid->wh($project->id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
 
