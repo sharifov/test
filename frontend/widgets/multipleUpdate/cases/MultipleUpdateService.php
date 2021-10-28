@@ -32,15 +32,22 @@ class MultipleUpdateService
                 $this->addErrorMessage('ID ' . $id . ' not found');
                 continue;
             }
+
+            $caseAbacDto = new CasesAbacDto($case, $form->statusId);
+            $caseAbacDto->pqc_status = $case->productQuoteChange->pqc_status_id ?? null;
+            $caseAbacDto->pqr_status = $case->productQuoteRefund->pqr_status_id ?? null;
+
             if ($form->isChangeStatus()) {
-                if (!Yii::$app->abac->can(new CasesAbacDto($case, $form->statusId), CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
+                /** @abac new $caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER, Case Status transfer rules on multi update */
+                if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
                     continue;
                 }
                 $this->changeStatus($form, $case);
                 continue;
             }
             if ($form->isProcessing()) {
-                if (!Yii::$app->abac->can(new CasesAbacDto($case, $form->statusId), CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
+                /** @abac new $caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER, Case Status transfer rules on multi update */
+                if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
                     continue;
                 }
                 $this->processing($form, $case);

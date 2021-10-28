@@ -17,6 +17,7 @@ class CasesAbacDto extends \stdClass
     public ?int $to_status = null;
     public bool $is_common_group = false;
     public ?int $pqc_status = null;
+    public ?int $pqr_status = null;
 
     public function __construct(?Cases $case, ?int $statusSet = null)
     {

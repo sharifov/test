@@ -13,6 +13,7 @@ use common\models\Lead;
 use common\models\Project;
 use kartik\select2\ThemeDefaultAsset;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use sales\behaviors\metric\MetricCasesCounterBehavior;
 use sales\behaviors\metric\MetricLeadCounterBehavior;
 use sales\entities\cases\events\CasesAssignLeadEvent;
@@ -78,6 +79,7 @@ use function Amp\Promise\timeoutWithDefault;
  * @property CaseSale[] $caseSale
  * @property CaseEventLog[] $caseEventLogs
  * @property ProductQuoteChange|null $productQuoteChange
+ * @property ProductQuoteRefund|null $productQuoteRefund
  */
 class Cases extends ActiveRecord implements Objectable
 {
@@ -719,6 +721,11 @@ class Cases extends ActiveRecord implements Objectable
     public function getProductQuoteChange(): ActiveQuery
     {
         return $this->hasOne(ProductQuoteChange::class, ['pqc_case_id' => 'cs_id']);
+    }
+
+    public function getProductQuoteRefund(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteRefund::class, ['pqr_case_id' => 'cs_id']);
     }
 
     /*
