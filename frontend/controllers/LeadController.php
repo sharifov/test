@@ -185,7 +185,6 @@ class LeadController extends FController
                 'allowActions' => [
                     'view',
                     'take',
-                    'ajax-take',
                     'create-by-chat',
                     'ajax-create-from-phone-widget',
                     'ajax-link-to-call'
@@ -396,8 +395,7 @@ class LeadController extends FController
             throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
         }
         $leadForm = new LeadForm($lead);
-        if (
-            $leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
+        if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
             $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
         ) {
             $leadForm->mode = $leadForm::VIEW_MODE;
@@ -1397,12 +1395,12 @@ class LeadController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
         $gid = Yii::$app->request->get('gid');
         if (Yii::$app->request->isAjax && $gid) {
-            if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
-                try {
-                    $lead = $this->findLeadByGid($gid);
-                    $oldStatus = $lead->status;
-                    $user = Auth::user();
-
+            try {
+                $lead = $this->findLeadByGid($gid);
+                $oldStatus = $lead->status;
+                $user = Auth::user();
+                $leadAbacDto = new LeadAbacDto($lead, $user->getId());
+                if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS) && Auth::can('lead/take', ['lead' => $lead])) {
                     $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
                     $this->transaction->wrap(function () use ($lead) {
@@ -1420,15 +1418,15 @@ class LeadController extends FController
                         );
                         (new LeadUserConversionRepository())->save($leadUserConversion);
                     }
-                } catch (\RuntimeException | \DomainException $exception) {
-                    Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::DomainException');
-                    $result['error'] = $exception->getMessage();
-                } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:Throwable');
-                    $result['error'] = $throwable->getMessage();
+                } else {
+                    $result ['error'] = 'Access Denied!';
                 }
-            } else {
-                $result ['error'] = 'Access Denied!';
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::DomainException');
+                $result['error'] = $exception->getMessage();
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:Throwable');
+                $result['error'] = $throwable->getMessage();
             }
         }
 
