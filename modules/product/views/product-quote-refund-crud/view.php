@@ -58,6 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqr_created_dt:byUserDateTime',
             'pqr_updated_dt:byUserDateTime',
             'pqr_case_id',
+            'pqr_cid',
             [
                 'attribute' => 'pqr_type_id',
                 'value' => static function (ProductQuoteRefund $model) {

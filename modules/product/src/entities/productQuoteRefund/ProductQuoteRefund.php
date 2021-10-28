@@ -49,6 +49,7 @@ use yii\db\ActiveRecord;
  * @property Cases $case
  * @property string $pqr_data_json [json]
  * @property string $pqr_gid [varchar(32)]
+ * @property string $pqr_cid [varchar(32)]
  */
 class ProductQuoteRefund extends \yii\db\ActiveRecord
 {
@@ -130,6 +131,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $clientSelling,
         $clientRefundAmount,
         $caseId,
+        $cid,
         $data
     ): self {
         $refund = self::create(
@@ -147,6 +149,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $refund->pqr_client_selling_price = $clientSelling;
         $refund->pqr_client_refund_amount = $clientRefundAmount;
         $refund->pqr_data_json = $data;
+        $refund->pqr_cid = $cid;
         $refund->detachBehavior('user');
         return $refund;
     }
@@ -154,6 +157,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public function error(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::ERROR;
+    }
+
+    public function declined(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::DECLINED;
     }
 
     public function inProgress(): void
@@ -239,6 +247,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
 
             [['pqr_type_id'], 'integer'],
             [['pqr_type_id'], 'in', 'range' => array_keys(self::TYPE_LIST)],
+
+            [['pqr_gid', 'pqr_cid'], 'string', 'max' => 32],
         ];
     }
 
@@ -357,6 +367,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'pqr_id',
+            'gid' => 'pqr_gid',
+            'cid' => 'pqr_cid',
             'productQuoteId' => 'pqr_product_quote_id',
             'productQuoteGid' => static function (ProductQuoteRefund $model) {
                 return $model->productQuote->pq_gid ?? null;
