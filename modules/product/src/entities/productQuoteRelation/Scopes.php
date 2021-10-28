@@ -46,6 +46,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['pqr_type_id' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE]);
     }
 
+    public function byType(array $types): Scopes
+    {
+        return $this->andWhere(['IN', 'pqr_type_id', $types]);
+    }
+
     public function byParentQuoteId(int $id): Scopes
     {
         return $this->andWhere(['pqr_parent_pq_id' => $id]);
