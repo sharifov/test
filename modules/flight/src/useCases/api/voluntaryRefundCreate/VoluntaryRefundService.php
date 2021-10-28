@@ -225,7 +225,7 @@ class VoluntaryRefundService
         try {
             $orderRefund = OrderRefund::createByVoluntaryRefund(
                 OrderRefund::generateUid(),
-                $originProductQuote->pq_id,
+                $order->or_id,
                 $order->or_app_total,
                 CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->penaltyAmount, $order->orClientCurrency->cur_base_rate),
                 CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->processingFee, $order->orClientCurrency->cur_base_rate),
