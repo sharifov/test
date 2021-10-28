@@ -2411,19 +2411,6 @@ class TestController extends FController
         Yii::info($message, 'info\test/info');
         Yii::info($message, 'log\test/log');
 
-
-        $message = json_encode([
-            'message' => 'Test message 3',
-            'trace' => ['tr1' => 'ttttttttttt1'],
-            'a3' => '1111',
-            'b4' => '222',
-        ]);
-
-        Yii::error($message, 'test/error');
-        Yii::warning($message, 'test/warning');
-        Yii::info($message, 'info\test/info');
-        Yii::info($message, 'log\test/log');
-
 //        $a = new StartDTO();
 //        $a->ip = 'asdasdasd';
 //
@@ -2436,12 +2423,9 @@ class TestController extends FController
         } catch (\Throwable $throwable) {
             //VarDumper::dump(get_object_vars($throwable), 10, true);
             //VarDumper::dump(AppHelper::throwableLog($throwable, true), 10, true);
-            //Yii::error(AppHelper::throwableLog($throwable, false), 'error:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable, false), 'error:Throwable');
         }
 
-//        Yii::error(111, 'error:Throwable');
-        Yii::error(AppHelper::throwableLog($throwable, false), 'error:Throwable');
-
-        return 123;
+        return date('Y-m-d h:i:s');
     }
 }
