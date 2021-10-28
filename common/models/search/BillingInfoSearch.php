@@ -19,6 +19,7 @@ class BillingInfoSearch extends BillingInfo
         return [
             [['bi_id', 'bi_payment_method_id', 'bi_cc_id', 'bi_order_id', 'bi_status_id', 'bi_created_user_id', 'bi_updated_user_id'], 'integer'],
             [['bi_first_name', 'bi_last_name', 'bi_middle_name', 'bi_company_name', 'bi_address_line1', 'bi_address_line2', 'bi_city', 'bi_state', 'bi_country', 'bi_zip', 'bi_contact_phone', 'bi_contact_email', 'bi_contact_name', 'bi_created_dt', 'bi_updated_dt'], 'safe'],
+            [['bi_hash'], 'string'],
         ];
     }
 
@@ -65,6 +66,7 @@ class BillingInfoSearch extends BillingInfo
             'bi_status_id' => $this->bi_status_id,
             'bi_created_user_id' => $this->bi_created_user_id,
             'bi_updated_user_id' => $this->bi_updated_user_id,
+            'bi_hash' => $this->bi_hash,
             'DATE(bi_created_dt)' => $this->bi_created_dt,
             'DATE(bi_updated_dt)' => $this->bi_updated_dt,
         ]);
