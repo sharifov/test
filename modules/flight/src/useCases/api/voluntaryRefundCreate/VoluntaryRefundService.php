@@ -2,10 +2,13 @@
 
 namespace modules\flight\src\useCases\api\voluntaryRefundCreate;
 
+use common\components\BackOffice;
 use common\models\CaseSale;
 use common\models\Client;
+use common\models\Project;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefundRepository;
+use modules\flight\src\useCases\api\voluntaryRefundCreate\dto\RefundCreateResultDto;
 use modules\flight\src\useCases\sale\FlightFromSaleService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
@@ -45,6 +48,7 @@ use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\CurrencyHelper;
+use webapi\src\request\BoRequestDataHelper;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
 use webapi\src\services\payment\PaymentRequestVoluntaryService;
 
@@ -122,14 +126,14 @@ class VoluntaryRefundService
         $this->paymentRequestVoluntaryService = $paymentRequestVoluntaryService;
     }
 
-    public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, int $projectId, ?ProductQuote $originProductQuote): void
+    public function startRefundAutoProcess(VoluntaryRefundCreateForm $voluntaryRefundCreateForm, Project $project, ?ProductQuote $originProductQuote): RefundCreateResultDto
     {
         try {
             $caseCategoryKey = self::getCaseCategoryKey();
             if (!$case = CasesQuery::getLastActiveCaseByBookingId($voluntaryRefundCreateForm->bookingId, $caseCategoryKey)) {
                 $case = $this->casesCreateService->createRefund(
                     $voluntaryRefundCreateForm->bookingId,
-                    $projectId,
+                    $project->id,
                     $caseCategoryKey
                 );
             }
@@ -169,7 +173,7 @@ class VoluntaryRefundService
 
         try {
             $client = $this->getOrCreateClient(
-                $projectId,
+                $project->id,
                 $orderContactForm
             );
             $case->cs_client_id = $client->id;
@@ -185,7 +189,7 @@ class VoluntaryRefundService
                     $orderCreateSaleForm,
                     $orderContactForm,
                     $case,
-                    $projectId
+                    $project->id
                 );
             } else {
                 $this->orderCreateFromSaleService->caseOrderRelation($order->or_id, $case->cs_id);
@@ -262,8 +266,8 @@ class VoluntaryRefundService
                 $productQuoteObjectRefund = ProductQuoteObjectRefund::create(
                     $productQuoteRefund->pqr_id,
                     $flightQuoteTicketRefund->fqtr_id,
-                    CurrencyHelper::convertToBaseCurrency($ticketForm->sellingPrice, $order->orClientCurrency),
-                    CurrencyHelper::convertToBaseCurrency($ticketForm->airlinePenalty, $order->orClientCurrency),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->sellingPrice, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->airlinePenalty, $order->orClientCurrency->cur_base_rate),
                     CurrencyHelper::convertToBaseCurrency($ticketForm->processingFee, $order->orClientCurrency->cur_base_rate),
                     CurrencyHelper::convertToBaseCurrency($ticketForm->refundAmount, $order->orClientCurrency->cur_base_rate),
                     $voluntaryRefundCreateForm->refundForm->currency,
@@ -298,7 +302,7 @@ class VoluntaryRefundService
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'Product Quote Refund structure creation failed', $e);
+            $this->errorHandler($case, $productQuoteRefund ?? null, 'Product Quote Refund structure creation failed', $e);
             throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
         }
 
@@ -311,7 +315,7 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'PaymentRequest processing is failed', $e);
+            $this->errorHandler($case, $productQuoteRefund, 'PaymentRequest processing is failed', $e);
             throw new VoluntaryRefundCodeException('PaymentRequest processing is failed', VoluntaryRefundCodeException::PAYMENT_DATA_PROCESSED_FAILED);
         }
 
@@ -328,7 +332,7 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, null, 'BillingInfo processing is failed', $e);
+            $this->errorHandler($case, $productQuoteRefund, 'BillingInfo processing is failed', $e);
             throw new VoluntaryRefundCodeException('BillingInfo processing is failed', VoluntaryRefundCodeException::BILLING_INFO_PROCESSED_FAILED);
         }
 
@@ -337,9 +341,23 @@ class VoluntaryRefundService
 
         $case->awaiting(null, 'Product Quote Refund initiated');
         $this->casesRepository->save($case);
+
+        if (!$boRequestEndpoint = SettingHelper::getVoluntaryRefundBoEndpoint()) {
+            $this->errorHandler($case, $productQuoteRefund, 'BO endpoint is not set', null);
+            throw new \RuntimeException('BO endpoint is not set', VoluntaryRefundCodeException::BO_REQUEST_IS_NO_SEND);
+        }
+
+        $boDataRequest = BoRequestDataHelper::getDataForVoluntaryCreateByForm($project->api_key, $voluntaryRefundCreateForm);
+        $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+        if (mb_strtolower($result['status']) === 'failed') {
+            $this->errorHandler($case, $productQuoteRefund, 'BO returns an error', null);
+            throw new BoResponseException($result['message'] ?? '', VoluntaryRefundCodeException::BO_REQUEST_FAILED);
+        }
+
+        return new RefundCreateResultDto($result['saleData'] ?? [], $result['refundData'] ?? []);
     }
 
-    public function processProductQuote(ProductQuote $productQuote, VoluntaryRefundCreateForm $form, int $projectId): void
+    public function processProductQuote(ProductQuote $productQuote): self
     {
         if ($productQuoteRefundsNotFinished = ProductQuoteRefundQuery::findAllNotFinishedByProductQuoteId($productQuote->pq_id)) {
             foreach ($productQuoteRefundsNotFinished as $productQuoteRefund) {
@@ -364,8 +382,7 @@ class VoluntaryRefundService
             $relatedProductQuote->declined();
             $this->productQuoteRepository->save($relatedProductQuote);
         }
-
-        $this->startRefundAutoProcess($form, $projectId, $productQuote);
+        return $this;
     }
 
     private function getCaseSaleData(string $bookingId, Cases $case, int $caseEventLogType): array
@@ -453,7 +470,7 @@ class VoluntaryRefundService
         ?Cases $case,
         ?ProductQuoteRefund $productQuoteRefund,
         string $description,
-        \Throwable $exception
+        ?\Throwable $exception
     ): void {
         if ($case) {
             $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, $description);
@@ -466,6 +483,8 @@ class VoluntaryRefundService
             $this->productQuoteRefundRepository->save($productQuoteRefund);
         }
 
-        \Yii::error(AppHelper::throwableLog($exception, true), 'VoluntaryRefundService:errorHandler');
+        if ($exception) {
+            \Yii::error(AppHelper::throwableLog($exception, true), 'VoluntaryRefundService:errorHandler');
+        }
     }
 }

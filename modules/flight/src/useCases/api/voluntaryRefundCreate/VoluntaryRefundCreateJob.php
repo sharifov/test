@@ -48,9 +48,9 @@ class VoluntaryRefundCreateJob extends BaseJob implements JobInterface
             }
 
             if ($this->productQuoteId && $productQuote = ProductQuote::findOne(['pq_id' => $this->productQuoteId])) {
-                $voluntaryRefundService->processProductQuote($productQuote, $voluntaryRefundCreateForm, $flightRequest->fr_project_id);
+                $voluntaryRefundService->processProductQuote($productQuote)->startRefundAutoProcess($voluntaryRefundCreateForm, $flightRequest->project, $productQuote);
             } else {
-                $voluntaryRefundService->startRefundAutoProcess($voluntaryRefundCreateForm, $flightRequest->fr_project_id, null);
+                $voluntaryRefundService->startRefundAutoProcess($voluntaryRefundCreateForm, $flightRequest->project, null);
             }
 
             $flightRequest->statusToDone();
