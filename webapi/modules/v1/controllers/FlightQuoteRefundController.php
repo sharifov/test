@@ -770,16 +770,12 @@ class FlightQuoteRefundController extends ApiBaseController
                 throw new \RuntimeException('BO endpoint is not set', VoluntaryRefundCodeException::BO_REQUEST_IS_NO_SEND);
             }
 
-            $productQuoteRefund->processing();
+            $productQuoteRefund->inProgress();
+            $productQuoteRefund->detachBehavior('user');
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 
             $boDataRequest = BoRequestDataHelper::getDataForVoluntaryRefundConfirm($project->api_key, $voluntaryRefundConfirmForm, $productQuoteRefund);
             $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
-            // ToDo: remove debug before deploy in prod
-            \Yii::info([
-                'requestData' => $boDataRequest,
-                'response' => $result
-            ], 'info\VoluntaryRefund::BO::Response');
             $boRequestConfirmResult = true;
             if (mb_strtolower($result['status']) === 'failed') {
                 $productQuoteRefund->error();

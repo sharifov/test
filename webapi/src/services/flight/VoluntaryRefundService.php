@@ -55,6 +55,7 @@ class VoluntaryRefundService implements BoWebhookService
             throw new NotFoundException('Not found project by project api key: ' . $form->project_key);
         }
 
+        $productQuoteRefund->detachBehavior('user');
         $productQuote = $productQuoteRefund->productQuote;
         $case = $productQuoteRefund->case;
         if ($form->isProcessing()) {
