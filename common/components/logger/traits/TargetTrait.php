@@ -130,6 +130,18 @@ trait TargetTrait
         if (!empty($text['trace']) && empty($data['@trace'])) {
             $data['@trace'] = $text['trace'];
         }
+
+        if (!empty($text['line']) && empty($data['@line'])) {
+            $data['@line'] = $text['line'];
+        }
+
+        if (!empty($text['file']) && empty($data['@file'])) {
+            $data['@file'] = $text['file'];
+        }
+
+        if (!empty($text['code']) && empty($data['@statusCode'])) {
+            $data['@statusCode'] = $text['code'];
+        }
         return $data;
     }
 
@@ -145,14 +157,14 @@ trait TargetTrait
             $dataList = AppHelper::throwableLog($text, true);
         } else {
             $dataList = get_object_vars($text);
+        }
 
-            if ($dataList) {
-                foreach ($dataList as $key => $value) {
-                    if ($isData) {
-                        $data['@app.data'][$key] = $value;
-                    } else {
-                        $data[$key] = $value;
-                    }
+        if ($dataList) {
+            foreach ($dataList as $key => $value) {
+                if ($isData) {
+                    $data['@app.data'][$key] = $value;
+                } else {
+                    $data[$key] = $value;
                 }
             }
         }
@@ -177,10 +189,6 @@ trait TargetTrait
 
         if (!empty($dataList['file']) && empty($data['@file'])) {
             $data['@file'] = $dataList['file'];
-        }
-
-        if (!empty($dataList['trace']) && empty($data['@trace'])) {
-            $data['@code'] = $dataList['code'];
         }
 
         return $data;
