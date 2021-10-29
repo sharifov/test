@@ -22,7 +22,7 @@ class ProductQuoteRefundStatus
         self::PENDING => 'Pending',
         self::CONFIRMED => 'Confirmed',
         self::CANCELED => 'Canceled',
-        self::COMPLETED => 'Done',
+        self::COMPLETED => 'Completed',
         self::ERROR => 'Error',
         self::PROCESSING => 'Processing',
         self::IN_PROGRESS => 'In Progress',
