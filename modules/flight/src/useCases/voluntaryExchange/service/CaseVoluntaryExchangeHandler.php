@@ -39,11 +39,6 @@ class CaseVoluntaryExchangeHandler
         if ($deadline = CaseVoluntaryExchangeService::getCaseDeadline($flightQuote)) {
             $this->case->cs_deadline_dt = $deadline;
             $this->objectCollection->getCasesRepository()->save($this->case);
-            $this->case->addEventLog(
-                CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
-                'Set deadline from FlightQuote',
-                ['uid' => $flightQuote->fq_uid]
-            );
             return $deadline;
         }
         \Yii::warning(

@@ -28,5 +28,7 @@ class ApiCodeException
 
     public const COMMUNICATION_ERROR = Module::API . 120;
 
+    public const REQUEST_TO_BACK_OFFICE_ERROR = Module::API . 130;
+
     public const SUCCESS = Module::API . 200;
 }

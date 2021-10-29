@@ -268,15 +268,6 @@ class VoluntaryExchangeService
 
             if ($flightRequest = $flightRequestService->getFlightRequest()) {
                 (new CleanDataVoluntaryExchangeService($flightRequest, $productQuoteChange, $this->objectCollection));
-
-                /* TODO:: temporary disable */
-                /*
-                try {
-                    OtaRequestVoluntaryRequestService::fail($flightRequest, null);
-                } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:OtaRequest:Fail');
-                }
-                */
             }
         }
     }

@@ -10,7 +10,7 @@ namespace common\components\hybrid;
 class HybridWhData
 {
     public const WH_TYPE_FLIGHT_SCHEDULE_CHANGE    = 'flight/schedule-change';
-    public const WH_TYPE_VOLUNTARY_CHANGE_UPDATE   = 'flight/voluntary-change/update';
+    public const WH_TYPE_VOLUNTARY_CHANGE_UPDATE   = 'flight/voluntary-exchange/update';
     public const WH_TYPE_VOLUNTARY_REFUND_UPDATE   = 'flight/voluntary-refund/update';
 
     public const WH_DATA = [
@@ -23,8 +23,8 @@ class HybridWhData
         self::WH_TYPE_VOLUNTARY_CHANGE_UPDATE => [
             'booking_id'                => '',
             'product_quote_gid'         => '',
-            'change_quote_gid'          => '',
-            'change_status_id'          => '',
+            'exchange_gid'              => '',
+            'exchange_status'           => '',
         ],
         self::WH_TYPE_VOLUNTARY_REFUND_UPDATE => [
             'booking_id'                => '',

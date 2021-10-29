@@ -26,6 +26,7 @@ use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
 use sales\repositories\product\ProductQuoteRepository;
+use webapi\src\services\payment\PaymentRequestVoluntaryService;
 use Yii;
 
 /**
@@ -33,30 +34,46 @@ use Yii;
  */
 class VoluntaryExchangeObjectCollection
 {
-    private ?CasesRepository $casesRepository;
-    private ?FlightRequestRepository $flightRequestRepository;
-    private ?FlightRequestLogRepository $flightRequestLogRepository;
-    private ?ClientManageService $clientManageService;
-    private ?CasesSaleService $casesSaleService;
-    private ?OrderCreateFromSaleService $orderCreateFromSaleService;
-    private ?OrderRepository $orderRepository;
-    private ?FlightFromSaleService $flightFromSaleService;
-    private ?ProductQuoteChangeRepository $productQuoteChangeRepository;
-    private ?ProductQuoteRepository $productQuoteRepository;
-    private ?ProductQuoteDataManageService $productQuoteDataManageService;
-    private ?CasesCommunicationService $casesCommunicationService;
-    private ?InvoiceRepository $invoiceRepository;
-    private ?CreditCardRepository $creditCardRepository;
-    private ?FlightQuoteRepository $flightQuoteRepository;
-    private ?FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository;
-    private ?FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository;
-    private ?FlightQuoteManageService $flightQuoteManageService;
-    private ?ProductQuoteRelationRepository $productQuoteRelationRepository;
-    private ?FlightQuoteTripRepository $flightQuoteTripRepository;
-    private ?FlightQuoteSegmentRepository $flightQuoteSegmentRepository;
-    private ?FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository;
-    private ?FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository;
-    private ?ProductQuoteOptionRepository $productQuoteOptionRepository;
+    private CasesRepository $casesRepository;
+    private FlightRequestRepository $flightRequestRepository;
+    private FlightRequestLogRepository $flightRequestLogRepository;
+    private ClientManageService $clientManageService;
+    private CasesSaleService $casesSaleService;
+    private OrderCreateFromSaleService $orderCreateFromSaleService;
+    private OrderRepository $orderRepository;
+    private FlightFromSaleService $flightFromSaleService;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteRepository $productQuoteRepository;
+    private ProductQuoteDataManageService $productQuoteDataManageService;
+    private CasesCommunicationService $casesCommunicationService;
+    private InvoiceRepository $invoiceRepository;
+    private CreditCardRepository $creditCardRepository;
+    private FlightQuoteRepository $flightQuoteRepository;
+    private FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository;
+    private FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository;
+    private FlightQuoteManageService $flightQuoteManageService;
+    private ProductQuoteRelationRepository $productQuoteRelationRepository;
+    private FlightQuoteTripRepository $flightQuoteTripRepository;
+    private FlightQuoteSegmentRepository $flightQuoteSegmentRepository;
+    private FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository;
+    private FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository;
+    private ProductQuoteOptionRepository $productQuoteOptionRepository;
+    private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
+    private PaymentRequestVoluntaryService $paymentRequestVoluntaryService;
+
+    public function getPaymentRequestVoluntaryService(): PaymentRequestVoluntaryService
+    {
+        return $this->paymentRequestVoluntaryService ?? ($this->paymentRequestVoluntaryService = Yii::createObject(
+            PaymentRequestVoluntaryService::class
+        ));
+    }
+
+    public function getBoRequestVoluntaryExchangeService(): BoRequestVoluntaryExchangeService
+    {
+        return $this->boRequestVoluntaryExchangeService ?? ($this->boRequestVoluntaryExchangeService = Yii::createObject(
+            BoRequestVoluntaryExchangeService::class
+        ));
+    }
 
     public function getProductQuoteOptionRepository(): ProductQuoteOptionRepository
     {

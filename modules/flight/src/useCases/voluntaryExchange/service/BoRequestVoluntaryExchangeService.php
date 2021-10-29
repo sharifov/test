@@ -12,6 +12,7 @@ use sales\exception\BoResponseException;
 use sales\exception\ValidationException;
 use sales\helpers\ErrorsToStringHelper;
 use sales\services\cases\CasesSaleService;
+use webapi\src\ApiCodeException;
 
 /**
  * Class BoRequestReProtectionService
@@ -82,9 +83,35 @@ class BoRequestVoluntaryExchangeService
         return $this->orderContactForm;
     }
 
-    public function sendVoluntaryExchange(ProductQuoteChange $productQuoteChange): bool
+    public function sendVoluntaryExchange(array $post): bool
     {
-        $dataJson = JsonHelper::decode($productQuoteChange->pqc_data_json);
-        return BackOffice::voluntaryExchange($dataJson);
+        return BackOffice::voluntaryExchange(self::mappingBORequest($post));
+    }
+
+    public static function mappingBORequest(array $post): array
+    {
+        $data['apiKey'] = $post['key'] ?? null;
+        $data['bookingId'] = $post['bookingId'] ?? null;
+        $data['billing'] = $post['billing'] ?? null;
+        $data['payment'] = $post['payment_request'] ?? null;
+
+        $data['exchange']['currency'] = $post['currency'] ?? null;
+        $data['exchange']['validatingCarrier'] = $post['validatingCarrier'] ?? null;
+        $data['exchange']['gds'] = $post['gds'] ?? null;
+        $data['exchange']['pcc'] = $post['pcc'] ?? null;
+
+        $data['exchange']['fareType'] = $post['fareType'] ?? null;
+        $data['exchange']['cabin'] = $post['cabin'] ?? null;
+        $data['exchange']['currencies'] = $post['currencies'] ?? null;
+        $data['exchange']['currencyRates'] = $post['currencyRates'] ?? null;
+        $data['exchange']['keys'] = $post['keys'] ?? null;
+        $data['exchange']['meta'] = $post['meta'] ?? null;
+        $data['exchange']['trips'] = $post['trips'] ?? null;
+        $data['exchange']['passengers'] = $post['passengers'] ?? null;
+
+        $data['exchange']['cons'] = $post['cons'] ?? null; /* TODO::  */
+        $data['exchange']['tickets'] = $post['tickets'] ?? null; /* TODO::  */
+
+        return $data;
     }
 }

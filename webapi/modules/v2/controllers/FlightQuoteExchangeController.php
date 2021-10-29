@@ -6,15 +6,18 @@ use common\components\jobs\VoluntaryExchangeCreateJob;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
+use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateHandler;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use sales\entities\cases\CaseEventLog;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
@@ -175,6 +178,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{30}}                   billing.city                 City
      * @apiParam {string{40}}                   [billing.state]              State
      * @apiParam {string{2}}                    billing.country_id           Country code (for example "US")
+     * @apiParam {string}                       billing.country              Country name
      * @apiParam {string{10}}                   [billing.zip]                Zip
      * @apiParam {string{20}}                   [billing.contact_phone]      Contact phone
      * @apiParam {string{160}}                  [billing.contact_email]      Contact email
@@ -386,6 +390,7 @@ class FlightQuoteExchangeController extends BaseController
                   "address_line1": "1013 Weda Cir",
                   "address_line2": "",
                   "country_id": "US",
+                  "country" : "United States",
                   "city": "Mayfield",
                   "state": "KY",
                   "zip": "99999",
@@ -416,8 +421,10 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "resultMessage": "FlightRequest created",
-                    "flightRequestId" : 123,
+                    "resultMessage": "Processing was successful",
+                    "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
+                    "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
+                    "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
                     "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
                },
      *        "code": "13200",
@@ -552,8 +559,6 @@ class FlightQuoteExchangeController extends BaseController
      */
     public function actionCreate()
     {
-        /* TODO:: add - ErrorName + TypeMessage */
-
         try {
             $post = Yii::$app->request->post();
         } catch (\Throwable $throwable) {
@@ -603,17 +608,6 @@ class FlightQuoteExchangeController extends BaseController
                 }
             }
 
-            if (!empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
-                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post)) {
-                    throw new \RuntimeException('Request to Back Office is failed');
-                }
-            } else {
-                \Yii::warning(
-                    'Setting VoluntaryExchangeBoEndpoint is empty. Request not sent.',
-                    'FlightQuoteExchangeController:SettingVoluntaryExchangeBoEndpoint'
-                );
-            }
-
             $flightRequest = FlightRequest::create(
                 $voluntaryExchangeCreateForm->booking_id,
                 FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
@@ -632,15 +626,28 @@ class FlightQuoteExchangeController extends BaseController
                 );
             }
 
-            $job = new VoluntaryExchangeCreateJob();
-            $job->flight_request_id = $flightRequest->fr_id;
-            $job->case_id = $case->cs_id;
-            $jobId = Yii::$app->queue_job->priority(100)->push($job);
-            $flightRequest->fr_job_id = $jobId;
-            $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+            $voluntaryExchangeCreateHandler = new VoluntaryExchangeCreateHandler($case, $flightRequest, $this->objectCollection);
+            try {
+                $voluntaryExchangeCreateHandler->processing();
+
+                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post)) {
+                    $case->addEventLog(
+                        CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                        'Request (create Voluntary Exchange) to Back Office is failed'
+                    );
+                    throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
+                }
+            } catch (\Throwable $throwable) {
+                $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
+                throw $throwable;
+            }
+
+            $voluntaryExchangeCreateHandler->doneProcess();
 
             $dataMessage['resultMessage'] = 'Processing was successful';
-            $dataMessage['flightRequestId'] = $flightRequest->fr_id;
+            $dataMessage['originQuoteGid'] = $voluntaryExchangeCreateHandler->getOriginProductQuote()->pq_gid;
+            $dataMessage['changeQuoteGid'] = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote()->pq_gid;
+            $dataMessage['productQuoteChangeGid'] = $voluntaryExchangeCreateHandler->getProductQuoteChange()->pqc_gid;
             $dataMessage['caseGid'] = $case->cs_gid;
 
             return new SuccessResponse(
@@ -672,7 +679,7 @@ class FlightQuoteExchangeController extends BaseController
 
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
-                new ErrorsMessage($throwable->getMessage()),
+                new ErrorsMessage('Server error. Please try again later.'),
                 new CodeMessage($throwable->getCode())
             );
         }

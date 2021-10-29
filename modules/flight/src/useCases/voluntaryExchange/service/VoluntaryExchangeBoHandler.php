@@ -93,7 +93,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             case FlightVoluntaryExchangeUpdateForm::STATUS_CANCELED:
                 $this->handleCanceled();
                 break;
-            case FlightVoluntaryExchangeUpdateForm::STATUS_PROCESSING:
+            case FlightVoluntaryExchangeUpdateForm::STATUS_PENDING:
                 $this->handleProcessing();
                 break;
             default:
@@ -122,8 +122,8 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             [
                 'booking_id' => $form->booking_id,
                 'product_quote_gid' => $this->originProductQuote->pq_gid,
-                'change_quote_gid' => $this->productQuoteChange->pqc_gid,
-                'change_status_id' => $this->productQuoteChange->pqc_status_id,
+                'exchange_gid' => $this->productQuoteChange->pqc_gid,
+                'exchange_status' => ucfirst($this->form->status),
             ]
         )->getCollectedData();
         \Yii::$app->hybrid->wh($this->project->id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);

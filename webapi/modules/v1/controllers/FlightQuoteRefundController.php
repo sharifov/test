@@ -308,7 +308,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{30}}           billing.city                 City
      * @apiParam {string{40}}           [billing.state]              State
      * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
-     * @apiParam {string{2}}            billing.country             Country (for example "United States")
+     * @apiParam {string}               billing.country             Country (for example "United States")
      * @apiParam {string{10}}           billing.zip                Zip
      * @apiParam {string{20}}           billing.contact_phone      Contact phone
      * @apiParam {string{160}}          billing.contact_email      Contact email

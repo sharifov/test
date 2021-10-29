@@ -155,6 +155,7 @@ class OrderCreateFromSaleService
     {
         if (!CaseOrder::findOne(['co_order_id' => $orderId, 'co_case_id' => $caseId])) {
             $caseOrder = CaseOrder::create($caseId, $orderId);
+            $caseOrder->detachBehavior('user');
             if (!$caseOrder->validate()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($caseOrder));
             }

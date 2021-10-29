@@ -13,20 +13,20 @@ use webapi\src\logger\behaviors\filters\Filterable;
  *
  * @property VoluntaryExchangeObjectCollection $objectCollection
  * @property FlightRequest $flightRequest
- * @property ProductQuoteChange $productQuoteChange
+ * @property ProductQuoteChange|null $productQuoteChange
  * @property Filterable $creditCardFilter
  */
 class CleanDataVoluntaryExchangeService
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
     private FlightRequest $flightRequest;
-    private ProductQuoteChange $productQuoteChange;
+    private ?ProductQuoteChange $productQuoteChange = null;
     private Filterable $creditCardFilter;
 
     /**
-     * @param VoluntaryExchangeObjectCollection $objectCollection
      * @param FlightRequest $flightRequest
-     * @param ProductQuoteChange $productQuoteChange
+     * @param ProductQuoteChange|null $productQuoteChange
+     * @param VoluntaryExchangeObjectCollection $objectCollection
      */
     public function __construct(
         FlightRequest $flightRequest,
