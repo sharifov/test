@@ -7,6 +7,7 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
@@ -86,5 +87,11 @@ class VoluntaryRefundConfirmForm extends Model
     public function formName(): string
     {
         return '';
+    }
+
+    public function getFilteredData(): array
+    {
+        $filter = \Yii::createObject(CreditCardFilter::class);
+        return $filter->filterData($this->toArray());
     }
 }

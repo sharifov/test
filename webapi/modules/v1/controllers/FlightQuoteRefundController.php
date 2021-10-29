@@ -26,6 +26,7 @@ use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\services\CurrencyHelper;
 use webapi\src\ApiCodeException;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\Messages;
 use webapi\src\request\BoRequestDataHelper;
 use webapi\src\response\ErrorResponse;
@@ -497,7 +498,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundCreateForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_REFUND_CREATE,
-                $post,
+                $voluntaryRefundCreateForm->getFilteredData(),
                 $project->id,
                 $this->apiUser->au_id
             );
@@ -752,7 +753,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundConfirmForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_REFUND_CONFIRM,
-                $post,
+                $voluntaryRefundConfirmForm->getFilteredData(),
                 $project->id,
                 $this->apiUser->au_id
             );
