@@ -8,7 +8,6 @@ use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use yii\base\Model;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class VoluntaryRefundCreateForm
@@ -30,9 +29,9 @@ class VoluntaryRefundCreateForm extends Model
     public $billing;
     public $refund;
 
-    public ?PaymentRequestForm $paymentRequestForm = null;
-    public ?BillingInfoForm $billingInfoForm = null;
-    public ?VoluntaryRefundForm $refundForm = null;
+    private ?PaymentRequestForm $paymentRequestForm = null;
+    private ?BillingInfoForm $billingInfoForm = null;
+    private ?VoluntaryRefundForm $refundForm = null;
 
     public function rules(): array
     {
@@ -110,5 +109,20 @@ class VoluntaryRefundCreateForm extends Model
     {
         $filter = \Yii::createObject(CreditCardFilter::class);
         return $filter->filterData($this->toArray());
+    }
+
+    public function getPaymentRequestForm(): ?PaymentRequestForm
+    {
+        return $this->paymentRequestForm;
+    }
+
+    public function getBillingInfoForm(): ?BillingInfoForm
+    {
+        return $this->billingInfoForm;
+    }
+
+    public function getRefundForm(): ?VoluntaryRefundForm
+    {
+        return $this->refundForm;
     }
 }

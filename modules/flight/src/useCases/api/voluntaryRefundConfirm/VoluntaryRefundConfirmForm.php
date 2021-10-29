@@ -32,8 +32,8 @@ class VoluntaryRefundConfirmForm extends Model
     public $refundGid;
     public $orderId;
 
-    public ?PaymentRequestForm $paymentRequestForm = null;
-    public ?BillingInfoForm $billingInfoForm = null;
+    private ?PaymentRequestForm $paymentRequestForm = null;
+    private ?BillingInfoForm $billingInfoForm = null;
 
     public function rules(): array
     {
@@ -93,5 +93,15 @@ class VoluntaryRefundConfirmForm extends Model
     {
         $filter = \Yii::createObject(CreditCardFilter::class);
         return $filter->filterData($this->toArray());
+    }
+
+    public function getPaymentRequestForm(): ?PaymentRequestForm
+    {
+        return $this->paymentRequestForm;
+    }
+
+    public function getBillingInfoForm(): ?BillingInfoForm
+    {
+        return $this->billingInfoForm;
     }
 }
