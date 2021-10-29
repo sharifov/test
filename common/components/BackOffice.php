@@ -444,7 +444,6 @@ class BackOffice
         if (!$data) {
             \Yii::error([
                     'message' => 'BO voluntaryRefund data is empty',
-                    'request' => $requestData,
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryRefund:dataIsEmpty');
             throw new BoResponseException('BO voluntaryRefund data is empty', BoResponseException::BO_DATA_IS_EMPTY);
@@ -452,7 +451,6 @@ class BackOffice
         if (!is_array($data)) {
             \Yii::error([
                     'message' => 'BO voluntaryRefund response Data type is invalid',
-                    'request' => $requestData,
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryRefund:dataIsInvalid');
             throw new BoResponseException('BO voluntaryRefund response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
