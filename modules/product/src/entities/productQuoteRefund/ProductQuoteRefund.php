@@ -174,6 +174,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $this->pqr_status_id = ProductQuoteRefundStatus::PROCESSING;
     }
 
+    public function pending(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::PENDING;
+    }
+
     public function isInProcessing(): bool
     {
         return $this->pqr_status_id === ProductQuoteRefundStatus::PROCESSING;

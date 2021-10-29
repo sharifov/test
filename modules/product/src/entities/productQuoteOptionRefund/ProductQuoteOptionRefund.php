@@ -247,4 +247,9 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
         $self->pqor_data_json = $data;
         return $self;
     }
+
+    public function pending(): void
+    {
+        $this->pqor_status_id = ProductQuoteOptionRefundStatus::PENDING;
+    }
 }

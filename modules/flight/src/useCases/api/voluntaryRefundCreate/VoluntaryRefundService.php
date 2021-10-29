@@ -257,7 +257,7 @@ class VoluntaryRefundService
                 $voluntaryRefundCreateForm->refundForm->orderId,
                 $voluntaryRefundCreateForm->toArray()
             );
-            $productQuoteRefund->inProgress();
+            $productQuoteRefund->pending();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 
             foreach ($voluntaryRefundCreateForm->refundForm->ticketForms as $ticketForm) {
@@ -301,6 +301,7 @@ class VoluntaryRefundService
                     $auxiliaryOptionsForm->refundAllow,
                     $auxiliaryOptionsForm->toArray()
                 );
+                $productQuoteOptionRefund->pending();
                 $productQuoteOptionRefund->detachBehavior('user');
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
             }
@@ -339,7 +340,7 @@ class VoluntaryRefundService
             throw new VoluntaryRefundCodeException('BillingInfo processing is failed', VoluntaryRefundCodeException::BILLING_INFO_PROCESSED_FAILED);
         }
 
-        $productQuoteRefund->processing();
+        $productQuoteRefund->inProgress();
         $this->productQuoteRefundRepository->save($productQuoteRefund);
 
         $case->awaiting(null, 'Product Quote Refund initiated');
@@ -371,7 +372,7 @@ class VoluntaryRefundService
 
         if ($productQuoteChangesNotFinished = ProductQuoteChangeQuery::findAllNotFinishedByProductQuoteId($productQuote->pq_id)) {
             foreach ($productQuoteChangesNotFinished as $productQuoteChange) {
-                $productQuoteChange->declined();
+                $productQuoteChange->cancel();
                 $this->productQuoteChangeRepository->save($productQuoteChange);
             }
         }

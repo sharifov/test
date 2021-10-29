@@ -507,10 +507,10 @@ class FlightQuoteRefundController extends ApiBaseController
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->bookingId)) {
                 if ($productQuote->isChangeable()) {
                     if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
-                        throw new \DomainException('Quote not available for refund', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
+                        throw new \DomainException('Quote not available for refund due to exists active refund or change', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
                     }
                 } else {
-                    throw new \DomainException('Quote not available for refund', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
+                    throw new \DomainException('Quote not available for refund due to status of product quote not in changeable list', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
                 }
                 $refundResult = $this->voluntaryRefundService
                     ->processProductQuote($productQuote)
