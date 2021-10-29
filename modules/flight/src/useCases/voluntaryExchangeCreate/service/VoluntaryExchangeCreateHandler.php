@@ -15,6 +15,8 @@ use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeServi
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
@@ -180,6 +182,19 @@ class VoluntaryExchangeCreateHandler
             $this->voluntaryExchangeService->recommendedExchangeQuote($this->originProductQuote->pq_id, $this->voluntaryExchangeQuote->pq_id);
         } catch (\Throwable $throwable) {
             $this->caseHandler->caseToPendingManual('Could not create new Voluntary Exchange quote');
+            throw $throwable;
+        }
+
+        try {
+            if (!ProductQuoteChangeRelationRepository::exist($this->productQuoteChange->pqc_id, $this->voluntaryExchangeQuote->pq_id)) {
+                $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
+                    $this->productQuoteChange->pqc_id,
+                    $this->voluntaryExchangeQuote->pq_id
+                );
+                (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
+            }
+        } catch (\Throwable $throwable) {
+            $this->caseHandler->caseToPendingManual('Could not create ProductQuoteChangeRelation');
             throw $throwable;
         }
 

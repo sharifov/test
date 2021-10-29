@@ -777,6 +777,8 @@ class FlightQuoteController extends FController
         $flight = $this->flightRepository->find($flightId);
 
         try {
+            throw new \RuntimeException('Service(CreateVoluntaryQuote) under construction');
+
             if (!$case = Cases::findOne(['cs_id' => $caseId])) {
                 throw new \RuntimeException('Case not found');
             }

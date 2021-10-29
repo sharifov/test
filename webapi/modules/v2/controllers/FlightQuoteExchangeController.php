@@ -859,7 +859,9 @@ class FlightQuoteExchangeController extends BaseController
                 throw new \RuntimeException('VoluntaryExchange by BookingID(' . $bookingId . ') already processed');
             }
 
-            /* TODO::  */
+            /* TODO::
+                add request to BO - https://dev-backoffice.travel-dev.com/docs/api/#api-AirOrder_Self-Service-Create_Exchange_Order
+             */
 
             $dataMessage['resultMessage'] = 'TODO::';
 
