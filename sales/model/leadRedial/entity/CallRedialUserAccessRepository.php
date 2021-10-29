@@ -49,6 +49,9 @@ class CallRedialUserAccessRepository
     public function remove(CallRedialUserAccess $access): void
     {
         $result = $access->remove();
+        if ($result === 0) {
+            return;
+        }
         if (!$result) {
             throw new \RuntimeException('Removing error. Result = ' . VarDumper::dumpAsString($result));
         }
