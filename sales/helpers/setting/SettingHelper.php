@@ -722,4 +722,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['product_quote_refund_client_status_mapping'] ?? [];
     }
+
+    public static function getRedialCheckIsOnCallTime(): int
+    {
+        return Yii::$app->params['settings']['lead_redial_is_on_call_check_time'] ?? 20;
+    }
 }
