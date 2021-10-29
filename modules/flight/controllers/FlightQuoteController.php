@@ -827,6 +827,9 @@ class FlightQuoteController extends FController
             if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
                 throw new \RuntimeException('Sorry, reProtection quote could not be created because originalQuote does not pricing');
             }
+            if (!$originProductQuote->productQuoteLastChange || !$originProductQuote->productQuoteLastChange->isTypeReProtection()) {
+                throw new \RuntimeException('ProductQuoteLastChange is not type ReProtection');
+            }
 
             $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findByProductQuoteId($originProductQuote->pq_id);
             $case = $productQuoteChange->pqcCase;
@@ -871,6 +874,9 @@ class FlightQuoteController extends FController
                 if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
                     throw new \RuntimeException('Sorry, reProtection quote could not be created because originalQuote does not pricing');
                 }
+                if (!$originProductQuote->productQuoteLastChange || !$originProductQuote->productQuoteLastChange->isTypeReProtection()) {
+                    throw new \RuntimeException('ProductQuoteLastChange is not type ReProtection');
+                }
 
                 $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
                 if (!$form->load(Yii::$app->request->post())) {
@@ -889,15 +895,9 @@ class FlightQuoteController extends FController
                 }
 
                 $userId = Auth::id();
-                if ($originProductQuote->productQuoteLastChange->isTypeVoluntary()) {
-                    $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments) {
-                        return $this->voluntaryQuoteManualCreateService->createProcessing($flight, $originProductQuote, $form, $userId, $segments);
-                    });
-                } else {
-                    $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments) {
-                        return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId, $segments);
-                    });
-                }
+                $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments) {
+                    return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId, $segments);
+                });
 
                 $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
@@ -915,7 +915,7 @@ class FlightQuoteController extends FController
 
     public function actionAjaxPrepareDump(): array
     {
-        if (Yii::$app->request->isAjax) { /* TODO::  */
+        if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $response = ['message' => '', 'status' => 0, 'reservation_dump' => [], 'segments' => '', 'key_trip_list' => ''];
             $originSegmentsBaggage = [];

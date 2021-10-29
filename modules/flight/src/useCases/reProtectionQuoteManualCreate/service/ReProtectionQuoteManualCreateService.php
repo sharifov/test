@@ -39,6 +39,8 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
@@ -272,6 +274,15 @@ class ReProtectionQuoteManualCreateService
         }
 
         $this->productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
+
+        $productQuoteChange = $originProductQuote->productQuoteLastChange;
+        if (!ProductQuoteChangeRelationRepository::exist($productQuoteChange->pqc_id, $productQuote->pq_id)) {
+            $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
+                $productQuoteChange->pqc_id,
+                $productQuote->pq_id
+            );
+            (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
+        }
 
         return $flightQuote;
     }
