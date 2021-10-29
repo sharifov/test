@@ -30,7 +30,8 @@ class HybridWhData
             'booking_id'                => '',
             'product_quote_gid'         => '',
             'refund_gid'                => '',
-            'refund_status_id'          => '',
+            'refund_order_id'           => '',
+            'refund_status'             => '',
         ],
     ];
 
