@@ -6,6 +6,7 @@ use common\components\validators\CheckJsonValidator;
 use common\models\Currency;
 use common\models\Employee;
 use frontend\helpers\JsonHelper;
+use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use sales\behaviors\StringToJsonBehavior;
@@ -88,7 +89,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
     {
         return [
             [['pqor_product_quote_refund_id'], 'required'],
-            [['pqor_product_quote_refund_id', 'pqor_product_quote_option_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id'], 'integer'],
+            [['pqor_product_quote_refund_id', 'pqor_product_quote_option_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id', 'pqor_order_refund_id'], 'integer'],
             [['pqor_selling_price', 'pqor_penalty_amount', 'pqor_processing_fee_amount', 'pqor_refund_amount', 'pqor_client_currency_rate', 'pqor_client_selling_price', 'pqor_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['pqor_created_dt', 'pqor_updated_dt'], 'safe'],
             [['pqor_client_currency'], 'string', 'max' => 3],
@@ -99,6 +100,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             [['pqor_product_quote_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteRefund::class, 'targetAttribute' => ['pqor_product_quote_refund_id' => 'pqr_id']],
             [['pqor_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_updated_user_id' => 'id']],
             [['pqor_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pqor_client_currency' => 'cur_code']],
+            [['pqor_order_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrderRefund::class, 'targetAttribute' => ['pqor_client_currency' => 'orr_id']],
             ['pqor_data_json', 'safe'],
             ['pqor_data_json', 'trim'],
             ['pqor_data_json', CheckJsonValidator::class],
