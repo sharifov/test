@@ -279,6 +279,7 @@ class VoluntaryRefundService
                     $ticketForm->toArray()
                 );
                 $productQuoteObjectRefund->pending();
+                $productQuoteObjectRefund->detachBehavior('user');
                 $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);
             }
 
@@ -300,6 +301,7 @@ class VoluntaryRefundService
                     $auxiliaryOptionsForm->refundAllow,
                     $auxiliaryOptionsForm->toArray()
                 );
+                $productQuoteOptionRefund->detachBehavior('user');
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
             }
         } catch (\Throwable $e) {
