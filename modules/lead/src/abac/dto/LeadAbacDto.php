@@ -32,8 +32,8 @@ class LeadAbacDto extends \stdClass
     public bool $isShiftTime;
     public bool $withinPersonalTakeLimits;
     public bool $hasAppliedQuote;
-    public bool $isInProject;
-    public bool $isInDepartment;
+    public bool $isInProject = false;
+    public bool $isInDepartment = false;
     public bool $canTakeByFrequencyMinutes;
 
 
@@ -51,9 +51,6 @@ class LeadAbacDto extends \stdClass
 
             if ($this->has_owner) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);
-            }
-
-            if ($this->has_owner) {
                 $this->isInProject = EmployeeProjectAccess::isInProject($lead->project_id, $userId);
                 $this->isInDepartment = EmployeeDepartmentAccess::isInDepartment($lead->l_dep_id, $userId);
             }
