@@ -239,6 +239,8 @@ use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\httpclient\CurlTransport;
 use yii\queue\Queue;
+use yii\web\ConflictHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -2393,11 +2395,25 @@ class TestController extends FController
 
     public function actionErrorTest()
     {
+
         $message = [
             'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
             'a1' => '1111',
             'b2' => '222',
+            'с3' => [
+                'message' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => '1111',
+                'b2' => '222',
+                'b3' => [
+                    'message' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => '222',
+                ],
+            ],
         ];
         Yii::error($message, 'test/error');
         Yii::warning($message, 'test/warning');

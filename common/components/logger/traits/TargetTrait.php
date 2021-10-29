@@ -6,6 +6,7 @@
 
 namespace common\components\logger\traits;
 
+use sales\helpers\app\AppHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\log\Logger;
@@ -108,9 +109,10 @@ trait TargetTrait
 
     /**
      * @param $text
+     * @param false $isData
      * @return array
      */
-    protected function parseTextArray($text, $isData = false): array
+    protected function parseTextArray($text, bool $isData = false): array
     {
         $data = [];
         if ($text) {
@@ -133,12 +135,54 @@ trait TargetTrait
 
     /**
      * @param $text
+     * @param false $isData
      * @return array
      */
-    protected function parseTextObject($text): array
+    protected function parseTextObject($text, bool $isData = false): array
     {
-        $data = get_object_vars($text);
-        $data['@message'] = var_export($data, true);
+
+        if (is_a($text, \Throwable::class)) {
+            $dataList = AppHelper::throwableLog($text, true);
+        } else {
+            $dataList = get_object_vars($text);
+
+            if ($dataList) {
+                foreach ($dataList as $key => $value) {
+                    if ($isData) {
+                        $data['@app.data'][$key] = $value;
+                    } else {
+                        $data[$key] = $value;
+                    }
+                }
+            }
+        }
+
+        if (!empty($dataList['message']) && empty($dataList['@message'])) {
+            $data['@message'] = $dataList['message'];
+        } else {
+            $data['@message'] = var_export($dataList, true);
+        }
+
+        if (!empty($dataList['code']) && empty($data['@statusCode'])) {
+            $data['@statusCode'] = $dataList['code'];
+        }
+
+        if (!empty($dataList['trace']) && empty($data['@trace'])) {
+            $data['@trace'] = $dataList['trace'];
+        }
+
+        if (!empty($dataList['line']) && empty($data['@line'])) {
+            $data['@line'] = $dataList['line'];
+        }
+
+        if (!empty($dataList['file']) && empty($data['@file'])) {
+            $data['@file'] = $dataList['file'];
+        }
+
+        if (!empty($dataList['trace']) && empty($data['@trace'])) {
+            $data['@code'] = $dataList['code'];
+        }
+
         return $data;
     }
 
@@ -175,7 +219,7 @@ trait TargetTrait
             case 'string':
                 return ['@message' => $text];
             case 'object':
-                return $this->parseTextObject($text);
+                return $this->parseTextObject($text, true);
             default:
                 return ['@message' => \Yii::t('log', "Warning, wrong log message type '{$type}'")];
         }
