@@ -52,6 +52,9 @@ class LeadAbacDto extends \stdClass
             if ($this->has_owner) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);
                 $this->isInProject = EmployeeProjectAccess::isInProject($lead->project_id, $userId);
+            }
+
+            if ($lead->l_dep_id) {
                 $this->isInDepartment = EmployeeDepartmentAccess::isInDepartment($lead->l_dep_id, $userId);
             }
 
