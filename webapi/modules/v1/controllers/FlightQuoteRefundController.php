@@ -528,7 +528,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
+                AppHelper::throwableLog($e, true),
                 'FlightQuoteRefundController:actionCreate:BoResponseException'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -542,7 +542,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
+                AppHelper::throwableLog($e, true),
                 'FlightQuoteRefundController:actionCreate:RuntimeException|DomainException'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -556,7 +556,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
+                AppHelper::throwableLog($e, true),
                 'FlightQuoteRefundController:actionCreate:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(
