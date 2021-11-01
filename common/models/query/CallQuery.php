@@ -83,6 +83,11 @@ class CallQuery extends \yii\db\ActiveQuery
         return $this->andWhere(['c_status_id' => Call::STATUS_RINGING]);
     }
 
+    public function active(): self
+    {
+        return $this->andWhere(['c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS, Call::STATUS_DELAY, Call::STATUS_HOLD]]);
+    }
+
     /**
      * @param null $db
      * @return array|Call|null

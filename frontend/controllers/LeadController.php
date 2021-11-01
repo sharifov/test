@@ -2333,11 +2333,27 @@ class LeadController extends FController
         try {
             $lead = $this->useCaseLeadManageService->createFromPhoneWidget($call, Auth::user());
 
-            $call->c_lead_id = $lead->id;
-            if (!$call->save(false, ['c_lead_id'])) {
-                $result['warning'] = true;
-                $result['message'] = 'Lead has been create, but call is not assigned';
+            if ($call->c_parent_id) {
+                $parent = Call::find()->byId($call->c_parent_id)->active()->one();
+            } else {
+                $parent = $call;
             }
+            if ($parent) {
+                $parent->c_lead_id = $lead->id;
+                if (!$parent->save(false)) {
+                    $result['warning'] = true;
+                    $result['message'] = 'Lead has been create, but call (' . $parent->c_id . ') is not assigned.';
+                }
+            }
+            $children = Call::find()->byParentId($parent->c_id)->active()->all();
+            foreach ($children as $child) {
+                $child->c_lead_id = $lead->id;
+                if (!$child->save(false)) {
+                    $result['warning'] = true;
+                    $result['message'] .= 'Lead has been create, but call (' . $child->c_id . ') is not assigned.';
+                }
+            }
+
             $result['url'] = Url::to('/lead/view/' . $lead->gid);
 
             $result['contactData'] = (new CallUpdateMessage())->getContactData($call, Auth::id());
