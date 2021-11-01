@@ -31,7 +31,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/set_recommended';
 
     /** QUERY PERMISSIONS */
-    public const SQL_IS_OWNER_ACCESS = self::NS . 'sql/is_owner';
+    public const SQL_CASE_QUEUES = self::NS . 'sql/queue';
 
     /** UI PERMISSION */
     public const UI_BLOCK_EVENT_LOG_LIST  = self::NS . 'ui/block/event-log-list';
@@ -54,17 +54,17 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE   => self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE,
 
         self::OBJ_CASE_STATUS_ROUTE_RULES                   => self::OBJ_CASE_STATUS_ROUTE_RULES,
-        self::SQL_IS_OWNER_ACCESS                           => self::SQL_IS_OWNER_ACCESS,
+        self::SQL_CASE_QUEUES                           => self::SQL_CASE_QUEUES,
     ];
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_MASK    = 'mask';
     public const ACTION_UNMASK  = 'unmask';
     public const ACTION_ACCESS  = 'access';
-    public const ACTION_ALL_ACCESS  = 'all access';
-    public const ACTION_OWNER_ACCESS  = 'owner access';
-    public const ACTION_EMPTY_OWNER_ACCESS  = 'empty owner access';
-    public const ACTION_GROUP_ACCESS  = 'group access';
+    public const ACTION_ALL_ACCESS  = 'allAccess';
+    public const ACTION_OWNER_ACCESS  = 'ownerAccess';
+    public const ACTION_EMPTY_OWNER_ACCESS  = 'emptyOwnerAccess';
+    public const ACTION_GROUP_ACCESS  = 'groupAccess';
     public const ACTION_READ  = 'read';
     public const ACTION_CREATE  = 'create';
     public const ACTION_TRANSFER  = 'transfer';
@@ -84,20 +84,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
 
         self::OBJ_CASE_STATUS_ROUTE_RULES   => [self::ACTION_TRANSFER],
-        self::SQL_IS_OWNER_ACCESS           => [self::ACTION_OWNER_ACCESS, self::ACTION_EMPTY_OWNER_ACCESS, self::ACTION_GROUP_ACCESS, self::ACTION_ALL_ACCESS],
-    ];
-
-    protected const ATTR_SQL_IS_OWNER_ACCESS = [
-        'optgroup' => 'SQL',
-        'id' => self::NS . 'sqlOwnerAccess',
-        'field' => 'sqlOwnerAccess',
-        'label' => 'Is Owner Access',
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        //'validation' => ['allow_empty_value' => true],
-        'operators' =>  [self::OP_EQUAL2]
+        self::SQL_CASE_QUEUES           => [self::ACTION_OWNER_ACCESS, self::ACTION_EMPTY_OWNER_ACCESS, self::ACTION_GROUP_ACCESS, self::ACTION_ALL_ACCESS],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -193,9 +180,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_CASE_IS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
-        self::SQL_IS_OWNER_ACCESS => [
-            self::ATTR_SQL_IS_OWNER_ACCESS
-        ],
+        self::SQL_CASE_QUEUES => [],
     ];
 
     /**

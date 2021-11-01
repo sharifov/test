@@ -6,6 +6,7 @@ use common\models\CaseSale;
 use common\models\Employee;
 use common\models\query\CaseSaleQuery;
 use common\models\UserGroupAssign;
+use modules\Cases\src\abac\CasesAbacObject;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
@@ -196,18 +197,23 @@ class CasesQRepository
 
         $query->andWhere($this->createSubQueryForNeedAction($user->id, [], $checkDepPermission = true));
 
-        if ($user->can('caseListAny')) {
+
+        /** @abac null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_ALL_ACCESS, Access to all Cases*/
+        if (\Yii::$app->abac->can(null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_ALL_ACCESS)) {
             return $query;
         }
 
         $userIds = [];
-        if ($user->can('caseListOwner')) {
+        /** @abac null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner*/
+        if (\Yii::$app->abac->can(null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
             $userIds[] = $user->id;
         }
-        if ($user->can('caseListEmpty')) {
+        /** @abac null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty*/
+        if (\Yii::$app->abac->can(null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
         }
-        if ($user->can('caseListGroup')) {
+        /** @abac null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner*/
+        if (\Yii::$app->abac->can(null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
         }
 
