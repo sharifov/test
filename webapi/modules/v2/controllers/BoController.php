@@ -77,10 +77,10 @@ class BoController extends BaseController
     }
 
     /**
-     * @api {post} /v2/bo/wh BO Webhook
+     * @api {post} /v2/bo/wh  WebHook from BackOffice
      * @apiVersion 0.1.0
-     * @apiName BO Webhook
-     * @apiGroup Webhook
+     * @apiName BackOffice WebHook
+     * @apiGroup WebHooks Incoming
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -92,9 +92,9 @@ class BoController extends BaseController
      *
      * @apiParam {string{30}=reprotection_update,flight_refund}           type                          Type of action on reprotection
      * @apiParam {array[]}              data                          Any Data from BO
-     * @apiParam {string}               data.booking_id               Booking Id
-     * @apiParam {string}               [data.project_key]            Project Key Ex: (ovago, hop2)
-     * @apiParam {string}               data.reprotection_quote_gid   Reprotection quote gid
+     * @apiParam {string{8}}               data.booking_id               Booking Id
+     * @apiParam {string{20}}               [data.project_key]            Project Key Ex: (ovago, hop2)
+     * @apiParam {string{32}}               data.reprotection_quote_gid   Reprotection quote gid
      *
      * @apiParamExample {json} Request-Example Reprotection Update:
      *  {

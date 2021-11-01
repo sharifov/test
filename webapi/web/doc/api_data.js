@@ -1,6 +1,156 @@
 define({ "api": [
   {
     "type": "get, post",
+    "url": "/health-check",
+    "title": "Get health check",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>components health check passed statuses (&quot;true&quot; or &quot;false&quot;)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
+    "url": "/health-check/metrics",
+    "title": "Get health check metrics text",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales_Metrics",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "metrics",
+            "description": "<p>in plain text format containing components health statuses (&quot;1&quot; for OK, &quot;0&quot; for failed)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 1\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 0\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
     "version": "0.1.0",
@@ -11171,10 +11321,10 @@ define({ "api": [
   {
     "type": "post",
     "url": "/v2/bo/wh",
-    "title": "BO Webhook",
+    "title": "WebHook from BackOffice",
     "version": "0.1.0",
-    "name": "BO_Webhook",
-    "group": "Webhook",
+    "name": "BackOffice_WebHook",
+    "group": "WebHooks_Incoming",
     "permission": [
       {
         "name": "Authorized User"
@@ -11225,6 +11375,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "8",
             "optional": false,
             "field": "data.booking_id",
             "description": "<p>Booking Id</p>"
@@ -11232,6 +11383,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "20",
             "optional": true,
             "field": "data.project_key",
             "description": "<p>Project Key Ex: (ovago, hop2)</p>"
@@ -11239,6 +11391,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "32",
             "optional": false,
             "field": "data.reprotection_quote_gid",
             "description": "<p>Reprotection quote gid</p>"
@@ -11282,6 +11435,307 @@ define({ "api": [
       ]
     },
     "filename": "webapi/modules/v2/controllers/BoController.php",
-    "groupTitle": "Webhook"
+    "groupTitle": "WebHooks_Incoming"
+  },
+  {
+    "type": "post",
+    "url": "flight/schedule-change",
+    "title": "WebHook Hybrid OTA ( flight/schedule-change )",
+    "version": "0.1.0",
+    "name": "Flight_schedule-change",
+    "group": "WebHooks_Outgoing",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of message</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.reprotection_quote_gid",
+            "description": "<p>Reprotection quote GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.case_gid",
+            "description": "<p>Case GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.product_quote_gid",
+            "description": "<p>Product quote GID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request message Example:",
+          "content": "{\n    \"type\": \"flight/schedule-change\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"reprotection_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n        \"case_gid\": \"1569a42c916c811e2033142d8ae54176\"\n        \"product_quote_gid\": \"5569a42c916c811e2033142d8ae54170\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/ApiDocData.php",
+    "groupTitle": "WebHooks_Outgoing"
+  },
+  {
+    "type": "post",
+    "url": "flight/schedule-change",
+    "title": "WebHook Hybrid OTA ( flight/voluntary-exchange/update )",
+    "version": "0.1.0",
+    "name": "Flight_voluntary-exchange_update",
+    "group": "WebHooks_Outgoing",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of message</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.product_quote_gid",
+            "description": "<p>Product quote GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.exchange_gid",
+            "description": "<p>Exchange GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "allowedValues": [
+              "processing",
+              "canceled"
+            ],
+            "optional": false,
+            "field": "data.exchange_status",
+            "description": "<p>Exchange Client status</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request message Example:",
+          "content": "{\n    \"type\": \"flight/voluntary-exchange/update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"product_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n        \"exchange_gid\": \"1569a42c916c811e2033142d8ae54176\"\n        \"exchange_status\": \"processing\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/ApiDocData.php",
+    "groupTitle": "WebHooks_Outgoing"
+  },
+  {
+    "type": "post",
+    "url": "flight/schedule-change",
+    "title": "WebHook Hybrid OTA ( flight/voluntary-refund/update )",
+    "version": "0.1.0",
+    "name": "Flight_voluntary-refund_update",
+    "group": "WebHooks_Outgoing",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of message</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.product_quote_gid",
+            "description": "<p>Product quote GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.refund_gid",
+            "description": "<p>Refund GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.refund_order_id",
+            "description": "<p>Refund Client status</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "allowedValues": [
+              "processing",
+              "canceled"
+            ],
+            "optional": false,
+            "field": "data.refund_status",
+            "description": "<p>Refund Client status</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request message Example:",
+          "content": "{\n    \"type\": \"flight/voluntary-refund/update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"product_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n        \"refund_gid\": \"1569a42c916c811e2033142d8ae54176\"\n        \"refund_order_id\": \"1569a42c916c811e2033142d8ae54176\"\n        \"refund_status\": \"processing\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/ApiDocData.php",
+    "groupTitle": "WebHooks_Outgoing"
   }
 ] });

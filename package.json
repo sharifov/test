@@ -17,6 +17,7 @@
   "devDependencies": {
     "@babel/core": "^7.10.5",
     "babel-plugin-transform-react-jsx": "^6.24.1",
+    "grunt-apidoc": "^0.11.0",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-clean-css": "^4.3.0",
