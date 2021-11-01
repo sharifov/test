@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "description": "apiDoc CRM Sales",
   "title": "CRM Sales API",
-  "url" : ""
+  "url" : "",
+  "template": {
+    "withCompare": true
+  }
 }
