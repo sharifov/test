@@ -4409,42 +4409,49 @@ define({ "api": [
             "type": "string",
             "size": "150",
             "optional": false,
-            "field": "key",
-            "description": "<p>Key</p>"
+            "field": "apiKey",
+            "description": "<p>ApiKey</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": false,
-            "field": "prices",
+            "field": "exchange",
+            "description": "<p>Exchange Data Info</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "exchange.prices",
             "description": "<p>Prices</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "prices.totalPrice",
+            "field": "exchange.prices.totalPrice",
             "description": "<p>Total Price (total for exchange pay)</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "prices.comm",
+            "field": "exchange.prices.comm",
             "description": "<p>Comm</p>"
           },
           {
             "group": "Parameter",
             "type": "bool",
             "optional": false,
-            "field": "prices.isCk",
+            "field": "exchange.prices.isCk",
             "description": "<p>isCk</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
-            "optional": false,
-            "field": "passengers",
+            "optional": true,
+            "field": "exchange.passengers",
             "description": "<p>Passengers</p>"
           },
           {
@@ -4452,7 +4459,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "passengers.ADT",
+            "field": "exchange.passengers.ADT",
             "description": "<p>Pax Type (ADT,CHD,INF)</p>"
           },
           {
@@ -4460,77 +4467,77 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "passengers.ADT.codeAs",
+            "field": "exchange.passengers.ADT.codeAs",
             "description": "<p>Pax Type Code</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "passengers.ADT.cnt",
+            "field": "exchange.passengers.ADT.cnt",
             "description": "<p>Cnt</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.baseFare",
+            "field": "exchange.passengers.ADT.baseFare",
             "description": "<p>Base Fare (diffFare)</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.pubBaseFare",
+            "field": "exchange.passengers.ADT.pubBaseFare",
             "description": "<p>Pub Base Fare</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.baseTax",
+            "field": "exchange.passengers.ADT.baseTax",
             "description": "<p>Base Tax (airlinePenalty)</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.markup",
+            "field": "exchange.passengers.ADT.markup",
             "description": "<p>Markup (processingFee)</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.comm",
+            "field": "exchange.passengers.ADT.comm",
             "description": "<p>Comm</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.price",
+            "field": "exchange.passengers.ADT.price",
             "description": "<p>Price (total for exchange pay)</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.tax",
+            "field": "exchange.passengers.ADT.tax",
             "description": "<p>Tax</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": true,
-            "field": "passengers.ADT.oBaseFare",
+            "field": "exchange.passengers.ADT.oBaseFare",
             "description": "<p>oBaseFare</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.oBaseFare.amount",
+            "field": "exchange.passengers.ADT.oBaseFare.amount",
             "description": "<p>oBaseFare Amount</p>"
           },
           {
@@ -4538,21 +4545,21 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "passengers.ADT.oBaseFare.currency",
+            "field": "exchange.passengers.ADT.oBaseFare.currency",
             "description": "<p>oBaseFare Currency</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": true,
-            "field": "passengers.ADT.oBaseTax",
+            "field": "exchange.passengers.ADT.oBaseTax",
             "description": "<p>oBaseTax</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.oBaseTax.amount",
+            "field": "exchange.passengers.ADT.oBaseTax.amount",
             "description": "<p>oBaseTax Amount</p>"
           },
           {
@@ -4560,21 +4567,21 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "passengers.ADT.oBaseTax.currency",
+            "field": "exchange.passengers.ADT.oBaseTax.currency",
             "description": "<p>oBaseTax Currency</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": true,
-            "field": "passengers.ADT.oExchangeFareDiff",
+            "field": "exchange.passengers.ADT.oExchangeFareDiff",
             "description": "<p>oExchangeFareDiff</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "passengers.ADT.oExchangeFareDiff.amount",
+            "field": "exchange.passengers.ADT.oExchangeFareDiff.amount",
             "description": "<p>oExchangeFareDiff Amount</p>"
           },
           {
@@ -4582,42 +4589,42 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "passengers.ADT.oExchangeFareDiff.currency",
+            "field": "exchange.passengers.ADT.oExchangeFareDiff.currency",
             "description": "<p>oExchangeFareDiff Currency</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": false,
-            "field": "passengers.ADT.oExchangeTaxDiff",
+            "field": "exchange.passengers.ADT.oExchangeTaxDiff",
             "description": "<p>oExchangeTaxDiff</p>"
           },
           {
             "group": "Parameter",
             "type": "object[]",
             "optional": false,
-            "field": "trips",
+            "field": "exchange.trips",
             "description": "<p>Trips</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "trips.tripId",
+            "field": "exchange.trips.tripId",
             "description": "<p>Trip Id</p>"
           },
           {
             "group": "Parameter",
             "type": "object[]",
             "optional": false,
-            "field": "trips.segments",
+            "field": "exchange.trips.segments",
             "description": "<p>Segments</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "trips.segments.segmentId",
+            "field": "exchange.trips.segments.segmentId",
             "description": "<p>Segment Id</p>"
           },
           {
@@ -4625,7 +4632,7 @@ define({ "api": [
             "type": "string",
             "size": "format Y-m-d H:i",
             "optional": false,
-            "field": "trips.segments.departureTime",
+            "field": "exchange.trips.segments.departureTime",
             "description": "<p>DepartureTime</p>"
           },
           {
@@ -4633,21 +4640,21 @@ define({ "api": [
             "type": "string",
             "size": "format Y-m-d H:i",
             "optional": false,
-            "field": "trips.segments.arrivalTime",
+            "field": "exchange.trips.segments.arrivalTime",
             "description": "<p>ArrivalTime</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": true,
-            "field": "trips.segments.stop",
+            "field": "exchange.trips.segments.stop",
             "description": "<p>Stop</p>"
           },
           {
             "group": "Parameter",
             "type": "object[]",
             "optional": true,
-            "field": "trips.segments.stops",
+            "field": "exchange.trips.segments.stops",
             "description": "<p>Stops</p>"
           },
           {
@@ -4655,7 +4662,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "trips.segments.stops.locationCode",
+            "field": "exchange.trips.segments.stops.locationCode",
             "description": "<p>Location Code</p>"
           },
           {
@@ -4663,7 +4670,7 @@ define({ "api": [
             "type": "string",
             "size": "format Y-m-d H:i",
             "optional": false,
-            "field": "trips.segments.stops.departureDateTime",
+            "field": "exchange.trips.segments.stops.departureDateTime",
             "description": "<p>Departure DateTime</p>"
           },
           {
@@ -4671,28 +4678,28 @@ define({ "api": [
             "type": "string",
             "size": "format Y-m-d H:i",
             "optional": false,
-            "field": "trips.segments.stops.arrivalDateTime",
+            "field": "exchange.trips.segments.stops.arrivalDateTime",
             "description": "<p>Departure DateTime</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "trips.segments.stops.duration",
+            "field": "exchange.trips.segments.stops.duration",
             "description": "<p>Duration</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "trips.segments.stops.elapsedTime",
+            "field": "exchange.trips.segments.stops.elapsedTime",
             "description": "<p>Elapsed Time</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "trips.segments.stops.equipment",
+            "field": "exchange.trips.segments.stops.equipment",
             "description": "<p>Equipment</p>"
           },
           {
@@ -4700,7 +4707,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "trips.segments.departureAirportCode",
+            "field": "exchange.trips.segments.departureAirportCode",
             "description": "<p>Departure Airport Code IATA</p>"
           },
           {
@@ -4708,7 +4715,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "trips.segments.arrivalAirportCode",
+            "field": "exchange.trips.segments.arrivalAirportCode",
             "description": "<p>Arrival Airport Code IATA</p>"
           },
           {
@@ -4716,7 +4723,7 @@ define({ "api": [
             "type": "string",
             "size": "5}",
             "optional": false,
-            "field": "trips.segments.flightNumber",
+            "field": "exchange.trips.segments.flightNumber",
             "description": "<p>Flight Number</p>"
           },
           {
@@ -4724,14 +4731,14 @@ define({ "api": [
             "type": "string",
             "size": "1",
             "optional": false,
-            "field": "trips.segments.bookingClass",
+            "field": "exchange.trips.segments.bookingClass",
             "description": "<p>BookingClass</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "trips.segments.duration",
+            "field": "exchange.trips.segments.duration",
             "description": "<p>Segment duration</p>"
           },
           {
@@ -4739,7 +4746,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "trips.segments.departureAirportTerminal",
+            "field": "exchange.trips.segments.departureAirportTerminal",
             "description": "<p>Departure Airport Terminal Code</p>"
           },
           {
@@ -4747,7 +4754,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": true,
-            "field": "trips.segments.arrivalAirportTerminal",
+            "field": "exchange.trips.segments.arrivalAirportTerminal",
             "description": "<p>Arrival Airport Terminal Code</p>"
           },
           {
@@ -4755,7 +4762,7 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": true,
-            "field": "trips.segments.operatingAirline",
+            "field": "exchange.trips.segments.operatingAirline",
             "description": "<p>Operating Airline</p>"
           },
           {
@@ -4763,7 +4770,7 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": true,
-            "field": "trips.segments.marketingAirline",
+            "field": "exchange.trips.segments.marketingAirline",
             "description": "<p>Marketing Airline</p>"
           },
           {
@@ -4771,7 +4778,7 @@ define({ "api": [
             "type": "string",
             "size": "30",
             "optional": true,
-            "field": "trips.segments.airEquipType",
+            "field": "exchange.trips.segments.airEquipType",
             "description": "<p>AirEquipType</p>"
           },
           {
@@ -4779,14 +4786,14 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": true,
-            "field": "trips.segments.marriageGroup",
+            "field": "exchange.trips.segments.marriageGroup",
             "description": "<p>MarriageGroup</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": true,
-            "field": "trips.segments.mileage",
+            "field": "exchange.trips.segments.mileage",
             "description": "<p>Mileage</p>"
           },
           {
@@ -4794,7 +4801,7 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": true,
-            "field": "trips.segments.meal",
+            "field": "exchange.trips.segments.meal",
             "description": "<p>Meal</p>"
           },
           {
@@ -4802,29 +4809,29 @@ define({ "api": [
             "type": "string",
             "size": "50",
             "optional": true,
-            "field": "trips.segments.fareCode",
+            "field": "exchange.trips.segments.fareCode",
             "description": "<p>Fare Code</p>"
           },
           {
             "group": "Parameter",
             "type": "bool",
             "optional": true,
-            "field": "trips.segments.recheckBaggage",
+            "field": "exchange.trips.segments.recheckBaggage",
             "description": "<p>Recheck Baggage</p>"
           },
           {
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "paxCnt",
+            "field": "exchange.paxCnt",
             "description": "<p>Pax Cnt</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "size": "2",
-            "optional": true,
-            "field": "validatingCarrier",
+            "optional": false,
+            "field": "exchange.validatingCarrier",
             "description": "<p>ValidatingCarrier</p>"
           },
           {
@@ -4832,7 +4839,7 @@ define({ "api": [
             "type": "string",
             "size": "2",
             "optional": false,
-            "field": "gds",
+            "field": "exchange.gds",
             "description": "<p>Gds</p>"
           },
           {
@@ -4840,7 +4847,7 @@ define({ "api": [
             "type": "string",
             "size": "10",
             "optional": false,
-            "field": "pcc",
+            "field": "exchange.pcc",
             "description": "<p>pcc</p>"
           },
           {
@@ -4848,7 +4855,7 @@ define({ "api": [
             "type": "string",
             "size": "50",
             "optional": false,
-            "field": "fareType",
+            "field": "exchange.fareType",
             "description": "<p>Fare Type</p>"
           },
           {
@@ -4856,7 +4863,7 @@ define({ "api": [
             "type": "string",
             "size": "1",
             "optional": false,
-            "field": "cabin",
+            "field": "exchange.cabin",
             "description": "<p>Cabin</p>"
           },
           {
@@ -4864,21 +4871,29 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "currency",
+            "field": "exchange.cons",
+            "description": "<p>Consolidator</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.currency",
             "description": "<p>Currency</p>"
           },
           {
             "group": "Parameter",
             "type": "array[]",
-            "optional": false,
-            "field": "currencies",
+            "optional": true,
+            "field": "exchange.currencies",
             "description": "<p>Currencies (For example [USD])</p>"
           },
           {
             "group": "Parameter",
             "type": "object[]",
             "optional": true,
-            "field": "currencyRates",
+            "field": "exchange.currencyRates",
             "description": "<p>CurrencyRates</p>"
           },
           {
@@ -4886,7 +4901,7 @@ define({ "api": [
             "type": "string",
             "size": "6",
             "optional": false,
-            "field": "currencyRates.USDUSD",
+            "field": "exchange.currencyRates.USDUSD",
             "description": "<p>Currency Codes</p>"
           },
           {
@@ -4894,7 +4909,7 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "currencyRates.USDUSD.from",
+            "field": "exchange.currencyRates.USDUSD.from",
             "description": "<p>Currency Code</p>"
           },
           {
@@ -4902,28 +4917,28 @@ define({ "api": [
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "currencyRates.USDUSD.to",
+            "field": "exchange.currencyRates.USDUSD.to",
             "description": "<p>Currency Code</p>"
           },
           {
             "group": "Parameter",
             "type": "number",
             "optional": false,
-            "field": "currencyRates.USDUSD.rate",
+            "field": "exchange.currencyRates.USDUSD.rate",
             "description": "<p>Rate</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": true,
-            "field": "keys",
+            "field": "exchange.keys",
             "description": "<p>Keys</p>"
           },
           {
             "group": "Parameter",
             "type": "object",
             "optional": true,
-            "field": "meta",
+            "field": "exchange.meta",
             "description": "<p>Meta</p>"
           },
           {
@@ -5131,7 +5146,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"bookingId\": \"XXXYYYZ\",\n    \"key\": \"51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789\",\n    \"prices\": {\n        \"totalPrice\": 332.12,\n        \"comm\": 0,\n        \"isCk\": false\n    },\n    \"passengers\": {\n        \"ADT\": {\n            \"codeAs\": \"JCB\",\n            \"cnt\": 1,\n            \"baseFare\": 32.12,\n            \"pubBaseFare\": 32.12,\n            \"baseTax\": 300,\n            \"markup\": 0,\n            \"comm\": 0,\n            \"price\": 332.12,\n            \"tax\": 300,\n            \"oBaseFare\": {\n                \"amount\": 32.120003,\n                \"currency\": \"USD\"\n            },\n            \"oBaseTax\": {\n                \"amount\": 300,\n                \"currency\": \"USD\"\n            },\n            \"oExchangeFareDiff\": {\n                \"amount\": 8,\n                \"currency\": \"USD\"\n            },\n            \"oExchangeTaxDiff\": {\n                \"amount\": 24.12,\n                \"currency\": \"USD\"\n            }\n        }\n    },\n    \"trips\": [\n        {\n            \"tripId\": 1,\n            \"segments\": [\n                {\n                    \"segmentId\": 1,\n                    \"departureTime\": \"2022-01-10 20:15\",\n                    \"arrivalTime\": \"2022-01-11 21:10\",\n                    \"stop\": 1,\n                    \"stops\": [\n                        {\n                            \"locationCode\": \"LFW\",\n                            \"departureDateTime\": \"2022-01-11 12:35\",\n                            \"arrivalDateTime\": \"2022-01-11 11:35\",\n                            \"duration\": 60,\n                            \"elapsedTime\": 620,\n                            \"equipment\": \"787\"\n                        }\n                    ],\n                    \"flightNumber\": \"513\",\n                    \"bookingClass\": \"H\",\n                    \"duration\": 1015,\n                    \"departureAirportCode\": \"JFK\",\n                    \"departureAirportTerminal\": \"8\",\n                    \"arrivalAirportCode\": \"ADD\",\n                    \"arrivalAirportTerminal\": \"2\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"787\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"O\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"DL\",\n                    \"fareCode\": \"HLESUS\",\n                    \"recheckBaggage\": false\n                },\n                {\n                    \"segmentId\": 2,\n                    \"departureTime\": \"2022-01-11 23:15\",\n                    \"arrivalTime\": \"2022-01-12 01:20\",\n                    \"stop\": 0,\n                    \"stops\": null,\n                    \"flightNumber\": \"308\",\n                    \"bookingClass\": \"H\",\n                    \"duration\": 125,\n                    \"departureAirportCode\": \"ADD\",\n                    \"departureAirportTerminal\": \"2\",\n                    \"arrivalAirportCode\": \"NBO\",\n                    \"arrivalAirportTerminal\": \"1C\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"738\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"I\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"D\",\n                    \"fareCode\": \"HLESUS\",\n                    \"recheckBaggage\": false\n                }\n            ],\n            \"duration\": 1265\n        },\n        {\n            \"tripId\": 2,\n            \"segments\": [\n                {\n                    \"segmentId\": 1,\n                    \"departureTime\": \"2022-01-31 05:00\",\n                    \"arrivalTime\": \"2022-01-31 07:15\",\n                    \"stop\": 0,\n                    \"stops\": null,\n                    \"flightNumber\": \"309\",\n                    \"bookingClass\": \"E\",\n                    \"duration\": 135,\n                    \"departureAirportCode\": \"NBO\",\n                    \"departureAirportTerminal\": \"1C\",\n                    \"arrivalAirportCode\": \"ADD\",\n                    \"arrivalAirportTerminal\": \"2\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"738\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"O\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"B\",\n                    \"fareCode\": \"ELPRUS\",\n                    \"recheckBaggage\": false\n                },\n                {\n                    \"segmentId\": 2,\n                    \"departureTime\": \"2022-01-31 08:30\",\n                    \"arrivalTime\": \"2022-01-31 18:15\",\n                    \"stop\": 1,\n                    \"stops\": [\n                        {\n                            \"locationCode\": \"LFW\",\n                            \"departureDateTime\": \"2022-01-31 12:15\",\n                            \"arrivalDateTime\": \"2022-01-31 11:00\",\n                            \"duration\": 75,\n                            \"elapsedTime\": 330,\n                            \"equipment\": \"787\"\n                        }\n                    ],\n                    \"flightNumber\": \"512\",\n                    \"bookingClass\": \"E\",\n                    \"duration\": 1065,\n                    \"departureAirportCode\": \"ADD\",\n                    \"departureAirportTerminal\": \"2\",\n                    \"arrivalAirportCode\": \"JFK\",\n                    \"arrivalAirportTerminal\": \"8\",\n                    \"operatingAirline\": \"ET\",\n                    \"airEquipType\": \"787\",\n                    \"marketingAirline\": \"ET\",\n                    \"marriageGroup\": \"I\",\n                    \"cabin\": \"Y\",\n                    \"meal\": \"LD\",\n                    \"fareCode\": \"ELPRUS\",\n                    \"recheckBaggage\": false\n                }\n            ],\n            \"duration\": 1275\n        }\n    ],\n    \"paxCnt\": 1,\n    \"validatingCarrier\": \"\",\n    \"gds\": \"S\",\n    \"pcc\": \"G9MJ\",\n    \"cons\": \"GTT\",\n    \"fareType\": \"SR\",\n    \"cabin\": \"Y\",\n    \"currency\": \"USD\",\n    \"currencies\": [\n        \"USD\"\n    ],\n    \"currencyRates\": {\n        \"USDUSD\": {\n            \"from\": \"USD\",\n            \"to\": \"USD\",\n            \"rate\": 1\n        }\n    },\n    \"keys\": {},\n    \"meta\": {\n        \"eip\": 0,\n        \"noavail\": false,\n        \"searchId\": \"U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx\",\n        \"lang\": \"en\",\n        \"rank\": 0,\n        \"cheapest\": false,\n        \"fastest\": false,\n        \"best\": false,\n        \"country\": \"us\"\n    },\n    \"billing\": {\n          \"first_name\": \"John\",\n          \"last_name\": \"Doe\",\n          \"middle_name\": \"\",\n          \"address_line1\": \"1013 Weda Cir\",\n          \"address_line2\": \"\",\n          \"country_id\": \"US\",\n          \"country\" : \"United States\",\n          \"city\": \"Mayfield\",\n          \"state\": \"KY\",\n          \"zip\": \"99999\",\n          \"company_name\": \"\",\n          \"contact_phone\": \"+19074861000\",\n          \"contact_email\": \"test@test.com\",\n          \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n          \"method_key\": \"cc\",\n          \"currency\": \"USD\",\n          \"method_data\": {\n              \"card\": {\n                  \"number\": \"4111555577778888\",\n                  \"holder_name\": \"Test test\",\n                  \"expiration_month\": 10,\n                  \"expiration_year\": 23,\n                  \"cvv\": \"1234\"\n              }\n          },\n          \"amount\": 112.25\n    }\n}",
+          "content": " {\n    \"bookingId\": \"XXXYYYZ\",\n    \"apiKey\": \"51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789\",\n    \"exchange\": {\n        \"trips\": [\n            {\n                \"tripId\": 1,\n                \"segments\": [\n                    {\n                        \"segmentId\": 1,\n                        \"departureTime\": \"2022-01-10 20:15\",\n                        \"arrivalTime\": \"2022-01-11 21:10\",\n                        \"stop\": 0,\n                        \"stops\": [\n                            {\n                                \"locationCode\": \"LFW\",\n                                \"departureDateTime\": \"2022-01-11 12:35\",\n                                \"arrivalDateTime\": \"2022-01-11 11:35\",\n                                \"duration\": 60,\n                                \"elapsedTime\": 620,\n                                \"equipment\": \"787\"\n                            }\n                        ],\n                        \"flightNumber\": \"513\",\n                        \"bookingClass\": \"H\",\n                        \"duration\": 1015,\n                        \"departureAirportCode\": \"JFK\",\n                        \"departureAirportTerminal\": \"8\",\n                        \"arrivalAirportCode\": \"ADD\",\n                        \"arrivalAirportTerminal\": \"2\",\n                        \"operatingAirline\": \"ET\",\n                        \"airEquipType\": \"787\",\n                        \"marketingAirline\": \"ET\",\n                        \"marriageGroup\": \"O\",\n                        \"cabin\": \"Y\",\n                        \"meal\": \"DL\",\n                        \"fareCode\": \"HLESUS\",\n                        \"recheckBaggage\": false\n                    },\n                    {\n                        \"segmentId\": 2,\n                        \"departureTime\": \"2022-01-11 23:15\",\n                        \"arrivalTime\": \"2022-01-12 01:20\",\n                        \"stop\": 0,\n                        \"stops\": null,\n                        \"flightNumber\": \"308\",\n                        \"bookingClass\": \"H\",\n                        \"duration\": 125,\n                        \"departureAirportCode\": \"ADD\",\n                        \"departureAirportTerminal\": \"2\",\n                        \"arrivalAirportCode\": \"NBO\",\n                        \"arrivalAirportTerminal\": \"1C\",\n                        \"operatingAirline\": \"ET\",\n                        \"airEquipType\": \"738\",\n                        \"marketingAirline\": \"ET\",\n                        \"marriageGroup\": \"I\",\n                        \"cabin\": \"Y\",\n                        \"meal\": \"D\",\n                        \"fareCode\": \"HLESUS\",\n                        \"recheckBaggage\": false\n                    }\n                ],\n                \"duration\": 1265\n            }\n        ],\n        \"passengers\": {\n            \"ADT\": {\n                \"codeAs\": \"JCB\",\n                \"cnt\": 1,\n                \"baseFare\": 32.12,\n                \"pubBaseFare\": 32.12,\n                \"baseTax\": 300,\n                \"markup\": 0,\n                \"comm\": 0,\n                \"price\": 332.12,\n                \"tax\": 300,\n                \"oBaseFare\": {\n                    \"amount\": 32.120003,\n                    \"currency\": \"USD\"\n                },\n                \"oBaseTax\": {\n                    \"amount\": 300,\n                    \"currency\": \"USD\"\n                },\n                \"oExchangeFareDiff\": {\n                    \"amount\": 8,\n                    \"currency\": \"USD\"\n                },\n                \"oExchangeTaxDiff\": {\n                    \"amount\": 24.12,\n                    \"currency\": \"USD\"\n                }\n            }\n        },\n        \"validatingCarrier\": \"AA\",\n        \"gds\": \"S\",\n        \"pcc\": \"G9MJ\",\n        \"cons\": \"GTT\",\n        \"fareType\": \"SR\",\n        \"cabin\": \"Y\",\n        \"currency\": \"USD\",\n        \"currencies\": [\n            \"USD\"\n        ],\n        \"currencyRates\": {\n            \"USDUSD\": {\n                \"from\": \"USD\",\n                \"to\": \"USD\",\n                \"rate\": 1\n            }\n        },\n        \"keys\": {},\n        \"meta\": {}\n    },\n    \"billing\": {\n          \"first_name\": \"John\",\n          \"last_name\": \"Doe\",\n          \"middle_name\": \"\",\n          \"address_line1\": \"1013 Weda Cir\",paymentRequestForm\n          \"address_line2\": \"\",\n          \"country_id\": \"US\",\n          \"country\" : \"United States\",\n          \"city\": \"Mayfield\",\n          \"state\": \"KY\",\n          \"zip\": \"99999\",\n          \"company_name\": \"\",\n          \"contact_phone\": \"+19074861000\",\n          \"contact_email\": \"test@test.com\",\n          \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n          \"method_key\": \"card\",\n          \"currency\": \"USD\",\n          \"method_data\": {\n              \"card\": {\n                  \"number\": \"4111555577778888\",\n                  \"holder_name\": \"Test test\",\n                  \"expiration_month\": 10,\n                  \"expiration_year\": 23,\n                  \"cvv\": \"123\"\n              }\n          },\n          \"amount\": 112.25\n    }\n}",
           "type": "json"
         }
       ]
@@ -5159,7 +5174,7 @@ define({ "api": [
         },
         {
           "title": "Error-Response (Unprocessable entity):",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"bookingId\": [\n              \"bookingId cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {

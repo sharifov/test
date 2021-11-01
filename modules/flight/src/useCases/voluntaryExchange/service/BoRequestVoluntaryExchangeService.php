@@ -5,6 +5,7 @@ namespace modules\flight\src\useCases\voluntaryExchange\service;
 use common\components\BackOffice;
 use frontend\helpers\JsonHelper;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\entities\cases\Cases;
@@ -83,34 +84,44 @@ class BoRequestVoluntaryExchangeService
         return $this->orderContactForm;
     }
 
-    public function sendVoluntaryExchange(array $post): bool
+    public function sendVoluntaryExchange(array $post, VoluntaryExchangeCreateForm $form): bool
     {
-        return BackOffice::voluntaryExchange(self::mappingBORequest($post));
+        return BackOffice::voluntaryExchange(self::mappingBORequest($post, $form));
     }
 
-    public static function mappingBORequest(array $post): array
+    public static function mappingBORequest(array $post, VoluntaryExchangeCreateForm $form): array
     {
-        $data['apiKey'] = $post['key'] ?? null;
-        $data['bookingId'] = $post['bookingId'] ?? null;
-        $data['billing'] = $post['billing'] ?? null;
-        $data['payment'] = $post['payment_request'] ?? null;
+        $data = $post;
+        if (array_key_exists('billing', $data)) {
+            unset($data['billing']);
+        }
+        if (array_key_exists('payment_request', $data)) {
+            unset($data['payment_request']);
+        }
 
-        $data['exchange']['currency'] = $post['currency'] ?? null;
-        $data['exchange']['validatingCarrier'] = $post['validatingCarrier'] ?? null;
-        $data['exchange']['gds'] = $post['gds'] ?? null;
-        $data['exchange']['pcc'] = $post['pcc'] ?? null;
-
-        $data['exchange']['fareType'] = $post['fareType'] ?? null;
-        $data['exchange']['cabin'] = $post['cabin'] ?? null;
-        $data['exchange']['currencies'] = $post['currencies'] ?? null;
-        $data['exchange']['currencyRates'] = $post['currencyRates'] ?? null;
-        $data['exchange']['keys'] = $post['keys'] ?? null;
-        $data['exchange']['meta'] = $post['meta'] ?? null;
-        $data['exchange']['trips'] = $post['trips'] ?? null;
-        $data['exchange']['passengers'] = $post['passengers'] ?? null;
-
-        $data['exchange']['cons'] = $post['cons'] ?? null; /* TODO::  */
-        $data['exchange']['tickets'] = $post['tickets'] ?? null; /* TODO::  */
+        if ($form->billingInfoForm) {
+            $data['billing'] = [
+                'address' => $form->billingInfoForm->address_line1,
+                'countryCode' => $form->billingInfoForm->country_id,
+                'country' => $form->billingInfoForm->country,
+                'city' => $form->billingInfoForm->city,
+                'state' => $form->billingInfoForm->state,
+                'zip' => $form->billingInfoForm->zip,
+                'phone' => $form->billingInfoForm->contact_phone,
+                'email' => $form->billingInfoForm->contact_email
+            ];
+        }
+        if ($form->paymentRequestForm) {
+            $data['payment'] = [
+                'type' => mb_strtoupper($form->paymentRequestForm->method_key),
+                'card' => [
+                    'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
+                    'number' => $form->paymentRequestForm->creditCardForm->number,
+                    'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
+                    'cvv' => $form->paymentRequestForm->creditCardForm->cvv
+                ]
+            ];
+        }
 
         return $data;
     }

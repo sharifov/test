@@ -36,7 +36,7 @@ class CleanDataVoluntaryExchangeService
         $this->objectCollection = $objectCollection;
         $this->flightRequest = $flightRequest;
         $this->productQuoteChange = $productQuoteChange;
-        $this->creditCardFilter = new V4();
+        $this->creditCardFilter = new CreditCardFilter();
 
         $this->processing();
     }

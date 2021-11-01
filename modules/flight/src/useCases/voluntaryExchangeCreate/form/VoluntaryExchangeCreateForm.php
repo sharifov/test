@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\voluntaryExchangeCreate\form;
 
 use common\components\validators\CheckAndConvertToJsonValidator;
 use common\models\Currency;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\exchange\ExchangeForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\TripForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\price\VoluntaryExchangePriceForm;
 use sales\helpers\ErrorsToStringHelper;
@@ -16,109 +17,53 @@ use yii\base\Model;
  *
  * @property PaymentRequestForm|null $paymentRequestForm
  * @property BillingInfoForm|null $billingInfoForm
- * @property VoluntaryExchangePriceForm|null $voluntaryExchangePriceForm
- * @property TripForm[]|null $tripForms
+ * @property ExchangeForm|null $exchangeForm
  */
 class VoluntaryExchangeCreateForm extends Model
 {
-    public $booking_id;
-    public $flight_quote;
-    public $key;
-    public $paxCnt;
-    public $gds;
-    public $pcc;
-    public $validatingCarrier;
-    public $fareType;
-    public $cabin;
-    public $currency;
-    public $passengers;
+    public $bookingId;
+    public $apiKey;
+    public $exchange;
 
-    public $prices;
-    public $trips;
     public $payment_request;
     public $billing;
 
-    private ?PaymentRequestForm $paymentRequestForm;
-    private ?BillingInfoForm $billingInfoForm;
-    private ?VoluntaryExchangePriceForm $voluntaryExchangePriceForm;
-    private array $tripForms = [];
+    private ?PaymentRequestForm $paymentRequestForm = null;
+    private ?BillingInfoForm $billingInfoForm = null;
+    private ?ExchangeForm $exchangeForm = null;
 
     public function rules(): array
     {
         return [
-            [['booking_id'], 'required'],
-            [['booking_id'], 'string', 'max' => 10],
+            [['bookingId'], 'required'],
+            [['bookingId'], 'string', 'max' => 10],
 
-            [['key'], 'required'],
-            [['key'], 'string', 'max' => 150],
+            [['apiKey'], 'required'],
+            [['apiKey'], 'string', 'max' => 150],
 
-            [['paxCnt'], 'integer'],
+            [['exchange'], 'required'],
+            [['exchange'], CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+            [['exchange'], 'exchangeProcessing'],
 
-            [['validatingCarrier'], 'integer'],
-
-            [['paxCnt'], 'integer'],
-
-            [['gds'], 'required'],
-            [['gds'], 'string', 'max' => 2],
-
-            [['pcc'], 'string', 'max' => 10],
-
-            [['validatingCarrier'], 'string', 'max' => 2],
-
-            [['fareType'], 'string', 'max' => 50],
-
-            [['cabin'], 'string'],
-
-            ['currency', 'required'],
-            ['currency', 'string', 'max' => 3],
-            ['currency', 'exist', 'targetClass' => Currency::class, 'targetAttribute' => 'cur_code'],
-
-            [['prices'], 'required'],
-            [['prices'], CheckAndConvertToJsonValidator::class],
-            [['prices'], 'pricesProcessing'],
-
-            [['trips'], 'required'],
-            [['trips'], CheckAndConvertToJsonValidator::class],
-            [['trips'], 'tripsProcessing'],
-
-            [['payment_request'], CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true],
+            [['payment_request'], CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
             [['payment_request'], 'paymentRequestProcessing'],
 
-            [['billing'], CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true],
+            [['billing'], CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
             [['billing'], 'billingProcessing'],
-
-            [['passengers'], 'safe'],
         ];
     }
 
-    public function tripsProcessing(string $attribute): void
+    public function exchangeProcessing(string $attribute): void
     {
-        if (!empty($this->trips)) {
-            foreach ($this->trips as $key => $trip) {
-                $tripForm = new TripForm();
-                $tripForm->setFormName('');
-                if (!$tripForm->load($trip)) {
-                    $this->addError($attribute, 'TripForm not loaded');
-                } elseif (!$tripForm->validate()) {
-                    $this->addError($attribute, 'TripForm.' . $key . '.' . ErrorsToStringHelper::extractFromModel($tripForm, ' '));
-                } else {
-                    $this->tripForms[] = $tripForm;
-                }
-            }
-        }
-    }
-
-    public function pricesProcessing(string $attribute): void
-    {
-        if (!empty($this->prices)) {
-            $form = new VoluntaryExchangePriceForm();
-            $form->setFormName('');
-            if (!$form->load($this->prices)) {
-                $this->addError($attribute, 'VoluntaryExchangePriceForm not loaded');
-            } elseif (!$form->validate()) {
-                $this->addError($attribute, 'VoluntaryExchangePriceForm: ' . ErrorsToStringHelper::extractFromModel($form, ', '));
+        if (!empty($this->exchange)) {
+            $exchangeForm = new ExchangeForm();
+            $exchangeForm->setFormName('');
+            if (!$exchangeForm->load($this->exchange)) {
+                $this->addError($attribute, 'ExchangeForm is not loaded');
+            } elseif (!$exchangeForm->validate()) {
+                $this->addError($attribute, 'ExchangeForm: ' . ErrorsToStringHelper::extractFromModel($exchangeForm, ', '));
             } else {
-                $this->voluntaryExchangePriceForm = $form;
+                $this->exchangeForm = $exchangeForm;
             }
         }
     }
@@ -166,15 +111,5 @@ class VoluntaryExchangeCreateForm extends Model
     public function getBillingInfoForm(): ?BillingInfoForm
     {
         return $this->billingInfoForm;
-    }
-
-    public function getVoluntaryExchangePriceForm(): ?VoluntaryExchangePriceForm
-    {
-        return $this->voluntaryExchangePriceForm;
-    }
-
-    public function getTripForms(): array
-    {
-        return $this->tripForms;
     }
 }

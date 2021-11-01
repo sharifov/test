@@ -167,10 +167,14 @@ class VoluntaryExchangeCreateHandler
         }
 
         try {
+            if (!$exchangeProductQuoteData = $flightProductQuoteData['exchange'] ?? null) {
+                throw new \RuntimeException('ExchangeProductQuoteData not found');
+            }
+
             $flight = $this->voluntaryExchangeService->getFlightByOriginQuote($this->originProductQuote);
             $flightQuote = $this->objectCollection->getFlightQuoteManageService()->createVoluntaryExchange(
                 $flight,
-                $flightProductQuoteData,
+                $exchangeProductQuoteData,
                 $this->originProductQuote->pq_order_id,
                 $this->case,
                 null,

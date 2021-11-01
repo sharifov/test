@@ -8,6 +8,8 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
+use webapi\src\logger\behaviors\filters\creditCard\V5;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\VarDumper;
@@ -386,7 +388,7 @@ class BackOffice
             if (!$response->isOk) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange server error',
-                    'request' => $request,
+                    'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryExchange:serverError');
                 return false;
@@ -396,7 +398,7 @@ class BackOffice
             if (!$data) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange data is empty',
-                    'request' => $request,
+                    'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryExchange:dataIsEmpty');
                 return false;
@@ -404,7 +406,7 @@ class BackOffice
             if (!is_array($data)) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange response Data type is invalid',
-                    'request' => $request,
+                    'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryExchange:dataIsInvalid');
                 return false;
@@ -412,7 +414,7 @@ class BackOffice
             if (!isset($data['success']) || $data['success'] !== true) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange is not success response',
-                    'request' => $request,
+                    'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryExchange:dataObjectInvalid');
                 return false;
