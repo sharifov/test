@@ -100,7 +100,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             [['pqor_product_quote_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteRefund::class, 'targetAttribute' => ['pqor_product_quote_refund_id' => 'pqr_id']],
             [['pqor_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_updated_user_id' => 'id']],
             [['pqor_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pqor_client_currency' => 'cur_code']],
-            [['pqor_order_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrderRefund::class, 'targetAttribute' => ['pqor_client_currency' => 'orr_id']],
+            [['pqor_order_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrderRefund::class, 'targetAttribute' => ['pqor_order_refund_id' => 'orr_id']],
             ['pqor_data_json', 'safe'],
             ['pqor_data_json', 'trim'],
             ['pqor_data_json', CheckJsonValidator::class],
