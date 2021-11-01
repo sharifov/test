@@ -185,6 +185,7 @@ class LeadController extends FController
                 'allowActions' => [
                     'view',
                     'take',
+                    'ajax-take',
                     'create-by-chat',
                     'ajax-create-from-phone-widget',
                     'ajax-link-to-call'
@@ -1399,28 +1400,33 @@ class LeadController extends FController
             try {
                 $lead = $this->findLeadByGid($gid);
                 $oldStatus = $lead->status;
-                $user = Auth::user();
-                $leadAbacDto = new LeadAbacDto($lead, $user->getId());
-                if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS) && Auth::can('lead/take', ['lead' => $lead])) {
-                    $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
+                $allowRbac = Auth::can('lead/take', ['lead' => $lead]);
+                if ($allowRbac) {
+                    $user = Auth::user();
+                    $leadAbacDto = new LeadAbacDto($lead, $user->getId());
+                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                        $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
-                    $this->transaction->wrap(function () use ($lead) {
-                        if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
-                            $qCall->delete();
+                        $this->transaction->wrap(function () use ($lead) {
+                            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                                $qCall->delete();
+                            }
+                            $this->leadRepository->save($lead);
+                        });
+
+                        if ($oldStatus === Lead::STATUS_PENDING) {
+                            $leadUserConversion = LeadUserConversion::create(
+                                $lead->id,
+                                $user->getId(),
+                                LeadUserConversionDictionary::DESCRIPTION_TAKE
+                            );
+                            (new LeadUserConversionRepository())->save($leadUserConversion);
                         }
-                        $this->leadRepository->save($lead);
-                    });
-
-                    if ($oldStatus === Lead::STATUS_PENDING) {
-                        $leadUserConversion = LeadUserConversion::create(
-                            $lead->id,
-                            $user->getId(),
-                            LeadUserConversionDictionary::DESCRIPTION_TAKE
-                        );
-                        (new LeadUserConversionRepository())->save($leadUserConversion);
+                    } else {
+                        $result ['error'] = 'Access Denied (ABAC)!';
                     }
                 } else {
-                    $result ['error'] = 'Access Denied!';
+                    $result ['error'] = 'Access Denied (RBAC)!';
                 }
             } catch (\RuntimeException | \DomainException $exception) {
                 Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::DomainException');
