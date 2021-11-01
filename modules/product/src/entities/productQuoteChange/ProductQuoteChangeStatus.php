@@ -60,18 +60,6 @@ class ProductQuoteChangeStatus
         self::DECLINED => 'declined'
     ];
 
-    private const BO_STATUSES_LIST = [
-        self::NEW => '',
-        self::PENDING => 'pending',
-        self::IN_PROGRESS => 'processing',
-        self::COMPLETED => 'exchanged',
-        self::CANCELED => '',
-        self::ERROR => '',
-        self::DECLINED => 'cancelled',
-        self::PROCESSING => 'processing',
-        self::CONFIRMED => 'processing',
-    ];
-
     public static function getList(): array
     {
         return self::LIST;
@@ -110,15 +98,10 @@ class ProductQuoteChangeStatus
         return self::UNIQUE_KEY_LIST[$id] ?? null;
     }
 
-    public static function getBoStatusesList(): array
-    {
-        return self::BO_STATUSES_LIST;
-    }
-
-    public static function getBoKeyStatusById(int $id): ?string
+    public static function getClientKeyStatusById(int $id): string
     {
         $key = self::getKeyById($id);
         $statusMap = SettingHelper::getProductQuoteChangeClientStatusMapping();
-        return $statusMap[$key] ?? self::getBoStatusesList()[$id] ?? null;
+        return $statusMap[$key] ?? $key ?? '';
     }
 }
