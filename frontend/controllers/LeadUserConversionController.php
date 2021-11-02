@@ -98,8 +98,9 @@ class LeadUserConversionController extends FController
 
         //$userList = Employee::getList();
         $userList = Employee::getActiveUsersListFromCommonGroups(Auth::id());
+        VarDumper::dump($userList);
         $usersExist = LeadUserConversionService::getUserIdsByLead($leadId);
-        $userList = array_diff_key($userList, $usersExist);
+        $userList = array_diff_key($userList, []);
 
         return $this->renderAjax('add', [
             'leadUserConversionAddForm' => $form,
