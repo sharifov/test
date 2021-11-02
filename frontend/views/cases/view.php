@@ -60,7 +60,7 @@ $caseAbacDto = new CasesAbacDto($model);
 /** @abac $caseAbacDto, CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK, Disable mask client data on Case view*/
 $disableMasking = Yii::$app->abac->can($caseAbacDto, CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK);
 
-$clientProjectInfo = $model->client->clientProjects;
+$clientProjectInfo = $model->client->clientProjects ?? null;
 $unsubscribe = false;
 if (isset($clientProjectInfo) && $clientProjectInfo) {
     foreach ($clientProjectInfo as $item) {
