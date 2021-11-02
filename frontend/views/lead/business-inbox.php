@@ -333,10 +333,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{take} <br> {view}',
             'visibleButtons' => [
                 /*'take' => static function (Lead $model, $key, $index) {
-                    return Auth::can('lead/view', ['lead' => $model]);
+                    return Auth::can('leadSection', ['lead' => $model]);
                 },*/
                 'view' => static function (Lead $model, $key, $index) {
-                    return Auth::can('lead/view', ['lead' => $model]);
+                    return Auth::can('leadSection', ['lead' => $model]);
                 },
             ],
             'buttons' => [
