@@ -2415,17 +2415,75 @@ class TestController extends FController
                 ],
             ],
         ];
-        Yii::error($message, 'test/error');
-        Yii::warning($message, 'test/warning');
-        Yii::info($message, 'info\test/info');
-        Yii::info($message, 'log\test/log');
 
-        $message = 'Test message 2';
 
-        Yii::error($message, 'test/error');
-        Yii::warning($message, 'test/warning');
-        Yii::info($message, 'info\test/info');
-        Yii::info($message, 'log\test/log');
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message1' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => [
+                    'message3' => 'Test message 1',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message4' => 'Test message 21',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'b' => '1111',
+                        'b2' => '222',
+                        'b3' => [
+                            'message5' => 'Test message 31',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'a1' => '1111',
+                            'b2' => '222',
+                            'с3' => '222',
+                        ],
+                    ],
+                ],
+                'b2' => '222',
+                'b3' => [
+                    'message2' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message3' => 'Test message 1',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'a1' => '1111',
+                        'b2' => '222',
+                        'с3' => [
+                            'message4' => 'Test message 21',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'b' => '1111',
+                            'b2' => '222',
+                            'b3' => [
+                                'message5' => 'Test message 31',
+                                'trace' => ['tr1' => 'ttttttttttt1'],
+                                'a1' => '1111',
+                                'b2' => '222',
+                                'с3' => '222',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+//        Yii::error($message, 'test/error');
+//        Yii::warning($message, 'test/warning');
+//        Yii::info($message, 'info\test/info');
+//        Yii::info($message, 'log\test/log');
+//
+//        $message = 'Test message 2';
+//
+//        Yii::error($message, 'test/error');
+//        Yii::warning($message, 'test/warning');
+//        Yii::info($message, 'info\test/info');
+//        Yii::info($message, 'log\test/log');
 
 //        $a = new StartDTO();
 //        $a->ip = 'asdasdasd';
@@ -2439,9 +2497,82 @@ class TestController extends FController
         } catch (\Throwable $throwable) {
             //VarDumper::dump(get_object_vars($throwable), 10, true);
             //VarDumper::dump(AppHelper::throwableLog($throwable, true), 10, true);
-            Yii::error(AppHelper::throwableLog($throwable, false), 'error:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable, true), 'error:Throwable');
+            //Yii::error($throwable, 'error:Throwable');
         }
 
         return date('Y-m-d h:i:s');
+    }
+
+    public function actionArrayTrim()
+    {
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message1' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => [
+                    'message3' => 'Test message 1',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message4' => 'Test message 21',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'b' => '1111',
+                        'b2' => '222',
+                        'b3' => [
+                            'message5' => 'Test message 31',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'a1' => '1111',
+                            'b2' => '222',
+                            'с3' => '222',
+                        ],
+                    ],
+                ],
+                'b2' => '222',
+                'b3' => [
+                    'message2' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message3' => 'Test message 1',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'a1' => '1111',
+                        'b2' => '222',
+                        'с3' => [
+                            'message4' => 'Test message 21',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'b' => '1111',
+                            'b2' => '222',
+                            'b3' => [
+                                'message5' => 'Test message 31',
+                                'trace' => ['tr1' => 'ttttttttttt1'],
+                                'a1' => '1111',
+                                'b2' => '222',
+                                'с3' => '222',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+
+        VarDumper::dump($message, 10, true);
+
+
+        echo '<hr>';
+        $message = AppHelper::shotArrayData($message);
+
+        VarDumper::dump($message, 10, true);
+
+
+        exit;
+
     }
 }

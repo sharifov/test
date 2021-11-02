@@ -39,7 +39,7 @@ class AppHelper
         $data['line'] = $throwable->getLine();
 
         if ($trace) {
-            $data['trace'] = $throwable->getTrace();
+            $data['trace'] = $throwable->getTraceAsString();
         }
 
         return $data;
@@ -191,5 +191,32 @@ class AppHelper
             }
         }
         return $newArray;
+    }
+
+    /**
+     * @param array $data
+     * @param int $level
+     * @param int $currentLevel
+     * @return array
+     */
+    public static function shotArrayData(array $data, int $level = 3, int $currentLevel = 0): array
+    {
+        $dataResponse = [];
+        $currentLevel++;
+        if ($data) {
+            foreach ($data as $key => $itemData) {
+                if (!empty($itemData) && is_array($itemData)) {
+                    if ($currentLevel >= $level) {
+                        $dataResponse[$key] = json_encode($itemData);
+                    } else {
+                        $dataResponse[$key] = self::shotArrayData($itemData, $level, $currentLevel);
+                    }
+                } else {
+                    $dataResponse[$key] = $itemData;
+                }
+            }
+            unset($data);
+        }
+        return $dataResponse;
     }
 }

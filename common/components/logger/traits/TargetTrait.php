@@ -116,6 +116,7 @@ trait TargetTrait
     {
         $data = [];
         if ($text) {
+            $text = AppHelper::shotArrayData($text);
             foreach ($text as $key => $value) {
                 if ($isData) {
                     $data['@app.data'][$key] = $value;
@@ -126,21 +127,37 @@ trait TargetTrait
         }
         if (!empty($text['message']) && empty($data['@message'])) {
             $data['@message'] = $text['message'];
+            if (isset($data['@app.data']['message'])) {
+                unset($data['@app.data']['message']);
+            }
         }
+
         if (!empty($text['trace']) && empty($data['@trace'])) {
             $data['@trace'] = $text['trace'];
+            if (isset($data['@app.data']['trace'])) {
+                unset($data['@app.data']['trace']);
+            }
         }
 
         if (!empty($text['line']) && empty($data['@line'])) {
             $data['@line'] = $text['line'];
+            if (isset($data['@app.data']['line'])) {
+                unset($data['@app.data']['line']);
+            }
         }
 
         if (!empty($text['file']) && empty($data['@file'])) {
             $data['@file'] = $text['file'];
+            if (isset($data['@app.data']['file'])) {
+                unset($data['@app.data']['file']);
+            }
         }
 
         if (!empty($text['code']) && empty($data['@statusCode'])) {
             $data['@statusCode'] = $text['code'];
+            if (isset($data['@app.data']['code'])) {
+                unset($data['@app.data']['code']);
+            }
         }
         return $data;
     }
@@ -157,17 +174,19 @@ trait TargetTrait
             $dataList = AppHelper::throwableLog($text, true);
         } else {
             $dataList = get_object_vars($text);
-        }
 
-        if ($dataList) {
-            foreach ($dataList as $key => $value) {
-                if ($isData) {
-                    $data['@app.data'][$key] = $value;
-                } else {
-                    $data[$key] = $value;
+            if ($dataList) {
+                $dataList = AppHelper::shotArrayData($dataList);
+                foreach ($dataList as $key => $value) {
+                    if ($isData) {
+                        $data['@app.data'][$key] = $value;
+                    } else {
+                        $data[$key] = $value;
+                    }
                 }
             }
         }
+
 
         if (!empty($dataList['message']) && empty($dataList['@message'])) {
             $data['@message'] = $dataList['message'];
