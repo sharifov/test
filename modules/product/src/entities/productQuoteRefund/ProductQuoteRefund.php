@@ -10,6 +10,7 @@ use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
+use modules\product\src\entities\productQuoteRefund\serializer\ProductQuoteRefundSerializer;
 use sales\entities\cases\Cases;
 use sales\entities\serializer\Serializable;
 use sales\services\CurrencyHelper;
@@ -466,6 +467,6 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
 
     public function serialize(): array
     {
-        return [];
+        return (new ProductQuoteRefundSerializer($this))->getData();
     }
 }

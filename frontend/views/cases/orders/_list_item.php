@@ -618,7 +618,7 @@ $('body').off('click', '.btn-send-voluntary-refund-quote-email').on('click', '.b
     btn.addClass('disabled');
     
     let modal = $('#modal-md');
-    $('#modal-md-label').html('Send Flight Schedule Change Email');
+    $('#modal-md-label').html('Send Flight Voluntary Refund Email');
     modal.find('.modal-body').html('');
     modal.find('.modal-body').load(url, function( response, status, xhr ) {
         if(status === 'error') {

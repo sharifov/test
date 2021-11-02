@@ -8,8 +8,10 @@ use common\models\Employee;
 use frontend\helpers\JsonHelper;
 use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
+use modules\product\src\entities\productQuoteOptionRefund\serializer\ProductQuoteOptionRefundSerializer;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use sales\behaviors\StringToJsonBehavior;
+use sales\entities\serializer\Serializable;
 use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -44,7 +46,7 @@ use yii\db\ActiveRecord;
  * @property bool $pqor_refund_allow [tinyint(1)]
  * @property string $pqor_data_json [json]
  */
-class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
+class ProductQuoteOptionRefund extends \yii\db\ActiveRecord implements Serializable
 {
     use FieldsTrait;
 
@@ -256,5 +258,10 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
     public function new(): void
     {
         $this->pqor_status_id = ProductQuoteOptionRefundStatus::NEW;
+    }
+
+    public function serialize(): array
+    {
+        return (new ProductQuoteOptionRefundSerializer($this))->getData();
     }
 }
