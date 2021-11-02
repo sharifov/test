@@ -27,6 +27,7 @@ use sales\model\leadDataKey\entity\LeadDataKey;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\phoneList\entity\PhoneList;
 use sales\model\visitorLog\useCase\CreateVisitorLog;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
@@ -38,6 +39,7 @@ use sales\services\client\ClientManageService;
 use sales\services\lead\LeadHashGenerator;
 use sales\services\TransactionManager;
 use thamtech\uuid\helpers\UuidHelper;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 
@@ -276,12 +278,22 @@ class LeadManageService
         $clientPhoneNumber = $call->isIn() ? $call->c_from : $call->c_to;
 
         $sourceId = null;
-        if ($departmentPhoneProject = DepartmentPhoneProject::findOne(['dpp_phone_number' => $internalPhoneNumber])) {
-            $sourceId = $departmentPhoneProject->dpp_source_id;
+
+        if ($internalPhoneNumber) {
+            $source = (new Query())
+                ->select(['dpp_source_id'])
+                ->from(PhoneList::tableName())
+                ->innerJoin(DepartmentPhoneProject::tableName(), 'dpp_phone_list_id = pl_id')
+                ->andWhere(['pl_phone_number' => $internalPhoneNumber, 'pl_enabled' => true])
+                ->andWhere(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])
+                ->one();
+            if ($source && $source['dpp_source_id']) {
+                $sourceId = (int)$source['dpp_source_id'];
+            }
         }
 
-        if (!$sourceId && ($project = $call->cProject) && $sources = $project->sources) {
-            $sourceId = $sources[0]->id;
+        if (!$sourceId && $call->c_project_id) {
+            $sourceId = Sources::getByProjectId($call->c_project_id);
         }
 
         $lead = Lead::createManually(
