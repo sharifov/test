@@ -2573,6 +2573,5 @@ class TestController extends FController
 
 
         exit;
-
     }
 }
