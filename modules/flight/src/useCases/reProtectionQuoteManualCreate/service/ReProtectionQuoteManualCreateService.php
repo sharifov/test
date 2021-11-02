@@ -135,7 +135,8 @@ class ReProtectionQuoteManualCreateService
         ProductQuote $originProductQuote,
         ReProtectionQuoteCreateForm $form,
         ?int $userId,
-        array $segments
+        array $segments,
+        int $changeId
     ): FlightQuote {
         if ($reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originProductQuote->pq_id)) {
             foreach ($reprotectionQuotes as $reprotectionQuote) {
@@ -275,10 +276,9 @@ class ReProtectionQuoteManualCreateService
 
         $this->productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
 
-        $productQuoteChange = $originProductQuote->productQuoteLastChange;
-        if (!ProductQuoteChangeRelationRepository::exist($productQuoteChange->pqc_id, $productQuote->pq_id)) {
+        if (!ProductQuoteChangeRelationRepository::exist($changeId, $productQuote->pq_id)) {
             $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
-                $productQuoteChange->pqc_id,
+                $changeId,
                 $productQuote->pq_id
             );
             (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();

@@ -459,4 +459,37 @@ class BackOffice
         }
         return $data;
     }
+
+    public static function getExchangeData(array $requestData, string $endpoint = 'flight-request/get-exchange-data'): array
+    {
+        try {
+            $response = self::sendRequest2(
+                $endpoint,
+                $requestData,
+                'POST',
+                30,
+                Yii::$app->params['backOffice']['serverUrlV3']
+            );
+        } catch (\Throwable $exception) {
+            \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:getExchangeData');
+            throw new BoResponseException('BO "Get Exchange Data" server error', BoResponseException::BO_SERVER_ERROR);
+        }
+
+        $data = $response->data;
+        if (!$data) {
+            \Yii::error([
+                    'message' => 'BO voluntaryRefund data is empty',
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:getExchangeData:dataIsEmpty');
+            throw new BoResponseException('BO "Get Exchange Data" data is empty', BoResponseException::BO_DATA_IS_EMPTY);
+        }
+        if (!is_array($data)) {
+            \Yii::error([
+                    'message' => 'BO voluntaryRefund response Data type is invalid',
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:getExchangeData:dataIsInvalid');
+            throw new BoResponseException('BO "Get Exchange Data" response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
+        }
+        return $data;
+    }
 }

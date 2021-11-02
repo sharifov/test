@@ -27,11 +27,16 @@ use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePa
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\service\ReProtectionQuoteManualCreateService;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\AddChangeForm;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuoteCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOPrepareService;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOService;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryQuoteManualCreateService;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
@@ -79,6 +84,7 @@ use yii\widgets\ActiveForm;
  * @property ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService
  * @property ProductQuoteCloneService $productQuoteCloneService
  * @property VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  */
 class FlightQuoteController extends FController
 {
@@ -117,6 +123,7 @@ class FlightQuoteController extends FController
     private ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService;
     private ProductQuoteCloneService $productQuoteCloneService;
     private VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     /**
      * FlightQuoteController constructor.
@@ -149,6 +156,7 @@ class FlightQuoteController extends FController
         ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService,
         ProductQuoteCloneService $productQuoteCloneService,
         VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService,
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -163,6 +171,7 @@ class FlightQuoteController extends FController
         $this->reProtectionQuoteManualCreateService = $reProtectionQuoteManualCreateService;
         $this->productQuoteCloneService = $productQuoteCloneService;
         $this->voluntaryQuoteManualCreateService = $voluntaryQuoteManualCreateService;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
     /**
@@ -768,17 +777,78 @@ class FlightQuoteController extends FController
         }
     }
 
-    public function actionCreateVoluntaryQuote() /* TODO:: */
+    public function actionAddChange(): string
+    {
+        $addChangeForm = new AddChangeForm();
+        $errors = [];
+        try {
+            if (!$addChangeForm->load(Yii::$app->request->get())) {
+                throw new \RuntimeException('AddChangeForm not loaded');
+            }
+            if (!$addChangeForm->validate()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($addChangeForm));
+            }
+        } catch (\Throwable $throwable) {
+            return $throwable->getMessage();
+        }
+
+        if (Yii::$app->request->isPost) {
+            try {
+                if ($addChangeForm->load(Yii::$app->request->post()) && $addChangeForm->validate()) {
+                    if ($addChangeForm->type_id === ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE) {
+                        if (!$case = Cases::findOne(['cs_id' => $addChangeForm->case_id])) {
+                            throw new \RuntimeException('Case not found by ID(' . $addChangeForm->case_id . ')');
+                        }
+                        if (!$originProductQuote = ProductQuote::findOne(['pq_id' => $addChangeForm->origin_quote_id])) {
+                            throw new \RuntimeException('OriginProductQuote not found by ID(' . $addChangeForm->origin_quote_id . ')');
+                        }
+                        $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
+                        $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
+                        if (!$voluntaryExchangeBOService->isAllow()) {
+                            throw new \RuntimeException('Origin Quote not available for exchange. BackOffice refused');
+                        }
+
+                        $productQuoteChange = ProductQuoteChange::createVoluntaryExchange(
+                            $addChangeForm->origin_quote_id,
+                            $addChangeForm->case_id,
+                            false
+                        );
+                    } else {
+                        $productQuoteChange = ProductQuoteChange::createReProtection(
+                            $addChangeForm->origin_quote_id,
+                            $addChangeForm->case_id0,
+                            false
+                        );
+                    }
+                    $this->productQuoteChangeRepository->save($productQuoteChange);
+
+                    return "<script> $('#modal-sm').modal('hide'); pjaxReload({container: '#pjax-case-orders'});</script>";
+                }
+            } catch (\Throwable $throwable) {
+                $errors[] = $throwable->getMessage();
+            }
+        }
+
+        $params = [
+            'addChangeForm' => $addChangeForm,
+            'errors' => $errors,
+        ];
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('partial/_add_change', $params);
+        }
+        return $this->render('partial/_add_change', $params);
+    }
+
+    public function actionCreateVoluntaryQuote()
     {
         $flightId = Yii::$app->request->get('flight_id', 0);
         $caseId = Yii::$app->request->get('case_id', 0);
         $originQuoteId = Yii::$app->request->get('origin_quote_id', 0);
+        $changeId = Yii::$app->request->get('change_id', 0);
 
         $flight = $this->flightRepository->find($flightId);
 
         try {
-            throw new \RuntimeException('Service(CreateVoluntaryQuote) under construction');
-
             if (!$case = Cases::findOne(['cs_id' => $caseId])) {
                 throw new \RuntimeException('Case not found');
             }
@@ -786,20 +856,23 @@ class FlightQuoteController extends FController
                 throw new \RuntimeException('OriginProductQuote not found');
             }
             if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
-                throw new \RuntimeException('Sorry, Change quote could not be created because originalQuote does not pricing');
+                throw new \RuntimeException('Sorry, Voluntary quote could not be created because originalQuote does not pricing');
             }
-
-            /* TODO:: find or create PQC */
-
-
-            //$productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findByProductQuoteId($originProductQuote->pq_id);
+            if (!$productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) {
+                throw new \RuntimeException('ProductQuoteChange not found');
+            }
+            $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
+            $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
+            if (!$voluntaryExchangeBOService->isAllow()) {
+                throw new \RuntimeException('Origin Quote not available for exchange. BackOffice refused');
+            }
 
             $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
         } catch (\RuntimeException | \DomainException $exception) {
             Yii::warning(AppHelper::throwableLog($exception), 'FlightQuoteController:actionCreateReProtectionQuote:Exception');
             return $exception->getMessage();
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateReProtectionQuote:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateReProtectionQuote:Throwable');
             return $throwable->getMessage();
         }
 
@@ -808,17 +881,87 @@ class FlightQuoteController extends FController
             'flight' => $flight,
             'flightQuotePaxPrices' => $flightQuotePaxPrices,
             'originProductQuote' => $originProductQuote,
+            'changeId' => $changeId,
+            'originQuoteId' => $originQuoteId,
+            'caseId' => $caseId,
         ];
         if (Yii::$app->request->isAjax) {
-            return $this->renderAjax('partial/_add_re_protection_manual', $params);
+            return $this->renderAjax('partial/_add_voluntary_quote_manual', $params);
         }
-        return $this->render('partial/_add_re_protection_manual', $params);
+        return $this->render('partial/_add_voluntary_quote_manual', $params);
+    }
+
+    public function actionSaveVoluntaryQuote()
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $response = ['message' => '', 'status' => 0];
+            $flightId = Yii::$app->request->get('flight_id', 0);
+            $caseId = Yii::$app->request->post('case_id', 0);
+            $originQuoteId = Yii::$app->request->post('origin_quote_id', 0);
+            $changeId = Yii::$app->request->post('change_id', 0);
+
+            try {
+                $flight = $this->flightRepository->find($flightId);
+
+                if (!$case = Cases::findOne(['cs_id' => $caseId])) {
+                    throw new \RuntimeException('Case not found');
+                }
+                if (!$originProductQuote = ProductQuote::findOne(['pq_id' => $originQuoteId])) {
+                    throw new \RuntimeException('OriginProductQuote not found');
+                }
+                if (!$productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) {
+                    throw new \RuntimeException('ProductQuoteChange not found');
+                }
+
+                $form = new VoluntaryQuoteCreateForm(Auth::id(), $flightId);
+                if (!$form->load(Yii::$app->request->post())) {
+                    throw new \RuntimeException('ReProtectionQuoteCreateForm not loaded');
+                }
+                if (!$form->validate()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
+                }
+
+                $gds = GdsByQuoteGuard::guard($form->gds);
+                $itinerary = $segments = [];
+                $reservationService = new ReservationService($gds);
+                $reservationService->parseReservation($form->reservationDump, true, $itinerary);
+                if ($reservationService->parseStatus && $reservationService->parseResult) {
+                    $segments = $reservationService->parseResult;
+                }
+
+                $userId = Auth::id();
+                $flightQuote = Yii::createObject(TransactionManager::class)
+                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments, $changeId) {
+                        return $this->voluntaryQuoteManualCreateService->createProcessing(
+                            $flight,
+                            $originProductQuote,
+                            $form,
+                            $userId,
+                            $segments,
+                            $changeId
+                        );
+                    });
+
+                $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
+                $response['status'] = 1;
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionAjaxPrepareDump:Exception');
+                $response['message'] = VarDumper::dumpAsString($exception->getMessage());
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxPrepareDump:throwable');
+                $response['message'] = 'Internal Server Error';
+            }
+            return $response;
+        }
+        throw new BadRequestHttpException();
     }
 
     public function actionCreateReProtectionQuote()
     {
         $flightId = Yii::$app->request->get('flight_id', 0);
         $flight = $this->flightRepository->find($flightId);
+        $changeId = Yii::$app->request->get('change_id', 0);
 
         try {
             if (!$originProductQuote = $this->reProtectionQuoteManualCreateService::getOriginQuoteByFlight($flightId)) {
@@ -827,11 +970,10 @@ class FlightQuoteController extends FController
             if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
                 throw new \RuntimeException('Sorry, reProtection quote could not be created because originalQuote does not pricing');
             }
-            if (!$originProductQuote->productQuoteLastChange || !$originProductQuote->productQuoteLastChange->isTypeReProtection()) {
-                throw new \RuntimeException('ProductQuoteLastChange is not type ReProtection');
+            if (!$productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) {
+                throw new \RuntimeException('ProductQuoteChange not found');
             }
 
-            $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findByProductQuoteId($originProductQuote->pq_id);
             $case = $productQuoteChange->pqcCase;
 
             /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Act Flight Create Reprotection quote from dump*/
@@ -851,6 +993,7 @@ class FlightQuoteController extends FController
             'flight' => $flight,
             'flightQuotePaxPrices' => $flightQuotePaxPrices,
             'originProductQuote' => $originProductQuote,
+            'changeId' => $changeId,
         ];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('partial/_add_re_protection_manual', $params);
@@ -864,6 +1007,7 @@ class FlightQuoteController extends FController
             Yii::$app->response->format = Response::FORMAT_JSON;
             $response = ['message' => '', 'status' => 0];
             $flightId = Yii::$app->request->get('flight_id', 0);
+            $changeId = Yii::$app->request->get('change_id', 0);
 
             try {
                 $flight = $this->flightRepository->find($flightId);
@@ -874,8 +1018,15 @@ class FlightQuoteController extends FController
                 if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
                     throw new \RuntimeException('Sorry, reProtection quote could not be created because originalQuote does not pricing');
                 }
-                if (!$originProductQuote->productQuoteLastChange || !$originProductQuote->productQuoteLastChange->isTypeReProtection()) {
+                if (!($productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) || !$productQuoteChange->isTypeReProtection()) {
                     throw new \RuntimeException('ProductQuoteLastChange is not type ReProtection');
+                }
+
+                $case = $productQuoteChange->pqcCase;
+                /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Act Flight Create Reprotection quote from dump*/
+                $caseAbacDto = new CasesAbacDto($case);
+                if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) {
+                    throw new ForbiddenHttpException('You do not have access to perform this action.');
                 }
 
                 $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
@@ -895,9 +1046,17 @@ class FlightQuoteController extends FController
                 }
 
                 $userId = Auth::id();
-                $flightQuote = Yii::createObject(TransactionManager::class)->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments) {
-                    return $this->reProtectionQuoteManualCreateService->createReProtectionManual($flight, $originProductQuote, $form, $userId, $segments);
-                });
+                $flightQuote = Yii::createObject(TransactionManager::class)
+                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments, $changeId) {
+                        return $this->reProtectionQuoteManualCreateService->createReProtectionManual(
+                            $flight,
+                            $originProductQuote,
+                            $form,
+                            $userId,
+                            $segments,
+                            $changeId
+                        );
+                    });
 
                 $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;

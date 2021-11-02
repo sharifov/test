@@ -96,7 +96,7 @@ class FlightQuoteExchangeController extends BaseController
      *  }
      *
      * @apiParam {string{7..10}}                bookingId                    Booking ID
-     * @apiParam {string{150}}                  apiKey                       ApiKey
+     * @apiParam {string{150}}                  apiKey                       ApiKey (Project API Key)
      * @apiParam {object}                       exchange                     Exchange Data Info
      * @apiParam {object}                       exchange.prices                       Prices
      * @apiParam {number}                       exchange.prices.totalPrice            Total Price (total for exchange pay)
@@ -200,7 +200,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParamExample {json} Request-Example:
          {
             "bookingId": "XXXYYYZ",
-            "apiKey": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
+            "apiKey": "test-api-key",
             "exchange": {
                 "trips": [
                     {
@@ -644,7 +644,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{20}}           [billing.contact_phone]      Contact phone
      * @apiParam {string{160}}          [billing.contact_email]      Contact email
      * @apiParam {string{60}}           [billing.contact_name]       Contact name
-     * @apiParam {object}               payment_request                      Payment request
+     * @apiParam {object}               [payment_request]                    Payment request
      * @apiParam {number}               payment_request.amount               Amount
      * @apiParam {string{3}}            payment_request.currency             Currency code
      * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")

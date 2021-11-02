@@ -1,24 +1,18 @@
 <?php
 
 use common\models\Airline;
-use common\models\Employee;
-use common\models\Lead;
 use kartik\select2\Select2;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuotePaxPrice;
-use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
-use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\services\parsingDump\lib\ParsingDump;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
-use yii\jui\AutoComplete;
 
 /**
  * @var View $this
@@ -27,6 +21,8 @@ use yii\jui\AutoComplete;
  * @var FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @var ProductQuote $originProductQuote
  * @var int $changeId
+ * @var int $originQuoteId
+ * @var int $caseId
  */
 
 $paxCntTypes = [
@@ -34,11 +30,8 @@ $paxCntTypes = [
     FlightPax::PAX_CHILD => $flight->fl_children,
     FlightPax::PAX_INFANT => $flight->fl_infants
 ];
-$pjaxId = 'pjax-container-prices';
-
+$pjaxId = 'pjax-container-vc';
 ?>
-
-    <br />
     <div class="row">
         <div class="col-md-12">
             <table class="table table-striped table-neutral">
@@ -83,7 +76,6 @@ $pjaxId = 'pjax-container-prices';
             </table>
         </div>
     </div>
-    <hr />
     <div class="row">
         <div class="col-md-12">
             <div id="box_segments"></div>
@@ -105,8 +97,11 @@ $pjaxId = 'pjax-container-prices';
                     <?php echo $form->errorSummary($createQuoteForm)?>
                 </div>
 
-                <?php // echo Html::hiddenInput('flightId', $flight->fl_id, ['id' => 'flightId'])?>
-                <?= Html::hiddenInput('keyTripList', null, ['id' => 'keyTripList']) ?>
+                <?php echo Html::hiddenInput('change_id', $changeId, ['id' => 'changeId'])?>
+                <?php echo Html::hiddenInput('origin_quote_id', $originQuoteId, ['id' => 'originQuoteId'])?>
+                <?php echo Html::hiddenInput('case_id', $changeId, ['id' => 'caseId'])?>
+
+                <?php echo Html::hiddenInput('keyTripList', null, ['id' => 'keyTripList']) ?>
 
                 <?php echo $form->field($createQuoteForm, 'flightId')->hiddenInput()->label(false) ?>
 
@@ -186,18 +181,10 @@ $pjaxId = 'pjax-container-prices';
     </div>
 
     <?php
-    $urlPrepareDump = \yii\helpers\Url::to([
-        '/flight/flight-quote/ajax-prepare-dump',
-        'flight_id' => $flight->getId(),
-        'change_id' => $changeId,
-    ]);
-    $urlSave = \yii\helpers\Url::to([
-        '/flight/flight-quote/ajax-save-re-protection',
-        'flight_id' => $flight->getId(),
-        'change_id' => $changeId,
-    ]);
+    $urlPrepareDump = \yii\helpers\Url::to(['/flight/flight-quote/ajax-prepare-dump', 'flight_id' => $flight->getId()]);
+    $urlSave = \yii\helpers\Url::to(['/flight/flight-quote/save-voluntary-quote', 'flight_id' => $flight->getId()]);
     $js = <<<JS
-    var addRPQuoteForm = $('#add-quote-form');
+    var addVoluntaryQuoteForm = $('#add-quote-form');
 
     $(document).on('beforeSubmit', '#add-quote-form', function(event) {
         let baggageData = $('.segment_baggage_forms').serialize();
@@ -205,7 +192,7 @@ $pjaxId = 'pjax-container-prices';
         $('#segment_trip_data').val($('.segment_trip_forms').serialize());
     });
     
-    addRPQuoteForm.on('click', '#save_dump_btn', function () {
+    addVoluntaryQuoteForm.on('click', '#save_dump_btn', function () {
 
         $('#error_summary_box').html('');
         let baggageData = $('.segment_baggage_forms').serialize();
@@ -217,7 +204,7 @@ $pjaxId = 'pjax-container-prices';
         $.ajax({
             url: '{$urlSave}',
             type: 'POST',
-            data: addRPQuoteForm.serialize(),
+            data: addVoluntaryQuoteForm.serialize(),
             dataType: 'json'
         })
         .done(function(dataResponse) {
@@ -262,7 +249,7 @@ $pjaxId = 'pjax-container-prices';
         });
     });
 
-    addRPQuoteForm.on('click', '#prepare_dump_btn', function () {
+    addVoluntaryQuoteForm.on('click', '#prepare_dump_btn', function () {
 
         $('#error_summary_box').html('');
         let dump = $('#reservationdump').val();
@@ -310,7 +297,7 @@ $pjaxId = 'pjax-container-prices';
             });
         }
     });
-    
+
     function loadingBtn(btnObj, loading)
     {
         if (loading === true) {

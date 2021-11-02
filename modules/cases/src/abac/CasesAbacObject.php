@@ -25,6 +25,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_FLIGHT_REPROTECTION_CONFIRM  = self::NS . 'act/flight-reprotection-confirm';
     public const ACT_FLIGHT_REPROTECTION_REFUND  = self::NS . 'act/flight-reprotection-refund';
     public const ACT_FLIGHT_REPROTECTION_QUOTE  = self::NS . 'act/flight-reprotection-quote';
+    public const ACT_FLIGHT_VOLUNTARY_QUOTE  = self::NS . 'act/flight-voluntary-quote';
     public const ACT_PRODUCT_QUOTE_REMOVE = self::NS . 'act/product_quote/remove';
     public const ACT_PRODUCT_QUOTE_VIEW_DETAILS = self::NS . 'act/product_quote/view_details';
     public const ACT_REPROTECTION_QUOTE_SEND_EMAIL = self::NS . 'act/reprotection_quote/send_email';
@@ -48,6 +49,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_FLIGHT_REPROTECTION_CONFIRM               => self::ACT_FLIGHT_REPROTECTION_CONFIRM,
         self::ACT_FLIGHT_REPROTECTION_REFUND                => self::ACT_FLIGHT_REPROTECTION_REFUND,
         self::ACT_FLIGHT_REPROTECTION_QUOTE                 => self::ACT_FLIGHT_REPROTECTION_QUOTE,
+        self::ACT_FLIGHT_VOLUNTARY_QUOTE                    => self::ACT_FLIGHT_VOLUNTARY_QUOTE,
         self::ACT_VIEW_QUOTES_DIFF                          => self::ACT_VIEW_QUOTES_DIFF,
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE   => self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE,
 
@@ -73,6 +75,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_FLIGHT_REPROTECTION_CONFIRM   => [self::ACTION_ACCESS],
         self::ACT_FLIGHT_REPROTECTION_REFUND    => [self::ACTION_ACCESS],
         self::ACT_FLIGHT_REPROTECTION_QUOTE     => [self::ACTION_CREATE],
+        self::ACT_FLIGHT_VOLUNTARY_QUOTE        => [self::ACTION_CREATE],
         self::ACT_VIEW_QUOTES_DIFF              => [self::ACTION_ACCESS],
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
 
@@ -185,6 +188,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_CASE_IS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+
+        self::ACT_FLIGHT_VOLUNTARY_QUOTE => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
     ];
 
     /**
