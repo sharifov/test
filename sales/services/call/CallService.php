@@ -10,6 +10,7 @@ use common\models\PhoneBlacklist;
 use common\models\UserCallStatus;
 use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
+use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\services\ServiceFinder;
@@ -174,5 +175,45 @@ class CallService
         } else {
             \Yii::error(VarDumper::dumpAsString($ucs->errors), 'CallService:busyCall:save');
         }
+    }
+
+    public function guardFromInternalCall(array $data): void
+    {
+        $from = $data['From'] ?? null;
+
+        if (!$from) {
+            return;
+        }
+
+        if (!PhoneList::find()->andWhere(['pl_phone_number' => $from])->exists()) {
+            return;
+        }
+
+        if ($call = Call::findOne(['c_call_sid' => $data['CallSid'] ?? ''])) {
+            $call->declined();
+        } else {
+            $call = Call::createDeclined(
+                $data['CallSid'] ?? null,
+                Call::CALL_TYPE_IN,
+                $from,
+                $data['To'] ?? null,
+                date('Y-m-d H:i:s'),
+                $data['c_com_call_id'] ?? null,
+                Call::getClientTime($data),
+                Call::getDisplayRegion($data['FromCountry'] ?? ''),
+                $data['FromState'] ?? null,
+                $data['FromCity'] ?? null,
+                null,
+                Call::getStirStatusByVerstatKey($data['StirVerstat'] ?? '')
+            );
+            $call->setDataCreatedParams($data);
+        }
+
+        if (!$call->save()) {
+            \Yii::error(VarDumper::dumpAsString($call->errors), 'CallService:guardFromInternalCall:Call:save');
+            throw new \Exception('CallService:guardFromInternalCall: Can not save call in db', 1);
+        }
+
+        throw new CallFromInternalNumberException('Declined Call Id: ' . $call->c_id . '. Reason: Calling from internal number.');
     }
 }
