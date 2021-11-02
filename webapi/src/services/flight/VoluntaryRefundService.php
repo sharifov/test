@@ -98,7 +98,7 @@ class VoluntaryRefundService implements BoWebhookService
         $whData['refund_status'] = ProductQuoteRefundStatus::getClientKeyStatusById($productQuoteRefund->pqr_status_id);
         \Yii::info([
             'type' => HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE,
-            ['data' => $whData]
+            ['data' => $whData, 'caseUserId' => $case->cs_user_id ?? null]
         ], 'info\Webhook::OTA::VoluntaryRefund');
         \Yii::$app->hybrid->wh($project->id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
 
