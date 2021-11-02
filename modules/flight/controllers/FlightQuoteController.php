@@ -830,7 +830,7 @@ class FlightQuoteController extends FController
                     } else {
                         $productQuoteChange = ProductQuoteChange::createReProtection(
                             $addChangeForm->origin_quote_id,
-                            $addChangeForm->case_id0,
+                            $addChangeForm->case_id,
                             false
                         );
                     }
