@@ -18,6 +18,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionTy
  * @var Order $order
  * @var ProductQuote $quote
  * @var int $nr
+ * @var int $projectId
  * @var int $caseId
  * @var \yii\web\View $this
  * @var bool $isReprotection
@@ -63,25 +64,9 @@ if ($quote->productQuoteLastChange) {
 
     <td><?=Html::encode($quote->getBookingId())?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
-    <?php if ($quote->productQuoteLastChange) : ?>
-        <td <?= $changeTitle ? 'data-toggle="tooltip" data-original-title="' . $changeTitle . '"' : ''?>>
-            <?= $quote->productQuoteLastChange->pqc_status_id ? ProductQuoteChangeStatus::asFormat($quote->productQuoteLastChange->pqc_status_id) : '-' ?>
-            <?= $quote->productQuoteLastChange->pqc_decision_type_id ? ' - ' . ProductQuoteChangeDecisionType::asFormat($quote->productQuoteLastChange->pqc_decision_type_id) : '' ?>
-        </td>
-    <?php else : ?>
-        <td>-</td>
-    <?php endif; ?>
-
-    <?php if ($quote->productQuoteLastRefund) : ?>
-        <td <?= $quote->productQuoteLastRefund->pqr_id ? 'data-toggle="tooltip" data-original-title="PQ Refund ID: ' . $quote->productQuoteLastRefund->pqr_id . '"' : ''?>>
-            <?= $quote->productQuoteLastRefund->pqr_status_id ? ProductQuoteRefundStatus::asFormat($quote->productQuoteLastRefund->pqr_status_id) : '-' ?>
-        </td>
-    <?php else : ?>
-        <td>-</td>
-    <?php endif; ?>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
     <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
-    <td>
+    <td colspan="3">
       <div class="btn-group">
 
         <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -110,6 +95,23 @@ if ($quote->productQuoteLastChange) {
                         'origin_quote_id' => $quote->pq_id,
                     ]),
                     'title' => 'Add Change'
+                ]) ?>
+            <?php endif ?>
+
+            <?php /* TODO:: add abac */ ?>
+            <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
+                <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Refund Quote', null, [
+                    'data-flight-id' => $flight->getId(),
+                    'class' => 'dropdown-item btn_create_voluntary_refund',
+                    'data-url' => Url::to([
+                        '/flight/flight-quote/create-voluntary-quote-refund',
+                        'flight_quote_id' => $quote->flightQuote->fq_id,
+                        'project_id' => $projectId,
+                        'origin_product_quote_id' => $quote->pq_id,
+                        'order_id' => $order->or_id,
+                        'case_id' => $caseId
+                    ]),
+                    'title' => 'Add Voluntary Refund Quote'
                 ]) ?>
             <?php endif ?>
 

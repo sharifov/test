@@ -207,11 +207,9 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Product</th>
                     <th>Booking ID</th>
                     <th>Status</th>
-                    <th>Change Status / Decision</th>
-                    <th>Refund Status</th>
                     <th>Created</th>
                     <th>Client Price</th>
-                    <th></th>
+                    <th colspan="3"></th>
                 </tr>
                 <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
 //                    $ordTotalPrice += $productQuote->pq_price;
@@ -226,7 +224,8 @@ $orderAbacDto = new OrderAbacDto($order);
                               'order' => $order,
                               'isReprotection' => false,
                               'caseId' => $caseId,
-                              'caseAbacDto' => $caseAbacDto
+                              'caseAbacDto' => $caseAbacDto,
+                              'projectId' => $order->or_project_id
                           ]) ?>
                       </tr>
                 <?php endforeach; ?>

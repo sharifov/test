@@ -2,8 +2,9 @@
 
 namespace modules\flight\controllers;
 
+use common\components\BackOffice;
 use common\models\Notifications;
-use common\models\Quote;
+use common\models\Project;
 use frontend\helpers\JsonHelper;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
@@ -11,6 +12,8 @@ use modules\flight\components\api\ApiFlightQuoteSearchService;
 use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
+use modules\flight\models\FlightQuoteFlight;
+use modules\flight\models\query\FlightQuoteTicketQuery;
 use modules\flight\src\dto\flightQuoteSearchDTO\FlightQuoteSearchDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
@@ -20,10 +23,7 @@ use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
 use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
-use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
-use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
-use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\service\ReProtectionQuoteManualCreateService;
@@ -32,17 +32,19 @@ use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuot
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOPrepareService;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOService;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryQuoteManualCreateService;
-use modules\order\src\events\OrderFileGeneratedEvent;
-use modules\product\src\entities\product\Product;
+use modules\flight\src\useCases\voluntaryRefund\manualCreate\TicketForm;
+use modules\flight\src\useCases\voluntaryRefund\manualCreate\VoluntaryRefundCreateForm;
+use modules\flight\src\useCases\voluntaryRefund\VoluntaryRefundService;
+use modules\order\src\entities\order\OrderRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
-use modules\product\src\entities\productType\ProductType;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
+use sales\exception\BoResponseException;
 use sales\forms\CompositeFormHelper;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\app\AppHelper;
@@ -54,6 +56,7 @@ use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\ReservationService;
 use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
 use sales\services\TransactionManager;
+use webapi\src\request\BoRequestDataHelper;
 use Yii;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\search\FlightQuoteSearch;
@@ -84,6 +87,8 @@ use yii\widgets\ActiveForm;
  * @property ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService
  * @property ProductQuoteCloneService $productQuoteCloneService
  * @property VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService
+ * @property OrderRepository $orderRepository
+ * @property VoluntaryRefundService $voluntaryRefundService
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  */
 class FlightQuoteController extends FController
@@ -123,6 +128,8 @@ class FlightQuoteController extends FController
     private ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService;
     private ProductQuoteCloneService $productQuoteCloneService;
     private VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService;
+    private OrderRepository $orderRepository;
+    private VoluntaryRefundService $voluntaryRefundService;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     /**
@@ -140,6 +147,8 @@ class FlightQuoteController extends FController
      * @param ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService
      * @param ProductQuoteCloneService $productQuoteCloneService
      * @param VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService
+     * @param OrderRepository $orderRepository
+     * @param VoluntaryRefundService $voluntaryRefundService
      * @param array $config
      */
     public function __construct(
@@ -156,6 +165,8 @@ class FlightQuoteController extends FController
         ReProtectionQuoteManualCreateService $reProtectionQuoteManualCreateService,
         ProductQuoteCloneService $productQuoteCloneService,
         VoluntaryQuoteManualCreateService $voluntaryQuoteManualCreateService,
+        OrderRepository $orderRepository,
+        VoluntaryRefundService $voluntaryRefundService,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
         $config = []
     ) {
@@ -171,6 +182,8 @@ class FlightQuoteController extends FController
         $this->reProtectionQuoteManualCreateService = $reProtectionQuoteManualCreateService;
         $this->productQuoteCloneService = $productQuoteCloneService;
         $this->voluntaryQuoteManualCreateService = $voluntaryQuoteManualCreateService;
+        $this->orderRepository = $orderRepository;
+        $this->voluntaryRefundService = $voluntaryRefundService;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
@@ -188,7 +201,8 @@ class FlightQuoteController extends FController
             ],
             'access' => [
                 'allowActions' => [
-                    'ajax-quote-details'
+                    'ajax-quote-details',
+                    'create-voluntary-quote-refund'
                 ]
             ]
         ];
@@ -1199,5 +1213,100 @@ class FlightQuoteController extends FController
             return ActiveForm::validateMultiple($models);
         }
         throw new BadRequestHttpException('Not found POST request');
+    }
+
+    public function actionCreateVoluntaryQuoteRefund()
+    {
+        if (Yii::$app->request->isPjax) {
+            $form = new VoluntaryRefundCreateForm();
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+                try {
+                    $productQuote = $this->productQuoteRepository->find($form->originProductQuoteId);
+                    $order = $this->orderRepository->find($form->orderId);
+
+                    $this->voluntaryRefundService->createManual($order, $form->caseId, $productQuote, $form);
+
+                    return "<script>$('#modal-lg').modal('hide');createNotify('Success', 'Refund created', 'success');pjaxReload({container: '#pjax-case-orders'})</script>";
+                } catch (NotFoundException | \RuntimeException | \DomainException $e) {
+                    $form->disableReadOnlyAllFields();
+                    $form->addError('general', $e->getMessage());
+                } catch (\Throwable $e) {
+                    $form->addError('general', 'Refund creation failed');
+                    Yii::error(AppHelper::throwableLog($e, true), 'FlightQuoteController::actionCreateVoluntaryQuoteRefund::refundCreation::Throwable');
+                }
+            }
+            return $this->renderAjax('partial/_voluntary_refund_create', [
+                'message' => '',
+                'errors' => [],
+                'form' => $form
+            ]);
+        }
+
+        if (Yii::$app->request->isAjax) {
+            $flightQuoteId = Yii::$app->request->get('flight_quote_id');
+            $projectId = Yii::$app->request->get('project_id');
+            $originProductQuoteId = Yii::$app->request->get('origin_product_quote_id');
+            $orderId = Yii::$app->request->get('order_id');
+            $caseId = Yii::$app->request->get('case_id');
+
+            $message = '';
+            $errors = [];
+            $form = new VoluntaryRefundCreateForm();
+            try {
+                if (!$project = Project::findOne(['id' => $projectId])) {
+                    throw new NotFoundException('Project not found');
+                }
+
+                if (!$flightQuoteFlight = FlightQuoteFlight::findOne(['fqf_fq_id' => $flightQuoteId])) {
+                    throw new NotFoundException('BookingId not found');
+                }
+
+                $tickets = FlightQuoteTicketQuery::findByFlightQuoteId((int)$flightQuoteId);
+                if (!$tickets) {
+                    throw new \DomainException('Tickets not found');
+                }
+
+                $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id, $tickets);
+                $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');
+
+                if (!empty($result['status']) && mb_strtolower($result['status']) === 'failed') {
+                    throw new BoResponseException($result['error'] ? ErrorsToStringHelper::extractFromGetErrors($result['errors']) : $result['message']);
+                }
+
+                $form->load($result);
+                $form->bookingId = $flightQuoteFlight->fqf_booking_id;
+                $form->originProductQuoteId = $originProductQuoteId;
+                $form->orderId = $orderId;
+                $form->caseId = $caseId;
+
+                if (!$form->airlineAllow) {
+                    throw new \RuntimeException('Refund not allowed by Airline');
+                }
+
+                $refundForm = $form->getRefundForm();
+
+                if ($refundForm && !$refundForm->getTicketForms()) {
+                    foreach ($tickets as $ticket) {
+                        $ticketForm = new TicketForm();
+                        $ticketForm->number = $ticket->fqt_ticket_number;
+                        $refundForm->setTicketForm($ticketForm);
+                    }
+                    $form->disableReadOnlyAllFields();
+                    Yii::$app->getSession()->setFlash('warning', 'Not all data received from BO');
+                }
+            } catch (\DomainException | NotFoundException | \RuntimeException $e) {
+                $message = $e->getMessage();
+            } catch (\Throwable $e) {
+                $message = 'Internal Server Error';
+                Yii::error(AppHelper::throwableLog($e, true), 'FlightQuoteController::actionCreateVoluntaryQuoteRefund::Throwable');
+            }
+
+            return $this->renderAjax('partial/_voluntary_refund_create', [
+                'message' => $message,
+                'errors' => $errors,
+                'form' => $form
+            ]);
+        }
+        throw new BadRequestHttpException('Method not allowed');
     }
 }
