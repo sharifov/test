@@ -305,6 +305,9 @@ class VoluntaryRefundService
                 $productQuoteOptionRefund->detachBehavior('user');
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
             }
+        } catch (\RuntimeException | \DomainException $e) {
+            $this->errorHandler($case, $productQuoteRefund ?? null, 'Product Quote Refund structure creation failed: ' . $e->getMessage(), $e);
+            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
         } catch (\Throwable $e) {
             $this->errorHandler($case, $productQuoteRefund ?? null, 'Product Quote Refund structure creation failed', $e);
             throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
