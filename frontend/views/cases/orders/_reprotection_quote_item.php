@@ -408,6 +408,14 @@ if ($quote->productQuoteLastChange) {
                                         'title' => 'View Details'
                                     ]) ?>
                                   <?php endif; ?>
+
+                                  <?= Html::a('<i class="fa fa-envelope"></i> send VR Email', null, [
+                                      'class' => 'dropdown-item btn-send-voluntary-refund-quote-email',
+                                      'data-url' => Url::to(['/product/product-quote-refund/preview-refund-offer-email', 'product-quote-refund-id' => $refundItem->pqr_id, 'case-id' => $caseId, 'order-id' => $order->or_id, 'origin-quote-id' => $quote->pq_id]),
+                                      'data-toggle' => 'tooltip',
+                                      'data-placement' => 'right',
+                                      'title' => 'Send Voluntary Refund Email'
+                                  ]); ?>
                                 </div>
                               </div>
                             </td>

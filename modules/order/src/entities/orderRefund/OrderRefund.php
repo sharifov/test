@@ -7,7 +7,9 @@ use common\models\Employee;
 use common\models\query\CurrencyQuery;
 use common\models\query\EmployeeQuery;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderRefund\serializer\OrderRefundSerializer;
 use sales\entities\cases\Cases;
+use sales\entities\serializer\Serializable;
 use sales\services\CurrencyHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -44,7 +46,7 @@ use yii\db\ActiveRecord;
  * @property Order $order
  * @property Employee $updatedUser
  */
-class OrderRefund extends \yii\db\ActiveRecord
+class OrderRefund extends \yii\db\ActiveRecord implements Serializable
 {
     public static function createByScheduleChange(
         $uuid,
@@ -296,5 +298,15 @@ class OrderRefund extends \yii\db\ActiveRecord
     public function clientDone(): void
     {
         $this->orr_client_status_id = OrderRefundClientStatus::DONE;
+    }
+
+    public function new(): void
+    {
+        $this->orr_status_id = OrderRefundStatus::NEW;
+    }
+
+    public function serialize(): array
+    {
+        return (new OrderRefundSerializer($this))->getData();
     }
 }

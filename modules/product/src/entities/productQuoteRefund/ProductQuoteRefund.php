@@ -10,7 +10,9 @@ use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
+use modules\product\src\entities\productQuoteRefund\serializer\ProductQuoteRefundSerializer;
 use sales\entities\cases\Cases;
+use sales\entities\serializer\Serializable;
 use sales\services\CurrencyHelper;
 use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
@@ -51,7 +53,7 @@ use yii\db\ActiveRecord;
  * @property string $pqr_gid [varchar(32)]
  * @property string $pqr_cid [varchar(32)]
  */
-class ProductQuoteRefund extends \yii\db\ActiveRecord
+class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
 {
     use FieldsTrait;
 
@@ -152,6 +154,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $refund->pqr_cid = $cid;
         $refund->detachBehavior('user');
         return $refund;
+    }
+
+    public function new(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::NEW;
     }
 
     public function error(): void
@@ -456,5 +463,10 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public static function generateGid(): string
     {
         return md5(uniqid('pqr', true));
+    }
+
+    public function serialize(): array
+    {
+        return (new ProductQuoteRefundSerializer($this))->getData();
     }
 }

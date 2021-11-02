@@ -65,6 +65,7 @@ class VoluntaryRefundService
             $form->getRefundForm()->totalRefundable,
             $caseId
         );
+        $orderRefund->new();
         $this->orderRefundRepository->save($orderRefund);
 
         $productQuoteRefund = ProductQuoteRefund::createByVoluntaryRefund(
@@ -82,7 +83,7 @@ class VoluntaryRefundService
             null,
             $form->toArray()
         );
-        $productQuoteRefund->pending();
+        $productQuoteRefund->new();
         $this->productQuoteRefundRepository->save($productQuoteRefund);
 
         foreach ($form->getRefundForm()->ticketForms as $ticketForm) {
@@ -103,8 +104,7 @@ class VoluntaryRefundService
                 null,
                 $ticketForm->toArray()
             );
-            $productQuoteObjectRefund->pending();
-            $productQuoteObjectRefund->detachBehavior('user');
+            $productQuoteObjectRefund->new();
             $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);
         }
 
@@ -126,8 +126,7 @@ class VoluntaryRefundService
                 $auxiliaryOptionsForm->refundAllow,
                 $auxiliaryOptionsForm->toArray()
             );
-            $productQuoteOptionRefund->pending();
-            $productQuoteOptionRefund->detachBehavior('user');
+            $productQuoteOptionRefund->new();
             $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
         }
     }
