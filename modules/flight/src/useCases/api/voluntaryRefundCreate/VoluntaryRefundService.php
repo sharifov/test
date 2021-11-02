@@ -366,6 +366,7 @@ class VoluntaryRefundService
         if ($productQuoteRefundsNotFinished = ProductQuoteRefundQuery::findAllNotFinishedByProductQuoteId($productQuote->pq_id)) {
             foreach ($productQuoteRefundsNotFinished as $productQuoteRefund) {
                 $productQuoteRefund->cancel();
+                $productQuoteRefund->detachBehavior('user');
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
             }
         }
