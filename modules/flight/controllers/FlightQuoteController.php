@@ -1270,7 +1270,7 @@ class FlightQuoteController extends FController
                 $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');
 
                 if (!empty($result['status']) && mb_strtolower($result['status']) === 'failed') {
-                    throw new BoResponseException($result['error'] ? ErrorsToStringHelper::extractFromGetErrors($result['errors']) : $result['message']);
+                    throw new BoResponseException($result['errors'] ? ErrorsToStringHelper::extractFromGetErrors($result['errors']) : $result['message']);
                 }
 
                 $form->load($result);
