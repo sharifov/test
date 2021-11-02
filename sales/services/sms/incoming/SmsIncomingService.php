@@ -205,7 +205,9 @@ class SmsIncomingService
         }
         $sms = Sms::createIncomingByCaseType($form, $clientId ?: null, $ownerId, $caseId);
         $this->smsRepository->save($sms);
-        $case->addEventLog(null, 'SMS received from customer');
+        if ($case) {
+            $case->addEventLog(null, 'SMS received from customer');
+        }
 
         if ($caseId === null) {
 //            Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new exchange case creation allowed on SMS.', 'info\SmsIncomingService');

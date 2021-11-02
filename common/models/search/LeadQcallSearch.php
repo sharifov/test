@@ -192,12 +192,12 @@ class LeadQcallSearch extends LeadQcall
             'is_reserved' => new Expression('if (lqc_reservation_time > \'' . $nowDt . '\' AND (lqc_reservation_user_id != ' . $user->id . ' OR lqc_reservation_user_id IS NULL) , 1, 0)')
         ]);
 
-        $query->addSelect([
-            'is_not_empty_passengers' => new Expression('if ((' . Lead::tableName() . '.adults > 0 OR ' . Lead::tableName() . '.children > 0 OR ' . Lead::tableName() . '.infants > 0), 1, 2)')
-        ]);
+//        $query->addSelect([
+//            'is_not_empty_passengers' => new Expression('if ((' . Lead::tableName() . '.adults > 0 OR ' . Lead::tableName() . '.children > 0 OR ' . Lead::tableName() . '.infants > 0), 1, 2)')
+//        ]);
 
         $defaultOrder = [
-            'is_not_empty_passengers' => SORT_ASC,
+//            'is_not_empty_passengers' => SORT_ASC,
             'is_ready' => SORT_DESC,
             'is_reserved' => SORT_ASC,
         ];
@@ -377,7 +377,7 @@ class LeadQcallSearch extends LeadQcall
                     'lqc_dt_to',
                     'lqc_created_dt',
                     'lqc_lead_id',
-                    'is_not_empty_passengers',
+//                    'is_not_empty_passengers',
                 ]
             ],
             /*'pagination' => [
@@ -584,12 +584,12 @@ class LeadQcallSearch extends LeadQcall
             'is_reserved' => new Expression('if (lqc_reservation_time > \'' . $date . '\' AND lqc_reservation_user_id IS NULL, 1, 0)')
         ]);
 
-        $query->addSelect([
-            'is_not_empty_passengers' => new Expression('if ((' . Lead::tableName() . '.adults > 0 OR ' . Lead::tableName() . '.children > 0 OR ' . Lead::tableName() . '.infants > 0), 1, 2)')
-        ]);
+//        $query->addSelect([
+//            'is_not_empty_passengers' => new Expression('if ((' . Lead::tableName() . '.adults > 0 OR ' . Lead::tableName() . '.children > 0 OR ' . Lead::tableName() . '.infants > 0), 1, 2)')
+//        ]);
 
         $defaultOrder = [
-            'is_not_empty_passengers' => SORT_ASC,
+//            'is_not_empty_passengers' => SORT_ASC,
             'is_ready' => SORT_DESC,
             'is_reserved' => SORT_ASC,
         ];

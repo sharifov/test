@@ -31,7 +31,7 @@ class LeadRedialUnAssigner
         foreach ($accesses as $access) {
             $this->unAssign($access);
             if (!$access->isEqual($leadId)) {
-                \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
+                \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
             }
         }
     }
@@ -41,7 +41,7 @@ class LeadRedialUnAssigner
         $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
             $this->unAssign($access);
-            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
+            \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
         }
     }
 
@@ -50,7 +50,7 @@ class LeadRedialUnAssigner
         $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
             $this->unAssign($access);
-            \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
+            \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id, 0));
         }
     }
 
@@ -85,7 +85,7 @@ class LeadRedialUnAssigner
             }
         }
 
-        \Yii::$app->queue_lead_redial->push(new LeadRedialAssignToUsersJob($leadId, 0));
+        \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($leadId, 0));
     }
 
     private function missedCallNotification(int $userId): void
