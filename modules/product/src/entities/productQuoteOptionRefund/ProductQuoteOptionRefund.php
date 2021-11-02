@@ -252,4 +252,9 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
     {
         $this->pqor_status_id = ProductQuoteOptionRefundStatus::PENDING;
     }
+
+    public function new(): void
+    {
+        $this->pqor_status_id = ProductQuoteOptionRefundStatus::NEW;
+    }
 }

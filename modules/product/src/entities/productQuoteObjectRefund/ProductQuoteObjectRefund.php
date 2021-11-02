@@ -233,4 +233,9 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
     {
         $this->pqor_status_id = ProductQuoteObjectRefundStatus::PENDING;
     }
+
+    public function new(): void
+    {
+        $this->pqor_status_id = ProductQuoteObjectRefundStatus::NEW;
+    }
 }

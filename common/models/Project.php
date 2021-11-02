@@ -277,6 +277,11 @@ class Project extends \yii\db\ActiveRecord
         return ArrayHelper::getValue($this->p_params_json, 'object.case.reprotection_quote', []);
     }
 
+    public function getVoluntaryRefundEmailConfig(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.voluntary_refund', []);
+    }
+
     public static function getListByUserWithProjectKeys(int $user_id = 0): array
     {
         return self::find()->select([

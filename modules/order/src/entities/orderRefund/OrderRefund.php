@@ -297,4 +297,9 @@ class OrderRefund extends \yii\db\ActiveRecord
     {
         $this->orr_client_status_id = OrderRefundClientStatus::DONE;
     }
+
+    public function new(): void
+    {
+        $this->orr_status_id = OrderRefundStatus::NEW;
+    }
 }

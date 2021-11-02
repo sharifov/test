@@ -606,6 +606,30 @@ $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-s
         btn.removeClass('disabled');
     });
 });
+$('body').off('click', '.btn-send-voluntary-refund-quote-email').on('click', '.btn-send-voluntary-refund-quote-email', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-md');
+    $('#modal-md-label').html('Send Flight Schedule Change Email');
+    modal.find('.modal-body').html('');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+    });
+});
 $('body').off('click', '.btn-origin-reprotection-quote-diff').on('click', '.btn-origin-reprotection-quote-diff', function (e) {
     e.preventDefault();
     
