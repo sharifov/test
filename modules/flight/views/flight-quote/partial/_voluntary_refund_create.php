@@ -73,30 +73,29 @@ use yii\widgets\Pjax;
           <tr>
             <th>Booking Id</th>
             <th>Currency</th>
+            <th>Total Paid</th>
+            <th>Refund Cost</th>
             <th>Total Processing Fee</th>
             <th>Total Airline Penalty</th>
             <th>Total Refundable</th>
-            <th>Total Paid</th>
-            <th>Refund Cost</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td><?= $form->bookingId ?></td>
             <td><?= $form->getRefundForm()->currency ?></td>
-            <td><?= $activeForm->field($form->getRefundForm(), 'totalProcessingFee')->input('number', [
-                'readonly' => $form->refundDataReadOnly,
-                ])->label(false) ?></td>
-            <td><?= $activeForm->field($form->getRefundForm(), 'totalAirlinePenalty')->input('number', [
-                'readonly' => $form->refundDataReadOnly
-                ])->label(false) ?></td>
-            <td><?= $activeForm->field($form->getRefundForm(), 'totalRefundable')->input('number', [
-                'readonly' => $form->refundDataReadOnly
-                ])->label(false) ?></td>
+
             <td><?= $activeForm->field($form->getRefundForm(), 'totalPaid')->input('number', [
-                'readonly' => $form->refundDataReadOnly
+                    'readonly' => $form->refundDataReadOnly
                 ])->label(false) ?></td>
             <td><?= $activeForm->field($form->getRefundForm(), 'refundCost')->input('number', [
+                    'readonly' => $form->refundDataReadOnly
+                ])->label(false) ?></td>
+            <td><?= $activeForm->field($form->getRefundForm(), 'totalProcessingFee')->input('number', [
+                ])->label(false) ?></td>
+            <td><?= $activeForm->field($form->getRefundForm(), 'totalAirlinePenalty')->input('number', [
+                ])->label(false) ?></td>
+            <td><?= $activeForm->field($form->getRefundForm(), 'totalRefundable')->input('number', [
                 'readonly' => $form->refundDataReadOnly
                 ])->label(false) ?></td>
           </tr>
@@ -126,11 +125,9 @@ use yii\widgets\Pjax;
                   'name' => 'refund[tickets][' . $key . '][selling]'
               ])->label(false) ?></td>
               <td><?= $activeForm->field($ticketForm, 'airlinePenalty')->input('number', [
-                  'readonly' => $form->ticketDataReadOnly,
                   'name' => 'refund[tickets][' . $key . '][airlinePenalty]'
                   ])->label(false) ?></td>
               <td><?= $activeForm->field($ticketForm, 'processingFee')->input('number', [
-                  'readonly' => $form->ticketDataReadOnly,
                   'name' => 'refund[tickets][' . $key . '][processingFee]'
                   ])->label(false) ?></td>
               <td><?= $activeForm->field($ticketForm, 'refundable')->input('number', [
