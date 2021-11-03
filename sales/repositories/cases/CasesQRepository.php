@@ -6,7 +6,7 @@ use common\models\CaseSale;
 use common\models\Employee;
 use common\models\query\CaseSaleQuery;
 use common\models\UserGroupAssign;
-use modules\Cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\CasesAbacObject;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
