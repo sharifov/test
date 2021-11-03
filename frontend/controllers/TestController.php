@@ -2171,14 +2171,15 @@ class TestController extends FController
 
     public function actionZ()
     {
-        $casesSaleService = Yii::createObject(CasesSaleService::class);
+        /*Notifications::createAndPublish(
+            Auth::id(),
+            'Test',
+            'Test message',
+            Notifications::TYPE_INFO,
+            true
+        );*/
 
-        $saleId = Yii::$app->request->get('sale_id', 0);
-        $saleData = $casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
-
-        VarDumper::dump($saleData, 20, true);
-        exit();
-        //return $this->render('z');
+        return $this->render('z');
     }
 
     /**

@@ -36,7 +36,7 @@ class VoluntaryExchangeBOService
 
     public function isAllow(): bool
     {
-        return (bool) $this->result['airlineAllow'];
+        return (bool) $this->result['allow'];
     }
 
     public function getResult(): ?array
