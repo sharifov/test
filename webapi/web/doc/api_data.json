@@ -11359,7 +11359,8 @@
             "size": "30",
             "allowedValues": [
               "reprotection_update",
-              "flight_refund"
+              "flight_refund",
+              "voluntary_flight_refund"
             ],
             "optional": false,
             "field": "type",
