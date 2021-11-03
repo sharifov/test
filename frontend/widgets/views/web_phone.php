@@ -488,6 +488,16 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                 });
 
                 device.on('error', function (error) {
+                    if (error.code === 31205) {
+                        console.log('JWT Token Expired');
+                        console.log('Requesting Capability Token...');
+                        $.getJSON('/phone/get-token')
+                            .then(function (response) {
+                                let data = response.data;
+                                device.setup(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false, allowIncomingWhileBusy: false});
+                            });
+                        return;
+                    }
                     freeDialButton();
                     updateAgentStatus(connection, false, 1);
                     log('Twilio.Device Error: ' + error.message);
