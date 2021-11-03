@@ -119,7 +119,7 @@ class BoController extends BaseController
      *      "type": "voluntary_flight_refund",
      *      "data": {
      *          "booking_id": "C4RB44",
-     *          "project_key": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *          "project_key": "ovago",
      *          "status": "Refunded", // allowed values Processing, Refunded, Canceled
      *          "orderId": "RT-SHCN37D" // OTA order id
      *      }
