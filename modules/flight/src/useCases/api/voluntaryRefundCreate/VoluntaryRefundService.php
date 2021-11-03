@@ -319,10 +319,12 @@ class VoluntaryRefundService
             }
         } catch (\RuntimeException | \DomainException $e) {
             $this->errorHandler($case, $productQuoteRefund ?? null, 'Product Quote Refund structure creation failed: ' . $e->getMessage(), $e);
-            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
+            return new RefundCreateResultDto($result['saleData'] ?? [], $result['refundData'] ?? []);
+//            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
         } catch (\Throwable $e) {
             $this->errorHandler($case, $productQuoteRefund ?? null, 'Product Quote Refund structure creation failed', $e);
-            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
+            return new RefundCreateResultDto($result['saleData'] ?? [], $result['refundData'] ?? []);
+//            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
         }
 
         try {
@@ -334,8 +336,8 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, $productQuoteRefund, 'PaymentRequest processing is failed', $e);
-            throw new VoluntaryRefundCodeException('PaymentRequest processing is failed', VoluntaryRefundCodeException::PAYMENT_DATA_PROCESSED_FAILED);
+            $this->errorHandler($case, $productQuoteRefund ?? null, 'PaymentRequest processing is failed', $e);
+//            throw new VoluntaryRefundCodeException('PaymentRequest processing is failed', VoluntaryRefundCodeException::PAYMENT_DATA_PROCESSED_FAILED);
         }
 
         try {
@@ -351,12 +353,14 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, $productQuoteRefund, 'BillingInfo processing is failed', $e);
-            throw new VoluntaryRefundCodeException('BillingInfo processing is failed', VoluntaryRefundCodeException::BILLING_INFO_PROCESSED_FAILED);
+            $this->errorHandler($case, $productQuoteRefund ?? null, 'BillingInfo processing is failed', $e);
+//            throw new VoluntaryRefundCodeException('BillingInfo processing is failed', VoluntaryRefundCodeException::BILLING_INFO_PROCESSED_FAILED);
         }
 
-        $productQuoteRefund->inProcessing();
-        $this->productQuoteRefundRepository->save($productQuoteRefund);
+        if (isset($productQuoteRefund)) {
+            $productQuoteRefund->inProcessing();
+            $this->productQuoteRefundRepository->save($productQuoteRefund);
+        }
 
         $case->awaiting(null, 'Product Quote Refund initiated');
         $this->casesRepository->save($case);
