@@ -125,6 +125,16 @@ class BoController extends BaseController
      *      }
      *  }
      *
+     * @apiParamExample {json} Request-Example Voluntary Flight Exchange:
+     *  {
+     *      "type": "flight_exchange",
+     *      "data": {
+     *          "booking_id": "C4RB44",
+     *          "project_key": "ovago",
+     *          "status": "Exchanged", // allowed values Pending, Exchanged, Cancelled
+     *      }
+     *  }
+     *
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK
