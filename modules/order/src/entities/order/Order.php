@@ -791,4 +791,16 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     {
         return OrderSourceType::LIST[$this->or_type_id] ?? 'Unknown';
     }
+
+    /**
+     * @param int|null $userId
+     * @return bool
+     */
+    public function isOwner(?int $userId): bool
+    {
+        if ($userId === null) {
+            return false;
+        }
+        return $this->or_owner_user_id === $userId;
+    }
 }
