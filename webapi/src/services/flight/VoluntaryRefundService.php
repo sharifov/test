@@ -51,8 +51,8 @@ class VoluntaryRefundService implements BoWebhookService
             throw new NotFoundException('Product Quote Refund not found by bookingId: ' . $form->booking_id);
         }
 
-        if (!$project = Project::findOne(['api_key' => $form->project_key])) {
-            throw new NotFoundException('Not found project by project api key: ' . $form->project_key);
+        if (!$project = Project::findOne(['project_key' => $form->project_key])) {
+            throw new NotFoundException('Not found project by project key: ' . $form->project_key);
         }
 
         $productQuoteRefund->detachBehavior('user');
