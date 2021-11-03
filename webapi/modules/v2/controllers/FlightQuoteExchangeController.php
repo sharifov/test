@@ -579,14 +579,35 @@ class FlightQuoteExchangeController extends BaseController
 
             $voluntaryExchangeCreateHandler = new VoluntaryExchangeCreateHandler($case, $flightRequest, $this->objectCollection);
             try {
-                $voluntaryExchangeCreateHandler->processing();
-
-                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post, $voluntaryExchangeCreateForm)) {
+                if (!$responseBo = $this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post, $voluntaryExchangeCreateForm)) {
                     $case->addEventLog(
                         CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
                         'Request (create Voluntary Exchange) to Back Office is failed'
                     );
                     throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
+                }
+
+                $responseBoStatus = ($responseBo['status'] === 'Success');
+                $voluntaryExchangeCreateHandler->processing($responseBoStatus);
+
+                $dataJson = $flightRequest->fr_data_json;
+                $dataJson['responseBo'] = $responseBo;
+                $flightRequest->fr_data_json = $dataJson;
+                $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+
+                if ($responseBoStatus) {
+                    $case->addEventLog(
+                        CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                        'Request (create Voluntary Exchange) to Back Office is success',
+                        $responseBo
+                    );
+                } else {
+                    $case->addEventLog(
+                        CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                        'Request (create Voluntary Exchange) to Back Office is error',
+                        $responseBo
+                    );
+                    throw new \RuntimeException('Request to Back Office is failed.' . $responseBo['message'] ?? '', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
                 }
             } catch (\Throwable $throwable) {
                 $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());

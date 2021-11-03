@@ -370,7 +370,7 @@ class BackOffice
         }
     }
 
-    public static function voluntaryExchange(array $request): bool
+    public static function voluntaryExchange(array $request): ?array
     {
         if (empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
             throw new \DomainException('BO endpoint is empty');
@@ -391,7 +391,7 @@ class BackOffice
                     'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryExchange:serverError');
-                return false;
+                return null;
             }
 
             $data = $response->data;
@@ -401,7 +401,7 @@ class BackOffice
                     'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryExchange:dataIsEmpty');
-                return false;
+                return null;
             }
             if (!is_array($data)) {
                 \Yii::error([
@@ -409,22 +409,21 @@ class BackOffice
                     'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:voluntaryExchange:dataIsInvalid');
-                return false;
+                return null;
             }
-            if (!isset($data['success']) || $data['success'] !== true) {
+            if (empty($data['status'])) {
                 \Yii::error([
-                    'message' => 'BO voluntaryExchange is not success response',
+                    'message' => 'BO voluntaryExchange response - status not found in response',
                     'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response->content),
-                ], 'BackOffice:voluntaryExchange:dataObjectInvalid');
-                return false;
+                ], 'BackOffice:voluntaryExchange:statusNotFound');
+                return null;
             }
-
-            return true;
+            return $data;
         } catch (\Throwable $exception) {
             \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryExchange');
-            return false;
         }
+        return null;
     }
 
     public static function voluntaryRefund(array $requestData, string $endpoint): array
