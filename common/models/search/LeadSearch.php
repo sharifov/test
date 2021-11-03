@@ -375,10 +375,15 @@ class LeadSearch extends Lead
         ]);
 
         if (!$user->isOnlyAdmin() && !$user->isSuperAdmin()) {
-            $query->andWhere([
+            /*$query->andWhere([
                 Lead::tableName() . '.project_id' => ProjectEmployeeAccess::find()
                     ->select(ProjectEmployeeAccess::tableName() . '.project_id')
                     ->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $user->id])
+            ]);*/
+            $query->andWhere([
+                Lead::tableName() . '.project_id' => ProjectEmployeeAccess::find()
+                    ->select(ProjectEmployeeAccess::tableName() . '.project_id')
+                    ->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $user->id])->asArray()->column()
             ]);
             /*$query->andWhere([
                 Lead::tableName() . '.l_dep_id' => UserDepartment::find()
