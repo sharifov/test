@@ -55,6 +55,7 @@ class VoluntaryRefundService implements BoWebhookService
             throw new NotFoundException('Not found project by project api key: ' . $form->project_key);
         }
 
+        $productQuoteRefund->detachBehavior('user');
         $productQuote = $productQuoteRefund->productQuote;
         $case = $productQuoteRefund->case;
         if ($form->isProcessing()) {
@@ -79,7 +80,7 @@ class VoluntaryRefundService implements BoWebhookService
             $productQuote->cancelled();
             $this->productQuoteRepository->save($productQuote);
         } elseif ($form->isCanceled()) {
-            $productQuoteRefund->error();
+            $productQuoteRefund->declined();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 
             if ($case) {
@@ -93,8 +94,8 @@ class VoluntaryRefundService implements BoWebhookService
         $whData['booking_id'] = $form->booking_id;
         $whData['product_quote_gid'] = $productQuote->pq_gid;
         $whData['refund_gid'] = $productQuoteRefund->pqr_gid;
-        $whData['refund_status_key'] = ProductQuoteRefundStatus::getKeyById($productQuoteRefund->pqr_status_id);
-        \Yii::$app->hybrid->wh($project->id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
+        $whData['refund_order_id'] = $productQuoteRefund->pqr_cid;
+        $whData['refund_status'] = ProductQuoteRefundStatus::getClientKeyStatusById($productQuoteRefund->pqr_status_id);
 
         if ($case && $case->cs_user_id) {
             Notifications::createAndPublish(
@@ -105,5 +106,11 @@ class VoluntaryRefundService implements BoWebhookService
                 true
             );
         }
+
+        \Yii::info([
+            'type' => HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE,
+            ['data' => $whData, 'caseUserId' => $case->cs_user_id ?? null]
+        ], 'info\Webhook::OTA::VoluntaryRefund');
+        \Yii::$app->hybrid->wh($project->id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
     }
 }

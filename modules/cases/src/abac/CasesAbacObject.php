@@ -6,6 +6,7 @@ use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesStatus;
 
@@ -24,6 +25,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_FLIGHT_REPROTECTION_CONFIRM  = self::NS . 'act/flight-reprotection-confirm';
     public const ACT_FLIGHT_REPROTECTION_REFUND  = self::NS . 'act/flight-reprotection-refund';
     public const ACT_FLIGHT_REPROTECTION_QUOTE  = self::NS . 'act/flight-reprotection-quote';
+    public const ACT_FLIGHT_VOLUNTARY_QUOTE  = self::NS . 'act/flight-voluntary-quote';
     public const ACT_PRODUCT_QUOTE_REMOVE = self::NS . 'act/product_quote/remove';
     public const ACT_PRODUCT_QUOTE_VIEW_DETAILS = self::NS . 'act/product_quote/view_details';
     public const ACT_REPROTECTION_QUOTE_SEND_EMAIL = self::NS . 'act/reprotection_quote/send_email';
@@ -50,6 +52,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_FLIGHT_REPROTECTION_CONFIRM               => self::ACT_FLIGHT_REPROTECTION_CONFIRM,
         self::ACT_FLIGHT_REPROTECTION_REFUND                => self::ACT_FLIGHT_REPROTECTION_REFUND,
         self::ACT_FLIGHT_REPROTECTION_QUOTE                 => self::ACT_FLIGHT_REPROTECTION_QUOTE,
+        self::ACT_FLIGHT_VOLUNTARY_QUOTE                    => self::ACT_FLIGHT_VOLUNTARY_QUOTE,
         self::ACT_VIEW_QUOTES_DIFF                          => self::ACT_VIEW_QUOTES_DIFF,
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE   => self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE,
 
@@ -71,16 +74,17 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::LOGIC_CLIENT_DATA             => [self::ACTION_UNMASK],
-        self::UI_BLOCK_EVENT_LOG_LIST       => [self::ACTION_ACCESS],
-        self::UI_BTN_EVENT_LOG_VIEW         => [self::ACTION_READ],
+        self::LOGIC_CLIENT_DATA                 => [self::ACTION_UNMASK],
+        self::UI_BLOCK_EVENT_LOG_LIST           => [self::ACTION_ACCESS],
+        self::UI_BTN_EVENT_LOG_VIEW             => [self::ACTION_READ],
         self::ACT_REPROTECTION_QUOTE_SEND_EMAIL => [self::ACTION_ACCESS],
-        self::ACT_PRODUCT_QUOTE_REMOVE      => [self::ACTION_ACCESS],
-        self::ACT_PRODUCT_QUOTE_VIEW_DETAILS => [self::ACTION_ACCESS],
-        self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ACTION_ACCESS],
-        self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ACTION_ACCESS],
-        self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ACTION_CREATE],
-        self::ACT_VIEW_QUOTES_DIFF          => [self::ACTION_ACCESS],
+        self::ACT_PRODUCT_QUOTE_REMOVE          => [self::ACTION_ACCESS],
+        self::ACT_PRODUCT_QUOTE_VIEW_DETAILS    => [self::ACTION_ACCESS],
+        self::ACT_FLIGHT_REPROTECTION_CONFIRM   => [self::ACTION_ACCESS],
+        self::ACT_FLIGHT_REPROTECTION_REFUND    => [self::ACTION_ACCESS],
+        self::ACT_FLIGHT_REPROTECTION_QUOTE     => [self::ACTION_CREATE],
+        self::ACT_FLIGHT_VOLUNTARY_QUOTE        => [self::ACTION_CREATE],
+        self::ACT_VIEW_QUOTES_DIFF              => [self::ACTION_ACCESS],
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
 
         self::OBJ_CASE_STATUS_ROUTE_RULES   => [self::ACTION_TRANSFER],
@@ -165,6 +169,19 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_PQR_STATUS = [
+        'optgroup' => 'PQ Refund',
+        'id' => self::NS . 'pqr_status',
+        'field' => 'pqr_status',
+        'label' => 'PQR Status',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
@@ -180,6 +197,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_CASE_IS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+
+        self::ACT_FLIGHT_VOLUNTARY_QUOTE => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
         self::SQL_CASE_QUEUES => [],
     ];
 
@@ -204,25 +223,29 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
-        $attrStatus = self::ATTR_CASE_STATUS;
-        $attrCategory = self::ATTR_CASE_CATEGORY;
-        $attrStatusRule = self::ATTR_CASE_STATUS_RULE;
-        $attrPqcStatus = self::ATTR_PQC_STATUS;
+        $attrStatusList = self::ATTR_CASE_STATUS;
+        $attrCategoryList = self::ATTR_CASE_CATEGORY;
+        $attrStatusRuleList = self::ATTR_CASE_STATUS_RULE;
+        $attrPqcStatusList = self::ATTR_PQC_STATUS;
+        $attrPqrStatusList = self::ATTR_PQR_STATUS;
 
-        $attrStatus['values'] = CasesStatus::STATUS_LIST;
-        $attrStatusRule['values'] = CasesStatus::STATUS_LIST;
-        $attrCategory['values'] = CaseCategory::getList();
-        $attrPqcStatus['values'] = ProductQuoteChangeStatus::getList();
+        $attrStatusList['values'] = CasesStatus::STATUS_LIST;
+        $attrStatusRuleList['values'] = CasesStatus::STATUS_LIST;
+        $attrCategoryList['values'] = CaseCategory::getList();
+        $attrPqcStatusList['values'] = ProductQuoteChangeStatus::getList();
+        $attrPqrStatusList['values'] = ProductQuoteRefundStatus::getList();
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
-        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatus;
-        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrCategory;
-        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatusRule;
+        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatusList;
+        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrCategoryList;
+        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatusRuleList;
 
-        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrStatus;
-        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrCategory;
-        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrPqcStatus;
+        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrStatusList;
+        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrCategoryList;
+        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrPqcStatusList;
+        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrPqcStatusList;
+        $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrPqrStatusList;
 
         return $attributeList;
     }

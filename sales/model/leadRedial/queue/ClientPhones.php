@@ -48,4 +48,13 @@ class ClientPhones
 
         return $phones;
     }
+
+    public function getFirstClientPhone(Lead $lead): ?ClientPhonesDTO
+    {
+        $phones = $this->getPhones($lead);
+        if ($phones) {
+            return $phones[0];
+        }
+        return null;
+    }
 }

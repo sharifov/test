@@ -100,7 +100,7 @@ return [
                 'file-fb-log' => [
                     'class' => \common\components\logger\FilebeatTarget::class,
                     'levels' => ['info'],
-                    'categories' => ['log\*'],
+                    'categories' => ['log\*', 'elk\*'],
                     'logVars' => [],
                     'prefix' => static function () {
                         return LogHelper::getConsolePrefixData();

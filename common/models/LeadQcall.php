@@ -17,7 +17,7 @@ use yii\db\ActiveQuery;
  * @property int $lqc_weight
  * @property $lqc_created_dt
  * @property $lqc_call_from
- * @property string $lqc_reservation_time
+ * @property string|null $lqc_reservation_time
  * @property int $lqc_reservation_user_id
  *
  * @property Lead $lqcLead

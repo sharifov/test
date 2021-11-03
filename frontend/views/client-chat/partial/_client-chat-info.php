@@ -3,6 +3,8 @@
 use common\components\i18n\Formatter;
 use common\models\Client;
 use frontend\widgets\clientChat\ClientChatClientInfoWidget;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\OfferQuery;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
@@ -406,9 +408,9 @@ $leads = $clientChat->leads;
                                             ]) ?>
                                       <?php endif; ?>
                                         <?php
-                                         /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/
-//                                        if (Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) :
-                                        if ($lead->isAvailableToTake()) :
+                                         /** @abac LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS, Access To Take Lead*/
+                                        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+                                        if (Auth::can('lead/take', ['lead' => $lead]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) :
                                             echo Html::a('<i class="fa fa-download"></i> Take', null, [
                                                 'class' => 'dropdown-item',
                                                 'id' => 'take_button',
@@ -416,7 +418,6 @@ $leads = $clientChat->leads;
                                                 'data-pjax' => 0
                                                 ]);
                                         endif;
-//                                          endif;
                                         ?>
                                       <span data-cc-lead-info-quote="<?= $lead->id?>">
                                       <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>

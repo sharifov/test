@@ -30,7 +30,7 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'dateRange', [
                 'options' => ['class' => 'form-group'],
             ])->widget(\kartik\daterange\DateRangePicker::class, [
-                'presetDropdown' => false,
+                'presetDropdown' => true,
                 'hideInput' => true,
                 'convertFormat' => true,
                 'pluginOptions' => [

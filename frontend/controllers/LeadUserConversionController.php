@@ -96,10 +96,10 @@ class LeadUserConversionController extends FController
             return $this->asJson(ActiveForm::formatError($form));
         }
 
-        //$userList = Employee::getList();
-        $userList = Employee::getActiveUsersListFromCommonGroups(Auth::id());
-        $usersExist = LeadUserConversionService::getUserIdsByLead($leadId);
-        $userList = array_diff_key($userList, $usersExist);
+        $userList = Employee::getActiveUsersList();
+//        $userList = Employee::getActiveUsersListFromCommonGroups(Auth::id());
+//        $usersExist = LeadUserConversionService::getUserIdsByLead($leadId);
+//        $userList = array_diff_key($userList, $usersExist);
 
         return $this->renderAjax('add', [
             'leadUserConversionAddForm' => $form,

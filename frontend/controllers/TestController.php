@@ -218,6 +218,7 @@ use sales\temp\LeadFlowUpdate;
 use sales\widgets\PhoneSelect2Widget;
 use Twilio\TwiML\VoiceResponse;
 use webapi\models\ApiLead;
+use webapi\src\logger\StartDTO;
 use webapi\src\response\messages\DataMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
@@ -238,6 +239,8 @@ use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\httpclient\CurlTransport;
 use yii\queue\Queue;
+use yii\web\ConflictHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -2392,43 +2395,183 @@ class TestController extends FController
 
     public function actionErrorTest()
     {
-        /*$message = [
+
+        $message = [
             'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
             'a1' => '1111',
             'b2' => '222',
+            'с3' => [
+                'message' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => '1111',
+                'b2' => '222',
+                'b3' => [
+                    'message' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => '222',
+                ],
+            ],
         ];
-        Yii::error($message, 'test/error');
-        Yii::warning($message, 'test/warning');
-        Yii::info($message, 'info\test/info');
-        Yii::info($message, 'log\test/log');
-
-        $message = 'Test message 2';
-
-        Yii::error($message, 'test/error');
-        Yii::warning($message, 'test/warning');
-        Yii::info($message, 'info\test/info');
-        Yii::info($message, 'log\test/log');
 
 
-        $message = json_encode([
-            'message' => 'Test message 3',
+        $message = [
+            'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
-            'a3' => '1111',
-            'b4' => '222',
-        ]);
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message1' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => [
+                    'message3' => 'Test message 1',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message4' => 'Test message 21',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'b' => '1111',
+                        'b2' => '222',
+                        'b3' => [
+                            'message5' => 'Test message 31',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'a1' => '1111',
+                            'b2' => '222',
+                            'с3' => '222',
+                        ],
+                    ],
+                ],
+                'b2' => '222',
+                'b3' => [
+                    'message2' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message3' => 'Test message 1',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'a1' => '1111',
+                        'b2' => '222',
+                        'с3' => [
+                            'message4' => 'Test message 21',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'b' => '1111',
+                            'b2' => '222',
+                            'b3' => [
+                                'message5' => 'Test message 31',
+                                'trace' => ['tr1' => 'ttttttttttt1'],
+                                'a1' => '1111',
+                                'b2' => '222',
+                                'с3' => '222',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        Yii::error($message, 'test/error');
-        Yii::warning($message, 'test/warning');
-        Yii::info($message, 'info\test/info');
-        Yii::info($message, 'log\test/log');
-*/
+//        Yii::error($message, 'test/error');
+//        Yii::warning($message, 'test/warning');
+//        Yii::info($message, 'info\test/info');
+//        Yii::info($message, 'log\test/log');
+//
+//        $message = 'Test message 2';
+//
+//        Yii::error($message, 'test/error');
+//        Yii::warning($message, 'test/warning');
+//        Yii::info($message, 'info\test/info');
+//        Yii::info($message, 'log\test/log');
+
+//        $a = new StartDTO();
+//        $a->ip = 'asdasdasd';
+//
+//        VarDumper::dump($a);
+//        Yii::error($a, 'error:Throwable2');
+//        exit;
 
         try {
             $a = 3 / 0;
         } catch (\Throwable $throwable) {
-            VarDumper::dump($throwable, 10, true);
-            Yii::error($throwable, 'error:Throwable');
+            //VarDumper::dump(get_object_vars($throwable), 10, true);
+            //VarDumper::dump(AppHelper::throwableLog($throwable, true), 10, true);
+            Yii::error(AppHelper::throwableLog($throwable, true), 'error:Throwable');
+            //Yii::error($throwable, 'error:Throwable');
         }
+
+        return date('Y-m-d h:i:s');
+    }
+
+    public function actionArrayTrim()
+    {
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message1' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => [
+                    'message3' => 'Test message 1',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message4' => 'Test message 21',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'b' => '1111',
+                        'b2' => '222',
+                        'b3' => [
+                            'message5' => 'Test message 31',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'a1' => '1111',
+                            'b2' => '222',
+                            'с3' => '222',
+                        ],
+                    ],
+                ],
+                'b2' => '222',
+                'b3' => [
+                    'message2' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message3' => 'Test message 1',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'a1' => '1111',
+                        'b2' => '222',
+                        'с3' => [
+                            'message4' => 'Test message 21',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'b' => '1111',
+                            'b2' => '222',
+                            'b3' => [
+                                'message5' => 'Test message 31',
+                                'trace' => ['tr1' => 'ttttttttttt1'],
+                                'a1' => '1111',
+                                'b2' => '222',
+                                'с3' => '222',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+
+        VarDumper::dump($message, 10, true);
+
+
+        echo '<hr>';
+        $message = AppHelper::shotArrayData($message);
+
+        VarDumper::dump($message, 10, true);
+
+
+        exit;
     }
 }

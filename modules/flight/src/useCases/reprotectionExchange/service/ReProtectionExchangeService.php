@@ -59,9 +59,9 @@ class ReProtectionExchangeService
 
         $case->addEventLog(CaseEventLog::RE_PROTECTION_EXCHANGE, 'Exchange request started processing');
 
-        if (!$productQuoteChange->isDecisionPending()) {
+        if (!$productQuoteChange->isPending()) {
             $message = 'ProductQuoteChange not in status ' .
-                ProductQuoteChangeStatus::getName(ProductQuoteChangeStatus::DECISION_PENDING);
+                ProductQuoteChangeStatus::getName(ProductQuoteChangeStatus::PENDING);
 
             $case->addEventLog(CaseEventLog::RE_PROTECTION_EXCHANGE, $message);
             throw new \DomainException($message, 101);

@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteRefund;
 
+use sales\helpers\setting\SettingHelper;
 use yii\helpers\Html;
 
 class ProductQuoteRefundStatus
@@ -21,7 +22,7 @@ class ProductQuoteRefundStatus
         self::PENDING => 'Pending',
         self::CONFIRMED => 'Confirmed',
         self::CANCELED => 'Canceled',
-        self::COMPLETED => 'Done',
+        self::COMPLETED => 'Completed',
         self::ERROR => 'Error',
         self::PROCESSING => 'Processing',
         self::IN_PROGRESS => 'In Progress',
@@ -45,7 +46,7 @@ class ProductQuoteRefundStatus
         self::PENDING => 'pending',
         self::CONFIRMED => 'confirmed',
         self::CANCELED => 'canceled',
-        self::COMPLETED => 'done',
+        self::COMPLETED => 'completed',
         self::ERROR => 'error',
         self::PROCESSING => 'processing',
         self::IN_PROGRESS => 'in_progress',
@@ -84,5 +85,12 @@ class ProductQuoteRefundStatus
     public static function getKeyById(int $id): ?string
     {
         return self::getKeyList()[$id] ?? null;
+    }
+
+    public static function getClientKeyStatusById(int $id): string
+    {
+        $key = self::getKeyById($id);
+        $statusMap = SettingHelper::getProductQuoteRefundClientStatusMapping();
+        return $statusMap[$key] ?? $key ?? '';
     }
 }

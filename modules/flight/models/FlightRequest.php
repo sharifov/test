@@ -45,8 +45,8 @@ class FlightRequest extends \yii\db\ActiveRecord
         self::TYPE_RE_PROTECTION_CREATE => 'reprotection/create',
         self::TYPE_VOLUNTARY_EXCHANGE_CREATE => 'flight-quote-exchange/create',
         self::TYPE_VOLUNTARY_EXCHANGE_CONFIRM => 'flight-quote-exchange/confirm',
-        self::TYPE_VOLUNTARY_REFUND_CREATE => 'flight-quote-refund/create',
-        self::TYPE_VOLUNTARY_REFUND_CONFIRM => 'flight-quote-refund/confirm'
+        self::TYPE_VOLUNTARY_REFUND_CREATE => 'voluntary-flight-quote-refund/create',
+        self::TYPE_VOLUNTARY_REFUND_CONFIRM => 'voluntary-flight-quote-refund/confirm'
     ];
 
     public const STATUS_NEW = 1;

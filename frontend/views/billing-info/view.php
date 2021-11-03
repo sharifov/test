@@ -45,6 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'bi_contact_name',
             'bi_payment_method_id',
             'bi_cc_id',
+            'bi_hash',
             'bi_order_id',
             'bi_status_id',
             'bi_created_user_id',

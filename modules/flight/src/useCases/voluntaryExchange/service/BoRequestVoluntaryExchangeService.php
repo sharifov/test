@@ -5,6 +5,7 @@ namespace modules\flight\src\useCases\voluntaryExchange\service;
 use common\components\BackOffice;
 use frontend\helpers\JsonHelper;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\entities\cases\Cases;
@@ -12,6 +13,7 @@ use sales\exception\BoResponseException;
 use sales\exception\ValidationException;
 use sales\helpers\ErrorsToStringHelper;
 use sales\services\cases\CasesSaleService;
+use webapi\src\ApiCodeException;
 
 /**
  * Class BoRequestReProtectionService
@@ -82,9 +84,45 @@ class BoRequestVoluntaryExchangeService
         return $this->orderContactForm;
     }
 
-    public function sendVoluntaryExchange(ProductQuoteChange $productQuoteChange): bool
+    public function sendVoluntaryExchange(array $post, VoluntaryExchangeCreateForm $form): bool
     {
-        $dataJson = JsonHelper::decode($productQuoteChange->pqc_data_json);
-        return BackOffice::voluntaryExchange($dataJson);
+        return BackOffice::voluntaryExchange(self::mappingBORequest($post, $form));
+    }
+
+    public static function mappingBORequest(array $post, VoluntaryExchangeCreateForm $form): array
+    {
+        $data = $post;
+        if (array_key_exists('billing', $data)) {
+            unset($data['billing']);
+        }
+        if (array_key_exists('payment_request', $data)) {
+            unset($data['payment_request']);
+        }
+
+        if ($form->billingInfoForm) {
+            $data['billing'] = [
+                'address' => $form->billingInfoForm->address_line1,
+                'countryCode' => $form->billingInfoForm->country_id,
+                'country' => $form->billingInfoForm->country,
+                'city' => $form->billingInfoForm->city,
+                'state' => $form->billingInfoForm->state,
+                'zip' => $form->billingInfoForm->zip,
+                'phone' => $form->billingInfoForm->contact_phone,
+                'email' => $form->billingInfoForm->contact_email
+            ];
+        }
+        if ($form->paymentRequestForm) {
+            $data['payment'] = [
+                'type' => mb_strtoupper($form->paymentRequestForm->method_key),
+                'card' => [
+                    'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
+                    'number' => $form->paymentRequestForm->creditCardForm->number,
+                    'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
+                    'cvv' => $form->paymentRequestForm->creditCardForm->cvv
+                ]
+            ];
+        }
+
+        return $data;
     }
 }

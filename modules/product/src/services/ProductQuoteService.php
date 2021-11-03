@@ -102,7 +102,7 @@ class ProductQuoteService implements BoWebhookService
             $this->productQuoteRepository->save($productQuote);
 
             $pqChange = $productQuote->relateParent->productQuoteLastChange;
-            $pqChange->pqc_status_id = ProductQuoteChangeStatus::COMPLETE;
+            $pqChange->pqc_status_id = ProductQuoteChangeStatus::COMPLETED;
             $pqChange->save();
 
             $case = $productQuote->relateParent->productQuoteLastChange->pqcCase;

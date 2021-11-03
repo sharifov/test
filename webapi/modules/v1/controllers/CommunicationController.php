@@ -66,6 +66,7 @@ use sales\repositories\client\ClientsQuery;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserProjectParamsRepository;
 use sales\services\call\CallDeclinedException;
+use sales\services\call\CallFromInternalNumberException;
 use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
@@ -360,6 +361,15 @@ class CommunicationController extends ApiBaseController
             }
 
             $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || Call::isTrustedVerstat($postCall['StirVerstat'] ?? '');
+
+            try {
+                $this->callService->guardFromInternalCall($postCall);
+            } catch (CallFromInternalNumberException $e) {
+                $vr = new VoiceResponse();
+                $vr->say('You are calling from internal phone number. Your call will be declined.', ['language' => 'en-US']);
+                $vr->reject(['reason' => 'busy']);
+                return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: ' . $e->getMessage());
+            }
 
             try {
                 $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);

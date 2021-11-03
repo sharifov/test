@@ -206,6 +206,11 @@ class UserStatsReport extends Model
         if (!$this->validate()) {
             $this->isValid = false;
             $query->where('0=1');
+
+            if (!\Yii::$app->request->isPost) {
+                $this->clearErrors();
+            }
+
             return $dataProvider;
         }
         $this->isValid = true;
@@ -506,7 +511,7 @@ class UserStatsReport extends Model
                 ->leftJoin(UserGroup::tableName(), 'ug_id = ugs_group_id')
                 ->groupBy(['ugs_group_id']);
             if ($this->groups || $this->access->groupsLimitedAccess) {
-                $groups = $this->groups ?: $this->access->groups;
+                $groups = $this->groups ?: array_keys($this->access->groups);
                 $groupQuery->andWhere(['ugs_group_id' => $groups]);
             }
             $dataProvider->query = $groupQuery;
@@ -538,13 +543,13 @@ class UserStatsReport extends Model
             $query->addSelect(['sum(leads_created) as leads_created']);
         }
         if (Metrics::isSalesConversion($metrics)) {
-            $query->addSelect(['sum(conversion_percent) as conversion_percent']);
+            $query->addSelect(['round(sum(conversion_percent)/(count(*)), 2) as conversion_percent']);
         }
         if (Metrics::isSoldLeads($metrics)) {
             $query->addSelect(['sum(sold_leads) as sold_leads']);
         }
         if (Metrics::isSplitShare($metrics)) {
-            $query->addSelect(['sum(split_share) as split_share']);
+            $query->addSelect(['round(sum(split_share)/(count(*)), 2) as split_share']);
         }
         if (Metrics::isQualifiedLeadsTaken($metrics)) {
             $query->addSelect(['sum(qualified_leads_taken) as qualified_leads_taken']);

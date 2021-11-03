@@ -24,7 +24,7 @@ class LeadRedialAssigner
         $access = CallRedialUserAccess::create($leadId, $userId, $createdDt);
 
         CallRedialUserAccess::getDb()->createCommand(
-            "insert into " . CallRedialUserAccess::tableName() . " (`crua_lead_id`, `crua_user_id`, `crua_created_dt`) values (:value, :value2, :value3) on duplicate key update crua_created_dt = :value3, crua_lead_id = :value, crua_user_id = :value2",
+            "insert into " . CallRedialUserAccess::tableName() . " (`crua_lead_id`, `crua_user_id`, `crua_created_dt`) values (:value, :value2, :value3)",
             [
                 ':value' => $access->crua_lead_id,
                 ':value2' => $access->crua_user_id,

@@ -147,7 +147,7 @@ class LeadCreateApiService
 
             $this->calculateTripType($modelLead->flights, $lead);
 
-            $lead->l_is_test =  $modelLead->is_test ? 1 : 0;  //$this->clientManageService->checkIfPhoneIsTest($modelLead->phones);
+            $lead->l_is_test =  $modelLead->is_test ? 1 : $this->clientManageService->checkIfPhoneIsTest($modelLead->phones);
 
             if (!$lead->validate()) {
                 if ($errors = $lead->getErrors()) {

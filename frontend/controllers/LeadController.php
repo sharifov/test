@@ -18,6 +18,7 @@ use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
 use common\models\LeadFlow;
 //use common\models\LeadLog;
+use common\models\LeadQcall;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
@@ -45,6 +46,7 @@ use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
+use sales\access\EmployeeAccess;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
@@ -183,6 +185,7 @@ class LeadController extends FController
                 'allowActions' => [
                     'view',
                     'take',
+                    'ajax-take',
                     'create-by-chat',
                     'ajax-create-from-phone-widget',
                     'ajax-link-to-call'
@@ -1382,49 +1385,59 @@ class LeadController extends FController
     }
 
     /**
-     * @param string $gid
-     * @return string|Response
-     * @throws ForbiddenHttpException
+     * @return array
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
-    public function actionAjaxTake(string $gid): array
+    public function actionAjaxTake(): array
     {
+        $result = ['success' => false, 'error' => 'GID parameter not found'];
         Yii::$app->response->format = Response::FORMAT_JSON;
-
-        if (Yii::$app->request->isAjax) {
-            $result = ['success' => false, 'message' => ''];
-            $lead = $this->findLeadByGid($gid);
-
+        $gid = Yii::$app->request->get('gid');
+        if (Yii::$app->request->isAjax && $gid) {
             try {
+                $lead = $this->findLeadByGid($gid);
                 $oldStatus = $lead->status;
+                $allowRbac = Auth::can('lead/take', ['lead' => $lead]);
+                if ($allowRbac) {
+                    $user = Auth::user();
+                    $leadAbacDto = new LeadAbacDto($lead, $user->getId());
+                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                        $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
-                /** @var Employee $user */
-                $user = Yii::$app->user->identity;
-                $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
+                        $this->transaction->wrap(function () use ($lead) {
+                            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                                $qCall->delete();
+                            }
+                            $this->leadRepository->save($lead);
+                        });
 
-                if ($oldStatus === Lead::STATUS_PENDING) {
-                    $leadUserConversion = LeadUserConversion::create(
-                        $lead->id,
-                        $user->getId(),
-                        LeadUserConversionDictionary::DESCRIPTION_TAKE
-                    );
-                    (new LeadUserConversionRepository())->save($leadUserConversion);
+                        if ($oldStatus === Lead::STATUS_PENDING) {
+                            $leadUserConversion = LeadUserConversion::create(
+                                $lead->id,
+                                $user->getId(),
+                                LeadUserConversionDictionary::DESCRIPTION_TAKE
+                            );
+                            (new LeadUserConversionRepository())->save($leadUserConversion);
+                        }
+                    } else {
+                        $result ['error'] = 'Access Denied (ABAC)!';
+                    }
+                } else {
+                    $result ['error'] = 'Access Denied (RBAC)!';
                 }
-
-                $result['success'] = true;
             } catch (\RuntimeException | \DomainException $exception) {
-                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::exception');
-                $result['message'] = stripslashes(VarDumper::dumpAsString($exception->getMessage()));
+                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::DomainException');
+                $result['error'] = $exception->getMessage();
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:throwable');
-                $result['message'] = 'Internal Server Error';
+                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:Throwable');
+                $result['error'] = $throwable->getMessage();
             }
-
-            return $result; // asJson
         }
 
-        throw new BadRequestHttpException();
+        return $result;
     }
 
     /**
@@ -2326,11 +2339,27 @@ class LeadController extends FController
         try {
             $lead = $this->useCaseLeadManageService->createFromPhoneWidget($call, Auth::user());
 
-            $call->c_lead_id = $lead->id;
-            if (!$call->save(false, ['c_lead_id'])) {
-                $result['warning'] = true;
-                $result['message'] = 'Lead has been create, but call is not assigned';
+            if ($call->c_parent_id) {
+                $parent = Call::find()->byId($call->c_parent_id)->active()->one();
+            } else {
+                $parent = $call;
             }
+            if ($parent) {
+                $parent->c_lead_id = $lead->id;
+                if (!$parent->save(false)) {
+                    $result['warning'] = true;
+                    $result['message'] = 'Lead has been create, but call (' . $parent->c_id . ') is not assigned.';
+                }
+            }
+            $children = Call::find()->byParentId($parent->c_id)->active()->all();
+            foreach ($children as $child) {
+                $child->c_lead_id = $lead->id;
+                if (!$child->save(false)) {
+                    $result['warning'] = true;
+                    $result['message'] .= 'Lead has been create, but call (' . $child->c_id . ') is not assigned.';
+                }
+            }
+
             $result['url'] = Url::to('/lead/view/' . $lead->gid);
 
             $result['contactData'] = (new CallUpdateMessage())->getContactData($call, Auth::id());

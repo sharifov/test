@@ -243,7 +243,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             $reProtectionCreateService->setProductQuoteChangeIsAutomate($productQuoteChange, (bool) $this->flight_request_is_automate);
 
-            if ($productQuoteChange->isStatusNew() || $productQuoteChange->isDecisionPending()) {
+            if ($productQuoteChange->isStatusNew() || $productQuoteChange->isPending()) {
                 if ($case->isError() || $case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
                     if (!$case->cs_user_id) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'New reprotection request');
@@ -297,7 +297,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                             $productQuoteChange
                         );
 
-                        $productQuoteChange->decisionPending();
+                        $productQuoteChange->statusToPending();
                         $productQuoteChangeRepository->save($productQuoteChange);
                         $eventDispatcher->dispatch(new ProductQuoteChangeAutoDecisionPendingEvent($productQuoteChange->pqc_id));
                         $flightRequestService->done('Client Email send');

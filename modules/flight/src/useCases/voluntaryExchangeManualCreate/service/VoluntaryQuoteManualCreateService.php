@@ -40,6 +40,8 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
@@ -77,7 +79,8 @@ class VoluntaryQuoteManualCreateService
         ProductQuote $originProductQuote,
         ReProtectionQuoteCreateForm $form,
         ?int $userId,
-        array $segments
+        array $segments,
+        int $changeId
     ): FlightQuote {
         if ($changeQuotes = ProductQuoteQuery::getChangeQuotesByOriginQuote($originProductQuote->pq_id)) {
             foreach ($changeQuotes as $quote) {
@@ -217,6 +220,14 @@ class VoluntaryQuoteManualCreateService
 
         $this->objectCollection->getProductQuoteDataManageService()
             ->updateRecommendedChangeQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
+
+        if (!ProductQuoteChangeRelationRepository::exist($changeId, $productQuote->pq_id)) {
+            $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
+                $changeId,
+                $productQuote->pq_id
+            );
+            (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
+        }
 
         return $flightQuote;
     }

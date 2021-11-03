@@ -33,7 +33,7 @@ class Scopes extends ActiveQuery
 
     public function excludeStatuses(array $statuses): self
     {
-        return $this->andWhere(['NOT IN', 'pqr_status_id', $statuses]);
+        return $this->andWhere(['NOT IN', 'pqc_status_id', $statuses]);
     }
 
     /**

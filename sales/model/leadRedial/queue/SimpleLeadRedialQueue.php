@@ -95,7 +95,7 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 $this->qCallService->resetReservation($leadQcall);
             });
 
-            \Yii::$app->queue_lead_redial->delay(self::LEAD_PREPARE_DELAY)->push(new LeadCallPrepareCheckerJob($lead->id));
+            \Yii::$app->queue_job->delay(self::LEAD_PREPARE_DELAY)->push(new LeadCallPrepareCheckerJob($lead->id));
 
             return new RedialCall(
                 $agentPhone,
@@ -125,23 +125,35 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
 
     private function getClientPhone(Lead $lead): ?string
     {
-        $clientPhones = $this->clientPhones->getPhones($lead);
-        if ($clientPhones) {
-            $clientPhone = $clientPhones[0]->phone;
-            if (PhoneBlacklist::find()->isExists($clientPhone)) {
-                \Yii::error([
-                    'message' => 'Found blocked client phone',
-                    'phone' => $clientPhone,
-                    'leadId' => $lead->id,
-                ], 'SimpleLeadRedialQueue');
-                return null;
-            }
-            return $clientPhone;
+        $clientPhone = $this->clientPhones->getFirstClientPhone($lead);
+
+        if (!$clientPhone) {
+            \Yii::error([
+                'message' => 'Not found client phone',
+                'leadId' => $lead->id,
+            ], 'SimpleLeadRedialQueue');
+            return null;
         }
-        \Yii::error([
-            'message' => 'Not found client phone',
-            'leadId' => $lead->id,
-        ], 'SimpleLeadRedialQueue');
-        return null;
+
+        if (PhoneBlacklist::find()->isExists($clientPhone->phone)) {
+            try {
+                $this->qCallService->remove($lead->id);
+                \Yii::warning([
+                    'message' => 'Lead removed from Redial Queue, because found blocked client phone',
+                    'phone' => $clientPhone->phone,
+                    'leadId' => $lead->id,
+                ], 'SimpleLeadRedialQueue:getClientPhone');
+            } catch (\Throwable $e) {
+                \Yii::error([
+                    'message' => 'Removed lead with blocked client phone from Redial Queue error',
+                    'exception' => $e->getMessage(),
+                    'phone' => $clientPhone->phone,
+                    'leadId' => $lead->id,
+                ], 'SimpleLeadRedialQueue:getClientPhone');
+            }
+            return null;
+        }
+
+        return $clientPhone->phone;
     }
 }

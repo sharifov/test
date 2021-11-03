@@ -66,7 +66,7 @@ class Refund
         }
 
         $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($productQuote->pq_id);
-        if (!$productQuoteChange->isDecisionPending()) {
+        if (!$productQuoteChange->isPending()) {
             throw new \DomainException('Product Quote Change status is not in "Decision pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"', 101);
         }
 

@@ -21,6 +21,7 @@ class ProductQuoteRefundSearch extends ProductQuoteRefund
             [['pqr_selling_price', 'pqr_penalty_amount', 'pqr_processing_fee_amount', 'pqr_refund_amount', 'pqr_client_currency_rate', 'pqr_client_selling_price', 'pqr_client_refund_amount'], 'number'],
             [['pqr_client_currency', 'pqr_created_dt', 'pqr_updated_dt'], 'safe'],
             ['pqr_case_id', 'integer'],
+            [['pqr_gid', 'pqr_cid'], 'string', 'max' => 32]
         ];
     }
 
@@ -79,6 +80,8 @@ class ProductQuoteRefundSearch extends ProductQuoteRefund
         ]);
 
         $query->andFilterWhere(['like', 'pqr_client_currency', $this->pqr_client_currency]);
+        $query->andFilterWhere(['like', 'pqr_gid', $this->pqr_gid]);
+        $query->andFilterWhere(['like', 'pqr_cid', $this->pqr_cid]);
 
         return $dataProvider;
     }

@@ -2,6 +2,7 @@
 
 namespace webapi\src\request;
 
+use modules\flight\models\FlightQuoteTicket;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmForm;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
@@ -97,6 +98,28 @@ class BoRequestDataHelper
                 ]
             ];
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
+        }
+        return $data;
+    }
+
+    /**
+     * @param string $apiKey
+     * @param string $bookingId
+     * @param FlightQuoteTicket[] $flightQuoteTickets
+     * @return array
+     */
+    public static function getRequestDataForVoluntaryRefundData(string $apiKey, string $bookingId, array $flightQuoteTickets): array
+    {
+        $data = [
+            'apiKey' => $apiKey,
+            'bookingId' => $bookingId,
+            'tickets' => []
+        ];
+
+        if ($flightQuoteTickets) {
+            foreach ($flightQuoteTickets as $flightQuoteTicket) {
+                $data['tickets'][] = $flightQuoteTicket->fqt_ticket_number;
+            }
         }
         return $data;
     }

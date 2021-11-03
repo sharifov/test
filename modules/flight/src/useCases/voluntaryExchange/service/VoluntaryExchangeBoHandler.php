@@ -17,6 +17,7 @@ use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
@@ -93,7 +94,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             case FlightVoluntaryExchangeUpdateForm::STATUS_CANCELED:
                 $this->handleCanceled();
                 break;
-            case FlightVoluntaryExchangeUpdateForm::STATUS_PROCESSING:
+            case FlightVoluntaryExchangeUpdateForm::STATUS_PENDING:
                 $this->handleProcessing();
                 break;
             default:
@@ -122,11 +123,24 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             [
                 'booking_id' => $form->booking_id,
                 'product_quote_gid' => $this->originProductQuote->pq_gid,
-                'change_quote_gid' => $this->productQuoteChange->pqc_gid,
-                'change_status_id' => $this->productQuoteChange->pqc_status_id,
+                'exchange_gid' => $this->productQuoteChange->pqc_gid,
+                'exchange_status' => ProductQuoteChangeStatus::getClientKeyStatusById($this->productQuoteChange->pqc_status_id),
             ]
         )->getCollectedData();
-        \Yii::$app->hybrid->wh($this->project->id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
+
+        \Yii::info([
+            'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+            'requestData' => $whData,
+        ], 'info\Webhook::OTA::VoluntaryExchange:Request');
+        $responseData = \Yii::$app->hybrid->wh(
+            $this->project->id,
+            HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE,
+            ['data' => $whData]
+        );
+        \Yii::info([
+            'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+            'responseData' => $responseData,
+        ], 'info\Webhook::OTA::VoluntaryExchange:Response');
     }
 
     private function handleExchanged(): void

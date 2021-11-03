@@ -291,7 +291,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function getProductQuoteChangesActive(): ActiveQuery
     {
-        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id', 'pqc_status_id' => SettingHelper::getActiveQuoteChangeStatuses()]);
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->andWhere(['pqc_status_id' => SettingHelper::getActiveQuoteChangeStatuses()]);
     }
 
     public function getProductQuoteLastRefund(): ActiveQuery
@@ -317,7 +317,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function getProductQuoteRefundsActive(): ActiveQuery
     {
-        return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id', 'pqr_status_id' => SettingHelper::getActiveQuoteRefundStatuses()]);
+        return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->andWhere(['pqr_status_id' => SettingHelper::getActiveQuoteRefundStatuses()]);
     }
 
     /**

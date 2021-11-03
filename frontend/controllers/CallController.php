@@ -52,6 +52,7 @@ use sales\model\contactPhoneList\entity\ContactPhoneList;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\leadRedial\assign\LeadRedialAccessChecker;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
+use sales\model\leadRedial\job\CheckUserIsOnRedialCallJob;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
@@ -1280,7 +1281,9 @@ class CallController extends FController
                     if ($redialCall) {
                         $prepare = new PrepareCurrentCallsForNewCall($userId);
                         if ($prepare->prepare()) {
+                            UserStatus::isOnCallOn($userId);
                             Yii::createObject(LeadRedialUnAssigner::class)->acceptRedialCall($userId, $redialCall->leadId);
+                            \Yii::$app->queue_job->delay(SettingHelper::getRedialCheckIsOnCallTime())->push(new CheckUserIsOnRedialCallJob($userId, $redialCall->leadId, date('Y-m-d H:i:s')));
                             $response['isRedialCall'] = true;
                             $response['redialCall'] = $redialCall->toArray();
                         } else {

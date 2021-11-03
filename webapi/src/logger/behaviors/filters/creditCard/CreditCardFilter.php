@@ -20,6 +20,7 @@ class CreditCardFilter implements Filterable
             new V2(),
             new V3(),
             new V4(),
+            new V5(),
         ];
     }
 

@@ -51,12 +51,17 @@ class CasesStatusTransferList
         return $list;
     }
 
-    public static function getAllowTransferListByAbac(Cases $case)
+    public static function getAllowTransferListByAbac(Cases $case): array
     {
         $list = self::ORIGIN;
 
         foreach ($list as $statusId => $status) {
-            if (!Yii::$app->abac->can(new CasesAbacDto($case, $statusId), CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
+            $caseAbacDto = new CasesAbacDto($case, $statusId);
+            $caseAbacDto->pqc_status = $case->productQuoteChange->pqc_status_id ?? null;
+            $caseAbacDto->pqr_status = $case->productQuoteRefund->pqr_status_id ?? null;
+
+            /** @abac new $caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER, Case Status transfer rules */
+            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
                 unset($list[$statusId]);
             }
         }

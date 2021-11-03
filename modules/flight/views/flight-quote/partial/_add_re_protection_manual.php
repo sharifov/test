@@ -26,6 +26,7 @@ use yii\jui\AutoComplete;
  * @var Flight $flight
  * @var FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @var ProductQuote $originProductQuote
+ * @var int $changeId
  */
 
 $paxCntTypes = [
@@ -185,8 +186,16 @@ $pjaxId = 'pjax-container-prices';
     </div>
 
     <?php
-    $urlPrepareDump = \yii\helpers\Url::to(['/flight/flight-quote/ajax-prepare-dump', 'flight_id' => $flight->getId()]);
-    $urlSave = \yii\helpers\Url::to(['/flight/flight-quote/ajax-save-re-protection', 'flight_id' => $flight->getId()]);
+    $urlPrepareDump = \yii\helpers\Url::to([
+        '/flight/flight-quote/ajax-prepare-dump',
+        'flight_id' => $flight->getId(),
+        'change_id' => $changeId,
+    ]);
+    $urlSave = \yii\helpers\Url::to([
+        '/flight/flight-quote/ajax-save-re-protection',
+        'flight_id' => $flight->getId(),
+        'change_id' => $changeId,
+    ]);
     $js = <<<JS
     var addRPQuoteForm = $('#add-quote-form');
 

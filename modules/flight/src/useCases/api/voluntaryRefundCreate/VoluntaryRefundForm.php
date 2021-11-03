@@ -58,8 +58,8 @@ class VoluntaryRefundForm extends Model
             ['tickets', IsArrayValidator::class, 'skipOnEmpty' => false],
             ['tickets', 'ticketsValidation', 'skipOnEmpty' => false],
 
-            ['auxiliaryOptions', IsArrayValidator::class, 'skipOnEmpty' => false],
-            ['auxiliaryOptions', 'auxiliaryOptionsValidation', 'skipOnEmpty' => false],
+            ['auxiliaryOptions', IsArrayValidator::class, 'skipOnEmpty' => true],
+            ['auxiliaryOptions', 'auxiliaryOptionsValidation', 'skipOnEmpty' => true],
 
             ['orderId', 'string']
         ];
@@ -99,6 +99,9 @@ class VoluntaryRefundForm extends Model
         }
 
         foreach ($this->auxiliaryOptions as $key => $auxiliaryOption) {
+            if (!is_array($auxiliaryOption)) {
+                $this->addError('auxiliaryOptions' . '.' . $key, 'Refund.auxiliaryOptions.' . $key . ': is not array');
+            }
             $auxiliaryOptionForm = new AuxiliaryOptionForm();
             $auxiliaryOptionForm->load($auxiliaryOption, '');
             if (!$auxiliaryOptionForm->validate()) {

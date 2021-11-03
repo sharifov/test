@@ -380,10 +380,15 @@ class LeadSearch extends Lead
                     ->select(ProjectEmployeeAccess::tableName() . '.project_id')
                     ->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $user->id])
             ]);
-            $query->andWhere([
+            /*$query->andWhere([
                 Lead::tableName() . '.l_dep_id' => UserDepartment::find()
                     ->select(UserDepartment::tableName() . '.ud_dep_id')
                     ->andWhere([UserDepartment::tableName() . '.ud_user_id' => $user->id])
+            ]);*/
+            $query->andWhere([
+                Lead::tableName() . '.l_dep_id' => UserDepartment::find()
+                    ->select(UserDepartment::tableName() . '.ud_dep_id')
+                    ->andWhere([UserDepartment::tableName() . '.ud_user_id' => $user->id])->asArray()->column()
             ]);
         }
 

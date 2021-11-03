@@ -7,8 +7,10 @@ use common\models\Currency;
 use common\models\Employee;
 use frontend\helpers\JsonHelper;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
+use modules\product\src\entities\productQuoteObjectRefund\serializer\ProductQuoteObjectRefundSerializer;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\interfaces\ProductQuoteObjectRefundStructure;
+use sales\entities\serializer\Serializable;
 use sales\repositories\NotFoundException;
 use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
@@ -42,7 +44,7 @@ use yii\db\ActiveRecord;
  * @property Employee $updatedUser
  * @property string $pqor_data_json [json]
  */
-class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
+class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializable
 {
     use FieldsTrait;
 
@@ -232,5 +234,15 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord
     public function pending(): void
     {
         $this->pqor_status_id = ProductQuoteObjectRefundStatus::PENDING;
+    }
+
+    public function new(): void
+    {
+        $this->pqor_status_id = ProductQuoteObjectRefundStatus::NEW;
+    }
+
+    public function serialize(): array
+    {
+        return (new ProductQuoteObjectRefundSerializer($this))->getData();
     }
 }

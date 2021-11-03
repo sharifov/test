@@ -10,7 +10,9 @@ use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
+use modules\product\src\entities\productQuoteRefund\serializer\ProductQuoteRefundSerializer;
 use sales\entities\cases\Cases;
+use sales\entities\serializer\Serializable;
 use sales\services\CurrencyHelper;
 use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
@@ -49,8 +51,9 @@ use yii\db\ActiveRecord;
  * @property Cases $case
  * @property string $pqr_data_json [json]
  * @property string $pqr_gid [varchar(32)]
+ * @property string $pqr_cid [varchar(32)]
  */
-class ProductQuoteRefund extends \yii\db\ActiveRecord
+class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
 {
     use FieldsTrait;
 
@@ -130,6 +133,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $clientSelling,
         $clientRefundAmount,
         $caseId,
+        $cid,
         $data
     ): self {
         $refund = self::create(
@@ -147,13 +151,24 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         $refund->pqr_client_selling_price = $clientSelling;
         $refund->pqr_client_refund_amount = $clientRefundAmount;
         $refund->pqr_data_json = $data;
+        $refund->pqr_cid = $cid;
         $refund->detachBehavior('user');
         return $refund;
+    }
+
+    public function new(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::NEW;
     }
 
     public function error(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::ERROR;
+    }
+
+    public function declined(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::DECLINED;
     }
 
     public function inProgress(): void
@@ -164,6 +179,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public function processing(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::PROCESSING;
+    }
+
+    public function pending(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::PENDING;
     }
 
     public function isInProcessing(): bool
@@ -239,6 +259,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
 
             [['pqr_type_id'], 'integer'],
             [['pqr_type_id'], 'in', 'range' => array_keys(self::TYPE_LIST)],
+
+            [['pqr_gid', 'pqr_cid'], 'string', 'max' => 32],
         ];
     }
 
@@ -357,6 +379,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'pqr_id',
+            'gid' => 'pqr_gid',
+            'cid' => 'pqr_cid',
             'productQuoteId' => 'pqr_product_quote_id',
             'productQuoteGid' => static function (ProductQuoteRefund $model) {
                 return $model->productQuote->pq_gid ?? null;
@@ -439,5 +463,10 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public static function generateGid(): string
     {
         return md5(uniqid('pqr', true));
+    }
+
+    public function serialize(): array
+    {
+        return (new ProductQuoteRefundSerializer($this))->getData();
     }
 }

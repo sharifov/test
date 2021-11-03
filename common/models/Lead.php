@@ -3465,6 +3465,11 @@ Reason: {reason}',
         );
     }
 
+    public function hasAppliedQuote(): bool
+    {
+        return Quote::find()->where(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED])->exists();
+    }
+
     public function getFirstFlightSegment()
     {
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
@@ -4294,8 +4299,16 @@ Reason: {reason}',
         return $out;
     }
 
-
     /**
+     * @param Employee $user
+     * @return array
+     */
+    public static function getAllStatuses(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+        /**
      * @param Employee $user
      * @return array
      */

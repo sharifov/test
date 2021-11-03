@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use common\models\Employee;
 use common\models\query\EmployeeQuery;
 use common\models\UserConnection;
 use common\models\UserOnline;
@@ -14,6 +15,7 @@ use sales\model\userData\entity\UserDataKey;
 use sales\model\userData\entity\UserDataQuery;
 use sales\model\userStatDay\entity\UserStatDay;
 use yii\console\Controller;
+use yii\db\Expression;
 use yii\db\IntegrityException;
 use yii\db\Query;
 use yii\helpers\Console;
@@ -87,19 +89,28 @@ class UserController extends Controller
 
         $date = new \DateTimeImmutable('-1 day');
 
-        $query = new Query();
-        $subQuery = EmployeeQuery::getSalesQuery($date->format('Y-m-d 00:00:00'), $date->format('Y-m-d 23:59:59'));
-        $query->from(['gross_profit_query' => $subQuery]);
-        $query->select([
-                'gross_profit' => 'sum(gross_profit)',
-                'employee_id'
-            ]);
-        $query->groupBy(['employee_id']);
-
+        $query = (new Query())
+            ->select([
+                'users.id as employee_id',
+                'gross_profit' => new Expression('if ((gross_profit is null or gross_profit = 0), 0, gross_profit)')
+            ])
+            ->from(['users' => Employee::tableName()])
+            ->leftJoin([
+                'gr_users' => (new Query())
+                    ->select([
+                        'gross_profit' => 'sum(gross_profit)',
+                        'employee_id'
+                    ])
+                    ->from([
+                        'gross_profit_query' => EmployeeQuery::getSalesQuery($date->format('Y-m-d 00:00:00'), $date->format('Y-m-d 23:59:59'))
+                    ])
+                    ->groupBy(['employee_id'])
+            ], 'gr_users.employee_id = users.id')
+            ->andWhere(['users.status' => Employee::STATUS_ACTIVE]);
         $result = $query->all();
         $userStatDayErrors = [];
         foreach ($result as $userGrossProfit) {
-            $userStatDay = UserStatDay::craeteOrUpdateGrossProfit(
+            $userStatDay = UserStatDay::createOrUpdateGrossProfit(
                 (float)$userGrossProfit['gross_profit'],
                 $userGrossProfit['employee_id'],
                 (int)$date->format('d'),
@@ -119,16 +130,24 @@ class UserController extends Controller
         $dateNow = new \DateTimeImmutable();
         $to = $dateNow->modify('-1 day');
         $from = $to->modify('-' . SettingHelper::getCalculateGrossProfitInDays() . ' days');
-
-        $query = new Query();
-        $subQuery = EmployeeQuery::getSalesQuery($from->format('Y-m-d 00:00:00'), $to->format('Y-m-d 23:59:59'));
-        $query->from(['gross_profit_query' => $subQuery]);
-        $query->select([
-            'gross_profit' => 'sum(gross_profit)',
-            'employee_id'
-        ]);
-        $query->groupBy(['employee_id']);
-
+        $query = (new Query())
+            ->select([
+                'users.id as employee_id',
+                'gross_profit' => new Expression('if ((gross_profit is null or gross_profit = 0), 0, gross_profit)')
+            ])
+            ->from(['users' => Employee::tableName()])
+            ->leftJoin([
+                'gr_users' => (new Query())
+                    ->select([
+                        'gross_profit' => 'sum(gross_profit)',
+                        'employee_id'
+                    ])
+                    ->from([
+                        'gross_profit_query' => EmployeeQuery::getSalesQuery($from->format('Y-m-d 00:00:00'), $to->format('Y-m-d 23:59:59'))
+                    ])
+                    ->groupBy(['employee_id'])
+            ], 'gr_users.employee_id = users.id')
+            ->andWhere(['users.status' => Employee::STATUS_ACTIVE]);
         $result = $query->all();
 
         $userGrossProfitPeriodErrors = [];

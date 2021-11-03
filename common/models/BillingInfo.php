@@ -38,6 +38,7 @@ use yii\db\ActiveRecord;
  * @property int|null $bi_updated_user_id
  * @property string|null $bi_created_dt
  * @property string|null $bi_updated_dt
+ * @property string|null $bi_hash
  *
  * @property CreditCard $biCc
  * @property Employee $biCreatedUser
@@ -55,6 +56,18 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
     public static function tableName()
     {
         return 'billing_info';
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            $billing_hash_key = $this->generateHashKey();
+            if ($this->bi_hash !== $billing_hash_key) {
+                $this->bi_hash = $billing_hash_key;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -79,6 +92,7 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
             [['bi_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['bi_order_id' => 'or_id']],
             [['bi_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['bi_updated_user_id' => 'id']],
             [['bi_payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['bi_payment_method_id' => 'pm_id']],
+            ['bi_hash', 'string', 'max' => 32],
         ];
     }
 
@@ -110,6 +124,7 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
             'bi_updated_user_id' => 'Updated User ID',
             'bi_created_dt' => 'Created Dt',
             'bi_updated_dt' => 'Updated Dt',
+            'bi_hash' => 'Hash key'
         ];
     }
 
@@ -231,5 +246,24 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new BillingInfoSerializer($this))->getData();
+    }
+
+    public function generateHashKey(): string
+    {
+        $sourceKey = $this->bi_first_name . '|' .
+            $this->bi_last_name . '|' .
+            $this->bi_middle_name . '|' .
+            $this->bi_address_line1 . '|' .
+            $this->bi_address_line2 . '|' .
+            $this->bi_city . '|' .
+            $this->bi_state . '|' .
+            $this->bi_country . '|' .
+            $this->bi_zip . '|' .
+            $this->bi_contact_phone . '|' .
+            $this->bi_contact_email . '|' .
+            $this->bi_order_id . '|' .
+            $this->bi_cc_id;
+
+        return md5($sourceKey);
     }
 }

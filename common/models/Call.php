@@ -1380,7 +1380,7 @@ class Call extends \yii\db\ActiveRecord
 //                    //Yii::info($message, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
 //                }
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
-                if ($this->isActiveTwStatus()) {
+                if ($this->isActiveStatus()) {
                     UserStatus::isOnCallOn($this->c_created_user_id);
                 } else {
                     UserStatus::isOnCallOff($this->c_created_user_id);
@@ -1394,7 +1394,7 @@ class Call extends \yii\db\ActiveRecord
             if ($this->isOut() && ($insert || $isChangedStatus) && $this->isStatusRinging()) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
-                if ($this->isActiveTwStatus()) {
+                if ($this->isActiveStatus()) {
                     UserStatus::isOnCallOn($this->c_created_user_id);
                 }
             }
@@ -1404,7 +1404,7 @@ class Call extends \yii\db\ActiveRecord
                 $internalParent->c_status_id = self::STATUS_RINGING;
                 $message = (new CallUpdateMessage())->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $message);
-                if ($internalParent->isActiveTwStatus()) {
+                if ($internalParent->isActiveStatus()) {
                     UserStatus::isOnCallOn($internalParent->c_created_user_id);
                 }
             }
@@ -1413,13 +1413,13 @@ class Call extends \yii\db\ActiveRecord
                 $internalParent = $this->cParent;
                 $parentMessage = (new CallUpdateMessage())->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $parentMessage);
-                if ($internalParent->isActiveTwStatus()) {
+                if ($internalParent->isActiveStatus()) {
                     UserStatus::isOnCallOn($internalParent->c_created_user_id);
                 }
 
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
-                if ($this->isActiveTwStatus()) {
+                if ($this->isActiveStatus()) {
                     UserStatus::isOnCallOn($this->c_created_user_id);
                 }
             }
@@ -2791,8 +2791,8 @@ class Call extends \yii\db\ActiveRecord
         return in_array($key, self::STIR_TRUSTED_GROUP);
     }
 
-    public function isActiveTwStatus(): bool
+    public function isActiveStatus(): bool
     {
-        return in_array($this->c_call_status, [self::TW_STATUS_RINGING, self::TW_STATUS_IN_PROGRESS], true);
+        return in_array($this->c_status_id, [self::STATUS_RINGING, self::STATUS_IN_PROGRESS], true);
     }
 }

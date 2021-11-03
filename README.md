@@ -213,42 +213,12 @@ If app config param "apiHealthCheck" username is not empty base auth then API ca
 Generate API Documentation (apiDoc):
 
  ```
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc2" -t ./webapi/web/apidoc/template2 -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc3" -t ./webapi/web/apidoc/template3 -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc4" -t ./webapi/web/apidoc/template4 -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc5" -t ./webapi/web/apidoc/template5 -f ".*\\.php$"
- sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc6" -t ./webapi/web/apidoc/template6 -f ".*\\.php$"
+ sudo apidoc -c ./apidoc.json -i "./webapi/modules/" -i "./webapi/controllers/" -o "./webapi/web/doc" -f ".*\\.php$"
+ sudo apidoc -c ./apidoc.json -i "./webapi/modules/" -i "./webapi/controllers/" -o "./webapi/web/doc2/" -t ./webapi/web/apidoc/template2 -f ".*\\.php$"
  ```
 
 Api Example:
 -------------------
-
-POST - ```https://sales.api.travelinsides.com/v1/lead/create``` :
-
-CURL Example:
-```
-curl -X POST \
-  'http://sales.api.travelinsides.com/v1/lead/create?debug=1' \
-  -H 'authorization: Basic YmFja29mZmljZTpiZl90ZXN0MjAxOA==' \
-  -H 'cache-control: no-cache' \
-  -H 'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW' \
-  -H 'postman-token: 4f7d0470-f7c1-93fc-2539-10144d213666' \
-  -F 'lead[emails][0]=chalpet@gmail.com' \
-  -F 'lead[emails][1]=chalpet2@gmail.com' \
-  -F 'lead[phones][0]=+373-69-98-698' \
-  -F 'lead[phones][1]=+373-69-98-698' \
-  -F 'lead[flights][0][origin]=BOS' \
-  -F 'lead[flights][0][destination]=LGW' \
-  -F 'lead[flights][0][departure]=2018-09-19' \
-  -F 'lead[flights][1][origin]=LGW' \
-  -F 'lead[flights][1][destination]=BOS' \
-  -F 'lead[flights][1][departure]=2018-09-22' \
-  -F 'lead[source_id]=38' \
-  -F 'lead[adults]=1' \
-  -F 'lead[client_first_name]=Alexandr' \
-  -F 'lead[client_last_name]=Freeman'
-```
 
 Documentation is at [docs/guide/README.md](docs/guide/README.md).
 

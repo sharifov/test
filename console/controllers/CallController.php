@@ -362,7 +362,7 @@ class CallController extends Controller
 //            $limitAgents = SettingHelper::getRedialGetLimitAgents() - $lead->agentsHasAccessToCall;
 //            $job = new LeadRedialAssignToUsersJob($lead->lqc_lead_id, $limitAgents <= 0 ? SettingHelper::getRedialGetLimitAgents() : $limitAgents, 0);
             $job = new LeadRedialAssignToUsersJob($lead->lqc_lead_id, 0);
-            Yii::$app->queue_lead_redial->priority(1)->push($job);
+            Yii::$app->queue_lead_redial->priority(3)->push($job);
             $processed++;
         }
 

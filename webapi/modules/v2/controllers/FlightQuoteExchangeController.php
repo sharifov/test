@@ -6,15 +6,18 @@ use common\components\jobs\VoluntaryExchangeCreateJob;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
+use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateHandler;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use sales\entities\cases\CaseEventLog;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
@@ -93,78 +96,80 @@ class FlightQuoteExchangeController extends BaseController
      *  }
      *
      * @apiParam {string{7..10}}                bookingId                    Booking ID
-     * @apiParam {string{150}}                  key                          Key
-     * @apiParam {object}                       prices                       Prices
-     * @apiParam {number}                       prices.totalPrice            Total Price (total for exchange pay)
-     * @apiParam {number}                       prices.comm                  Comm
-     * @apiParam {bool}                         prices.isCk                  isCk
-     * @apiParam {object}                       passengers                   Passengers
-     * @apiParam {string{3}}                    passengers.ADT               Pax Type (ADT,CHD,INF)
-     * @apiParam {string{3}}                    passengers.ADT.codeAs        Pax Type Code
-     * @apiParam {int}                          passengers.ADT.cnt           Cnt
-     * @apiParam {number}                       passengers.ADT.baseFare      Base Fare (diffFare)
-     * @apiParam {number}                       passengers.ADT.pubBaseFare   Pub Base Fare
-     * @apiParam {number}                       passengers.ADT.baseTax       Base Tax (airlinePenalty)
-     * @apiParam {number}                       passengers.ADT.markup        Markup (processingFee)
-     * @apiParam {number}                       passengers.ADT.comm          Comm
-     * @apiParam {number}                       passengers.ADT.price         Price (total for exchange pay)
-     * @apiParam {number}                       passengers.ADT.tax           Tax
-     * @apiParam {object}                       [passengers.ADT.oBaseFare]                  oBaseFare
-     * @apiParam {number}                       passengers.ADT.oBaseFare.amount             oBaseFare Amount
-     * @apiParam {string{3}}                    passengers.ADT.oBaseFare.currency           oBaseFare Currency
-     * @apiParam {object}                       [passengers.ADT.oBaseTax]                   oBaseTax
-     * @apiParam {number}                       passengers.ADT.oBaseTax.amount              oBaseTax Amount
-     * @apiParam {string{3}}                    passengers.ADT.oBaseTax.currency            oBaseTax Currency
-     * @apiParam {object}                       [passengers.ADT.oExchangeFareDiff]          oExchangeFareDiff
-     * @apiParam {number}                       passengers.ADT.oExchangeFareDiff.amount     oExchangeFareDiff Amount
-     * @apiParam {string{3}}                    passengers.ADT.oExchangeFareDiff.currency   oExchangeFareDiff Currency
-     * @apiParam {object}                       passengers.ADT.oExchangeTaxDiff             oExchangeTaxDiff
-     * @apiParam {number}                       passengers.ADT.oBaseFare.amount             oExchangeTaxDiff Amount
-     * @apiParam {string{3}}                    passengers.ADT.oBaseFare.currency           oExchangeTaxDiff Currency
-     * @apiParam {object[]}                     trips                                        Trips
-     * @apiParam {int}                          trips.tripId                                 Trip Id
-     * @apiParam {object[]}                     trips.segments                               Segments
-     * @apiParam {int}                          trips.segments.segmentId                     Segment Id
-     * @apiParam {string{format Y-m-d H:i}}     trips.segments.departureTime                 DepartureTime
-     * @apiParam {string{format Y-m-d H:i}}     trips.segments.arrivalTime                   ArrivalTime
-     * @apiParam {int}                          [trips.segments.stop]                        Stop
-     * @apiParam {object[]}                     [trips.segments.stops]                       Stops
-     * @apiParam {string{3}}                    trips.segments.stops.locationCode            Location Code
-     * @apiParam {string{format Y-m-d H:i}}     trips.segments.stops.departureDateTime       Departure DateTime
-     * @apiParam {string{format Y-m-d H:i}}     trips.segments.stops.arrivalDateTime         Departure DateTime
-     * @apiParam {int}                          trips.segments.stops.duration                Duration
-     * @apiParam {int}                          trips.segments.stops.elapsedTime             Elapsed Time
-     * @apiParam {int}                          trips.segments.stops.equipment               Equipment
-     * @apiParam {string{3}}                    trips.segments.departureAirportCode     Departure Airport Code IATA
-     * @apiParam {string{3}}                    trips.segments.arrivalAirportCode       Arrival Airport Code IATA
-     * @apiParam {string{5}}}                   trips.segments.flightNumber             Flight Number
-     * @apiParam {string{1}}                    trips.segments.bookingClass             BookingClass
-     * @apiParam {int}                          trips.segments.duration                 Segment duration
-     * @apiParam {string{3}}                    trips.segments.departureAirportTerminal]     Departure Airport Terminal Code
-     * @apiParam {string{3}}                    [trips.segments.arrivalAirportTerminal]       Arrival Airport Terminal Code
-     * @apiParam {string{2}}                    [trips.segments.operatingAirline]       Operating Airline
-     * @apiParam {string{2}}                    [trips.segments.marketingAirline]       Marketing Airline
-     * @apiParam {string{30}}                   [trips.segments.airEquipType]           AirEquipType
-     * @apiParam {string{3}}                    [trips.segments.marriageGroup]          MarriageGroup
-     * @apiParam {int}                          [trips.segments.mileage]                Mileage
-     * @apiParam {string{2}}                    [trips.segments.meal]                   Meal
-     * @apiParam {string{50}}                   [trips.segments.fareCode]               Fare Code
-     * @apiParam {bool}                         [trips.segments.recheckBaggage]         Recheck Baggage
-     * @apiParam {int}                          paxCnt                                  Pax Cnt
-     * @apiParam {string{2}}                    [validatingCarrier]                     ValidatingCarrier
-     * @apiParam {string{2}}                    gds                                     Gds
-     * @apiParam {string{10}}                   pcc                                     pcc
-     * @apiParam {string{50}}                   fareType                                Fare Type
-     * @apiParam {string{1}}                    cabin                                   Cabin
-     * @apiParam {string{3}}                    currency                                Currency
-     * @apiParam {array[]}                      currencies                              Currencies (For example [USD])
-     * @apiParam {object[]}                     [currencyRates]                         CurrencyRates
-     * @apiParam {string{6}}                    currencyRates.USDUSD                    Currency Codes
-     * @apiParam {string{3}}                    currencyRates.USDUSD.from               Currency Code
-     * @apiParam {string{3}}                    currencyRates.USDUSD.to                 Currency Code
-     * @apiParam {number}                       currencyRates.USDUSD.rate               Rate
-     * @apiParam {object}                       [keys]                                  Keys
-     * @apiParam {object}                       [meta]                                  Meta
+     * @apiParam {string{150}}                  apiKey                       ApiKey (Project API Key)
+     * @apiParam {object}                       exchange                     Exchange Data Info
+     * @apiParam {object}                       exchange.prices                       Prices
+     * @apiParam {number}                       exchange.prices.totalPrice            Total Price (total for exchange pay)
+     * @apiParam {number}                       exchange.prices.comm                  Comm
+     * @apiParam {bool}                         exchange.prices.isCk                  isCk
+     * @apiParam {object}                       [exchange.passengers]                 Passengers
+     * @apiParam {string{3}}                    exchange.passengers.ADT               Pax Type (ADT,CHD,INF)
+     * @apiParam {string{3}}                    exchange.passengers.ADT.codeAs        Pax Type Code
+     * @apiParam {int}                          exchange.passengers.ADT.cnt           Cnt
+     * @apiParam {number}                       exchange.passengers.ADT.baseFare      Base Fare (diffFare)
+     * @apiParam {number}                       exchange.passengers.ADT.pubBaseFare   Pub Base Fare
+     * @apiParam {number}                       exchange.passengers.ADT.baseTax       Base Tax (airlinePenalty)
+     * @apiParam {number}                       exchange.passengers.ADT.markup        Markup (processingFee)
+     * @apiParam {number}                       exchange.passengers.ADT.comm          Comm
+     * @apiParam {number}                       exchange.passengers.ADT.price         Price (total for exchange pay)
+     * @apiParam {number}                       exchange.passengers.ADT.tax           Tax
+     * @apiParam {object}                       [exchange.passengers.ADT.oBaseFare]                  oBaseFare
+     * @apiParam {number}                       exchange.passengers.ADT.oBaseFare.amount             oBaseFare Amount
+     * @apiParam {string{3}}                    exchange.passengers.ADT.oBaseFare.currency           oBaseFare Currency
+     * @apiParam {object}                       [exchange.passengers.ADT.oBaseTax]                   oBaseTax
+     * @apiParam {number}                       exchange.passengers.ADT.oBaseTax.amount              oBaseTax Amount
+     * @apiParam {string{3}}                    exchange.passengers.ADT.oBaseTax.currency            oBaseTax Currency
+     * @apiParam {object}                       [exchange.passengers.ADT.oExchangeFareDiff]          oExchangeFareDiff
+     * @apiParam {number}                       exchange.passengers.ADT.oExchangeFareDiff.amount     oExchangeFareDiff Amount
+     * @apiParam {string{3}}                    exchange.passengers.ADT.oExchangeFareDiff.currency   oExchangeFareDiff Currency
+     * @apiParam {object}                       exchange.passengers.ADT.oExchangeTaxDiff             oExchangeTaxDiff
+     * @apiParam {number}                       exchange.passengers.ADT.oBaseFare.amount             oExchangeTaxDiff Amount
+     * @apiParam {string{3}}                    exchange.passengers.ADT.oBaseFare.currency           oExchangeTaxDiff Currency
+     * @apiParam {object[]}                     exchange.trips                                        Trips
+     * @apiParam {int}                          exchange.trips.tripId                                 Trip Id
+     * @apiParam {object[]}                     exchange.trips.segments                               Segments
+     * @apiParam {int}                          exchange.trips.segments.segmentId                     Segment Id
+     * @apiParam {string{format Y-m-d H:i}}     exchange.trips.segments.departureTime                 DepartureTime
+     * @apiParam {string{format Y-m-d H:i}}     exchange.trips.segments.arrivalTime                   ArrivalTime
+     * @apiParam {int}                          [exchange.trips.segments.stop]                        Stop
+     * @apiParam {object[]}                     [exchange.trips.segments.stops]                       Stops
+     * @apiParam {string{3}}                    exchange.trips.segments.stops.locationCode            Location Code
+     * @apiParam {string{format Y-m-d H:i}}     exchange.trips.segments.stops.departureDateTime       Departure DateTime
+     * @apiParam {string{format Y-m-d H:i}}     exchange.trips.segments.stops.arrivalDateTime         Departure DateTime
+     * @apiParam {int}                          exchange.trips.segments.stops.duration                Duration
+     * @apiParam {int}                          exchange.trips.segments.stops.elapsedTime             Elapsed Time
+     * @apiParam {int}                          exchange.trips.segments.stops.equipment               Equipment
+     * @apiParam {string{3}}                    exchange.trips.segments.departureAirportCode     Departure Airport Code IATA
+     * @apiParam {string{3}}                    exchange.trips.segments.arrivalAirportCode       Arrival Airport Code IATA
+     * @apiParam {string{5}}}                   exchange.trips.segments.flightNumber             Flight Number
+     * @apiParam {string{1}}                    exchange.trips.segments.bookingClass             BookingClass
+     * @apiParam {int}                          exchange.trips.segments.duration                 Segment duration
+     * @apiParam {string{3}}                    exchange.trips.segments.departureAirportTerminal]     Departure Airport Terminal Code
+     * @apiParam {string{3}}                    [exchange.trips.segments.arrivalAirportTerminal]       Arrival Airport Terminal Code
+     * @apiParam {string{2}}                    [exchange.trips.segments.operatingAirline]       Operating Airline
+     * @apiParam {string{2}}                    [exchange.trips.segments.marketingAirline]       Marketing Airline
+     * @apiParam {string{30}}                   [exchange.trips.segments.airEquipType]           AirEquipType
+     * @apiParam {string{3}}                    [exchange.trips.segments.marriageGroup]          MarriageGroup
+     * @apiParam {int}                          [exchange.trips.segments.mileage]                Mileage
+     * @apiParam {string{2}}                    [exchange.trips.segments.meal]                   Meal
+     * @apiParam {string{50}}                   [exchange.trips.segments.fareCode]               Fare Code
+     * @apiParam {bool}                         [exchange.trips.segments.recheckBaggage]         Recheck Baggage
+     * @apiParam {int}                          exchange.paxCnt                                  Pax Cnt
+     * @apiParam {string{2}}                    exchange.validatingCarrier                       ValidatingCarrier
+     * @apiParam {string{2}}                    exchange.gds                                     Gds
+     * @apiParam {string{10}}                   exchange.pcc                                     pcc
+     * @apiParam {string{50}}                   exchange.fareType                                Fare Type
+     * @apiParam {string{1}}                    exchange.cabin                                   Cabin
+     * @apiParam {string{3}}                    exchange.cons                                     Consolidator
+     * @apiParam {string{3}}                    exchange.currency                                Currency
+     * @apiParam {array[]}                      [exchange.currencies]                              Currencies (For example [USD])
+     * @apiParam {object[]}                     [exchange.currencyRates]                         CurrencyRates
+     * @apiParam {string{6}}                    exchange.currencyRates.USDUSD                    Currency Codes
+     * @apiParam {string{3}}                    exchange.currencyRates.USDUSD.from               Currency Code
+     * @apiParam {string{3}}                    exchange.currencyRates.USDUSD.to                 Currency Code
+     * @apiParam {number}                       exchange.currencyRates.USDUSD.rate               Rate
+     * @apiParam {object}                       [exchange.keys]                                  Keys
+     * @apiParam {object}                       [exchange.meta]                                  Meta
      * @apiParam {object}                       [billing]                    Billing
      * @apiParam {string{30}}                   billing.first_name           First name
      * @apiParam {string{30}}                   billing.last_name            Last name
@@ -175,6 +180,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{30}}                   billing.city                 City
      * @apiParam {string{40}}                   [billing.state]              State
      * @apiParam {string{2}}                    billing.country_id           Country code (for example "US")
+     * @apiParam {string}                       billing.country              Country name
      * @apiParam {string{10}}                   [billing.zip]                Zip
      * @apiParam {string{20}}                   [billing.contact_phone]      Contact phone
      * @apiParam {string{160}}                  [billing.contact_email]      Contact email
@@ -194,198 +200,126 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParamExample {json} Request-Example:
          {
             "bookingId": "XXXYYYZ",
-            "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
-            "prices": {
-                "totalPrice": 332.12,
-                "comm": 0,
-                "isCk": false
-            },
-            "passengers": {
-                "ADT": {
-                    "codeAs": "JCB",
-                    "cnt": 1,
-                    "baseFare": 32.12,
-                    "pubBaseFare": 32.12,
-                    "baseTax": 300,
-                    "markup": 0,
-                    "comm": 0,
-                    "price": 332.12,
-                    "tax": 300,
-                    "oBaseFare": {
-                        "amount": 32.120003,
-                        "currency": "USD"
-                    },
-                    "oBaseTax": {
-                        "amount": 300,
-                        "currency": "USD"
-                    },
-                    "oExchangeFareDiff": {
-                        "amount": 8,
-                        "currency": "USD"
-                    },
-                    "oExchangeTaxDiff": {
-                        "amount": 24.12,
-                        "currency": "USD"
+            "apiKey": "test-api-key",
+            "exchange": {
+                "trips": [
+                    {
+                        "tripId": 1,
+                        "segments": [
+                            {
+                                "segmentId": 1,
+                                "departureTime": "2022-01-10 20:15",
+                                "arrivalTime": "2022-01-11 21:10",
+                                "stop": 0,
+                                "stops": [
+                                    {
+                                        "locationCode": "LFW",
+                                        "departureDateTime": "2022-01-11 12:35",
+                                        "arrivalDateTime": "2022-01-11 11:35",
+                                        "duration": 60,
+                                        "elapsedTime": 620,
+                                        "equipment": "787"
+                                    }
+                                ],
+                                "flightNumber": "513",
+                                "bookingClass": "H",
+                                "duration": 1015,
+                                "departureAirportCode": "JFK",
+                                "departureAirportTerminal": "8",
+                                "arrivalAirportCode": "ADD",
+                                "arrivalAirportTerminal": "2",
+                                "operatingAirline": "ET",
+                                "airEquipType": "787",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "O",
+                                "cabin": "Y",
+                                "meal": "DL",
+                                "fareCode": "HLESUS",
+                                "recheckBaggage": false
+                            },
+                            {
+                                "segmentId": 2,
+                                "departureTime": "2022-01-11 23:15",
+                                "arrivalTime": "2022-01-12 01:20",
+                                "stop": 0,
+                                "stops": null,
+                                "flightNumber": "308",
+                                "bookingClass": "H",
+                                "duration": 125,
+                                "departureAirportCode": "ADD",
+                                "departureAirportTerminal": "2",
+                                "arrivalAirportCode": "NBO",
+                                "arrivalAirportTerminal": "1C",
+                                "operatingAirline": "ET",
+                                "airEquipType": "738",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "I",
+                                "cabin": "Y",
+                                "meal": "D",
+                                "fareCode": "HLESUS",
+                                "recheckBaggage": false
+                            }
+                        ],
+                        "duration": 1265
                     }
-                }
-            },
-            "trips": [
-                {
-                    "tripId": 1,
-                    "segments": [
-                        {
-                            "segmentId": 1,
-                            "departureTime": "2022-01-10 20:15",
-                            "arrivalTime": "2022-01-11 21:10",
-                            "stop": 1,
-                            "stops": [
-                                {
-                                    "locationCode": "LFW",
-                                    "departureDateTime": "2022-01-11 12:35",
-                                    "arrivalDateTime": "2022-01-11 11:35",
-                                    "duration": 60,
-                                    "elapsedTime": 620,
-                                    "equipment": "787"
-                                }
-                            ],
-                            "flightNumber": "513",
-                            "bookingClass": "H",
-                            "duration": 1015,
-                            "departureAirportCode": "JFK",
-                            "departureAirportTerminal": "8",
-                            "arrivalAirportCode": "ADD",
-                            "arrivalAirportTerminal": "2",
-                            "operatingAirline": "ET",
-                            "airEquipType": "787",
-                            "marketingAirline": "ET",
-                            "marriageGroup": "O",
-                            "cabin": "Y",
-                            "meal": "DL",
-                            "fareCode": "HLESUS",
-                            "recheckBaggage": false
+                ],
+                "passengers": {
+                    "ADT": {
+                        "codeAs": "JCB",
+                        "cnt": 1,
+                        "baseFare": 32.12,
+                        "pubBaseFare": 32.12,
+                        "baseTax": 300,
+                        "markup": 0,
+                        "comm": 0,
+                        "price": 332.12,
+                        "tax": 300,
+                        "oBaseFare": {
+                            "amount": 32.120003,
+                            "currency": "USD"
                         },
-                        {
-                            "segmentId": 2,
-                            "departureTime": "2022-01-11 23:15",
-                            "arrivalTime": "2022-01-12 01:20",
-                            "stop": 0,
-                            "stops": null,
-                            "flightNumber": "308",
-                            "bookingClass": "H",
-                            "duration": 125,
-                            "departureAirportCode": "ADD",
-                            "departureAirportTerminal": "2",
-                            "arrivalAirportCode": "NBO",
-                            "arrivalAirportTerminal": "1C",
-                            "operatingAirline": "ET",
-                            "airEquipType": "738",
-                            "marketingAirline": "ET",
-                            "marriageGroup": "I",
-                            "cabin": "Y",
-                            "meal": "D",
-                            "fareCode": "HLESUS",
-                            "recheckBaggage": false
+                        "oBaseTax": {
+                            "amount": 300,
+                            "currency": "USD"
+                        },
+                        "oExchangeFareDiff": {
+                            "amount": 8,
+                            "currency": "USD"
+                        },
+                        "oExchangeTaxDiff": {
+                            "amount": 24.12,
+                            "currency": "USD"
                         }
-                    ],
-                    "duration": 1265
+                    }
                 },
-                {
-                    "tripId": 2,
-                    "segments": [
-                        {
-                            "segmentId": 1,
-                            "departureTime": "2022-01-31 05:00",
-                            "arrivalTime": "2022-01-31 07:15",
-                            "stop": 0,
-                            "stops": null,
-                            "flightNumber": "309",
-                            "bookingClass": "E",
-                            "duration": 135,
-                            "departureAirportCode": "NBO",
-                            "departureAirportTerminal": "1C",
-                            "arrivalAirportCode": "ADD",
-                            "arrivalAirportTerminal": "2",
-                            "operatingAirline": "ET",
-                            "airEquipType": "738",
-                            "marketingAirline": "ET",
-                            "marriageGroup": "O",
-                            "cabin": "Y",
-                            "meal": "B",
-                            "fareCode": "ELPRUS",
-                            "recheckBaggage": false
-                        },
-                        {
-                            "segmentId": 2,
-                            "departureTime": "2022-01-31 08:30",
-                            "arrivalTime": "2022-01-31 18:15",
-                            "stop": 1,
-                            "stops": [
-                                {
-                                    "locationCode": "LFW",
-                                    "departureDateTime": "2022-01-31 12:15",
-                                    "arrivalDateTime": "2022-01-31 11:00",
-                                    "duration": 75,
-                                    "elapsedTime": 330,
-                                    "equipment": "787"
-                                }
-                            ],
-                            "flightNumber": "512",
-                            "bookingClass": "E",
-                            "duration": 1065,
-                            "departureAirportCode": "ADD",
-                            "departureAirportTerminal": "2",
-                            "arrivalAirportCode": "JFK",
-                            "arrivalAirportTerminal": "8",
-                            "operatingAirline": "ET",
-                            "airEquipType": "787",
-                            "marketingAirline": "ET",
-                            "marriageGroup": "I",
-                            "cabin": "Y",
-                            "meal": "LD",
-                            "fareCode": "ELPRUS",
-                            "recheckBaggage": false
-                        }
-                    ],
-                    "duration": 1275
-                }
-            ],
-            "paxCnt": 1,
-            "validatingCarrier": "",
-            "gds": "S",
-            "pcc": "G9MJ",
-            "cons": "GTT",
-            "fareType": "SR",
-            "cabin": "Y",
-            "currency": "USD",
-            "currencies": [
-                "USD"
-            ],
-            "currencyRates": {
-                "USDUSD": {
-                    "from": "USD",
-                    "to": "USD",
-                    "rate": 1
-                }
-            },
-            "keys": {},
-            "meta": {
-                "eip": 0,
-                "noavail": false,
-                "searchId": "U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx",
-                "lang": "en",
-                "rank": 0,
-                "cheapest": false,
-                "fastest": false,
-                "best": false,
-                "country": "us"
+                "validatingCarrier": "AA",
+                "gds": "S",
+                "pcc": "G9MJ",
+                "cons": "GTT",
+                "fareType": "SR",
+                "cabin": "Y",
+                "currency": "USD",
+                "currencies": [
+                    "USD"
+                ],
+                "currencyRates": {
+                    "USDUSD": {
+                        "from": "USD",
+                        "to": "USD",
+                        "rate": 1
+                    }
+                },
+                "keys": {},
+                "meta": {}
             },
             "billing": {
                   "first_name": "John",
                   "last_name": "Doe",
                   "middle_name": "",
-                  "address_line1": "1013 Weda Cir",
+                  "address_line1": "1013 Weda Cir",paymentRequestForm
                   "address_line2": "",
                   "country_id": "US",
+                  "country" : "United States",
                   "city": "Mayfield",
                   "state": "KY",
                   "zip": "99999",
@@ -395,7 +329,7 @@ class FlightQuoteExchangeController extends BaseController
                   "contact_name": "Test Name"
             },
             "payment_request": {
-                  "method_key": "cc",
+                  "method_key": "card",
                   "currency": "USD",
                   "method_data": {
                       "card": {
@@ -403,7 +337,7 @@ class FlightQuoteExchangeController extends BaseController
                           "holder_name": "Test test",
                           "expiration_month": 10,
                           "expiration_year": 23,
-                          "cvv": "1234"
+                          "cvv": "123"
                       }
                   },
                   "amount": 112.25
@@ -416,8 +350,10 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "resultMessage": "FlightRequest created",
-                    "flightRequestId" : 123,
+                    "resultMessage": "Processing was successful",
+                    "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
+                    "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
+                    "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
                     "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
                },
      *        "code": "13200",
@@ -469,8 +405,8 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 422,
      *        "message": "Validation error",
      *        "errors": [
-     *            "booking_id": [
-     *               "booking_id cannot be blank."
+     *            "bookingId": [
+     *               "bookingId cannot be blank."
      *             ]
      *        ],
      *        "code": "13107",
@@ -552,8 +488,6 @@ class FlightQuoteExchangeController extends BaseController
      */
     public function actionCreate()
     {
-        /* TODO:: add - ErrorName + TypeMessage */
-
         try {
             $post = Yii::$app->request->post();
         } catch (\Throwable $throwable) {
@@ -592,7 +526,7 @@ class FlightQuoteExchangeController extends BaseController
         }
 
         try {
-            if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryExchangeCreateForm->booking_id)) {
+            if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryExchangeCreateForm->bookingId)) {
                 if ($productQuote->isChangeable()) {
                     if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
                         throw new \DomainException('Quote not available for exchange');
@@ -603,19 +537,8 @@ class FlightQuoteExchangeController extends BaseController
                 }
             }
 
-            if (!empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
-                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post)) {
-                    throw new \RuntimeException('Request to Back Office is failed');
-                }
-            } else {
-                \Yii::warning(
-                    'Setting VoluntaryExchangeBoEndpoint is empty. Request not sent.',
-                    'FlightQuoteExchangeController:SettingVoluntaryExchangeBoEndpoint'
-                );
-            }
-
             $flightRequest = FlightRequest::create(
-                $voluntaryExchangeCreateForm->booking_id,
+                $voluntaryExchangeCreateForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
                 $post,
                 $project->id,
@@ -632,15 +555,28 @@ class FlightQuoteExchangeController extends BaseController
                 );
             }
 
-            $job = new VoluntaryExchangeCreateJob();
-            $job->flight_request_id = $flightRequest->fr_id;
-            $job->case_id = $case->cs_id;
-            $jobId = Yii::$app->queue_job->priority(100)->push($job);
-            $flightRequest->fr_job_id = $jobId;
-            $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+            $voluntaryExchangeCreateHandler = new VoluntaryExchangeCreateHandler($case, $flightRequest, $this->objectCollection);
+            try {
+                $voluntaryExchangeCreateHandler->processing();
+
+                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post, $voluntaryExchangeCreateForm)) {
+                    $case->addEventLog(
+                        CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                        'Request (create Voluntary Exchange) to Back Office is failed'
+                    );
+                    throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
+                }
+            } catch (\Throwable $throwable) {
+                $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
+                throw $throwable;
+            }
+
+            $voluntaryExchangeCreateHandler->doneProcess();
 
             $dataMessage['resultMessage'] = 'Processing was successful';
-            $dataMessage['flightRequestId'] = $flightRequest->fr_id;
+            $dataMessage['originQuoteGid'] = $voluntaryExchangeCreateHandler->getOriginProductQuote()->pq_gid;
+            $dataMessage['changeQuoteGid'] = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote()->pq_gid;
+            $dataMessage['productQuoteChangeGid'] = $voluntaryExchangeCreateHandler->getProductQuoteChange()->pqc_gid;
             $dataMessage['caseGid'] = $case->cs_gid;
 
             return new SuccessResponse(
@@ -649,7 +585,7 @@ class FlightQuoteExchangeController extends BaseController
             );
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['booking_id'] = $post['booking_id'] ?? null;
+            $message['bookingId'] = $post['bookingId'] ?? null;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
@@ -663,7 +599,7 @@ class FlightQuoteExchangeController extends BaseController
             );
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['booking_id'] = $post['booking_id'] ?? null;
+            $message['bookingId'] = $post['bookingId'] ?? null;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
@@ -672,7 +608,7 @@ class FlightQuoteExchangeController extends BaseController
 
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
-                new ErrorsMessage($throwable->getMessage()),
+                new ErrorsMessage('Server error. Please try again later.'),
                 new CodeMessage($throwable->getCode())
             );
         }
@@ -708,7 +644,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{20}}           [billing.contact_phone]      Contact phone
      * @apiParam {string{160}}          [billing.contact_email]      Contact email
      * @apiParam {string{60}}           [billing.contact_name]       Contact name
-     * @apiParam {object}               payment_request                      Payment request
+     * @apiParam {object}               [payment_request]                    Payment request
      * @apiParam {number}               payment_request.amount               Amount
      * @apiParam {string{3}}            payment_request.currency             Currency code
      * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")
@@ -852,7 +788,9 @@ class FlightQuoteExchangeController extends BaseController
                 throw new \RuntimeException('VoluntaryExchange by BookingID(' . $bookingId . ') already processed');
             }
 
-            /* TODO::  */
+            /* TODO::
+                add request to BO - https://dev-backoffice.travel-dev.com/docs/api/#api-AirOrder_Self-Service-Create_Exchange_Order
+             */
 
             $dataMessage['resultMessage'] = 'TODO::';
 

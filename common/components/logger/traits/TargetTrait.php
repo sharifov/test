@@ -6,6 +6,7 @@
 
 namespace common\components\logger\traits;
 
+use sales\helpers\app\AppHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\log\Logger;
@@ -75,9 +76,12 @@ trait TargetTrait
             return;
         }
 
+        //VarDumper::dump($this->messages, 10, true);// exit;
+
         foreach ($this->messages as &$message) {
-            $message[0] = ArrayHelper::merge($context, $this->parseText($message[0]));
+            $message[0] = ArrayHelper::merge($context, $this->preParseText($message[0]));
         }
+        //VarDumper::dump($message, 10, true); exit;
     }
 
     /**
@@ -104,6 +108,112 @@ trait TargetTrait
     }
 
     /**
+     * @param $text
+     * @param false $isData
+     * @return array
+     */
+    protected function parseTextArray($text, bool $isData = false): array
+    {
+        $data = [];
+        if ($text) {
+            $text = AppHelper::shotArrayData($text);
+            foreach ($text as $key => $value) {
+                if ($isData) {
+                    $data['@app.data'][$key] = $value;
+                } else {
+                    $data[$key] = $value;
+                }
+            }
+        }
+        if (!empty($text['message']) && empty($data['@message'])) {
+            $data['@message'] = $text['message'];
+            if (isset($data['@app.data']['message'])) {
+                unset($data['@app.data']['message']);
+            }
+        }
+
+        if (!empty($text['trace']) && empty($data['@trace'])) {
+            $data['@trace'] = $text['trace'];
+            if (isset($data['@app.data']['trace'])) {
+                unset($data['@app.data']['trace']);
+            }
+        }
+
+        if (!empty($text['line']) && empty($data['@line'])) {
+            $data['@line'] = $text['line'];
+            if (isset($data['@app.data']['line'])) {
+                unset($data['@app.data']['line']);
+            }
+        }
+
+        if (!empty($text['file']) && empty($data['@file'])) {
+            $data['@file'] = $text['file'];
+            if (isset($data['@app.data']['file'])) {
+                unset($data['@app.data']['file']);
+            }
+        }
+
+        if (!empty($text['code']) && empty($data['@statusCode'])) {
+            $data['@statusCode'] = $text['code'];
+            if (isset($data['@app.data']['code'])) {
+                unset($data['@app.data']['code']);
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @param $text
+     * @param false $isData
+     * @return array
+     */
+    protected function parseTextObject($text, bool $isData = false): array
+    {
+
+        if (is_a($text, \Throwable::class)) {
+            $dataList = AppHelper::throwableLog($text, true);
+        } else {
+            $dataList = get_object_vars($text);
+
+            if ($dataList) {
+                $dataList = AppHelper::shotArrayData($dataList);
+                foreach ($dataList as $key => $value) {
+                    if ($isData) {
+                        $data['@app.data'][$key] = $value;
+                    } else {
+                        $data[$key] = $value;
+                    }
+                }
+            }
+        }
+
+
+        if (!empty($dataList['message']) && empty($dataList['@message'])) {
+            $data['@message'] = $dataList['message'];
+        } else {
+            $data['@message'] = var_export($dataList, true);
+        }
+
+        if (!empty($dataList['code']) && empty($data['@statusCode'])) {
+            $data['@statusCode'] = $dataList['code'];
+        }
+
+        if (!empty($dataList['trace']) && empty($data['@trace'])) {
+            $data['@trace'] = $dataList['trace'];
+        }
+
+        if (!empty($dataList['line']) && empty($data['@line'])) {
+            $data['@line'] = $dataList['line'];
+        }
+
+        if (!empty($dataList['file']) && empty($data['@file'])) {
+            $data['@file'] = $dataList['file'];
+        }
+
+        return $data;
+    }
+
+    /**
      * Convert's any type of log message to array.
      *
      * @param mixed $text Input log message.
@@ -113,13 +223,30 @@ trait TargetTrait
     protected function parseText($text)
     {
         $type = gettype($text);
+
         switch ($type) {
             case 'array':
-                return $text;
+                return $this->parseTextArray($text);
             case 'string':
                 return ['@message' => $text];
             case 'object':
-                return get_object_vars($text);
+                return $this->parseTextObject($text);
+            default:
+                return ['@message' => \Yii::t('log', "Warning, wrong log message type '{$type}'")];
+        }
+    }
+
+    protected function preParseText($text)
+    {
+        $type = gettype($text);
+
+        switch ($type) {
+            case 'array':
+                return $this->parseTextArray($text, true);
+            case 'string':
+                return ['@message' => $text];
+            case 'object':
+                return $this->parseTextObject($text, true);
             default:
                 return ['@message' => \Yii::t('log', "Warning, wrong log message type '{$type}'")];
         }
@@ -139,18 +266,22 @@ trait TargetTrait
         $level = Logger::getLevelName($level);
         $timestamp = date('c', $timestamp);
 
+        //$txt = $this->parseText($text);
+        //чVarDumper::dump($text, 10, true); exit;
+
         $result = ArrayHelper::merge(
             $this->parseText($text),
-            ['level' => $level, 'category' => $category, '@timestamp' => $timestamp]
+            ['@level' => $level, '@category' => $category, '@timestamp' => $timestamp]
         );
 
-        if (isset($message[4]) === true) {
-            $result['trace'] = $message[4];
+        if (!empty($message[4])) {
+            $result['@trace'] = $message[4];
         }
 
-        //VarDumper::dump($text);
-//        VarDumper::dump($message, 10, true); exit;
-//        VarDumper::dump($result, 10, true); exit;
+        if (!empty($message[5])) {
+            $result['@memory'] = $message[5];
+        }
+
         return $result;
     }
 }

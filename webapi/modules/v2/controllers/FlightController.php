@@ -1371,12 +1371,12 @@ class FlightController extends BaseController
      *  }
      *
      * @apiParam {string{32}}           product_quote_gid            Product Quote gid
-     * @apiParam {string[]}             [with]                       Array ("reprotection", "last_change")
+     * @apiParam {string[]}             [with]                       Array ("quote_list", "last_change")
      *
      * @apiParamExample {json} Request-Example:
      *   {
      *      "product_quote_gid": "2bd12377691f282e11af12937674e3d1",
-     *      "with": ["reprotection", "last_change"],
+     *      "with": ["quote_list", "last_change"],
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -1610,8 +1610,9 @@ class FlightController extends BaseController
                     ]
                 }
             },
-            "reprotection_quote_list": [
+            "quote_list": [
                 {
+                    "relation_type": "ReProtection",
                     "recommended": true,
                     "pq_gid": "289ddd4b911e88d7bf1eb14be44754d7",
                     "pq_name": "test",
@@ -1950,21 +1951,24 @@ class FlightController extends BaseController
                 new Message('product_quote', $productQuote->toArray())
             );
 
-            if ($form->withReprotection()) {
-                $reprotectionQuoteList = [];
-                $reprotectionRelationQuotes = ProductQuoteRelation::find()
+            if ($form->withQuoteList()) {
+                $quoteList = [];
+                $relationQuotes = ProductQuoteRelation::find()
                     ->leftJoinRecommended()
                     ->byParentQuoteId($productQuote->pq_id)
-                    ->reprotection()
+                    ->byType([ProductQuoteRelation::TYPE_REPROTECTION, ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE])
                     ->orderByRecommendedDesc()
                     ->all();
-                foreach ($reprotectionRelationQuotes as $relationQuote) {
-                    $reProtectionProductQuote = $relationQuote->pqrRelatedPq;
-                    $data = ArrayHelper::merge(['recommended' => $reProtectionProductQuote->isRecommended()], $reProtectionProductQuote->toArray());
-                    $reprotectionQuoteList[] = $data;
+                foreach ($relationQuotes as $relationQuote) {
+                    $changeProductQuote = $relationQuote->pqrRelatedPq;
+                    $data = ArrayHelper::merge(['recommended' => $changeProductQuote->isRecommended()], $changeProductQuote->toArray());
+                    $data = ArrayHelper::merge([
+                        'relation_type' => ProductQuoteRelation::getTypeName($relationQuote->pqr_type_id)
+                    ], $data);
+                    $quoteList[] = $data;
                 }
                 $response->addMessage(
-                    new Message('reprotection_quote_list', $reprotectionQuoteList)
+                    new Message('quote_list', $quoteList)
                 );
             }
 
