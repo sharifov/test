@@ -30,6 +30,7 @@ class ExchangeForm extends Model
     public $passengers;
     public $prices;
     public $trips;
+    public $tickets;
 
     private array $tripForms = [];
     private ?VoluntaryExchangePriceForm $voluntaryExchangePriceForm = null;
@@ -64,6 +65,9 @@ class ExchangeForm extends Model
             [['trips'], 'tripsProcessing'],
 
             [['passengers'], 'safe'],
+
+            [['tickets'], 'required'],
+            [['tickets'], CheckAndConvertToJsonValidator::class, 'skipOnError' => true],
         ];
     }
 

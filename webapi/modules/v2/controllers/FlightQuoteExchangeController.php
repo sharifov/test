@@ -102,6 +102,12 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {number}                       exchange.prices.totalPrice            Total Price (total for exchange pay)
      * @apiParam {number}                       exchange.prices.comm                  Comm
      * @apiParam {bool}                         exchange.prices.isCk                  isCk
+     * @apiParam {object}                       exchange.tickets                      Tickets
+     * @apiParam {string}                       exchange.tickets.numRef               NumRef
+     * @apiParam {string}                       exchange.tickets.firstName            FirstName
+     * @apiParam {string}                       exchange.tickets.lastName             LastName
+     * @apiParam {string{3}}                    exchange.tickets.paxType              paxType
+     * @apiParam {string}                       exchange.tickets.number               Number
      * @apiParam {object}                       [exchange.passengers]                 Passengers
      * @apiParam {string{3}}                    exchange.passengers.ADT               Pax Type (ADT,CHD,INF)
      * @apiParam {string{3}}                    exchange.passengers.ADT.codeAs        Pax Type Code
@@ -261,6 +267,22 @@ class FlightQuoteExchangeController extends BaseController
                             }
                         ],
                         "duration": 1265
+                    }
+                ],
+                "tickets": [
+                    {
+                        "numRef": "1.1",
+                        "firstName": "PAULA ANNE",
+                        "lastName": "ALVAREZ",
+                        "paxType": "ADT",
+                        "number": "123456789"
+                    },
+                    {
+                        "numRef": "2.1",
+                        "firstName": "ANNE",
+                        "lastName": "ALVAREZ",
+                        "paxType": "ADT",
+                        "number": "987654321"
                     }
                 ],
                 "passengers": {
