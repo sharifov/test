@@ -17,6 +17,7 @@ use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefu
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use sales\services\CurrencyHelper;
+use yii\helpers\Json;
 
 /**
  * Class VoluntaryRefundService
@@ -108,6 +109,7 @@ class VoluntaryRefundService
             $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);
         }
 
+
         foreach ($form->getRefundForm()->auxiliaryOptionsForms as $auxiliaryOptionsForm) {
             $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuote->pq_id, $auxiliaryOptionsForm->type);
 
@@ -124,7 +126,7 @@ class VoluntaryRefundService
                 $auxiliaryOptionsForm->amount,
                 $auxiliaryOptionsForm->refundable,
                 $auxiliaryOptionsForm->refundAllow,
-                $auxiliaryOptionsForm->toArray()
+                Json::decode($auxiliaryOptionsForm->details)
             );
             $productQuoteOptionRefund->new();
             $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);

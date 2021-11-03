@@ -240,6 +240,7 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
         $billing->bi_payment_method_id = $dto->paymentMethodId;
         $billing->bi_cc_id = $dto->creditCardId;
         $billing->bi_order_id = $dto->orderId;
+        $billing->bi_contact_name = $dto->contact_name;
         return $billing;
     }
 

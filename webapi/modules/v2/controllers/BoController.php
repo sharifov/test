@@ -90,7 +90,7 @@ class BoController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{30}=reprotection_update,flight_refund}           type                          Type of action on reprotection
+     * @apiParam {string{30}=reprotection_update,flight_refund,voluntary_flight_refund}           type                          Type of action on reprotection
      * @apiParam {array[]}              data                          Any Data from BO
      * @apiParam {string{8}}               data.booking_id               Booking Id
      * @apiParam {string{20}}               [data.project_key]            Project Key Ex: (ovago, hop2)

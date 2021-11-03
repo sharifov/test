@@ -5,6 +5,7 @@ namespace modules\flight\src\useCases\voluntaryRefund\manualCreate;
 use common\components\validators\CheckIsNumberValidator;
 use common\components\validators\IsArrayValidator;
 use common\models\Currency;
+use frontend\helpers\JsonHelper;
 use sales\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 
@@ -80,6 +81,7 @@ class VoluntaryRefundForm extends Model
             foreach ($data['refund']['auxiliaryOptions'] as $auxiliaryOption) {
                 $auxiliaryOptionForm = new AuxiliaryOptionForm();
                 $auxiliaryOptionForm->load($auxiliaryOption);
+                $auxiliaryOptionForm->details = JsonHelper::encode($auxiliaryOptionForm->details);
                 $this->auxiliaryOptionsForms[] = $auxiliaryOptionForm;
             }
         }
