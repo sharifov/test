@@ -32,6 +32,9 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_VIEW_QUOTES_DIFF = self::NS . 'act/reprotection_quote/original_quote_diff';
     public const ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/set_recommended';
 
+    /** QUERY PERMISSIONS */
+    public const SQL_CASE_QUEUES = self::NS . 'sql/queue';
+
     /** UI PERMISSION */
     public const UI_BLOCK_EVENT_LOG_LIST  = self::NS . 'ui/block/event-log-list';
     public const UI_BTN_EVENT_LOG_VIEW    = self::NS . 'ui/btn/event-log-view';
@@ -54,12 +57,17 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE   => self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE,
 
         self::OBJ_CASE_STATUS_ROUTE_RULES                   => self::OBJ_CASE_STATUS_ROUTE_RULES,
+        self::SQL_CASE_QUEUES                           => self::SQL_CASE_QUEUES,
     ];
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_MASK    = 'mask';
     public const ACTION_UNMASK  = 'unmask';
     public const ACTION_ACCESS  = 'access';
+    public const ACTION_ALL_ACCESS  = 'allAccess';
+    public const ACTION_OWNER_ACCESS  = 'ownerAccess';
+    public const ACTION_EMPTY_OWNER_ACCESS  = 'emptyOwnerAccess';
+    public const ACTION_GROUP_ACCESS  = 'groupAccess';
     public const ACTION_READ  = 'read';
     public const ACTION_CREATE  = 'create';
     public const ACTION_TRANSFER  = 'transfer';
@@ -80,6 +88,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
 
         self::OBJ_CASE_STATUS_ROUTE_RULES   => [self::ACTION_TRANSFER],
+        self::SQL_CASE_QUEUES           => [self::ACTION_OWNER_ACCESS, self::ACTION_EMPTY_OWNER_ACCESS, self::ACTION_GROUP_ACCESS, self::ACTION_ALL_ACCESS],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -190,6 +199,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         ],
 
         self::ACT_FLIGHT_VOLUNTARY_QUOTE => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
+        self::SQL_CASE_QUEUES => [],
     ];
 
     /**
