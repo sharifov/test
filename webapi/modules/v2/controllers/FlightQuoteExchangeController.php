@@ -529,10 +529,10 @@ class FlightQuoteExchangeController extends BaseController
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryExchangeCreateForm->bookingId)) {
                 if ($productQuote->isChangeable()) {
                     if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
-                        throw new \DomainException('Quote not available for exchange');
+                        throw new \DomainException('Product Quote not available for exchange');
                     }
                 } else {
-                    throw new \DomainException('Quote not available for exchange. Status(' .
+                    throw new \DomainException('Product Quote not available for exchange. Status(' .
                         ProductQuoteStatus::getName($productQuote->pq_status_id) . ')');
                 }
             }
