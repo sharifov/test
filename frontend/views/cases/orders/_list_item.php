@@ -209,7 +209,7 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Status</th>
                     <th>Created</th>
                     <th>Client Price</th>
-                    <th colspan="3"></th>
+                    <th></th>
                 </tr>
                 <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
 //                    $ordTotalPrice += $productQuote->pq_price;
@@ -260,7 +260,7 @@ $orderAbacDto = new OrderAbacDto($order);
                 </tr>
  */ ?>
                 <tr title="From DB">
-                    <th class="text-right" colspan="7">Total (price + opt + tips): </th>
+                    <th class="text-right" colspan="5">Total (price + opt + tips): </th>
                     <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <td></td>
                 </tr>
