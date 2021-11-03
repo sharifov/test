@@ -209,7 +209,7 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Status</th>
                     <th>Created</th>
                     <th>Client Price</th>
-                    <th colspan="3"></th>
+                    <th></th>
                 </tr>
                 <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
 //                    $ordTotalPrice += $productQuote->pq_price;
@@ -260,7 +260,7 @@ $orderAbacDto = new OrderAbacDto($order);
                 </tr>
  */ ?>
                 <tr title="From DB">
-                    <th class="text-right" colspan="7">Total (price + opt + tips): </th>
+                    <th class="text-right" colspan="5">Total (price + opt + tips): </th>
                     <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <td></td>
                 </tr>
@@ -596,6 +596,30 @@ $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-s
     $('#modal-md-label').html('Send Flight Schedule Change Email');
     modal.find('.modal-body').html('');
     let id = $(this).attr('data-id');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+    });
+});
+$('body').off('click', '.btn-send-voluntary-refund-quote-email').on('click', '.btn-send-voluntary-refund-quote-email', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-md');
+    $('#modal-md-label').html('Send Flight Voluntary Refund Email');
+    modal.find('.modal-body').html('');
     modal.find('.modal-body').load(url, function( response, status, xhr ) {
         if(status === 'error') {
             createNotify('Error', xhr.responseText, 'error');

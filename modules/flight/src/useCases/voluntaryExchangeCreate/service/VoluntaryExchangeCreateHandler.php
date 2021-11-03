@@ -71,7 +71,7 @@ class VoluntaryExchangeCreateHandler
         $this->caseHandler = new CaseVoluntaryExchangeHandler($case, $this->objectCollection);
     }
 
-    public function processing(): void
+    public function processing(bool $isChangeProcessed = true): void
     {
         $this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->flightRequest->fr_booking_id);
 
@@ -136,6 +136,10 @@ class VoluntaryExchangeCreateHandler
             }
         } else {
             $order = $this->originProductQuote->pqOrder;
+        }
+
+        if (!$isChangeProcessed) {
+            return;
         }
 
         try {

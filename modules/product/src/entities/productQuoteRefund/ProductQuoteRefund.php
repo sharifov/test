@@ -10,12 +10,15 @@ use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
+use modules\product\src\entities\productQuoteRefund\serializer\ProductQuoteRefundSerializer;
 use sales\entities\cases\Cases;
+use sales\entities\serializer\Serializable;
 use sales\services\CurrencyHelper;
 use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "product_quote_refund".
@@ -51,7 +54,7 @@ use yii\db\ActiveRecord;
  * @property string $pqr_gid [varchar(32)]
  * @property string $pqr_cid [varchar(32)]
  */
-class ProductQuoteRefund extends \yii\db\ActiveRecord
+class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
 {
     use FieldsTrait;
 
@@ -154,6 +157,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         return $refund;
     }
 
+    public function new(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::NEW;
+    }
+
     public function error(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::ERROR;
@@ -167,6 +175,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
     public function inProgress(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::IN_PROGRESS;
+    }
+
+    public function inProcessing(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::PROCESSING;
     }
 
     public function processing(): void
@@ -450,11 +463,43 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord
         return $this->pqr_status_id ? ProductQuoteRefundStatus::asFormat($this->pqr_status_id) : '-';
     }
 
+    public function getClientStatusName(): string
+    {
+        return $this->pqr_status_id ? ProductQuoteRefundStatus::getClientKeyStatusById($this->pqr_status_id) : '-';
+    }
+
+    public function getCountOfObjects(): int
+    {
+        return count($this->productQuoteObjectRefunds ?? []);
+    }
+
+    public function getCountOfOptions(): int
+    {
+        return count($this->productQuoteOptionRefunds ?? []);
+    }
+
+    public function getClientSellingPriceFormat(): string
+    {
+        return ($this->pqr_client_selling_price ? number_format($this->pqr_client_selling_price, 2) : '-')
+            . ' ' . Html::encode($this->pqr_client_currency);
+    }
+
+    public function getClientRefundAmountPriceFormat(): string
+    {
+        return ($this->pqr_client_refund_amount ? number_format($this->pqr_client_refund_amount, 2) : '-')
+            . ' ' . Html::encode($this->pqr_client_currency);
+    }
+
     /**
      * @return string
      */
     public static function generateGid(): string
     {
         return md5(uniqid('pqr', true));
+    }
+
+    public function serialize(): array
+    {
+        return (new ProductQuoteRefundSerializer($this))->getData();
     }
 }

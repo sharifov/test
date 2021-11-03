@@ -129,10 +129,10 @@ class ProductQuoteQuery
     public static function getRelatedQuoteByOriginTypesStatuses(int $quoteId, array $types, array $statuses): array
     {
         return ProductQuote::find()
-            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId and pqr_type_id = :typeId', [
-                'typeId' => $types,
+            ->innerJoin(ProductQuoteRelation::tableName(), 'pqr_related_pq_id = pq_id and pqr_parent_pq_id = :parentQuoteId', [
                 'parentQuoteId' => $quoteId,
             ])
+            ->andWhere(['pqr_type_id' => $types])
             ->byStatuses($statuses)
             ->all();
     }

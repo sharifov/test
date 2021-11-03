@@ -226,6 +226,18 @@ class VoluntaryRefundService
             throw new VoluntaryRefundCodeException('Origin Product Quote creation failed', VoluntaryRefundCodeException::ORIGIN_PRODUCT_QUOTE_CREATION_FAILED);
         }
 
+        if (!$boRequestEndpoint = SettingHelper::getVoluntaryRefundBoEndpoint()) {
+            $this->errorHandler($case, null, 'BO endpoint is not set', null);
+            throw new \RuntimeException('BO endpoint is not set', VoluntaryRefundCodeException::BO_REQUEST_IS_NO_SEND);
+        }
+
+        $boDataRequest = BoRequestDataHelper::getDataForVoluntaryCreateByForm($project->api_key, $voluntaryRefundCreateForm);
+        $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+        if (mb_strtolower($result['status']) === 'failed') {
+            $this->errorHandler($case, null, 'BO returns an error', null);
+            throw new BoResponseException($result['message'] ?? '', VoluntaryRefundCodeException::BO_REQUEST_FAILED);
+        }
+
         try {
             $orderRefund = OrderRefund::createByVoluntaryRefund(
                 OrderRefund::generateUid(),
@@ -305,9 +317,14 @@ class VoluntaryRefundService
                 $productQuoteOptionRefund->detachBehavior('user');
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
             }
+        } catch (\RuntimeException | \DomainException $e) {
+            $this->errorHandler($case, $productQuoteRefund ?? null, 'Product Quote Refund structure creation failed: ' . $e->getMessage(), $e);
+            return new RefundCreateResultDto($result['saleData'] ?? [], $result['refundData'] ?? []);
+//            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
         } catch (\Throwable $e) {
             $this->errorHandler($case, $productQuoteRefund ?? null, 'Product Quote Refund structure creation failed', $e);
-            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
+            return new RefundCreateResultDto($result['saleData'] ?? [], $result['refundData'] ?? []);
+//            throw new VoluntaryRefundCodeException('Product Quote Refund structure creation failed', VoluntaryRefundCodeException::PRODUCT_QUOTE_REFUND_CREATION_FAILED);
         }
 
         try {
@@ -319,8 +336,8 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, $productQuoteRefund, 'PaymentRequest processing is failed', $e);
-            throw new VoluntaryRefundCodeException('PaymentRequest processing is failed', VoluntaryRefundCodeException::PAYMENT_DATA_PROCESSED_FAILED);
+            $this->errorHandler($case, $productQuoteRefund ?? null, 'PaymentRequest processing is failed', $e);
+//            throw new VoluntaryRefundCodeException('PaymentRequest processing is failed', VoluntaryRefundCodeException::PAYMENT_DATA_PROCESSED_FAILED);
         }
 
         try {
@@ -336,27 +353,17 @@ class VoluntaryRefundService
                 );
             }
         } catch (\Throwable $e) {
-            $this->errorHandler($case, $productQuoteRefund, 'BillingInfo processing is failed', $e);
-            throw new VoluntaryRefundCodeException('BillingInfo processing is failed', VoluntaryRefundCodeException::BILLING_INFO_PROCESSED_FAILED);
+            $this->errorHandler($case, $productQuoteRefund ?? null, 'BillingInfo processing is failed', $e);
+//            throw new VoluntaryRefundCodeException('BillingInfo processing is failed', VoluntaryRefundCodeException::BILLING_INFO_PROCESSED_FAILED);
         }
 
-        $productQuoteRefund->inProgress();
-        $this->productQuoteRefundRepository->save($productQuoteRefund);
+        if (isset($productQuoteRefund)) {
+            $productQuoteRefund->inProcessing();
+            $this->productQuoteRefundRepository->save($productQuoteRefund);
+        }
 
         $case->awaiting(null, 'Product Quote Refund initiated');
         $this->casesRepository->save($case);
-
-        if (!$boRequestEndpoint = SettingHelper::getVoluntaryRefundBoEndpoint()) {
-            $this->errorHandler($case, $productQuoteRefund, 'BO endpoint is not set', null);
-            throw new \RuntimeException('BO endpoint is not set', VoluntaryRefundCodeException::BO_REQUEST_IS_NO_SEND);
-        }
-
-        $boDataRequest = BoRequestDataHelper::getDataForVoluntaryCreateByForm($project->api_key, $voluntaryRefundCreateForm);
-        $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
-        if (mb_strtolower($result['status']) === 'failed') {
-            $this->errorHandler($case, $productQuoteRefund, 'BO returns an error', null);
-            throw new BoResponseException($result['message'] ?? '', VoluntaryRefundCodeException::BO_REQUEST_FAILED);
-        }
 
         return new RefundCreateResultDto($result['saleData'] ?? [], $result['refundData'] ?? []);
     }
@@ -366,6 +373,7 @@ class VoluntaryRefundService
         if ($productQuoteRefundsNotFinished = ProductQuoteRefundQuery::findAllNotFinishedByProductQuoteId($productQuote->pq_id)) {
             foreach ($productQuoteRefundsNotFinished as $productQuoteRefund) {
                 $productQuoteRefund->cancel();
+                $productQuoteRefund->detachBehavior('user');
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
             }
         }

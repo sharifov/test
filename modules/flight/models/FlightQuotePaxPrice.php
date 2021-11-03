@@ -6,6 +6,7 @@ use common\models\Currency;
 use modules\flight\src\dto\flightQuotePaxPrice\FlightQuotePaxPriceApiBoDto;
 use modules\flight\src\entities\flightQuotePaxPrice\serializer\FlightQuotePaxPriceSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -242,5 +243,25 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             return FlightPax::getPaxTypeById($this->qpp_flight_pax_code_id);
         };
         return $fields;
+    }
+
+    public static function createByFlightQuotePaxPriceForm(
+        FlightQuotePaxPriceForm $form,
+        int $flightQuoteId,
+        string $currency
+    ): self {
+        $model = new self();
+        $model->qpp_flight_quote_id = $flightQuoteId;
+        $model->qpp_flight_pax_code_id = $form->paxCodeId;
+        $model->qpp_cnt = $form->cnt;
+        $model->qpp_fare = $form->fare;
+        $model->qpp_tax = $form->taxes;
+        $model->qpp_system_mark_up = $form->systemMarkUp;
+        $model->qpp_agent_mark_up = $form->markup;
+        $model->qpp_origin_fare = $form->fare;
+        $model->qpp_origin_currency = $currency;
+        $model->qpp_origin_tax = $form->taxes;
+
+        return $model;
     }
 }

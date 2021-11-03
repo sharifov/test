@@ -3,8 +3,10 @@
 namespace modules\flight\src\useCases\voluntaryRefund\manualCreate;
 
 use common\components\validators\CheckIsNumberValidator;
+use common\components\validators\CheckJsonValidator;
 use common\components\validators\IsArrayValidator;
 use common\components\validators\CheckIsBooleanValidator;
+use yii\helpers\Json;
 
 /**
  * Class AuxiliaryOptionForm
@@ -15,7 +17,7 @@ use common\components\validators\CheckIsBooleanValidator;
  * @property float $refundable
  * @property string $status
  * @property bool $refundAllow
- * @property array $details
+ * @property string $details
  */
 class AuxiliaryOptionForm extends \yii\base\Model
 {
@@ -38,7 +40,7 @@ class AuxiliaryOptionForm extends \yii\base\Model
             [['type', 'status'], 'string', 'max' => 50],
             [['refundAllow'], CheckIsBooleanValidator::class],
             [['refundable', 'amount'], CheckIsNumberValidator::class, 'allowInt' => true],
-            [['details'], IsArrayValidator::class]
+            [['details'], CheckJsonValidator::class]
         ];
     }
 

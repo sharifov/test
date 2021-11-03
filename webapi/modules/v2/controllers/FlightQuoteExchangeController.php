@@ -102,6 +102,12 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {number}                       exchange.prices.totalPrice            Total Price (total for exchange pay)
      * @apiParam {number}                       exchange.prices.comm                  Comm
      * @apiParam {bool}                         exchange.prices.isCk                  isCk
+     * @apiParam {object}                       exchange.tickets                      Tickets
+     * @apiParam {string}                       exchange.tickets.numRef               NumRef
+     * @apiParam {string}                       exchange.tickets.firstName            FirstName
+     * @apiParam {string}                       exchange.tickets.lastName             LastName
+     * @apiParam {string{3}}                    exchange.tickets.paxType              paxType
+     * @apiParam {string}                       exchange.tickets.number               Number
      * @apiParam {object}                       [exchange.passengers]                 Passengers
      * @apiParam {string{3}}                    exchange.passengers.ADT               Pax Type (ADT,CHD,INF)
      * @apiParam {string{3}}                    exchange.passengers.ADT.codeAs        Pax Type Code
@@ -263,6 +269,22 @@ class FlightQuoteExchangeController extends BaseController
                         "duration": 1265
                     }
                 ],
+                "tickets": [
+                    {
+                        "numRef": "1.1",
+                        "firstName": "PAULA ANNE",
+                        "lastName": "ALVAREZ",
+                        "paxType": "ADT",
+                        "number": "123456789"
+                    },
+                    {
+                        "numRef": "2.1",
+                        "firstName": "ANNE",
+                        "lastName": "ALVAREZ",
+                        "paxType": "ADT",
+                        "number": "987654321"
+                    }
+                ],
                 "passengers": {
                     "ADT": {
                         "codeAs": "JCB",
@@ -316,7 +338,7 @@ class FlightQuoteExchangeController extends BaseController
                   "first_name": "John",
                   "last_name": "Doe",
                   "middle_name": "",
-                  "address_line1": "1013 Weda Cir",paymentRequestForm
+                  "address_line1": "1013 Weda Cir",
                   "address_line2": "",
                   "country_id": "US",
                   "country" : "United States",
@@ -529,10 +551,10 @@ class FlightQuoteExchangeController extends BaseController
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryExchangeCreateForm->bookingId)) {
                 if ($productQuote->isChangeable()) {
                     if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
-                        throw new \DomainException('Quote not available for exchange');
+                        throw new \DomainException('Product Quote not available for exchange');
                     }
                 } else {
-                    throw new \DomainException('Quote not available for exchange. Status(' .
+                    throw new \DomainException('Product Quote not available for exchange. Status(' .
                         ProductQuoteStatus::getName($productQuote->pq_status_id) . ')');
                 }
             }
@@ -557,14 +579,35 @@ class FlightQuoteExchangeController extends BaseController
 
             $voluntaryExchangeCreateHandler = new VoluntaryExchangeCreateHandler($case, $flightRequest, $this->objectCollection);
             try {
-                $voluntaryExchangeCreateHandler->processing();
-
-                if (!$this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post, $voluntaryExchangeCreateForm)) {
+                if (!$responseBo = $this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post, $voluntaryExchangeCreateForm)) {
                     $case->addEventLog(
                         CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
                         'Request (create Voluntary Exchange) to Back Office is failed'
                     );
                     throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
+                }
+
+                $responseBoStatus = ($responseBo['status'] === 'Success');
+                $voluntaryExchangeCreateHandler->processing($responseBoStatus);
+
+                $dataJson = $flightRequest->fr_data_json;
+                $dataJson['responseBo'] = $responseBo;
+                $flightRequest->fr_data_json = $dataJson;
+                $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+
+                if ($responseBoStatus) {
+                    $case->addEventLog(
+                        CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                        'Request (create Voluntary Exchange) to Back Office is success',
+                        $responseBo
+                    );
+                } else {
+                    $case->addEventLog(
+                        CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                        'Request (create Voluntary Exchange) to Back Office is error',
+                        $responseBo
+                    );
+                    throw new \RuntimeException('Request to Back Office is failed.' . $responseBo['message'] ?? '', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
                 }
             } catch (\Throwable $throwable) {
                 $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());

@@ -17,6 +17,8 @@ use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\dto\ngs\QuoteNgsDataDto;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
+use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuoteCreateForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\helpers\app\AppHelper;
@@ -814,6 +816,41 @@ class FlightQuoteHelper
         }
 
         $model->oldPrices = serialize(ArrayHelper::toArray($model->prices));
+    }
+
+    public static function refreshChangeQuotePrice(VoluntaryQuoteCreateForm $createQuoteForm): VoluntaryQuoteCreateForm
+    {
+        $oldPrices = unserialize($createQuoteForm->oldPrices, ['allowed_classes' => false]);
+        $newPrices = $createQuoteForm->prices;
+
+        foreach ($oldPrices as $oldPrice) {
+            foreach ($newPrices as $key => $value) {
+                if ((int) $oldPrice['paxCodeId'] === (int) $value['paxCodeId']) {
+                    if ((float) $oldPrice['selling'] !== (float) $value['selling']) {
+                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice(($value['selling'] * $createQuoteForm->serviceFee) / 100);
+                        $value['markup'] = ProductQuoteHelper::roundPrice($value['selling'] - $value['systemMarkUp'] - $value['net']);
+                    } elseif ((float) $oldPrice['fare'] !== (float) $value['fare']) {
+                        $value['net'] = ProductQuoteHelper::roundPrice($value['fare'] + $value['taxes']);
+                        $sellingWoFee = $value['net'] + $value['markup'];
+                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice(($sellingWoFee * $createQuoteForm->serviceFee) / 100);
+                        $value['selling'] = ProductQuoteHelper::roundPrice($sellingWoFee + $value['systemMarkUp']);
+                    } elseif ((float) $oldPrice['taxes'] !== (float) $value['taxes']) {
+                        $value['net'] = ProductQuoteHelper::roundPrice($value['fare'] + $value['taxes']);
+                        $sellingWoFee = $value['net'] + $value['markup'];
+                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice(($sellingWoFee * $createQuoteForm->serviceFee) / 100);
+                        $value['selling'] = ProductQuoteHelper::roundPrice($sellingWoFee + $value['systemMarkUp']);
+                    } elseif ((float) $oldPrice['markup'] !== (float) $value['markup']) {
+                        $sellingWoFee = $value['net'] + $value['markup'];
+                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice(($sellingWoFee * $createQuoteForm->serviceFee) / 100);
+                        $value['selling'] = ProductQuoteHelper::roundPrice($sellingWoFee + $value['systemMarkUp']);
+                    }
+
+                    $createQuoteForm->prices[$key] = $value;
+                }
+            }
+        }
+        $createQuoteForm->oldPrices = serialize(ArrayHelper::toArray($createQuoteForm->prices));
+        return $createQuoteForm;
     }
 
     public static function getTripsSegmentsData(string $reservationDump, string $cabinClass, int $tripType): array

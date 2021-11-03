@@ -6,7 +6,8 @@ use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuotePaxPrice;
-use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuoteCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\services\parsingDump\lib\ParsingDump;
 use yii\bootstrap4\ActiveForm;
@@ -16,7 +17,7 @@ use yii\widgets\Pjax;
 
 /**
  * @var View $this
- * @var ReProtectionQuoteCreateForm $createQuoteForm
+ * @var VoluntaryQuoteCreateForm $createQuoteForm
  * @var Flight $flight
  * @var FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @var ProductQuote $originProductQuote
@@ -32,50 +33,23 @@ $paxCntTypes = [
 ];
 $pjaxId = 'pjax-container-vc';
 ?>
-    <div class="row">
-        <div class="col-md-12">
-            <table class="table table-striped table-neutral">
-                <thead>
-                <tr class="text-center">
-                    <th>Pax Type</th>
-                    <th>X</th>
-                    <th>Fare</th>
-                    <th>Taxes</th>
-                    <th>Mark-up</th>
-                    <th>SFP, %</th>
-                    <th>Selling Price, <?= $originProductQuote->pq_origin_currency ?></th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php
-                /** @var FlightQuotePaxPrice $paxPrice */
-                foreach ($flightQuotePaxPrices as $index => $paxPrice) : ?>
-                    <tr class="text-center pax-type-<?= FlightPax::getPaxTypeById($paxPrice->qpp_flight_pax_code_id) ?>" id="price-index-<?= $index ?>">
-                        <td class="td-input">
-                            <?= FlightPax::getPaxTypeById($paxPrice->qpp_flight_pax_code_id) ?>
-                        </td>
-                        <td><?= $paxPrice->qpp_cnt ?></td>
-                        <td class="td-input">
-                            <?= $paxPrice->qpp_fare ?>
-                        </td>
-                        <td class="td-input">
-                            <?= $paxPrice->qpp_tax ?>
-                        </td>
-                        <td class="td-input">
-                            <?= $paxPrice->qpp_agent_mark_up ?>
-                        </td>
-                        <td>
-                            <?= $originProductQuote->pq_service_fee_percent ?>
-                        </td>
-                        <td class="text-right">
-                            <?= ($paxPrice->qpp_fare + $paxPrice->qpp_tax + $paxPrice->qpp_agent_mark_up + $paxPrice->qpp_system_mark_up) * $paxPrice->qpp_cnt ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+
+<?php Pjax::begin([
+    'id' => $pjaxId,
+    'enableReplaceState' => false,
+    'enablePushState' => false,
+    'timeout' => 2000,
+]) ?>
+<?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'add-quote-form', 'enableClientValidation' => true]) ?>
+
+    <div id="box_quote_pax_price">
+        <?php echo $this->render('_flight_quote_pax_price', [
+            'originProductQuote' => $originProductQuote,
+            'createQuoteForm' => $createQuoteForm,
+            'form' => $form,
+        ]); ?>
     </div>
+
     <div class="row">
         <div class="col-md-12">
             <div id="box_segments"></div>
@@ -84,13 +58,7 @@ $pjaxId = 'pjax-container-vc';
     <hr />
     <div class="row">
         <div class="col-md-12">
-            <?php Pjax::begin([
-                    'id' => $pjaxId,
-                    'enableReplaceState' => false,
-                    'enablePushState' => false,
-                    'timeout' => 2000,
-            ]) ?>
-            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'add-quote-form', 'enableClientValidation' => true]) ?>
+
 
             <div class="_form-fields-wrapper">
                 <div id="error_summary_box">
@@ -100,6 +68,7 @@ $pjaxId = 'pjax-container-vc';
                 <?php echo Html::hiddenInput('change_id', $changeId, ['id' => 'changeId'])?>
                 <?php echo Html::hiddenInput('origin_quote_id', $originQuoteId, ['id' => 'originQuoteId'])?>
                 <?php echo Html::hiddenInput('case_id', $changeId, ['id' => 'caseId'])?>
+
 
                 <?php echo Html::hiddenInput('keyTripList', null, ['id' => 'keyTripList']) ?>
 
@@ -173,22 +142,63 @@ $pjaxId = 'pjax-container-vc';
                     </div>
                 </div>
             </div>
-
-            <?php ActiveForm::end(); ?>
-
-            <?php Pjax::end() ?>
         </div>
     </div>
 
+<?php ActiveForm::end(); ?>
+
+<?php Pjax::end() ?>
     <?php
     $urlPrepareDump = \yii\helpers\Url::to(['/flight/flight-quote/ajax-prepare-dump', 'flight_id' => $flight->getId()]);
     $urlSave = \yii\helpers\Url::to(['/flight/flight-quote/save-voluntary-quote', 'flight_id' => $flight->getId()]);
+    $urlRefreshPrice = \yii\helpers\Url::to(
+        [
+            '/flight/flight-quote/refresh-voluntary-price',
+            'flight_id' => $flight->getId(),
+            'origin_quote_id' => $originQuoteId,
+        ]
+    );
+
     $js = <<<JS
     var addVoluntaryQuoteForm = $('#add-quote-form');
+    
+    addVoluntaryQuoteForm.on('change', '.alt-quote-price', function (event) {
+        
+        $('#box_loading').html('<span class="spinner-border spinner-border-sm"></span>');
+        $('.alt-quote-price').prop('readonly', true);
+
+        $.ajax({
+            url: '{$urlRefreshPrice}',
+            type: 'POST',
+            data: addVoluntaryQuoteForm.serialize(),
+            dataType: 'json'
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                $('#box_quote_pax_price').html(dataResponse.data);
+            } else {
+                if (dataResponse.message.length) {
+                    new PNotify({
+                        title: "Error",
+                        type: "error",
+                        text: dataResponse.message,
+                        hide: true
+                    }); 
+                }
+            }
+        })
+        .fail(function(error) {
+            console.log(error);
+        })
+        .always(function() {
+            $('#box_loading').html('');
+            $('.alt-quote-price').prop('readonly', false);
+        });
+    });
 
     $(document).on('beforeSubmit', '#add-quote-form', function(event) {
         let baggageData = $('.segment_baggage_forms').serialize();
-        $('#baggage_data').val(baggageData);        
+        $('#baggage_data').val(baggageData);
         $('#segment_trip_data').val($('.segment_trip_forms').serialize());
     });
     

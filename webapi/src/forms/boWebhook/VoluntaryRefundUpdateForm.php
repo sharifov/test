@@ -37,7 +37,7 @@ class VoluntaryRefundUpdateForm extends \yii\base\Model
             [['booking_id'], 'string', 'max' => 50],
 
             [['project_key'], 'string', 'max' => 255],
-            [['project_key'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['project_key' => 'api_key'], 'skipOnError' => true],
+            [['project_key'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['project_key' => 'project_key'], 'skipOnError' => true],
 
             [['status'], 'string'],
             [['status'], 'in', 'range' => self::STATUS_LIST],

@@ -33,8 +33,10 @@ use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTOItinerary;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuoteCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -77,7 +79,7 @@ class VoluntaryQuoteManualCreateService
     public function createProcessing(
         Flight $flight,
         ProductQuote $originProductQuote,
-        ReProtectionQuoteCreateForm $form,
+        ChangeQuoteCreateForm $form,
         ?int $userId,
         array $segments,
         int $changeId
@@ -102,9 +104,15 @@ class VoluntaryQuoteManualCreateService
         $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
         $this->objectCollection->getFlightQuoteStatusLogRepository()->save($flightQuoteLog);
 
-        foreach ($originFlightQuote->flightQuotePaxPrices as $originalPaxPrice) {
-            $paxPrice = FlightQuotePaxPrice::clone($originalPaxPrice, $flightQuote->fq_id);
-            $this->objectCollection->getFlightQuotePaxPriceRepository()->save($paxPrice);
+        if (!empty($form->getFlightQuotePaxPriceForms())) {
+            foreach ($form->getFlightQuotePaxPriceForms() as $key => $flightQuotePaxPriceForm) {
+                $paxPrice = FlightQuotePaxPrice::createByFlightQuotePaxPriceForm(
+                    $flightQuotePaxPriceForm,
+                    $flightQuote->getId(),
+                    $productQuote->pq_origin_currency
+                );
+                $this->objectCollection->getFlightQuotePaxPriceRepository()->save($paxPrice);
+            }
         }
 
         $this->objectCollection->getFlightQuoteManageService()->createFlightQuoteFlight($flightQuote, null);
@@ -143,7 +151,7 @@ class VoluntaryQuoteManualCreateService
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
 
-            if ($form->gds === SearchService::GDS_WORLDSPAN) {
+            if (in_array($form->gds, [SearchService::GDS_WORLDSPAN, SearchService::GDS_TRAVELPORT], false)) {
                 $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment, $segments);
             }
 
@@ -267,7 +275,7 @@ class VoluntaryQuoteManualCreateService
         return $productQuote;
     }
 
-    private static function prepareFlightQuoteData(ReProtectionQuoteCreateForm $form): array
+    private static function prepareFlightQuoteData(ChangeQuoteCreateForm $form): array
     {
         return [
             'recordLocator' => $form->recordLocator,

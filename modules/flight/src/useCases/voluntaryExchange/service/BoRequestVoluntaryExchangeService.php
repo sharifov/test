@@ -84,7 +84,7 @@ class BoRequestVoluntaryExchangeService
         return $this->orderContactForm;
     }
 
-    public function sendVoluntaryExchange(array $post, VoluntaryExchangeCreateForm $form): bool
+    public function sendVoluntaryExchange(array $post, VoluntaryExchangeCreateForm $form): ?array
     {
         return BackOffice::voluntaryExchange(self::mappingBORequest($post, $form));
     }

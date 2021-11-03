@@ -24,6 +24,7 @@ use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\service\ReProtectionQuoteManualCreateService;
@@ -51,6 +52,7 @@ use sales\forms\CompositeFormHelper;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\product\ProductQuoteHelper;
 use sales\helpers\quote\BaggageHelper;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
@@ -896,7 +898,7 @@ class FlightQuoteController extends FController
                 throw new \RuntimeException('Origin Quote not available for exchange. BackOffice refused');
             }
 
-            $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
+            $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight);
         } catch (\RuntimeException | \DomainException $exception) {
             Yii::warning(AppHelper::throwableLog($exception), 'FlightQuoteController:actionCreateReProtectionQuote:Exception');
             return $exception->getMessage();
@@ -926,6 +928,7 @@ class FlightQuoteController extends FController
             Yii::$app->response->format = Response::FORMAT_JSON;
             $response = ['message' => '', 'status' => 0];
             $flightId = Yii::$app->request->get('flight_id', 0);
+
             $caseId = Yii::$app->request->post('case_id', 0);
             $originQuoteId = Yii::$app->request->post('origin_quote_id', 0);
             $changeId = Yii::$app->request->post('change_id', 0);
@@ -943,9 +946,9 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException('ProductQuoteChange not found');
                 }
 
-                $form = new VoluntaryQuoteCreateForm(Auth::id(), $flightId);
+                $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, false);
                 if (!$form->load(Yii::$app->request->post())) {
-                    throw new \RuntimeException('ReProtectionQuoteCreateForm not loaded');
+                    throw new \RuntimeException('VoluntaryQuoteCreateForm not loaded');
                 }
                 if (!$form->validate()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
@@ -978,7 +981,48 @@ class FlightQuoteController extends FController
                 Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionAjaxPrepareDump:Exception');
                 $response['message'] = VarDumper::dumpAsString($exception->getMessage());
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxPrepareDump:throwable');
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxPrepareDump:Throwable');
+                $response['message'] = 'Internal Server Error';
+            }
+            return $response;
+        }
+        throw new BadRequestHttpException();
+    }
+
+    public function actionRefreshVoluntaryPrice()
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $response = ['message' => '', 'status' => 0, 'data' => ''];
+
+            $flightId = Yii::$app->request->get('flight_id', 0);
+            $originQuoteId = Yii::$app->request->get('origin_quote_id', 0);
+
+            try {
+                $flight = $this->flightRepository->find($flightId);
+                if (!$originProductQuote = ProductQuote::findOne(['pq_id' => $originQuoteId])) {
+                    throw new \RuntimeException('OriginProductQuote not found');
+                }
+
+                $createQuoteForm = new VoluntaryQuoteCreateForm(Auth::id(), $flight, false);
+                if (!$createQuoteForm->load(Yii::$app->request->post())) {
+                    throw new \RuntimeException('VoluntaryQuoteCreateForm not loaded');
+                }
+
+                $createQuoteForm = FlightQuoteHelper::refreshChangeQuotePrice($createQuoteForm);
+
+                $response['data'] = $this->renderAjax('partial/_flight_quote_pax_price', [
+                    'originProductQuote' => $originProductQuote,
+                    'createQuoteForm' => $createQuoteForm,
+                    'form' => new ActiveForm(),
+                ]);
+                $response['message'] = 'Success';
+                $response['status'] = 1;
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:ActionRefreshVoluntaryPrice:Exception');
+                $response['message'] = VarDumper::dumpAsString($exception->getMessage());
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:ActionRefreshVoluntaryPrice:throwable');
                 $response['message'] = 'Internal Server Error';
             }
             return $response;
@@ -1246,7 +1290,7 @@ class FlightQuoteController extends FController
                     $form->disableReadOnlyAllFields();
                     $form->addError('general', $e->getMessage());
                 } catch (\Throwable $e) {
-                    $form->addError('general', 'Refund creation failed');
+                    $form->addError('general', 'Server error, check system logs');
                     Yii::error(AppHelper::throwableLog($e, true), 'FlightQuoteController::actionCreateVoluntaryQuoteRefund::refundCreation::Throwable');
                 }
             }
@@ -1291,7 +1335,7 @@ class FlightQuoteController extends FController
                 $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');
 
                 if (!empty($result['status']) && mb_strtolower($result['status']) === 'failed') {
-                    throw new BoResponseException($result['error'] ? ErrorsToStringHelper::extractFromGetErrors($result['errors']) : $result['message']);
+                    throw new BoResponseException($result['errors'] ? ErrorsToStringHelper::extractFromGetErrors($result['errors']) : $result['message']);
                 }
 
                 $form->load($result);

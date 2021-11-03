@@ -245,7 +245,7 @@ class ProductQuoteController extends FController
                 }
 
                 if (!$emailFrom) {
-                    throw new \RuntimeException('Agent not has assigned email');
+                    throw new \RuntimeException('Agent not has assigned email; Setup in project settings object.case.reprotection_quote.emailFrom;');
                 }
 
                 if (!$emailTemplateType) {

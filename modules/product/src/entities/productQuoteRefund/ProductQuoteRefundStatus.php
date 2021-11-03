@@ -30,15 +30,15 @@ class ProductQuoteRefundStatus
     ];
 
     private const CSS_CLASS_LIST = [
-        self::NEW => 'info',
+        self::NEW => 'primary',
         self::PENDING => 'warning',
         self::CONFIRMED => 'success',
-        self::CANCELED => 'danger',
+        self::CANCELED => 'awake',
         self::COMPLETED => 'success',
         self::ERROR => 'danger',
         self::PROCESSING => 'info',
         self::IN_PROGRESS => 'info',
-        self::DECLINED => 'danger'
+        self::DECLINED => 'awake'
     ];
 
     private const UNIQUE_KEY_LIST = [
