@@ -177,6 +177,11 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         $this->pqr_status_id = ProductQuoteRefundStatus::IN_PROGRESS;
     }
 
+    public function inProcessing(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::PROCESSING;
+    }
+
     public function processing(): void
     {
         $this->pqr_status_id = ProductQuoteRefundStatus::PROCESSING;
