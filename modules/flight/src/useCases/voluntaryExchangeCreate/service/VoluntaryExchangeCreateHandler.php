@@ -13,6 +13,7 @@ use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
@@ -37,6 +38,7 @@ use Yii;
  * @property ProductQuote $originProductQuote
  * @property ProductQuote $voluntaryExchangeQuote
  * @property ProductQuoteChange $productQuoteChange
+ * @property Order $order
  */
 class VoluntaryExchangeCreateHandler
 {
@@ -51,6 +53,7 @@ class VoluntaryExchangeCreateHandler
     private ?ProductQuote $originProductQuote = null;
     private ?ProductQuote $voluntaryExchangeQuote = null;
     private ?ProductQuoteChange $productQuoteChange = null;
+    private ?Order $order = null;
 
     /**
      * @param Cases $case
@@ -71,7 +74,7 @@ class VoluntaryExchangeCreateHandler
         $this->caseHandler = new CaseVoluntaryExchangeHandler($case, $this->objectCollection);
     }
 
-    public function processing(bool $isChangeProcessed = true): void
+    public function processing(): void
     {
         $this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->flightRequest->fr_booking_id);
 
@@ -106,7 +109,7 @@ class VoluntaryExchangeCreateHandler
             }
 
             try {
-                $order = $this->voluntaryExchangeService->createOrder(
+                $this->order = $this->voluntaryExchangeService->createOrder(
                     $this->objectCollection->getBoRequestVoluntaryExchangeService()->getOrderCreateFromSaleForm(),
                     $this->objectCollection->getBoRequestVoluntaryExchangeService()->getOrderContactForm(),
                     $this->case,
@@ -121,7 +124,7 @@ class VoluntaryExchangeCreateHandler
                 $this->originProductQuote = $this->voluntaryExchangeService->createOriginProductQuoteInfrastructure(
                     $this->objectCollection->getBoRequestVoluntaryExchangeService()->getOrderCreateFromSaleForm(),
                     $saleData,
-                    $order,
+                    $this->order,
                     $this->case
                 );
             } catch (\Throwable $throwable) {
@@ -135,13 +138,12 @@ class VoluntaryExchangeCreateHandler
                 \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:setCaseDeadline');
             }
         } else {
-            $order = $this->originProductQuote->pqOrder;
+            $this->order = $this->originProductQuote->pqOrder;
         }
+    }
 
-        if (!$isChangeProcessed) {
-            return;
-        }
-
+    public function additionalProcessing(): void
+    {
         try {
             if (empty($this->flightRequest->fr_data_json)) {
                 throw new \RuntimeException('FlightRequest data_json cannot be empty');
@@ -215,8 +217,10 @@ class VoluntaryExchangeCreateHandler
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($voluntaryExchangeCreateForm));
             }
         } catch (\Throwable $throwable) {
-            $this->caseHandler->caseToPendingManual('FlightRequest json data is corrupted');
-            throw $throwable;
+            \Yii::warning(
+                AppHelper::throwableLog($throwable),
+                'VoluntaryExchangeCreateHandler:additionalProcessing:preparePayment'
+            );
         }
 
         if (
@@ -226,12 +230,14 @@ class VoluntaryExchangeCreateHandler
             try {
                 $this->objectCollection->getPaymentRequestVoluntaryService()->processing(
                     $paymentRequestForm,
-                    $order,
+                    $this->order,
                     'Create by Voluntary Exchange API processing'
                 );
             } catch (\Throwable $throwable) {
-                $this->caseHandler->caseToPendingManual('PaymentRequest processing is failed');
-                throw $throwable;
+                \Yii::warning(
+                    AppHelper::throwableLog($throwable),
+                    'VoluntaryExchangeCreateHandler:additionalProcessing:PaymentRequest'
+                );
             }
         }
 
@@ -245,13 +251,15 @@ class VoluntaryExchangeCreateHandler
 
                 BillingInfoApiVoluntaryService::getOrCreateBillingInfo(
                     $billingInfoForm,
-                    $order->getId(),
+                    $this->order->getId() ?? null,
                     $creditCardId,
                     $paymentMethodId
                 );
             } catch (\Throwable $throwable) {
-                $this->caseHandler->caseToPendingManual('BillingInfo create is failed');
-                throw $throwable;
+                \Yii::warning(
+                    AppHelper::throwableLog($throwable),
+                    'VoluntaryExchangeCreateHandler:additionalProcessing:Billing'
+                );
             }
         }
     }
@@ -313,7 +321,7 @@ class VoluntaryExchangeCreateHandler
 
         if ($this->flightRequestService) {
             $this->flightRequestService->error($description);
-            if ($flightRequest = $this->flightRequestService->getFlightRequest()) {
+            if (($this->productQuoteChange) && ($flightRequest = $this->flightRequestService->getFlightRequest())) {
                 (new CleanDataVoluntaryExchangeService($flightRequest, $this->productQuoteChange, $this->objectCollection));
             }
         }

@@ -385,41 +385,31 @@ class BackOffice
                 Yii::$app->params['backOffice']['serverUrlV3']
             );
 
+            if (!isset($response->content) || !$content = JsonHelper::decode($response->content)) {
+                \Yii::error([
+                    'message' => 'BO voluntaryExchange server error. Content not found',
+                    'request' => (new CreditCardFilter())->filterData($request),
+                    'content' => VarDumper::dumpAsString($response),
+                ], 'BackOffice:voluntaryExchange:serverError');
+                return null;
+            }
             if (!$response->isOk) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange server error',
                     'request' => (new CreditCardFilter())->filterData($request),
-                    'content' => VarDumper::dumpAsString($response->content),
+                    'content' => VarDumper::dumpAsString($content),
                 ], 'BackOffice:voluntaryExchange:serverError');
-                return null;
+                return $content;
             }
-
-            $data = $response->data;
-            if (!$data) {
-                \Yii::error([
-                    'message' => 'BO voluntaryExchange data is empty',
-                    'request' => (new CreditCardFilter())->filterData($request),
-                    'content' => VarDumper::dumpAsString($response->content),
-                ], 'BackOffice:voluntaryExchange:dataIsEmpty');
-                return null;
-            }
-            if (!is_array($data)) {
-                \Yii::error([
-                    'message' => 'BO voluntaryExchange response Data type is invalid',
-                    'request' => (new CreditCardFilter())->filterData($request),
-                    'content' => VarDumper::dumpAsString($response->content),
-                ], 'BackOffice:voluntaryExchange:dataIsInvalid');
-                return null;
-            }
-            if (empty($data['status'])) {
+            if (!isset($content['status'])) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange response - status not found in response',
                     'request' => (new CreditCardFilter())->filterData($request),
-                    'content' => VarDumper::dumpAsString($response->content),
+                    'content' => VarDumper::dumpAsString($content),
                 ], 'BackOffice:voluntaryExchange:statusNotFound');
                 return null;
             }
-            return $data;
+            return $content;
         } catch (\Throwable $exception) {
             \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryExchange');
         }
