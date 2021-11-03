@@ -293,7 +293,10 @@ class LeadManageService
         }
 
         if (!$sourceId && $call->c_project_id) {
-            $sourceId = Sources::getByProjectId($call->c_project_id);
+            $source = Sources::getByProjectId($call->c_project_id);
+            if ($source) {
+                $sourceId = $source->id;
+            }
         }
 
         $lead = Lead::createManually(
