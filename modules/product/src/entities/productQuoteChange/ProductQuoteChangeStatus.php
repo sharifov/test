@@ -30,13 +30,13 @@ class ProductQuoteChangeStatus
     ];
 
     private const CLASS_LIST = [
-        self::NEW => 'info',
+        self::NEW => 'primary',
         self::PENDING => 'warning',
         self::IN_PROGRESS => 'info',
         self::COMPLETED => 'success',
-        self::CANCELED => 'danger',
+        self::CANCELED => 'awake',
         self::ERROR => 'danger',
-        self::DECLINED => 'danger',
+        self::DECLINED => 'awake',
         self::PROCESSING => 'info',
         self::CONFIRMED => 'info',
     ];

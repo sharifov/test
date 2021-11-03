@@ -66,7 +66,7 @@ if ($quote->productQuoteLastChange) {
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
     <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
-    <td colspan="3">
+    <td>
       <div class="btn-group">
 
         <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -134,7 +134,7 @@ if ($quote->productQuoteLastChange) {
     <?php if ($quote->productQuoteChanges) : ?>
         <tr>
             <td></td>
-            <td colspan="7">
+            <td colspan="5">
                 <p><b>Change Quote List:</b></p>
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
@@ -218,7 +218,7 @@ if ($quote->productQuoteLastChange) {
                         <?php if ($quoteChangeRelations = $changeItem->productQuoteChangeRelations) : ?>
                             <tr>
                                 <td></td>
-                                <td colspan="7">
+                                <td colspan="5">
                                     <table class="table table-bordered table-striped table-hover">
                                       <thead>
                                         <tr>
@@ -362,17 +362,20 @@ if ($quote->productQuoteLastChange) {
     <?php if ($quote->productQuoteRefunds) : ?>
         <tr>
             <td></td>
-            <td colspan="7">
+            <td colspan="5">
                 <p><b>Refund List:</b></p>
                 <table class="table table-bordered table-striped">
                     <thead>
                     <tr>
                         <th style="width: 30px;">Nr</th>
                         <th style="width: 80px;">Type</th>
+                        <th title="Count of Objects">Obj</th>
+                        <th title="Count of Options">Opt</th>
                         <th>Status</th>
+                        <th title="Client Status mapping from SiteSettings for OTA" data-toggle="tooltip">Client Status</th>
                         <th>Selling price</th>
                         <th>Refund amount</th>
-                        <th>Client currency</th>
+<!--                        <th>Client currency</th>-->
                         <th style="width: 140px">Created</th>
                         <th style="width: 60px">Action</th>
                     </tr>
@@ -380,16 +383,19 @@ if ($quote->productQuoteLastChange) {
                     <tbody>
                     <?php foreach ($quote->productQuoteRefunds as $nr => $refundItem) : ?>
                         <tr>
-                            <td data-toggle="tooltip" data-original-title="ProductQuoteRefund ID: <?=Html::encode($refundItem->pqr_id)?>" title="ProductQuoteChangeID: <?=Html::encode($refundItem->pqr_id)?>">
+                            <td data-toggle="tooltip" data-html="true" title="Refund ID: <?=Html::encode($refundItem->pqr_id)?> <br> Refund GID: <?=Html::encode($refundItem->pqr_gid)?> <br> Refund CID: <?=Html::encode($refundItem->pqr_cid)?>">
                                 <?=($nr + 1)?>
                             </td>
                             <td>
                                 <?= Html::tag('span', $refundItem->getShortTypeName(), ['class' => 'badge badge-light', 'title' => $refundItem->getTypeName()]); ?>
                             </td>
+                            <td><?= $refundItem->getCountOfObjects() ?></td>
+                            <td><?= $refundItem->getCountOfOptions() ?></td>
                             <td><?= $refundItem->getStatusLabel()?></td>
-                            <td><?= $refundItem->pqr_client_selling_price ? number_format($refundItem->pqr_client_selling_price, 2) : '-'?></td>
-                            <td><?= $refundItem->pqr_client_refund_amount ? number_format($refundItem->pqr_client_refund_amount, 2) : '-'?></td>
-                            <td><?= $refundItem->pqr_client_currency ? Html::encode($refundItem->pqr_client_currency) : '-'?></td>
+                            <td><?= Html::encode($refundItem->getClientStatusName()) ?></td>
+                            <td><?= $refundItem->getClientSellingPriceFormat() ?></td>
+                            <td><?= $refundItem->getClientRefundAmountPriceFormat() ?></td>
+                            <!-- <td><?php // $refundItem->pqr_client_currency ? Html::encode($refundItem->pqr_client_currency) : '-'?></td> -->
                             <td><small><?=$refundItem->pqr_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($refundItem->pqr_created_dt)) : '-'?></small></td>
                             <td>
                               <div class="btn-group">

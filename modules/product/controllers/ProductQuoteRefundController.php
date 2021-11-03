@@ -147,7 +147,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 }
 
                 if (!$emailFrom) {
-                    throw new \RuntimeException('Agent not has assigned email');
+                    throw new \RuntimeException('Agent not has assigned email; Setup in project settings object.case.voluntary_refund.emailFrom;');
                 }
 
                 if (!$emailTemplateType) {

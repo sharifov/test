@@ -18,6 +18,7 @@ use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "product_quote_refund".
@@ -455,6 +456,33 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
     public function getStatusLabel(): string
     {
         return $this->pqr_status_id ? ProductQuoteRefundStatus::asFormat($this->pqr_status_id) : '-';
+    }
+
+    public function getClientStatusName(): string
+    {
+        return $this->pqr_status_id ? ProductQuoteRefundStatus::getClientKeyStatusById($this->pqr_status_id) : '-';
+    }
+
+    public function getCountOfObjects(): int
+    {
+        return count($this->productQuoteObjectRefunds ?? []);
+    }
+
+    public function getCountOfOptions(): int
+    {
+        return count($this->productQuoteOptionRefunds ?? []);
+    }
+
+    public function getClientSellingPriceFormat(): string
+    {
+        return ($this->pqr_client_selling_price ? number_format($this->pqr_client_selling_price, 2) : '-')
+            . ' ' . Html::encode($this->pqr_client_currency);
+    }
+
+    public function getClientRefundAmountPriceFormat(): string
+    {
+        return ($this->pqr_client_refund_amount ? number_format($this->pqr_client_refund_amount, 2) : '-')
+            . ' ' . Html::encode($this->pqr_client_currency);
     }
 
     /**

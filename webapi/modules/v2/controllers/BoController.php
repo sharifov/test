@@ -90,7 +90,7 @@ class BoController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{30}=reprotection_update,flight_refund}           type                          Type of action on reprotection
+     * @apiParam {string{30}=reprotection_update,flight_refund,voluntary_flight_refund}           type                          Type of action on reprotection
      * @apiParam {array[]}              data                          Any Data from BO
      * @apiParam {string{8}}               data.booking_id               Booking Id
      * @apiParam {string{20}}               [data.project_key]            Project Key Ex: (ovago, hop2)
@@ -119,7 +119,7 @@ class BoController extends BaseController
      *      "type": "voluntary_flight_refund",
      *      "data": {
      *          "booking_id": "C4RB44",
-     *          "project_key": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *          "project_key": "ovago",
      *          "status": "Refunded", // allowed values Processing, Refunded, Canceled
      *          "orderId": "RT-SHCN37D" // OTA order id
      *      }
