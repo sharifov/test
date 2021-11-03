@@ -1231,7 +1231,7 @@ class FlightQuoteController extends FController
                     $form->disableReadOnlyAllFields();
                     $form->addError('general', $e->getMessage());
                 } catch (\Throwable $e) {
-                    $form->addError('general', 'Refund creation failed');
+                    $form->addError('general', 'Server error, check system logs');
                     Yii::error(AppHelper::throwableLog($e, true), 'FlightQuoteController::actionCreateVoluntaryQuoteRefund::refundCreation::Throwable');
                 }
             }

@@ -17,6 +17,7 @@ use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefu
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use sales\services\CurrencyHelper;
+use sales\services\TransactionManager;
 use yii\helpers\Json;
 
 /**
@@ -28,6 +29,7 @@ use yii\helpers\Json;
  * @property FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository
  * @property ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository
  * @property ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository
+ * @property TransactionManager $transactionManager
  */
 class VoluntaryRefundService
 {
@@ -36,100 +38,105 @@ class VoluntaryRefundService
     private FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository;
     private ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository;
     private ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository;
+    private TransactionManager $transactionManager;
 
     public function __construct(
         OrderRefundRepository $orderRefundRepository,
         ProductQuoteRefundRepository $productQuoteRefundRepository,
         FlightQuoteTicketRefundRepository $flightQuoteTicketRefundRepository,
         ProductQuoteObjectRefundRepository $productQuoteObjectRefundRepository,
-        ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository
+        ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository,
+        TransactionManager $transactionManager
     ) {
         $this->orderRefundRepository = $orderRefundRepository;
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
         $this->flightQuoteTicketRefundRepository = $flightQuoteTicketRefundRepository;
         $this->productQuoteObjectRefundRepository = $productQuoteObjectRefundRepository;
         $this->productQuoteOptionRefundRepository = $productQuoteOptionRefundRepository;
+        $this->transactionManager = $transactionManager;
     }
 
     public function createManual(Order $order, int $caseId, ProductQuote $originProductQuote, VoluntaryRefundCreateForm $form): void
     {
-        $orderRefund = OrderRefund::createByVoluntaryRefund(
-            OrderRefund::generateUid(),
-            $order->or_id,
-            $order->or_app_total,
-            CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalAirlinePenalty, $order->orClientCurrency->cur_base_rate),
-            CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalProcessingFee, $order->orClientCurrency->cur_base_rate),
-            CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalRefundable, $order->orClientCurrency->cur_base_rate),
-            $order->or_client_currency,
-            $order->or_client_currency_rate,
-            $order->or_client_total,
-            $form->getRefundForm()->totalRefundable,
-            $caseId
-        );
-        $orderRefund->new();
-        $this->orderRefundRepository->save($orderRefund);
-
-        $productQuoteRefund = ProductQuoteRefund::createByVoluntaryRefund(
-            $orderRefund->orr_id,
-            $originProductQuote->pq_id,
-            CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalPaid, $order->orClientCurrency->cur_base_rate),
-            CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalProcessingFee, $order->orClientCurrency->cur_base_rate),
-            CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalRefundable, $order->orClientCurrency->cur_base_rate),
-            CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalAirlinePenalty, $order->orClientCurrency->cur_base_rate),
-            $form->getRefundForm()->currency,
-            $order->or_client_currency_rate,
-            $form->getRefundForm()->totalPaid,
-            $form->getRefundForm()->totalRefundable,
-            $caseId,
-            null,
-            $form->toArray()
-        );
-        $productQuoteRefund->new();
-        $this->productQuoteRefundRepository->save($productQuoteRefund);
-
-        foreach ($form->getRefundForm()->ticketForms as $ticketForm) {
-            $flightQuoteTicketRefund = FlightQuoteTicketRefund::create($ticketForm->number, null);
-            $this->flightQuoteTicketRefundRepository->save($flightQuoteTicketRefund);
-
-            $productQuoteObjectRefund = ProductQuoteObjectRefund::create(
-                $productQuoteRefund->pqr_id,
-                $flightQuoteTicketRefund->fqtr_id,
-                CurrencyHelper::convertToBaseCurrency($ticketForm->selling, $order->orClientCurrency->cur_base_rate),
-                CurrencyHelper::convertToBaseCurrency($ticketForm->airlinePenalty, $order->orClientCurrency->cur_base_rate),
-                CurrencyHelper::convertToBaseCurrency($ticketForm->processingFee, $order->orClientCurrency->cur_base_rate),
-                CurrencyHelper::convertToBaseCurrency($ticketForm->refundable, $order->orClientCurrency->cur_base_rate),
-                $form->getRefundForm()->currency,
+        $this->transactionManager->wrap(function () use ($order, $caseId, $originProductQuote, $form) {
+            $orderRefund = OrderRefund::createByVoluntaryRefund(
+                OrderRefund::generateUid(),
+                $order->or_id,
+                $order->or_app_total,
+                CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalAirlinePenalty, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalProcessingFee, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalRefundable, $order->orClientCurrency->cur_base_rate),
+                $order->or_client_currency,
                 $order->or_client_currency_rate,
-                $ticketForm->selling,
-                $ticketForm->refundable,
-                null,
-                $ticketForm->toArray()
+                $order->or_client_total,
+                $form->getRefundForm()->totalRefundable,
+                $caseId
             );
-            $productQuoteObjectRefund->new();
-            $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);
-        }
+            $orderRefund->new();
+            $this->orderRefundRepository->save($orderRefund);
 
-
-        foreach ($form->getRefundForm()->auxiliaryOptionsForms as $auxiliaryOptionsForm) {
-            $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuote->pq_id, $auxiliaryOptionsForm->type);
-
-            $productQuoteOptionRefund = ProductQuoteOptionRefund::create(
+            $productQuoteRefund = ProductQuoteRefund::createByVoluntaryRefund(
                 $orderRefund->orr_id,
-                $productQuoteRefund->pqr_id,
-                $productQuoteOption->pqo_id ?? null,
-                CurrencyHelper::convertToBaseCurrency($auxiliaryOptionsForm->amount, $order->orClientCurrency->cur_base_rate),
-                null,
-                null,
-                $auxiliaryOptionsForm->amount,
+                $originProductQuote->pq_id,
+                CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalPaid, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalProcessingFee, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalRefundable, $order->orClientCurrency->cur_base_rate),
+                CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->totalAirlinePenalty, $order->orClientCurrency->cur_base_rate),
                 $form->getRefundForm()->currency,
                 $order->or_client_currency_rate,
-                $auxiliaryOptionsForm->amount,
-                $auxiliaryOptionsForm->refundable,
-                $auxiliaryOptionsForm->refundAllow,
-                Json::decode($auxiliaryOptionsForm->details)
+                $form->getRefundForm()->totalPaid,
+                $form->getRefundForm()->totalRefundable,
+                $caseId,
+                null,
+                $form->toArray()
             );
-            $productQuoteOptionRefund->new();
-            $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
-        }
+            $productQuoteRefund->new();
+            $this->productQuoteRefundRepository->save($productQuoteRefund);
+
+            foreach ($form->getRefundForm()->ticketForms as $ticketForm) {
+                $flightQuoteTicketRefund = FlightQuoteTicketRefund::create($ticketForm->number, null);
+                $this->flightQuoteTicketRefundRepository->save($flightQuoteTicketRefund);
+
+                $productQuoteObjectRefund = ProductQuoteObjectRefund::create(
+                    $productQuoteRefund->pqr_id,
+                    $flightQuoteTicketRefund->fqtr_id,
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->selling, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->airlinePenalty, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->processingFee, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->refundable, $order->orClientCurrency->cur_base_rate),
+                    $form->getRefundForm()->currency,
+                    $order->or_client_currency_rate,
+                    $ticketForm->selling,
+                    $ticketForm->refundable,
+                    null,
+                    $ticketForm->toArray()
+                );
+                $productQuoteObjectRefund->new();
+                $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);
+            }
+
+
+            foreach ($form->getRefundForm()->auxiliaryOptionsForms as $auxiliaryOptionsForm) {
+                $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuote->pq_id, $auxiliaryOptionsForm->type);
+
+                $productQuoteOptionRefund = ProductQuoteOptionRefund::create(
+                    $orderRefund->orr_id,
+                    $productQuoteRefund->pqr_id,
+                    $productQuoteOption->pqo_id ?? null,
+                    CurrencyHelper::convertToBaseCurrency($auxiliaryOptionsForm->amount, $order->orClientCurrency->cur_base_rate),
+                    null,
+                    null,
+                    $auxiliaryOptionsForm->amount,
+                    $form->getRefundForm()->currency,
+                    $order->or_client_currency_rate,
+                    $auxiliaryOptionsForm->amount,
+                    $auxiliaryOptionsForm->refundable,
+                    $auxiliaryOptionsForm->refundAllow,
+                    Json::decode($auxiliaryOptionsForm->details)
+                );
+                $productQuoteOptionRefund->new();
+                $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
+            }
+        });
     }
 }

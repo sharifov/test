@@ -231,7 +231,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord implements Serializa
         ?float $clientSellingPrice,
         ?float $clientRefundAmount,
         bool $refundAllow,
-        array $data
+        ?array $data
     ): self {
         $self = new self();
         $self->pqor_order_refund_id = $orderRefundId;
