@@ -202,11 +202,9 @@ class VoluntaryRefundService
                 );
             }
 
-            if (!$order->or_client_currency_rate) {
-                $order->or_client_currency = $voluntaryRefundCreateForm->refundForm->currency;
-                $order->or_client_currency_rate = $order->orClientCurrency->cur_app_rate;
-                $this->orderRepository->save($order);
-            }
+            $order->or_client_currency = $voluntaryRefundCreateForm->refundForm->currency;
+            $order->or_client_currency_rate = $order->orClientCurrency->cur_app_rate;
+            $this->orderRepository->save($order);
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Order creation failed', $e);
             throw new VoluntaryRefundCodeException('Order creation failed', VoluntaryRefundCodeException::ORDER_CREATION_FAILED);
