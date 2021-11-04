@@ -52,6 +52,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqor_client_currency',
             'pqor_client_currency_rate',
             'pqor_client_selling_price',
+            'pqor_client_penalty_amount',
+            'pqor_client_processing_fee_amount',
             'pqor_client_refund_amount',
             'pqor_created_user_id:username',
             'pqor_updated_user_id:username',

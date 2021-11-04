@@ -69,6 +69,8 @@ class VoluntaryRefundService
                 $order->or_client_currency,
                 $order->or_client_currency_rate,
                 $order->or_client_total,
+                $form->getRefundForm()->totalAirlinePenalty,
+                $form->getRefundForm()->totalProcessingFee,
                 $form->getRefundForm()->totalRefundable,
                 $caseId
             );
@@ -85,6 +87,8 @@ class VoluntaryRefundService
                 $form->getRefundForm()->currency,
                 $order->or_client_currency_rate,
                 $form->getRefundForm()->totalPaid,
+                $form->getRefundForm()->totalAirlinePenalty,
+                $form->getRefundForm()->totalProcessingFee,
                 $form->getRefundForm()->totalRefundable,
                 $caseId,
                 null,
@@ -107,6 +111,8 @@ class VoluntaryRefundService
                     $form->getRefundForm()->currency,
                     $order->or_client_currency_rate,
                     $ticketForm->selling,
+                    $ticketForm->airlinePenalty,
+                    $ticketForm->processingFee,
                     $ticketForm->refundable,
                     null,
                     $ticketForm->toArray()
