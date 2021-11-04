@@ -43,6 +43,8 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteRefund $productQuoteRefund
  * @property Employee $updatedUser
  * @property string $pqor_data_json [json]
+ * @property string $pqor_client_penalty_amount [decimal(8,2)]
+ * @property string $pqor_client_processing_fee_amount [decimal(8,2)]
  */
 class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializable
 {
@@ -86,7 +88,7 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializa
         return [
             [['pqor_product_quote_refund_id', 'pqor_quote_object_id'], 'required'],
             [['pqor_product_quote_refund_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id', 'pqor_quote_object_id'], 'integer'],
-            [['pqor_selling_price', 'pqor_penalty_amount', 'pqor_processing_fee_amount', 'pqor_refund_amount', 'pqor_client_currency_rate', 'pqor_client_selling_price', 'pqor_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
+            [['pqor_selling_price', 'pqor_penalty_amount', 'pqor_processing_fee_amount', 'pqor_refund_amount', 'pqor_client_currency_rate', 'pqor_client_selling_price', 'pqor_client_refund_amount', 'pqor_client_penalty_amount', 'pqor_client_processing_fee_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['pqor_created_dt', 'pqor_updated_dt'], 'safe'],
             [['pqor_client_currency'], 'string', 'max' => 3],
             [['pqor_title'], 'string', 'max' => 50],
@@ -124,6 +126,8 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializa
             'pqor_created_dt' => 'Created Dt',
             'pqor_updated_dt' => 'Updated Dt',
             'pqor_data_json' => 'Data',
+            'pqor_client_penalty_amount' => 'Client Penalty Amount',
+            'pqor_client_processing_fee_amount' => 'Client Processing Fee'
         ];
     }
 
