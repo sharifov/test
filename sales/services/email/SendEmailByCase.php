@@ -95,10 +95,11 @@ class SendEmailByCase
     {
         $emailConfigs = $project->getEmailConfigOnApiCaseCreate()[$caseCategory->cc_key] ?? null;
         if (!$emailConfigs) {
-            \Yii::error(VarDumper::dumpAsString([
+            \Yii::error([
+                'message' => 'Not found email config',
                 'projectId' => $project->id,
                 'categoryKey' => $caseCategory->cc_key,
-            ]), 'SendEmailOnCaseCreationBOJob::getEmailConfigsDto');
+            ], 'SendEmailOnCaseCreationBOJob::getEmailConfigsDto');
             throw new \RuntimeException('Not Found email configs in project(' . $project->name . ' - ' . $project->id . ') params by case category key (' . $caseCategory->cc_key . ')');
         }
         return new EmailConfigsDTO($emailConfigs);
