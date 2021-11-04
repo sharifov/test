@@ -8,7 +8,7 @@ use yii\validators\Validator;
  * Class InternalPhoneValidator
  *
  * @property InternalPhoneGuard $phoneGuard
- * @property bool $allowInternalPhone;
+ * @property bool $allowInternalPhone
  */
 class InternalPhoneValidator extends Validator
 {

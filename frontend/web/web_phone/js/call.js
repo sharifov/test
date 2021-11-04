@@ -10,7 +10,8 @@ var PhoneWidgetCall = function () {
         'ajaxSaveCallUrl': '',
         'clearMissedCallsUrl': '',
         'ajaxCreateLeadUrl': '',
-        'ajaxClientGetInfoJsonUrl': '/client/ajax-get-info-json'
+        'ajaxClientGetInfoJsonUrl': '/client/ajax-get-info-json',
+        'ajaxCreateLeadWithInvalidClientUrl': '',
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -971,6 +972,10 @@ var PhoneWidgetCall = function () {
                     if (data.error) {
                         createNotify('Error', data.message, 'error');
                     } else {
+                        if (data.message === 'client is invalid') {
+                            createLeadWithoutCallClient(callSid);
+                            return;
+                        }
                         if(data.warning) {
                             createNotify('Warning', data.message, 'warning');
                         }
@@ -987,6 +992,38 @@ var PhoneWidgetCall = function () {
                 }
             });
         });
+    }
+
+    function createLeadWithoutCallClient(callSid) {
+        let modalTitle = 'Create New Lead';
+        var modal = $('#modal-md');
+        $.ajax({
+            type: 'get',
+            url: settings.ajaxCreateLeadWithInvalidClientUrl,
+            data: {callSid:callSid},
+            dataType: 'html',
+            beforeSend: function () {
+                modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+                modal.find('.modal-title').html(modalTitle);
+                modal.modal('show');
+            },
+            success: function (data) {
+                modal.find('.modal-body').html(data);
+                modal.find('.modal-title').html(modalTitle);
+                $('#preloader').addClass('d-none');
+            },
+            error: function () {
+                new PNotify({
+                    title: 'Error',
+                    type: 'error',
+                    text: 'Internal Server Error. Try again letter.',
+                    hide: true
+                });
+                setTimeout(function () {
+                    $('#modal-md').modal('hide');
+                }, 300)
+            },
+        })
     }
 
     function holdClickEvent() {

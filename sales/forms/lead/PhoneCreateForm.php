@@ -4,8 +4,6 @@ namespace sales\forms\lead;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\ClientPhone;
-use sales\services\client\InternalPhoneException;
-use sales\services\client\InternalPhoneGuard;
 use sales\services\client\InternalPhoneValidator;
 use yii\base\Model;
 
