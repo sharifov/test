@@ -39,7 +39,7 @@ class ProductQuoteRefundSerializer extends Serializer
             'pqr_client_refund_amount',
             'pqr_cid',
             'pqr_client_penalty_amount',
-            'pqr_client_processing_fee'
+            'pqr_client_processing_fee_amount'
         ];
     }
 
