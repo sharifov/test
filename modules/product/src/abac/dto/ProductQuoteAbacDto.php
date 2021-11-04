@@ -43,7 +43,7 @@ class ProductQuoteAbacDto extends \stdClass
     public bool $isOrderOwner;
     public ?int $orTypeId = null;
     public ?int $csCategoryId = null;
-    public bool $isCaseOwner;
+    public bool $isCaseOwner = false;
     public bool $isCommonGroup = false;
     public ?int $csStatusId = null;
     public bool $isAutomateCase;
