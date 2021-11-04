@@ -581,6 +581,33 @@ $('body').off('click', '.has_reprotection_quotes').on('click', '.has_reprotectio
     
     tr.next(1).toggleClass('hidden');
 });
+
+$('body').off('click', '.btn_voluntary_offer_email').on('click', '.btn_voluntary_offer_email', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-md');
+    $('#modal-md-label').html('Send Flight Voluntary Change Email');
+    modal.find('.modal-body').html('');
+    let id = $(this).attr('data-id');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+    });
+});
+
 $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-send-reprotection-quote-email', function (e) {
     e.preventDefault();
     

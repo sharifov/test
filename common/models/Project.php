@@ -5,6 +5,7 @@ namespace common\models;
 use common\models\local\ContactInfo;
 use common\models\query\ProjectQuery;
 use frontend\helpers\JsonHelper;
+use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
@@ -280,6 +281,11 @@ class Project extends \yii\db\ActiveRecord
     public function getVoluntaryRefundEmailConfig(): array
     {
         return ArrayHelper::getValue($this->p_params_json, 'object.case.voluntary_refund', []);
+    }
+
+    public function getVoluntaryChangeEmailConfig(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.voluntary_exchange', []);
     }
 
     public static function getListByUserWithProjectKeys(int $user_id = 0): array
