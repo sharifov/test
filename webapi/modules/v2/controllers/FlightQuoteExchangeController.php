@@ -9,6 +9,7 @@ use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeS
 use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
+use modules\flight\src\useCases\voluntaryExchangeConfirm\service\VoluntaryExchangeConfirmHandler;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateHandler;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
@@ -831,18 +832,22 @@ class FlightQuoteExchangeController extends BaseController
             );
         }
 
+        $flightRequest = FlightRequest::create(
+            $voluntaryExchangeConfirmForm->booking_id,
+            FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CONFIRM,
+            $post,
+            $project->id,
+            $this->auth->getId()
+        );
+        $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+
+        $voluntaryExchangeCreateHandler = new VoluntaryExchangeConfirmHandler(
+            $flightRequest,
+            $voluntaryExchangeConfirmForm,
+            $this->objectCollection
+        );
+
         try {
-            $flightRequest = FlightRequest::create(
-                $voluntaryExchangeConfirmForm->booking_id,
-                FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CONFIRM,
-                $post,
-                $project->id,
-                $this->auth->getId()
-            );
-            $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
-
-            // quote_gid
-
             /* TODO::
                 add request to BO - https://dev-backoffice.travel-dev.com/docs/api/#api-AirOrder_Self-Service-Create_Exchange_Order
              */

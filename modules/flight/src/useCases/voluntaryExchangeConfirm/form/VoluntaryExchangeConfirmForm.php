@@ -3,7 +3,6 @@
 namespace modules\flight\src\useCases\voluntaryExchangeConfirm\form;
 
 use common\components\validators\CheckAndConvertToJsonValidator;
-use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -27,6 +26,7 @@ use yii\base\Model;
  * @property ProductQuote|null $changeQuote
  * @property ProductQuote|null $originQuote
  * @property ProductQuoteChange|null $productQuoteChange
+ * @property Cases $case
  */
 class VoluntaryExchangeConfirmForm extends Model
 {
@@ -42,6 +42,7 @@ class VoluntaryExchangeConfirmForm extends Model
     private ?ProductQuote $changeQuote = null;
     private ?ProductQuote $originQuote = null;
     private ?ProductQuoteChange $productQuoteChange = null;
+    private ?Cases $case = null;
 
     public function rules(): array
     {
@@ -69,6 +70,9 @@ class VoluntaryExchangeConfirmForm extends Model
             }
             if (!$this->productQuoteChange = $this->changeQuote->productQuoteChangeLastRelation->pqcrPqc ?? null) {
                 throw new ValidationException('ProductQuoteChange not found');
+            }
+            if (!$this->case = $this->productQuoteChange->pqcCase ?? null) {
+                throw new ValidationException('Case not found');
             }
             if (!$this->originQuote = ProductQuoteQuery::getOriginProductQuoteByChangeQuote($this->changeQuote->pq_id)) {
                 throw new ValidationException('Origin Quote not found');

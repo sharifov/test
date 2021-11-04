@@ -34,7 +34,6 @@ use function Amp\Promise\timeoutWithDefault;
  * @property Cases $case;
  * @property FlightRequest $flightRequest
  * @property VoluntaryExchangeObjectCollection $objectCollection
- * @property VoluntaryExchangeService $voluntaryExchangeService
  * @property FlightRequestService $flightRequestService
  * @property CaseVoluntaryExchangeHandler $caseHandler
  * @property VoluntaryExchangeConfirmForm $confirmForm
@@ -46,41 +45,52 @@ use function Amp\Promise\timeoutWithDefault;
  */
 class VoluntaryExchangeConfirmHandler
 {
-    private Cases $case;
+
     private FlightRequest $flightRequest;
     private VoluntaryExchangeConfirmForm $confirmForm;
     private VoluntaryExchangeObjectCollection $objectCollection;
 
-    private VoluntaryExchangeService $voluntaryExchangeService;
     private FlightRequestService $flightRequestService;
     private CaseVoluntaryExchangeHandler $caseHandler;
 
+    private Cases $case;
     private ?ProductQuote $originProductQuote = null;
     private ?ProductQuote $voluntaryExchangeQuote = null;
     private ?ProductQuoteChange $productQuoteChange = null;
     private ?Order $order = null;
 
     /**
-     * @param Cases $case
      * @param FlightRequest $flightRequest
      * @param VoluntaryExchangeConfirmForm $confirmForm
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
      */
     public function __construct(
-        Cases $case,
         FlightRequest $flightRequest,
         VoluntaryExchangeConfirmForm $confirmForm,
         VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
     ) {
-        /* TODO::  */
-        $this->case = $case;
+        $this->confirmForm = $confirmForm;
         $this->flightRequest = $flightRequest;
         $this->objectCollection = $voluntaryExchangeObjectCollection;
-        $this->confirmForm = $confirmForm;
 
-        $this->voluntaryExchangeService =  new VoluntaryExchangeService($this->objectCollection);
+        $this->case = $confirmForm->getCase();
+        $this->originProductQuote = $confirmForm->getOriginQuote();
+        $this->voluntaryExchangeQuote = $confirmForm->getOriginQuote();
+        $this->productQuoteChange = $confirmForm->getProductQuoteChange();
+
         $this->flightRequestService = new FlightRequestService($flightRequest, $this->objectCollection);
-        $this->caseHandler = new CaseVoluntaryExchangeHandler($case, $this->objectCollection);
+        $this->caseHandler = new CaseVoluntaryExchangeHandler($this->case, $this->objectCollection);
+    }
+
+    public function prepareRequest(): void
+    {
+        $request['apiKey'] = $this->case->project->api_key;
+        $request['bookingId'] = $this->confirmForm->booking_id;
+
+        /* TODO::  */
+
+        $request['billing'] = null /* TODO::  */;
+        $request['payment'] = null /* TODO::  */;
     }
 
     public function processing(): void

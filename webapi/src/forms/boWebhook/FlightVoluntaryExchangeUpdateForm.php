@@ -34,7 +34,7 @@ class FlightVoluntaryExchangeUpdateForm extends \yii\base\Model
             [['booking_id'], 'string'],
 
             [['project_key'], 'string'],
-            [['project_key'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_key' => 'api_key']],
+            [['project_key'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_key' => 'project_key']],
 
             [['status'], 'required'],
             [['status'], 'string'],
