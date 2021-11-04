@@ -215,6 +215,8 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializa
         string $clientCurrency,
         float $clientCurrencyRate,
         float $clientSellingPrice,
+        float $clientPenaltyAmount,
+        float $clientProcessingFeeAmount,
         float $clientRefundAmount,
         ?string $title,
         array $dataJson
@@ -229,6 +231,8 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializa
         $self->pqor_client_currency = $clientCurrency;
         $self->pqor_client_currency_rate = $clientCurrencyRate;
         $self->pqor_client_selling_price = $clientSellingPrice;
+        $self->pqor_client_penalty_amount = $clientPenaltyAmount;
+        $self->pqor_client_processing_fee_amount = $clientProcessingFeeAmount;
         $self->pqor_client_refund_amount = $clientRefundAmount;
         $self->pqor_title = $title;
         $self->pqor_data_json = $dataJson;

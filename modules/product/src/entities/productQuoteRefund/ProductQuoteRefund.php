@@ -134,6 +134,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         $clientCurrency,
         $clientCurrencyRate,
         $clientSelling,
+        $clientPenaltyAmount,
+        $clientProcessingFeeAmount,
         $clientRefundAmount,
         $caseId,
         $cid,
@@ -152,6 +154,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         $refund->pqr_refund_amount = $refundAmount;
         $refund->pqr_penalty_amount = $penaltyAmount;
         $refund->pqr_client_selling_price = $clientSelling;
+        $refund->pqr_client_penalty_amount = $clientPenaltyAmount;
+        $refund->pqr_client_processing_fee_amount = $clientProcessingFeeAmount;
         $refund->pqr_client_refund_amount = $clientRefundAmount;
         $refund->pqr_data_json = $data;
         $refund->pqr_cid = $cid;

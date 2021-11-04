@@ -246,7 +246,9 @@ class VoluntaryRefundService
                 CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->refundForm->totalRefundAmount, $order->orClientCurrency->cur_base_rate),
                 $order->or_client_currency,
                 $order->or_client_currency_rate,
-                $order->or_client_total,
+                $voluntaryRefundCreateForm->refundForm->totalPaid,
+                $voluntaryRefundCreateForm->refundForm->penaltyAmount,
+                $voluntaryRefundCreateForm->refundForm->processingFee,
                 $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
                 $case->cs_id
             );
@@ -262,6 +264,8 @@ class VoluntaryRefundService
                 $voluntaryRefundCreateForm->refundForm->currency,
                 $order->or_client_currency_rate,
                 $voluntaryRefundCreateForm->refundForm->totalPaid,
+                $voluntaryRefundCreateForm->refundForm->penaltyAmount,
+                $voluntaryRefundCreateForm->refundForm->processingFee,
                 $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
                 $case->cs_id,
                 $voluntaryRefundCreateForm->refundForm->orderId,
@@ -284,6 +288,8 @@ class VoluntaryRefundService
                     $voluntaryRefundCreateForm->refundForm->currency,
                     $order->or_client_currency_rate,
                     $ticketForm->sellingPrice,
+                    $ticketForm->airlinePenalty,
+                    $ticketForm->processingFee,
                     $ticketForm->refundAmount,
                     null,
                     $ticketForm->toArray()

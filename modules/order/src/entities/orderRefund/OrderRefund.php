@@ -85,6 +85,8 @@ class OrderRefund extends \yii\db\ActiveRecord implements Serializable
         $clientCurrency,
         $clientCurrencyRate,
         $clientSellingPrice,
+        $clientPenaltyAmount,
+        $clientProcessingFeeAmount,
         $clientRefundAmount,
         $caseId
     ): self {
@@ -104,6 +106,8 @@ class OrderRefund extends \yii\db\ActiveRecord implements Serializable
         $refund->orr_status_id = OrderRefundStatus::PENDING;
         $refund->orr_description = 'Voluntary refund request';
         $refund->orr_client_refund_amount = $clientRefundAmount;
+        $refund->orr_client_penalty_amount = $clientPenaltyAmount;
+        $refund->orr_client_processing_fee_amount = $clientProcessingFeeAmount;
         $refund->detachBehavior('user');
         return $refund;
     }
