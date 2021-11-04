@@ -497,7 +497,7 @@ class ProductQuoteController extends FController
 
     public function actionSetRecommended()
     {
-        $reprotectionQuoteId = Yii::$app->request->post('quoteId', 0);
+        $changeQuoteId = Yii::$app->request->post('quoteId', 0);
 
         $result = [
             'error' => false,
@@ -509,13 +509,13 @@ class ProductQuoteController extends FController
                 throw new \DomainException('You do not have access to perform this action');
             }
 
-            $reprotectionQuote = $this->productQuoteRepository->find($reprotectionQuoteId);
+            $changeQuote = $this->productQuoteRepository->find($changeQuoteId);
 
-            if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id)) {
+            if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByChangeQuote($changeQuote->pq_id)) {
                 throw new NotFoundException('Origin Quote Not Found');
             }
 
-            $this->productQuoteDataManageService->updateRecommendedChangeQuote($originQuote->pq_id, $reprotectionQuote->pq_id);
+            $this->productQuoteDataManageService->updateRecommendedChangeQuote($originQuote->pq_id, $changeQuote->pq_id);
         } catch (NotFoundException | \RuntimeException | \DomainException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();

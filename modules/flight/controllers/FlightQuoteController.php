@@ -821,7 +821,7 @@ class FlightQuoteController extends FController
                         $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
                         $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
                         if (!$voluntaryExchangeBOService->isAllow()) {
-                            throw new \RuntimeException('Origin Quote not available for exchange. BackOffice refused');
+                            throw new \RuntimeException('Exchange is not allowed');
                         }
 
                         $productQuoteChange = ProductQuoteChange::createVoluntaryExchange(
@@ -880,7 +880,7 @@ class FlightQuoteController extends FController
             $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
             $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
             if (!$voluntaryExchangeBOService->isAllow()) {
-                throw new \RuntimeException('Origin Quote not available for exchange. BackOffice refused');
+                throw new \RuntimeException('Exchange is not allowed');
             }
 
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight);

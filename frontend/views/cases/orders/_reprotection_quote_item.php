@@ -166,52 +166,55 @@ if ($quote->productQuoteLastChange) {
                             <td><?= $changeItem->getDecisionTypeLabel()?></td>
                             <td><small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small></td>
                             <td>
-                                <div class="btn-group">
+                        <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
+                        <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
+                        <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE) || Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
+                            <div class="btn-group">
 
-                                <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                  <i class="fa fa-bars"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <?php if ($changeItem->isTypeVoluntary()) : ?>
-                                        <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
-                                        <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
-                                            <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
-                                                <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Change Quote', null, [
-                                                    'data-flight-id' => $flight->getId(),
-                                                    'class' => 'dropdown-item btn_create_voluntary',
-                                                    'data-url' => Url::to([
-                                                        '/flight/flight-quote/create-voluntary-quote',
-                                                        'flight_id' => $flight->getId(),
-                                                        'case_id' => $caseId,
-                                                        'origin_quote_id' => $quote->pq_id,
-                                                        'change_id' => $changeItem->pqc_id,
-                                                    ]),
-                                                    'title' => 'Add Voluntary Change Quote'
-                                                ]) ?>
-                                            <?php endif ?>
-                                        <?php endif ?>
-                                    <?php else : ?>
-                                        <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
-                                        <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
-                                            <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
-                                                <?= Html::a('<i class="fas fa-plus-circle"></i> Add ReProtection Quote', null, [
-                                                    'data-flight-id' => $flight->getId(),
-                                                    'class' => 'dropdown-item btn_create_from_dump',
-                                                    'data-url' => Url::to([
-                                                        '/flight/flight-quote/create-re-protection-quote',
-                                                        'flight_id' => $flight->getId(),
-                                                        'change_id' => $changeItem->pqc_id,
-                                                    ]),
-                                                    'data-toggle' => 'tooltip',
-                                                    'data-placement' => 'right',
-                                                    'title' => 'Add ReProtection Quote'
-                                                ]) ?>
-                                            <?php endif ?>
+                            <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <i class="fa fa-bars"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <?php if ($changeItem->isTypeVoluntary()) : ?>
+                                    <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
+                                    <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
+                                        <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
+                                            <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Change Quote', null, [
+                                                'data-flight-id' => $flight->getId(),
+                                                'class' => 'dropdown-item btn_create_voluntary',
+                                                'data-url' => Url::to([
+                                                    '/flight/flight-quote/create-voluntary-quote',
+                                                    'flight_id' => $flight->getId(),
+                                                    'case_id' => $caseId,
+                                                    'origin_quote_id' => $quote->pq_id,
+                                                    'change_id' => $changeItem->pqc_id,
+                                                ]),
+                                                'title' => 'Add Voluntary Change Quote'
+                                            ]) ?>
                                         <?php endif ?>
                                     <?php endif ?>
+                                <?php else : ?>
+                                    <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
+                                    <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
+                                        <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
+                                            <?= Html::a('<i class="fas fa-plus-circle"></i> Add ReProtection Quote', null, [
+                                                'data-flight-id' => $flight->getId(),
+                                                'class' => 'dropdown-item btn_create_from_dump',
+                                                'data-url' => Url::to([
+                                                    '/flight/flight-quote/create-re-protection-quote',
+                                                    'flight_id' => $flight->getId(),
+                                                    'change_id' => $changeItem->pqc_id,
+                                                ]),
+                                                'data-toggle' => 'tooltip',
+                                                'data-placement' => 'right',
+                                                'title' => 'Add ReProtection Quote'
+                                            ]) ?>
+                                        <?php endif ?>
+                                    <?php endif ?>
+                                <?php endif ?>
                                 </div>
-                              </div>
-
+                            </div>
+                        <?php endif ?>
                             </td>
                         </tr>
 
