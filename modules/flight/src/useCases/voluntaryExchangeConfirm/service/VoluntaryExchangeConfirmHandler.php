@@ -6,6 +6,7 @@ use common\components\purifier\Purifier;
 use common\models\CaseSale;
 use common\models\Notifications;
 use frontend\helpers\JsonHelper;
+use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
 use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
@@ -23,6 +24,8 @@ use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
+use webapi\src\forms\billing\BillingInfoForm;
+use webapi\src\forms\payment\PaymentRequestForm;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
 use Yii;
 
@@ -86,14 +89,46 @@ class VoluntaryExchangeConfirmHandler
     {
         $request['apiKey'] = $this->case->project->api_key;
         $request['bookingId'] = $this->confirmForm->booking_id;
+        $request['billing'] = self::mappingBilling($this->confirmForm->getBillingInfoForm());
+        $request['payment'] = self::mappingPayment($this->confirmForm->getPaymentRequestForm());
+
+        /* TODO::  */
+    }
+
+    private function prepareExchange(): array
+    {
+        $data['currency'] = $this->voluntaryExchangeQuote->pq_client_currency ?: $this->voluntaryExchangeQuote->pq_origin_currency;
+        $data['validatingCarrier'] = $this->voluntaryExchangeQuote->flightQuote->fq_main_airline;
+        $data['gds'] = $this->voluntaryExchangeQuote->flightQuote->fq_gds;
+        $data['pcc'] = $this->voluntaryExchangeQuote->flightQuote->fq_gds_pcc;
+        $data['fareType'] = FlightQuote::getFareTypeNameById($this->voluntaryExchangeQuote->flightQuote->fq_fare_type_id);
+        $data['cabin'] = $this->voluntaryExchangeQuote->flightQuote->fq_cabin_class;
+
+        $caseSale = $this->getSale();
 
         /* TODO::  */
 
-        $request['billing'] = null /* TODO::  */;
-        $request['payment'] = null /* TODO::  */;
+        //$this->originProductQuote->flightQuote->
+
+        //$data['tickets'] = [];
+
+        return $data;
     }
 
-    public function processing(): void
+    private function getSale(): CaseSale
+    {
+        if (!$caseSale = CaseSale::findOne(['css_cs_id' => $this->case->cs_id, 'css_sale_book_id' => $this->confirmForm->booking_id])) {
+            throw new \RuntimeException('CaseSale not found by case(' . $this->case->cs_id . ') and booking(' . $this->confirmForm->booking_id . ')');
+        }
+        return $caseSale;
+    }
+
+    public function doneProcess(): void
+    {
+        /* TODO::  */
+    }
+
+    public function failProcess(string $description): void
     {
         /* TODO::  */
     }
@@ -141,16 +176,6 @@ class VoluntaryExchangeConfirmHandler
         }
     }
 
-    public function doneProcess(): void
-    {
-        /* TODO::  */
-    }
-
-    public function failProcess(string $description): void
-    {
-        /* TODO::  */
-    }
-
     public function getOriginProductQuote(): ?ProductQuote
     {
         return $this->originProductQuote;
@@ -164,5 +189,39 @@ class VoluntaryExchangeConfirmHandler
     public function getProductQuoteChange(): ?ProductQuoteChange
     {
         return $this->productQuoteChange;
+    }
+
+    public static function mappingBilling(?BillingInfoForm $billingInfoForm): array
+    {
+        $data['billing'] = null;
+        if ($billingInfoForm) {
+            $data['billing'] = [
+                'address' => $billingInfoForm->address_line1,
+                'countryCode' => $billingInfoForm->country_id,
+                'country' => $billingInfoForm->country,
+                'city' => $billingInfoForm->city,
+                'state' => $billingInfoForm->state,
+                'zip' => $billingInfoForm->zip,
+                'phone' => $billingInfoForm->contact_phone,
+                'email' => $billingInfoForm->contact_email
+            ];
+        }
+        return $data;
+    }
+    public static function mappingPayment(?PaymentRequestForm $paymentRequestForm): array
+    {
+        $data['payment'] = null;
+        if ($paymentRequestForm) {
+            $data['payment'] = [
+                'type' => mb_strtoupper($paymentRequestForm->method_key),
+                'card' => [
+                    'holderName' => $paymentRequestForm->creditCardForm->holder_name,
+                    'number' => $paymentRequestForm->creditCardForm->number,
+                    'expirationDate' => $paymentRequestForm->creditCardForm->expiration_month . '/' . $paymentRequestForm->creditCardForm->expiration_year,
+                    'cvv' => $paymentRequestForm->creditCardForm->cvv
+                ]
+            ];
+        }
+        return $data;
     }
 }
