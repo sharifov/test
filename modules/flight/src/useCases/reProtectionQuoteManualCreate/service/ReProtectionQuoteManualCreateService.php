@@ -199,7 +199,7 @@ class ReProtectionQuoteManualCreateService
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
 
-            if ($form->gds === SearchService::GDS_WORLDSPAN) {
+            if (in_array($form->gds, [SearchService::GDS_WORLDSPAN, SearchService::GDS_TRAVELPORT], false)) {
                 $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment, $segments);
             }
 
