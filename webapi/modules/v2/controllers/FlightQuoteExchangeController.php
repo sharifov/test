@@ -579,6 +579,13 @@ class FlightQuoteExchangeController extends BaseController
 
             $voluntaryExchangeCreateHandler = new VoluntaryExchangeCreateHandler($case, $flightRequest, $this->objectCollection);
             try {
+                $voluntaryExchangeCreateHandler->processing();
+            } catch (\Throwable $throwable) {
+                $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
+                throw $throwable;
+            }
+
+            try {
                 if (!$responseBo = $this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post, $voluntaryExchangeCreateForm)) {
                     $case->addEventLog(
                         CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
@@ -586,40 +593,37 @@ class FlightQuoteExchangeController extends BaseController
                     );
                     throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
                 }
-
-                $responseBoStatus = ($responseBo['status'] === 'Success');
-                $voluntaryExchangeCreateHandler->processing($responseBoStatus);
-
                 $dataJson = $flightRequest->fr_data_json;
                 $dataJson['responseBo'] = $responseBo;
                 $flightRequest->fr_data_json = $dataJson;
                 $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
-                if ($responseBoStatus) {
-                    $case->addEventLog(
-                        CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
-                        'Request (create Voluntary Exchange) to Back Office is success',
-                        $responseBo
-                    );
-                } else {
-                    $case->addEventLog(
-                        CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
-                        'Request (create Voluntary Exchange) to Back Office is error',
-                        $responseBo
-                    );
-                    throw new \RuntimeException('Request to Back Office is failed.' . $responseBo['message'] ?? '', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
-                }
+                $responseBoStatus = ($responseBo['status'] === 'Success');
             } catch (\Throwable $throwable) {
                 $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
                 throw $throwable;
             }
 
-            $voluntaryExchangeCreateHandler->doneProcess();
+            if (!$responseBoStatus) {
+                $voluntaryExchangeCreateHandler->failProcess('Response from Back Office is failed, status (' . $responseBo['status']  . ')');
+                throw new \RuntimeException(
+                    'Request to Back Office is failed, status (' . $responseBo['status']  . ')',
+                    ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR
+                );
+            }
+
+            try {
+                $voluntaryExchangeCreateHandler->additionalProcessing();
+                $voluntaryExchangeCreateHandler->doneProcess();
+            } catch (\Throwable $throwable) {
+                $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');
+            }
 
             $dataMessage['resultMessage'] = 'Processing was successful';
             $dataMessage['originQuoteGid'] = $voluntaryExchangeCreateHandler->getOriginProductQuote()->pq_gid;
-            $dataMessage['changeQuoteGid'] = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote()->pq_gid;
-            $dataMessage['productQuoteChangeGid'] = $voluntaryExchangeCreateHandler->getProductQuoteChange()->pqc_gid;
+            $dataMessage['changeQuoteGid'] = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote()->pq_gid ?? null;
+            $dataMessage['productQuoteChangeGid'] = $voluntaryExchangeCreateHandler->getProductQuoteChange()->pqc_gid ?? null;
             $dataMessage['caseGid'] = $case->cs_gid;
 
             return new SuccessResponse(

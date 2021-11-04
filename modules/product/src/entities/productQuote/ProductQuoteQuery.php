@@ -37,6 +37,22 @@ class ProductQuoteQuery
         return $query->one();
     }
 
+    public static function getOriginProductQuoteByChangeQuote(
+        int $changeQuoteId,
+        array $typeIds = [ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE, ProductQuoteRelation::TYPE_REPROTECTION]
+    ): ?ProductQuote {
+        $query = ProductQuote::find()
+            ->innerJoin(
+                ProductQuoteRelation::tableName(),
+                new Expression(
+                    'pq_id = pqr_parent_pq_id and pqr_related_pq_id = :quoteId',
+                    ['quoteId' => $changeQuoteId]
+                )
+            )
+            ->andWhere(['IN', 'pqr_type_id', $typeIds]);
+        return $query->one();
+    }
+
     /**
      * @param int $offerId
      * @return ProductQuote[]
