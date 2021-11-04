@@ -33,6 +33,7 @@ use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTOItinerary;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\product\Product;
@@ -133,7 +134,7 @@ class ReProtectionQuoteManualCreateService
     public function createReProtectionManual(
         Flight $flight,
         ProductQuote $originProductQuote,
-        ReProtectionQuoteCreateForm $form,
+        ChangeQuoteCreateForm $form,
         ?int $userId,
         array $segments,
         int $changeId
@@ -349,7 +350,7 @@ class ReProtectionQuoteManualCreateService
             ->one();
     }
 
-    private static function prepareFlightQuoteData(ReProtectionQuoteCreateForm $form): array
+    private static function prepareFlightQuoteData(ChangeQuoteCreateForm $form): array
     {
         return [
             'recordLocator' => $form->recordLocator,

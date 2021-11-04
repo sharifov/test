@@ -9,6 +9,7 @@ use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
+use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use yii\base\Model;
 use yii\helpers\Html;
 
@@ -33,7 +34,7 @@ use yii\helpers\Html;
  * @property array $baggageFormsData
  * @property array $segmentTripFormsData
  */
-class ReProtectionQuoteCreateForm extends Model
+class ReProtectionQuoteCreateForm extends ChangeQuoteCreateForm
 {
     public $recordLocator;
     public $gds;
