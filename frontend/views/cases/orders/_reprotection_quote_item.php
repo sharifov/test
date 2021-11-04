@@ -13,6 +13,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
+use modules\product\src\abac\ProductQuoteChangeAbacObject;
+use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
 
 /**
  * @var Order $order
@@ -160,6 +162,7 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                     </thead>
                     <tbody>
                     <?php foreach ($quote->productQuoteChanges as $nr => $changeItem) : ?>
+                        <?php $pqcAbacDto = new ProductQuoteChangeAbacDto($changeItem) ?>
                         <tr>
                             <td data-toggle="tooltip" data-original-title="ProductQuoteChange ID: <?=Html::encode($changeItem->pqc_id)?>" title="ProductQuoteChangeID: <?=Html::encode($changeItem->pqc_id)?>">
                                 <?=($nr + 1)?>
@@ -176,8 +179,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                             <td>
 
                         <?php if ($changeItem->isTypeVoluntary()) : ?>
-                            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
-                            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
+                            <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
+                            <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE)) : ?>
                                 <div class="btn-group">
 
                                     <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -185,8 +188,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                                     </button>
                                     <div class="dropdown-menu">
 
-                                        <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
-                                        <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
+                                        <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
+                                        <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE)) : ?>
                                             <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
                                                 <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Change Quote', null, [
                                                     'data-flight-id' => $flight->getId(),
@@ -224,14 +227,14 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                         <?php endif ?>
 
                         <?php if ($changeItem->isTypeReProtection()) : ?>
-                            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
+                            <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE)) : ?>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   <i class="fa fa-bars"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                    <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
-                                    <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) : ?>
+                                    <?php /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
+                                    <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE)) : ?>
                                         <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
                                             <?= Html::a('<i class="fas fa-plus-circle"></i> Add ReProtection Quote', null, [
                                                 'data-flight-id' => $flight->getId(),

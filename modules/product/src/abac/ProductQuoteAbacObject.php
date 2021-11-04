@@ -11,6 +11,7 @@ use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productType\ProductTypeQuery;
 use sales\entities\cases\CaseCategory;
+use sales\entities\cases\CasesStatus;
 use sales\helpers\setting\SettingHelper;
 
 class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
@@ -283,6 +284,19 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_CASE_STATUS = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'csStatusId',
+        'field' => 'csStatusId',
+        'label' => 'Status',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_DECLINE_REPROTECTION_QUOTE    => [self::ATTR_REPROTECTION_QUOTE_IS_NEW],
@@ -360,6 +374,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attrOrderTypeList = self::ATTR_ORDER_TYPE;
         $attrCaseCategoryList = self::ATTR_CASE_CATEGORY;
         $attrCaseProjectList = self::ATTR_CASE_PROJECT;
+        $attrCaseStatusList = self::ATTR_CASE_STATUS;
 
         $attrStatusList['values'] = ProductQuoteStatus::getList();
         $attrProductTypeList['values'] = ProductTypeQuery::getListAll();
@@ -370,6 +385,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attrOrderTypeList['values'] = OrderSourceType::LIST;
         $attrCaseCategoryList['values'] = CaseCategory::getList();
         $attrCaseProjectList['values'] = $projects;
+        $attrCaseStatusList['values'] = CasesStatus::STATUS_LIST;
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
@@ -382,6 +398,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrOrderTypeList;
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrCaseCategoryList;
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrCaseProjectList;
+        $attributeList[self::ACT_VIEW_DETAILS][] = $attrCaseStatusList;
 
         $attributeList[self::ACT_ADD_CHANGE][] = $attrStatusList;
         $attributeList[self::ACT_ADD_CHANGE][] = $attrProductTypeList;
@@ -392,6 +409,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_ADD_CHANGE][] = $attrOrderTypeList;
         $attributeList[self::ACT_ADD_CHANGE][] = $attrCaseCategoryList;
         $attributeList[self::ACT_ADD_CHANGE][] = $attrCaseProjectList;
+        $attributeList[self::ACT_ADD_CHANGE][] = $attrCaseStatusList;
 
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrStatusList;
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrProductTypeList;
@@ -402,6 +420,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrOrderTypeList;
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrCaseCategoryList;
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrCaseProjectList;
+        $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrCaseStatusList;
 
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrStatusList;
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrProductTypeList;
@@ -412,6 +431,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrOrderTypeList;
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrCaseCategoryList;
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrCaseProjectList;
+        $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrCaseStatusList;
 
         return $attributeList;
     }

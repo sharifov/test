@@ -85,9 +85,9 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                                 '/hotel/hotel/update-ajax',
                                 'id' => $product->hotel->ph_id
                             ]),
-                            'data-hotel-id' => $product->hotel->ph_id,
-                            'class' => 'dropdown-item text-warning btn-update-hotel-request btn-update-request',
-                            'data-product-id' => $product->pr_id
+                                                     'data-hotel-id' => $product->hotel->ph_id,
+                                                     'class' => 'dropdown-item text-warning btn-update-hotel-request btn-update-request',
+                                                     'data-product-id' => $product->pr_id
                         ]) ?>
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [

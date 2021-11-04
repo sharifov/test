@@ -30,8 +30,8 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
                             '/hotel/hotel-quote/search-ajax',
                             'id' => $hotelProduct->ph_id
                         ]),
-                        'data-hotel-id' => $hotelProduct->ph_id,
-                        'class' => 'btn-search-hotel-quotes'
+                                                             'data-hotel-id' => $hotelProduct->ph_id,
+                                                             'class' => 'btn-search-hotel-quotes'
                     ]) ?>
                 </li>
 

@@ -84,7 +84,7 @@ use yii\bootstrap4\Html;
         return "<div><label><input type='checkbox' {$checked} name='{$name}' value='{$value}'>&nbsp;{$label}</label></div>";
     }
 ])
-                                                                        ?>
+?>
 
 <?= $form->field($filtersForm, 'selectedBoardsTypes')->checkboxList($filtersForm->boardsTypes, [
     'item' => function ($index, $label, $name, $checked, $value) {

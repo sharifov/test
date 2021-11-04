@@ -75,9 +75,9 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                                 '/cruise/cruise/update-ajax',
                                 'id' => $product->cruise->crs_id,
                             ]),
-                            'data-product-id' => $product->pr_id,
-                            'data-cruise-id' => $product->cruise->crs_id,
-                            'class' => 'dropdown-item text-warning btn-update-cruise-request btn-update-request'
+                                                     'data-product-id' => $product->pr_id,
+                                                     'data-cruise-id' => $product->cruise->crs_id,
+                                                     'class' => 'dropdown-item text-warning btn-update-cruise-request btn-update-request'
                         ]) ?>
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
