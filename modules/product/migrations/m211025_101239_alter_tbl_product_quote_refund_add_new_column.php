@@ -24,7 +24,7 @@ class m211025_101239_alter_tbl_product_quote_refund_add_new_column extends Migra
         $productQuoteRefunds = ProductQuoteRefund::find()->all();
         foreach ($productQuoteRefunds as $productQuoteRefund) {
             $productQuoteRefund->pqr_gid = ProductQuoteRefund::generateGid();
-            $productQuoteRefund->save();
+            $productQuoteRefund->save(false);
         }
     }
 
