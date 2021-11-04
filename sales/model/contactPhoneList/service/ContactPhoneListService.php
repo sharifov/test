@@ -57,6 +57,11 @@ class ContactPhoneListService
         return self::isExistByDataKey($phone, ContactPhoneDataDictionary::KEY_AUTO_CREATE_CASE_OFF);
     }
 
+    public static function isInvalid(string $phone): bool
+    {
+        return self::isExistByDataKey($phone, ContactPhoneDataDictionary::KEY_INVALID);
+    }
+
     public static function isExistByDataKey(
         string $phone,
         string $key,

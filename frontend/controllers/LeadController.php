@@ -64,6 +64,8 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\department\department\DefaultPhoneType;
 use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
@@ -2312,7 +2314,7 @@ class LeadController extends FController
             throw new NotFoundHttpException('Call not found');
         }
 
-        if (!$this->clientOnCallIsValid($call)) {
+        if ($this->clientOnCallIsInvalid($call)) {
             return $this->asJson([
                 'error' => false,
                 'message' => 'client is invalid',
@@ -2369,7 +2371,7 @@ class LeadController extends FController
             throw new NotFoundHttpException('Call not found');
         }
 
-        if ($this->clientOnCallIsValid($call)) {
+        if (!$this->clientOnCallIsInvalid($call)) {
             return 'Client already is Valid.';
         }
 
@@ -2414,9 +2416,9 @@ class LeadController extends FController
         }
     }
 
-    private function clientOnCallIsValid(Call $call): bool
+    private function clientOnCallIsInvalid(Call $call): bool
     {
-        return $call->c_client_id !== null;
+        return $call->c_client_id === null || ContactPhoneListService::isInvalid($call->getClientPhoneNumber());
     }
 
     public function actionLinkChat()

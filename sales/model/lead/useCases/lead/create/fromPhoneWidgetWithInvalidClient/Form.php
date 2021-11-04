@@ -45,7 +45,7 @@ class Form extends Model
         $this->projectId = $call->c_project_id;
         $this->callSid = $call->c_call_sid;
 
-        $internalPhoneNumber = $call->isIn() ? $call->c_to : $call->c_from;
+        $internalPhoneNumber = $call->getInternalPhoneNumber();
         if (!$internalPhoneNumber) {
             throw new \DomainException('Not detected internal phone. CallId: ' . $call->c_id);
         }

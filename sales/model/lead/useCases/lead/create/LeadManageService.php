@@ -280,8 +280,8 @@ class LeadManageService
 
     public function createFromPhoneWidget(Call $call, Employee $user): Lead
     {
-        $internalPhoneNumber = $call->isIn() ? $call->c_to : $call->c_from;
-        $clientPhoneNumber = $call->isIn() ? $call->c_from : $call->c_to;
+        $internalPhoneNumber = $call->getInternalPhoneNumber();
+        $clientPhoneNumber = $call->getClientPhoneNumber();
 
         $sourceId = null;
 

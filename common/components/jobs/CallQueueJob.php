@@ -20,9 +20,6 @@ use common\models\UserGroupAssign;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
-use sales\model\callTerminateLog\entity\CallTerminateLog;
-use sales\model\callTerminateLog\repository\CallTerminateLogRepository;
-use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -31,9 +28,6 @@ use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadManageService;
-use sales\services\phone\blackList\PhoneBlackListManageService;
-use sales\services\project\ProjectParamsService;
-use yii\base\BaseObject;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -67,14 +61,6 @@ class CallQueueJob extends BaseJob implements JobInterface
     private CasesRepository $casesRepository;
     private ClientManageService $clientManageService;
     private CasesSaleService $casesSaleService;
-
-    /*public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
-    {
-        parent::__construct($config);
-        $this->casesCreateService = Yii::createObject(CasesCreateService::class);
-        $this->clientManageService = Yii::createObject(ClientManageService::class);
-    }*/
-
 
     /**
      * @param Queue $queue
@@ -110,38 +96,13 @@ class CallQueueJob extends BaseJob implements JobInterface
                 $originalAgentId = $call->c_created_user_id;
 
                 if ($call->isStatusIvr()) {
-                    // Yii::info('CallId: ' . $this->call_id . ', STATUS_IVR' ,'info\CallQueueJob-STATUS_IVR');
-                    // $call->c_call_status = Call::TW_STATUS_QUEUE;
                     $call->setStatusQueue();
                 }
 
                 if ($call->c_dep_id && ($departmentParams = $call->cDep->getParams()) && $project = Project::findOne($call->c_project_id)) {
                     $projectParams = $project->getParams();
                     if ($departmentParams->object->type->isLead()) {
-                        if ($call->c_from) {
-//                        $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
-//                        if (!$lead) {
-//                            $lead = Lead::createNewLeadByPhone($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
-//                        }
-//                        if ($lead) {
-//                            $call->c_lead_id = $lead->id;
-//
-//                            if ((int)$lead->l_call_status_id !== Lead::CALL_STATUS_READY && $call->isEnded()) {
-//                                $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-//                                if (!$lead->update()) {
-//                                    Yii::error('CallId: ' . $this->call_id . ' ' . VarDumper::dumpAsString($lead->errors) ,'JOB:CallQueueJob:Lead:update');
-//                                }
-//                            }
-//
-                            ////                            if(!$call->update()) {
-                            ////                                Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');
-                            ////                            }
-//                        }
-//
-//                        if (!$originalAgentId && $lead && $lead->employee_id) {
-//                            $originalAgentId = $lead->employee_id;
-//                        }
-
+                        if ($call->c_from && !ContactPhoneListService::isInvalid($call->c_from)) {
                             try {
                                 $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
 
@@ -160,10 +121,6 @@ class CallQueueJob extends BaseJob implements JobInterface
                                             $call->c_offset_gmt
                                         );
                                 }
-
-//                            if (!$lead) {
-//                              return true;
-                                //                          }
 
                                 $call->c_lead_id = $lead->id ?? null;
 
@@ -236,9 +193,6 @@ class CallQueueJob extends BaseJob implements JobInterface
                             if (!$call->c_client_id) {
                                 $call->c_client_id = $case->cs_client_id ?? null;
                             }
-//                        if (!$call->update()) {
-//                            Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');
-//                        }
 
                             if (!$originalAgentId && $case && $case->cs_user_id) {
                                 $originalAgentId = $case->cs_user_id;
