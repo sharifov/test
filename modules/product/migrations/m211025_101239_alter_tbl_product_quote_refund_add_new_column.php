@@ -15,8 +15,11 @@ class m211025_101239_alter_tbl_product_quote_refund_add_new_column extends Migra
      */
     public function safeUp()
     {
-        $this->addColumn('{{%product_quote_refund}}', 'pqr_gid', $this->string(32)->notNull()->after('pqr_id'));
-        $this->createIndex('IND-product_quote_refund-pqr_gid', '{{%product_quote_refund}}', 'pqr_gid');
+        $schema = $this->db->getTableSchema('product_quote_refund');
+        if ($schema && !in_array('pqr_gid', $schema->columnNames, true)) {
+            $this->addColumn('{{%product_quote_refund}}', 'pqr_gid', $this->string(32)->notNull()->after('pqr_id'));
+            $this->createIndex('IND-product_quote_refund-pqr_gid', '{{%product_quote_refund}}', 'pqr_gid');
+        }
 
         $productQuoteRefunds = ProductQuoteRefund::find()->all();
         foreach ($productQuoteRefunds as $productQuoteRefund) {
