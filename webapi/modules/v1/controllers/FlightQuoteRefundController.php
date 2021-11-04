@@ -238,7 +238,7 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                AppHelper::throwableLog($throwable),
                 'FlightQuoteRefundController:actionInfo:Warning'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -250,7 +250,7 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         } catch (\Throwable $throwable) {
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $post),
+                AppHelper::throwableLog($throwable, true),
                 'FlightQuoteRefundController:actionInfo:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -280,7 +280,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{0..50}}        bookingId          Booking ID
      * @apiParam {object}               refund                            Refund Data
      * @apiParam {string{..3}}          refund.currency                   Currency
-     * @apiParam {string}               refund.orderId                    OTA Order Id
+     * @apiParam {string{..32}}               refund.orderId                    OTA Order Id
      * @apiParam {number}               refund.processingFee              Processing fee
      * @apiParam {number}               refund.penaltyAmount              Airline penalty amount
      * @apiParam {number}               refund.totalRefundAmount          Total refund amount
@@ -585,7 +585,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *
      * @apiParam {string{0..10}}        bookingId          Booking ID
      * @apiParam {string{..32}}         refundRequestGid          Refund Request Gid
-     * @apiParam {string}               orderId                    OTA Order Id
+     * @apiParam {string{..32}}               orderId                    OTA Order Id
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -596,7 +596,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{30}}           billing.city                 City
      * @apiParam {string{40}}           [billing.state]              State
      * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
-     * @apiParam {string{2}}            billing.country             Country (for example "United States")
+     * @apiParam {string}               billing.country             Country (for example "United States")
      * @apiParam {string{10}}           billing.zip                Zip
      * @apiParam {string{20}}           billing.contact_phone      Contact phone
      * @apiParam {string{160}}          billing.contact_email      Contact email
@@ -701,6 +701,16 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "errors": [],
      *      "type": "app_bo"
      * }
+     * @apiErrorExample {html} Codes designation
+     * [
+     *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *      13107 - Validation Failed
+     *      13112 - Not found refund in pending status by booking and gid
+     *      15411 - Bo request failed; See tab "Error From BO"
+     *      601 - BO Server Error: i.e. request timeout
+     *      602 - BO response body is empty
+     *      603 - BO response type is invalid (not array)
+     * ]
      */
     public function actionConfirm()
     {
@@ -802,9 +812,9 @@ class FlightQuoteRefundController extends ApiBaseController
             $job = new VoluntaryRefundConfirmJob(
                 $flightRequest->fr_id,
                 $productQuoteRefund->pqr_id,
-                $boRequestConfirmResult
+                $voluntaryRefundConfirmForm->orderId
             );
-            $jobId = \Yii::$app->queue_job->priority(100)->push($job);
+            $jobId = \Yii::$app->queue_job->priority(10)->push($job);
 
             $flightRequest->fr_job_id = $jobId;
             $this->flightRequestRepository->save($flightRequest);
@@ -818,7 +828,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
+                AppHelper::throwableLog($e, true),
                 'FlightQuoteRefundController:actionCreate:BoResponseException'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -832,7 +842,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                AppHelper::throwableLog($throwable),
                 'FlightQuoteRefundController:actionConfirm:Warning'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -846,7 +856,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $post),
+                AppHelper::throwableLog($throwable, true),
                 'FlightQuoteRefundController:actionConfirm:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(

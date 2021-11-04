@@ -9,6 +9,7 @@ use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeS
 use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
+use modules\flight\src\useCases\voluntaryExchangeConfirm\service\VoluntaryExchangeConfirmHandler;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateHandler;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
@@ -677,64 +678,66 @@ class FlightQuoteExchangeController extends BaseController
      *
      * @apiParam {string{7..10}}        booking_id                   Booking ID
      * @apiParam {string{32}}           quote_gid                    Product Quote GID
-     * @apiParam {object}               billing                      Billing
-     * @apiParam {string{30}}           billing.first_name           First name
-     * @apiParam {string{30}}           billing.last_name            Last name
-     * @apiParam {string{30}}           [billing.middle_name]        Middle name
-     * @apiParam {string{40}}           [billing.company_name]       Company
-     * @apiParam {string{50}}           billing.address_line1        Address line 1
-     * @apiParam {string{50}}           [billing.address_line2]      Address line 2
-     * @apiParam {string{30}}           billing.city                 City
-     * @apiParam {string{40}}           [billing.state]              State
-     * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
-     * @apiParam {string{10}}           [billing.zip]                Zip
-     * @apiParam {string{20}}           [billing.contact_phone]      Contact phone
-     * @apiParam {string{160}}          [billing.contact_email]      Contact email
-     * @apiParam {string{60}}           [billing.contact_name]       Contact name
-     * @apiParam {object}               [payment_request]                    Payment request
-     * @apiParam {number}               payment_request.amount               Amount
-     * @apiParam {string{3}}            payment_request.currency             Currency code
-     * @apiParam {string{2}}            payment_request.method_key           Method key (for example "cc")
-     * @apiParam {object}               payment_request.method_data          Method data
-     * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
-     * @apiParam {string{50}}           payment_request.method_data.card.number          Number
-     * @apiParam {string{50}}           [payment_request.method_data.card.holder_name]   Holder name
-     * @apiParam {int}                  payment_request.method_data.card.expiration_month       Month
-     * @apiParam {int}                  payment_request.method_data.card.expiration_year        Year
-     * @apiParam {string{32}}           payment_request.method_data.card.cvv             CVV
+     * @apiParam {object}                       [billing]                    Billing
+     * @apiParam {string{30}}                   billing.first_name           First name
+     * @apiParam {string{30}}                   billing.last_name            Last name
+     * @apiParam {string{30}}                   [billing.middle_name]        Middle name
+     * @apiParam {string{40}}                   [billing.company_name]       Company
+     * @apiParam {string{50}}                   billing.address_line1        Address line 1
+     * @apiParam {string{50}}                   [billing.address_line2]      Address line 2
+     * @apiParam {string{30}}                   billing.city                 City
+     * @apiParam {string{40}}                   [billing.state]              State
+     * @apiParam {string{2}}                    billing.country_id           Country code (for example "US")
+     * @apiParam {string}                       billing.country              Country name
+     * @apiParam {string{10}}                   [billing.zip]                Zip
+     * @apiParam {string{20}}                   [billing.contact_phone]      Contact phone
+     * @apiParam {string{160}}                  [billing.contact_email]      Contact email
+     * @apiParam {string{60}}                   [billing.contact_name]       Contact name
+     * @apiParam {object}                       [payment_request]                                   Payment request
+     * @apiParam {number}                       payment_request.amount                              Customer must pay for initiate refund process
+     * @apiParam {string{3}}                    payment_request.currency                            Currency code
+     * @apiParam {string{2}}                    payment_request.method_key                          Method key (for example "cc")
+     * @apiParam {object}                       payment_request.method_data                         Method data
+     * @apiParam {object}                       payment_request.method_data.card                    Card (for credit card)
+     * @apiParam {string{..20}}                 payment_request.method_data.card.number             Number
+     * @apiParam {string{..50}}                 [payment_request.method_data.card.holder_name]      Holder name
+     * @apiParam {int}                          payment_request.method_data.card.expiration_month   Month
+     * @apiParam {int}                          payment_request.method_data.card.expiration_year    Year
+     * @apiParam {string{..4}}                  payment_request.method_data.card.cvv                CVV
      *
      * @apiParamExample {json} Request-Example:
          {
             "booking_id":"XXXYYYZ",
             "quote_gid": "2f2887a061f8069f7ada8af9e062f0f4",
-            "payment":{
-                "method_key":"cc",
-                "method_data":{
-                    "card":{
-                        "number":"4111555577778888",
-                        "holder_name":"John Doe",
-                        "expiration_month":10,
-                        "expiration_year":2022,
-                        "cvv":"097"
-                    }
-                },
-                "amount":29.95,
-                "currency":"USD"
+            "billing": {
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "middle_name": "",
+                  "address_line1": "1013 Weda Cir",
+                  "address_line2": "",
+                  "country_id": "US",
+                  "country" : "United States",
+                  "city": "Mayfield",
+                  "state": "KY",
+                  "zip": "99999",
+                  "company_name": "",
+                  "contact_phone": "+19074861000",
+                  "contact_email": "test@test.com",
+                  "contact_name": "Test Name"
             },
-            "billing":{
-                "first_name":"John",
-                "last_name":"Doe",
-                "middle_name":null,
-                "company_name":"General Motors",
-                "address_line1":"123 Main Street",
-                "address_line2":"",
-                "city":"Paris",
-                "state":"State",
-                "country":"United States",
-                "zip":"94000",
-                "contact_phone":"+137396512345",
-                "contact_email":"alex@test.com",
-                "contact_name":"Mr. Alexander"
+            "payment_request": {
+                  "method_key": "card",
+                  "currency": "USD",
+                  "method_data": {
+                      "card": {
+                          "number": "4111555577778888",
+                          "holder_name": "Test test",
+                          "expiration_month": 10,
+                          "expiration_year": 23,
+                          "cvv": "123"
+                      }
+                  },
+                  "amount": 112.25
             }
         }
      *
@@ -829,12 +832,22 @@ class FlightQuoteExchangeController extends BaseController
             );
         }
 
-        try {
-            $bookingId = $voluntaryExchangeConfirmForm->booking_id;
-            if ($productQuoteChange = VoluntaryExchangeInfoService::getLastProductQuoteChange($bookingId)) {
-                throw new \RuntimeException('VoluntaryExchange by BookingID(' . $bookingId . ') already processed');
-            }
+        $flightRequest = FlightRequest::create(
+            $voluntaryExchangeConfirmForm->booking_id,
+            FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CONFIRM,
+            $post,
+            $project->id,
+            $this->auth->getId()
+        );
+        $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
+        $voluntaryExchangeCreateHandler = new VoluntaryExchangeConfirmHandler(
+            $flightRequest,
+            $voluntaryExchangeConfirmForm,
+            $this->objectCollection
+        );
+
+        try {
             /* TODO::
                 add request to BO - https://dev-backoffice.travel-dev.com/docs/api/#api-AirOrder_Self-Service-Create_Exchange_Order
              */

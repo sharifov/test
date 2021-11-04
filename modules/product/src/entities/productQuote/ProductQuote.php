@@ -110,6 +110,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteRefund[] $productQuoteRefundsActive
  * @property ProductQuoteData|null $productQuoteDataRecommended
  * @property ProductQuoteChangeRelation[]|null $productQuoteChangeRelations
+ * @property ProductQuoteChangeRelation|null $productQuoteChangeLastRelation
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
@@ -447,6 +448,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteChangeRelations(): \yii\db\ActiveQuery
     {
         return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pqc_id']);
+    }
+
+    public function getProductQuoteChangeLastRelation(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pqc_id'])->orderBy(['pqc_id' => SORT_DESC]);
     }
 
     public static function find(): Scopes

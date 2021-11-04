@@ -46,6 +46,10 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pqor_client_selling_price')->input('number', ['step' => 'any']) ?>
 
+        <?= $form->field($model, 'pqor_client_penalty_amount')->input('number', ['step' => 'any']) ?>
+
+        <?= $form->field($model, 'pqor_client_processing_fee_amount')->input('number', ['step' => 'any']) ?>
+
         <?= $form->field($model, 'pqor_client_refund_amount')->input('number', ['step' => 'any']) ?>
     </div>
 

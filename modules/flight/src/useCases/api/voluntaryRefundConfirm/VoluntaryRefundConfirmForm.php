@@ -41,7 +41,7 @@ class VoluntaryRefundConfirmForm extends Model
             [['bookingId', 'refundGid', 'orderId'], 'required'],
             [['bookingId'], 'string', 'max' => 10],
             [['refundGid'], 'string', 'max' => 32],
-            [['orderId'], 'string'],
+            [['orderId'], 'string', 'max' => 32],
 
             [['payment_request'], 'safe'],
             [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],

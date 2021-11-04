@@ -66,6 +66,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'pqr_client_currency_rate',
             'pqr_client_selling_price',
+            'pqr_client_penalty_amount',
+            'pqr_client_processing_fee_amount',
             'pqr_client_refund_amount',
             [
                 'class' => UserSelect2Column::class,

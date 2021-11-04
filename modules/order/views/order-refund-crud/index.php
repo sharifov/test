@@ -63,6 +63,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'orr_client_currency_rate',
             'orr_client_selling_price',
+            'orr_client_penalty_amount',
+            'orr_client_processing_fee_amount',
             'orr_client_charge_amount',
             'orr_client_refund_amount',
 //            'orr_description:ntext',

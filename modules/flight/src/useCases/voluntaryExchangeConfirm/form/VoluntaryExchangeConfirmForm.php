@@ -2,10 +2,12 @@
 
 namespace modules\flight\src\useCases\voluntaryExchangeConfirm\form;
 
-use common\components\validators\CheckJsonValidator;
-use frontend\helpers\JsonHelper;
+use common\components\validators\CheckAndConvertToJsonValidator;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use sales\entities\cases\Cases;
+use sales\exception\ValidationException;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
@@ -17,20 +19,30 @@ use yii\base\Model;
  * @property $booking_id
  * @property $payment_request
  * @property $billing
- * @property $change_gid
+ * @property $quote_gid
  *
  * @property PaymentRequestForm|null $paymentRequestForm
  * @property BillingInfoForm|null $billingInfoForm
+ * @property ProductQuote|null $changeQuote
+ * @property ProductQuote|null $originQuote
+ * @property ProductQuoteChange|null $productQuoteChange
+ * @property Cases $case
  */
 class VoluntaryExchangeConfirmForm extends Model
 {
     public $booking_id;
+    public $quote_gid;
+
     public $payment_request;
     public $billing;
-    public $change_gid;
 
-    private ?PaymentRequestForm $paymentRequestForm;
-    private ?BillingInfoForm $billingInfoForm;
+    private ?PaymentRequestForm $paymentRequestForm = null;
+    private ?BillingInfoForm $billingInfoForm = null;
+
+    private ?ProductQuote $changeQuote = null;
+    private ?ProductQuote $originQuote = null;
+    private ?ProductQuoteChange $productQuoteChange = null;
+    private ?Cases $case = null;
 
     public function rules(): array
     {
@@ -38,26 +50,47 @@ class VoluntaryExchangeConfirmForm extends Model
             [['booking_id'], 'required'],
             [['booking_id'], 'string', 'max' => 10],
 
-            [['change_gid'], 'required'],
-            [['change_gid'], 'string', 'max' => 32],
-            [['change_gid'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteChange::class, 'targetAttribute' => ['change_gid' => 'pqc_gid']],
+            [['quote_gid'], 'required'],
+            [['quote_gid'], 'string', 'max' => 32],
+            [['quote_gid'], 'quoteProcessing'],
 
-            [['payment_request'], CheckJsonValidator::class, 'skipOnEmpty' => true],
+            [['payment_request'], CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
             [['payment_request'], 'paymentRequestProcessing'],
 
-            [['billing'], CheckJsonValidator::class, 'skipOnEmpty' => true],
+            [['billing'], CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
             [['billing'], 'billingProcessing'],
         ];
+    }
+
+    public function quoteProcessing(string $attribute): void
+    {
+        try {
+            if (!$this->changeQuote = ProductQuote::findOne(['pq_gid' => $this->quote_gid])) {
+                throw new ValidationException('ProductQuote not found');
+            }
+            if (!$this->productQuoteChange = $this->changeQuote->productQuoteChangeLastRelation->pqcrPqc ?? null) {
+                throw new ValidationException('ProductQuoteChange not found');
+            }
+            if (!$this->case = $this->productQuoteChange->pqcCase ?? null) {
+                throw new ValidationException('Case not found');
+            }
+            if (!$this->originQuote = ProductQuoteQuery::getOriginProductQuoteByChangeQuote($this->changeQuote->pq_id)) {
+                throw new ValidationException('Origin Quote not found');
+            }
+        } catch (\Throwable $throwable) {
+            $this->addError($attribute, $throwable->getMessage());
+        }
     }
 
     public function paymentRequestProcessing(string $attribute): void
     {
         if (!empty($this->payment_request)) {
             $paymentRequestForm = new PaymentRequestForm();
+            $paymentRequestForm->setFormName('');
             if (!$paymentRequestForm->load($this->payment_request)) {
                 $this->addError($attribute, 'PaymentRequestForm is not loaded');
             } elseif (!$paymentRequestForm->validate()) {
-                $this->addError($attribute, 'PaymentRequestForm: ' . ErrorsToStringHelper::extractFromModel($paymentRequestForm, ', '));
+                $this->addError($attribute, 'PaymentRequestForm: ' . ErrorsToStringHelper::extractFromModel($paymentRequestForm, ' '));
             } else {
                 $this->paymentRequestForm = $paymentRequestForm;
             }
@@ -68,10 +101,11 @@ class VoluntaryExchangeConfirmForm extends Model
     {
         if (!empty($this->billing)) {
             $billingInfoForm = new BillingInfoForm();
+            $billingInfoForm->setFormName('');
             if (!$billingInfoForm->load($this->billing)) {
                 $this->addError($attribute, 'BillingInfoForm is not loaded');
             } elseif (!$billingInfoForm->validate()) {
-                $this->addError($attribute, 'BillingInfoForm: ' . ErrorsToStringHelper::extractFromModel($billingInfoForm, ', '));
+                $this->addError($attribute, 'BillingInfoForm: ' . ErrorsToStringHelper::extractFromModel($billingInfoForm, ' '));
             } else {
                 $this->billingInfoForm = $billingInfoForm;
             }
@@ -81,5 +115,35 @@ class VoluntaryExchangeConfirmForm extends Model
     public function formName(): string
     {
         return '';
+    }
+
+    public function getPaymentRequestForm(): ?PaymentRequestForm
+    {
+        return $this->paymentRequestForm;
+    }
+
+    public function getBillingInfoForm(): ?BillingInfoForm
+    {
+        return $this->billingInfoForm;
+    }
+
+    public function getChangeQuote(): ?ProductQuote
+    {
+        return $this->changeQuote;
+    }
+
+    public function getOriginQuote(): ?ProductQuote
+    {
+        return $this->originQuote;
+    }
+
+    public function getProductQuoteChange(): ?ProductQuoteChange
+    {
+        return $this->productQuoteChange;
+    }
+
+    public function getCase(): ?Cases
+    {
+        return $this->case;
     }
 }
