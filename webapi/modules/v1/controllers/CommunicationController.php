@@ -1286,7 +1286,7 @@ class CommunicationController extends ApiBaseController
 
         if (isset($calData['From']) && $calData['From']) {
             $clientPhoneNumber = $calData['From'];
-            if ($clientPhoneNumber) {
+            if ($clientPhoneNumber && !ContactPhoneListService::isInvalid($clientPhoneNumber)) {
                 $client = ClientsQuery::oneByPhoneAndProject($clientPhoneNumber, $call_project_id, null);
                 if ($client) {
                     /** @var Client $client */
