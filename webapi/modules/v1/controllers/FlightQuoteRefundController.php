@@ -701,6 +701,16 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "errors": [],
      *      "type": "app_bo"
      * }
+     * @apiErrorExample {html} Codes designation
+     * [
+     *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *      13107 - Validation Failed
+     *      13112 - Not found refund in pending status by booking and gid
+     *      15411 - Bo request failed; See tab "Error From BO"
+     *      601 - BO Server Error: i.e. request timeout
+     *      602 - BO response body is empty
+     *      603 - BO response type is invalid (not array)
+     * ]
      */
     public function actionConfirm()
     {

@@ -5926,6 +5926,11 @@ define({ "api": [
           "title": "Error-Response Error From BO:",
           "content": "HTTP/1.1 200 OK\n{\n     \"status\": 422,\n     \"message\": \"FlightRequest is not found.\",\n     \"name\": \"BO Request Failed\",\n     \"code\": \"15411\",\n     \"errors\": [],\n     \"type\": \"app_bo\"\n}",
           "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13113 - Flight Request already processing; This feature helps to handle duplicate requests\n     13107 - Validation Failed\n     13112 - Not found refund in pending status by booking and gid\n     15411 - Bo request failed; See tab \"Error From BO\"\n     601 - BO Server Error: i.e. request timeout\n     602 - BO response body is empty\n     603 - BO response type is invalid (not array)\n]",
+          "type": "html"
         }
       ]
     },
