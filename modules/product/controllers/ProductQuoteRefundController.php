@@ -256,7 +256,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                             $whData['refund_order_id'] = $productQuoteRefund->pqr_cid;
                             $whData['refund_status'] = ProductQuoteRefundStatus::getClientKeyStatusById($productQuoteRefund->pqr_status_id);
                             \Yii::$app->hybrid->wh($case->cs_project_id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
-                            $case->addEventLog(null, 'Request HybridService sent successfully');
+                            $case->addEventLog(null, 'WH to HybridService sent successfully');
                         } catch (\Throwable $throwable) {
                             $errorData = [];
                             $errorData['message'] = 'OTA site is not informed (hybridService->whVoluntaryRefund)';

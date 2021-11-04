@@ -221,7 +221,7 @@ if ($quote->productQuoteLastChange) {
                         <?php if ($quoteChangeRelations = $changeItem->productQuoteChangeRelations) : ?>
                             <tr>
                                 <td></td>
-                                <td colspan="5">
+                                <td colspan="7">
                                     <table class="table table-bordered table-striped table-hover">
                                       <thead>
                                         <tr>
