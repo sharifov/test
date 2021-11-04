@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\email\form\EmailSendForm;
 use http\Url;
+use kartik\mpdf\Pdf;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 use sales\auth\Auth;
@@ -20,6 +21,7 @@ use common\models\search\EmailSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -341,6 +343,29 @@ class EmailController extends FController
 
         if (!Yii::$app->abac->can(new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access denied.');
+        }
+
+        if (Yii::$app->request->get('pdf')) {
+            $headers = $this->renderPartial('_headers', [
+                'mail' => $model,
+            ]);
+            Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+            $txt = $model->getEmailBodyHtml();
+            $txt = preg_replace('/<style(.*?)<\/style>/s', '', $txt);
+            $pdf = new Pdf([
+                'mode' => Pdf::MODE_CORE, // leaner size using standard fonts
+                'destination' => Pdf::DEST_DOWNLOAD,
+                'content' => $headers . '<br>' . $txt, #strip_tags($model->getEmailBodyHtml(), '<p><head><object><embed>'),
+                'options' => [
+                    // any mpdf options you wish to set
+                ],
+                'methods' => [
+                    'SetTitle' => 'Case email content',
+                    'SetHeader' => ['Case email content||Generated on: ' . date("l, m F Y, H:i")],
+                    'SetFooter' => ['|Page {PAGENO}|'],
+                ]
+            ]);
+            return $pdf->render();
         }
 
         if (Yii::$app->request->get('preview')) {

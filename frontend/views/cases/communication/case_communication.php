@@ -799,7 +799,7 @@ $js = <<<JS
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
         $(".view-mail").replaceWith( '<div id="mail_headers"><h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files + '<hr>' + $(".view-mail").html() + '</div>');
         var popup = $('#modal-email-view');
-        popup.find('#modal-email-view-label').replaceWith('<button class="btn btn-default" id="clipboard_button" title="Text copied!" data-toggle="mail_tooltip">Copy email to clipboard</button>');
+        popup.find('#modal-email-view-label').replaceWith('<a href="/email/view?id=' + id + '&pdf=1" + id title="Allow popup windows in browser settings!" data-toggle="mail_tooltip">Download PDF</a>');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
