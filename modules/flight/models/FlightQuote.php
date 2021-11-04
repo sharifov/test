@@ -557,6 +557,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         $this->fq_type_id = self::TYPE_REPROTECTION;
     }
 
+    public function isTypeVoluntary(): bool
+    {
+        return $this->fq_type_id === self::TYPE_VOLUNTARY_EXCHANGE;
+    }
+
     /**
      * @return bool
      */

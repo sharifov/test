@@ -190,6 +190,11 @@ class ProductQuoteController extends FController
         return ['message' => 'Successfully removed product quote (' . $model->pq_id . ')'];
     }
 
+    public function actionPreviewVoluntaryOfferEmail()
+    {
+        throw new BadRequestHttpException('Service under construction'); /* TODO::  */
+    }
+
     public function actionPreviewReprotectionQuoteEmail()
     {
         $caseId = Yii::$app->request->get('case-id');
