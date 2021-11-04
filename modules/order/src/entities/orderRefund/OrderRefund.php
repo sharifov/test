@@ -45,6 +45,8 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property Order $order
  * @property Employee $updatedUser
+ * @property string $orr_client_penalty_amount [decimal(8,2)]
+ * @property string $orr_client_processing_fee_amount [decimal(8,2)]
  */
 class OrderRefund extends \yii\db\ActiveRecord implements Serializable
 {
@@ -179,7 +181,7 @@ class OrderRefund extends \yii\db\ActiveRecord implements Serializable
         return [
             [['orr_order_id', 'orr_uid'], 'required'],
             [['orr_order_id', 'orr_client_status_id', 'orr_status_id', 'orr_created_user_id', 'orr_updated_user_id'], 'integer'],
-            [['orr_selling_price', 'orr_penalty_amount', 'orr_processing_fee_amount', 'orr_charge_amount', 'orr_refund_amount', 'orr_client_currency_rate', 'orr_client_selling_price', 'orr_client_charge_amount', 'orr_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
+            [['orr_selling_price', 'orr_penalty_amount', 'orr_processing_fee_amount', 'orr_charge_amount', 'orr_refund_amount', 'orr_client_currency_rate', 'orr_client_selling_price', 'orr_client_charge_amount', 'orr_client_refund_amount', 'orr_client_penalty_amount', 'orr_client_processing_fee_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['orr_description'], 'string'],
             [['orr_expiration_dt', 'orr_created_dt', 'orr_updated_dt'], 'safe'],
 
@@ -225,6 +227,8 @@ class OrderRefund extends \yii\db\ActiveRecord implements Serializable
             'orr_created_dt' => 'Created Dt',
             'orr_updated_dt' => 'Updated Dt',
             'orr_case_id' => 'Case ID',
+            'orr_client_penalty_amount' => 'Client Penalty Amount',
+            'orr_client_processing_fee_amount' => 'Client Processing Fee'
         ];
     }
 

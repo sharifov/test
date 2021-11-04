@@ -64,6 +64,14 @@ use yii\widgets\ActiveForm;
             'step' => 'any',
         ]) ?>
 
+        <?= $form->field($model, 'orr_client_penalty_amount')->input('number', [
+            'step' => 'any',
+        ]) ?>
+
+        <?= $form->field($model, 'orr_client_processing_fee_amount')->input('number', [
+            'step' => 'any',
+        ]) ?>
+
         <?= $form->field($model, 'orr_client_charge_amount')->input('number', [
             'step' => 'any',
         ]) ?>
