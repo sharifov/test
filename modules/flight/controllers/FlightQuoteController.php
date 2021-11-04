@@ -37,6 +37,8 @@ use modules\flight\src\useCases\voluntaryRefund\manualCreate\TicketForm;
 use modules\flight\src\useCases\voluntaryRefund\manualCreate\VoluntaryRefundCreateForm;
 use modules\flight\src\useCases\voluntaryRefund\VoluntaryRefundService;
 use modules\order\src\entities\order\OrderRepository;
+use modules\product\src\abac\ProductQuoteAbacObject;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -445,11 +447,17 @@ class FlightQuoteController extends FController
     {
         $productQuoteId = Yii::$app->request->get('id');
 
-        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) {
+        /*if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }*/
+
+        $productQuote = $this->productQuoteRepository->find($productQuoteId);
+
+        /** @abac new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::ACT_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS, Product quote view details */
+        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::ACT_VIEW_DETAILS, ProductQuoteAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
-        $productQuote = $this->productQuoteRepository->find($productQuoteId);
         $lead = $productQuote->pqProduct->prLead;
 
         if ($lead && $lead->isInTrash() && Auth::user()->isAgent()) {
@@ -808,6 +816,13 @@ class FlightQuoteController extends FController
             return $throwable->getMessage();
         }
 
+        $originProductQuote = ProductQuote::findOne(['pq_id' => $addChangeForm->origin_quote_id]);
+
+        /** @abac new ProductQuoteAbacDto($originProductQuote), ProductQuoteAbacObject::ACT_ADD_CHANGE, CasesAbacObject::ACTION_ACCESS, Product quote add change */
+        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($originProductQuote), ProductQuoteAbacObject::ACT_ADD_CHANGE, ProductQuoteAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         if (Yii::$app->request->isPost) {
             try {
                 if ($addChangeForm->load(Yii::$app->request->post()) && $addChangeForm->validate()) {
@@ -815,7 +830,7 @@ class FlightQuoteController extends FController
                         if (!$case = Cases::findOne(['cs_id' => $addChangeForm->case_id])) {
                             throw new \RuntimeException('Case not found by ID(' . $addChangeForm->case_id . ')');
                         }
-                        if (!$originProductQuote = ProductQuote::findOne(['pq_id' => $addChangeForm->origin_quote_id])) {
+                        if (!$originProductQuote) {
                             throw new \RuntimeException('OriginProductQuote not found by ID(' . $addChangeForm->origin_quote_id . ')');
                         }
                         $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
@@ -1292,6 +1307,12 @@ class FlightQuoteController extends FController
             $originProductQuoteId = Yii::$app->request->get('origin_product_quote_id');
             $orderId = Yii::$app->request->get('order_id');
             $caseId = Yii::$app->request->get('case_id');
+
+            $productQuote = $this->productQuoteRepository->find($originProductQuoteId);
+            /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::ACT_CREATE_VOL_REFUND, ProductQuoteAbacObject::ACTION_ACCESS, Create Voluntary Quote Refund */
+            if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::ACT_CREATE_VOL_REFUND, ProductQuoteAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('Access denied');
+            }
 
             $message = '';
             $errors = [];

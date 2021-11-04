@@ -14,6 +14,8 @@ use modules\order\src\entities\orderData\OrderDataActions;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
 use modules\order\src\services\OrderPriceUpdater;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
+use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\auth\Auth;
@@ -161,14 +163,21 @@ class OrderProductController extends FController
         $orderId = (int) Yii::$app->request->post('order_id');
         $productQuoteId = (int) Yii::$app->request->post('product_quote_id');
 
-        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) {
+        /*if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access denied');
-        }
+        }*/
 
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db->beginTransaction();
+
+        $model = $this->productQuoteRepository->find($productQuoteId);
+
+        /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::ACT_PRODUCT_QUOTE_REMOVE, ProductQuoteAbacObject::ACTION_ACCESS, Remove Product quote  */
+        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($model), ProductQuoteAbacObject::ACT_PRODUCT_QUOTE_REMOVE, ProductQuoteAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         try {
-            $model = $this->productQuoteRepository->find($productQuoteId);
             $order = $model->pqOrder;
             $model->removeOrderRelation();
             $this->productQuoteRepository->save($model);

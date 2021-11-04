@@ -1078,4 +1078,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return in_array($this->pq_status_id, SettingHelper::getProductQuoteChangeableStatuses(), false);
     }
+
+    /**
+     * @param int|null $userId
+     * @return bool
+     */
+    public function isOwner(?int $userId): bool
+    {
+        if ($userId === null) {
+            return false;
+        }
+        return $this->pq_owner_user_id === $userId;
+    }
 }

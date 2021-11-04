@@ -51,6 +51,8 @@ if ($quote->productQuoteLastChange) {
     }
 }
 
+$productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
+
 ?>
 
     <td data-toggle="tooltip" data-original-title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>" title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>"><?= $nr ?></td>
@@ -73,8 +75,9 @@ if ($quote->productQuoteLastChange) {
           <i class="fa fa-bars"></i>
         </button>
         <div class="dropdown-menu">
-            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS, Product quote view details */ ?>
-            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) : ?>
+            <?php /** @abac new $productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS, Product quote view details */ ?>
+            <?php // if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) : ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_VIEW_DETAILS, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
                 <?= Html::a('<i class="fas fa-info-circle"></i> View Details', null, [
                     'data-product-quote-gid' => $quote->pq_gid,
                     'class' => 'dropdown-item btn-show-product-quote-details',
@@ -85,38 +88,43 @@ if ($quote->productQuoteLastChange) {
                 ]) ?>
             <?php endif; ?>
 
-            <?php /* TODO:: add abac */ ?>
-            <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
-                <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Change', null, [
-                    'class' => 'dropdown-item btn_create_change',
-                    'data-url' => Url::to([
-                        '/flight/flight-quote/add-change',
-                        'case_id' => $caseId,
-                        'origin_quote_id' => $quote->pq_id,
-                    ]),
-                    'title' => 'Add Change'
-                ]) ?>
+            <?php /** @abac new $productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_ADD_CHANGE, CasesAbacObject::ACTION_ACCESS, Product quote add change */ ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_ADD_CHANGE, ProductQuoteAbacObject::ACTION_ACCESS)) :  ?>
+                <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
+                    <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Change', null, [
+                        'class' => 'dropdown-item btn_create_change',
+                        'data-url' => Url::to([
+                            '/flight/flight-quote/add-change',
+                            'case_id' => $caseId,
+                            'origin_quote_id' => $quote->pq_id,
+                        ]),
+                        'title' => 'Add Change'
+                    ]) ?>
+                <?php endif ?>
             <?php endif ?>
 
-            <?php /* TODO:: add abac */ ?>
-            <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
-                <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Refund Quote', null, [
-                    'data-flight-id' => $flight->getId(),
-                    'class' => 'dropdown-item btn_create_voluntary_refund',
-                    'data-url' => Url::to([
-                        '/flight/flight-quote/create-voluntary-quote-refund',
-                        'flight_quote_id' => $quote->flightQuote->fq_id,
-                        'project_id' => $projectId,
-                        'origin_product_quote_id' => $quote->pq_id,
-                        'order_id' => $order->or_id,
-                        'case_id' => $caseId
-                    ]),
-                    'title' => 'Add Voluntary Refund Quote'
-                ]) ?>
+            <?php /** @abac new $productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_CREATE_VOL_REFUND, CasesAbacObject::ACTION_ACCESS, Product quote add voluntary refund */ ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_CREATE_VOL_REFUND, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+                <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
+                    <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Refund Quote', null, [
+                        'data-flight-id' => $flight->getId(),
+                        'class' => 'dropdown-item btn_create_voluntary_refund',
+                        'data-url' => Url::to([
+                            '/flight/flight-quote/create-voluntary-quote-refund',
+                            'flight_quote_id' => $quote->flightQuote->fq_id,
+                            'project_id' => $projectId,
+                            'origin_product_quote_id' => $quote->pq_id,
+                            'order_id' => $order->or_id,
+                            'case_id' => $caseId
+                        ]),
+                        'title' => 'Add Voluntary Refund Quote'
+                    ]) ?>
+                <?php endif ?>
             <?php endif ?>
 
-            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS, Action Remove product from order */ ?>
-            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) : ?>
+            <?php /** @abac $productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_PRODUCT_QUOTE_REMOVE, ProductQuoteAbacObject::ACTION_ACCESS, Action Remove product from order */ ?>
+            <?php //if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) : ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_PRODUCT_QUOTE_REMOVE, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
                 <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Remove', null, [
                     'data-order-id' => $order->or_id,
                     'data-product-quote-id' => $quote->pq_id,

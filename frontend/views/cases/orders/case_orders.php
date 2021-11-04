@@ -427,7 +427,9 @@ $js = <<<JS
         modal.find('.modal-title').html('Product Quote [' + gid + '] Details');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             if (status == 'error') {
-                createNotify('Error', xhr.responseText, 'error');
+                if (xhr.status !== 403) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }
             } else {
                 modal.modal({
                   backdrop: 'static',
@@ -522,8 +524,10 @@ $js = <<<JS
         modal.find('.modal-title').html('Create voluntary refund');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             console.log(xhr);
-            if (status === 'error' && xhr.status !== 403) {
-                createNotify('Error', xhr.responseText, 'error');
+            if (status === 'error') {
+                if (xhr.status !== 403) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }                
             } else {
                 modal.modal({
                   backdrop: 'static',
@@ -547,8 +551,10 @@ $js = <<<JS
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Add Change');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            if (status === 'error' && xhr.status !== 403) {
-                createNotify('Error', xhr.responseText, 'error');
+            if (status === 'error') {
+                if (xhr.status !== 403) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }                
             } else {
                 modal.modal({
                   backdrop: 'static',
@@ -885,7 +891,9 @@ $js = <<<JS
                   }
               })
             .fail(function( jqXHR, textStatus ) {
-                alert( "Request failed: " + textStatus );
+                if (jqXHR.status != 403) {
+                    alert( "Request failed: " + textStatus );
+                }                
             }).always(function() {
                 $('#preloader').addClass('d-none');
             });
