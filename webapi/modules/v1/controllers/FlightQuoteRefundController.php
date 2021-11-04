@@ -238,7 +238,7 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                AppHelper::throwableLog($throwable),
                 'FlightQuoteRefundController:actionInfo:Warning'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -250,7 +250,7 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         } catch (\Throwable $throwable) {
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $post),
+                AppHelper::throwableLog($throwable, true),
                 'FlightQuoteRefundController:actionInfo:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -829,7 +829,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($e, true), $post),
+                AppHelper::throwableLog($e, true),
                 'FlightQuoteRefundController:actionCreate:BoResponseException'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -843,7 +843,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::warning(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable), $post),
+                AppHelper::throwableLog($throwable),
                 'FlightQuoteRefundController:actionConfirm:Warning'
             );
             return $this->endApiLog(new ErrorResponse(
@@ -857,7 +857,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToError();
             $flightRequest->save();
             \Yii::error(
-                ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $post),
+                AppHelper::throwableLog($throwable, true),
                 'FlightQuoteRefundController:actionConfirm:Throwable'
             );
             return $this->endApiLog(new ErrorResponse(
