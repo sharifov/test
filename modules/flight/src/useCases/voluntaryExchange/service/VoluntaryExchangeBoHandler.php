@@ -72,6 +72,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         if (!$form instanceof FlightVoluntaryExchangeUpdateForm) {
             throw new \RuntimeException('Form must be instanceof FlightVoluntaryExchangeUpdateForm');
         }
+
         $this->form = $form;
         if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->form->booking_id)) {
             throw new \RuntimeException('OriginProductQuote not found by booking_id(' . $this->form->booking_id . ')');
@@ -82,7 +83,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         if (!$this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange((int) $this->productQuoteChange->pqc_id)) {
             throw new \RuntimeException('voluntaryQuote not found by pqcID(' . $this->productQuoteChange->pqc_id . ')');
         }
-        if (!$this->project = Project::findOne(['api_key' => $this->form->project_key])) {
+        if (!$this->project = Project::findOne(['project_key' => $this->form->project_key])) {
             throw new \RuntimeException('Project not found by key(' . $this->form->project_key . ')');
         }
         $this->case = $this->productQuoteChange->pqcCase;
