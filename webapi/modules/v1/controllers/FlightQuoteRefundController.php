@@ -812,10 +812,9 @@ class FlightQuoteRefundController extends ApiBaseController
             $job = new VoluntaryRefundConfirmJob(
                 $flightRequest->fr_id,
                 $productQuoteRefund->pqr_id,
-                $boRequestConfirmResult,
                 $voluntaryRefundConfirmForm->orderId
             );
-            $jobId = \Yii::$app->queue_job->priority(100)->push($job);
+            $jobId = \Yii::$app->queue_job->priority(10)->push($job);
 
             $flightRequest->fr_job_id = $jobId;
             $this->flightRequestRepository->save($flightRequest);
