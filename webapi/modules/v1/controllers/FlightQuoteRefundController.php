@@ -280,7 +280,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{0..50}}        bookingId          Booking ID
      * @apiParam {object}               refund                            Refund Data
      * @apiParam {string{..3}}          refund.currency                   Currency
-     * @apiParam {string}               refund.orderId                    OTA Order Id
+     * @apiParam {string{..32}}               refund.orderId                    OTA Order Id
      * @apiParam {number}               refund.processingFee              Processing fee
      * @apiParam {number}               refund.penaltyAmount              Airline penalty amount
      * @apiParam {number}               refund.totalRefundAmount          Total refund amount
@@ -585,7 +585,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *
      * @apiParam {string{0..10}}        bookingId          Booking ID
      * @apiParam {string{..32}}         refundRequestGid          Refund Request Gid
-     * @apiParam {string}               orderId                    OTA Order Id
+     * @apiParam {string{..32}}               orderId                    OTA Order Id
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -596,7 +596,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{30}}           billing.city                 City
      * @apiParam {string{40}}           [billing.state]              State
      * @apiParam {string{2}}            billing.country_id           Country code (for example "US")
-     * @apiParam {string{2}}            billing.country             Country (for example "United States")
+     * @apiParam {string}               billing.country             Country (for example "United States")
      * @apiParam {string{10}}           billing.zip                Zip
      * @apiParam {string{20}}           billing.contact_phone      Contact phone
      * @apiParam {string{160}}          billing.contact_email      Contact email
@@ -812,7 +812,8 @@ class FlightQuoteRefundController extends ApiBaseController
             $job = new VoluntaryRefundConfirmJob(
                 $flightRequest->fr_id,
                 $productQuoteRefund->pqr_id,
-                $boRequestConfirmResult
+                $boRequestConfirmResult,
+                $voluntaryRefundConfirmForm->orderId
             );
             $jobId = \Yii::$app->queue_job->priority(100)->push($job);
 

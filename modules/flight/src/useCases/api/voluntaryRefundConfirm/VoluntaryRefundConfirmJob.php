@@ -31,6 +31,7 @@ use yii\queue\JobInterface;
  * @property-read ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository
  * @property-read OrderRefundRepository $orderRefundRepository
  * @property-read CasesRepository $caseRepository
+ * @property-read string $productQuoteRefundCid
  */
 class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
 {
@@ -43,11 +44,13 @@ class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
     private ProductQuoteOptionRefundRepository $productQuoteOptionRefundRepository;
     private OrderRefundRepository $orderRefundRepository;
     private CasesRepository $caseRepository;
+    private string $productQuoteRefundCid;
 
     public function __construct(
         int $flightRequestId,
         int $productQuoteRefundId,
         bool $boRequestConfirmResult,
+        string $productQuoteRefundCid,
         ?float $timeStart = null,
         $config = []
     ) {
@@ -61,6 +64,7 @@ class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
         $this->productQuoteOptionRefundRepository = \Yii::createObject(ProductQuoteOptionRefundRepository::class);
         $this->orderRefundRepository = \Yii::createObject(OrderRefundRepository::class);
         $this->caseRepository = \Yii::createObject(CasesRepository::class);
+        $this->productQuoteRefundCid = $productQuoteRefundCid;
     }
 
     /**
@@ -87,6 +91,7 @@ class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
             }
 
 
+            $productQuoteRefund->pqr_cid = $this->productQuoteRefundCid;
             $productQuoteRefund->detachBehavior('user');
             $productQuoteRefund->processing();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
