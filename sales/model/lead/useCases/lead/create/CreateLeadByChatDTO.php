@@ -99,7 +99,17 @@ class CreateLeadByChatDTO
             $this->visitorLog->vl_project_id = $this->chat->cch_project_id;
         }
 
-        $source = Sources::find()->select(['id'])->where(['cid' => $this->visitorLog->vl_source_cid])->one();
+        $sourceId = null;
+        $source = Sources::find()->select(['id'])->where(['cid' => $this->visitorLog->vl_source_cid, 'project_id' => $this->form->projectId])->asArray()->one();
+        if ($source) {
+            $sourceId = (int)$source['id'];
+        } else {
+            $source = Sources::getByProjectId($this->form->projectId);
+            if ($source) {
+                $sourceId = $source->id;
+            }
+        }
+
         $ip = $this->chatVisitorData->getRequestIp();
         $gmtOffset = ClientChatHelper::formatOffsetUtcToLeadOffsetGmt($this->chatVisitorData->getOffsetUtc());
 
@@ -108,7 +118,7 @@ class CreateLeadByChatDTO
             $this->client->first_name,
             $this->client->last_name,
             $this->chat->cch_ip,
-            $source['id'] ?? null,
+            $sourceId,
             $this->form->projectId,
             $this->chat->cchChannel->ccc_dep_id,
             $this->userId,
