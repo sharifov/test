@@ -69,7 +69,7 @@ class ApiDocData
      * @apiParam {string{8}}               data.booking_id              Booking Id
      * @apiParam {string{32}}              data.product_quote_gid       Product quote GID
      * @apiParam {string{32}}              data.exchange_gid            Exchange GID
-     * @apiParam {string{32}=Pending,Processing,Exchanged,Canceled}     data.exchange_status         Exchange Client status
+     * @apiParam {string{32}=Pending,Processing,Exchanged,Cancelled}     data.exchange_status         Exchange Client status
      *
      * @apiParamExample {json} Request message Example:
      *  {

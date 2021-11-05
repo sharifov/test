@@ -11677,7 +11677,7 @@ define({ "api": [
               "Pending",
               "Processing",
               "Exchanged",
-              "Canceled"
+              "Cancelled"
             ],
             "optional": false,
             "field": "data.exchange_status",
