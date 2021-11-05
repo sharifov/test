@@ -45,6 +45,9 @@ class ContactPhoneDataHelper
             ||
             /** @abac CallAbacObject::ACT_DATA_AUTO_CREATE_LEAD_OFF, CallAbacObject::ACTION_TOGGLE_DATA, Access to add/remove ContactPhoneData - key auto_create_lead_off */
             (Yii::$app->abac->can(null, CallAbacObject::ACT_DATA_AUTO_CREATE_LEAD_OFF, CallAbacObject::ACTION_TOGGLE_DATA))
+            ||
+            /** @abac CallAbacObject::ACT_DATA_INVALID, CallAbacObject::ACTION_TOGGLE_DATA, Access to add/remove ContactPhoneData - key invalid */
+            (Yii::$app->abac->can(null, CallAbacObject::ACT_DATA_INVALID, CallAbacObject::ACTION_TOGGLE_DATA))
             ;
     }
 }

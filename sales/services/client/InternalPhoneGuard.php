@@ -2,8 +2,7 @@
 
 namespace sales\services\client;
 
-use common\models\DepartmentPhoneProject;
-use common\models\UserProjectParams;
+use sales\model\phoneList\entity\PhoneList;
 
 /**
  * Class InternalPhoneGuard
@@ -12,7 +11,7 @@ use common\models\UserProjectParams;
  */
 class InternalPhoneGuard
 {
-    public $internalPhones;
+    private array $internalPhones = [];
 
     /**
      * @param string $phone
@@ -26,40 +25,10 @@ class InternalPhoneGuard
 
     private function getInternalPhones(): array
     {
-        if ($this->internalPhones !== null) {
+        if (!empty($this->internalPhones)) {
             return $this->internalPhones;
         }
-        $this->internalPhones = array_merge([], $this->getDepartmentPhones(), $this->getUserProjectParams());
+        $this->internalPhones = PhoneList::find()->select(['pl_phone_number'])->column();
         return $this->internalPhones;
-    }
-
-    /**
-     * @return array
-     */
-    private function getDepartmentPhones(): array
-    {
-//        $phones = [];
-//        foreach (DepartmentPhoneProject::find()->select(['dpp_phone_number'])->asArray()->all() as $phone) {
-//            if ($phone['dpp_phone_number']) {
-//                $phones[] = $phone['dpp_phone_number'];
-//            }
-//        }
-//        return $phones;
-        return DepartmentPhoneProject::find()->select(['pl_phone_number'])->innerJoinWith('phoneList', false)->column();
-    }
-
-    /**
-     * @return array
-     */
-    private function getUserProjectParams(): array
-    {
-//        $phones = [];
-//        foreach (UserProjectParams::find()->select(['upp_tw_phone_number'])->asArray()->all() as $phone) {
-//            if ($phone['upp_tw_phone_number']) {
-//                $phones[] = $phone['upp_tw_phone_number'];
-//            }
-//        }
-//        return $phones;
-        return UserProjectParams::find()->select(['pl_phone_number'])->innerJoinWith('phoneList', false)->column();
     }
 }

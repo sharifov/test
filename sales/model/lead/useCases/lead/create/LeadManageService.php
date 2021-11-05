@@ -4,6 +4,8 @@ namespace sales\model\lead\useCases\lead\create;
 
 use common\models\Call;
 use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
@@ -11,8 +13,11 @@ use common\models\LeadFlow;
 use common\models\LeadPreferences;
 use common\models\Sources;
 use common\models\VisitorLog;
+use sales\forms\lead\EmailCreateForm;
+use sales\forms\lead\PhoneCreateForm;
 use sales\forms\lead\PreferencesCreateForm;
 use sales\helpers\clientChat\ClientChatHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
@@ -35,6 +40,7 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\cases\CasesManageService;
+use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadHashGenerator;
 use sales\services\TransactionManager;
@@ -274,8 +280,8 @@ class LeadManageService
 
     public function createFromPhoneWidget(Call $call, Employee $user): Lead
     {
-        $internalPhoneNumber = $call->isIn() ? $call->c_to : $call->c_from;
-        $clientPhoneNumber = $call->isIn() ? $call->c_from : $call->c_to;
+        $internalPhoneNumber = $call->getInternalPhoneNumber();
+        $clientPhoneNumber = $call->getClientPhoneNumber();
 
         $sourceId = null;
 
@@ -347,6 +353,95 @@ class LeadManageService
                 LeadUserConversionDictionary::DESCRIPTION_MANUAL
             );
             $this->leadUserConversionRepository->save($leadUserConversion);
+
+            return $lead;
+        });
+    }
+
+    public function createFromPhoneWidgetWithInvalidClient(fromPhoneWidgetWithInvalidClient\Form $form, Call $call): Lead
+    {
+        return $this->transactionManager->wrap(function () use ($call, $form) {
+            $phones = [];
+            if ($form->phone) {
+                $phones[] = new PhoneCreateForm([
+                    'phone' => $form->phone,
+                    'type' => ClientPhone::PHONE_NOT_SET,
+                ]);
+            }
+            $emails = [];
+            if ($form->email) {
+                $emails[] = new EmailCreateForm([
+                    'email' => $form->email,
+                    'type' => ClientEmail::EMAIL_NOT_SET,
+                ]);
+            }
+            $client = $this->clientManageService->getOrCreate(
+                $phones,
+                $emails,
+                new ClientCreateForm([
+                    'firstName' => $form->firstName,
+                    'middleName' => $form->middleName,
+                    'lastName' => $form->lastName,
+                    'projectId' => $form->getProjectId(),
+                    'typeCreate' => Client::TYPE_CREATE_LEAD,
+                ])
+            );
+
+            $lead = Lead::createManually(
+                $client->id,
+                $client->first_name,
+                $client->last_name,
+                null,
+                null,
+                null,
+                null,
+                null,
+                $form->getSourceId(),
+                $form->getProjectId(),
+                null,
+                $form->phone,
+                $form->email,
+                $form->getDepartmentId(),
+                null
+            );
+            $lead->processing($form->getUserId(), $form->getUserId(), LeadFlow::DESCRIPTION_MANUAL_FROM_CALL);
+
+            $hash = $this->leadHashGenerator->generate(
+                null,
+                $form->getProjectId(),
+                null,
+                null,
+                null,
+                null,
+                [$form->phone],
+                null
+            );
+            $lead->setRequestHash($hash);
+            if ($form->phone) {
+                $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$form->phone]);
+            }
+
+            $this->leadRepository->save($lead);
+
+            $this->createLeadPreferences($lead->id, new PreferencesCreateForm());
+
+            if ($logId = (new CreateVisitorLog())->create($client, $lead)) {
+                $lead->setVisitorLog($logId);
+                $this->leadRepository->save($lead);
+            }
+
+            $leadUserConversion = LeadUserConversion::create(
+                $lead->id,
+                $form->getUserId(),
+                LeadUserConversionDictionary::DESCRIPTION_MANUAL
+            );
+            $this->leadUserConversionRepository->save($leadUserConversion);
+
+            $call->c_lead_id = $lead->id;
+            $call->c_client_id = $client->id;
+            if (!$call->save()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($call));
+            }
 
             return $lead;
         });

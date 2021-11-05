@@ -2795,4 +2795,14 @@ class Call extends \yii\db\ActiveRecord
     {
         return in_array($this->c_status_id, [self::STATUS_RINGING, self::STATUS_IN_PROGRESS], true);
     }
+
+    public function getClientPhoneNumber(): ?string
+    {
+        return $this->isIn() ? $this->c_from : $this->c_to;
+    }
+
+    public function getInternalPhoneNumber(): ?string
+    {
+        return $this->isIn() ? $this->c_to : $this->c_from;
+    }
 }

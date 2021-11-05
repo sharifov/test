@@ -217,6 +217,7 @@ $ajaxAcceptPriorityCallUrl = Url::to(['/call/ajax-accept-priority-call']);
 $ajaxAcceptWarmTransferCallUrl = Url::to(['/call/ajax-accept-warm-transfer-call']);
 $ajaxAddPhoneToBlackList = Url::to(['/call/ajax-add-phone-black-list']);
 $ajaxCreateLeadUrl = Url::to('/lead/ajax-create-from-phone-widget');
+$ajaxCreateLeadWithInvalidClientUrl = Url::to('/lead/ajax-create-from-phone-widget-with-invalid-client');
 $ajaxClientGetInfoJsonUrl = Url::to('/client/ajax-get-info-json');
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
@@ -259,7 +260,8 @@ PhoneWidgetCall.init({
     'addPhoneBlackListUrl': '$ajaxAddPhoneToBlackList',
     'canAddBlockList': $canAddBlockList,
     'ajaxCreateLeadUrl': '$ajaxCreateLeadUrl',
-    'ajaxClientGetInfoJsonUrl': '$ajaxClientGetInfoJsonUrl'
+    'ajaxClientGetInfoJsonUrl': '$ajaxClientGetInfoJsonUrl',
+    'ajaxCreateLeadWithInvalidClientUrl': '$ajaxCreateLeadWithInvalidClientUrl'
 });
 JS;
 $this->registerJs($js);

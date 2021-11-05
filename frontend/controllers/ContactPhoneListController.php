@@ -162,6 +162,9 @@ class ContactPhoneListController extends FController
                 /** @abac CallAbacObject::ACT_DATA_AUTO_CREATE_LEAD_OFF, CallAbacObject::ACTION_TOGGLE_DATA, Access to add/remove ContactPhoneData - key auto_create_lead_off */
                 return (Yii::$app->abac->can(null, CallAbacObject::ACT_DATA_AUTO_CREATE_LEAD_OFF, CallAbacObject::ACTION_TOGGLE_DATA));
                 break;
+            case ContactPhoneDataDictionary::KEY_INVALID:
+                /** @abac CallAbacObject::ACT_DATA_INVALID, CallAbacObject::ACTION_TOGGLE_DATA, Access to add/remove ContactPhoneData - key invalid */
+                return (Yii::$app->abac->can(null, CallAbacObject::ACT_DATA_INVALID, CallAbacObject::ACTION_TOGGLE_DATA));
             default:
                 return false;
         }

@@ -22,6 +22,7 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_DATA_IS_TRUSTED            = self::NS . 'act/data-is-trusted';
     public const ACT_DATA_AUTO_CREATE_CASE_OFF  = self::NS . 'act/data-auto-create-case-off';
     public const ACT_DATA_AUTO_CREATE_LEAD_OFF  = self::NS . 'act/data-auto-create-lead-off';
+    public const ACT_DATA_INVALID               = self::NS . 'act/data-invalid';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
@@ -30,6 +31,7 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_DATA_IS_TRUSTED           => self::ACT_DATA_IS_TRUSTED,
         self::ACT_DATA_AUTO_CREATE_CASE_OFF => self::ACT_DATA_AUTO_CREATE_CASE_OFF,
         self::ACT_DATA_AUTO_CREATE_LEAD_OFF => self::ACT_DATA_AUTO_CREATE_LEAD_OFF,
+        self::ACT_DATA_INVALID              => self::ACT_DATA_INVALID,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -43,6 +45,7 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_DATA_IS_TRUSTED           => [self::ACTION_TOGGLE_DATA],
         self::ACT_DATA_AUTO_CREATE_CASE_OFF => [self::ACTION_TOGGLE_DATA],
         self::ACT_DATA_AUTO_CREATE_LEAD_OFF => [self::ACTION_TOGGLE_DATA],
+        self::ACT_DATA_INVALID              => [self::ACTION_TOGGLE_DATA],
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [];

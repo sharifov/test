@@ -66,6 +66,8 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\department\department\DefaultPhoneType;
 use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
@@ -100,6 +102,7 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use yii\validators\StringValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
@@ -188,6 +191,7 @@ class LeadController extends FController
                     'ajax-take',
                     'create-by-chat',
                     'ajax-create-from-phone-widget',
+                    'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call'
                 ],
             ],
@@ -2319,9 +2323,15 @@ class LeadController extends FController
     {
         $callSid = Yii::$app->request->post('callSid');
 
-
         if (!$call = Call::findOne(['c_call_sid' => $callSid])) {
-            throw new BadRequestHttpException('Call not found');
+            throw new NotFoundHttpException('Call not found');
+        }
+
+        if ($this->clientOnCallIsInvalid($call)) {
+            return $this->asJson([
+                'error' => false,
+                'message' => 'client is invalid',
+            ]);
         }
 
         $leadAbacDto = new LeadAbacDto(null, $call->c_created_user_id);
@@ -2373,6 +2383,71 @@ class LeadController extends FController
         }
 
         return $this->asJson($result);
+    }
+
+    public function actionAjaxCreateFromPhoneWidgetWithInvalidClient()
+    {
+        if (!Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
+            throw new BadRequestHttpException();
+        }
+
+        $callSid = (string)Yii::$app->request->get('callSid');
+        if (!$callSid) {
+            throw new BadRequestHttpException('Not found CallSid');
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $callSid])) {
+            throw new NotFoundHttpException('Call not found');
+        }
+
+        if (!$this->clientOnCallIsInvalid($call)) {
+            return 'Client already is Valid.';
+        }
+
+        $leadAbacDto = new LeadAbacDto(null, $call->c_created_user_id);
+        /** @abac new LeadAbacDto(null, $call->c_created_user_id), LeadAbacObject::ACT_CREATE_FROM_PHONE_WIDGET, LeadAbacObject::ACTION_CREATE, Restrict access to create lead in phone widget in contact info block */
+        if (!(bool)\Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CREATE_FROM_PHONE_WIDGET, LeadAbacObject::ACTION_CREATE, $call->cCreatedUser)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $userId = Auth::id();
+
+        try {
+            $form = new \sales\model\lead\useCases\lead\create\fromPhoneWidgetWithInvalidClient\Form($call, $userId);
+
+            if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
+                try {
+                    $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
+                    $lead = $leadManageService->createFromPhoneWidgetWithInvalidClient($form, $call);
+                    $data = json_encode((new CallUpdateMessage())->getContactData($call, Auth::id()));
+                    $leadUrl = Url::to('/lead/view/' . $lead->gid);
+                    return "<script> $('#modal-md').modal('hide');createNotify('Create Lead', 'Lead saved', 'success');PhoneWidgetContactInfo.load(" . $data . ");window.open('" . $leadUrl . "', '_blank').focus();</script>";
+                } catch (\Throwable $e) {
+                    Yii::error([
+                        'message' => 'Create lead from phone widget error',
+                        'error' => $e->getMessage(),
+                        'callId' => $call->c_id,
+                        'userId' => $userId,
+                    ], 'LeadController:actionAjaxCreateFromPhoneWidgetWithInvalidClient:1');
+                    Yii::$app->session->setFlash('error', $e->getMessage());
+                }
+            }
+
+            return $this->renderAjax('partial/_lead_create_from_phone_widget_with_invalid_client', ['leadForm' => $form]);
+        } catch (\Throwable $t) {
+            Yii::error([
+                'message' => 'Create lead from phone widget error',
+                'error' => $t->getMessage(),
+                'callId' => $call->c_id,
+                'userId' => $userId,
+            ], 'LeadController:actionAjaxCreateFromPhoneWidgetWithInvalidClient:2');
+            return 'Server error. Please try again later.';
+        }
+    }
+
+    private function clientOnCallIsInvalid(Call $call): bool
+    {
+        return $call->c_client_id === null || ContactPhoneListService::isInvalid($call->getClientPhoneNumber());
     }
 
     public function actionLinkChat()

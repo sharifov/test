@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -16,7 +17,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cpd_cpl_id')->textInput() ?>
 
-        <?= $form->field($model, 'cpd_key')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'cpd_key')->dropDownList(ContactPhoneDataDictionary::KEY_LIST) ?>
 
         <?= $form->field($model, 'cpd_value')->textInput(['maxlength' => true]) ?>
 
