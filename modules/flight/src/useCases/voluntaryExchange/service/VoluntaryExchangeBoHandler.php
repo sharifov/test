@@ -179,13 +179,13 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         $transaction = new Transaction(['db' => \Yii::$app->db]);
         try {
             $transaction->begin();
-            $this->productQuoteChange->error();
+            $this->productQuoteChange->declined();
             $this->objectCollection->getProductQuoteChangeRepository()->save($this->productQuoteChange);
 
             $this->case->error(null, 'Exchanged from BackOffice request');
             $this->objectCollection->getCasesRepository()->save($this->case);
 
-            $this->voluntaryQuote->error();
+            $this->voluntaryQuote->declined();
             $this->objectCollection->getProductQuoteRepository()->save($this->voluntaryQuote);
 
             $transaction->commit();

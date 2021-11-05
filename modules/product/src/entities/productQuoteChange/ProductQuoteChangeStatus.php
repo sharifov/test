@@ -22,7 +22,7 @@ class ProductQuoteChangeStatus
         self::PENDING => 'Pending',
         self::IN_PROGRESS => 'In progress',
         self::COMPLETED => 'Completed',
-        self::CANCELED => 'Cancelled',
+        self::CANCELED => 'Canceled',
         self::ERROR => 'Error',
         self::DECLINED => 'Declined',
         self::PROCESSING => 'Processing',
