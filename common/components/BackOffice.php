@@ -467,21 +467,21 @@ class BackOffice
         $data = $response->data;
         if (!$data) {
             \Yii::error([
-                    'message' => 'BO voluntaryRefund data is empty',
+                    'message' => 'BO (' . $endpoint . ') data is empty',
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:getExchangeData:dataIsEmpty');
             throw new BoResponseException('BO "Get Exchange Data" data is empty', BoResponseException::BO_DATA_IS_EMPTY);
         }
         if (!is_array($data)) {
             \Yii::error([
-                    'message' => 'BO voluntaryRefund response Data type is invalid',
+                    'message' => 'BO  (' . $endpoint . ') response Data type is invalid',
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:getExchangeData:dataIsInvalid');
             throw new BoResponseException('BO "Get Exchange Data" response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
         }
         if (!array_key_exists('allow', $data)) {
             \Yii::error([
-                    'message' => 'BO voluntaryRefund response Data allow key not found',
+                    'message' => 'BO  (' . $endpoint . ') response Data allow key not found',
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:getExchangeData:dataIsInvalid');
             throw new BoResponseException('BO "Get Exchange Data" response Data allow key not found', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
