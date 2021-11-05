@@ -201,11 +201,14 @@ class FlightFromSaleService
         $flightQuote->fq_service_fee_percent = 0;
         $this->flightQuoteRepository->save($flightQuote);
 
+        $segmentCabin = null;
+
         if ($itinerary = ArrayHelper::getValue($saleData, 'itinerary')) {
             foreach ($trips = self::prepareTrips($itinerary) as $keyTrip => $trip) {
                 $flightQuoteTrip = FlightQuoteTrip::create($flightQuote, (int) $trip['duration']);
 
                 $this->flightQuoteTripRepository->save($flightQuoteTrip);
+                $durationSegments = 0;
 
                 if ($tripSegments = ArrayHelper::getValue($itinerary, "{$keyTrip}.segments")) {
                     foreach ($tripSegments as $segment) {
@@ -236,7 +239,15 @@ class FlightFromSaleService
                             $segmentApiForm->baggage
                         );
                         $this->flightQuoteSegmentPaxBaggageRepository->save($flightQuoteSegmentPaxBaggage);
+
+                        $durationSegments += (int) $segmentApiForm->flightDuration;
+
+                        $segmentCabin = $segment['cabin'];
                     }
+                }
+                if ((int) $flightQuoteTrip->fqt_duration === 0) {
+                    $flightQuoteTrip->fqt_duration = $durationSegments;
+                    $this->flightQuoteTripRepository->save($flightQuoteTrip);
                 }
             }
         }
@@ -307,6 +318,9 @@ class FlightFromSaleService
             }
         }
 
+        if (empty($flightProduct->fl_cabin_class) && !empty($segmentCabin)) {
+            $flightProduct->fl_cabin_class = $segmentCabin;
+        }
         $flightProduct->fl_adults = $paxTypeCount[FlightPax::PAX_ADULT] ?? 0;
         $flightProduct->fl_children = $paxTypeCount[FlightPax::PAX_CHILD] ?? 0;
         $flightProduct->fl_infants = $paxTypeCount[FlightPax::PAX_INFANT] ?? 0;

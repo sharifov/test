@@ -102,6 +102,6 @@ class ProductQuoteChangeStatus
     {
         $key = self::getKeyById($id);
         $statusMap = SettingHelper::getProductQuoteChangeClientStatusMapping();
-        return $statusMap[$key] ?? $key ?? '';
+        return $statusMap[$key] ?? '';
     }
 }

@@ -85,32 +85,83 @@ class VoluntaryExchangeConfirmHandler
         $this->caseHandler = new CaseVoluntaryExchangeHandler($this->case, $this->objectCollection);
     }
 
-    public function prepareRequest(): void
+    public function prepareRequest(): array
     {
         $request['apiKey'] = $this->case->project->api_key;
         $request['bookingId'] = $this->confirmForm->booking_id;
         $request['billing'] = self::mappingBilling($this->confirmForm->getBillingInfoForm());
         $request['payment'] = self::mappingPayment($this->confirmForm->getPaymentRequestForm());
-
-        /* TODO::  */
+        $request['exchange'] = $this->prepareExchange();
+        return $request;
     }
 
     private function prepareExchange(): array
     {
+        $caseSale = $this->getSale();
+        $data['cons'] = $caseSale->css_sale_data['consolidator'] ?? null;
+        $data['tickets'] = null;
+        if ($flightPaxes = $this->voluntaryExchangeQuote->flightQuote->fqFlight->flightPaxes ?? null) {
+            foreach ($flightPaxes as $key => $flightPax) {
+                $data['tickets'][$key]['firstName'] = $flightPax->fp_first_name;
+                $data['tickets'][$key]['lastName'] = $flightPax->fp_last_name;
+                $data['tickets'][$key]['paxType'] = $flightPax->fp_pax_type;
+                $data['tickets'][$key]['number'] = $flightPax->flightQuoteTicket->fqt_ticket_number ?? null;
+                $data['tickets'][$key]['numRef'] = $key + 1 . '.1';
+            }
+        }
+
+        $data['trips'] = null;
+        if ($flightQuoteTrips = $this->voluntaryExchangeQuote->flightQuote->flightQuoteTrips ?? null) {
+            foreach ($flightQuoteTrips as $keyTrip => $trip) {
+                $tripId = $keyTrip + 1;
+                $data['trips'][$keyTrip]['tripId'] = $tripId;
+                $data['trips'][$keyTrip]['duration'] = (int) $trip->fqt_duration;
+
+                if ($segments = $trip->flightQuoteSegments) {
+                    foreach ($segments as $keySegment => $segment) {
+                        $segmentId = $keySegment + 1;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['segmentId'] = $segmentId;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['departureTime'] = $segment->fqs_departure_dt;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['arrivalTime'] = $segment->fqs_arrival_dt;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['flightNumber'] = $segment->fqs_flight_number;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['bookingClass'] = $segment->fqs_booking_class;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['duration'] = $segment->fqs_duration;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['departureAirportCode'] = $segment->fqs_departure_airport_iata;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['departureAirportTerminal'] = $segment->fqs_departure_airport_terminal;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['arrivalAirportCode'] = $segment->fqs_arrival_airport_iata;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['arrivalAirportTerminal'] = $segment->fqs_arrival_airport_terminal;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['operatingAirline'] = $segment->fqs_operating_airline;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['airEquipType'] = $segment->fqs_air_equip_type;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['marketingAirline'] = $segment->fqs_marketing_airline;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['marriageGroup'] = $segment->fqs_marriage_group;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['cabin'] = $segment->fqs_cabin_class;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['meal'] = $segment->fqs_meal;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['fareCode'] = $segment->fqs_fare_code;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['recheckBaggage'] = $segment->fqs_recheck_baggage;
+
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['stop'] = $segment->fqs_stop;
+                        $data['trips'][$keyTrip]['segments'][$keySegment]['stops'] = [];
+                        if ($stops = $segment->flightQuoteSegmentStops) {
+                            foreach ($stops as $keyStop => $stop) {
+                                $data['trips'][$keyTrip]['segments'][$keySegment]['stops'][$keyStop]['locationCode'] = $stop->qss_location_iata;
+                                $data['trips'][$keyTrip]['segments'][$keySegment]['stops'][$keyStop]['departureDateTime'] = $stop->qss_departure_dt;
+                                $data['trips'][$keyTrip]['segments'][$keySegment]['stops'][$keyStop]['arrivalDateTime'] = $stop->qss_arrival_dt;
+                                $data['trips'][$keyTrip]['segments'][$keySegment]['stops'][$keyStop]['duration'] = $stop->qss_duration;
+                                $data['trips'][$keyTrip]['segments'][$keySegment]['stops'][$keyStop]['elapsedTime'] = $stop->qss_elapsed_time;
+                                $data['trips'][$keyTrip]['segments'][$keySegment]['stops'][$keyStop]['equipment'] = $stop->qss_equipment;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         $data['currency'] = $this->voluntaryExchangeQuote->pq_client_currency ?: $this->voluntaryExchangeQuote->pq_origin_currency;
         $data['validatingCarrier'] = $this->voluntaryExchangeQuote->flightQuote->fq_main_airline;
         $data['gds'] = $this->voluntaryExchangeQuote->flightQuote->fq_gds;
         $data['pcc'] = $this->voluntaryExchangeQuote->flightQuote->fq_gds_pcc;
         $data['fareType'] = FlightQuote::getFareTypeNameById($this->voluntaryExchangeQuote->flightQuote->fq_fare_type_id);
-        $data['cabin'] = $this->voluntaryExchangeQuote->flightQuote->fq_cabin_class;
 
-        $caseSale = $this->getSale();
-
-        /* TODO::  */
-
-        //$this->originProductQuote->flightQuote->
-
-        //$data['tickets'] = [];
+        $data['cabin'] = $this->voluntaryExchangeQuote->flightQuote->fqFlight->fl_cabin_class;
 
         return $data;
     }
@@ -191,11 +242,10 @@ class VoluntaryExchangeConfirmHandler
         return $this->productQuoteChange;
     }
 
-    public static function mappingBilling(?BillingInfoForm $billingInfoForm): array
+    public static function mappingBilling(?BillingInfoForm $billingInfoForm): ?array
     {
-        $data['billing'] = null;
         if ($billingInfoForm) {
-            $data['billing'] = [
+            $data = [
                 'address' => $billingInfoForm->address_line1,
                 'countryCode' => $billingInfoForm->country_id,
                 'country' => $billingInfoForm->country,
@@ -206,13 +256,12 @@ class VoluntaryExchangeConfirmHandler
                 'email' => $billingInfoForm->contact_email
             ];
         }
-        return $data;
+        return $data ?? null;
     }
-    public static function mappingPayment(?PaymentRequestForm $paymentRequestForm): array
+    public static function mappingPayment(?PaymentRequestForm $paymentRequestForm): ?array
     {
-        $data['payment'] = null;
         if ($paymentRequestForm) {
-            $data['payment'] = [
+            $data = [
                 'type' => mb_strtoupper($paymentRequestForm->method_key),
                 'card' => [
                     'holderName' => $paymentRequestForm->creditCardForm->holder_name,
@@ -222,6 +271,6 @@ class VoluntaryExchangeConfirmHandler
                 ]
             ];
         }
-        return $data;
+        return $data ?? null;
     }
 }

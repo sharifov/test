@@ -447,12 +447,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
     public function getProductQuoteChangeRelations(): \yii\db\ActiveQuery
     {
-        return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pqc_id']);
+        return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pq_id']);
     }
 
     public function getProductQuoteChangeLastRelation(): \yii\db\ActiveQuery
     {
-        return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pqc_id'])->orderBy(['pqc_id' => SORT_DESC]);
+        return $this->hasOne(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pq_id'])->orderBy(['pqcr_pqc_id' => SORT_DESC]);
     }
 
     public static function find(): Scopes
@@ -917,6 +917,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isBooked(): bool
     {
         return $this->pq_status_id === ProductQuoteStatus::BOOKED;
+    }
+
+    public function isSold(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::SOLD;
     }
 
     public function isInProgress(): bool

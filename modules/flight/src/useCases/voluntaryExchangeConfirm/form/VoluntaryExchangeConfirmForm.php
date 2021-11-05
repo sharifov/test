@@ -5,7 +5,9 @@ namespace modules\flight\src\useCases\voluntaryExchangeConfirm\form;
 use common\components\validators\CheckAndConvertToJsonValidator;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use sales\entities\cases\Cases;
 use sales\exception\ValidationException;
 use sales\helpers\ErrorsToStringHelper;
@@ -30,6 +32,12 @@ use yii\base\Model;
  */
 class VoluntaryExchangeConfirmForm extends Model
 {
+    public const PQC_ALLOW_STATUS_LIST = [
+        ProductQuoteChangeStatus::NEW,
+        ProductQuoteChangeStatus::PENDING,
+        ProductQuoteChangeStatus::IN_PROGRESS,
+    ];
+
     public $booking_id;
     public $quote_gid;
 
@@ -68,14 +76,31 @@ class VoluntaryExchangeConfirmForm extends Model
             if (!$this->changeQuote = ProductQuote::findOne(['pq_gid' => $this->quote_gid])) {
                 throw new ValidationException('ProductQuote not found');
             }
+            if (!in_array($this->changeQuote->pq_status_id, ProductQuoteStatus::PROCESSING_LIST, false)) {
+                $processingList = [];
+                foreach (ProductQuoteStatus::PROCESSING_LIST as $statusId) {
+                    $processingList[] = ProductQuoteStatus::getName($statusId);
+                }
+                throw new ValidationException('ProductQuote not in processing statuses(' . implode(',', $processingList) . '). Current status(' .
+                    ProductQuoteStatus::getName($this->changeQuote->pq_status_id) . ')');
+            }
             if (!$this->productQuoteChange = $this->changeQuote->productQuoteChangeLastRelation->pqcrPqc ?? null) {
                 throw new ValidationException('ProductQuoteChange not found');
+            }
+            if (!in_array($this->productQuoteChange->pqc_status_id, self::PQC_ALLOW_STATUS_LIST, false)) {
+                $processingPQCList = implode(',', ProductQuoteChangeStatus::getNames(self::PQC_ALLOW_STATUS_LIST));
+                throw new ValidationException('ProductQuoteChange not in processing statuses(' . $processingPQCList . '). Current status(' .
+                    ProductQuoteChangeStatus::getName($this->productQuoteChange->pqc_status_id) . ')');
             }
             if (!$this->case = $this->productQuoteChange->pqcCase ?? null) {
                 throw new ValidationException('Case not found');
             }
             if (!$this->originQuote = ProductQuoteQuery::getOriginProductQuoteByChangeQuote($this->changeQuote->pq_id)) {
                 throw new ValidationException('Origin Quote not found');
+            }
+            if (!($this->originQuote->isBooked() || $this->originQuote->isSold())) {
+                throw new ValidationException('Origin Quote in status(Booked,Sold). Current status(' .
+                    ProductQuoteStatus::getName($this->originQuote->pq_status_id) . ')');
             }
         } catch (\Throwable $throwable) {
             $this->addError($attribute, $throwable->getMessage());
