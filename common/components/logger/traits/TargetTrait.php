@@ -132,6 +132,10 @@ trait TargetTrait
             }
         }
 
+        if (empty($data['@message']) && is_array($text)) {
+            $data['@message'] = json_encode($text);
+        }
+
         if (!empty($text['trace']) && empty($data['@trace'])) {
             $data['@trace'] = $text['trace'];
             if (isset($data['@app.data']['trace'])) {
@@ -192,6 +196,10 @@ trait TargetTrait
             $data['@message'] = $dataList['message'];
         } else {
             $data['@message'] = var_export($dataList, true);
+        }
+
+        if (empty($data['@message']) && is_array($dataList)) {
+            $data['@message'] = json_encode($dataList);
         }
 
         if (!empty($dataList['code']) && empty($data['@statusCode'])) {
