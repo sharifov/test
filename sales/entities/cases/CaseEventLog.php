@@ -6,6 +6,7 @@ use Yii;
 use sales\entities\cases\Cases;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "case_event_log".
@@ -18,6 +19,7 @@ use yii\db\ActiveRecord;
  * @property string|null $cel_created_dt
  *
  * @property Cases $celCase
+ * @property int|null $cel_category_id [tinyint(1)]
  */
 class CaseEventLog extends ActiveRecord
 {
@@ -51,6 +53,25 @@ class CaseEventLog extends ActiveRecord
         self::VOLUNTARY_REFUND_CONFIRM => 'Voluntary Refund Confirm',
     ];
 
+    private const CATEGORY_ERROR = 1;
+    private const CATEGORY_WARNING = 2;
+    private const CATEGORY_INFO = 3;
+    private const CATEGORY_DEBUG = 4;
+
+    private const CATEGORY_LIST = [
+        self::CATEGORY_ERROR => 'Error',
+        self::CATEGORY_WARNING => 'Warning',
+        self::CATEGORY_INFO => 'Info',
+        self::CATEGORY_DEBUG => 'Debug'
+    ];
+
+    private const CATEGORY_ICON_CLASS_LIST = [
+        self::CATEGORY_ERROR => 'fas fa-times red',
+        self::CATEGORY_WARNING => 'fas fa-exclamation-triangle yellow',
+        self::CATEGORY_INFO => 'fas fa-info-circle blue',
+        self::CATEGORY_DEBUG => 'fas fa-list'
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -65,11 +86,12 @@ class CaseEventLog extends ActiveRecord
     public function rules()
     {
         return [
-            [['cel_case_id', 'cel_type_id'], 'integer'],
+            [['cel_case_id', 'cel_type_id', 'cel_category_id'], 'integer'],
             [['cel_data_json'], 'safe'],
             ['cel_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['cel_description'], 'string', 'max' => 255],
             [['cel_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['cel_case_id' => 'cs_id']],
+            [['cel_category_id'], 'in', 'range' => array_keys(self::getCategoryList()), 'skipOnEmpty' => true]
         ];
     }
 
@@ -85,6 +107,7 @@ class CaseEventLog extends ActiveRecord
             'cel_description' => 'Description',
             'cel_data_json' => 'Data',
             'cel_created_dt' => 'Created Dt',
+            'cel_category_id' => 'Category'
         ];
     }
 
@@ -126,5 +149,30 @@ class CaseEventLog extends ActiveRecord
             $log->cel_data_json = $data;
             $log->save();
         }
+    }
+
+    public static function getEventLogList(): array
+    {
+        return self::CASE_EVENT_LOG_LIST;
+    }
+
+    public static function getCategoryList(): array
+    {
+        return self::CATEGORY_LIST;
+    }
+
+    public static function getCategoryIconClassList(): array
+    {
+        return self::CATEGORY_ICON_CLASS_LIST;
+    }
+
+    public function getCategoryName(): string
+    {
+        return self::getCategoryList()[$this->cel_category_id] ?? '';
+    }
+
+    public function getCategoryNameFormat(): string
+    {
+        return $this->cel_category_id ? (Html::tag('i', '', ['class' => self::getCategoryIconClassList()[$this->cel_category_id] ?? '']) . ' ' . $this->getCategoryName()) : '';
     }
 }

@@ -40,7 +40,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cel_type_id',
                 'value' => static function (CaseEventLog $model) {
                     return $model->cel_type_id ? CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id] : null;
-                }
+                },
+                'format' => 'raw',
+                'filter' => CaseEventLog::getEventLogList()
+            ],
+            [
+                'attribute' => 'cel_category_id',
+                'value' => static function (CaseEventLog $model) {
+                    return $model->getCategoryNameFormat();
+                },
+                'format' => 'raw',
+                'filter' => CaseEventLog::getCategoryList()
             ],
             //'cel_data_json',
             [
@@ -65,7 +75,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                     return '<small>' . $resultStr . '</small>';
                 },
-                'filter' => false
             ],
             [
                 'class' => DateTimeColumn::class,
