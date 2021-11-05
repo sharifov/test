@@ -900,10 +900,10 @@ class FlightQuoteController extends FController
 
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight);
         } catch (\RuntimeException | \DomainException $exception) {
-            Yii::warning(AppHelper::throwableLog($exception), 'FlightQuoteController:actionCreateReProtectionQuote:Exception');
+            Yii::warning(AppHelper::throwableLog($exception), 'FlightQuoteController:actionCreateVoluntaryQuote:Exception');
             return $exception->getMessage();
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateReProtectionQuote:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateVoluntaryQuote:Throwable');
             return $throwable->getMessage();
         }
 
