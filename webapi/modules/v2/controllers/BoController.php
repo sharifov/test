@@ -131,7 +131,7 @@ class BoController extends BaseController
      *      "data": {
      *          "booking_id": "C4RB44",
      *          "project_key": "ovago",
-     *          "status": "Exchanged", // allowed values Pending, Processing, Exchanged, Cancelled
+     *          "status": "Exchanged", // allowed values Pending, Processing, Exchanged, Canceled
      *      }
      *  }
      *

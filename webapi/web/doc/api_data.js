@@ -11474,7 +11474,7 @@ define({ "api": [
         },
         {
           "title": "Request-Example Voluntary Flight Exchange:",
-          "content": "{\n    \"type\": \"flight_exchange\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"status\": \"Exchanged\", // allowed values Pending, Processing, Exchanged, Cancelled\n    }\n}",
+          "content": "{\n    \"type\": \"flight_exchange\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"status\": \"Exchanged\", // allowed values Pending, Processing, Exchanged, Canceled\n    }\n}",
           "type": "json"
         }
       ]
@@ -11604,7 +11604,7 @@ define({ "api": [
     "group": "WebHooks_Outgoing",
     "permission": [
       {
-        "name": "Authorized User"
+        "name": "Authorized Userhttps://translate.google.com/?hl=ru&tab=TT"
       }
     ],
     "header": {
@@ -11677,7 +11677,7 @@ define({ "api": [
               "Pending",
               "Processing",
               "Exchanged",
-              "Cancelled"
+              "Canceled"
             ],
             "optional": false,
             "field": "data.exchange_status",

@@ -55,7 +55,7 @@ class ApiDocData
      * @apiVersion 0.1.0
      * @apiName Flight voluntary-exchange update
      * @apiGroup WebHooks Outgoing
-     * @apiPermission Authorized User
+     * @apiPermission Authorized Userhttps://translate.google.com/?hl=ru&tab=TT
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
      * @apiHeaderExample {json} Header-Example:
@@ -69,7 +69,7 @@ class ApiDocData
      * @apiParam {string{8}}               data.booking_id              Booking Id
      * @apiParam {string{32}}              data.product_quote_gid       Product quote GID
      * @apiParam {string{32}}              data.exchange_gid            Exchange GID
-     * @apiParam {string{32}=Pending,Processing,Exchanged,Cancelled}     data.exchange_status         Exchange Client status
+     * @apiParam {string{32}=Pending,Processing,Exchanged,Canceled}     data.exchange_status         Exchange Client status
      *
      * @apiParamExample {json} Request message Example:
      *  {
