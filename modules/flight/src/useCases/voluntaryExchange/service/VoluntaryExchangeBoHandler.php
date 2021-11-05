@@ -126,7 +126,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
                 'booking_id' => $form->booking_id,
                 'product_quote_gid' => $this->originProductQuote->pq_gid,
                 'exchange_gid' => $this->productQuoteChange->pqc_gid,
-                'exchange_status' => ProductQuoteChangeStatus::getClientKeyStatusById($this->productQuoteChange->pqc_status_id),
+                'exchange_status' => ucfirst(ProductQuoteChangeStatus::getClientKeyStatusById($this->productQuoteChange->pqc_status_id)),
             ]
         )->getCollectedData();
 
