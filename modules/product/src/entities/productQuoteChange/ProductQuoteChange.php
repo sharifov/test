@@ -367,4 +367,9 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     {
         return md5(uniqid('pqc', false));
     }
+
+    public function getClientStatusName(): string
+    {
+        return $this->pqc_status_id ? ProductQuoteChangeStatus::getClientKeyStatusById($this->pqc_status_id) : '-';
+    }
 }

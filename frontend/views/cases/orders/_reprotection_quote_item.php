@@ -150,8 +150,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                         <th style="width: 30px;">Nr</th>
                         <th style="width: 60px;">Type</th>
                         <th>Status</th>
+                        <th title="Client Status mapping from SiteSettings for OTA" data-toggle="tooltip">Client Status</th>
                         <th style="width: 140px">Created</th>
-
                         <th style="width: 60px" title="is Automate">Auto</th>
                         <th>Decision Type</th>
                         <th style="width: 150px">Decision DateTime</th>
@@ -161,13 +161,14 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                     <tbody>
                     <?php foreach ($quote->productQuoteChanges as $nr => $changeItem) : ?>
                         <tr>
-                            <td data-toggle="tooltip" data-original-title="ProductQuoteChange ID: <?=Html::encode($changeItem->pqc_id)?>" title="ProductQuoteChangeID: <?=Html::encode($changeItem->pqc_id)?>">
+                            <td data-toggle="tooltip" data-html="true" title="Change ID: <?=Html::encode($changeItem->pqc_id)?> <br> Change GID: <?=Html::encode($changeItem->pqc_gid)?>">
                                 <?=($nr + 1)?>
                             </td>
                             <td>
                                 <?= Html::tag('span', $changeItem->getShortTypeName(), ['class' => 'badge badge-light', 'title' => $changeItem->getTypeName()]); ?>
                             </td>
                             <td><?= $changeItem->getStatusLabel()?></td>
+                            <td><?= Html::encode($changeItem->getClientStatusName()) ?></td>
                             <td><small><?=$changeItem->pqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_created_dt)) : '-'?></small></td>
 
                             <td><?= $changeItem->pqc_is_automate ? '<i class="fa fa-check" title="Automate"></i>' : '-' ?></td>
