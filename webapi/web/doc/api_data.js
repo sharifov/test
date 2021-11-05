@@ -11687,7 +11687,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request message Example:",
-          "content": "{\n    \"type\": \"flight/voluntary-exchange/update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"product_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n        \"exchange_gid\": \"1569a42c916c811e2033142d8ae54176\"\n        \"exchange_status\": \"exchanged\"\n    }\n}",
+          "content": "{\n    \"type\": \"flight/voluntary-exchange/update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"product_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n        \"exchange_gid\": \"1569a42c916c811e2033142d8ae54176\"\n        \"exchange_status\": \"Exchanged\"\n    }\n}",
           "type": "json"
         }
       ]

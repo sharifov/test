@@ -78,7 +78,7 @@ class ApiDocData
      *          "booking_id": "C4RB44",
      *          "product_quote_gid": "4569a42c916c811e2033142d8ae54179"
      *          "exchange_gid": "1569a42c916c811e2033142d8ae54176"
-     *          "exchange_status": "exchanged"
+     *          "exchange_status": "Exchanged"
      *      }
      *  }
      *
