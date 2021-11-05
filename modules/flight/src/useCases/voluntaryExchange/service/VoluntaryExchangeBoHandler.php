@@ -92,7 +92,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             case FlightVoluntaryExchangeUpdateForm::STATUS_EXCHANGED:
                 $this->handleExchanged();
                 break;
-            case FlightVoluntaryExchangeUpdateForm::STATUS_CANCELLED:
+            case FlightVoluntaryExchangeUpdateForm::STATUS_CANCELED:
                 $this->handleCanceled();
                 break;
             case FlightVoluntaryExchangeUpdateForm::STATUS_PENDING:
