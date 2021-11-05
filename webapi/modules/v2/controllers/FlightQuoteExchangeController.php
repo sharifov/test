@@ -850,12 +850,10 @@ class FlightQuoteExchangeController extends BaseController
         try {
             $requestData = $voluntaryExchangeCreateHandler->prepareRequest();
 
-
-
-
             /* TODO::
                 add request to BO - https://dev-backoffice.travel-dev.com/docs/api/#api-AirOrder_Self-Service-Create_Exchange_Order
              */
+            $dataMessage['message'] = 'Service under construction';
 
             $dataMessage['requestData'] = $requestData; /* TODO::  */
 
