@@ -132,12 +132,15 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         \Yii::info([
             'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
             'requestData' => $whData,
+            'formBOData' => $form->toArray(),
         ], 'info\Webhook::OTA::VoluntaryExchange:Request');
+
         $responseData = \Yii::$app->hybrid->wh(
             $this->project->id,
             HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
             ['data' => $whData]
         );
+
         \Yii::info([
             'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
             'responseData' => $responseData,
