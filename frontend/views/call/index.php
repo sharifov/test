@@ -130,8 +130,11 @@ $pjaxListId = 'pjax-call-index';
                             </div>';
                     },
                     'allow_list' => static function ($url, Call $model) {
+                        if (!$model->c_from) {
+                            return '';
+                        }
                         $title = ContactPhoneListService::isAllowList($model->c_from) ? 'Remove Phone number from Allow List' : 'Add Phone number to Allow List';
-                        return'<div class="dropdown">
+                        return '<div class="dropdown">
                               <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-check-square"></i>
                               </button>

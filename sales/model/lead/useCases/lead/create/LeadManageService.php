@@ -354,6 +354,8 @@ class LeadManageService
             );
             $this->leadUserConversionRepository->save($leadUserConversion);
 
+            $this->updateLeadOnRelationActiveCalls($lead, $call);
+
             return $lead;
         });
     }
@@ -437,13 +439,50 @@ class LeadManageService
             );
             $this->leadUserConversionRepository->save($leadUserConversion);
 
-            $call->c_lead_id = $lead->id;
-            $call->c_client_id = $client->id;
-            if (!$call->save()) {
-                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($call));
-            }
+            $this->updateLeadOnRelationActiveCalls($lead, $call);
 
             return $lead;
         });
+    }
+
+    private function updateLeadOnRelationActiveCalls(Lead $lead, Call $call): void
+    {
+        $call->c_lead_id = $lead->id;
+        $call->c_client_id = $lead->client_id;
+        if (!$call->save()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($call));
+        }
+
+        $parentId = null;
+
+        if ($call->c_parent_id) {
+            $parent = Call::find()->byId($call->c_parent_id)->active()->one();
+            if ($parent) {
+                $parentId = $parent->c_id;
+                $parent->c_lead_id = $lead->id;
+                $parent->c_client_id = $lead->client_id;
+                if (!$parent->save()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($parent));
+                }
+            }
+        } else {
+            $parentId = $call->c_id;
+        }
+
+        if (!$parentId) {
+            return;
+        }
+
+        $children = Call::find()->byParentId($parentId)->active()->all();
+        foreach ($children as $child) {
+            if ($child->c_id === $call->c_id) {
+                continue;
+            }
+            $child->c_lead_id = $lead->id;
+            $child->c_client_id = $lead->client_id;
+            if (!$child->save(false)) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($child));
+            }
+        }
     }
 }
