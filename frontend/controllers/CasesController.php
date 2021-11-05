@@ -1981,7 +1981,7 @@ class CasesController extends FController
     public function actionAjaxCaseEventLog()
     {
         $searchModel = new CaseEventLogSearch();
-        $dataProvider = $searchModel->searchByCase(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->searchByCase(Yii::$app->request->queryParams, Auth::user());
 
         return $this->renderAjax('event-log/event-log', [
             'searchModel' => $searchModel,

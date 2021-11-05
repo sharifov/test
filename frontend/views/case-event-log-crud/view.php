@@ -39,6 +39,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->cel_type_id ? CaseEventLog::CASE_EVENT_LOG_LIST[$model->cel_type_id] : null;
                 }
             ],
+            [
+                'attribute' => 'cel_category_id',
+                'value' => static function (CaseEventLog $model) {
+                    return $model->getCategoryNameFormat();
+                },
+                'format' => 'raw'
+            ],
             'cel_description',
             'cel_created_dt',
         ],
