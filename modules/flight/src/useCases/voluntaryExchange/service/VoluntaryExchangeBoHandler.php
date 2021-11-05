@@ -133,6 +133,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
             'requestData' => $whData,
             'formBOData' => $form->toArray(),
+            'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($this->productQuoteChange->pqc_status_id),
         ], 'info\Webhook::OTA::VoluntaryExchange:Request');
 
         $responseData = \Yii::$app->hybrid->wh(
