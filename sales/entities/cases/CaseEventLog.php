@@ -56,7 +56,7 @@ class CaseEventLog extends ActiveRecord
     private const CATEGORY_ERROR = 1;
     private const CATEGORY_WARNING = 2;
     private const CATEGORY_INFO = 3;
-    private const CATEGORY_DEBUG = 4;
+    public const CATEGORY_DEBUG = 4;
 
     private const CATEGORY_LIST = [
         self::CATEGORY_ERROR => 'Error',

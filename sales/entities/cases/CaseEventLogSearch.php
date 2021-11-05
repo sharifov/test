@@ -2,6 +2,7 @@
 
 namespace sales\entities\cases;
 
+use common\models\Employee;
 use sales\entities\cases\CaseEventLog;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -83,11 +84,16 @@ class CaseEventLogSearch extends CaseEventLog
      *
      * @param array $params
      *
+     * @param Employee $employee
      * @return ActiveDataProvider
      */
-    public function searchByCase($params)
+    public function searchByCase($params, Employee $employee)
     {
         $query = CaseEventLog::find()->where(['cel_case_id' => $params['case_id']]);
+
+        if (!$employee->isAdmin() && !$employee->isSuperAdmin()) {
+            $query->andWhere(['<>', 'cel_category_id', CaseEventLog::CATEGORY_DEBUG]);
+        }
 
         // add conditions that should always apply here
 
