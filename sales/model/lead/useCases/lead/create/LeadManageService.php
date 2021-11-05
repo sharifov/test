@@ -206,7 +206,8 @@ class LeadManageService
             $form->clientPhone,
             $form->clientEmail,
             $form->depId,
-            null
+            null,
+            Lead::TYPE_CREATE_MANUALLY
         );
 
         $lead->processing($employeeId, $creatorId, $reason);
@@ -320,7 +321,8 @@ class LeadManageService
             $clientPhoneNumber,
             null,
             $call->c_dep_id,
-            null
+            null,
+            Lead::TYPE_CREATE_MANUALLY_FROM_CALL
         );
         $lead->processing($user->id, $user->id, LeadFlow::DESCRIPTION_MANUAL_FROM_CALL);
 
@@ -404,7 +406,8 @@ class LeadManageService
                 $form->phone,
                 $form->email,
                 $form->getDepartmentId(),
-                null
+                null,
+                Lead::TYPE_CREATE_MANUALLY_FROM_CALL
             );
             $lead->processing($form->getUserId(), $form->getUserId(), LeadFlow::DESCRIPTION_MANUAL_FROM_CALL);
 

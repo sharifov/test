@@ -354,6 +354,7 @@ class Lead extends ActiveRecord implements Objectable
     public const TYPE_CREATE_CLONE = 6;
     public const TYPE_CREATE_IMPORT = 7;
     public const TYPE_CREATE_CLIENT_CHAT = 8;
+    public const TYPE_CREATE_MANUALLY_FROM_CALL = 9;
 
     public const TYPE_CREATE_LIST = [
         self::TYPE_CREATE_MANUALLY => 'Manually',
@@ -364,6 +365,7 @@ class Lead extends ActiveRecord implements Objectable
         self::TYPE_CREATE_CLONE => 'Clone',
         self::TYPE_CREATE_IMPORT => 'Import',
         self::TYPE_CREATE_CLIENT_CHAT => 'Client Chat',
+        self::TYPE_CREATE_MANUALLY_FROM_CALL => 'Manually from call',
     ];
 
     public const TYPE_BASIC = 1;
@@ -641,6 +643,7 @@ class Lead extends ActiveRecord implements Objectable
      * @param $clientEmail
      * @param $depId
      * @param $delayedCharge
+     * @param $typeCreate
      * @return Lead
      */
     public static function createManually(
@@ -658,7 +661,8 @@ class Lead extends ActiveRecord implements Objectable
         $clientPhone,
         $clientEmail,
         $depId,
-        $delayedCharge
+        $delayedCharge,
+        $typeCreate
     ): self {
         $lead = self::create();
         $lead->client_id = $clientId;
@@ -677,7 +681,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
         $lead->status = null;
-        $lead->l_type_create = self::TYPE_CREATE_MANUALLY;
+        $lead->l_type_create = $typeCreate;
         $lead->recordEvent(new LeadCreatedManuallyEvent($lead));
         return $lead;
     }
