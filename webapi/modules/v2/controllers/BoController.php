@@ -90,11 +90,11 @@ class BoController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{30}=reprotection_update,flight_refund,voluntary_flight_refund}           type                          Type of action on reprotection
+     * @apiParam {string{30}=reprotection_update,flight_refund,voluntary_flight_refund,flight_exchange}           type                          Type action
      * @apiParam {array[]}              data                          Any Data from BO
      * @apiParam {string{8}}               data.booking_id               Booking Id
      * @apiParam {string{20}}               [data.project_key]            Project Key Ex: (ovago, hop2)
-     * @apiParam {string{32}}               data.reprotection_quote_gid   Reprotection quote gid
+     * @apiParam {string{32}}               [data.reprotection_quote_gid]   Reprotection quote gid
      *
      * @apiParamExample {json} Request-Example Reprotection Update:
      *  {
@@ -131,7 +131,7 @@ class BoController extends BaseController
      *      "data": {
      *          "booking_id": "C4RB44",
      *          "project_key": "ovago",
-     *          "status": "Exchanged", // allowed values Pending, Exchanged, Cancelled
+     *          "status": "Exchanged", // allowed values Pending, Processing, Exchanged, Cancelled
      *      }
      *  }
      *

@@ -11416,11 +11416,12 @@ define({ "api": [
             "allowedValues": [
               "reprotection_update",
               "flight_refund",
-              "voluntary_flight_refund"
+              "voluntary_flight_refund",
+              "flight_exchange"
             ],
             "optional": false,
             "field": "type",
-            "description": "<p>Type of action on reprotection</p>"
+            "description": "<p>Type action</p>"
           },
           {
             "group": "Parameter",
@@ -11449,7 +11450,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "string",
             "size": "32",
-            "optional": false,
+            "optional": true,
             "field": "data.reprotection_quote_gid",
             "description": "<p>Reprotection quote gid</p>"
           }
@@ -11473,7 +11474,7 @@ define({ "api": [
         },
         {
           "title": "Request-Example Voluntary Flight Exchange:",
-          "content": "{\n    \"type\": \"flight_exchange\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"status\": \"Exchanged\", // allowed values Pending, Exchanged, Cancelled\n    }\n}",
+          "content": "{\n    \"type\": \"flight_exchange\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"status\": \"Exchanged\", // allowed values Pending, Processing, Exchanged, Cancelled\n    }\n}",
           "type": "json"
         }
       ]
