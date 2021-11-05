@@ -96,6 +96,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
                 $this->handleCanceled();
                 break;
             case FlightVoluntaryExchangeUpdateForm::STATUS_PENDING:
+            case FlightVoluntaryExchangeUpdateForm::STATUS_PROCESSING:
                 $this->handleProcessing();
                 break;
             default:
