@@ -53,6 +53,7 @@ use modules\product\src\repositories\ProductQuoteRelationRepository;
 use sales\auth\Auth;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\product\ProductQuoteHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\parsingDump\BaggageService;
 use yii\db\Query;
@@ -104,16 +105,7 @@ class VoluntaryQuoteManualCreateService
         $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
         $this->objectCollection->getFlightQuoteStatusLogRepository()->save($flightQuoteLog);
 
-        if (!empty($form->getFlightQuotePaxPriceForms())) {
-            foreach ($form->getFlightQuotePaxPriceForms() as $key => $flightQuotePaxPriceForm) {
-                $paxPrice = FlightQuotePaxPrice::createByFlightQuotePaxPriceForm(
-                    $flightQuotePaxPriceForm,
-                    $flightQuote->getId(),
-                    $productQuote->pq_origin_currency
-                );
-                $this->objectCollection->getFlightQuotePaxPriceRepository()->save($paxPrice);
-            }
-        }
+        $this->priceProcessing($form, $productQuote, $flightQuote);
 
         $this->objectCollection->getFlightQuoteManageService()->createFlightQuoteFlight($flightQuote, null);
         $relation = ProductQuoteRelation::createVoluntaryExchange($originProductQuote->pq_id, $flightQuote->fq_product_quote_id, $userId);
@@ -271,6 +263,40 @@ class VoluntaryQuoteManualCreateService
             $productQuoteOption = ProductQuoteOption::copy($originalProductQuoteOption, $productQuote->pq_id);
             $this->objectCollection->getProductQuoteOptionRepository()->save($productQuoteOption);
         }
+
+        return $productQuote;
+    }
+
+    private function priceProcessing(
+        ChangeQuoteCreateForm $form,
+        ProductQuote $productQuote,
+        FlightQuote $flightQuote
+    ): ProductQuote {
+        $markupSum = 0;
+        $sellingSum = 0;
+        if (!empty($form->getFlightQuotePaxPriceForms())) {
+            foreach ($form->getFlightQuotePaxPriceForms() as $key => $flightQuotePaxPriceForm) {
+                $paxPrice = FlightQuotePaxPrice::createByFlightQuotePaxPriceForm(
+                    $flightQuotePaxPriceForm,
+                    $flightQuote->getId(),
+                    $productQuote->pq_origin_currency
+                );
+                $this->objectCollection->getFlightQuotePaxPriceRepository()->save($paxPrice);
+                $markupSum += $flightQuotePaxPriceForm->markup;
+                $sellingSum += $flightQuotePaxPriceForm->selling;
+            }
+        }
+
+        $productQuote = ProductQuoteHelper::resetPrices($productQuote);
+
+        $productQuote->pq_service_fee_percent = $form->serviceFee;
+        $productQuote->pq_origin_currency_rate = $form->currencyRate;
+        $productQuote->pq_origin_currency = $form->currencyCode;
+        $productQuote->pq_agent_markup = $markupSum;
+        $productQuote->pq_price = $sellingSum;
+        $productQuote->pq_origin_price = $sellingSum;
+        $productQuote->pq_client_price = $sellingSum;
+        $this->objectCollection->getProductQuoteRepository()->save($productQuote);
 
         return $productQuote;
     }
