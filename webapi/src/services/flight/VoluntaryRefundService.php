@@ -46,9 +46,9 @@ class VoluntaryRefundService implements BoWebhookService
      */
     public function processRequest(Model $form): void
     {
-        $productQuoteRefund = ProductQuoteRefundQuery::getByBookingId($form->booking_id);
+        $productQuoteRefund = ProductQuoteRefundQuery::getByBookingIdAndCid($form->booking_id, $form->orderId);
         if (!$productQuoteRefund) {
-            throw new NotFoundException('Product Quote Refund not found by bookingId: ' . $form->booking_id);
+            throw new NotFoundException('Product Quote Refund not found by bookingId: ' . $form->booking_id . ' and cid' . $form->orderId);
         }
 
         if (!$project = Project::findOne(['project_key' => $form->project_key])) {
