@@ -4496,7 +4496,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"todo\": \"TODO::\"\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"Processing was successful\",\n                    \"originQuoteGid\" : \"a1275b33cda3bbcbeea2d684475a7e8a\",\n                    \"changeQuoteGid\" : \"5c63db4e9d4d24f480088fd5e194e4f5\",\n                    \"productQuoteChangeGid\" : \"ee61d0abb62d96879e2c29ddde403650\",\n                    \"caseGid\" : \"e7dce13b4e6a5f3ccc2cec9c21fa3255\"\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]

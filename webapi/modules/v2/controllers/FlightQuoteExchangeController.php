@@ -747,7 +747,11 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "todo": "TODO::"
+                    "resultMessage": "Processing was successful",
+                    "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
+                    "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
+                    "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
+                    "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
                },
      *        "code": "13200",
      *        "technical": {
