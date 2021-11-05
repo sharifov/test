@@ -912,8 +912,8 @@ class Cases extends ActiveRecord implements Objectable
         return $this->cs_is_automate;
     }
 
-    public function addEventLog(?int $type, string $description, array $data = []): void
+    public function addEventLog(?int $type, string $description, array $data = [], ?int $categoryId = null): void
     {
-        CaseEventLog::add($this->cs_id, $type, $description, $data);
+        CaseEventLog::add($this->cs_id, $type, $description, $data, $categoryId);
     }
 }
