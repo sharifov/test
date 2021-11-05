@@ -263,7 +263,8 @@ class LeadManageService
             $form->clientPhone,
             $form->clientEmail,
             $form->depId,
-            $form->delayedCharge
+            $form->delayedCharge,
+            Lead::TYPE_CREATE_MANUALLY
         );
 
         $lead->processing($employeeId, $creatorId, $reason);
