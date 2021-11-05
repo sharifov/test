@@ -125,4 +125,9 @@ class BoRequestVoluntaryExchangeService
 
         return $data;
     }
+
+    public function sendVoluntaryConfirm(array $requestData): ?array
+    {
+        return BackOffice::voluntaryExchange($requestData);
+    }
 }

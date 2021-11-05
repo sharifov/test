@@ -176,12 +176,65 @@ class VoluntaryExchangeConfirmHandler
 
     public function doneProcess(): void
     {
-        /* TODO::  */
+        $this->case->awaiting(null, 'Voluntary Exchange Confirm api processing');
+        $this->objectCollection->getCasesRepository()->save($this->case);
+
+        $this->voluntaryExchangeQuote->inProgress(null, 'Voluntary Exchange Confirm api processing');
+        $this->objectCollection->getProductQuoteRepository()->save($this->voluntaryExchangeQuote);
+
+        $this->productQuoteChange->inProgress();
+        $this->objectCollection->getProductQuoteChangeRepository()->save($this->productQuoteChange);
+
+        $this->flightRequestService->done('FlightRequest successfully processed');
+
+        if ($this->case->cs_user_id) {
+            $linkToCase = Purifier::createCaseShortLink($this->case);
+            Notifications::createAndPublish(
+                $this->case->cs_user_id,
+                'Voluntary Exchange Confirm request',
+                'Voluntary Exchange request. Case: (' . $linkToCase . ')',
+                Notifications::TYPE_INFO,
+                true
+            );
+        }
+        $this->case->addEventLog(
+            CaseEventLog::VOLUNTARY_EXCHANGE_CONFIRM,
+            'Voluntary Exchange Confirm process completed successfully'
+        );
     }
 
     public function failProcess(string $description): void
     {
-        /* TODO::  */
+        if ($this->case) {
+            $this->case->error(null, 'Voluntary Exchange Confirm Api processing fail');
+            if ($this->case->isAutomate()) {
+                $this->case->offIsAutomate();
+            }
+            $this->objectCollection->getCasesRepository()->save($this->case);
+
+            if ($this->case->cs_user_id) {
+                $linkToCase = Purifier::createCaseShortLink($this->case);
+                Notifications::createAndPublish(
+                    $this->case->cs_user_id,
+                    'Voluntary Exchange Confirm request fail',
+                    'Error in Voluntary Exchange Confirm request. Case: (' . $linkToCase . ')',
+                    Notifications::TYPE_DANGER,
+                    true
+                );
+            }
+        }
+
+        if ($this->productQuoteChange) {
+            $this->productQuoteChange->error();
+            $this->objectCollection->getProductQuoteChangeRepository()->save($this->productQuoteChange);
+        }
+
+        if ($this->flightRequestService) {
+            $this->flightRequestService->error($description);
+            if (($this->productQuoteChange) && ($flightRequest = $this->flightRequestService->getFlightRequest())) {
+                (new CleanDataVoluntaryExchangeService($flightRequest, $this->productQuoteChange, $this->objectCollection));
+            }
+        }
     }
 
     public function additionalProcessing(): void

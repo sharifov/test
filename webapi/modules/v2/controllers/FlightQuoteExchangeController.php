@@ -841,21 +841,56 @@ class FlightQuoteExchangeController extends BaseController
         );
         $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
-        $voluntaryExchangeCreateHandler = new VoluntaryExchangeConfirmHandler(
+        $voluntaryExchangeConfirmHandler = new VoluntaryExchangeConfirmHandler(
             $flightRequest,
             $voluntaryExchangeConfirmForm,
             $this->objectCollection
         );
 
         try {
-            $requestData = $voluntaryExchangeCreateHandler->prepareRequest();
+            $requestData = $voluntaryExchangeConfirmHandler->prepareRequest();
 
-            /* TODO::
-                add request to BO - https://dev-backoffice.travel-dev.com/docs/api/#api-AirOrder_Self-Service-Create_Exchange_Order
-             */
-            $dataMessage['message'] = 'Service under construction';
+            try {
+                if (!$responseBo = $this->boRequestVoluntaryExchangeService->sendVoluntaryConfirm($requestData)) {
+                    $voluntaryExchangeConfirmForm->getCase()->addEventLog(
+                        CaseEventLog::VOLUNTARY_EXCHANGE_CONFIRM,
+                        'Request (confirm Voluntary Exchange) to Back Office is failed'
+                    );
+                    throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
+                }
+                $dataJson = $flightRequest->fr_data_json;
+                $dataJson['responseBo'] = $responseBo;
+                $flightRequest->fr_data_json = $dataJson;
+                $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
-            $dataMessage['requestData'] = $requestData; /* TODO::  */
+                $responseBoStatus = ($responseBo['status'] === 'Success');
+            } catch (\Throwable $throwable) {
+                $voluntaryExchangeConfirmHandler->failProcess($throwable->getMessage());
+                throw $throwable;
+            }
+
+            if (!$responseBoStatus) {
+                $voluntaryExchangeConfirmHandler->failProcess('Response from Back Office is failed, status (' . $responseBo['status']  . ')');
+                throw new \RuntimeException(
+                    'Request to Back Office is failed, status (' . $responseBo['status']  . ')',
+                    ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR
+                );
+            }
+
+            try {
+                $voluntaryExchangeConfirmHandler->additionalProcessing();
+                $voluntaryExchangeConfirmHandler->doneProcess();
+            } catch (\Throwable $throwable) {
+                $voluntaryExchangeConfirmHandler->failProcess($throwable->getMessage());
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');
+            }
+
+            $dataMessage['resultMessage'] = 'Processing was successful';
+            $dataMessage['originQuoteGid'] = $voluntaryExchangeConfirmForm->getOriginQuote()->pq_gid ?? null;
+            $dataMessage['changeQuoteGid'] = $voluntaryExchangeConfirmForm->getChangeQuote()->pq_gid ?? null;
+            $dataMessage['productQuoteChangeGid'] = $voluntaryExchangeConfirmForm->getProductQuoteChange()->pqc_gid ?? null;
+            $dataMessage['caseGid'] = $voluntaryExchangeConfirmForm->getCase()->cs_gid ?? null;
+            $dataMessage['requestData'] = $requestData;
 
             return new SuccessResponse(
                 new DataMessage($dataMessage),
@@ -863,12 +898,12 @@ class FlightQuoteExchangeController extends BaseController
             );
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message['bookingId'] = $post['bookingId'] ?? null;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
             ];
-            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionConfirm:Warning');
 
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
@@ -877,12 +912,12 @@ class FlightQuoteExchangeController extends BaseController
             );
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message['bookingId'] = $post['bookingId'] ?? null;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
             ];
-            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+            \Yii::error($message, 'FlightQuoteExchangeController:actionConfirm:Throwable');
 
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),

@@ -36,6 +36,15 @@ class VoluntaryExchangeConfirmForm extends Model
         ProductQuoteChangeStatus::NEW,
         ProductQuoteChangeStatus::PENDING,
         ProductQuoteChangeStatus::IN_PROGRESS,
+        ProductQuoteChangeStatus::ERROR,
+    ];
+
+    public const PQ_ALLOW_STATUS_LIST = [
+        ProductQuoteStatus::NEW,
+        ProductQuoteStatus::PENDING,
+        ProductQuoteStatus::IN_PROGRESS,
+        ProductQuoteStatus::APPLIED,
+        ProductQuoteStatus::ERROR,
     ];
 
     public $booking_id;
@@ -76,9 +85,9 @@ class VoluntaryExchangeConfirmForm extends Model
             if (!$this->changeQuote = ProductQuote::findOne(['pq_gid' => $this->quote_gid])) {
                 throw new ValidationException('ProductQuote not found');
             }
-            if (!in_array($this->changeQuote->pq_status_id, ProductQuoteStatus::PROCESSING_LIST, false)) {
+            if (!in_array($this->changeQuote->pq_status_id, self::PQ_ALLOW_STATUS_LIST, false)) {
                 $processingList = [];
-                foreach (ProductQuoteStatus::PROCESSING_LIST as $statusId) {
+                foreach (self::PQ_ALLOW_STATUS_LIST as $statusId) {
                     $processingList[] = ProductQuoteStatus::getName($statusId);
                 }
                 throw new ValidationException('ProductQuote not in processing statuses(' . implode(',', $processingList) . '). Current status(' .
@@ -152,22 +161,22 @@ class VoluntaryExchangeConfirmForm extends Model
         return $this->billingInfoForm;
     }
 
-    public function getChangeQuote(): ?ProductQuote
+    public function getChangeQuote(): ProductQuote
     {
         return $this->changeQuote;
     }
 
-    public function getOriginQuote(): ?ProductQuote
+    public function getOriginQuote(): ProductQuote
     {
         return $this->originQuote;
     }
 
-    public function getProductQuoteChange(): ?ProductQuoteChange
+    public function getProductQuoteChange(): ProductQuoteChange
     {
         return $this->productQuoteChange;
     }
 
-    public function getCase(): ?Cases
+    public function getCase(): Cases
     {
         return $this->case;
     }
