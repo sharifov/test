@@ -27,6 +27,7 @@ use yii\widgets\ActiveForm;
       <?= $form->field($model, 'pqr_selling_price')->input('number', [
           'step' => 'any'
       ]) ?>
+
       <?= $form->field($model, 'pqr_penalty_amount')->input('number', [
           'step' => 'any'
       ]) ?>
@@ -57,6 +58,14 @@ use yii\widgets\ActiveForm;
         ]) ?>
 
         <?= $form->field($model, 'pqr_client_selling_price')->input('number', [
+            'step' => 'any'
+        ]) ?>
+
+        <?= $form->field($model, 'pqr_client_penalty_amount')->input('number', [
+            'step' => 'any'
+        ]) ?>
+
+        <?= $form->field($model, 'pqr_client_processing_fee_amount')->input('number', [
             'step' => 'any'
         ]) ?>
 

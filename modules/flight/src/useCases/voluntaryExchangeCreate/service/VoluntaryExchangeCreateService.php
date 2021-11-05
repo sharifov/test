@@ -74,7 +74,6 @@ class VoluntaryExchangeCreateService
         array $typeIds = [ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE]
     ): ?ProductQuoteChange {
         return ProductQuoteChange::find()
-            ->select(ProductQuoteChange::tableName() . '.pqc_status_id')
             ->where(['pqc_pq_id' => $productQuoteId])
             ->andWhere(['IN', 'pqc_type_id', $typeIds])
             ->orderBy(['pqc_id' => SORT_DESC])

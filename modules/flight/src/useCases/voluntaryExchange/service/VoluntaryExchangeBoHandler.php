@@ -72,17 +72,18 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         if (!$form instanceof FlightVoluntaryExchangeUpdateForm) {
             throw new \RuntimeException('Form must be instanceof FlightVoluntaryExchangeUpdateForm');
         }
+
         $this->form = $form;
         if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->form->booking_id)) {
             throw new \RuntimeException('OriginProductQuote not found by booking_id(' . $this->form->booking_id . ')');
         }
-        if (!$this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId($this->originProductQuote->pq_id)) {
+        if (!$this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId((int) $this->originProductQuote->pq_id)) {
             throw new \RuntimeException('ProductQuoteChange not found by pqID(' . $this->originProductQuote->pq_id . ')');
         }
-        if (!$this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange($this->productQuoteChange->pqc_id)) {
+        if (!$this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange((int) $this->productQuoteChange->pqc_id)) {
             throw new \RuntimeException('voluntaryQuote not found by pqcID(' . $this->productQuoteChange->pqc_id . ')');
         }
-        if (!$this->project = Project::findOne(['api_key' => $this->form->project_key])) {
+        if (!$this->project = Project::findOne(['project_key' => $this->form->project_key])) {
             throw new \RuntimeException('Project not found by key(' . $this->form->project_key . ')');
         }
         $this->case = $this->productQuoteChange->pqcCase;
@@ -95,6 +96,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
                 $this->handleCanceled();
                 break;
             case FlightVoluntaryExchangeUpdateForm::STATUS_PENDING:
+            case FlightVoluntaryExchangeUpdateForm::STATUS_PROCESSING:
                 $this->handleProcessing();
                 break;
             default:
@@ -131,12 +133,16 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         \Yii::info([
             'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
             'requestData' => $whData,
+            'formBOData' => $form->toArray(),
+            'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($this->productQuoteChange->pqc_status_id),
         ], 'info\Webhook::OTA::VoluntaryExchange:Request');
+
         $responseData = \Yii::$app->hybrid->wh(
             $this->project->id,
-            HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE,
+            HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
             ['data' => $whData]
         );
+
         \Yii::info([
             'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
             'responseData' => $responseData,

@@ -4285,7 +4285,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "object",
-            "optional": false,
+            "optional": true,
             "field": "billing",
             "description": "<p>Billing</p>"
           },
@@ -4364,6 +4364,13 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "optional": false,
+            "field": "billing.country",
+            "description": "<p>Country name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
             "size": "10",
             "optional": true,
             "field": "billing.zip",
@@ -4405,7 +4412,7 @@ define({ "api": [
             "type": "number",
             "optional": false,
             "field": "payment_request.amount",
-            "description": "<p>Amount</p>"
+            "description": "<p>Customer must pay for initiate refund process</p>"
           },
           {
             "group": "Parameter",
@@ -4440,7 +4447,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "50",
+            "size": "..20",
             "optional": false,
             "field": "payment_request.method_data.card.number",
             "description": "<p>Number</p>"
@@ -4448,7 +4455,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "50",
+            "size": "..50",
             "optional": true,
             "field": "payment_request.method_data.card.holder_name",
             "description": "<p>Holder name</p>"
@@ -4470,7 +4477,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "32",
+            "size": "..4",
             "optional": false,
             "field": "payment_request.method_data.card.cvv",
             "description": "<p>CVV</p>"
@@ -4480,7 +4487,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"booking_id\":\"XXXYYYZ\",\n    \"quote_gid\": \"2f2887a061f8069f7ada8af9e062f0f4\",\n    \"payment\":{\n        \"method_key\":\"cc\",\n        \"method_data\":{\n            \"card\":{\n                \"number\":\"4111555577778888\",\n                \"holder_name\":\"John Doe\",\n                \"expiration_month\":10,\n                \"expiration_year\":2022,\n                \"cvv\":\"097\"\n            }\n        },\n        \"amount\":29.95,\n        \"currency\":\"USD\"\n    },\n    \"billing\":{\n        \"first_name\":\"John\",\n        \"last_name\":\"Doe\",\n        \"middle_name\":null,\n        \"company_name\":\"General Motors\",\n        \"address_line1\":\"123 Main Street\",\n        \"address_line2\":\"\",\n        \"city\":\"Paris\",\n        \"state\":\"State\",\n        \"country\":\"United States\",\n        \"zip\":\"94000\",\n        \"contact_phone\":\"+137396512345\",\n        \"contact_email\":\"alex@test.com\",\n        \"contact_name\":\"Mr. Alexander\"\n    }\n}",
+          "content": " {\n    \"booking_id\":\"XXXYYYZ\",\n    \"quote_gid\": \"2f2887a061f8069f7ada8af9e062f0f4\",\n    \"billing\": {\n          \"first_name\": \"John\",\n          \"last_name\": \"Doe\",\n          \"middle_name\": \"\",\n          \"address_line1\": \"1013 Weda Cir\",\n          \"address_line2\": \"\",\n          \"country_id\": \"US\",\n          \"country\" : \"United States\",\n          \"city\": \"Mayfield\",\n          \"state\": \"KY\",\n          \"zip\": \"99999\",\n          \"company_name\": \"\",\n          \"contact_phone\": \"+19074861000\",\n          \"contact_email\": \"test@test.com\",\n          \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n          \"method_key\": \"card\",\n          \"currency\": \"USD\",\n          \"method_data\": {\n              \"card\": {\n                  \"number\": \"4111555577778888\",\n                  \"holder_name\": \"Test test\",\n                  \"expiration_month\": 10,\n                  \"expiration_year\": 23,\n                  \"cvv\": \"123\"\n              }\n          },\n          \"amount\": 112.25\n    }\n}",
           "type": "json"
         }
       ]
@@ -5686,6 +5693,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "..32",
             "optional": false,
             "field": "orderId",
             "description": "<p>OTA Order Id</p>"
@@ -5772,7 +5780,6 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "2",
             "optional": false,
             "field": "billing.country",
             "description": "<p>Country (for example &quot;United States&quot;)</p>"
@@ -5926,6 +5933,11 @@ define({ "api": [
           "title": "Error-Response Error From BO:",
           "content": "HTTP/1.1 200 OK\n{\n     \"status\": 422,\n     \"message\": \"FlightRequest is not found.\",\n     \"name\": \"BO Request Failed\",\n     \"code\": \"15411\",\n     \"errors\": [],\n     \"type\": \"app_bo\"\n}",
           "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13113 - Flight Request already processing; This feature helps to handle duplicate requests\n     13107 - Validation Failed\n     13112 - Not found refund in pending status by booking and gid\n     15411 - Bo request failed; See tab \"Error From BO\"\n     601 - BO Server Error: i.e. request timeout\n     602 - BO response body is empty\n     603 - BO response type is invalid (not array)\n]",
+          "type": "html"
         }
       ]
     },
@@ -5993,6 +6005,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "..32",
             "optional": false,
             "field": "refund.orderId",
             "description": "<p>OTA Order Id</p>"

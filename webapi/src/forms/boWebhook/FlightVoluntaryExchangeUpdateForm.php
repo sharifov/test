@@ -16,11 +16,13 @@ class FlightVoluntaryExchangeUpdateForm extends \yii\base\Model
     public const STATUS_PENDING = 'pending';
     public const STATUS_EXCHANGED = 'exchanged';
     public const STATUS_CANCELED = 'cancelled';
+    public const STATUS_PROCESSING = 'processing';
 
     public const STATUS_LIST = [
         self::STATUS_PENDING => self::STATUS_PENDING,
         self::STATUS_EXCHANGED => self::STATUS_EXCHANGED,
         self::STATUS_CANCELED => self::STATUS_CANCELED,
+        self::STATUS_PROCESSING => self::STATUS_PROCESSING,
     ];
 
     public $booking_id;
@@ -34,7 +36,7 @@ class FlightVoluntaryExchangeUpdateForm extends \yii\base\Model
             [['booking_id'], 'string'],
 
             [['project_key'], 'string'],
-            [['project_key'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_key' => 'api_key']],
+            [['project_key'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_key' => 'project_key']],
 
             [['status'], 'required'],
             [['status'], 'string'],

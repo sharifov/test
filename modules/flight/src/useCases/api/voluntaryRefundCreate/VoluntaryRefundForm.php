@@ -61,7 +61,7 @@ class VoluntaryRefundForm extends Model
             ['auxiliaryOptions', IsArrayValidator::class, 'skipOnEmpty' => true],
             ['auxiliaryOptions', 'auxiliaryOptionsValidation', 'skipOnEmpty' => true],
 
-            ['orderId', 'string']
+            ['orderId', 'string', 'max' => 32]
         ];
     }
 

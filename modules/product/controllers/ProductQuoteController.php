@@ -23,8 +23,10 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
+use modules\product\src\forms\ChangeQuoteSendEmailForm;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
 use modules\product\src\forms\ReprotectionQuoteSendEmailForm;
+use modules\product\src\forms\VoluntaryChangeQuotePreviewEmailForm;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
@@ -192,7 +194,220 @@ class ProductQuoteController extends FController
 
     public function actionPreviewVoluntaryOfferEmail()
     {
-        throw new BadRequestHttpException('Service under construction'); /* TODO::  */
+        $caseId = (int) Yii::$app->request->get('case_id');
+        $originQuoteId = (int) Yii::$app->request->get('origin_quote_id');
+        $orderId = (int) Yii::$app->request->get('order_id');
+        $changeId = (int) Yii::$app->request->get('change_id');
+
+        $form = new ChangeQuoteSendEmailForm();
+
+        if (!$case = Cases::findOne((int)$caseId)) {
+            $form->addError('general', 'Case Not Found');
+        }
+
+        if (!$order = Order::findOne((int)$orderId)) {
+            throw new BadRequestHttpException('Order not found');
+        }
+
+        if (!$productQuoteChange = ProductQuoteChange::findOne($changeId)) {
+            throw new BadRequestHttpException('ProductQuoteChange not found');
+        }
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $originalQuote = ProductQuote::findOne(['pq_id' => $originQuoteId]);
+                if (!$originalQuote) {
+                    throw new \RuntimeException('Original quote not found');
+                }
+
+                $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
+                $emailData['change_gid'] = $productQuoteChange->pqc_gid;
+                $emailData['original_quote'] = $originalQuote->serialize();
+
+                $bookingId = $case->cs_order_uid;
+                $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
+                if (!empty($emailData['original_quote']['data'])) {
+                    ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
+                }
+                $emailFrom = Auth::user()->email;
+                $emailTemplateType = null;
+                $emailFromName = Auth::user()->nickname;
+
+                if ($case->cs_project_id) {
+                    $project = $case->project;
+                    if ($project && $emailConfig = $project->getVoluntaryChangeEmailConfig()) {
+                        $emailFrom = $emailConfig['emailFrom'] ?? '';
+                        $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
+                        $emailFromName = $emailConfig['emailFromName'] ?? $emailFromName;
+                    }
+                }
+
+                if (!$emailFrom) {
+                    throw new \RuntimeException('Agent not has assigned email; Setup in project settings object.case.voluntary_exchange.emailFrom;');
+                }
+
+                if (!$emailTemplateType) {
+                    throw new \RuntimeException('Email template type is not set in project params');
+                }
+                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
+                if ($previewEmailResult['error']) {
+                    $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
+                    $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');
+                } else {
+                    $previewEmailForm = new VoluntaryChangeQuotePreviewEmailForm($previewEmailResult['data']);
+                    $previewEmailForm->email_from_name = $emailFromName;
+                    $previewEmailForm->changeId = $changeId;
+                    $previewEmailForm->originQuoteId = $originQuoteId;
+
+                    $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $emailTemplateType]);
+                    if ($emailTemplateType) {
+                        $previewEmailForm->email_tpl_id = $emailTemplateType->etp_id;
+                    }
+
+                    return $this->renderAjax('partial/_voluntary_quote_preview_email', [
+                        'previewEmailForm' => $previewEmailForm,
+                    ]);
+                }
+            } catch (\DomainException | \RuntimeException | ForbiddenHttpException $e) {
+                $form->addError('error', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error($e->getMessage(), 'ProductQuoteController::actionPreviewVoluntaryOfferEmail::Throwable');
+                $form->addError('general', 'Internal Server Error');
+            }
+        }
+
+        $form->caseId = $caseId;
+
+        return $this->renderAjax('partial/_voluntary_quote_choose_client_email', [
+            'form' => $form,
+            'case' => $case,
+            'order' => $order
+        ]);
+    }
+
+    public function actionVoluntaryQuoteSendEmail()
+    {
+        $previewEmailForm = new VoluntaryChangeQuotePreviewEmailForm();
+
+        if ($previewEmailForm->load(Yii::$app->request->post())) {
+            if (!$case = Cases::findOne((int)$previewEmailForm->case_id)) {
+                throw new BadRequestHttpException('Case Not Found');
+            }
+
+            if (!$originQuote = ProductQuote::findOne($previewEmailForm->originQuoteId)) {
+                throw new BadRequestHttpException('OriginQuote Not Found');
+            }
+
+            if (!$productQuoteChange = ProductQuoteChange::findOne($previewEmailForm->changeId)) {
+                throw new BadRequestHttpException('ProductQuoteChange Not Found');
+            }
+
+            $caseAbacDto = new CasesAbacDto($case);
+            $caseAbacDto->pqc_status = $productQuoteChange->pqc_status_id;
+
+            if ($previewEmailForm->validate()) {
+                try {
+                    if (!$originQuote) {
+                        throw new \RuntimeException('Origin quote not found');
+                    }
+
+                    $mail = new Email();
+                    $mail->e_project_id = $case->cs_project_id;
+                    $mail->e_case_id = $case->cs_id;
+                    if ($previewEmailForm->email_tpl_id) {
+                        $mail->e_template_type_id = $previewEmailForm->email_tpl_id;
+                    }
+                    $mail->e_type_id = Email::TYPE_OUTBOX;
+                    $mail->e_status_id = Email::STATUS_PENDING;
+                    $mail->e_email_subject = $previewEmailForm->email_subject;
+                    $mail->body_html = $previewEmailForm->email_message;
+                    $mail->e_email_from = $previewEmailForm->email_from;
+
+                    $mail->e_email_from_name = $previewEmailForm->email_from_name;
+                    $mail->e_email_to_name = $previewEmailForm->email_to_name;
+
+                    if ($previewEmailForm->language_id) {
+                        $mail->e_language_id = $previewEmailForm->language_id;
+                    }
+
+                    $mail->e_email_to = $previewEmailForm->email_to;
+                    //$mail->email_data = [];
+                    $mail->e_created_dt = date('Y-m-d H:i:s');
+                    $mail->e_created_user_id = Yii::$app->user->id;
+
+                    if ($mail->save()) {
+                        $mail->e_message_id = $mail->generateMessageId();
+                        $mail->update();
+
+                        $previewEmailForm->is_send = true;
+
+                        $mailResponse = $mail->sendMail();
+
+                        if (isset($mailResponse['error']) && $mailResponse['error']) {
+                            throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                        }
+
+                        $case->addEventLog(
+                            null,
+                            ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username,
+                            ['changeId' => $previewEmailForm->changeId]
+                        );
+
+                        $productQuoteChange->statusToPending();
+                        if (!$productQuoteChange->save()) {
+                            Yii::warning(
+                                'ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0],
+                                'ProductQuoteController::actionVoluntaryQuoteSendEmail::ProductQuoteChange::save'
+                            );
+                        }
+
+                        /* TODO::  */
+                        /*try {
+                            $hybridService = Yii::createObject(HybridService::class);
+                            $data = [
+                                'data' => [
+                                    'booking_id' => $case->cs_order_uid,
+
+                                    'case_gid' => $case->cs_gid,
+                                    'product_quote_gid' => $originQuote->pq_gid,
+                                ]
+                            ];
+                            $hybridService->whReprotection($case->cs_project_id, $data);
+                            $case->addEventLog(null, 'Request HybridService sent successfully');
+                        } catch (\Throwable $throwable) {
+                            $errorData = [];
+                            $errorData['message'] = 'OTA site is not informed (hybridService->whReprotection)';
+                            $errorData['project_id'] = $case->cs_project_id;
+                            $errorData['case_id'] = $case->cs_id;
+                            $errorData['throwable'] = AppHelper::throwableLog($throwable);
+
+                            Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                        }
+                        */
+
+                        return '<script>$("#modal-md").modal("hide"); 
+                            createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success");
+                            if ($("#pjax-case-orders").length) {
+                                pjaxReload({container: "#pjax-case-orders"});
+                            }
+                        </script>';
+                    }
+
+                    throw new \RuntimeException($mail->getErrorSummary(false)[0]);
+                } catch (\DomainException | \RuntimeException $throwable) {
+                    Yii::error(AppHelper::throwableLog($throwable), 'ProductQuoteController::actionVoluntaryQuoteSendEmail::Exception');
+                    $previewEmailForm->addError('error', $throwable->getMessage());
+                } catch (\Throwable $throwable) {
+                    $previewEmailForm->addError('error', 'Internal Server Error');
+                    Yii::error(AppHelper::throwableLog($throwable), 'ProductQuoteController::actionVoluntaryQuoteSendEmail::Throwable');
+                }
+            }
+        }
+        $previewEmailForm->case_id = $previewEmailForm->case_id ?: 0;
+
+        return $this->renderAjax('partial/_voluntary_quote_preview_email', [
+            'previewEmailForm' => $previewEmailForm
+        ]);
     }
 
     public function actionPreviewReprotectionQuoteEmail()

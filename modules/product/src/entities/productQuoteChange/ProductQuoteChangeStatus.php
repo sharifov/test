@@ -53,7 +53,7 @@ class ProductQuoteChangeStatus
         self::PENDING => 'pending',
         self::CONFIRMED => 'confirmed',
         self::CANCELED => 'canceled',
-        self::COMPLETED => 'done',
+        self::COMPLETED => 'completed',
         self::ERROR => 'error',
         self::PROCESSING => 'processing',
         self::IN_PROGRESS => 'in_progress',
@@ -102,6 +102,6 @@ class ProductQuoteChangeStatus
     {
         $key = self::getKeyById($id);
         $statusMap = SettingHelper::getProductQuoteChangeClientStatusMapping();
-        return $statusMap[$key] ?? $key ?? '';
+        return $statusMap[$key] ?? '';
     }
 }

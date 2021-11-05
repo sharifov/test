@@ -204,19 +204,21 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                                         <?php endif ?>
 
                                         <?php /* TODO:: add Abac */ ?>
-                                        <?php echo Html::a('<i class="fas fa-plus-circle"></i> Send offer exchange email', null, [
-                                            'data-flight-id' => $flight->getId(),
-                                            'class' => 'dropdown-item btn_voluntary_offer_email',
-                                            'data-url' => Url::to([
-                                                '/product/product-quote/preview-voluntary-offer-email',
-                                                'flight_id' => $flight->getId(),
-                                                'case_id' => $caseId,
-                                                'origin_quote_id' => $quote->pq_id,
-                                                'change_id' => $changeItem->pqc_id,
-                                            ]),
-                                            'title' => 'Send offer exchange email',
-                                            'onclick' => 'alert("Service under construction");',
-                                        ]) ?>
+                                        <?php if ($changeItem->productQuoteChangeRelations) : ?>
+                                            <?php echo Html::a('<i class="fas fa-envelope"></i> Send offer exchange email', null, [
+                                                'data-flight-id' => $flight->getId(),
+                                                'class' => 'dropdown-item btn_voluntary_offer_email',
+                                                'data-url' => Url::to([
+                                                    '/product/product-quote/preview-voluntary-offer-email',
+                                                    'flight_id' => $flight->getId(),
+                                                    'case_id' => $caseId,
+                                                    'origin_quote_id' => $quote->pq_id,
+                                                    'change_id' => $changeItem->pqc_id,
+                                                    'order_id' => $order->or_id
+                                                ]),
+                                                'title' => 'Send offer exchange email',
+                                            ]) ?>
+                                        <?php endif ?>
 
                                     </div>
                                 </div>
@@ -311,7 +313,12 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                                                         if ($changeItem->isTypeReProtection() && !$changeQuote->isDeclined() && Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
                                                             echo Html::a('<i class="fa fa-envelope"></i> send SC Email', null, [
                                                                 'class' => 'dropdown-item btn-send-reprotection-quote-email',
-                                                                'data-url' => Url::to(['/product/product-quote/preview-reprotection-quote-email', 'reprotection-quote-id' => $changeQuote->pq_id, 'case-id' => $caseId, 'order-id' => $order->or_id]),
+                                                                'data-url' => Url::to([
+                                                                    '/product/product-quote/preview-reprotection-quote-email',
+                                                                    'reprotection-quote-id' => $changeQuote->pq_id,
+                                                                    'case-id' => $caseId,
+                                                                    'order-id' => $order->or_id
+                                                                ]),
                                                                 'data-toggle' => 'tooltip',
                                                                 'data-placement' => 'right',
                                                                 'title' => 'Send Schedule Change Email'
