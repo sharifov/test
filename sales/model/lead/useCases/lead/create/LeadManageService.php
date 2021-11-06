@@ -29,9 +29,8 @@ use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository
 use sales\model\leadData\entity\LeadData;
 use sales\model\leadData\repository\LeadDataRepository;
 use sales\model\leadDataKey\entity\LeadDataKey;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\visitorLog\useCase\CreateVisitorLog;
 use sales\repositories\cases\CasesRepository;
@@ -64,7 +63,7 @@ use yii\helpers\Json;
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
  * @property VisitorLogRepository $visitorLogRepository
  * @property LeadDataRepository $leadDataRepository
- * @property LeadUserConversionRepository $leadUserConversionRepository
+ * @property LeadUserConversionService $leadUserConversionService
  */
 class LeadManageService
 {
@@ -113,24 +112,10 @@ class LeadManageService
      */
     private LeadDataRepository $leadDataRepository;
     /**
-     * @var LeadUserConversionRepository
+     * @var LeadUserConversionService
      */
-    private LeadUserConversionRepository $leadUserConversionRepository;
+    private LeadUserConversionService $leadUserConversionService;
 
-    /**
-     * LeadManageService constructor.
-     * @param TransactionManager $transactionManager
-     * @param CasesManageService $casesManageService
-     * @param CasesRepository $casesRepository
-     * @param ClientManageService $clientManageService
-     * @param LeadHashGenerator $leadHashGenerator
-     * @param LeadRepository $leadRepository
-     * @param LeadPreferencesRepository $leadPreferencesRepository
-     * @param ClientChatLeadRepository $clientChatLeadRepository
-     * @param ClientChatVisitorDataRepository $clientChatVisitorDataRepository
-     * @param VisitorLogRepository $visitorLogRepository
-     * @param LeadDataRepository $leadDataRepository
-     */
     public function __construct(
         TransactionManager $transactionManager,
         CasesManageService $casesManageService,
@@ -143,7 +128,7 @@ class LeadManageService
         ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
         VisitorLogRepository $visitorLogRepository,
         LeadDataRepository $leadDataRepository,
-        LeadUserConversionRepository $leadUserConversionRepository
+        LeadUserConversionService $leadUserConversionService
     ) {
         $this->transactionManager = $transactionManager;
         $this->casesManageService = $casesManageService;
@@ -156,7 +141,7 @@ class LeadManageService
         $this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
         $this->visitorLogRepository = $visitorLogRepository;
         $this->leadDataRepository = $leadDataRepository;
-        $this->leadUserConversionRepository = $leadUserConversionRepository;
+        $this->leadUserConversionService = $leadUserConversionService;
     }
 
     /**
@@ -349,12 +334,12 @@ class LeadManageService
                 $this->leadRepository->save($lead);
             }
 
-            $leadUserConversion = LeadUserConversion::create(
+            $this->leadUserConversionService->add(
                 $leadId,
                 $user->id,
-                LeadUserConversionDictionary::DESCRIPTION_MANUAL
+                LeadUserConversionDictionary::DESCRIPTION_MANUAL,
+                $user->id
             );
-            $this->leadUserConversionRepository->save($leadUserConversion);
 
             $this->updateLeadOnRelationActiveCalls($lead, $call);
 
@@ -435,12 +420,12 @@ class LeadManageService
                 $this->leadRepository->save($lead);
             }
 
-            $leadUserConversion = LeadUserConversion::create(
+            $this->leadUserConversionService->add(
                 $lead->id,
                 $form->getUserId(),
-                LeadUserConversionDictionary::DESCRIPTION_MANUAL
+                LeadUserConversionDictionary::DESCRIPTION_MANUAL,
+                $form->getUserId()
             );
-            $this->leadUserConversionRepository->save($leadUserConversion);
 
             $this->updateLeadOnRelationActiveCalls($lead, $call);
 

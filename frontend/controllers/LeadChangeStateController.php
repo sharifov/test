@@ -19,6 +19,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadStateService;
 use Yii;
@@ -105,12 +106,13 @@ class LeadChangeStateController extends FController
                 $user = Yii::$app->user->identity;
                 $this->assignService->takeOver($lead, $user, Yii::$app->user->id, $form->description);
 
-                $leadUserConversion = LeadUserConversion::create(
+                $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                $leadUserConversionService->add(
                     $lead->id,
                     $user->getId(),
-                    LeadUserConversionDictionary::DESCRIPTION_TAKE_OVER
+                    LeadUserConversionDictionary::DESCRIPTION_TAKE_OVER,
+                    $user->getId()
                 );
-                (new LeadUserConversionRepository())->save($leadUserConversion);
 
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {

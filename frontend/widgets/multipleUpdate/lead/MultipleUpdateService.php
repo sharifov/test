@@ -5,9 +5,8 @@ namespace frontend\widgets\multipleUpdate\lead;
 use common\models\Employee;
 use common\models\Lead;
 use sales\auth\Auth;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\services\lead\LeadStateService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
@@ -20,7 +19,7 @@ use yii\bootstrap4\Html;
  *
  * @property LeadStateService $leadStateService
  * @property QCallService $qCallService
- * @property LeadUserConversionRepository $leadUserConversionRepository
+ * @property LeadUserConversionService $leadUserConversionService
  * @property array $report
  */
 class MultipleUpdateService
@@ -28,17 +27,17 @@ class MultipleUpdateService
     private $leadStateService;
     private $qCallService;
     private $report;
-    private LeadUserConversionRepository $leadUserConversionRepository;
+    private LeadUserConversionService $leadUserConversionService;
 
     public function __construct(
         LeadStateService $leadStateService,
         QCallService $qCallService,
-        LeadUserConversionRepository $leadUserConversionRepository
+        LeadUserConversionService $leadUserConversionService
     ) {
         $this->leadStateService = $leadStateService;
         $this->qCallService = $qCallService;
         $this->report = [];
-        $this->leadUserConversionRepository = $leadUserConversionRepository;
+        $this->leadUserConversionService = $leadUserConversionService;
     }
 
     /**
@@ -97,12 +96,12 @@ class MultipleUpdateService
                 $this->leadStateService->pending($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
                 if ($form->authUserIsSupervisor()) {
-                    $leadUserConversion = LeadUserConversion::create(
+                    $this->leadUserConversionService->add(
                         $lead->id,
                         $newOwner->id,
-                        LeadUserConversionDictionary::DESCRIPTION_ASSIGN
+                        LeadUserConversionDictionary::DESCRIPTION_ASSIGN,
+                        $creatorId
                     );
-                    $this->leadUserConversionRepository->save($leadUserConversion);
                 }
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
@@ -187,12 +186,12 @@ class MultipleUpdateService
                 $this->leadStateService->processing($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->movedStateMessage($lead, 'Processing', $oldOwnerId, $newOwner->id, $newOwner->userName));
                 if ($form->authUserIsSupervisor()) {
-                    $leadUserConversion = LeadUserConversion::create(
+                    $this->leadUserConversionService->add(
                         $lead->id,
                         $newOwner->id,
-                        LeadUserConversionDictionary::DESCRIPTION_ASSIGN
+                        LeadUserConversionDictionary::DESCRIPTION_ASSIGN,
+                        $creatorId
                     );
-                    $this->leadUserConversionRepository->save($leadUserConversion);
                 }
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());

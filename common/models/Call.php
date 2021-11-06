@@ -35,9 +35,8 @@ use sales\model\callLog\services\CallLogTransferService;
 use sales\model\client\notifications\ClientNotificationCanceler;
 use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use sales\model\conference\service\ConferenceDataService;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\repositories\cases\CasesRepository;
@@ -1128,12 +1127,13 @@ class Call extends \yii\db\ActiveRecord
                             );
                             $leadRepository->save($lead);
 
-                            $leadUserConversion = LeadUserConversion::create(
+                            $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                            $leadUserConversionService->add(
                                 $lead->id,
                                 $this->c_created_user_id,
-                                LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE
+                                LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE,
+                                $this->c_created_user_id
                             );
-                            (new LeadUserConversionRepository())->save($leadUserConversion);
 
                             $qCallService->remove($lead->id);
 

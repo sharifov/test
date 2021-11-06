@@ -29,6 +29,7 @@ use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\model\userClientChatData\service\UserClientChatDataService;
 use sales\repositories\NotFoundException;
@@ -489,12 +490,13 @@ class ClientChatFlightQuoteController extends FController
         $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
         $lead = $leadManageService->createByClientChat((new CreateLeadByChatDTO($form, $chat, $userId))->leadInProgressDataPrepare());
 
-        $leadUserConversion = LeadUserConversion::create(
+        $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+        $leadUserConversionService->add(
             $lead->id,
             $userId,
-            LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL
+            LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL,
+            $userId
         );
-        (new LeadUserConversionRepository())->save($leadUserConversion);
 
         return $lead;
     }

@@ -6,11 +6,9 @@ use common\models\query\EmployeeQuery;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
-use sales\model\leadRedial\entity\CallRedialUserAccessQuery;
 use sales\model\leadRedial\queue\AgentPhone;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use Yii;
 use common\models\Call;
 use common\models\DepartmentPhoneProject;
@@ -41,6 +39,7 @@ use yii\helpers\VarDumper;
  * @property QCallService $qCallService
  * @property AgentPhone $agentPhone
  * @property EventDispatcher $eventDispatcher
+ * @property LeadUserConversionService $leadUserConversionService
  */
 class LeadRedialService
 {
@@ -51,6 +50,7 @@ class LeadRedialService
     private $qCallService;
     private AgentPhone $agentPhone;
     private EventDispatcher $eventDispatcher;
+    private LeadUserConversionService $leadUserConversionService;
 
     public function __construct(
         LeadRepository $leadRepository,
@@ -59,7 +59,8 @@ class LeadRedialService
         TakeGuard $takeGuard,
         QCallService $qCallService,
         AgentPhone $agentPhone,
-        EventDispatcher $eventDispatcher
+        EventDispatcher $eventDispatcher,
+        LeadUserConversionService $leadUserConversionService
     ) {
         $this->leadRepository = $leadRepository;
         $this->serviceFinder = $serviceFinder;
@@ -68,6 +69,7 @@ class LeadRedialService
         $this->qCallService = $qCallService;
         $this->agentPhone = $agentPhone;
         $this->eventDispatcher = $eventDispatcher;
+        $this->leadUserConversionService = $leadUserConversionService;
     }
 
     /**
@@ -171,16 +173,15 @@ class LeadRedialService
         $lead->answered();
         $lead->processing($user->id, $creatorId, 'Lead redial');
 
-        $leadUserConversion = LeadUserConversion::create(
-            $lead->id,
-            $user->getId(),
-            LeadUserConversionDictionary::DESCRIPTION_TAKE
-        );
-
-        $this->transactionManager->wrap(function () use ($lead, $leadUserConversion) {
+        $this->transactionManager->wrap(function () use ($lead, $user) {
             $this->qCallService->remove($lead->id);
             $this->leadRepository->save($lead);
-            (new LeadUserConversionRepository())->save($leadUserConversion);
+            $this->leadUserConversionService->add(
+                $lead->id,
+                $user->getId(),
+                LeadUserConversionDictionary::DESCRIPTION_TAKE,
+                $user->getId()
+            );
         });
     }
 

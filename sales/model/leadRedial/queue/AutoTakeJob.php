@@ -8,9 +8,8 @@ use common\models\Lead;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use sales\helpers\app\AppHelper;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\qcall\QCallService;
 use sales\services\TransactionManager;
@@ -61,23 +60,24 @@ class AutoTakeJob implements JobInterface
             $lead->processing($userId, $userId, 'Lead redial');
         }
 
-        $leadUserConversion = LeadUserConversion::create(
-            $lead->id,
-            $userId,
-            LeadUserConversionDictionary::DESCRIPTION_TAKE
-        );
-
         try {
             $transactionManager = \Yii::createObject(TransactionManager::class);
             $qCallService = \Yii::createObject(QCallService::class);
             $leadRepository = \Yii::createObject(LeadRepository::class);
+            $leadUserConversionService = \Yii::createObject(LeadUserConversionService::class);
 
-            $transactionManager->wrap(function () use ($lead, $leadRepository, $leadUserConversion, $qCallService, $leadChanged) {
+
+            $transactionManager->wrap(function () use ($lead, $leadRepository, $qCallService, $leadChanged, $userId, $leadUserConversionService) {
                 $qCallService->remove($lead->id);
                 if ($leadChanged) {
                     $leadRepository->save($lead);
                 }
-                (new LeadUserConversionRepository())->save($leadUserConversion);
+                $leadUserConversionService->add(
+                    $lead->id,
+                    $userId,
+                    LeadUserConversionDictionary::DESCRIPTION_TAKE,
+                    $userId
+                );
             });
             $this->sendAutoTakeCommand($userId, $call, $lead);
             $this->sendAssignLeadNotification($lead);

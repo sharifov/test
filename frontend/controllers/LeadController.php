@@ -78,9 +78,8 @@ use sales\model\lead\useCases\lead\import\LeadImportParseService;
 use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
 use sales\model\lead\useCases\lead\link\LeadLinkChatForm;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\model\phone\AvailablePhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -1419,12 +1418,13 @@ class LeadController extends FController
                         });
 
                         if ($oldStatus === Lead::STATUS_PENDING) {
-                            $leadUserConversion = LeadUserConversion::create(
+                            $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                            $leadUserConversionService->add(
                                 $lead->id,
                                 $user->getId(),
-                                LeadUserConversionDictionary::DESCRIPTION_TAKE
+                                LeadUserConversionDictionary::DESCRIPTION_TAKE,
+                                $user->getId()
                             );
-                            (new LeadUserConversionRepository())->save($leadUserConversion);
                         }
                     } else {
                         $result ['error'] = 'Access Denied (ABAC)!';
@@ -1478,12 +1478,13 @@ class LeadController extends FController
             $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
 
             if ($oldStatus === Lead::STATUS_PENDING) {
-                $leadUserConversion = LeadUserConversion::create(
+                $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                $leadUserConversionService->add(
                     $lead->id,
                     $user->getId(),
-                    LeadUserConversionDictionary::DESCRIPTION_TAKE
+                    LeadUserConversionDictionary::DESCRIPTION_TAKE,
+                    $user->getId()
                 );
-                (new LeadUserConversionRepository())->save($leadUserConversion);
             }
 
             Yii::$app->getSession()->setFlash('success', 'Lead taken!');
@@ -2209,12 +2210,13 @@ class LeadController extends FController
                     $clientManageService->checkIpChanged($lead->client, $form->requestIp);
                 }
 
-                $leadUserConversion = LeadUserConversion::create(
+                $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                $leadUserConversionService->add(
                     $lead->id,
                     Yii::$app->user->id,
-                    LeadUserConversionDictionary::DESCRIPTION_MANUAL
+                    LeadUserConversionDictionary::DESCRIPTION_MANUAL,
+                    Yii::$app->user->id
                 );
-                (new LeadUserConversionRepository())->save($leadUserConversion);
 
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
@@ -2247,12 +2249,13 @@ class LeadController extends FController
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                     $lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
 
-                    $leadUserConversion = LeadUserConversion::create(
+                    $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                    $leadUserConversionService->add(
                         $lead->id,
                         Yii::$app->user->id,
-                        LeadUserConversionDictionary::DESCRIPTION_MANUAL
+                        LeadUserConversionDictionary::DESCRIPTION_MANUAL,
+                        Yii::$app->user->id
                     );
-                    (new LeadUserConversionRepository())->save($leadUserConversion);
 
                     Yii::$app->session->setFlash('success', 'Lead save');
                     return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
@@ -2302,12 +2305,13 @@ class LeadController extends FController
                 $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
                 $lead = $leadManageService->createByClientChat((new CreateLeadByChatDTO($form, $chat, $userId))->leadInProgressDataPrepare());
 
-                $leadUserConversion = LeadUserConversion::create(
+                $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                $leadUserConversionService->add(
                     $lead->id,
                     $userId,
-                    LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL
+                    LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL,
+                    $userId
                 );
-                (new LeadUserConversionRepository())->save($leadUserConversion);
 
                 return "<script> $('#modal-md').modal('hide');refreshChatInfo('" . $chat->cch_id . "')</script>";
             } catch (\Throwable $e) {
@@ -2598,12 +2602,13 @@ class LeadController extends FController
                 Yii::$app->session->setFlash('success', 'Success');
 
                 if ((int) $lead->employee_id !== $user->getId()) {
-                    $leadUserConversion = LeadUserConversion::create(
+                    $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                    $leadUserConversionService->add(
                         $clone->id,
                         $user->getId(),
-                        LeadUserConversionDictionary::DESCRIPTION_CLONE
+                        LeadUserConversionDictionary::DESCRIPTION_CLONE,
+                        $user->getId()
                     );
-                    (new LeadUserConversionRepository())->save($leadUserConversion);
                 }
 
                 return $this->redirect(['lead/view', 'gid' => $clone->gid]);

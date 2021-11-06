@@ -3,7 +3,6 @@
 namespace sales\model\leadUserConversion\entity;
 
 use yii\data\ActiveDataProvider;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
 
 class LeadUserConversionSearch extends LeadUserConversion
 {
