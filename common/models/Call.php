@@ -1101,121 +1101,122 @@ class Call extends \yii\db\ActiveRecord
 //            }
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
+        }
 
-            if (
-                ($this->c_lead_id || $this->c_case_id)
-                && $this->isIn()
-                && $this->isStatusInProgress()
-                && $isChangedStatusFromEmptyInclude
-                && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, self::STATUS_QUEUE, null], true)
-            ) {
-                $host = \Yii::$app->params['url_address'] ?? '';
+        if (
+            $this->c_created_user_id
+            && ($this->c_lead_id || $this->c_case_id)
+            && $isChangedStatusFromEmptyInclude
+            && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, null], true)
+            && $this->isStatusInProgress()
+            && $this->isIn()
+        ) {
+            $host = \Yii::$app->params['url_address'] ?? '';
 
-                if ($this->c_dep_id && ($departmentParams = $this->cDep->getParams())) {
-                    if ($this->c_lead_id && $departmentParams->object->type->isLead()) {
-                        $lead = $this->cLead;
+            if ($this->c_dep_id && ($departmentParams = $this->cDep->getParams())) {
+                if ($this->c_lead_id && $departmentParams->object->type->isLead()) {
+                    $lead = $this->cLead;
 
-                        if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->isPending()) {
-                            //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
-                            try {
-                                $lead->answered();
-                                $lead->processing(
-                                    $this->c_created_user_id,
-                                    null,
-                                    LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD
-                                );
-                                $leadRepository->save($lead);
+                    if ($lead && !$lead->employee_id && $lead->isPending()) {
+                        //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
+                        try {
+                            $lead->answered();
+                            $lead->processing(
+                                $this->c_created_user_id,
+                                null,
+                                LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD
+                            );
+                            $leadRepository->save($lead);
 
-                                $leadUserConversion = LeadUserConversion::create(
-                                    $lead->id,
-                                    $this->c_created_user_id,
-                                    LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE
-                                );
-                                (new LeadUserConversionRepository())->save($leadUserConversion);
+                            $leadUserConversion = LeadUserConversion::create(
+                                $lead->id,
+                                $this->c_created_user_id,
+                                LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE
+                            );
+                            (new LeadUserConversionRepository())->save($leadUserConversion);
 
-                                $qCallService->remove($lead->id);
+                            $qCallService->remove($lead->id);
 
-                                if (
-                                    $ntf = Notifications::create(
-                                        $lead->employee_id,
-                                        'AutoCreated new Lead (' . $lead->id . ')',
-                                        'A new Lead (Id: ' . Purifier::createLeadShortLink($lead) . ') has been created for you. Call Id: ' . $this->c_id,
-                                        Notifications::TYPE_SUCCESS,
-                                        true
-                                    )
-                                ) {
-                                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                    Notifications::publish(
-                                        'getNewNotification',
-                                        ['user_id' => $lead->employee_id],
-                                        $dataNotification
-                                    );
-                                }
-//                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
-                                // Notifications::publish('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
-
-                                $pubChannel = UserConnection::getLastUserChannel($lead->employee_id);
-                                Notifications::pub(
-                                    [$pubChannel],
-                                    'openUrl',
-                                    ['url' => $host . '/lead/view/' . $lead->gid]
-                                );
-                            } catch (\Throwable $e) {
-                                Yii::error(
-                                    'CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(),
-                                    'Call:afterSave:Lead:Answered:Processing'
+                            if (
+                                $ntf = Notifications::create(
+                                    $lead->employee_id,
+                                    'AutoCreated new Lead (' . $lead->id . ')',
+                                    'A new Lead (Id: ' . Purifier::createLeadShortLink($lead) . ') has been created for you. Call Id: ' . $this->c_id,
+                                    Notifications::TYPE_SUCCESS,
+                                    true
+                                )
+                            ) {
+                                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                Notifications::publish(
+                                    'getNewNotification',
+                                    ['user_id' => $lead->employee_id],
+                                    $dataNotification
                                 );
                             }
+//                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
+                            // Notifications::publish('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
+
+                            $pubChannel = UserConnection::getLastUserChannel($lead->employee_id);
+                            Notifications::pub(
+                                [$pubChannel],
+                                'openUrl',
+                                ['url' => $host . '/lead/view/' . $lead->gid]
+                            );
+                        } catch (\Throwable $e) {
+                            Yii::error(
+                                'CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(),
+                                'Call:afterSave:Lead:Answered:Processing'
+                            );
                         }
                     }
+                }
 
 
-                    if ($this->c_case_id && $departmentParams->object->type->isCase()) {
-                        $case = $this->cCase;
+                if ($this->c_case_id && $departmentParams->object->type->isCase()) {
+                    $case = $this->cCase;
 
-                        if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
-                            try {
-                                $casesManageService = Yii::createObject(CasesManageService::class);
-                                $casesManageService->callAutoTake(
-                                    $this->c_case_id,
-                                    $this->c_created_user_id,
-                                    null,
-                                    'Call auto take'
-                                );
+                    if ($case && !$case->cs_user_id && $case->isPending()) {
+                        try {
+                            $casesManageService = Yii::createObject(CasesManageService::class);
+                            $casesManageService->callAutoTake(
+                                $this->c_case_id,
+                                $this->c_created_user_id,
+                                null,
+                                'Call auto take'
+                            );
 
 //                            $caseRepo = Yii::createObject(CasesRepository::class);
 //                            $case->processing((int)$this->c_created_user_id, null);
 //                            $caseRepo->save($case);
 
-                                if (
-                                    $ntf = Notifications::create(
-                                        $this->c_created_user_id,
-                                        'AutoCreated new Case (' . $case->cs_id . ')',
-                                        'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id,
-                                        Notifications::TYPE_SUCCESS,
-                                        true
-                                    )
-                                ) {
-                                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                    Notifications::publish(
-                                        'getNewNotification',
-                                        ['user_id' => $this->c_created_user_id],
-                                        $dataNotification
-                                    );
-                                }
+                            if (
+                                $ntf = Notifications::create(
+                                    $this->c_created_user_id,
+                                    'AutoCreated new Case (' . $case->cs_id . ')',
+                                    'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id,
+                                    Notifications::TYPE_SUCCESS,
+                                    true
+                                )
+                            ) {
+                                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                Notifications::publish(
+                                    'getNewNotification',
+                                    ['user_id' => $this->c_created_user_id],
+                                    $dataNotification
+                                );
+                            }
 
 //                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
-                                // Notifications::publish('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
-                                $pubChannel = UserConnection::getLastUserChannel($this->c_created_user_id);
-                                Notifications::pub(
-                                    [$pubChannel],
-                                    'openUrl',
-                                    ['url' => $host . '/cases/view/' . $case->cs_gid]
-                                );
-                            } catch (\DomainException $e) {
-                            } catch (\Throwable $e) {
-                                Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
-                            }
+                            // Notifications::publish('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+                            $pubChannel = UserConnection::getLastUserChannel($this->c_created_user_id);
+                            Notifications::pub(
+                                [$pubChannel],
+                                'openUrl',
+                                ['url' => $host . '/cases/view/' . $case->cs_gid]
+                            );
+                        } catch (\DomainException $e) {
+                        } catch (\Throwable $e) {
+                            Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
                         }
                     }
                 }
