@@ -614,8 +614,8 @@ class FlightQuoteExchangeController extends BaseController
             }
 
             try {
-                $voluntaryExchangeCreateHandler->doneProcess();
                 $voluntaryExchangeCreateHandler->additionalProcessing();
+                $voluntaryExchangeCreateHandler->doneProcess();
             } catch (\Throwable $throwable) {
                 $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
                 Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');
