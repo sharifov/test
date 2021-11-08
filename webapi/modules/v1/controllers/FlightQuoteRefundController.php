@@ -222,10 +222,10 @@ class FlightQuoteRefundController extends ApiBaseController
             return $this->endApiLog(new SuccessResponse(
                 new Message('refund', [
                     'totalPaid' => (float)$productQuoteRefund->pqr_client_selling_price,
-                    'totalAirlinePenalty' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_penalty_amount, $productQuoteRefund->pqr_client_currency_rate),
-                    'totalProcessingFee' => CurrencyHelper::convertFromBaseCurrency($productQuoteRefund->pqr_processing_fee_amount, $productQuoteRefund->pqr_client_currency_rate),
+                    'totalAirlinePenalty' => (float)$productQuoteRefund->pqr_client_penalty_amount,
+                    'totalProcessingFee' => (float)$productQuoteRefund->pqr_client_processing_fee_amount,
                     'totalRefundable' => (float)$productQuoteRefund->pqr_client_refund_amount,
-                    'refundCost' => (float)ArrayHelper::getValue(JsonHelper::decode($productQuoteRefund->pqr_data_json, true), 'payment_request.amount'),
+                    'refundCost' => (float)$productQuoteRefund->pqr_client_refund_cost,
                     'currency' => $productQuoteRefund->pqr_client_currency,
                     'tickets' => array_map(static function (ProductQuoteObjectRefund $model) {
                         return $model->setFields($model->getApiDataMapped())->toArray();
