@@ -131,9 +131,6 @@ class CaseEventLogSearch extends CaseEventLog
         $query->andFilterWhere(['like', 'cel_description', $this->cel_description])
             ->andFilterWhere(['like', 'cel_data_json', $this->cel_data_json]);
 
-        var_dump($query->createCommand()->rawSql);
-        die;
-
         return $dataProvider;
     }
 }
