@@ -117,7 +117,7 @@ use yii\bootstrap4\Html;
                         'class' => 'control-label'
                     ],
                 ])->dropDownList(Quote::getStopsLIst(), [
-                              'prompt' => '--'
+                                 'prompt' => '--'
                 ]) ?>
             </div>
 

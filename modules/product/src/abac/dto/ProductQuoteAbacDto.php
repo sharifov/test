@@ -11,6 +11,7 @@ use sales\auth\Auth;
  * @package modules\product\src\abac\dto
  *
  * @property bool $is_new
+ * @property int|null $pqStatusId
  * @property bool $isPqChangeable
  * @property bool $isOwner
  * @property bool $hasPqrActive
@@ -24,13 +25,15 @@ use sales\auth\Auth;
  * @property int|null $orTypeId
  * @property int|null $csCategoryId
  * @property bool $isCaseOwner
- * @property bool $is_common_group
+ * @property bool $isCommonGroup
+ * @property int|null $csStatusId
  * @property bool $isAutomateCase
  * @property int|null $csProjectId
  */
 class ProductQuoteAbacDto extends \stdClass
 {
     public bool $is_new;
+    public ?int $pqStatusId;
     public bool $isPqChangeable;
     public bool $isOwner;
     public bool $hasPqrActive;
@@ -55,6 +58,7 @@ class ProductQuoteAbacDto extends \stdClass
             $userId = Auth::id();
 
             $this->is_new = $productQuote->isNew();
+            $this->pqStatusId = $productQuote->pq_status_id;
             $this->isPqChangeable = $productQuote->isChangeable();
             $this->isOwner = $productQuote->isOwner($userId);
             $this->hasPqrActive = (bool)$productQuote->productQuoteRefundsActive;
@@ -68,6 +72,7 @@ class ProductQuoteAbacDto extends \stdClass
                     $this->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup($userId, $productQuote->productQuoteLastChange->pqcCase->cs_user_id);
                 }
 
+                $this->csStatusId = $productQuote->productQuoteLastChange->pqcCase->cs_status;
                 $this->isAutomateCase = $productQuote->productQuoteLastChange->pqcCase->isAutomate();
                 $this->csProjectId = $productQuote->productQuoteLastChange->pqcCase->cs_project_id;
             }

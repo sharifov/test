@@ -76,6 +76,8 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use modules\product\src\abac\ProductQuoteChangeAbacObject;
+use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
 
 /**
  * FlightQuoteController implements the CRUD actions for FlightQuote model.
@@ -892,6 +894,13 @@ class FlightQuoteController extends FController
             if (!$productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) {
                 throw new \RuntimeException('ProductQuoteChange not found');
             }
+
+            /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Act Flight Create Voluntary quote*/
+            $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
+            if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE)) {
+                throw new ForbiddenHttpException('You do not have access to perform this action.');
+            }
+
             $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
             $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
             if (!$voluntaryExchangeBOService->isAllow()) {
@@ -1047,11 +1056,9 @@ class FlightQuoteController extends FController
                 throw new \RuntimeException('ProductQuoteChange not found');
             }
 
-            $case = $productQuoteChange->pqcCase;
-
-            /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Act Flight Create Reprotection quote from dump*/
-            $caseAbacDto = new CasesAbacDto($case);
-            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) {
+            /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE, Flight Create Reprotection quote from dump*/
+            $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
+            if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE)) {
                 throw new ForbiddenHttpException('You do not have access to perform this action.');
             }
 
@@ -1095,10 +1102,9 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException('ProductQuoteLastChange is not type ReProtection');
                 }
 
-                $case = $productQuoteChange->pqcCase;
-                /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE, Act Flight Create Reprotection quote from dump*/
-                $caseAbacDto = new CasesAbacDto($case);
-                if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, CasesAbacObject::ACTION_CREATE)) {
+                /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE, Act Flight Create Reprotection quote from dump*/
+                $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
+                if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE)) {
                     throw new ForbiddenHttpException('You do not have access to perform this action.');
                 }
 

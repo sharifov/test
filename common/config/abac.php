@@ -15,7 +15,8 @@ return [
         'client' => \sales\model\client\abac\ClientAbacObject::class,
         'product-quote' => \modules\product\src\abac\ProductQuoteAbacObject::class,
         'call' => \sales\model\call\abac\CallAbacObject::class,
-        'user-flow-widget' => \frontend\widgets\frontendWidgetList\userflow\abac\UserFlowWidgetObject::class
+        'user-flow-widget' => \frontend\widgets\frontendWidgetList\userflow\abac\UserFlowWidgetObject::class,
+        'product-quote-change' => \modules\product\src\abac\ProductQuoteChangeAbacObject::class
     ],
     'scanDirs' => [
         '/modules/',

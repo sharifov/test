@@ -288,8 +288,8 @@ $paxCntTypes = [
                                 'tag' => false,
                             ],
                         ])->checkbox([
-                            'class' => 'alt-quote-price js-check-payment',
-                            'template' => '{input}'
+                                    'class' => 'alt-quote-price js-check-payment',
+                                    'template' => '{input}'
                         ])->label(false); ?>
                         <label for="<?= Html::getInputId($quote, 'check_payment') ?>"></label>
                     </td>

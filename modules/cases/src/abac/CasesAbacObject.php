@@ -24,7 +24,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     /** ACTION PERMISSION */
     public const ACT_FLIGHT_REPROTECTION_CONFIRM  = self::NS . 'act/flight-reprotection-confirm';
     public const ACT_FLIGHT_REPROTECTION_REFUND  = self::NS . 'act/flight-reprotection-refund';
-    public const ACT_FLIGHT_REPROTECTION_QUOTE  = self::NS . 'act/flight-reprotection-quote';
+    public const ACT_FLIGHT_REPROTECTION_QUOTE  = self::NS . 'act/flight-reprotection-quote'; /* TODO:: candidate to remove  was create new in ProductQuoteChangeAbacObject.php */
     public const ACT_FLIGHT_VOLUNTARY_QUOTE  = self::NS . 'act/flight-voluntary-quote';
     public const ACT_PRODUCT_QUOTE_REMOVE = self::NS . 'act/product_quote/remove'; /* TODO:: candidate to remove  was create new in ProductQuoteAbacObject.php */
     public const ACT_PRODUCT_QUOTE_VIEW_DETAILS = self::NS . 'act/product_quote/view_details'; /* TODO:: candidate to remove  was create new in ProductQuoteAbacObject.php  */

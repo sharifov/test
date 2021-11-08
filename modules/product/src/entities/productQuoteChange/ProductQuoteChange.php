@@ -307,7 +307,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
 
     public function isAutomate(): bool
     {
-        return $this->pqc_is_automate;
+        return (bool)$this->pqc_is_automate;
     }
 
 
