@@ -64,17 +64,17 @@ class ProductQuoteAbacDto extends \stdClass
             $this->hasPqrActive = (bool)$productQuote->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuote->productQuoteChangesActive;
 
-            if ($productQuote->productQuoteLastChange) {
-                $this->csCategoryId = $productQuote->productQuoteLastChange->pqcCase->cs_category_id;
-                $this->isCaseOwner = $productQuote->productQuoteLastChange->pqcCase->isOwner($userId);
+            if ($case = $productQuote->pqOrder->caseOrder[0]->cases) {
+                $this->csCategoryId = $case->cs_category_id;
+                $this->isCaseOwner = $case->isOwner($userId);
 
-                if ($productQuote->productQuoteLastChange->pqcCase->hasOwner()) {
-                    $this->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup($userId, $productQuote->productQuoteLastChange->pqcCase->cs_user_id);
+                if ($case->hasOwner()) {
+                    $this->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup($userId, $case->cs_user_id);
                 }
 
-                $this->csStatusId = $productQuote->productQuoteLastChange->pqcCase->cs_status;
-                $this->isAutomateCase = $productQuote->productQuoteLastChange->pqcCase->isAutomate();
-                $this->csProjectId = $productQuote->productQuoteLastChange->pqcCase->cs_project_id;
+                $this->csStatusId = $case->cs_status;
+                $this->isAutomateCase = $case->isAutomate();
+                $this->csProjectId = $case->cs_project_id;
             }
 
             $this->prTypeId = $productQuote->pqProduct->pr_type_id;
