@@ -208,7 +208,8 @@ class FlightQuoteController extends FController
             'access' => [
                 'allowActions' => [
                     'ajax-quote-details',
-                    'create-voluntary-quote-refund'
+                    'create-voluntary-quote-refund',
+                    'create-voluntary-quote'
                 ]
             ]
         ];
@@ -896,10 +897,10 @@ class FlightQuoteController extends FController
             }
 
             /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Act Flight Create Voluntary quote*/
-            /*$pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
+            $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
             if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE)) {
                 throw new ForbiddenHttpException('You do not have access to perform this action.');
-            }*/
+            }
 
             $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
             $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
