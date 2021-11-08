@@ -93,6 +93,7 @@ class CaseEventLogSearch extends CaseEventLog
 
         if (!$employee->isAdmin() && !$employee->isSuperAdmin()) {
             $query->andWhere(['<>', 'cel_category_id', CaseEventLog::CATEGORY_DEBUG]);
+            $query->orWhere(['cel_category_id' => null]);
         }
 
         // add conditions that should always apply here
