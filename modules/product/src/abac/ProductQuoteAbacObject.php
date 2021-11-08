@@ -23,8 +23,8 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
     public const ALL = self::NS . '*';
 
     /** ACTION PERMISSION */
-    public const ACT_DECLINE_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/decline'; /*TODO:: to remove*/
-    public const ACT_VIEW_DETAILS_REFUND_QUOTE = self::NS . 'act/refund_quote/details'; /*TODO:: to move in ProductQuoteRefund in feature task SL-6589 */
+    public const ACT_DECLINE_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/decline'; /*TODO:: to remove after release 3.34*/
+    public const ACT_VIEW_DETAILS_REFUND_QUOTE = self::NS . 'act/refund_quote/details'; /*TODO:: to remove */
     public const ACT_VIEW_DETAILS = self::NS . 'act/view_details'; /*TODO:: to remove */
     public const ACT_ADD_CHANGE = self::NS . 'act/add_change'; /*TODO:: to remove */
     public const ACT_CREATE_VOL_REFUND = self::NS . 'act/create_voluntary_quote_refund'; /*TODO:: to remove */

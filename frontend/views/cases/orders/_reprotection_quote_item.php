@@ -15,6 +15,8 @@ use yii\helpers\Url;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\abac\ProductQuoteChangeAbacObject;
 use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
+use modules\product\src\abac\ProductQuoteRefundAbacObject;
+use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
 
 /**
  * @var Order $order
@@ -431,6 +433,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                     </thead>
                     <tbody>
                     <?php foreach ($quote->productQuoteRefunds as $nr => $refundItem) : ?>
+                        <?php $pqrAbacDto = new ProductQuoteRefundAbacDto($refundItem) ?>
                         <tr>
                             <td data-toggle="tooltip" data-html="true" title="Refund ID: <?=Html::encode($refundItem->pqr_id)?> <br> Refund GID: <?=Html::encode($refundItem->pqr_gid)?> <br> Refund CID: <?=Html::encode($refundItem->pqr_cid)?>">
                                 <?=($nr + 1)?>
@@ -452,8 +455,8 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                   <i class="fa fa-bars"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                  <?php /** @abac ProductQuoteAbacObject::ACT_VIEW_DETAILS_REFUND_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS, Product quote refund view details */ ?>
-                                  <?php if (Yii::$app->abac->can(null, ProductQuoteAbacObject::ACT_VIEW_DETAILS_REFUND_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+                                  <?php /** @abac $pqrAbacDto, ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_ACCESS_DETAILS, Product quote refund view details */ ?>
+                                  <?php if (Yii::$app->abac->can($pqrAbacDto, ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_ACCESS_DETAILS)) : ?>
                                         <?= Html::a('<i class="fas fa-info-circle"></i> View Details', null, [
                                         'data-refund-quote-id' => $refundItem->pqr_id,
                                         'class' => 'dropdown-item btn-show-refund-quote-details',
