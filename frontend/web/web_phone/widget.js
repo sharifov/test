@@ -6681,7 +6681,7 @@ let PhoneWidgetSms = function () {
   }
 
   function getBackToContacts() {
-    return '<a href="#" class="widget-modal__close"><i class="fa fa-arrow-left"></i>Back to contacts</i></a>';
+    return '<a class="widget-modal__close"><i class="fa fa-arrow-left"></i>Back to contacts</i></a>';
   }
 
   function sendStart() {
@@ -6976,7 +6976,7 @@ let PhoneWidgetContacts = function () {
   }
 
   function viewContact(contact) {
-    let content = '<div class="widget-phone__contact-info-modal widget-modal contact-modal-info">' + '<a href="#" class="widget-modal__close">' + '<i class="fa fa-arrow-left"></i>' + 'Back to contacts</i>' + '</a>' + '<div class="contact-modal-info__user">' + '<div class="agent-text-avatar">' + '<span>' + contact['avatar'] + '</span>' + '</div>' + '<h3 class="contact-modal-info__name">' + contact['name'] + '</h3>' + //                '<div class="contact-modal-info__actions">' +
+    let content = '<div class="widget-phone__contact-info-modal widget-modal contact-modal-info">' + '<a class="widget-modal__close">' + '<i class="fa fa-arrow-left"></i>' + 'Back to contacts</i>' + '</a>' + '<div class="contact-modal-info__user">' + '<div class="agent-text-avatar">' + '<span>' + contact['avatar'] + '</span>' + '</div>' + '<h3 class="contact-modal-info__name">' + contact['name'] + '</h3>' + //                '<div class="contact-modal-info__actions">' +
     //                    '<ul class="contact-options-list">' +
     //                        '<li class="contact-options-list__option js-edit-mode">' +
     //                            '<i class="fa fa-user"></i>' +
@@ -7377,7 +7377,7 @@ let PhoneWidgetEmail = function () {
   }
 
   function getBackToContacts() {
-    return '<a href="#" class="widget-modal__close"><i class="fa fa-arrow-left"></i>Back to contacts</i></a>';
+    return '<a class="widget-modal__close"><i class="fa fa-arrow-left"></i>Back to contacts</i></a>';
   }
 
   function show(contact, contactEmail, user) {
