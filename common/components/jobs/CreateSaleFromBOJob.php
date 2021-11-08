@@ -41,6 +41,7 @@ class CreateSaleFromBOJob extends BaseJob implements JobInterface
 
     private $casesSaleService;
     private $orderCreateFromSaleService;
+    private $orderRepository;
     private $flightFromSaleService;
 
     /**
