@@ -53,7 +53,7 @@ if ($quote->productQuoteLastChange) {
     }
 }
 
-$productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
+$productQuoteAbacDto = new ProductQuoteAbacDto($quote);
 
 ?>
 
@@ -77,9 +77,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
           <i class="fa fa-bars"></i>
         </button>
         <div class="dropdown-menu">
-            <?php /** @abac new $productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS, Product quote view details */ ?>
-            <?php // if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) : ?>
-            <?php if (Yii::$app->abac->can($productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_VIEW_DETAILS, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+            <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */ ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) : ?>
                 <?= Html::a('<i class="fas fa-info-circle"></i> View Details', null, [
                     'data-product-quote-gid' => $quote->pq_gid,
                     'class' => 'dropdown-item btn-show-product-quote-details',
@@ -90,8 +89,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                 ]) ?>
             <?php endif; ?>
 
-            <?php /** @abac new $productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_ADD_CHANGE, CasesAbacObject::ACTION_ACCESS, Product quote add change */ ?>
-            <?php if (Yii::$app->abac->can($productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_ADD_CHANGE, ProductQuoteAbacObject::ACTION_ACCESS)) :  ?>
+            <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_CREATE_CHANGE, Product quote add change */ ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_CHANGE)) :  ?>
                 <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
                     <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Change', null, [
                         'class' => 'dropdown-item btn_create_change',
@@ -105,8 +104,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                 <?php endif ?>
             <?php endif ?>
 
-            <?php /** @abac new $productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_CREATE_VOL_REFUND, CasesAbacObject::ACTION_ACCESS, Product quote add voluntary refund */ ?>
-            <?php if (Yii::$app->abac->can($productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_CREATE_VOL_REFUND, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+            <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND, Product quote add voluntary refund */ ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND)) : ?>
                 <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
                     <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Refund Quote', null, [
                         'data-flight-id' => $flight->getId(),
@@ -124,9 +123,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                 <?php endif ?>
             <?php endif ?>
 
-            <?php /** @abac $productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_PRODUCT_QUOTE_REMOVE, ProductQuoteAbacObject::ACTION_ACCESS, Action Remove product from order */ ?>
-            <?php //if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) : ?>
-            <?php if (Yii::$app->abac->can($productQuoteAbacDtoAbacDto, ProductQuoteAbacObject::ACT_PRODUCT_QUOTE_REMOVE, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+            <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DELETE, Action Remove product from order */ ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DELETE)) : ?>
                 <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Remove', null, [
                     'data-order-id' => $order->or_id,
                     'data-product-quote-id' => $quote->pq_id,
@@ -378,8 +376,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                                                         ]); ?>
                                                       <?php endif; ?>
 
-                                                      <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::ACT_DECLINE_REPROTECTION_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS, Action Flight Reprotection quote decline */ ?>
-                                                      <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::ACT_DECLINE_REPROTECTION_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS)) : ?>
+                                                      <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE, ReProtection quote decline */ ?>
+                                                      <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE)) : ?>
                                                             <?= Html::a('<i class="fas fa-times text-danger"></i> set Decline', null, [
                                                               'class' => 'dropdown-item btn-reprotection-decline',
                                                               'data-url' => Url::to(['/product/product-quote/ajax-decline-reprotection-quote']),

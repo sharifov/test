@@ -172,8 +172,8 @@ class OrderProductController extends FController
 
         $model = $this->productQuoteRepository->find($productQuoteId);
 
-        /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::ACT_PRODUCT_QUOTE_REMOVE, ProductQuoteAbacObject::ACTION_ACCESS, Remove Product quote  */
-        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($model), ProductQuoteAbacObject::ACT_PRODUCT_QUOTE_REMOVE, ProductQuoteAbacObject::ACTION_ACCESS)) {
+        /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DELETE, Remove Product quote  */
+        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($model), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DELETE)) {
             throw new ForbiddenHttpException('Access denied');
         }
 

@@ -17,26 +17,31 @@ use sales\helpers\setting\SettingHelper;
 class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'product-quote/product-quote/';
+    private const NS = 'product/product-quote/';
 
     /** ALL PERMISSIONS */
     public const ALL = self::NS . '*';
 
     /** ACTION PERMISSION */
-    public const ACT_DECLINE_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/decline';
-    public const ACT_VIEW_DETAILS_REFUND_QUOTE = self::NS . 'act/refund_quote/details';
-    public const ACT_VIEW_DETAILS = self::NS . 'act/view_details';
-    public const ACT_ADD_CHANGE = self::NS . 'act/add_change';
-    public const ACT_CREATE_VOL_REFUND = self::NS . 'act/create_voluntary_quote_refund';
-    public const ACT_PRODUCT_QUOTE_REMOVE = self::NS . 'act/remove';
+    public const ACT_DECLINE_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/decline'; /*TODO:: to remove*/
+    public const ACT_VIEW_DETAILS_REFUND_QUOTE = self::NS . 'act/refund_quote/details'; /*TODO:: to move in ProductQuoteRefund in feature task SL-6589 */
+    public const ACT_VIEW_DETAILS = self::NS . 'act/view_details'; /*TODO:: to remove */
+    public const ACT_ADD_CHANGE = self::NS . 'act/add_change'; /*TODO:: to remove */
+    public const ACT_CREATE_VOL_REFUND = self::NS . 'act/create_voluntary_quote_refund'; /*TODO:: to remove */
+    public const ACT_PRODUCT_QUOTE_REMOVE = self::NS . 'act/remove'; /*TODO:: to remove */
+
+    /** OBJECT PERMISSION */
+    public const OBJ_PRODUCT_QUOTE = self::NS . 'obj/product-quote';
 
     public const OBJECT_LIST = [
-        self::ACT_DECLINE_REPROTECTION_QUOTE => self::ACT_DECLINE_REPROTECTION_QUOTE,
+        self::ACT_DECLINE_REPROTECTION_QUOTE => self::ACT_DECLINE_REPROTECTION_QUOTE, /*TODO:: to remove*/
         self::ACT_VIEW_DETAILS_REFUND_QUOTE => self::ACT_VIEW_DETAILS_REFUND_QUOTE,
-        self::ACT_VIEW_DETAILS => self::ACT_VIEW_DETAILS,
-        self::ACT_ADD_CHANGE => self::ACT_ADD_CHANGE,
-        self::ACT_CREATE_VOL_REFUND => self::ACT_CREATE_VOL_REFUND,
-        self::ACT_PRODUCT_QUOTE_REMOVE => self::ACT_PRODUCT_QUOTE_REMOVE
+        self::ACT_VIEW_DETAILS => self::ACT_VIEW_DETAILS, /*TODO:: to remove*/
+        self::ACT_ADD_CHANGE => self::ACT_ADD_CHANGE,     /*TODO:: to remove*/
+        self::ACT_CREATE_VOL_REFUND => self::ACT_CREATE_VOL_REFUND, /*TODO:: to remove*/
+        self::ACT_PRODUCT_QUOTE_REMOVE => self::ACT_PRODUCT_QUOTE_REMOVE, /*TODO:: to remove*/
+
+        self::OBJ_PRODUCT_QUOTE => self::OBJ_PRODUCT_QUOTE
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -46,14 +51,27 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
 
+    public const ACTION_DECLINE_RE_PROTECTION_QUOTE = 'declineReProtectionQuote';
+    public const ACTION_ACCESS_DETAILS = 'accessDetails';
+    public const ACTION_CREATE_CHANGE = 'createChange';
+    public const ACTION_CREATE_VOL_REFUND = 'createVoluntaryRefundQuote';
+
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::ACT_DECLINE_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
+        self::ACT_DECLINE_REPROTECTION_QUOTE => [self::ACTION_ACCESS], /*TODO:: to remove*/
         self::ACT_VIEW_DETAILS_REFUND_QUOTE => [self::ACTION_ACCESS],
-        self::ACT_VIEW_DETAILS => [self::ACTION_ACCESS],
-        self::ACT_ADD_CHANGE => [self::ACTION_ACCESS],
-        self::ACT_CREATE_VOL_REFUND => [self::ACTION_ACCESS],
-        self::ACT_PRODUCT_QUOTE_REMOVE => [self::ACTION_ACCESS],
+        self::ACT_VIEW_DETAILS => [self::ACTION_ACCESS], /*TODO:: to remove*/
+        self::ACT_ADD_CHANGE => [self::ACTION_ACCESS], /*TODO:: to remove*/
+        self::ACT_CREATE_VOL_REFUND => [self::ACTION_ACCESS], /*TODO:: to remove*/
+        self::ACT_PRODUCT_QUOTE_REMOVE => [self::ACTION_ACCESS], /*TODO:: to remove*/
+
+        self::OBJ_PRODUCT_QUOTE => [
+            self::ACTION_DECLINE_RE_PROTECTION_QUOTE,
+            self::ACTION_ACCESS_DETAILS,
+            self::ACTION_CREATE_CHANGE,
+            self::ACTION_CREATE_VOL_REFUND,
+            self::ACTION_DELETE
+        ]
     ];
 
     protected const ATTR_REPROTECTION_QUOTE_IS_NEW = [
@@ -299,7 +317,8 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::ACT_DECLINE_REPROTECTION_QUOTE    => [self::ATTR_REPROTECTION_QUOTE_IS_NEW],
+        self::ACT_DECLINE_REPROTECTION_QUOTE    => [self::ATTR_REPROTECTION_QUOTE_IS_NEW], /*TODO:: to remove*/
+        /*TODO:: to remove ACT_VIEW_DETAILS*/
         self::ACT_VIEW_DETAILS    => [
             self::ATTR_PRODUCT_QUOTE_OWNER,
             self::ATTR_ORDER_OWNER,
@@ -310,6 +329,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_PQR_ACTIVE,
             self::ATTR_HAS_PQC_ACTIVE
         ],
+        /*TODO:: to remove ACT_ADD_CHANGE*/
         self::ACT_ADD_CHANGE      => [
             self::ATTR_PRODUCT_QUOTE_OWNER,
             self::ATTR_ORDER_OWNER,
@@ -320,6 +340,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_PQR_ACTIVE,
             self::ATTR_HAS_PQC_ACTIVE
         ],
+        /*TODO:: to remove ACT_CREATE_VOL_REFUND*/
         self::ACT_CREATE_VOL_REFUND => [
             self::ATTR_PRODUCT_QUOTE_OWNER,
             self::ATTR_ORDER_OWNER,
@@ -330,6 +351,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_PQR_ACTIVE,
             self::ATTR_HAS_PQC_ACTIVE
         ],
+        /*TODO:: to remove ACT_PRODUCT_QUOTE_REMOVE*/
         self::ACT_PRODUCT_QUOTE_REMOVE => [
             self::ATTR_PRODUCT_QUOTE_OWNER,
             self::ATTR_ORDER_OWNER,
@@ -340,6 +362,18 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_PQR_ACTIVE,
             self::ATTR_HAS_PQC_ACTIVE
         ],
+
+        self::OBJ_PRODUCT_QUOTE => [
+            self::ATTR_REPROTECTION_QUOTE_IS_NEW,
+            self::ATTR_PRODUCT_QUOTE_OWNER,
+            self::ATTR_ORDER_OWNER,
+            self::ATTR_CASE_OWNER,
+            self::ATTR_IS_COMMON_GROUP,
+            self::ATTR_IS_AUTOMATE_CASE,
+            self::ATTR_IS_PQ_CHANGEABLE,
+            self::ATTR_HAS_PQR_ACTIVE,
+            self::ATTR_HAS_PQC_ACTIVE
+        ]
     ];
 
     /**
@@ -388,7 +422,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attrCaseStatusList['values'] = CasesStatus::STATUS_LIST;
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
-
+        /*TODO:: remove $attributeList[self::ACT_VIEW_DETAILS]*/
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrStatusList;
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrProductTypeList;
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrProductProjectList;
@@ -399,7 +433,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrCaseCategoryList;
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrCaseProjectList;
         $attributeList[self::ACT_VIEW_DETAILS][] = $attrCaseStatusList;
-
+        /*TODO:: remove $attributeList[self::ACT_ADD_CHANGE]*/
         $attributeList[self::ACT_ADD_CHANGE][] = $attrStatusList;
         $attributeList[self::ACT_ADD_CHANGE][] = $attrProductTypeList;
         $attributeList[self::ACT_ADD_CHANGE][] = $attrProductProjectList;
@@ -410,7 +444,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_ADD_CHANGE][] = $attrCaseCategoryList;
         $attributeList[self::ACT_ADD_CHANGE][] = $attrCaseProjectList;
         $attributeList[self::ACT_ADD_CHANGE][] = $attrCaseStatusList;
-
+        /*TODO:: remove $attributeList[self::ACT_CREATE_VOL_REFUND]*/
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrStatusList;
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrProductTypeList;
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrProductProjectList;
@@ -421,7 +455,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrCaseCategoryList;
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrCaseProjectList;
         $attributeList[self::ACT_CREATE_VOL_REFUND][] = $attrCaseStatusList;
-
+        /*TODO:: remove $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE]*/
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrStatusList;
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrProductTypeList;
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrProductProjectList;
@@ -432,6 +466,17 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrCaseCategoryList;
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrCaseProjectList;
         $attributeList[self::ACT_PRODUCT_QUOTE_REMOVE][] = $attrCaseStatusList;
+
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrStatusList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrProductTypeList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrProductProjectList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrOrderProjectList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrOrderStatusList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrOrderPayStatusList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrOrderTypeList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrCaseCategoryList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrCaseProjectList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE][] = $attrCaseStatusList;
 
         return $attributeList;
     }

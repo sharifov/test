@@ -455,8 +455,8 @@ class FlightQuoteController extends FController
 
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
 
-        /** @abac new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::ACT_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS, Product quote view details */
-        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::ACT_VIEW_DETAILS, ProductQuoteAbacObject::ACTION_ACCESS)) {
+        /** @abac new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
+        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
@@ -820,8 +820,8 @@ class FlightQuoteController extends FController
 
         $originProductQuote = ProductQuote::findOne(['pq_id' => $addChangeForm->origin_quote_id]);
 
-        /** @abac new ProductQuoteAbacDto($originProductQuote), ProductQuoteAbacObject::ACT_ADD_CHANGE, CasesAbacObject::ACTION_ACCESS, Product quote add change */
-        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($originProductQuote), ProductQuoteAbacObject::ACT_ADD_CHANGE, ProductQuoteAbacObject::ACTION_ACCESS)) {
+        /** @abac new ProductQuoteAbacDto($originProductQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_CHANGE, Product quote add change */
+        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($originProductQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_CHANGE)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
@@ -1315,8 +1315,8 @@ class FlightQuoteController extends FController
             $caseId = Yii::$app->request->get('case_id');
 
             $productQuote = $this->productQuoteRepository->find($originProductQuoteId);
-            /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::ACT_CREATE_VOL_REFUND, ProductQuoteAbacObject::ACTION_ACCESS, Create Voluntary Quote Refund */
-            if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::ACT_CREATE_VOL_REFUND, ProductQuoteAbacObject::ACTION_ACCESS)) {
+            /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND, Create Voluntary Quote Refund */
+            if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND)) {
                 throw new ForbiddenHttpException('Access denied');
             }
 
