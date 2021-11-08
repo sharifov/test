@@ -80,7 +80,7 @@ let PhoneWidgetContacts = function () {
             '</div>'
         }
 
-        return '<a href="#" class="collapsible-arrow"><i class="fas fa-chevron-right"></i></a>'
+        return '<a class="collapsible-arrow"><i class="fas fa-chevron-right"></i></a>'
     }
 
 
@@ -201,7 +201,7 @@ let PhoneWidgetContacts = function () {
 
     function viewContact(contact) {
         let content = '<div class="widget-phone__contact-info-modal widget-modal contact-modal-info">' +
-            '<a href="#" class="widget-modal__close">' +
+            '<a class="widget-modal__close">' +
             '<i class="fa fa-arrow-left"></i>' +
             'Back to contacts</i>' +
             '</a>' +

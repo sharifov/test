@@ -22,9 +22,9 @@ use yii\web\View;
         <div class="status-confirmation"></div>
       </div>
         <ul class="call-filter">
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-active" title="Active Calls" data-call-filter="active">0</a></li>
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" title="Direct Line" data-call-filter="direct">0</a></li>
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" title="General Line" data-call-filter="general">0</a></li>
+            <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-active" title="Active Calls" data-call-filter="active">0</a></li>
+            <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-direct" title="Direct Line" data-call-filter="direct">0</a></li>
+            <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-general" title="General Line" data-call-filter="general">0</a></li>
         </ul>
 
         <div id="widget-phone-notifications"></div>
@@ -132,7 +132,7 @@ use yii\web\View;
       <div class="widget-line-overlay__header">
           <div class="widget-line-overlay__queue-marker">
               <span data-queue-marker>Calls Queue</span>
-              <a href="#" class="widget-line-overlay__show-all-queues" data-call-filter="all" >All Calls</a>
+              <a class="widget-line-overlay__show-all-queues" data-call-filter="all" >All Calls</a>
           </div>
       </div>
       <div class="widget-line-overlay__body scrollable-block">
@@ -458,7 +458,7 @@ use yii\web\View;
       <span class="additional-bar__header-title">
         Settings
       </span>
-      <a href="#" class="additional-bar__close">
+      <a class="additional-bar__close">
         <i class="fas fa-times"></i>
       </a>
     </div>
