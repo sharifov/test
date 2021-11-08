@@ -26,7 +26,7 @@ use yii\helpers\Html;
                 <div class="x_panel">
                     <div class="x_title"></div>
                     <div class="x_content" style="display: block">
-                        <?php /*if ($order->orLead && Auth::can('leadSection', ['lead' => $order->orLead])) : ?>
+                        <?php /*if ($order->orLead && Auth::can('lead/view', ['lead' => $order->orLead])) : ?>
                             <?php echo Html::a('<i class="glyphicon glyphicon-search"></i> View Lead', [
                                 '/lead/view/' . $order->orLead->gid,
                             ], [

@@ -234,7 +234,7 @@ class LeadController extends FController
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if (!Auth::can('leadSection', ['lead' => $lead])) {
+        if (!Auth::can('lead/view', ['lead' => $lead])) {
             throw new ForbiddenHttpException('Access Denied.');
         }
 

@@ -369,7 +369,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Auth::user()->isAgent();
                 },
                 /*'view' => static function (Lead $model, $key, $index) {
-                    return Auth::can('leadSection', ['lead' => $model]);
+                    return Auth::can('lead/view', ['lead' => $model]);
                 },*/
             ],
             'buttons' => [
