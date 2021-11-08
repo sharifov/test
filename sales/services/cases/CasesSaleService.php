@@ -654,7 +654,7 @@ class CasesSaleService
                             }
                         } catch (\Throwable $throwable) {
                             $transaction->rollBack();
-                            $message['throwable'] = AppHelper::throwableLog($throwable, true);
+                            $message = AppHelper::throwableLog($throwable, true);
                             $message['saleData'] = $refreshSaleData;
                             Yii::error($message, 'CasesSaleService:createOrderStructureFromSale:Throwable');
                         }

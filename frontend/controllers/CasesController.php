@@ -1002,7 +1002,7 @@ class CasesController extends FController
                 }
             } catch (\Throwable $throwable) {
                 $transactionOrder->rollBack();
-                $message['throwable'] = AppHelper::throwableLog($throwable, true);
+                $message = AppHelper::throwableLog($throwable, true);
                 $message['saleData'] = $saleData;
                 Yii::error($message, 'CasesController:actionAddSale:Order');
             }

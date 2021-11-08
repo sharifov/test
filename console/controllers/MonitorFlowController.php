@@ -97,7 +97,7 @@ class MonitorFlowController extends Controller
                     ) . PHP_EOL;
                 }
             } catch (\Throwable $throwable) {
-                $message['throwable'] = AppHelper::throwableLog($throwable);
+                $message = AppHelper::throwableLog($throwable);
                 $message['data'] = $quoteData;
                 Yii::error($message, 'console:MonitorFlowController:actionWatchDogDeclineQuote:Quote:save');
                 echo 'Quote: ' . $quoteData['id'] . ' ' . VarDumper::dumpAsString($throwable->getMessage()) . PHP_EOL;

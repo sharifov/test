@@ -603,11 +603,11 @@ class ProductQuoteController extends FController
                             $hybridService->whReprotection($case->cs_project_id, $data);
                             $case->addEventLog(null, 'Request HybridService sent successfully');
                         } catch (\Throwable $throwable) {
-                            $errorData = [];
-                            $errorData['message'] = 'OTA site is not informed (hybridService->whReprotection)';
+                            $errorData = AppHelper::throwableLog($throwable);
+                            $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';
                             $errorData['project_id'] = $case->cs_project_id;
                             $errorData['case_id'] = $case->cs_id;
-                            $errorData['throwable'] = AppHelper::throwableLog($throwable);
+
 
                             Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
                         }

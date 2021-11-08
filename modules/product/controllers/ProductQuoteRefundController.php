@@ -258,11 +258,11 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                             \Yii::$app->hybrid->wh($case->cs_project_id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
                             $case->addEventLog(null, 'WH to HybridService sent successfully');
                         } catch (\Throwable $throwable) {
-                            $errorData = [];
-                            $errorData['message'] = 'OTA site is not informed (hybridService->whVoluntaryRefund)';
+                            // $errorData = [];
+                            $errorData = AppHelper::throwableLog($throwable);
+                            $errorData['description'] = 'OTA site is not informed (hybridService->whVoluntaryRefund)';
                             $errorData['project_id'] = $case->cs_project_id;
                             $errorData['case_id'] = $case->cs_id;
-                            $errorData['throwable'] = AppHelper::throwableLog($throwable);
 
                             Yii::warning($errorData, 'ProductQuoteRefundController:actionVoluntaryRefundSendEmail:Throwable');
                         }
