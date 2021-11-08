@@ -3,9 +3,9 @@
 namespace sales\entities\cases;
 
 use common\models\Employee;
-use sales\entities\cases\CaseEventLog;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 
 /**
  * CaseEventLogSearch represents the model behind the search form of `sales\entities\cases\CaseEventLog`.
@@ -91,11 +91,6 @@ class CaseEventLogSearch extends CaseEventLog
     {
         $query = CaseEventLog::find()->where(['cel_case_id' => $params['case_id']]);
 
-        if (!$employee->isAdmin() && !$employee->isSuperAdmin()) {
-            $query->andWhere(['<>', 'cel_category_id', CaseEventLog::CATEGORY_DEBUG]);
-            $query->orWhere(['cel_category_id' => null]);
-        }
-
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -118,6 +113,13 @@ class CaseEventLogSearch extends CaseEventLog
             return $dataProvider;
         }
 
+        if (!$employee->isAdmin() && !$employee->isSuperAdmin()) {
+            $query->andFilterWhere([
+                'OR',
+                ['<>', 'cel_category_id', CaseEventLog::CATEGORY_DEBUG],
+                ['is', 'cel_category_id', new Expression('NULL')]
+            ]);
+        }
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -128,6 +130,9 @@ class CaseEventLogSearch extends CaseEventLog
 
         $query->andFilterWhere(['like', 'cel_description', $this->cel_description])
             ->andFilterWhere(['like', 'cel_data_json', $this->cel_data_json]);
+
+        var_dump($query->createCommand()->rawSql);
+        die;
 
         return $dataProvider;
     }
