@@ -212,7 +212,7 @@ class VoluntaryRefundService
 
         try {
             if (!$originProductQuote) {
-                $originProductQuote = $this->createOriginProductQuoteInfrastructure(
+                $originProductQuote = $this->createOriginProductQuoteStructure(
                     $orderCreateSaleForm,
                     $saleData,
                     $order,
@@ -269,7 +269,9 @@ class VoluntaryRefundService
                 $voluntaryRefundCreateForm->refundForm->totalRefundAmount,
                 $case->cs_id,
                 $voluntaryRefundCreateForm->refundForm->orderId,
-                $voluntaryRefundCreateForm->toArray()
+                $voluntaryRefundCreateForm->toArray(),
+                CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->getPaymentRequestForm()->amount ?? 0, $order->orClientCurrency->cur_base_rate),
+                $voluntaryRefundCreateForm->getPaymentRequestForm()->amount ?? 0
             );
             $productQuoteRefund->pending();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
@@ -459,7 +461,7 @@ class VoluntaryRefundService
         return $order;
     }
 
-    private function createOriginProductQuoteInfrastructure(
+    private function createOriginProductQuoteStructure(
         OrderCreateFromSaleForm $orderCreateFromSaleForm,
         array $saleData,
         Order $order,
