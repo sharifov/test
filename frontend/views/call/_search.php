@@ -107,7 +107,7 @@ use kartik\form\ActiveForm;
                             'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                         ]
                     ])->label('Created DateTime Range');
-                    ?>
+?>
                 </div>
                 <div class="col-md-3">
                     <div class="col-md-6">

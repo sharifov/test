@@ -49,28 +49,28 @@ use common\models\Department;
 
             <div class="row">
                 <div class="col-md-3">
-                    <?= $form->field($model, 'createTimeRange', [
-                        //'addon'=>['prepend'=>['content'=>'<i class="fa fa-calendar"></i>']],
-                        'options' => ['class' => 'form-group']
-                    ])->widget(\kartik\daterange\DateRangePicker::class, [
-                        'useWithAddon' => true,
-                        'presetDropdown' => true,
-                        'hideInput' => true,
-                        'convertFormat' => true,
-                        'startAttribute' => 'createTimeStart',
-                        'endAttribute' => 'createTimeEnd',
-                        'pluginOptions' => [
-                            'timePicker' => true,
-                            'timePickerIncrement' => 1,
-                            'timePicker24Hour' => true,
-                            'locale' => [
-                                'format' => 'Y-m-d H:i',
-                                'separator' => ' - '
-                            ],
-                            'ranges' => \Yii::$app->params['dateRangePicker']['configs']['added3monthAllTime']
-                        ]
-                    ])->label('Created DateTime Range');
-                    ?>
+                <?= $form->field($model, 'createTimeRange', [
+                    //'addon'=>['prepend'=>['content'=>'<i class="fa fa-calendar"></i>']],
+                    'options' => ['class' => 'form-group']
+                ])->widget(\kartik\daterange\DateRangePicker::class, [
+                    'useWithAddon' => true,
+                    'presetDropdown' => true,
+                    'hideInput' => true,
+                    'convertFormat' => true,
+                    'startAttribute' => 'createTimeStart',
+                    'endAttribute' => 'createTimeEnd',
+                    'pluginOptions' => [
+                        'timePicker' => true,
+                        'timePickerIncrement' => 1,
+                        'timePicker24Hour' => true,
+                        'locale' => [
+                            'format' => 'Y-m-d H:i',
+                            'separator' => ' - '
+                        ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['added3monthAllTime']
+                    ]
+                ])->label('Created DateTime Range');
+?>
                 </div>
 
                 <div class="col-md-2">

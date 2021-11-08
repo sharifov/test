@@ -20,9 +20,9 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
 
     <?= $form->errorSummary($model) ?>
-
-    <?=
-    $form->field($model, 'orderUserProfits')->widget(\unclead\multipleinput\MultipleInput::class, [
+<?= $form->field($model, 'orderUserProfits')->widget(
+    \unclead\multipleinput\MultipleInput::class,
+    [
         'id' => 'order_user_profit_multiple_input',
         'columns' => [
             [
@@ -58,9 +58,8 @@ use yii\widgets\ActiveForm;
                 ]
             ]
         ]
-    ])->label(false);
-
-    ?>
+    ]
+)->label(false); ?>
 
     <?= Html::hiddenInput('orderId', $order->or_id) ?>
 

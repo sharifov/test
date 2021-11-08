@@ -355,20 +355,14 @@ $js = <<<JS
                 }, 'json');
 					
             } else {
-				widgetIcon.update({
-					type: 'incoming',
-					timer: true,
-					text: null,
-					currentCalls: null,
-					status: 'online',
-					timerStamp: 0
-				});
-				alert('You have active call');
-				$('.call-pane').removeClass('is_active');
-				$('.call-pane-calling').addClass('is_active');
-				$(".call-pane__call-btns").addClass("is-on-call");
-				freeDialButton();
-
+                if (data && data.is_on_call === true) {
+                    freeDialButton();
+				    window.sendCommandUpdatePhoneWidgetCurrentCalls(null, userId, window.generalLinePriorityIsEnabled);
+				    alert('New Call Error: You have an active call. If the message is shown by mistake please contact Administrator.');
+                }
+                if (data && data.is_offline === true) {
+                    alert('You status is offline.');
+                }
                 return false;
             }
         }, 'json');

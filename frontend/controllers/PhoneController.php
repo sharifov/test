@@ -373,9 +373,14 @@ class PhoneController extends FController
             if ($userId) {
                 $user = Employee::findOne($userId);
                 if ($user) {
-                    //if(!$user->isOnline() || !$user->isCallStatusReady() || !$userRedirect->isCallFree()) {
-                    if ($user->isOnline() && $user->isCallFree()) {
-                        $isReady = true;
+                    $isReady = true;
+                    if (!$user->isOnline()) {
+                        $isReady = false;
+                        $result['is_offline'] = true;
+                    }
+                    if (!$user->isCallFree()) {
+                        $isReady = false;
+                        $result['is_on_call'] = true;
                     }
                 }
             }

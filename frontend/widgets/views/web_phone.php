@@ -1078,7 +1078,14 @@ $js = <<<JS
                 }, 'json');
                 
             } else {
-                alert('You have active call');
+                if (data && data.is_on_call === true) {
+                    freeDialButton();
+				    window.sendCommandUpdatePhoneWidgetCurrentCalls(null, userId, window.generalLinePriorityIsEnabled);
+				    alert('New Call Error: You have an active call. If the message is shown by mistake please contact Administrator.');
+                }
+                if (data && data.is_offline === true) {
+                    alert('You status is offline.');
+                }
                 return false;
             }
         }, 'json');
