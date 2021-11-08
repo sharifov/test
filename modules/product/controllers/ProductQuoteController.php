@@ -391,12 +391,10 @@ class ProductQuoteController extends FController
                                 'responseData' => $responseData,
                             ], 'info\Webhook::OTA::ProductQuoteController:Response');
                         } catch (\Throwable $throwable) {
-                            $errorData = [];
-                            $errorData['message'] = 'OTA site is not informed (hybridService->whReprotection)';
+                            $errorData = AppHelper::throwableLog($throwable);
+                            $errorData['text'] = 'OTA site is not informed (VoluntaryQuoteSendEmail)';
                             $errorData['project_id'] = $case->cs_project_id;
                             $errorData['case_id'] = $case->cs_id;
-                            $errorData['throwable'] = AppHelper::throwableLog($throwable);
-
                             Yii::warning($errorData, 'ProductQuoteController:actionVoluntaryQuoteSendEmail:Throwable');
                         }
 
