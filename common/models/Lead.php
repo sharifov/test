@@ -2525,7 +2525,6 @@ class Lead extends ActiveRecord implements Objectable
         $status = empty($status) ? $this->status : $status;
         switch ($status) {
             case self::STATUS_PENDING:
-            case self::STATUS_NEW:
                 $label = '<span class="label status-label bg-light-brown">' . self::getStatus($status) . '</span>';
                 break;
             case self::STATUS_SNOOZE:
@@ -2544,6 +2543,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_NEW:
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
