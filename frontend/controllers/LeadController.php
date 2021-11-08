@@ -1403,7 +1403,7 @@ class LeadController extends FController
             try {
                 $lead = $this->findLeadByGid($gid);
                 $oldStatus = $lead->status;
-                $allowRbac = Auth::can('lead/take', ['lead' => $lead]);
+                $allowRbac = Auth::can('leadSection', ['lead' => $lead]);
                 if ($allowRbac) {
                     $user = Auth::user();
                     $leadAbacDto = new LeadAbacDto($lead, $user->getId());
@@ -1455,7 +1455,7 @@ class LeadController extends FController
     {
         $lead = $this->findLeadByGid($gid);
 
-        if (!Auth::can('lead/view', ['lead' => $lead])) {
+        if (!Auth::can('leadSection', ['lead' => $lead])) {
             throw new ForbiddenHttpException('Access Denied.');
         }
 
