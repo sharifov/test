@@ -19,6 +19,8 @@ use sales\helpers\UserCallIdentity;
 use sales\model\callTerminateLog\entity\CallTerminateLog;
 use sales\model\callTerminateLog\repository\CallTerminateLogRepository;
 use sales\model\callTerminateLog\service\CallTerminateLogService;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessQuery;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
@@ -215,8 +217,9 @@ class CallController extends Controller
                         $result = Yii::$app->communication->hangUp($call->c_call_sid);
 
                         if (
-                            SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list') &&
-                            CallTerminateLogService::isPhoneBlackListCandidate($call->c_from)
+                            SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list')
+                            && CallTerminateLogService::isPhoneBlackListCandidate($call->c_from)
+                            && !ContactPhoneListService::isProxy($call->c_from)
                         ) {
                             $addMinutes = (int) (SettingHelper::getCallTerminateBlackListByKey('black_list_expired_minutes') ?? 180);
                             PhoneBlackListManageService::createOrRenewExpiration($call->c_from, $addMinutes, new \DateTime(), 'Reason - CallTerminateLog');
