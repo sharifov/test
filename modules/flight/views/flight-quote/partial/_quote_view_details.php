@@ -21,9 +21,9 @@ use modules\product\src\entities\productQuote\ProductQuote;
                     <?php if ($segments) : ?>
                 <div class="trip__leg">
                     <h4 class="trip__subtitle">
-                        <span class="trip__leg-type"><?php if (count($flightQuote->flightQuoteTrips) < 3 && $tripKey == 0) :
+                        <span class="trip__leg-type"><?php if (count($flightQuote->flightQuoteTrips) < 2 && $tripKey == 0) :
                             ?>Depart<?php
-                                                     elseif (count($flightQuote->flightQuoteTrips) < 3 && $tripKey > 0) :
+                                                     elseif (count($flightQuote->flightQuoteTrips) < 2 && $tripKey > 0) :
                                                             ?>Return<?php
                                                      else :
                                                             ?><?= ($tripKey + 1);?> Trip<?php
@@ -163,7 +163,7 @@ if ($airline) {
                             <?php endforeach;?>
                         </div>
                     </div>
-                </div>Change List:
+                </div>
                     <?php endif; ?>
                 <?php endforeach;?>
             <?php else : ?>

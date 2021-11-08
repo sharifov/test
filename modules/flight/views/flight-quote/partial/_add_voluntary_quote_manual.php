@@ -161,9 +161,13 @@ $pjaxId = 'pjax-container-vc';
 
     $js = <<<JS
     var addVoluntaryQuoteForm = $('#add-quote-form');
-    
+    var lastPriceIdEl = '';
+
+    addVoluntaryQuoteForm.on('click', '.alt-quote-price', function (event) {
+        lastPriceIdEl = $(this).attr('id');
+    });
+
     addVoluntaryQuoteForm.on('change', '.alt-quote-price', function (event) {
-        
         $('#box_loading').html('<span class="spinner-border spinner-border-sm"></span>');
         $('.alt-quote-price').prop('readonly', true);
 
@@ -193,6 +197,9 @@ $pjaxId = 'pjax-container-vc';
         .always(function() {
             $('#box_loading').html('');
             $('.alt-quote-price').prop('readonly', false);
+            if (lastPriceIdEl.length) {
+                $('#' + lastPriceIdEl).focus();
+            }
         });
     });
 
