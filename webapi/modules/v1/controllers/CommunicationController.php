@@ -2872,8 +2872,32 @@ class CommunicationController extends ApiBaseController
                     $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 }
             } catch (\Throwable $e) {
+                $isDuplicateError = strpos($e->getMessage(), 'SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry') === 0;
+                if ($isDuplicateError) {
+                    Yii::info(
+                        array_merge(
+                            [
+                                'msg' => 'Some conference callback received in one time',
+                                'post' => $post,
+                                'form' => $form->getAttributes(),
+                            ],
+                            AppHelper::throwableLog($e, false),
+                        ),
+                        'log\API:CommunicationController:voiceConferenceCallCallback'
+                    );
+                } else {
+                    Yii::error(
+                        array_merge(
+                            [
+                                'post' => $post,
+                                'form' => $form->getAttributes(),
+                            ],
+                            AppHelper::throwableLog($e, false),
+                        ),
+                        'API:CommunicationController:voiceConferenceCallCallback'
+                    );
+                }
                 $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
-                Yii::error($e->getMessage(), 'API:CommunicationController:voiceConferenceCallCallback');
             }
         }
 

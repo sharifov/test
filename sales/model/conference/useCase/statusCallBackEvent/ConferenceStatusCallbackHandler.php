@@ -40,6 +40,8 @@ use yii\helpers\VarDumper;
  */
 class ConferenceStatusCallbackHandler
 {
+    public const DELAY_JOB_FOR_UPDATE_PARTICIPANT_CALL_ID = 5;
+
     private EventDispatcher $eventDispatcher;
     private ConferenceEventLogRepository $eventLogRepository;
     private Handler $saveParticipantHandler;
@@ -323,7 +325,7 @@ class ConferenceStatusCallbackHandler
         if ($call = $this->findAndUpdateCall($form->CallSid, $conference)) {
             $participant->cp_call_id = $call->c_id;
         } else {
-            $delayJob = 5;
+            $delayJob = self::DELAY_JOB_FOR_UPDATE_PARTICIPANT_CALL_ID;
             $job = new UpdateConferenceParticipantCallIdJob($participant->cp_call_sid, $participant->cp_cf_sid, $participant->cp_cf_id);
             $job->delayJob = $delayJob;
             \Yii::$app->queue_job->delay($delayJob)->push($job);

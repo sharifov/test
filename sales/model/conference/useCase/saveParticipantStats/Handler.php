@@ -40,7 +40,11 @@ class Handler
         }
 
         if (!$participants) {
-            \Yii::error('Not found conference participant result. Sid: ' . $command->conferenceSid, 'saveParticipantStats');
+            \Yii::info([
+                'message' => 'During the processing of the final state of the conference, no participants were found',
+                'reason' => 'Possible: Conference StatusCallbackEvent = conference-end received before any conference callback',
+                'conferenceSid' => $command->conferenceSid,
+            ], 'log\saveParticipantStats');
             return;
         }
 
