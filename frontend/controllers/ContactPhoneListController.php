@@ -89,7 +89,7 @@ class ContactPhoneListController extends FController
                     throw new \RuntimeException('ContactPhoneList not found');
                 }
 
-                if (ContactPhoneListService::isExistByDataKey($contactPhoneList->cpl_phone_number, $toggleDataForm->key)) {
+                if (ContactPhoneListService::isExistByDataKeys($contactPhoneList->cpl_phone_number, [$toggleDataForm->key])) {
                     ContactPhoneDataService::removeByCplIdAndKey($contactPhoneList->cpl_id, $toggleDataForm->key);
                     $result['result'] = 'removed';
                     $result['message'] = 'Removed Phone number from ' . ContactPhoneDataHelper::getName($toggleDataForm->key);

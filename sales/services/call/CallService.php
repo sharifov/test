@@ -10,6 +10,8 @@ use common\models\PhoneBlacklist;
 use common\models\UserCallStatus;
 use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\services\ServiceFinder;
@@ -70,6 +72,10 @@ class CallService
         }
 
         $internalPhoneNumber = $data['To'] ?? null;
+
+        if (ContactPhoneListService::isProxy($clientPhoneNumber)) {
+            return;
+        }
 
         if (!$blackPhone = PhoneBlacklist::find()->isExists($clientPhoneNumber)) {
             return;
