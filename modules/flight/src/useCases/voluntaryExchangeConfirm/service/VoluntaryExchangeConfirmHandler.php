@@ -48,7 +48,6 @@ use function Amp\Promise\timeoutWithDefault;
  */
 class VoluntaryExchangeConfirmHandler
 {
-
     private FlightRequest $flightRequest;
     private VoluntaryExchangeConfirmForm $confirmForm;
     private VoluntaryExchangeObjectCollection $objectCollection;
@@ -197,10 +196,7 @@ class VoluntaryExchangeConfirmHandler
                 true
             );
         }
-        $this->case->addEventLog(
-            CaseEventLog::VOLUNTARY_EXCHANGE_CONFIRM,
-            'Voluntary Exchange Confirm process completed successfully'
-        );
+        $this->addCaseEventLog('Voluntary Exchange Confirm process completed successfully', [], CaseEventLog::CATEGORY_INFO);
     }
 
     public function failProcess(string $description): void
@@ -211,6 +207,9 @@ class VoluntaryExchangeConfirmHandler
                 $this->case->offIsAutomate();
             }
             $this->objectCollection->getCasesRepository()->save($this->case);
+
+            $this->addCaseEventLog('Voluntary Exchange Api Confirm processing fail', [], CaseEventLog::CATEGORY_ERROR);
+            $this->addCaseEventLog($description, [], CaseEventLog::CATEGORY_DEBUG);
 
             if ($this->case->cs_user_id) {
                 $linkToCase = Purifier::createCaseShortLink($this->case);
@@ -250,6 +249,7 @@ class VoluntaryExchangeConfirmHandler
                     'Create by Voluntary Exchange API processing'
                 );
             } catch (\Throwable $throwable) {
+                $this->addCaseEventLog('Api Confirm. PaymentRequest not processed', [], CaseEventLog::CATEGORY_WARNING);
                 \Yii::warning(
                     AppHelper::throwableLog($throwable),
                     'VoluntaryExchangeCreateHandler:additionalProcessing:PaymentRequest'
@@ -267,17 +267,28 @@ class VoluntaryExchangeConfirmHandler
 
                 BillingInfoApiVoluntaryService::getOrCreateBillingInfo(
                     $billingInfoForm,
-                    $this->order->getId() ?? null,
+                    $this->order->or_id ?? null,
                     $creditCardId,
                     $paymentMethodId
                 );
             } catch (\Throwable $throwable) {
+                $this->addCaseEventLog('Api Confirm. BillingInfo not processed', [], CaseEventLog::CATEGORY_WARNING);
                 \Yii::warning(
                     AppHelper::throwableLog($throwable),
                     'VoluntaryExchangeCreateHandler:additionalProcessing:Billing'
                 );
             }
         }
+    }
+
+    public function addCaseEventLog(string $description, array $data = [], int $categoryId = CaseEventLog::CATEGORY_INFO): void
+    {
+        $this->case->addEventLog(
+            CaseEventLog::VOLUNTARY_EXCHANGE_CONFIRM,
+            $description,
+            $data,
+            $categoryId
+        );
     }
 
     public function getOriginProductQuote(): ?ProductQuote

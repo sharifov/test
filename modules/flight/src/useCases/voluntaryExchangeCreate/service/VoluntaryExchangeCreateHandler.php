@@ -91,11 +91,14 @@ class VoluntaryExchangeCreateHandler
                 if ($caseSale = CaseSale::findOne(['css_cs_id' => $this->case->cs_id, 'css_sale_id' => $saleData['saleId']])) {
                     $caseSale->delete();
                 }
-                $this->voluntaryExchangeService->createCaseSale($saleData, $this->case);
+                $caseSale = $this->voluntaryExchangeService->createCaseSale($saleData, $this->case);
             } catch (\Throwable $throwable) {
                 $this->caseHandler->caseToPendingManual('Case sale not created');
                 throw $throwable;
             }
+            $this->addCaseEventLog(
+                'Api Create. CaseSale created'
+            );
 
             try {
                 $client = $this->voluntaryExchangeService->getOrCreateClient(
@@ -119,6 +122,10 @@ class VoluntaryExchangeCreateHandler
                 $this->caseHandler->caseToPendingManual('Order not created');
                 throw $throwable;
             }
+            $this->addCaseEventLog(
+                'Api Create. Order created',
+                ['order_gid' => $this->order->or_gid]
+            );
 
             try {
                 $this->originProductQuote = $this->voluntaryExchangeService->createOriginProductQuoteInfrastructure(
@@ -131,6 +138,10 @@ class VoluntaryExchangeCreateHandler
                 $this->caseHandler->caseToPendingManual('OriginProductQuote not created');
                 throw $throwable;
             }
+            $this->addCaseEventLog(
+                'Api Create. OriginProductQuote created',
+                ['gid' => $this->originProductQuote->pq_gid]
+            );
 
             try {
                 $this->caseHandler->setCaseDeadline($this->originProductQuote->flightQuote);
@@ -164,6 +175,10 @@ class VoluntaryExchangeCreateHandler
             $this->caseHandler->caseToPendingManual('ProductQuoteChange not created');
             throw $throwable;
         }
+        $this->addCaseEventLog(
+            'Api Create. Change created',
+            ['gid' => $this->productQuoteChange->pqc_gid]
+        );
 
         try {
             $this->voluntaryExchangeService->declineVoluntaryExchangeQuotes($this->originProductQuote, $this->case);
@@ -171,6 +186,10 @@ class VoluntaryExchangeCreateHandler
             $this->caseHandler->caseToPendingManual('VoluntaryExchangeQuotes not declined');
             throw $throwable;
         }
+        $this->addCaseEventLog(
+            'Api Create. Old quotes declined',
+            ['gid' => $this->productQuoteChange->pqc_gid]
+        );
 
         try {
             if (!$exchangeProductQuoteData = $flightProductQuoteData['exchange'] ?? null) {
@@ -194,6 +213,10 @@ class VoluntaryExchangeCreateHandler
             $this->caseHandler->caseToPendingManual('Could not create new Voluntary Exchange quote');
             throw $throwable;
         }
+        $this->addCaseEventLog(
+            'Api Create. ExchangeQuote created',
+            ['gid' => $this->voluntaryExchangeQuote->pq_gid]
+        );
 
         try {
             if (!ProductQuoteChangeRelationRepository::exist($this->productQuoteChange->pqc_id, $this->voluntaryExchangeQuote->pq_id)) {
@@ -234,6 +257,7 @@ class VoluntaryExchangeCreateHandler
                     'Create by Voluntary Exchange API processing'
                 );
             } catch (\Throwable $throwable) {
+                $this->addCaseEventLog('Api Create. PaymentRequest not processed', [], CaseEventLog::CATEGORY_WARNING);
                 \Yii::warning(
                     AppHelper::throwableLog($throwable),
                     'VoluntaryExchangeCreateHandler:additionalProcessing:PaymentRequest'
@@ -256,6 +280,7 @@ class VoluntaryExchangeCreateHandler
                     $paymentMethodId
                 );
             } catch (\Throwable $throwable) {
+                $this->addCaseEventLog('Api Create. BillingInfo not processed', [], CaseEventLog::CATEGORY_WARNING);
                 \Yii::warning(
                     AppHelper::throwableLog($throwable),
                     'VoluntaryExchangeCreateHandler:additionalProcessing:Billing'
@@ -287,10 +312,7 @@ class VoluntaryExchangeCreateHandler
                 true
             );
         }
-        $this->case->addEventLog(
-            CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
-            'Voluntary Exchange process completed successfully'
-        );
+        $this->addCaseEventLog('Voluntary Exchange Create process completed successfully', [], CaseEventLog::CATEGORY_INFO);
     }
 
     public function failProcess(string $description): void
@@ -301,6 +323,9 @@ class VoluntaryExchangeCreateHandler
                 $this->case->offIsAutomate();
             }
             $this->objectCollection->getCasesRepository()->save($this->case);
+
+            $this->addCaseEventLog('Voluntary Exchange Api Create processing fail', [], CaseEventLog::CATEGORY_ERROR);
+            $this->addCaseEventLog($description, [], CaseEventLog::CATEGORY_DEBUG);
 
             if ($this->case->cs_user_id) {
                 $linkToCase = Purifier::createCaseShortLink($this->case);
@@ -340,5 +365,15 @@ class VoluntaryExchangeCreateHandler
     public function getProductQuoteChange(): ?ProductQuoteChange
     {
         return $this->productQuoteChange;
+    }
+
+    public function addCaseEventLog(string $description, array $data = [], int $categoryId = CaseEventLog::CATEGORY_INFO): void
+    {
+        $this->case->addEventLog(
+            CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+            $description,
+            $data,
+            $categoryId
+        );
     }
 }
