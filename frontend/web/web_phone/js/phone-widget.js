@@ -18,8 +18,7 @@ $(document).ready(function() {
     }
 
     window.tabHistoryLoaded = false;
-    $phoneTabAnchor.on("click", function ($e) {
-        $e.preventDefault();
+    $phoneTabAnchor.on("click", function () {
         $current = "#" + $(this).data("toggle-tab");
 
         $phoneTabAnchor.removeClass("is_active");
@@ -79,8 +78,9 @@ $(document).ready(function() {
             }
 
             PhoneWidgetContacts.requestFullList();
+
         }
-        return false;
+
     });
 
     function initLazyLoadHistory(simpleBar) {
@@ -191,11 +191,9 @@ $(document).ready(function() {
         elem.getContentElement();
     })
 
-    $('.toggle-bar-settings').on('click', function($e) {
-        $e.preventDefault();
+    $('.toggle-bar-settings').on('click', function() {
         $('#bar-settings').slideToggle(150)
         $('#bar-logs').slideUp(150)
-        return false;
     })
 
     $('.additional-bar__close').on('click', function() {

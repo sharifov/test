@@ -81,8 +81,8 @@ use yii\web\View;
 
         <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
       <!-- <span class="phone-widget__title">Calls</span> -->
-      <a href="#" class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
-      <a href="#" class="phone-widget__close header-action-small">
+      <a class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
+      <a class="phone-widget__close header-action-small">
         <!-- <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
@@ -93,14 +93,14 @@ use yii\web\View;
     </div>
     <ul class="phone-widget__header-actions">
       <li>
-        <a href="#" data-toggle-tab="tab-phone" class="is_active" data-call-in-progress="false">
+        <a data-toggle-tab="tab-phone" class="is_active" data-call-in-progress="false">
           <i class="fas fa-phone"></i>
           <span>Call</span>
         </a>
       </li>
         <?php if (Auth::can('PhoneWidget_HistoryTab')) : ?>
             <li>
-                <a href="#" data-toggle-tab="tab-history" data-missed-calls="0" style="margin-right: 15px">
+                <a data-toggle-tab="tab-history" data-missed-calls="0" style="margin-right: 15px">
                     <i class="fas fa-file-invoice"></i>
                     <span>history</span>
                 </a>
@@ -108,7 +108,7 @@ use yii\web\View;
         <?php endif;?>
         <?php if (Auth::can('PhoneWidget_ContactsTab')) : ?>
               <li>
-                <a href="#" data-toggle-tab="tab-contacts" >
+                <a data-toggle-tab="tab-contacts" >
                   <i class="far fa-address-book"></i>
                   <span>Contacts</span>
                 </a>
