@@ -179,8 +179,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                             <td>
 
                         <?php if ($changeItem->isTypeVoluntary()) : ?>
-                            <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
-                            <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE)) : ?>
+                            <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Flight Create Voluntary quote from dump*/ ?>
+                            <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE)) : ?>
                                 <div class="btn-group">
 
                                     <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -188,8 +188,8 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                                     </button>
                                     <div class="dropdown-menu">
 
-                                        <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE, Flight Create Voluntary quote from dump*/ ?>
-                                        <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE)) : ?>
+                                        <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_VOLUNTARY_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Flight Create Voluntary quote from dump*/ ?>
+                                        <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE)) : ?>
                                             <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
                                                 <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Change Quote', null, [
                                                     'data-flight-id' => $flight->getId(),
@@ -229,14 +229,14 @@ $productQuoteAbacDtoAbacDto = new ProductQuoteAbacDto($quote);
                         <?php endif ?>
 
                         <?php if ($changeItem->isTypeReProtection()) : ?>
-                            <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE)) : ?>
+                            <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE)) : ?>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   <i class="fa fa-bars"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                    <?php /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE, Flight Create Reprotection quote from dump*/ ?>
-                                    <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::ACT_FLIGHT_REPROTECTION_QUOTE, ProductQuoteChangeAbacObject::ACTION_CREATE)) : ?>
+                                    <?php /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE, Flight Create Reprotection quote from dump*/ ?>
+                                    <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE)) : ?>
                                         <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
                                             <?= Html::a('<i class="fas fa-plus-circle"></i> Add ReProtection Quote', null, [
                                                 'data-flight-id' => $flight->getId(),

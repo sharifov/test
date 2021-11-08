@@ -19,18 +19,16 @@ use sales\entities\cases\CasesStatus;
 class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'product-quote-change/product-quote-change/';
+    private const NS = 'product/product-quote-change/';
 
     /** ALL PERMISSIONS */
     public const ALL = self::NS . '*';
 
-    /** ACTION PERMISSION */
-    public const ACT_FLIGHT_REPROTECTION_QUOTE  = self::NS . 'act/flight-reprotection-quote';
-    public const ACT_FLIGHT_VOLUNTARY_QUOTE  = self::NS . 'act/flight-voluntary-quote';
+    /** OBJECT PERMISSION */
+    public const OBJ_PRODUCT_QUOTE_CHANGE = self::NS . 'obj/product-quote-change';
 
     public const OBJECT_LIST = [
-        self::ACT_FLIGHT_REPROTECTION_QUOTE => self::ACT_FLIGHT_REPROTECTION_QUOTE,
-        self::ACT_FLIGHT_VOLUNTARY_QUOTE => self::ACT_FLIGHT_VOLUNTARY_QUOTE
+        self::OBJ_PRODUCT_QUOTE_CHANGE => self::OBJ_PRODUCT_QUOTE_CHANGE
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -39,11 +37,15 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
     public const ACTION_CREATE  = 'create';
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
+    public const ACTION_CREATE_RE_PROTECTION_QUOTE = 'createReProtectionQuote';
+    public const ACTION_CREATE_VOLUNTARY_QUOTE = 'createVoluntaryQuote';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ACTION_CREATE],
-        self::ACT_FLIGHT_VOLUNTARY_QUOTE => [self::ACTION_CREATE],
+        self::OBJ_PRODUCT_QUOTE_CHANGE => [
+            self::ACTION_CREATE_RE_PROTECTION_QUOTE,
+            self::ACTION_CREATE_VOLUNTARY_QUOTE,
+        ],
     ];
 
     protected const ATTR_PQC_TYPE = [
@@ -327,18 +329,7 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::ACT_FLIGHT_REPROTECTION_QUOTE    => [
-            self::ATTR_IS_AUTOMATE_PQC,
-            self::ATTR_CASE_OWNER,
-            self::ATTR_IS_COMMON_GROUP,
-            self::ATTR_IS_AUTOMATE_CASE,
-            self::ATTR_PRODUCT_QUOTE_OWNER,
-            self::ATTR_IS_PQ_CHANGEABLE,
-            self::ATTR_HAS_PQR_ACTIVE,
-            self::ATTR_HAS_PQC_ACTIVE,
-            self::ATTR_ORDER_OWNER,
-        ],
-        self::ACT_FLIGHT_VOLUNTARY_QUOTE      => [
+        self::OBJ_PRODUCT_QUOTE_CHANGE      => [
             self::ATTR_IS_AUTOMATE_PQC,
             self::ATTR_CASE_OWNER,
             self::ATTR_IS_COMMON_GROUP,
@@ -395,33 +386,19 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrTypeList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrStatusList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrDecisionList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrCaseCategoryList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrCaseProjectList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrCaseStatusList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrPqStatusList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrProductTypeList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrProductProjectList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrOrderProjectList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrOrderStatusList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrOrderPayStatusList;
-        $attributeList[self::ACT_FLIGHT_REPROTECTION_QUOTE][] = $attrOrderTypeList;
-
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrTypeList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrStatusList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrDecisionList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrCaseCategoryList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrCaseProjectList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrCaseStatusList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrPqStatusList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrProductTypeList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrProductProjectList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrOrderProjectList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrOrderStatusList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrOrderPayStatusList;
-        $attributeList[self::ACT_FLIGHT_VOLUNTARY_QUOTE][] = $attrOrderTypeList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrTypeList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrStatusList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrDecisionList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrCaseCategoryList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrCaseProjectList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrCaseStatusList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrPqStatusList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrProductTypeList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrProductProjectList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrOrderProjectList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrOrderStatusList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrOrderPayStatusList;
+        $attributeList[self::OBJ_PRODUCT_QUOTE_CHANGE][] = $attrOrderTypeList;
 
         return $attributeList;
     }
