@@ -6,7 +6,9 @@ use common\components\hybrid\HybridWhData;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use modules\order\src\entities\order\Order;
+use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
 use modules\product\src\abac\ProductQuoteAbacObject;
+use modules\product\src\abac\ProductQuoteRefundAbacObject;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteObjectRefund\search\ProductQuoteObjectRefundSearch;
 use modules\product\src\entities\productQuoteOptionRefund\search\ProductQuoteOptionRefundSearch;
@@ -76,11 +78,12 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
     {
         $productQuoteId = Yii::$app->request->get('id');
 
-        if (!Yii::$app->abac->can(null, ProductQuoteAbacObject::ACT_VIEW_DETAILS_REFUND_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS)) {
+        $productQuoteRefund = $this->productQuoteRefundRepository->find($productQuoteId);
+        /** @abac $pqrAbacDto, ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_ACCESS_DETAILS, Product quote refund view details */
+        if (!Yii::$app->abac->can(new ProductQuoteRefundAbacDto($productQuoteRefund), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_ACCESS_DETAILS)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
-        $productQuoteRefund = $this->productQuoteRefundRepository->find($productQuoteId);
         $dataProvider = new ActiveDataProvider();
         $dataProvider->setModels([$productQuoteRefund]);
         $dataProvider->pagination = false;
