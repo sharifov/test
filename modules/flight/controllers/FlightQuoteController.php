@@ -882,6 +882,14 @@ class FlightQuoteController extends FController
 
         $flight = $this->flightRepository->find($flightId);
 
+        $productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId]);
+
+        /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Act Flight Create Voluntary quote*/
+        $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
+        if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action.');
+        }
+
         try {
             if (!$case = Cases::findOne(['cs_id' => $caseId])) {
                 throw new \RuntimeException('Case not found');
@@ -892,14 +900,8 @@ class FlightQuoteController extends FController
             if ((!$originProductQuote->flightQuote || !$flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices)) {
                 throw new \RuntimeException('Sorry, Voluntary quote could not be created because originalQuote does not pricing');
             }
-            if (!$productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) {
+            if (!$productQuoteChange) {
                 throw new \RuntimeException('ProductQuoteChange not found');
-            }
-
-            /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Act Flight Create Voluntary quote*/
-            $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
-            if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE)) {
-                throw new ForbiddenHttpException('You do not have access to perform this action.');
             }
 
             $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
