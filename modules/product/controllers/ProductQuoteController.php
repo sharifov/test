@@ -381,7 +381,7 @@ class ProductQuoteController extends FController
                             ], 'info\Webhook::OTA::ProductQuoteController:Request');
 
                             $responseData = \Yii::$app->hybrid->wh(
-                                $this->project->id,
+                                $case->cs_project_id,
                                 HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
                                 ['data' => $whData]
                             );
