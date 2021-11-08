@@ -584,8 +584,8 @@ class FlightQuoteRefundController extends ApiBaseController
      *  }
      *
      * @apiParam {string{0..10}}        bookingId          Booking ID
-     * @apiParam {string{..32}}         refundRequestGid          Refund Request Gid
-     * @apiParam {string{..32}}               orderId                    OTA Order Id
+     * @apiParam {string{..32}}         refundGid          Refund GID
+     * @apiParam {string{..32}}               orderId                    OTA Refund Order Id
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name

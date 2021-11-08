@@ -100,7 +100,7 @@ class SendEmailByCase
                 'projectId' => $project->id,
                 'categoryKey' => $caseCategory->cc_key,
             ], 'SendEmailOnCaseCreationBOJob::getEmailConfigsDto');
-            throw new \RuntimeException('Not Found email configs in project(' . $project->name . ' - ' . $project->id . ') params by case category key (' . $caseCategory->cc_key . ')');
+            throw new \RuntimeException('Not Found email configs in project (' . $project->name . ' - ' . $project->id . ') params by case category key (' . $caseCategory->cc_key . ')');
         }
         return new EmailConfigsDTO($emailConfigs);
     }
