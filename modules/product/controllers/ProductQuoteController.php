@@ -2,6 +2,7 @@
 
 namespace modules\product\controllers;
 
+use common\components\hybrid\HybridWhData;
 use common\components\HybridService;
 use common\models\Email;
 use common\models\EmailTemplateType;
@@ -20,6 +21,7 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -361,19 +363,33 @@ class ProductQuoteController extends FController
                             );
                         }
 
-                        /* TODO::  */
-                        /*try {
-                            $hybridService = Yii::createObject(HybridService::class);
-                            $data = [
-                                'data' => [
+                        try {
+                            $whData = (new HybridWhData())->fillCollectedData(
+                                HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                                [
                                     'booking_id' => $case->cs_order_uid,
-
-                                    'case_gid' => $case->cs_gid,
                                     'product_quote_gid' => $originQuote->pq_gid,
+                                    'exchange_gid' => $productQuoteChange->pqc_gid,
+                                    'exchange_status' => ucfirst(ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id)),
                                 ]
-                            ];
-                            $hybridService->whReprotection($case->cs_project_id, $data);
-                            $case->addEventLog(null, 'Request HybridService sent successfully');
+                            )->getCollectedData();
+
+                            \Yii::info([
+                                'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                                'requestData' => $whData,
+                                'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id),
+                            ], 'info\Webhook::OTA::ProductQuoteController:Request');
+
+                            $responseData = \Yii::$app->hybrid->wh(
+                                $this->project->id,
+                                HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                                ['data' => $whData]
+                            );
+
+                            \Yii::info([
+                                'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                                'responseData' => $responseData,
+                            ], 'info\Webhook::OTA::ProductQuoteController:Response');
                         } catch (\Throwable $throwable) {
                             $errorData = [];
                             $errorData['message'] = 'OTA site is not informed (hybridService->whReprotection)';
@@ -381,9 +397,8 @@ class ProductQuoteController extends FController
                             $errorData['case_id'] = $case->cs_id;
                             $errorData['throwable'] = AppHelper::throwableLog($throwable);
 
-                            Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                            Yii::warning($errorData, 'ProductQuoteController:actionVoluntaryQuoteSendEmail:Throwable');
                         }
-                        */
 
                         return '<script>$("#modal-md").modal("hide"); 
                             createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success");
