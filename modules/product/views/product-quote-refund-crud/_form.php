@@ -37,6 +37,9 @@ use yii\widgets\ActiveForm;
       <?= $form->field($model, 'pqr_refund_amount')->input('number', [
           'step' => 'any'
       ]) ?>
+      <?= $form->field($model, 'pqr_refund_cost')->input('number', [
+          'step' => 'any'
+      ]) ?>
 
       <?= $form->field($model, 'pqr_status_id')->dropDownList(ProductQuoteRefundStatus::getList(), [
           'prompt' => '---'
@@ -70,6 +73,10 @@ use yii\widgets\ActiveForm;
         ]) ?>
 
         <?= $form->field($model, 'pqr_client_refund_amount')->input('number', [
+            'step' => 'any'
+        ]) ?>
+
+        <?= $form->field($model, 'pqr_client_refund_cost')->input('number', [
             'step' => 'any'
         ]) ?>
 

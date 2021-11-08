@@ -55,6 +55,8 @@ use yii\helpers\Html;
  * @property string $pqr_cid [varchar(32)]
  * @property string $pqr_client_penalty_amount [decimal(8,2)]
  * @property string $pqr_client_processing_fee_amount [decimal(8,2)]
+ * @property string $pqr_refund_cost [decimal(8,2)]
+ * @property string $pqr_client_refund_cost [decimal(8,2)]
  */
 class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
 {
@@ -251,7 +253,10 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         return [
             [['pqr_order_refund_id', 'pqr_product_quote_id'], 'required'],
             [['pqr_order_refund_id', 'pqr_product_quote_id', 'pqr_status_id', 'pqr_created_user_id', 'pqr_updated_user_id'], 'integer'],
-            [['pqr_selling_price', 'pqr_penalty_amount', 'pqr_processing_fee_amount', 'pqr_refund_amount', 'pqr_client_currency_rate', 'pqr_client_selling_price', 'pqr_client_refund_amount', 'pqr_client_penalty_amount', 'pqr_client_processing_fee_amount'], 'number', 'min' => 0, 'max' => 999999.99],
+            [['pqr_selling_price', 'pqr_penalty_amount', 'pqr_processing_fee_amount', 'pqr_refund_amount',
+                'pqr_client_currency_rate', 'pqr_client_selling_price', 'pqr_client_refund_amount',
+                'pqr_client_penalty_amount', 'pqr_client_processing_fee_amount', 'pqr_refund_cost',
+                'pqr_client_refund_cost'], 'number', 'min' => 0, 'max' => 999999.99],
             [['pqr_created_dt', 'pqr_updated_dt'], 'safe'],
             [['pqr_client_currency'], 'string', 'max' => 3],
             [['pqr_client_currency'], 'default', 'value' => null],
@@ -303,6 +308,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
             'pqr_type_id' => 'Type',
             'pqr_client_penalty_amount' => 'Client Penalty Amount',
             'pqr_client_processing_fee_amount' => 'Client Processing Fee',
+            'pqr_refund_cost' => 'Refund Cost',
+            'pqr_client_refund_cost' => 'Client Refund Cost',
         ];
     }
 
@@ -421,6 +428,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
             'clientCurrencyRate' => 'pqr_client_currency_rate',
             'clientSellingPrice' => 'pqr_client_selling_price',
             'clientRefundAmount' => 'pqr_client_refund_amount',
+            'refundCost' => 'pqr_refund_cost',
+            'clientRefundCost' => 'pqr_client_refund_cost',
             'createdDt' => 'pqr_created_dt',
             'updatedDt' => 'pqr_updated_dt',
         ];

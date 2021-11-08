@@ -44,6 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqr_penalty_amount',
             'pqr_processing_fee_amount',
             'pqr_refund_amount',
+            'pqr_refund_cost',
             [
                 'attribute' => 'pqr_status_id',
                 'value' => static function (ProductQuoteRefund $model) {
@@ -69,6 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqr_client_penalty_amount',
             'pqr_client_processing_fee_amount',
             'pqr_client_refund_amount',
+            'pqr_client_refund_cost',
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'pqr_created_user_id',
