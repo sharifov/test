@@ -51,7 +51,7 @@ class ApiDocData
     // ==================================== flight/voluntary-exchange/update =========================================
 
     /**
-     * @api {post} flight/schedule-change WebHook Hybrid OTA ( flight/voluntary-exchange/update )
+     * @api {post} flight/voluntary-exchange/update WebHook Hybrid OTA ( flight/voluntary-exchange/update )
      * @apiVersion 0.1.0
      * @apiName Flight voluntary-exchange update
      * @apiGroup WebHooks Outgoing
@@ -69,7 +69,7 @@ class ApiDocData
      * @apiParam {string{8}}               data.booking_id              Booking Id
      * @apiParam {string{32}}              data.product_quote_gid       Product quote GID
      * @apiParam {string{32}}              data.exchange_gid            Exchange GID
-     * @apiParam {string{32}=Pending,Processing,Exchanged,Canceled}     data.exchange_status         Exchange Client status
+     * @apiParam {string{32}=Pending,Exchanged,Canceled}     data.exchange_status         Exchange Client status
      *
      * @apiParamExample {json} Request message Example:
      *  {
@@ -89,7 +89,7 @@ class ApiDocData
     // ==================================== flight/voluntary-refund/update ===========================================
 
     /**
-     * @api {post} flight/schedule-change WebHook Hybrid OTA ( flight/voluntary-refund/update )
+     * @api {post} flight/voluntary-refund/update WebHook Hybrid OTA ( flight/voluntary-refund/update )
      * @apiVersion 0.1.0
      * @apiName Flight voluntary-refund update
      * @apiGroup WebHooks Outgoing
@@ -108,7 +108,7 @@ class ApiDocData
      * @apiParam {string{32}}              data.product_quote_gid       Product quote GID
      * @apiParam {string{32}}              data.refund_gid            Refund GID
      * @apiParam {string{32}}              data.refund_order_id         Refund Client status
-     * @apiParam {string{32}=processing,canceled}              data.refund_status         Refund Client status
+     * @apiParam {string{32}=Pending,Processing,Refunded,Canceled}              data.refund_status         Refund Client status
      *
      * @apiParamExample {json} Request message Example:
      *  {
@@ -117,8 +117,8 @@ class ApiDocData
      *          "booking_id": "C4RB44",
      *          "product_quote_gid": "4569a42c916c811e2033142d8ae54179"
      *          "refund_gid": "1569a42c916c811e2033142d8ae54176"
-     *          "refund_order_id": "1569a42c916c811e2033142d8ae54176"
-     *          "refund_status": "processing"
+     *          "refund_order_id": "XXXXXXXXX"
+     *          "refund_status": "Processing"
      *      }
      *  }
      *
