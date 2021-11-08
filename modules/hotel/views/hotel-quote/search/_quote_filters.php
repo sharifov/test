@@ -78,13 +78,15 @@ use yii\bootstrap4\Html;
 </script>
 
 
-<?= $form->field($filtersForm, 'selectedCategories')->checkboxList($filtersForm->categories, [
-    'item' => function ($index, $label, $name, $checked, $value) {
-        $checked = $checked ? 'checked' : '';
-        return "<div><label><input type='checkbox' {$checked} name='{$name}' value='{$value}'>&nbsp;{$label}</label></div>";
-    }
-])
-                                                                        ?>
+<?= $form->field($filtersForm, 'selectedCategories')->checkboxList(
+    $filtersForm->categories,
+    [
+        'item' => function ($index, $label, $name, $checked, $value) {
+            $checked = $checked ? 'checked' : '';
+            return "<div><label><input type='checkbox' {$checked} name='{$name}' value='{$value}'>&nbsp;{$label}</label></div>";
+        }
+    ]
+) ?>
 
 <?= $form->field($filtersForm, 'selectedBoardsTypes')->checkboxList($filtersForm->boardsTypes, [
     'item' => function ($index, $label, $name, $checked, $value) {
