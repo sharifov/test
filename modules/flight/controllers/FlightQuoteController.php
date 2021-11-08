@@ -209,7 +209,8 @@ class FlightQuoteController extends FController
                 'allowActions' => [
                     'ajax-quote-details',
                     'create-voluntary-quote-refund',
-                    'create-voluntary-quote'
+                    'create-voluntary-quote',
+                    'add-change'
                 ]
             ]
         ];
