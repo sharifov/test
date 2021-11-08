@@ -77,9 +77,9 @@ class BoController extends BaseController
     }
 
     /**
-     * @api {post} /v2/bo/wh  WebHook from BackOffice
+     * @api {post} /v2/bo/wh  WebHook Reprotection Update (BackOffice)
      * @apiVersion 0.1.0
-     * @apiName BackOffice WebHook
+     * @apiName BackOffice WebHook Reprotection Update
      * @apiGroup WebHooks Incoming
      * @apiPermission Authorized User
      *
@@ -90,11 +90,11 @@ class BoController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{30}=reprotection_update,flight_refund,voluntary_flight_refund,flight_exchange}           type                          Type action
-     * @apiParam {array[]}              data                          Any Data from BO
+     * @apiParam {string{30}=reprotection_update}           type                          Message Type action
+     * @apiParam {array[]}              data                          Any Data
      * @apiParam {string{8}}               data.booking_id               Booking Id
-     * @apiParam {string{20}}               [data.project_key]            Project Key Ex: (ovago, hop2)
-     * @apiParam {string{32}}               [data.reprotection_quote_gid]   Reprotection quote gid
+     * @apiParam {string{20}}               data.project_key            Project Key ("ovago", "hop2")
+     * @apiParam {string{32}}               data.reprotection_quote_gid   Reprotection quote GID
      *
      * @apiParamExample {json} Request-Example Reprotection Update:
      *  {
@@ -106,6 +106,47 @@ class BoController extends BaseController
      *      }
      *  }
      *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *     "status": 200,
+     *     "message": "OK",
+     *      "data": {
+     *          "success": true
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *      "status": 400,
+     *      "message": "Load data error",
+     *      "errors": [
+     *          "Not found data on POST request"
+     *       ]
+     * }
+     */
+
+    /**
+     * @api {post} /v2/bo/wh  WebHook Flight Refund (BackOffice)
+     * @apiVersion 0.1.0
+     * @apiName BackOffice WebHook Flight Refund
+     * @apiGroup WebHooks Incoming
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{30}=flight_refund}           type                          Message Type action
+     * @apiParam {array[]}              data                          Any Data
+     * @apiParam {string{8}}               data.booking_id               Booking Id
+     *
+     *
      * @apiParamExample {json} Request-Example Flight Refund:
      *  {
      *      "type": "flight_refund",
@@ -114,6 +155,51 @@ class BoController extends BaseController
      *      }
      *  }
      *
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *     "status": 200,
+     *     "message": "OK",
+     *      "data": {
+     *          "success": true
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *      "status": 400,
+     *      "message": "Load data error",
+     *      "errors": [
+     *          "Not found data on POST request"
+     *       ]
+     * }
+     */
+
+    /**
+     * @api {post} /v2/bo/wh  WebHook Voluntary Flight Refund (BackOffice)
+     * @apiVersion 0.1.0
+     * @apiName BackOffice WebHook Voluntary Flight Refund
+     * @apiGroup WebHooks Incoming
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{30}=voluntary_flight_refund}           type                          Message Type action
+     * @apiParam {array[]}              data                          Any Data
+     * @apiParam {string{8}}               data.booking_id               Booking Id
+     * @apiParam {string{20}}               data.project_key            Project Key ("ovago", "hop2")
+     * @apiParam {string{20}=Processing,Refunded,Canceled}               data.status               Refund status
+     * @apiParam {string{32}}               data.orderId              Refund Order Id
+     *
+     *
      * @apiParamExample {json} Request-Example Voluntary Flight Refund:
      *  {
      *      "type": "voluntary_flight_refund",
@@ -121,9 +207,53 @@ class BoController extends BaseController
      *          "booking_id": "C4RB44",
      *          "project_key": "ovago",
      *          "status": "Refunded", // allowed values Processing, Refunded, Canceled
-     *          "orderId": "RT-SHCN37D" // OTA order id
+     *          "orderId": "RT-SHCN37D" // OTA Refund order id
      *      }
      *  }
+     *
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *     "status": 200,
+     *     "message": "OK",
+     *      "data": {
+     *          "success": true
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *      "status": 400,
+     *      "message": "Load data error",
+     *      "errors": [
+     *          "Not found data on POST request"
+     *       ]
+     * }
+     */
+
+    /**
+     * @api {post} /v2/bo/wh  WebHook Voluntary Flight Exchange (BackOffice)
+     * @apiVersion 0.1.0
+     * @apiName BackOffice WebHook Voluntary Flight Exchange
+     * @apiGroup WebHooks Incoming
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{30}=flight_exchange}           type                          Type action
+     * @apiParam {array[]}              data                          Any Data
+     * @apiParam {string{8}}               data.booking_id               Booking Id
+     * @apiParam {string{20}}               data.project_key            Project Key (ovago, hop2)
+     * @apiParam {string{20}=Processing,Exchanged,Canceled}               data.status   Exchange status
+     *
      *
      * @apiParamExample {json} Request-Example Voluntary Flight Exchange:
      *  {
@@ -156,6 +286,7 @@ class BoController extends BaseController
      *       ]
      * }
      */
+
 
     public function actionWh()
     {
