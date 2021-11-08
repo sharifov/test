@@ -108,7 +108,7 @@ class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
             if ($case) {
                 $case->awaiting(null, 'Product Quote Refund initiated');
                 $this->caseRepository->save($case);
-                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund set to processing');
+                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_CONFIRM, 'Refund set to processing', null, CaseEventLog::CATEGORY_INFO);
 
                 if ($case->cs_user_id) {
                     Notifications::createAndPublish(
@@ -141,7 +141,7 @@ class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
         ?\Throwable $e
     ): void {
         if ($case) {
-            $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, $description);
+            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_CONFIRM, $description, null, CaseEventLog::CATEGORY_ERROR);
             $case->offIsAutomate()->error(null, $description);
             $this->caseRepository->save($case);
         }

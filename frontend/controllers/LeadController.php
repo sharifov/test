@@ -1426,6 +1426,8 @@ class LeadController extends FController
                                 $user->getId()
                             );
                         }
+                        $result['success'] = true;
+                        $result['error'] = '';
                     } else {
                         $result ['error'] = 'Access Denied (ABAC)!';
                     }

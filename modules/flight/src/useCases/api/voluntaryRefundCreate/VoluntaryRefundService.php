@@ -164,7 +164,8 @@ class VoluntaryRefundService
             $case->addEventLog(
                 CaseEventLog::VOLUNTARY_REFUND_CREATE,
                 'Case Sale created by Data',
-                ['case_id' => $case->cs_id]
+                ['case_id' => $case->cs_id],
+                CaseEventLog::CATEGORY_INFO
             );
         } catch (\Throwable $e) {
             $this->errorHandler($case, null, 'Case Sale creation failed', $e);
@@ -198,7 +199,8 @@ class VoluntaryRefundService
                 $case->addEventLog(
                     CaseEventLog::VOLUNTARY_REFUND_CREATE,
                     'Order related with case GID: ' . $order->or_gid,
-                    ['order_gid' => $order->or_gid]
+                    ['order_gid' => $order->or_gid],
+                    CaseEventLog::CATEGORY_INFO
                 );
             }
 
@@ -408,7 +410,8 @@ class VoluntaryRefundService
         $case->addEventLog(
             $caseEventLogType,
             'START: Request getSaleFrom BackOffice, BookingID: ' . $bookingId,
-            ['fr_booking_id' => $bookingId]
+            ['fr_booking_id' => $bookingId],
+            CaseEventLog::CATEGORY_INFO
         );
         $saleSearch = $this->casesSaleService->getSaleData($bookingId);
         if (empty($saleSearch['saleId'])) {
@@ -417,10 +420,11 @@ class VoluntaryRefundService
         $case->addEventLog(
             $caseEventLogType,
             'START: Request DetailRequestToBackOffice SaleID: ' . $saleSearch['saleId'],
-            ['sale_id' => $saleSearch['saleId']]
+            ['sale_id' => $saleSearch['saleId']],
+            CaseEventLog::CATEGORY_INFO
         );
         $saleData = $this->casesSaleService->detailRequestToBackOffice($saleSearch['saleId'], 0, 120, 1);
-        $case->addEventLog($caseEventLogType, 'Responses from BackOffice accepted successfully');
+        $case->addEventLog($caseEventLogType, 'Responses from BackOffice accepted successfully', null, CaseEventLog::CATEGORY_INFO);
 
         return $saleData;
     }
@@ -455,7 +459,8 @@ class VoluntaryRefundService
         $case->addEventLog(
             CaseEventLog::VOLUNTARY_REFUND_CREATE,
             'Order created GID: ' . $order->or_gid,
-            ['order_gid' => $order->or_gid]
+            ['order_gid' => $order->or_gid],
+            CaseEventLog::CATEGORY_INFO
         );
 
         return $order;
@@ -471,7 +476,8 @@ class VoluntaryRefundService
         $case->addEventLog(
             CaseEventLog::VOLUNTARY_REFUND_CREATE,
             'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
-            ['pq_gid' => $originProductQuote->pq_gid]
+            ['pq_gid' => $originProductQuote->pq_gid],
+            CaseEventLog::CATEGORY_INFO
         );
         return $originProductQuote;
     }
@@ -491,7 +497,7 @@ class VoluntaryRefundService
         ?\Throwable $exception
     ): void {
         if ($case) {
-            $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, $description);
+            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_CREATE, $description, null, CaseEventLog::CATEGORY_ERROR);
             $case->offIsAutomate()->error(null, $description);
             $this->casesRepository->save($case);
         }
