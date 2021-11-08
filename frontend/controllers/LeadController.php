@@ -1422,6 +1422,8 @@ class LeadController extends FController
                             );
                             (new LeadUserConversionRepository())->save($leadUserConversion);
                         }
+                        $result['success'] = true;
+                        $result['error'] = '';
                     } else {
                         $result ['error'] = 'Access Denied (ABAC)!';
                     }
