@@ -38,5 +38,5 @@ RUN pecl install -o -f redis \
 RUN runtimeRequirements="libgeoip-dev" \
     && apt-get update && apt-get install -y ${runtimeRequirements} \
     && pecl install geoip-1.1.1 \
-    && echo "extension=geoip.so" > /usr/local/etc/php/conf.d/ext-geoip.ini \
+    && docker-php-ext-enable geoip \
     && rm -rf /var/lib/apt/lists/*

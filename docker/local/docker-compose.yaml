@@ -15,6 +15,105 @@ services:
     depends_on:
       - php-fpm
 
+  redis:
+    build:
+      context: ./redis
+      args:
+        REDIS_VERSION: ${REDIS_VERSION}
+    restart: always
+    networks:
+      - default
+    ports:
+      - ${REDIS_HOST_PORT}:6379
+
+  mysql:
+    build:
+      context: ./mysql
+      args:
+        MYSQL_VERSION: ${MYSQL_VERSION}
+    volumes:
+      - ${MYSQL_HOST_PATH_DB}:/var/lib/mysql
+      - ${MYSQL_HOST_PATH_DUMP}:/docker-entrypoint-initdb.d
+    ports:
+      - ${MYSQL_HOST_PORT}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    restart: always
+    networks:
+      - default
+
+  psql:
+    build:
+      context: ./psql
+      args:
+        POSTGRES_VERSION: ${POSTGRES_VERSION}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ${POSTGRES_HOST_PATH_DB}:/var/lib/postgresql/data
+#      - ${POSTGRES_HOST_PATH_DUMP}:/dump
+#      - ${POSTGRES_HOST_PATH_DUMP}:/docker-entrypoint-initdb.d
+    ports:
+      - ${POSTGRES_HOST_PORT}:5432
+    restart: always
+    networks:
+      - default
+
+  centrifugo:
+    image: centrifugo/centrifugo:${CENTRIFUGO_VERSION}
+    volumes:
+      - ./../../../docker/centrifugo/config.json:/centrifugo/config.json
+    command: centrifugo -c config.json
+    ports:
+      - ${CENTRIFUGO_HOST_PORT}:8000
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    networks:
+      default:
+        aliases:
+          - centrifugo
+    restart: always
+
+  beanstalkd:
+    build:
+      context: ./beanstalkd
+      args:
+        version: ${BEANSTALKD_VERSION}
+    restart: always
+    ports:
+      - ${BEANSTALKD_PORT}
+    networks:
+      - default
+
+  web:
+    build:
+      context: ./web
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+     - php-fpm
+     - mysql
+     - psql
+     - redis
+     - beanstalkd
+     - centrifugo
+     - queue
+    restart: always
+    environment:
+      PHP_IDE_CONFIG: "serverName=SalesWebServer"
+    networks:
+      - default
+      - sales-communication
+
   nginx:
     build:
       context: ./nginx
@@ -47,87 +146,6 @@ services:
       sales-communication:
         aliases:
           - ${HOST_API}
-  web:
-    build:
-      context: ./web
-      args:
-        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
-    volumes:
-      - ./../../:${APP_ROOT}/www
-    depends_on:
-     - php-fpm
-     - mysql
-     - psql
-     - redis
-     - beanstalkd
-     - centrifugo
-     - queue
-    restart: always
-    environment:
-      PHP_IDE_CONFIG: "serverName=SalesWebServer"
-    networks:
-      - default
-      - sales-communication
-
-  redis:
-    build:
-      context: ./redis
-      args:
-        REDIS_VERSION: ${REDIS_VERSION}
-    restart: always
-    networks:
-      - default
-    ports:
-      - ${REDIS_PORT}
-
-  mysql:
-    build:
-      context: ./mysql
-      args:
-        MYSQL_VERSION: ${MYSQL_VERSION}
-    volumes:
-      - ./../../../mysql-docker/db:/var/lib/mysql
-      - ./../../../mysql-docker/dump:/dump
-    ports:
-      - ${MYSQL_HOST_PORT}:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    restart: always
-    networks:
-      - default
-
-  psql:
-    build:
-      context: ./psql
-      args:
-        POSTGRES_VERSION: ${POSTGRES_VERSION}
-    environment:
-      POSTGRES_PASSWORD: PSQL_PASSWORD
-    volumes:
-      - ./../../../psql-docker/db:/var/lib/postgresql/data
-      - ./../../../psql-docker/dump:/dump
-    ports:
-      - ${PSQL_HOST_PORT}:5432
-    restart: always
-    networks:
-      - default
-
-  centrifugo:
-    image: centrifugo/centrifugo:${CENTRIFUGO_VERSION}
-    volumes:
-      - ./../../../centrifugo-docker/config.json:/centrifugo/config.json
-    command: centrifugo -c config.json
-    ports:
-      - ${CENTRIFUGO_HOST_PORT}:8000
-    ulimits:
-      nofile:
-        soft: 65535
-        hard: 65535
-    networks:
-      default:
-        aliases:
-          - centrifugo
-    restart: always
 
   ws:
     build:
@@ -144,17 +162,6 @@ services:
       - beanstalkd
     restart: always
     command: ./yii websocket-server/start
-    networks:
-      - default
-
-  beanstalkd:
-    build:
-      context: ./beanstalkd
-      args:
-        version: ${BEANSTALKD_VERSION}
-    restart: always
-    ports:
-      - ${BEANSTALKD_PORT}
     networks:
       - default
 
