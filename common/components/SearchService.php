@@ -268,7 +268,7 @@ class SearchService
         $toDateTime = new \DateTime($to);
         $interval = $toDateTime->diff($fromDateTime);
 
-        return $interval->format('%hh %im');
+        return $interval->format('%dd %hh %im');
     }
 
     protected static function getType($type)
