@@ -523,4 +523,13 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
     {
         return (new ProductQuoteRefundSerializer($this))->getData();
     }
+
+    public function calculateSystemPrices(): void
+    {
+        $this->pqr_selling_price = CurrencyHelper::convertToBaseCurrency($this->pqr_client_selling_price, $this->clientCurrency->cur_base_rate);
+        $this->pqr_client_refund_cost = CurrencyHelper::convertToBaseCurrency($this->pqr_client_refund_cost, $this->clientCurrency->cur_base_rate);
+        $this->pqr_client_processing_fee_amount = CurrencyHelper::convertToBaseCurrency($this->pqr_client_processing_fee_amount, $this->clientCurrency->cur_base_rate);
+        $this->pqr_client_penalty_amount = CurrencyHelper::convertToBaseCurrency($this->pqr_client_penalty_amount, $this->clientCurrency->cur_base_rate);
+        $this->pqr_client_refund_amount = CurrencyHelper::convertToBaseCurrency($this->pqr_client_refund_amount, $this->clientCurrency->cur_base_rate);
+    }
 }

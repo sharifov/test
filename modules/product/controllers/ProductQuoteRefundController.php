@@ -5,7 +5,10 @@ namespace modules\product\controllers;
 use common\components\hybrid\HybridWhData;
 use common\models\Email;
 use common\models\EmailTemplateType;
+use modules\flight\src\useCases\voluntaryRefund\manualUpdate\VoluntaryRefundUpdateForm;
+use modules\flight\src\useCases\voluntaryRefund\VoluntaryRefundService;
 use modules\order\src\entities\order\Order;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
 use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
 use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\abac\ProductQuoteRefundAbacObject;
@@ -18,6 +21,7 @@ use modules\product\src\forms\VoluntaryRefundPreviewEmailForm;
 use modules\product\src\forms\VoluntaryRefundSendEmailForm;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
+use sales\forms\CompositeFormHelper;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ProjectHashGenerator;
 use sales\repositories\NotFoundException;
@@ -36,12 +40,14 @@ use yii\web\ForbiddenHttpException;
  * @property-read ProductQuoteRefundRepository $productQuoteRefundRepository
  * @property-read ProductQuoteRepository $productQuoteRepository
  * @property-read CasesCommunicationService $casesCommunicationService
+ * @property-read VoluntaryRefundService $voluntaryRefundService
  */
 class ProductQuoteRefundController extends \frontend\controllers\FController
 {
     private ProductQuoteRefundRepository $productQuoteRefundRepository;
     private ProductQuoteRepository $productQuoteRepository;
     private CasesCommunicationService $casesCommunicationService;
+    private VoluntaryRefundService $voluntaryRefundService;
 
     public function __construct(
         $id,
@@ -49,12 +55,14 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
         ProductQuoteRefundRepository $productQuoteRefundRepository,
         ProductQuoteRepository $productQuoteRepository,
         CasesCommunicationService $casesCommunicationService,
+        VoluntaryRefundService $voluntaryRefundService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->voluntaryRefundService = $voluntaryRefundService;
     }
 
     /**
@@ -67,7 +75,8 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 'allowActions' => [
                     'ajax-view-details',
                     'preview-refund-offer-email',
-                    'voluntary-refund-send-email'
+                    'voluntary-refund-send-email',
+                    'edit-refund'
                 ]
             ]
         ];
@@ -288,5 +297,55 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
         return $this->renderAjax('partial/_voluntary_refund_preview_email', [
             'previewEmailForm' => $previewEmailForm
         ]);
+    }
+
+    public function actionEditRefund()
+    {
+        $productQuoteRefundId = Yii::$app->request->get('product-quote-refund-id');
+
+        $productQuoteRefund = $this->productQuoteRefundRepository->find($productQuoteRefundId);
+
+        /** @abac new ProductQuoteRefundAbacDto($model), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_UPDATE, Update Voluntary Quote Refund */
+        if (!Yii::$app->abac->can(new ProductQuoteRefundAbacDto($productQuoteRefund), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        if (Yii::$app->request->isPjax) {
+            $form = new VoluntaryRefundUpdateForm($productQuoteRefund);
+            $data = CompositeFormHelper::prepareDataForMultiInput(
+                Yii::$app->request->post(),
+                'VoluntaryRefundUpdateForm',
+                ['tickets' => 'TicketForm']
+            );
+            echo '<pre>';
+            if ($form->load($data['post']) && $form->validate()) {
+                try {
+                    $this->voluntaryRefundService->updateManual($productQuoteRefund, $form);
+
+                    return "<script>$('#modal-lg').modal('hide');createNotify('Success', 'Refund updated', 'success');pjaxReload({container: '#pjax-case-orders'})</script>";
+                } catch (NotFoundException | \RuntimeException | \DomainException $e) {
+                    $form->addError('general', $e->getMessage());
+                } catch (\Throwable $e) {
+                    $form->addError('general', 'Server error, check system logs');
+                    Yii::error(AppHelper::throwableLog($e, true), 'ProductQuoteRefundController::actionEditRefund::Throwable');
+                }
+            }
+            return $this->renderAjax('partial/_voluntary_refund_update', [
+                'form' => $form,
+                'message' => '',
+                'errors' => []
+            ]);
+        }
+
+        if (Yii::$app->request->isAjax) {
+            $form = new VoluntaryRefundUpdateForm($productQuoteRefund);
+
+            return $this->renderAjax('partial/_voluntary_refund_update', [
+                'form' => $form,
+                'message' => '',
+                'errors' => []
+            ]);
+        }
+        throw new BadRequestHttpException('Method not allowed');
     }
 }
