@@ -272,6 +272,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                             <th style="width: 50px" title="Recommended">Rec</th>
                                           <th>Status</th>
                                           <th style="width: 180px">Created</th>
+                                          <th>Client Price</th>
                                           <th>Owner</th>
                                           <th style="width: 60px;">Action</th>
                                         </tr>
@@ -289,8 +290,13 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                               <td><?= ProductQuoteStatus::asFormat($changeQuote->pq_status_id)?></td>
                                               <td><small><?=$changeQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeQuote->pq_created_dt)) : '-'?></small></td>
                                               <td>
+                                                <span style="white-space: nowrap;">
+                                                    <?php echo $changeQuote->pq_client_price ?> <?php echo $changeQuote->pq_client_currency ?? $changeQuote->pq_origin_currency ?>
+                                                </span>
+                                              </td>
+                                              <td>
                                                   <?php if ($changeQuote->pqOwnerUser) : ?>
-                                                    <i class="fa fa-user"></i> <?= $changeQuote->pqOwnerUser->username ?>
+                                                    <i class="fa fa-user" title="<?= $changeQuote->pqOwnerUser->username ?>"></i>
                                                   <?php endif; ?>
                                               </td>
                                               <td>
