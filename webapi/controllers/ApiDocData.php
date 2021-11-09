@@ -39,7 +39,7 @@ class ApiDocData
      * @apiVersion 0.1.0
      * @apiName Flight schedule-change
      * @apiGroup WebHooks Outgoing
-     * @apiPermission write (#App:BasicAuth)
+     * @apiPermission Basic Auth (#App:BasicAuth)
      *
      * @apiParam {string{30}}           type                          Type of message
      * @apiParam {array[]}              data
@@ -48,8 +48,6 @@ class ApiDocData
      * @apiParam {string{32}}               data.case_gid                 Case GID
      * @apiParam {string{32}}               data.product_quote_gid        Product quote GID
      *
-     *
-     * write (#App:BasicAuth)
      *
      * @apiParamExample {json} Request message Example:
      *  {
