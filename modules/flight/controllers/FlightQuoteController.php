@@ -210,7 +210,8 @@ class FlightQuoteController extends FController
                     'ajax-quote-details',
                     'create-voluntary-quote-refund',
                     'create-voluntary-quote',
-                    'add-change'
+                    'add-change',
+                    'refresh-voluntary-price'
                 ]
             ]
         ];
