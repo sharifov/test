@@ -10,6 +10,28 @@ class ApiDocData
 {
 
 
+
+
+    // ==================================== Authorization =================================================
+    /**
+     * @api {post} BasicAuth Authorization User (Basic)
+     * @apiVersion 0.1.0
+     * @apiName BasicAuth
+     * @apiGroup App
+     * @apiPermission Basic Auth
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeader {string} Accept-Encoding Accept-Encoding: gzip, deflate
+     *
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     */
+
+
+
     // ==================================== flight/schedule-change =================================================
 
     /**
@@ -17,14 +39,7 @@ class ApiDocData
      * @apiVersion 0.1.0
      * @apiName Flight schedule-change
      * @apiGroup WebHooks Outgoing
-     * @apiPermission Authorized User
-     *
-     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
-     * @apiHeaderExample {json} Header-Example:
-     *  {
-     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
-     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
-     *  }
+     * @apiPermission write (#App:BasicAuth)
      *
      * @apiParam {string{30}}           type                          Type of message
      * @apiParam {array[]}              data
@@ -32,6 +47,9 @@ class ApiDocData
      * @apiParam {string{32}}               data.reprotection_quote_gid   Reprotection quote GID
      * @apiParam {string{32}}               data.case_gid                 Case GID
      * @apiParam {string{32}}               data.product_quote_gid        Product quote GID
+     *
+     *
+     * write (#App:BasicAuth)
      *
      * @apiParamExample {json} Request message Example:
      *  {
@@ -55,14 +73,7 @@ class ApiDocData
      * @apiVersion 0.1.0
      * @apiName Flight voluntary-exchange update
      * @apiGroup WebHooks Outgoing
-     * @apiPermission Authorized Userhttps://translate.google.com/?hl=ru&tab=TT
-     *
-     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
-     * @apiHeaderExample {json} Header-Example:
-     *  {
-     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
-     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
-     *  }
+     * @apiPermission Basic Auth
      *
      * @apiParam {string{30}}           type                          Type of message
      * @apiParam {array[]}              data
@@ -93,14 +104,7 @@ class ApiDocData
      * @apiVersion 0.1.0
      * @apiName Flight voluntary-refund update
      * @apiGroup WebHooks Outgoing
-     * @apiPermission Authorized User
-     *
-     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
-     * @apiHeaderExample {json} Header-Example:
-     *  {
-     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
-     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
-     *  }
+     * @apiPermission Basic Auth
      *
      * @apiParam {string{30}}           type                          Type of message
      * @apiParam {array[]}              data
