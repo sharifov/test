@@ -460,15 +460,17 @@ class FlightQuoteController extends FController
 
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
 
-        /** @abac new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
-        if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
-            throw new ForbiddenHttpException('Access denied');
-        }
-
         $lead = $productQuote->pqProduct->prLead;
 
         if ($lead && $lead->isInTrash() && Auth::user()->isAgent()) {
             throw new ForbiddenHttpException('Access Denied for Agent');
+        }
+
+        if (!$lead) {
+            /** @abac new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
+            if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
+                throw new ForbiddenHttpException('Access denied');
+            }
         }
 
         return $this->renderPartial('partial/_quote_view_details', [
