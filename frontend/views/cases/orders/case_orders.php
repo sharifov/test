@@ -538,6 +538,33 @@ $js = <<<JS
         });
     });
     
+    $(document).on('click', '.btn-edit-voluntary-refund-quote', function(e) {
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let modal = $('#modal-lg');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Edit voluntary refund');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            console.log(xhr);
+            if (status === 'error') {
+                if (xhr.status !== 403) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }                
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
+    
 
     $(document).on('click', '.btn_create_change', function(e) {
         e.preventDefault();

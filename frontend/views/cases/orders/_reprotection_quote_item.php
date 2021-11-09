@@ -467,12 +467,21 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                     ]) ?>
                                   <?php endif; ?>
 
-                                  <?= Html::a('<i class="fa fa-envelope"></i> send VR Email', null, [
+                                  <?= Html::a('<i class="fa fa-envelope"></i> Send VR Email', null, [
                                       'class' => 'dropdown-item btn-send-voluntary-refund-quote-email',
                                       'data-url' => Url::to(['/product/product-quote-refund/preview-refund-offer-email', 'product-quote-refund-id' => $refundItem->pqr_id, 'case-id' => $caseId, 'order-id' => $order->or_id, 'origin-quote-id' => $quote->pq_id]),
                                       'data-toggle' => 'tooltip',
                                       'data-placement' => 'right',
                                       'title' => 'Send Voluntary Refund Email'
+                                  ]); ?>
+
+
+                                  <?= Html::a('<i class="fa fa-pencil"></i> Edit', null, [
+                                      'class' => 'dropdown-item btn-edit-voluntary-refund-quote',
+                                      'data-url' => Url::to(['/product/product-quote-refund/edit-refund', 'product-quote-refund-id' => $refundItem->pqr_id]),
+                                      'data-toggle' => 'tooltip',
+                                      'data-placement' => 'right',
+                                      'title' => 'Edit Voluntary Refund'
                                   ]); ?>
                                 </div>
                               </div>

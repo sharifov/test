@@ -12,6 +12,7 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\interfaces\ProductQuoteObjectRefundStructure;
 use sales\entities\serializer\Serializable;
 use sales\repositories\NotFoundException;
+use sales\services\CurrencyHelper;
 use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -252,5 +253,13 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializa
     public function serialize(): array
     {
         return (new ProductQuoteObjectRefundSerializer($this))->getData();
+    }
+
+    public function calculateSystemPrices(): void
+    {
+        $this->pqor_client_penalty_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_penalty_amount, $this->clientCurrency->cur_base_rate);
+        $this->pqor_client_processing_fee_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_processing_fee_amount, $this->clientCurrency->cur_base_rate);
+        $this->pqor_client_refund_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_refund_amount, $this->clientCurrency->cur_base_rate);
+        $this->pqor_client_selling_price = CurrencyHelper::convertToBaseCurrency($this->pqor_client_selling_price, $this->clientCurrency->cur_base_rate);
     }
 }
