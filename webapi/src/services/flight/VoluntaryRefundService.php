@@ -64,7 +64,7 @@ class VoluntaryRefundService implements BoWebhookService
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
                 $description = 'Refund set to processing ';
                 if ($case) {
-                    $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, $description);
+                    $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, $description, [], CaseEventLog::CATEGORY_INFO);
                 }
             }
         } elseif ($form->isRefunded()) {
@@ -74,7 +74,7 @@ class VoluntaryRefundService implements BoWebhookService
             if ($case) {
                 $case->solved(null, 'Refund complete (WH BO)');
                 $this->casesRepository->save($case);
-                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is completed (WH BO)');
+                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is completed (WH BO)', [], CaseEventLog::CATEGORY_INFO);
             }
 
             $productQuote->cancelled();
@@ -86,7 +86,7 @@ class VoluntaryRefundService implements BoWebhookService
             if ($case) {
                 $case->error(null, 'Refund canceled (WH BO)');
                 $this->casesRepository->save($case);
-                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is canceled (WH BO)');
+                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is canceled (WH BO)', [], CaseEventLog::CATEGORY_INFO);
             }
         }
 

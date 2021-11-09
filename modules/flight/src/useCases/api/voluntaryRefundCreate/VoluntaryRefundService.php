@@ -424,7 +424,7 @@ class VoluntaryRefundService
             CaseEventLog::CATEGORY_INFO
         );
         $saleData = $this->casesSaleService->detailRequestToBackOffice($saleSearch['saleId'], 0, 120, 1);
-        $case->addEventLog($caseEventLogType, 'Responses from BackOffice accepted successfully', null, CaseEventLog::CATEGORY_INFO);
+        $case->addEventLog($caseEventLogType, 'Responses from BackOffice accepted successfully', [], CaseEventLog::CATEGORY_INFO);
 
         return $saleData;
     }
@@ -497,7 +497,7 @@ class VoluntaryRefundService
         ?\Throwable $exception
     ): void {
         if ($case) {
-            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_CREATE, $description, null, CaseEventLog::CATEGORY_ERROR);
+            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_CREATE, $description, [], CaseEventLog::CATEGORY_ERROR);
             $case->offIsAutomate()->error(null, $description);
             $this->casesRepository->save($case);
         }
