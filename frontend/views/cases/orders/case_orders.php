@@ -550,11 +550,8 @@ $js = <<<JS
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Edit voluntary refund');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            console.log(xhr);
             if (status === 'error') {
-                if (xhr.status !== 403) {
-                    createNotify('Error', xhr.responseText, 'error');
-                }                
+                createNotify('Error', xhr.responseText, 'error');
             } else {
                 modal.modal({
                   backdrop: 'static',

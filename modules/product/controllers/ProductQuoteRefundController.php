@@ -8,7 +8,9 @@ use common\models\EmailTemplateType;
 use modules\flight\src\useCases\voluntaryRefund\manualUpdate\VoluntaryRefundUpdateForm;
 use modules\flight\src\useCases\voluntaryRefund\VoluntaryRefundService;
 use modules\order\src\entities\order\Order;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
 use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
+use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\abac\ProductQuoteRefundAbacObject;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteObjectRefund\search\ProductQuoteObjectRefundSearch;
@@ -303,6 +305,11 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
 
         $productQuoteRefund = $this->productQuoteRefundRepository->find($productQuoteRefundId);
 
+        /** @abac new ProductQuoteRefundAbacDto($model), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_UPDATE, Update Voluntary Quote Refund */
+        if (!Yii::$app->abac->can(new ProductQuoteRefundAbacDto($productQuoteRefund), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         if (Yii::$app->request->isPjax) {
             $form = new VoluntaryRefundUpdateForm($productQuoteRefund);
             $data = CompositeFormHelper::prepareDataForMultiInput(
@@ -332,10 +339,6 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
 
         if (Yii::$app->request->isAjax) {
             $form = new VoluntaryRefundUpdateForm($productQuoteRefund);
-//            /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND, Create Voluntary Quote Refund */
-//            if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND)) {
-//                throw new ForbiddenHttpException('Access denied');
-//            }
 
             return $this->renderAjax('partial/_voluntary_refund_update', [
                 'form' => $form,

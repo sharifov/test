@@ -17,6 +17,7 @@ use modules\product\src\abac\ProductQuoteChangeAbacObject;
 use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
 use modules\product\src\abac\ProductQuoteRefundAbacObject;
 use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
+use yii\web\ForbiddenHttpException;
 
 /**
  * @var Order $order
@@ -476,13 +477,17 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                   ]); ?>
 
 
-                                  <?= Html::a('<i class="fa fa-pencil"></i> Edit', null, [
-                                      'class' => 'dropdown-item btn-edit-voluntary-refund-quote',
-                                      'data-url' => Url::to(['/product/product-quote-refund/edit-refund', 'product-quote-refund-id' => $refundItem->pqr_id]),
-                                      'data-toggle' => 'tooltip',
-                                      'data-placement' => 'right',
-                                      'title' => 'Edit Voluntary Refund'
-                                  ]); ?>
+                                  <?php
+                                  /** @abac new ProductQuoteRefundAbacDto($model), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_UPDATE, Update Voluntary Quote Refund */
+                                    if (Yii::$app->abac->can(new ProductQuoteRefundAbacDto($refundItem), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_UPDATE)) : ?>
+                                        <?= Html::a('<i class="fa fa-pencil"></i> Edit', null, [
+                                        'class' => 'dropdown-item btn-edit-voluntary-refund-quote',
+                                        'data-url' => Url::to(['/product/product-quote-refund/edit-refund', 'product-quote-refund-id' => $refundItem->pqr_id]),
+                                        'data-toggle' => 'tooltip',
+                                        'data-placement' => 'right',
+                                        'title' => 'Edit Voluntary Refund'
+                                    ]); ?>
+                                    <?php endif; ?>
                                 </div>
                               </div>
                             </td>
