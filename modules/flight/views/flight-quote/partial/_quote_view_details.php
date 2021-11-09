@@ -2,13 +2,13 @@
 
 use common\components\SearchService;
 use common\models\Airline;
+use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
 
 /* @var $this yii\web\View */
 /* @var $productQuote ProductQuote*/
 /* @var $flightQuote FlightQuote*/
-
 ?>
 
 
@@ -21,13 +21,20 @@ use modules\product\src\entities\productQuote\ProductQuote;
                     <?php if ($segments) : ?>
                 <div class="trip__leg">
                     <h4 class="trip__subtitle">
-                        <span class="trip__leg-type"><?php if (count($flightQuote->flightQuoteTrips) < 2 && $tripKey == 0) :
-                            ?>Depart<?php
-                                                     elseif (count($flightQuote->flightQuoteTrips) < 2 && $tripKey > 0) :
-                                                            ?>Return<?php
-                                                     else :
-                                                            ?><?= ($tripKey + 1);?> Trip<?php
-                                                     endif?></span>
+                        <span class="trip__leg-type">
+                            <span class="trip__leg-type">
+                                <?php if ($flightQuote->fqFlight->fl_trip_type_id !== Flight::TRIP_TYPE_MULTI_DESTINATION) : ?>
+                                    <?php if (count($flightQuote->flightQuoteTrips) < 3 && $tripKey == 0) : ?>
+                                        Depart
+                                    <?php elseif (count($flightQuote->flightQuoteTrips) < 3 && $tripKey > 0) : ?>
+                                        Return
+                                    <?php else : ?>
+                                        <?= ($tripKey + 1);?> Trip
+                                    <?php endif ?>
+                                <?php else : ?>
+                                    <?= ($tripKey + 1);?> Trip
+                                <?php endif ?>
+                            </span>
                         <span class="trip__leg-date"><?= Yii::$app->formatter_search->asDatetime(strtotime($segments[0]->fqs_departure_dt), 'EEE d MMM')?></span>
                     </h4>
                     <div class="trip__card">
