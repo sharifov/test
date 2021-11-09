@@ -30,14 +30,14 @@ class SendLeadInfoToGaJob extends BaseJob implements JobInterface
             if ($this->checkParams() && $gaLead = new GaLead($this->lead)) {
                 $response = $gaLead->send();
                 if ($response) {
-                    Yii::info(
+                    /*Yii::info(
                         [
                             'leadId' => $this->lead->id,
                             'message' => 'Info sent to GA',
                             'data' => $gaLead->getPostData()
                         ],
                         'info\SendLeadInfoToGaJob:execute:sent'
-                    );
+                    );*/
                 } else {
                     Yii::warning(
                         [
