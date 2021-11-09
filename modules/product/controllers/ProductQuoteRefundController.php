@@ -20,6 +20,7 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use modules\product\src\forms\VoluntaryRefundPreviewEmailForm;
 use modules\product\src\forms\VoluntaryRefundSendEmailForm;
 use sales\auth\Auth;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
 use sales\helpers\app\AppHelper;
@@ -255,7 +256,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                             throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
                         }
 
-                        $case->addEventLog(null, ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username);
+                        $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_EMAIL_SEND, ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username, [], CaseEventLog::CATEGORY_INFO);
 
                         $productQuoteRefund->pending();
                         $this->productQuoteRefundRepository->save($productQuoteRefund);
@@ -268,14 +269,14 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                             $whData['refund_order_id'] = $productQuoteRefund->pqr_cid;
                             $whData['refund_status'] = ProductQuoteRefundStatus::getClientKeyStatusById($productQuoteRefund->pqr_status_id);
                             \Yii::$app->hybrid->wh($case->cs_project_id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
-                            $case->addEventLog(null, 'WH to HybridService sent successfully');
+                            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_SEND_OTA, 'WH to HybridService sent successfully', $whData, CaseEventLog::CATEGORY_DEBUG);
                         } catch (\Throwable $throwable) {
                             // $errorData = [];
                             $errorData = AppHelper::throwableLog($throwable);
                             $errorData['description'] = 'OTA site is not informed (hybridService->whVoluntaryRefund)';
                             $errorData['project_id'] = $case->cs_project_id;
                             $errorData['case_id'] = $case->cs_id;
-
+                            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_SEND_OTA, 'WH to HybridService failed', $errorData, CaseEventLog::CATEGORY_ERROR);
                             Yii::warning($errorData, 'ProductQuoteRefundController:actionVoluntaryRefundSendEmail:Throwable');
                         }
 
