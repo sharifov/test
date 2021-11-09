@@ -352,7 +352,8 @@ class ProductQuoteController extends FController
                         $case->addEventLog(
                             null,
                             ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username,
-                            ['changeId' => $previewEmailForm->changeId]
+                            ['changeId' => $previewEmailForm->changeId],
+                            CaseEventLog::CATEGORY_INFO
                         );
 
                         $productQuoteChange->statusToPending();

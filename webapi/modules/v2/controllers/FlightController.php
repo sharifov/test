@@ -1613,6 +1613,7 @@ class FlightController extends BaseController
             "quote_list": [
                 {
                     "relation_type": "ReProtection",
+                    "relation_type_id": 4, "(1-replace, 2-clone, 3-alternative, 4-reProtection, 5-voluntary exchange)"
                     "recommended": true,
                     "pq_gid": "289ddd4b911e88d7bf1eb14be44754d7",
                     "pq_name": "test",
@@ -1963,7 +1964,8 @@ class FlightController extends BaseController
                     $changeProductQuote = $relationQuote->pqrRelatedPq;
                     $data = ArrayHelper::merge(['recommended' => $changeProductQuote->isRecommended()], $changeProductQuote->toArray());
                     $data = ArrayHelper::merge([
-                        'relation_type' => ProductQuoteRelation::getTypeName($relationQuote->pqr_type_id)
+                        'relation_type' => ProductQuoteRelation::getTypeName($relationQuote->pqr_type_id),
+                        'relation_type_id' => $relationQuote->pqr_type_id,
                     ], $data);
                     $quoteList[] = $data;
                 }

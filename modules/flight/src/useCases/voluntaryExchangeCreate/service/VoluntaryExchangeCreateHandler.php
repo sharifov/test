@@ -312,7 +312,7 @@ class VoluntaryExchangeCreateHandler
                 true
             );
         }
-        $this->addCaseEventLog('Voluntary Exchange Create process completed successfully', [], CaseEventLog::CATEGORY_INFO);
+        $this->addCaseEventLog('Voluntary Exchange Create process completed successfully', []);
     }
 
     public function failProcess(string $description): void
