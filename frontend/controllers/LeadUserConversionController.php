@@ -83,7 +83,8 @@ class LeadUserConversionController extends FController
                         $form->leadId,
                         $form->userId,
                         LeadUserConversionDictionary::DESCRIPTION_QA,
-                        Auth::id()
+                        Auth::id(),
+                        false
                     );
                     return $this->asJson(['success' => true]);
                 } catch (\DomainException $e) {

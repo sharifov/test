@@ -34,8 +34,13 @@ class LeadUserConversionService
         int $leadId,
         int $userId,
         ?string $description = null,
-        ?int $createdUserId = null
+        ?int $createdUserId = null,
+        bool $validateUsers = true
     ): void {
+        if ($validateUsers && $createdUserId !== null && $createdUserId !== $userId) {
+            return;
+        }
+
         $leadWasFollowUp = LeadFlow::find()
             ->andWhere(['lead_id' => $leadId])
             ->andWhere([
@@ -45,10 +50,6 @@ class LeadUserConversionService
             ])
             ->exists();
         if ($leadWasFollowUp) {
-            return;
-        }
-
-        if ($createdUserId !== null && $createdUserId !== $userId) {
             return;
         }
 
