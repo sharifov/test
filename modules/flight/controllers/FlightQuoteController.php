@@ -1221,15 +1221,13 @@ class FlightQuoteController extends FController
                         $prevSegment = $segments[$key - 1] ?? $segments[$key];
                         $isNextTrip = false;
 
-                        if ($tripType === Flight::TRIP_TYPE_MULTI_DESTINATION) {
-                            try {
-                                $isNextTrip = FlightQuoteHelper::isNextTrip($prevSegment, $segment);
-                            } catch (\Throwable $throwable) {
-                                \Yii::warning(
-                                    AppHelper::throwableLog($throwable),
-                                    'FlightQuoteController:actionAjaxPrepareDump:isNextTrip'
-                                );
-                            }
+                        try {
+                            $isNextTrip = FlightQuoteHelper::isNextTrip($prevSegment, $segment);
+                        } catch (\Throwable $throwable) {
+                            \Yii::warning(
+                                AppHelper::throwableLog($throwable),
+                                'FlightQuoteController:actionAjaxPrepareDump:isNextTrip'
+                            );
                         }
 
                         if ($isNextTrip) {
