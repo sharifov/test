@@ -214,7 +214,9 @@ class FlightQuoteController extends FController
                     'refresh-voluntary-price',
                     'ajax-prepare-dump',
                     'save-voluntary-quote',
-                    'create-re-protection-quote'
+                    'create-re-protection-quote',
+                    'ajax-save-re-protection',
+                    'segment-baggage-validate',
                 ]
             ]
         ];
