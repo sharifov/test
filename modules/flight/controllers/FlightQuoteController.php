@@ -211,7 +211,9 @@ class FlightQuoteController extends FController
                     'create-voluntary-quote-refund',
                     'create-voluntary-quote',
                     'add-change',
-                    'refresh-voluntary-price'
+                    'refresh-voluntary-price',
+                    'ajax-prepare-dump',
+                    'save-voluntary-quote',
                 ]
             ]
         ];
