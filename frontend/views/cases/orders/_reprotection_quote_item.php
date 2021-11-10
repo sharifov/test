@@ -17,6 +17,8 @@ use modules\product\src\abac\ProductQuoteChangeAbacObject;
 use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
 use modules\product\src\abac\ProductQuoteRefundAbacObject;
 use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
+use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
+use modules\product\src\abac\RelatedProductQuoteAbacObject;
 
 /**
  * @var Order $order
@@ -282,7 +284,13 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                             <?php
                                             $changeQuote = $quoteRelation->pqcrPq;
                                             $isRecommended = $changeQuote->isRecommended();
-                                            $productQuoteAbacDto = new ProductQuoteAbacDto($changeQuote);
+
+                                            $relatedPrQtAbacDto = new RelatedProductQuoteAbacDto($changeQuote);
+                                            $relatedPrQtAbacDto->orProjectId = $order->or_project_id ?? null;
+                                            $relatedPrQtAbacDto->orStatusId = $order->or_status_id ?? null;
+                                            $relatedPrQtAbacDto->orPayStatusId = $order->or_pay_status_id ?? null;
+                                            $relatedPrQtAbacDto->isOrderOwner = $order ? $order->isOwner(\sales\auth\Auth::id()) : null;
+                                            $relatedPrQtAbacDto->orTypeId = $order->or_project_id ?? null;
                                             ?>
                                             <tr>
                                               <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>"><?=($key + 1)?></td>
@@ -306,8 +314,8 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                                     <i class="fa fa-bars"></i>
                                                   </button>
                                                   <div class="dropdown-menu">
-                                                      <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS, Action Reprotection Quote View Details */ ?>
-                                                      <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) : ?>
+                                                      <?php /** @abac $relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS, ReProtection Quote View Details */ ?>
+                                                      <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) : ?>
                                                             <?= Html::a('<i class="fas fa-info-circle" title=""></i> view Details', null, [
                                                               'data-product-quote-gid' => $changeQuote->pq_gid,
                                                               'class' => 'dropdown-item btn-show-product-quote-details',
@@ -385,7 +393,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                                       <?php endif; ?>
 
                                                       <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE, ReProtection quote decline */ ?>
-                                                      <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE)) : ?>
+                                                      <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE)) : ?>
                                                             <?= Html::a('<i class="fas fa-times text-danger"></i> set Decline', null, [
                                                               'class' => 'dropdown-item btn-reprotection-decline',
                                                               'data-url' => Url::to(['/product/product-quote/ajax-decline-reprotection-quote']),

@@ -78,6 +78,8 @@ use yii\web\Response;
 use yii\widgets\ActiveForm;
 use modules\product\src\abac\ProductQuoteChangeAbacObject;
 use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
+use modules\product\src\abac\RelatedProductQuoteAbacObject;
+use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
 
 /**
  * FlightQuoteController implements the CRUD actions for FlightQuote model.
@@ -454,11 +456,6 @@ class FlightQuoteController extends FController
     public function actionAjaxQuoteDetails(): string
     {
         $productQuoteId = Yii::$app->request->get('id');
-
-        /*if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access denied');
-        }*/
-
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
 
         $lead = $productQuote->pqProduct->prLead;
@@ -468,9 +465,16 @@ class FlightQuoteController extends FController
         }
 
         if (!$lead) {
-            /** @abac new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
-            if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
-                throw new ForbiddenHttpException('Access denied');
+            if (!$productQuote->relateParent) {
+                /** @abac new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
+                if (!Yii::$app->abac->can(new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
+                    throw new ForbiddenHttpException('Access denied');
+                }
+            } else {
+                /** @abac new RelatedProductQuoteAbacDto($productQuote), RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS, ReProtection Quote View Details */
+                if (!Yii::$app->abac->can(new RelatedProductQuoteAbacDto($productQuote), RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
+                    throw new ForbiddenHttpException('Access denied');
+                }
             }
         }
 
