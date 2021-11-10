@@ -77,7 +77,7 @@ class VoluntaryExchangeConfirmHandler
 
         $this->case = $confirmForm->getCase();
         $this->originProductQuote = $confirmForm->getOriginQuote();
-        $this->voluntaryExchangeQuote = $confirmForm->getOriginQuote();
+        $this->voluntaryExchangeQuote = $confirmForm->getChangeQuote();
         $this->productQuoteChange = $confirmForm->getProductQuoteChange();
 
         $this->flightRequestService = new FlightRequestService($flightRequest, $this->objectCollection);
