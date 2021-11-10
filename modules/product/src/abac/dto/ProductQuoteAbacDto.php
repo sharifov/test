@@ -2,9 +2,11 @@
 
 namespace modules\product\src\abac\dto;
 
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\access\EmployeeGroupAccess;
 use sales\auth\Auth;
+use sales\entities\cases\Cases;
 
 /**
  * Class ProductQuoteAbacDto
@@ -51,42 +53,49 @@ class ProductQuoteAbacDto extends \stdClass
     public ?int $csStatusId = null;
     public bool $isAutomateCase;
     public ?int $csProjectId = null;
+    public int $userId;
 
     public function __construct(?ProductQuote $productQuote)
     {
-        if ($productQuote) {
-            $userId = Auth::id();
+        $this->userId = Auth::id();
 
+        if ($productQuote) {
             $this->is_new = $productQuote->isNew();
             $this->pqStatusId = $productQuote->pq_status_id;
             $this->isPqChangeable = $productQuote->isChangeable();
-            $this->isOwner = $productQuote->isOwner($userId);
+            $this->isOwner = $productQuote->isOwner($this->userId);
             $this->hasPqrActive = (bool)$productQuote->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuote->productQuoteChangesActive;
 
-            /*if ($case = $productQuote->pqOrder->caseOrder[0]->cases) {
-                $this->csCategoryId = $case->cs_category_id;
-                $this->isCaseOwner = $case->isOwner($userId);
-
-                if ($case->hasOwner()) {
-                    $this->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup($userId, $case->cs_user_id);
-                }
-
-                $this->csStatusId = $case->cs_status;
-                $this->isAutomateCase = $case->isAutomate();
-                $this->csProjectId = $case->cs_project_id;
-            }*/
-
             $this->prTypeId = $productQuote->pqProduct->pr_type_id;
             $this->prProjectId = $productQuote->pqProduct->pr_project_id;
+        }
+    }
 
-            if ($productQuote->pqOrder) {
-                $this->orProjectId = $productQuote->pqOrder->or_project_id;
-                $this->orStatusId = $productQuote->pqOrder->or_status_id;
-                $this->orPayStatusId = $productQuote->pqOrder->or_pay_status_id;
-                $this->isOrderOwner = $productQuote->pqOrder->isOwner($userId);
-                $this->orTypeId  = $productQuote->pqOrder->or_type_id;
+    public function mapOrderAttributes(?Order $order)
+    {
+        if ($order) {
+            $this->orProjectId = $order->or_project_id;
+            $this->orStatusId = $order->or_status_id;
+            $this->orPayStatusId = $order->or_pay_status_id;
+            $this->isOrderOwner = $order->isOwner($this->userId);
+            $this->orTypeId  = $order->or_type_id;
+        }
+    }
+
+    public function mapCaseAttributes(?Cases $case)
+    {
+        if ($case) {
+            $this->csCategoryId = $case->cs_category_id;
+            $this->isCaseOwner = $case->isOwner($this->userId);
+
+            if ($case->hasOwner()) {
+                $this->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup($this->userId, $case->cs_user_id);
             }
+
+            $this->csStatusId = $case->cs_status;
+            $this->isAutomateCase = $case->isAutomate();
+            $this->csProjectId = $case->cs_project_id;
         }
     }
 }

@@ -61,15 +61,8 @@ if ($quote->productQuoteLastChange) {
 }
 
 $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
-$productQuoteAbacDto->csCategoryId = $case->cs_category_id;
-$productQuoteAbacDto->isCaseOwner = $case->isOwner(Auth::id());
-if ($case->hasOwner()) {
-    $productQuoteAbacDto->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup(Auth::id(), $case->cs_user_id);
-}
-$productQuoteAbacDto->csStatusId = $case->cs_status;
-$productQuoteAbacDto->isAutomateCase = $case->isAutomate();
-$productQuoteAbacDto->csProjectId = $case->cs_project_id;
-
+$productQuoteAbacDto->mapCaseAttributes($case);
+$productQuoteAbacDto->mapOrderAttributes($order);
 ?>
 
     <td data-toggle="tooltip" data-original-title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>" title="Product Quote ID: <?= Html::encode($quote->pq_id)?>, GID: <?= Html::encode($quote->pq_gid)?>"><?= $nr ?></td>
@@ -97,7 +90,7 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                 <?= Html::a('<i class="fas fa-info-circle"></i> View Details', null, [
                     'data-product-quote-gid' => $quote->pq_gid,
                     'class' => 'dropdown-item btn-show-product-quote-details',
-                    'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id, 'case_id' => $case->cs_id]),
+                    'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id, 'case_id' => $case->cs_id, 'order_id' => $order->or_id]),
                     'data-toggle' => 'tooltip',
                     'data-placement' => 'right',
                     'title' => 'View Details'
@@ -113,6 +106,7 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                             '/flight/flight-quote/add-change',
                             'case_id' => $case->cs_id,
                             'origin_quote_id' => $quote->pq_id,
+                            'order_id' => $order->or_id
                         ]),
                         'title' => 'Add Change'
                     ]) ?>
@@ -298,11 +292,7 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                             $isRecommended = $changeQuote->isRecommended();
 
                                             $relatedPrQtAbacDto = new RelatedProductQuoteAbacDto($changeQuote);
-                                            $relatedPrQtAbacDto->orProjectId = $order->or_project_id ?? null;
-                                            $relatedPrQtAbacDto->orStatusId = $order->or_status_id ?? null;
-                                            $relatedPrQtAbacDto->orPayStatusId = $order->or_pay_status_id ?? null;
-                                            $relatedPrQtAbacDto->isOrderOwner = $order ? $order->isOwner(\sales\auth\Auth::id()) : null;
-                                            $relatedPrQtAbacDto->orTypeId = $order->or_project_id ?? null;
+                                            $relatedPrQtAbacDto->mapOrderAttributes($order);
                                             ?>
                                             <tr>
                                               <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>"><?=($key + 1)?></td>
@@ -331,7 +321,12 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                                             <?= Html::a('<i class="fas fa-info-circle" title=""></i> view Details', null, [
                                                               'data-product-quote-gid' => $changeQuote->pq_gid,
                                                               'class' => 'dropdown-item btn-show-product-quote-details',
-                                                              'data-url' => Url::to([$changeQuote->getQuoteDetailsPageUrl(), 'id' => $changeQuote->pq_id, 'case_id' => $case->cs_id]),
+                                                              'data-url' => Url::to([
+                                                                  $changeQuote->getQuoteDetailsPageUrl(),
+                                                                  'id' => $changeQuote->pq_id,
+                                                                  'case_id' => $case->cs_id,
+                                                                  'order_id' => $order->or_id
+                                                              ]),
                                                               'data-toggle' => 'tooltip',
                                                               'data-placement' => 'right',
                                                               'title' => 'View Details'
@@ -405,7 +400,7 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                                       <?php endif; ?>
 
                                                       <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE, ReProtection quote decline */ ?>
-                                                      <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE)) : ?>
+                                                      <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE)) : ?>
                                                             <?= Html::a('<i class="fas fa-times text-danger"></i> set Decline', null, [
                                                               'class' => 'dropdown-item btn-reprotection-decline',
                                                               'data-url' => Url::to(['/product/product-quote/ajax-decline-reprotection-quote']),
