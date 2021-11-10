@@ -323,7 +323,7 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                                             <?= Html::a('<i class="fas fa-info-circle" title=""></i> view Details', null, [
                                                               'data-product-quote-gid' => $changeQuote->pq_gid,
                                                               'class' => 'dropdown-item btn-show-product-quote-details',
-                                                              'data-url' => Url::to([$changeQuote->getQuoteDetailsPageUrl(), 'id' => $changeQuote->pq_id]),
+                                                              'data-url' => Url::to([$changeQuote->getQuoteDetailsPageUrl(), 'id' => $changeQuote->pq_id, 'case_id' => $case->cs_id]),
                                                               'data-toggle' => 'tooltip',
                                                               'data-placement' => 'right',
                                                               'title' => 'View Details'
