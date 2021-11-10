@@ -174,6 +174,13 @@ class FlightQuoteRefundController extends ApiBaseController
      *   "code": 13107,
      *   "type": "app"
      * }
+     * @apiErrorExample {html} Codes designation
+     * [
+     *      13104 - Request is not POST
+     *      13106 - Post has not loaded
+     *      13107 - Validation Failed
+     *      13112 - ProductQuoteRefund not found by BookingId
+     * ]
      */
     public function actionInfo()
     {
@@ -443,6 +450,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiErrorExample {html} Codes designation
      * [
      *      13101 - Api User has no related project
+     *      13104 - Request is not POST
      *      13106 - Post has not loaded
      *      13107 - Validation Failed
      *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
@@ -727,6 +735,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiErrorExample {html} Codes designation
      * [
      *      13101 - Api User has no related project
+     *      13104 - Request is not POST
      *      13106 - Post has not loaded
      *      13107 - Validation Failed
      *      13112 - Not found refund in pending status by booking and gid
