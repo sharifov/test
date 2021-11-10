@@ -64,7 +64,7 @@ class ProductQuoteAbacDto extends \stdClass
             $this->hasPqrActive = (bool)$productQuote->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuote->productQuoteChangesActive;
 
-            if ($case = $productQuote->pqOrder->caseOrder[0]->cases) {
+            /*if ($case = $productQuote->pqOrder->caseOrder[0]->cases) {
                 $this->csCategoryId = $case->cs_category_id;
                 $this->isCaseOwner = $case->isOwner($userId);
 
@@ -75,7 +75,7 @@ class ProductQuoteAbacDto extends \stdClass
                 $this->csStatusId = $case->cs_status;
                 $this->isAutomateCase = $case->isAutomate();
                 $this->csProjectId = $case->cs_project_id;
-            }
+            }*/
 
             $this->prTypeId = $productQuote->pqProduct->pr_type_id;
             $this->prProjectId = $productQuote->pqProduct->pr_project_id;

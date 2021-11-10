@@ -2,6 +2,8 @@
 
 namespace modules\product\src\entities\productQuoteObjectRefund;
 
+use sales\repositories\NotFoundException;
+
 class ProductQuoteObjectRefundRepository
 {
     public function save(ProductQuoteObjectRefund $objectRefund): int
@@ -10,5 +12,13 @@ class ProductQuoteObjectRefundRepository
             throw new \RuntimeException('Product Quote Object Refund saving failed: ' . $objectRefund->getErrorSummary(true)[0]);
         }
         return $objectRefund->pqor_id;
+    }
+
+    public function find(int $id): ProductQuoteObjectRefund
+    {
+        if ($object = ProductQuoteObjectRefund::findOne(['pqor_id' => $id])) {
+            return $object;
+        }
+        throw new NotFoundException('ProductQuoteObjectRefund not found by id: ' . $id);
     }
 }

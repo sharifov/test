@@ -5,6 +5,7 @@ namespace modules\flight\src\useCases\voluntaryRefund;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefundRepository;
 use modules\flight\src\useCases\voluntaryRefund\manualCreate\VoluntaryRefundCreateForm;
+use modules\flight\src\useCases\voluntaryRefund\manualUpdate\VoluntaryRefundUpdateForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\entities\orderRefund\OrderRefundRepository;
@@ -144,6 +145,35 @@ class VoluntaryRefundService
                 );
                 $productQuoteOptionRefund->new();
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);
+            }
+        });
+    }
+
+    public function updateManual(ProductQuoteRefund $productQuoteRefund, VoluntaryRefundUpdateForm $form): void
+    {
+        $productQuoteRefund->pqr_client_selling_price = $form->totalPaid;
+        $productQuoteRefund->pqr_client_refund_cost = $form->refundCost;
+        $productQuoteRefund->pqr_client_processing_fee_amount = $form->totalProcessingFee;
+        $productQuoteRefund->pqr_client_penalty_amount = $form->totalAirlinePenalty;
+        $productQuoteRefund->pqr_client_refund_amount = $form->totalRefundable;
+        $productQuoteRefund->calculateSystemPrices();
+
+        $objects = [];
+        foreach ($form->tickets as $ticketForm) {
+            $productQuoteObjectRefund = $this->productQuoteObjectRefundRepository->find($ticketForm->id);
+
+            $productQuoteObjectRefund->pqor_client_penalty_amount = $ticketForm->airlinePenalty;
+            $productQuoteObjectRefund->pqor_client_processing_fee_amount = $ticketForm->processingFee;
+            $productQuoteObjectRefund->pqor_client_refund_amount = $ticketForm->refundable;
+            $productQuoteObjectRefund->pqor_client_selling_price = $ticketForm->selling;
+            $productQuoteObjectRefund->calculateSystemPrices();
+            $objects[] = $productQuoteObjectRefund;
+        }
+
+        $this->transactionManager->wrap(function () use ($productQuoteRefund, $objects) {
+            $this->productQuoteRefundRepository->save($productQuoteRefund);
+            foreach ($objects as $object) {
+                $this->productQuoteObjectRefundRepository->save($object);
             }
         });
     }

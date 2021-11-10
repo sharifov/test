@@ -19,13 +19,16 @@ use modules\product\src\abac\ProductQuoteRefundAbacObject;
 use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
 use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
 use modules\product\src\abac\RelatedProductQuoteAbacObject;
+use yii\web\ForbiddenHttpException;
+use sales\access\EmployeeGroupAccess;
+use sales\auth\Auth;
 
 /**
  * @var Order $order
  * @var ProductQuote $quote
  * @var int $nr
  * @var int $projectId
- * @var int $caseId
+ * @var  $case \sales\entities\cases\Cases
  * @var \yii\web\View $this
  * @var bool $isReprotection
  * @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto
@@ -58,6 +61,14 @@ if ($quote->productQuoteLastChange) {
 }
 
 $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
+$productQuoteAbacDto->csCategoryId = $case->cs_category_id;
+$productQuoteAbacDto->isCaseOwner = $case->isOwner(Auth::id());
+if ($case->hasOwner()) {
+    $productQuoteAbacDto->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup(Auth::id(), $case->cs_user_id);
+}
+$productQuoteAbacDto->csStatusId = $case->cs_status;
+$productQuoteAbacDto->isAutomateCase = $case->isAutomate();
+$productQuoteAbacDto->csProjectId = $case->cs_project_id;
 
 ?>
 
@@ -86,7 +97,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                 <?= Html::a('<i class="fas fa-info-circle"></i> View Details', null, [
                     'data-product-quote-gid' => $quote->pq_gid,
                     'class' => 'dropdown-item btn-show-product-quote-details',
-                    'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id]),
+                    'data-url' => Url::to([$quote->getQuoteDetailsPageUrl(), 'id' => $quote->pq_id, 'case_id' => $case->cs_id]),
                     'data-toggle' => 'tooltip',
                     'data-placement' => 'right',
                     'title' => 'View Details'
@@ -100,7 +111,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                         'class' => 'dropdown-item btn_create_change',
                         'data-url' => Url::to([
                             '/flight/flight-quote/add-change',
-                            'case_id' => $caseId,
+                            'case_id' => $case->cs_id,
                             'origin_quote_id' => $quote->pq_id,
                         ]),
                         'title' => 'Add Change'
@@ -120,7 +131,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                             'project_id' => $projectId,
                             'origin_product_quote_id' => $quote->pq_id,
                             'order_id' => $order->or_id,
-                            'case_id' => $caseId
+                            'case_id' => $case->cs_id
                         ]),
                         'title' => 'Add Voluntary Refund Quote'
                     ]) ?>
@@ -132,6 +143,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                 <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Remove', null, [
                     'data-order-id' => $order->or_id,
                     'data-product-quote-id' => $quote->pq_id,
+                    'data-case-id' => $case->cs_id,
                     'class' => 'dropdown-item btn-delete-quote-from-order',
                     'data-url' => \yii\helpers\Url::to(['/order/order-product/delete-ajax']),
                     'data-toggle' => 'tooltip',
@@ -200,7 +212,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                                     'data-url' => Url::to([
                                                         '/flight/flight-quote/create-voluntary-quote',
                                                         'flight_id' => $flight->getId(),
-                                                        'case_id' => $caseId,
+                                                        'case_id' => $case->cs_id,
                                                         'origin_quote_id' => $quote->pq_id,
                                                         'change_id' => $changeItem->pqc_id,
                                                     ]),
@@ -217,7 +229,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                                 'data-url' => Url::to([
                                                     '/product/product-quote/preview-voluntary-offer-email',
                                                     'flight_id' => $flight->getId(),
-                                                    'case_id' => $caseId,
+                                                    'case_id' => $case->cs_id,
                                                     'origin_quote_id' => $quote->pq_id,
                                                     'change_id' => $changeItem->pqc_id,
                                                     'order_id' => $order->or_id
@@ -334,7 +346,7 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                                                 'data-url' => Url::to([
                                                                     '/product/product-quote/preview-reprotection-quote-email',
                                                                     'reprotection-quote-id' => $changeQuote->pq_id,
-                                                                    'case-id' => $caseId,
+                                                                    'case-id' => $case->cs_id,
                                                                     'order-id' => $order->or_id
                                                                 ]),
                                                                 'data-toggle' => 'tooltip',
@@ -481,13 +493,26 @@ $productQuoteAbacDto = new ProductQuoteAbacDto($quote);
                                     ]) ?>
                                   <?php endif; ?>
 
-                                  <?= Html::a('<i class="fa fa-envelope"></i> send VR Email', null, [
+                                  <?= Html::a('<i class="fa fa-envelope"></i> Send VR Email', null, [
                                       'class' => 'dropdown-item btn-send-voluntary-refund-quote-email',
-                                      'data-url' => Url::to(['/product/product-quote-refund/preview-refund-offer-email', 'product-quote-refund-id' => $refundItem->pqr_id, 'case-id' => $caseId, 'order-id' => $order->or_id, 'origin-quote-id' => $quote->pq_id]),
+                                      'data-url' => Url::to(['/product/product-quote-refund/preview-refund-offer-email', 'product-quote-refund-id' => $refundItem->pqr_id, 'case-id' => $case->cs_id, 'order-id' => $order->or_id, 'origin-quote-id' => $quote->pq_id]),
                                       'data-toggle' => 'tooltip',
                                       'data-placement' => 'right',
                                       'title' => 'Send Voluntary Refund Email'
                                   ]); ?>
+
+
+                                  <?php
+                                  /** @abac new ProductQuoteRefundAbacDto($model), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_UPDATE, Update Voluntary Quote Refund */
+                                    if (Yii::$app->abac->can(new ProductQuoteRefundAbacDto($refundItem), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_UPDATE)) : ?>
+                                        <?= Html::a('<i class="fa fa-pencil"></i> Edit', null, [
+                                        'class' => 'dropdown-item btn-edit-voluntary-refund-quote',
+                                        'data-url' => Url::to(['/product/product-quote-refund/edit-refund', 'product-quote-refund-id' => $refundItem->pqr_id]),
+                                        'data-toggle' => 'tooltip',
+                                        'data-placement' => 'right',
+                                        'title' => 'Edit Voluntary Refund'
+                                    ]); ?>
+                                    <?php endif; ?>
                                 </div>
                               </div>
                             </td>
