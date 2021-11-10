@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
 
@@ -467,13 +467,3 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
     <?php Pjax::end(); ?>
 </div>
-
-<?php
-$js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-booked-gv').position().top }, 400);
-    })
-JS;
-
-$this->registerJs($js, $this::POS_END);
-?>

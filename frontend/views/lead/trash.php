@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(['timeout' => 6000]); ?>
+    <?php Pjax::begin(['timeout' => 6000, 'scrollTo' => 0]); ?>
 
     <?php $form = ActiveForm::begin([
             'action' => ['trash'],
@@ -438,13 +438,3 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
     <?php Pjax::end(); ?>
 </div>
-
-<?php
-$js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-trash-gv').position().top }, 400);
-    })
-JS;
-
-$this->registerJs($js, $this::POS_END);
-?>

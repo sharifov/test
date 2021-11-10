@@ -48,7 +48,7 @@ $pjaxListId = 'pjax-call-index';
         ]); ?>
     <?php endif ?>
 
-    <?php Pjax::begin(['id' => $pjaxListId, 'timeout' => 10000]); ?>
+    <?php Pjax::begin(['id' => $pjaxListId, 'timeout' => 10000, 'scrollTo' => 0]); ?>
     <?= GridView::widget([
         'id' => 'call-gv',
         'dataProvider' => $dataProvider,
@@ -418,10 +418,6 @@ $pjaxListId = 'pjax-call-index';
 $urlAllowList = Url::to(['/call/allow-list']);
 
 $js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#call-gv').position().top }, 400);
-    });
-
     $(document).on('click', '.js-allow-list', function (e) { 
         e.preventDefault();
     

@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <h1><i class="fa fa-spinner"></i> <?=\yii\helpers\Html::encode($this->title)?></h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET']]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET'], 'scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?= $this->render('_search_processing', ['model' => $searchModel]); ?>
 
     <?php
@@ -505,10 +505,6 @@ $js = <<<JS
             window.location = url;
         }
     });
-
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-processing-gv').position().top }, 400);
-    })
 
 /*$(document).on('pjax:end', function() {
     setClienTime();

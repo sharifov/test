@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 
 <div class="cases-q-unidentified">
-    <?php Pjax::begin(['id' => 'cases-q-unidentified-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'cases-q-unidentified-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'id' => 'unidentified-gv',
@@ -201,13 +201,3 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::end(); ?>
 </div>
-
-<?php
-$js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#unidentified-gv').position().top }, 400);
-    })
-JS;
-
-$this->registerJs($js, $this::POS_END);
-?>

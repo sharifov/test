@@ -38,7 +38,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 <h1> <?=\yii\helpers\Html::encode($this->title)?> </h1>
 <div class="lead-duplicate">
 
-    <?php Pjax::begin(['timeout' => 5000]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['timeout' => 5000, 'scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
 
@@ -520,13 +520,3 @@ echo \yii\grid\GridView::widget([
 ?>
 <?php Pjax::end(); ?>
 </div>
-
-<?php
-$js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-duplicate-gv').position().top }, 400);
-    })
-JS;
-
-$this->registerJs($js, $this::POS_END);
-?>

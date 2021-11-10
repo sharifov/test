@@ -96,7 +96,7 @@ $list = new ListsAccess($user->id);
 
             <?php endif; ?>
 
-            <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>
+            <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true, 'scrollTo' => 0]); ?>
 
             <?= $this->render('_redial_list', [
                 'dataProvider' => $dataProvider,
@@ -234,10 +234,6 @@ function leadRedialLastCallsReload() {
         new PNotify({title: "Reload last dialed leads", type: "error", text: 'Error', hide: true});
     })
 }
-
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-redial-pjax').position().top }, 400);
-    })
 
 JS;
 
