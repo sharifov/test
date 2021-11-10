@@ -703,10 +703,14 @@ class FlightQuoteRefundController extends ApiBaseController
      * }
      * @apiErrorExample {html} Codes designation
      * [
-     *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *      13101 - Api User has no related project
+     *      13106 - Post has not loaded
      *      13107 - Validation Failed
      *      13112 - Not found refund in pending status by booking and gid
-     *      15411 - Bo request failed; See tab "Error From BO"
+     *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *      15411 - Request to BO failed; See tab "Error From BO"
+     *      15412 - BO endpoint is not set; This is system crm error
+     *      150001 - Flight Request saving failed; This is system crm error
      *      601 - BO Server Error: i.e. request timeout
      *      602 - BO response body is empty
      *      603 - BO response type is invalid (not array)
@@ -755,11 +759,6 @@ class FlightQuoteRefundController extends ApiBaseController
         }
 
         try {
-            $hash = FlightRequest::generateHashFromDataJson($post);
-            if (FlightRequestQuery::existActiveRequestByHash($hash)) {
-                throw new \DomainException('FlightRequest (hash: ' . $hash . ') already processing', ApiCodeException::REQUEST_ALREADY_PROCESSED);
-            }
-
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundConfirmForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_REFUND_CONFIRM,
@@ -767,6 +766,12 @@ class FlightQuoteRefundController extends ApiBaseController
                 $project->id,
                 $this->apiUser->au_id
             );
+
+            $hash = FlightRequest::generateHashFromDataJson($post);
+            if (FlightRequestQuery::existActiveRequestByHash($hash)) {
+                throw new \DomainException('FlightRequest (hash: ' . $hash . ') already processing', ApiCodeException::REQUEST_ALREADY_PROCESSED);
+            }
+
             $flightRequest = $this->flightRequestRepository->save($flightRequest);
 
             $productQuoteRefund = ProductQuoteRefundQuery::getByBookingIdGidStatuses($voluntaryRefundConfirmForm->bookingId, $voluntaryRefundConfirmForm->refundGid, [ProductQuoteRefundStatus::PENDING]);
@@ -791,7 +796,6 @@ class FlightQuoteRefundController extends ApiBaseController
                 'sentData' => $boDataRequest,
                 'response' => $result
             ], 'info\BoConfirmRequest');
-            $boRequestConfirmResult = true;
             if (mb_strtolower($result['status']) === 'failed') {
                 $productQuoteRefund->error();
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
