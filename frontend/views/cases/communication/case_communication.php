@@ -799,25 +799,22 @@ $js = <<<JS
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
         $(".view-mail").replaceWith( '<div id="mail_headers"><h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files + '<hr>' + $(".view-mail").html() + '</div>');
         var popup = $('#modal-email-view');
-        popup.find('#modal-email-view-label').replaceWith('<a id="clipboard_button" title="Printer friendly version" data-toggle="mail_tooltip">Printer friendly version</a>');
+        popup.find('#modal-email-view-label').html('<button id="clipboard_button" title="Printer friendly version" data-toggle="mail_tooltip" class="btn btn-primary">Printer friendly version</button>');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
     });
     
     $('body').on('click', '#clipboard_button', function () {
-        window.print();
-        // $.get( '/email/view?id=599921&print=1', function( data ) {
-        //     w = window.open();
-        //     w.document.write(data);
-        //     // document.body.innerHTML = data;
-        //     w.print();
-        //     w.close(); 
-        // })
-        // .fail(function() {
-        //     alert("Error while getting email");
-        // });
+        let htmlToPrint = $('#mail_headers').html();
+        let originalContents = document.body.innerHTML;
+         document.body.innerHTML = htmlToPrint;
+         window.print();
+         document.body.innerHTML = originalContents;
+        // $("head").append('<style>@media print { body * { visibility: hidden; } .modal-body * {  visibility: visible; } .modal-body { position: absolute;  left: 0; top: 0; } }</style>');
+        // window.print();
     });
+    
     $('body').on('mouseleave', '#clipboard_button', function () {
     });
 
