@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Currency;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\product\src\abac\dto\ProductQuoteAbacDto;
@@ -167,8 +168,8 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                         <th title="Client Status mapping from SiteSettings for OTA" data-toggle="tooltip">Client Status</th>
                         <th style="width: 140px">Created</th>
                         <th style="width: 60px" title="is Automate">Auto</th>
-                        <th>Decision Type</th>
-                        <th style="width: 150px">Decision DateTime</th>
+                        <th>Decision</th>
+                        <th>Penalty</th>
                         <th style="width: 60px">Action</th>
                     </tr>
                     </thead>
@@ -187,8 +188,13 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                             <td><small><?=$changeItem->pqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_created_dt)) : '-'?></small></td>
 
                             <td><?= $changeItem->pqc_is_automate ? '<i class="fa fa-check" title="Automate"></i>' : '-' ?></td>
-                            <td><?= $changeItem->getDecisionTypeLabel()?></td>
-                            <td><small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small></td>
+                            <td>
+                                <?= $changeItem->getDecisionTypeLabel()?><br />
+                                <small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small>
+                            </td>
+                            <td>
+                                <?php echo $changeItem->pqc_penalty_amount ? $changeItem->pqc_penalty_amount . ' ' . Currency::getDefaultCurrencyCode() : '-' ?>
+                            </td>
                             <td>
 
                         <?php if ($changeItem->isTypeVoluntary()) : ?>
@@ -284,8 +290,7 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                             <th style="width: 50px" title="Recommended">Rec</th>
                                           <th>Status</th>
                                           <th style="width: 180px">Created</th>
-                                          <th>Client Price</th>
-                                          <th>Owner</th>
+                                          <th>Price Diff</th>
                                           <th style="width: 60px;">Action</th>
                                         </tr>
                                       </thead>
@@ -303,13 +308,9 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                               <td><small><?=$changeQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeQuote->pq_created_dt)) : '-'?></small></td>
                                               <td>
                                                 <span style="white-space: nowrap;">
-                                                    <?php echo $changeQuote->pq_client_price ?> <?php echo $changeQuote->pq_client_currency ?? $changeQuote->pq_origin_currency ?>
+
+                                                    <?php echo $changeQuote->getDifferenceOriginPrice($quote) ?> <?php echo $changeQuote->pq_origin_currency ?>
                                                 </span>
-                                              </td>
-                                              <td>
-                                                  <?php if ($changeQuote->pqOwnerUser) : ?>
-                                                    <i class="fa fa-user" title="<?= $changeQuote->pqOwnerUser->username ?>"></i>
-                                                  <?php endif; ?>
                                               </td>
                                               <td>
                                                 <div class="btn-group">

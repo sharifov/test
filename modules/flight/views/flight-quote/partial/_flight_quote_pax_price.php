@@ -25,7 +25,7 @@ use yii\helpers\Html;
                 <th>X</th>
                 <th>Fare</th>
                 <th>Taxes</th>
-                <th>Mark-up</th>
+                <th>Extra Markup</th>
                 <th>SFP, %</th>
                 <th>Net</th>
                 <th>Selling Price, <?php echo $originProductQuote->pq_origin_currency ?><span id="box_loading"></span></th>
@@ -38,6 +38,7 @@ use yii\helpers\Html;
                 <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][paxCodeId]')->hiddenInput()->label(false) ?>
                 <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][cnt]')->hiddenInput()->label(false) ?>
                 <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][net]')->hiddenInput()->label(false) ?>
+                <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][systemMarkUp]')->hiddenInput()->label(false) ?>
 
                 <tr class="pax-type-<?php echo $price['paxCode'] ?>" id="price-index-<?php echo $index ?>">
                     <td class="td-input">

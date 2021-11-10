@@ -1612,8 +1612,8 @@ class FlightController extends BaseController
             },
             "quote_list": [
                 {
-                    "relation_type": "ReProtection",
-                    "relation_type_id": 4, "(1-replace, 2-clone, 3-alternative, 4-reProtection, 5-voluntary exchange)"
+                    "relation_type": "Voluntary Exchange",
+                    "relation_type_id": 5, "(1-replace, 2-clone, 3-alternative, 4-reProtection, 5-voluntary exchange)"
                     "recommended": true,
                     "pq_gid": "289ddd4b911e88d7bf1eb14be44754d7",
                     "pq_name": "test",
@@ -1629,6 +1629,12 @@ class FlightController extends BaseController
                     "pq_status_name": "New",
                     "pq_files": [],
                     "data": {
+                        "changePricing" : {
+                            "baseFare": 10.01,
+                            "baseTax": 10.01,
+                            "markup": 10.01,
+                            "price": 30.01
+                        },
                         "fq_flight_id": 2,
                         "fq_source_id": null,
                         "fq_product_quote_id": 191,
@@ -1861,27 +1867,24 @@ class FlightController extends BaseController
                                 ]
                             }
                         ],
+                        "pax_prices": [
+                            {
+                                "qpp_fare": "877.00",
+                                "qpp_tax": "464.28",
+                                "qpp_system_mark_up": "50.00",
+                                "qpp_agent_mark_up": "0.00",
+                                "qpp_origin_fare": null,
+                                "qpp_origin_currency": "USD",
+                                "qpp_origin_tax": null,
+                                "qpp_client_currency": "USD",
+                                "qpp_client_fare": null,
+                                "qpp_client_tax": null,
+                                "paxType": "ADT"
+                            }
+                        ],
                         "paxes": [
                             {
                                 "fp_uid": "fp604741cd064a1",
-                                "fp_pax_id": null,
-                                "fp_pax_type": "ADT",
-                                "fp_first_name": null,
-                                "fp_last_name": null,
-                                "fp_middle_name": null,
-                                "fp_dob": null
-                            },
-                            {
-                                "fp_uid": "fp6047ae79a875c",
-                                "fp_pax_id": null,
-                                "fp_pax_type": "ADT",
-                                "fp_first_name": null,
-                                "fp_last_name": null,
-                                "fp_middle_name": null,
-                                "fp_dob": null
-                            },
-                            {
-                                "fp_uid": "fp6047ae8cdbb37",
                                 "fp_pax_id": null,
                                 "fp_pax_type": "ADT",
                                 "fp_first_name": null,
@@ -1962,10 +1965,12 @@ class FlightController extends BaseController
                     ->all();
                 foreach ($relationQuotes as $relationQuote) {
                     $changeProductQuote = $relationQuote->pqrRelatedPq;
-                    $data = ArrayHelper::merge(['recommended' => $changeProductQuote->isRecommended()], $changeProductQuote->toArray());
+                    $data = $changeProductQuote->toArray();
                     $data = ArrayHelper::merge([
+                        'recommended' => $changeProductQuote->isRecommended(),
                         'relation_type' => ProductQuoteRelation::getTypeName($relationQuote->pqr_type_id),
                         'relation_type_id' => $relationQuote->pqr_type_id,
+                        'diffPrice' => $changeProductQuote->getDifferenceOriginPrice($productQuote),
                     ], $data);
                     $quoteList[] = $data;
                 }

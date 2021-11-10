@@ -87,6 +87,13 @@ class FlightQuotePaxPriceForm extends Model
         ];
     }
 
+    public function attributeLabels()
+    {
+        return [
+            'markup' => 'Extra Markup',
+        ];
+    }
+
     public static function getMaxDecimalVal(): float
     {
         return self::MAX_DECIMAL_VAL;

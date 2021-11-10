@@ -13,6 +13,8 @@ use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOPrepareService;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOService;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -166,11 +168,24 @@ class VoluntaryExchangeCreateHandler
         }
 
         try {
-            $this->productQuoteChange = $this->voluntaryExchangeService->createProductQuoteChange(
+            $boPrepareService = new VoluntaryExchangeBOPrepareService($this->case->project, $this->originProductQuote);
+            $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
+
+            $clientPenaltyAmount = ($this->originProductQuote->pq_client_currency_rate && $voluntaryExchangeBOService->getServiceFeeAmount() !== null) ?
+                $voluntaryExchangeBOService->getServiceFeeAmount() * $this->originProductQuote->pq_client_currency_rate : null;
+
+            $this->productQuoteChange = ProductQuoteChange::createVoluntaryExchange(
                 $this->originProductQuote->pq_id,
                 $this->case->cs_id,
-                $flightProductQuoteData
+                false,
+                $voluntaryExchangeBOService->getServiceFeeAmount(),
+                $this->originProductQuote->pq_client_currency,
+                $this->originProductQuote->pq_client_currency_rate,
+                $clientPenaltyAmount
             );
+            $this->productQuoteChange->setDataJson($flightProductQuoteData);
+            $this->productQuoteChange->statusToPending();
+            $this->objectCollection->getProductQuoteChangeRepository()->save($this->productQuoteChange);
         } catch (\Throwable $throwable) {
             $this->caseHandler->caseToPendingManual('ProductQuoteChange not created');
             throw $throwable;

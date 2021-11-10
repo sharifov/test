@@ -883,10 +883,17 @@ class FlightQuoteController extends FController
                             throw new \RuntimeException('Exchange is not allowed');
                         }
 
+                        $clientPenaltyAmount = ($originProductQuote->pq_client_currency_rate && $voluntaryExchangeBOService->getServiceFeeAmount() !== null) ?
+                            $voluntaryExchangeBOService->getServiceFeeAmount() * $originProductQuote->pq_client_currency_rate : null;
+
                         $productQuoteChange = ProductQuoteChange::createVoluntaryExchange(
                             $addChangeForm->origin_quote_id,
                             $addChangeForm->case_id,
-                            false
+                            false,
+                            $voluntaryExchangeBOService->getServiceFeeAmount(),
+                            $originProductQuote->pq_client_currency,
+                            $originProductQuote->pq_client_currency_rate,
+                            $clientPenaltyAmount
                         );
                     } else {
                         $productQuoteChange = ProductQuoteChange::createReProtection(

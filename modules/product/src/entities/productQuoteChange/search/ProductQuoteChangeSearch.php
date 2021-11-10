@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteChange\search;
 
+use common\models\Currency;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -21,6 +22,9 @@ class ProductQuoteChangeSearch extends ProductQuoteChange
             [['pqc_is_automate'], 'boolean'],
             [['pqc_created_dt', 'pqc_updated_dt', 'pqc_decision_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['pqc_gid'], 'string'],
+
+            [['pqc_client_currency'], 'string', 'max' => 3],
+            [['pqc_penalty_amount', 'pqc_client_penalty_amount', 'pqc_client_currency_rate'], 'number'],
         ];
     }
 
@@ -66,6 +70,10 @@ class ProductQuoteChangeSearch extends ProductQuoteChange
             'pqc_is_automate' => $this->pqc_is_automate,
             'pqc_type_id' => $this->pqc_type_id,
             'pqc_gid' => $this->pqc_gid,
+            'pqc_client_currency' => $this->pqc_client_currency,
+            'pqc_penalty_amount' => $this->pqc_penalty_amount,
+            'pqc_client_penalty_amount' => $this->pqc_client_penalty_amount,
+            'pqc_client_currency_rate' => $this->pqc_client_currency_rate,
         ]);
 
         return $dataProvider;
