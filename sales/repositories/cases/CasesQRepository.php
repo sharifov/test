@@ -217,7 +217,7 @@ class CasesQRepository
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
         }
 
-        $query->andWhere(['IN', 'cs_user_id', $userIds]);
+//        $query->andWhere(['IN', 'cs_user_id', $userIds]);
 
         return $query;
     }
