@@ -799,20 +799,26 @@ $js = <<<JS
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
         $(".view-mail").replaceWith( '<div id="mail_headers"><h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files + '<hr>' + $(".view-mail").html() + '</div>');
         var popup = $('#modal-email-view');
-        popup.find('#modal-email-view-label').replaceWith('<a href="/email/view?id=' + id + '&pdf=1" + id title="Allow popup windows in browser settings!" data-toggle="mail_tooltip">Download PDF</a>');
+        popup.find('#modal-email-view-label').replaceWith('<a id="clipboard_button" title="Printer friendly version" data-toggle="mail_tooltip">Printer friendly version</a>');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
     });
     
     $('body').on('click', '#clipboard_button', function () {
-        var mail = $('#object-email-view').contents()[0].body.innerText;
-        mail = mail.replace('/<(\w+)/g', '', mail);
-        navigator.clipboard.writeText($("#mail_headers").text() + mail);
-         $('[data-toggle="mail_tooltip"]').tooltip({trigger: 'manual'}).tooltip('show');
+        window.print();
+        // $.get( '/email/view?id=599921&print=1', function( data ) {
+        //     w = window.open();
+        //     w.document.write(data);
+        //     // document.body.innerHTML = data;
+        //     w.print();
+        //     w.close(); 
+        // })
+        // .fail(function() {
+        //     alert("Error while getting email");
+        // });
     });
     $('body').on('mouseleave', '#clipboard_button', function () {
-        $('[data-toggle="mail_tooltip"]').tooltip('hide');
     });
 
     $('body').on('change', '.quotes-uid', function() {

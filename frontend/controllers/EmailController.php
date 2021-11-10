@@ -345,27 +345,13 @@ class EmailController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        if (Yii::$app->request->get('pdf')) {
-            $headers = $this->renderPartial('_headers', [
+        if (Yii::$app->request->get('print')) {
+            $emailHeaders = $this->renderPartial('_headers', [
                 'mail' => $model,
             ]);
-            Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
-            $txt = $model->getEmailBodyHtml();
-            $txt = preg_replace('/<style(.*?)<\/style>/s', '', $txt);
-            $pdf = new Pdf([
-                'mode' => Pdf::MODE_CORE, // leaner size using standard fonts
-                'destination' => Pdf::DEST_DOWNLOAD,
-                'content' => $headers . '<br>' . $txt, #strip_tags($model->getEmailBodyHtml(), '<p><head><object><embed>'),
-                'options' => [
-                    // any mpdf options you wish to set
-                ],
-                'methods' => [
-                    'SetTitle' => 'Case email content',
-                    'SetHeader' => ['Case email content||Generated on: ' . date("l, m F Y, H:i")],
-                    'SetFooter' => ['|Page {PAGENO}|'],
-                ]
-            ]);
-            return $pdf->render();
+            $emailBody = $model->getEmailBodyHtml();
+            strpos($emailBody, '<body');
+            return $emailHeaders . $emailBody;
         }
 
         if (Yii::$app->request->get('preview')) {
