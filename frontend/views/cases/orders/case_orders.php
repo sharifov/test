@@ -46,7 +46,7 @@ use yii\web\View;
                 'emptyText' => '<div class="text-center">Not found orders</div>',
                 //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
                 'itemView' => function ($model, $key, $index, $widget) use ($case, $caseAbacDto) {
-                    return $this->render('_list_item', ['order' => $model, 'index' => $index, 'caseId' => $case->cs_id, 'caseAbacDto' => $caseAbacDto]);
+                    return $this->render('_list_item', ['order' => $model, 'index' => $index, 'case' => $case, 'caseAbacDto' => $caseAbacDto]);
                 },
 
                 'itemOptions' => [
@@ -883,6 +883,7 @@ $js = <<<JS
         let menu = $(this);
         let productQuoteId = menu.data('product-quote-id');
         let orderId = menu.data('order-id');
+        let caseId = menu.data('case-id');
         let url = menu.data('url');
         
         //menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
@@ -891,7 +892,7 @@ $js = <<<JS
         $.ajax({
               url: url,
               type: 'post',
-              data: {'product_quote_id': productQuoteId, 'order_id': orderId},
+              data: {'product_quote_id': productQuoteId, 'order_id': orderId, 'case_id': caseId},
               dataType: 'json',
           })
               .done(function(data) {

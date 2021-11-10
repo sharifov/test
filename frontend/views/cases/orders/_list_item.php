@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
-/* @var $caseId integer */
+/* @var $case \sales\entities\cases\Cases */
 /* @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto */
 
 use common\models\Currency;
@@ -223,7 +223,7 @@ $orderAbacDto = new OrderAbacDto($order);
                               'nr' => $nr++,
                               'order' => $order,
                               'isReprotection' => false,
-                              'caseId' => $caseId,
+                              'case' => $case,
                               'caseAbacDto' => $caseAbacDto,
                               'projectId' => $order->or_project_id
                           ]) ?>
