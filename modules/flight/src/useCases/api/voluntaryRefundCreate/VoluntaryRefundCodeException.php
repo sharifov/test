@@ -16,7 +16,8 @@ class VoluntaryRefundCodeException extends \RuntimeException
     public const PAYMENT_DATA_PROCESSED_FAILED = Module::FLIGHT . 408;
     public const BILLING_INFO_PROCESSED_FAILED = Module::FLIGHT . 409;
 
-    public const PRODUCT_QUOTE_NOT_AVAILABLE = Module::FLIGHT . 410;
+    public const PRODUCT_QUOTE_NOT_AVAILABLE = Module::FLIGHT . 409;
+    public const PRODUCT_QUOTE_NOT_AVAILABLE_CHG_LIST = Module::FLIGHT . 410;
     public const BO_REQUEST_IS_NO_SEND = Module::FLIGHT . 412;
     public const BO_REQUEST_FAILED = Module::FLIGHT . 411;
 
