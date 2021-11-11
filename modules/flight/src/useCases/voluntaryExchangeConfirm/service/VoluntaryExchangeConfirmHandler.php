@@ -247,6 +247,11 @@ class VoluntaryExchangeConfirmHandler
                 (new CleanDataVoluntaryExchangeService($flightRequest, $this->productQuoteChange, $this->objectCollection));
             }
         }
+
+        if ($this->voluntaryExchangeQuote) {
+            $this->voluntaryExchangeQuote->error(null, 'Voluntary Exchange Api Confirm processing fail');
+            $this->objectCollection->getProductQuoteRepository()->save($this->voluntaryExchangeQuote);
+        }
     }
 
     public function additionalProcessing(): void
