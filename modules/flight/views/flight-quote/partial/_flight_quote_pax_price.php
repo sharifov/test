@@ -1,6 +1,7 @@
 <?php
 
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\flight\src\useCases\flightQuote\createManually\VoluntaryQuotePaxPriceForm;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuoteCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use yii\web\View;
@@ -47,41 +48,41 @@ use yii\helpers\Html;
                     <td class="td-input">
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][fare]')->input('number', [
                             'class' => 'form-control alt-quote-price',
-                            'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
-                            'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+                            'min' => VoluntaryQuotePaxPriceForm::getMinDecimalVal(),
+                            'max' => VoluntaryQuotePaxPriceForm::getMaxDecimalVal(),
                             'step' => 0.01
                         ])->label(false) ?>
                     </td>
                     <td class="td-input">
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][taxes]')->input('number', [
                             'class' => 'form-control alt-quote-price',
-                            'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
-                            'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+                            'min' => VoluntaryQuotePaxPriceForm::getMinDecimalVal(),
+                            'max' => VoluntaryQuotePaxPriceForm::getMaxDecimalVal(),
                             'step' => 0.01
                         ])->label(false) ?>
                     </td>
                     <td class="td-input">
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][systemMarkUp]')->input('number', [
-                            'class' => 'form-control alt-quote-price',
-                            'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+                            'class' => 'form-control ',
+                            'max' => VoluntaryQuotePaxPriceForm::getMaxDecimalVal(),
                             'step' => 0.01,
-                            'readonly' => true,
+                            'readonly' => 'readonly',
                         ])->label(false) ?>
                     </td>
                     <td class="td-input">
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][markup]')->input('number', [
                             'class' => 'form-control alt-quote-price',
-                            'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+                            'max' => VoluntaryQuotePaxPriceForm::getMaxDecimalVal(),
                             'step' => 0.01
                         ])->label(false) ?>
                     </td>
                     <td class="text-right">
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][selling]')->input('number', [
-                            'class' => 'form-control alt-quote-price',
-                            'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
-                            'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+                            'class' => 'form-control ',
+                            'min' => VoluntaryQuotePaxPriceForm::getMinDecimalVal(),
+                            'max' => VoluntaryQuotePaxPriceForm::getMaxDecimalVal(),
                             'step' => 0.01,
-                            'readonly' => true,
+                            'readonly' => 'readonly',
                         ])->label(false) ?>
                     </td>
                 </tr>

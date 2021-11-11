@@ -818,36 +818,6 @@ class FlightQuoteHelper
         $model->oldPrices = serialize(ArrayHelper::toArray($model->prices));
     }
 
-    public static function refreshChangeQuotePrice(VoluntaryQuoteCreateForm $createQuoteForm): VoluntaryQuoteCreateForm
-    {
-        $oldPrices = unserialize($createQuoteForm->oldPrices, ['allowed_classes' => false]);
-        $newPrices = $createQuoteForm->prices;
-
-        foreach ($oldPrices as $oldPrice) {
-            foreach ($newPrices as $key => $value) {
-                if ((int) $oldPrice['paxCodeId'] === (int) $value['paxCodeId']) {
-                    if ((float) $oldPrice['fare'] !== (float) $value['fare']) {
-                        $systemMarkUp = (float) $createQuoteForm->serviceFeeAmount - (float) $value['fare'] - (float) $value['taxes'];
-                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice($systemMarkUp);
-                        $selling = (float) $value['fare'] + (float) $value['taxes'] + $value['systemMarkUp'] + (float) $value['markup'];
-                        $value['selling'] = ProductQuoteHelper::roundPrice($selling);
-                    } elseif ((float) $oldPrice['taxes'] !== (float) $value['taxes']) {
-                        $systemMarkUp = (float) $createQuoteForm->serviceFeeAmount - (float) $value['fare'] - (float) $value['taxes'];
-                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice($systemMarkUp);
-                        $selling = (float) $value['fare'] + (float) $value['taxes'] + (float) $value['systemMarkUp'] + (float) $value['markup'];
-                        $value['selling'] = ProductQuoteHelper::roundPrice($selling);
-                    } elseif ((float) $oldPrice['markup'] !== (float) $value['markup']) {
-                        $selling = (float)$value['fare'] + (float)$value['taxes'] + (float)$value['systemMarkUp'] + (float)$value['markup'];
-                        $value['selling'] = ProductQuoteHelper::roundPrice($selling);
-                    }
-                    $createQuoteForm->prices[$key] = $value;
-                }
-            }
-        }
-        $createQuoteForm->oldPrices = serialize(ArrayHelper::toArray($createQuoteForm->prices));
-        return $createQuoteForm;
-    }
-
     public static function getTripsSegmentsData(string $reservationDump, string $cabinClass, int $tripType): array
     {
         $trips = [];

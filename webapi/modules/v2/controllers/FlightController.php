@@ -7,6 +7,7 @@ use DomainException;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\api\productQuoteGet\ProductQuoteGetForm;
+use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
 use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeForm;
@@ -1970,8 +1971,13 @@ class FlightController extends BaseController
                         'recommended' => $changeProductQuote->isRecommended(),
                         'relation_type' => ProductQuoteRelation::getTypeName($relationQuote->pqr_type_id),
                         'relation_type_id' => $relationQuote->pqr_type_id,
-                        'diffPrice' => $changeProductQuote->getDifferenceOriginPrice($productQuote),
                     ], $data);
+
+                    $data['data']['changePricing'] = null;
+                    if ($relationQuote->pqr_type_id === ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE) {
+                        $data['data']['changePricing'] = FlightQuotePaxPriceHelper::calculateVoluntaryPricing($changeProductQuote);
+                    }
+
                     $quoteList[] = $data;
                 }
                 $response->addMessage(

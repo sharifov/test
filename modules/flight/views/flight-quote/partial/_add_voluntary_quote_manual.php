@@ -181,9 +181,18 @@ $pjaxId = 'pjax-container-vc';
     });
 
     addVoluntaryQuoteForm.on('change', '.alt-quote-price', function (event) {
+        if (typeof $(this).attr('min') !== 'undefined') {
+            let min = parseFloat($(this).attr('min'));
+            let val = parseFloat($(this).val());
+            if (val < min) {
+                $(this).val(min);
+                return false;
+            }
+        }
+
         $('#box_loading').html('<span class="spinner-border spinner-border-sm"></span>');
         $('.alt-quote-price').prop('readonly', true);
-
+        
         $.ajax({
             url: '{$urlRefreshPrice}',
             type: 'POST',

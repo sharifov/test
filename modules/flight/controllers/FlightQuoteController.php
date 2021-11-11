@@ -25,6 +25,7 @@ use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\service\ReProtectionQuoteManualCreateService;
@@ -1072,7 +1073,7 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException('VoluntaryQuoteCreateForm not loaded');
                 }
 
-                $createQuoteForm = FlightQuoteHelper::refreshChangeQuotePrice($createQuoteForm);
+                $createQuoteForm = FlightQuotePaxPriceHelper::refreshChangeQuotePrice($createQuoteForm);
 
                 $response['data'] = $this->renderAjax('partial/_flight_quote_pax_price', [
                     'originProductQuote' => $originProductQuote,
