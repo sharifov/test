@@ -373,7 +373,7 @@ class BackOffice
     public static function voluntaryExchange(array $request): ?array
     {
         if (empty(SettingHelper::getVoluntaryExchangeBoEndpoint())) {
-            throw new \DomainException('BO endpoint is empty');
+            throw new BoResponseException('BO endpoint is empty', BoResponseException::BO_WRONG_ENDPOINT);
         }
 
         try {
@@ -385,13 +385,21 @@ class BackOffice
                 Yii::$app->params['backOffice']['serverUrlV3']
             );
 
+            $data = $response->data;
+            if (!empty($data['message']) && mb_stripos($data['message'], 'page not found') !== false) {
+                \Yii::error([
+                    'message' => 'BO wrong endpoint: ' . SettingHelper::getVoluntaryExchangeBoEndpoint(),
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:voluntaryExchange:wrongEndpoint');
+                throw new BoResponseException('BO wrong endpoint', BoResponseException::BO_WRONG_ENDPOINT);
+            }
             if (!isset($response->content) || !$content = JsonHelper::decode($response->content)) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange server error. Content not found',
                     'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response),
                 ], 'BackOffice:voluntaryExchange:serverError');
-                return null;
+                throw new BoResponseException('BO voluntaryExchange server error. Content not found', BoResponseException::BO_DATA_IS_EMPTY);
             }
             if (!$response->isOk) {
                 \Yii::error([
@@ -407,13 +415,12 @@ class BackOffice
                     'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($content),
                 ], 'BackOffice:voluntaryExchange:statusNotFound');
-                return null;
+                throw new BoResponseException('BO voluntaryExchange response - status not found in response', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
             }
             return $content;
         } catch (\Throwable $exception) {
-            \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryExchange');
+            throw $exception;
         }
-        return null;
     }
 
     public static function voluntaryRefund(array $requestData, string $endpoint): array
