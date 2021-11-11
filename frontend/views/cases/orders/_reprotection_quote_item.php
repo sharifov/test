@@ -336,7 +336,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                           ]) ?>
                                                       <?php endif; ?>
                                                       <?php
-                                                        /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, CRelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL, ReProtection Quote send email */
+                                                        /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL, ReProtection Quote send email */
                                                         if ($changeItem->isTypeReProtection() && !$changeQuote->isDeclined() && Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL)) {
                                                             echo Html::a('<i class="fa fa-envelope"></i> send SC Email', null, [
                                                                 'class' => 'dropdown-item btn-send-reprotection-quote-email',
@@ -354,64 +354,83 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                         }
                                                         ?>
                                                       <?php
-                                                      /** @abac new $caseAbacDto, CasesAbacObject::ACT_VIEW_QUOTES_DIFF, CasesAbacObject::ACTION_ACCESS, Action Reprotection Quote Difference */
-                                                        if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_VIEW_QUOTES_DIFF, CasesAbacObject::ACTION_ACCESS)) {
+                                                      /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL, ReProtection View Difference */
+                                                        if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DIFF)) {
                                                             echo Html::a('<i class="fas fa-columns"></i> view Difference', null, [
                                                                 'class' => 'dropdown-item btn-origin-reprotection-quote-diff',
-                                                                'data-url' => Url::to([$quote->getDiffUrlOriginReprotectionQuotes(), 'reprotection-quote-id' => $changeQuote->pq_id, 'origin-quote-id' => $quote->pq_id]),
+                                                                'data-url' => Url::to([
+                                                                    $quote->getDiffUrlOriginReprotectionQuotes(),
+                                                                    'reprotection-quote-id' => $changeQuote->pq_id,
+                                                                    'origin-quote-id' => $quote->pq_id,
+                                                                    'case_id' => $case->cs_id,
+                                                                    'order_id' => $order->or_id,
+                                                                    'pqc_id' => $changeItem->pqc_id
+                                                                ]),
                                                                 'data-toggle' => 'tooltip',
                                                                 'data-placement' => 'right',
                                                                 'title' => 'View Origin and Reprotection quotes Difference'
                                                             ]);
                                                         }
                                                         ?>
-                                                      <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS, Action Flight Reprotection quote confirm */ ?>
-                                                      <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) : ?>
+                                                      <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_CONFIRM, Flight ReProtection quote confirm */ ?>
+                                                      <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_CONFIRMED)) : ?>
                                                             <?= Html::a('<i class="fa fa-check-circle-o"></i> set Confirmed', null, [
                                                               'class' => 'dropdown-item btn-reprotection-confirm',
                                                               'data-url' => Url::to(['/product/product-quote/flight-reprotection-confirm']),
                                                               'data-reprotection-quote-id' => $changeQuote->pq_id,
+                                                              'data-case_id' => $case->cs_id,
+                                                              'data-order_id' => $order->or_id,
+                                                              'data-pqc_id' => $changeItem->pqc_id,
                                                               'data-toggle' => 'tooltip',
                                                               'data-placement' => 'right',
-                                                              'title' => 'Set Confirm status Reprotection quote'
+                                                              'title' => 'Set Confirm status ReProtection quote'
                                                           ]); ?>
                                                       <?php endif; ?>
-                                                      <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS, Action Flight Reprotection quote refund*/ ?>
-                                                      <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS)) : ?>
+                                                      <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTED, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote refund*/ ?>
+                                                      <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED)) : ?>
                                                             <?= Html::a('<i class="fa fa-reply"></i> set Refunded', null, [
                                                               'class' => 'dropdown-item btn-reprotection-refund',
                                                               'data-url' => Url::to(['/product/product-quote/flight-reprotection-refund']),
                                                               'data-reprotection-quote-id' => $changeQuote->pq_id,
-                                                              'data-title' => 'Reprotection Refund',
+                                                              'data-case_id' => $case->cs_id,
+                                                              'data-order_id' => $order->or_id,
+                                                              'data-pqc_id' => $changeItem->pqc_id,
+                                                              'data-title' => 'ReProtection Refund',
                                                               'data-toggle' => 'tooltip',
                                                               'data-placement' => 'right',
-                                                              'title' => 'Set Refund status Reprotection quote'
+                                                              'title' => 'Set Refund status ReProtection quote'
                                                           ]); ?>
                                                       <?php endif; ?>
 
-                                                      <?php /** @abac $caseAbacDto, CasesAbacObject::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE, CasesAbacObject::ACTION_ACCESS, Action Flight Reprotection quote recommended */ ?>
-                                                      <?php if (!$isRecommended && Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE, CasesAbacObject::ACTION_ACCESS)) : ?>
+                                                      <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote recommended */ ?>
+                                                      <?php if (!$isRecommended && Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_RECOMMENDED)) : ?>
                                                             <?= Html::a('<i class="fas fa-star"></i> set Recommended', null, [
                                                                 'class' => 'dropdown-item btn-reprotection-recommended',
                                                                 'data-url' => Url::to(['/product/product-quote/set-recommended']),
                                                                 'data-reprotection-quote-id' => $changeQuote->pq_id,
-                                                                'data-title' => 'Reprotection Set Recommended',
+                                                                'data-case_id' => $case->cs_id,
+                                                                'data-order_id' => $order->or_id,
+                                                                'data-pqc_id' => $changeItem->pqc_id,
+                                                                'data-title' => 'ReProtection Set Recommended',
                                                                 'data-toggle' => 'tooltip',
                                                                 'data-placement' => 'right',
-                                                                'title' => 'Set Recommended for Reprotection quote'
+                                                                'title' => 'Set Recommended for ReProtection quote'
                                                         ]); ?>
                                                       <?php endif; ?>
 
-                                                      <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE, ReProtection quote decline */ ?>
-                                                      <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE)) : ?>
+                                                      <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_DECLINE, ReProtection quote decline */ ?>
+                                                      <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_DECLINE)) : ?>
                                                             <?= Html::a('<i class="fas fa-times text-danger"></i> set Decline', null, [
                                                               'class' => 'dropdown-item btn-reprotection-decline',
                                                               'data-url' => Url::to(['/product/product-quote/ajax-decline-reprotection-quote']),
                                                               'data-reprotection-quote-id' => $changeQuote->pq_id,
-                                                              'data-title' => 'Decline Reprotection',
+                                                              'data-case_id' => $case->cs_id,
+                                                              'data-order_id' => $order->or_id,
+                                                              'data-pqc_id' => $changeItem->pqc_id,
+                                                              'data-title' => 'Decline ReProtection',
                                                               'data-toggle' => 'tooltip',
                                                               'data-placement' => 'right',
-                                                              'title' => 'Decline Reprotection quote'
+                                                              'title' => 'Decline ReProtection quote'
                                                           ]); ?>
                                                       <?php endif; ?>
 

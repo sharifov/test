@@ -663,8 +663,21 @@ class ProductQuoteController extends FController
     {
         try {
             $quoteId = Yii::$app->request->post('quoteId');
+            $caseId = Yii::$app->request->post('case_id');
+            $orderId = Yii::$app->request->post('order_id');
+            $pqcId = Yii::$app->request->post('pqc_id');
+
             if (!$quoteId) {
                 throw new \Exception('Not found Quote ID');
+            }
+            if (!$caseId) {
+                throw new \Exception('Not found Case ID');
+            }
+            if (!$orderId) {
+                throw new \Exception('Not found Order ID');
+            }
+            if (!$pqcId) {
+                throw new \Exception('Not found Product Quote Change ID');
             }
 
             $quote = Yii::createObject(ProductQuoteRepository::class)->find($quoteId);
@@ -674,13 +687,21 @@ class ProductQuoteController extends FController
             if (!$quote->flightQuote->isTypeReProtection()) {
                 throw new \Exception('Quote is not reprotection.');
             }
-            $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findParentRelated($quote);
-            $case = $productQuoteChange->pqcCase;
-            if (!$case) {
-                throw new \DomainException('Not found related case.');
+
+            if (!$order = Order::findOne($orderId)) {
+                throw new BadRequestHttpException('Order not found');
             }
-            $caseAbacDto = new CasesAbacDto($case);
-            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) {
+
+            $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+            $case = $this->casesRepository->find($caseId);
+
+            $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($quote);
+            $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+            $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+            $relatedProductQuoteAbacDto->mapCaseAttributes($case);
+
+            /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_CONFIRM, Act Flight ReProtection quote confirm */
+            if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_CONFIRMED)) {
                 throw new \Exception('You do not have access to perform this action.');
             }
 
@@ -701,8 +722,21 @@ class ProductQuoteController extends FController
     {
         try {
             $quoteId = Yii::$app->request->post('quoteId');
+            $caseId = Yii::$app->request->post('case_id');
+            $orderId = Yii::$app->request->post('order_id');
+            $pqcId = Yii::$app->request->post('pqc_id');
+
             if (!$quoteId) {
                 throw new \Exception('Not found Quote ID');
+            }
+            if (!$caseId) {
+                throw new \Exception('Not found Case ID');
+            }
+            if (!$orderId) {
+                throw new \Exception('Not found Order ID');
+            }
+            if (!$pqcId) {
+                throw new \Exception('Not found Product Quote Change ID');
             }
 
             $quote = Yii::createObject(ProductQuoteRepository::class)->find($quoteId);
@@ -713,7 +747,7 @@ class ProductQuoteController extends FController
                 throw new \Exception('Quote is not reprotection.');
             }
 
-            $productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findParentRelated($quote);
+            /*$productQuoteChange = Yii::createObject(ProductQuoteChangeRepository::class)->findParentRelated($quote);
             $case = $productQuoteChange->pqcCase;
             if (!$case) {
                 throw new \DomainException('Not found related case.');
@@ -721,6 +755,23 @@ class ProductQuoteController extends FController
             $caseAbacDto = new CasesAbacDto($case);
             if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS)) {
                 throw new \Exception('You do not have access to perform this action');
+            }*/
+
+            if (!$order = Order::findOne($orderId)) {
+                throw new BadRequestHttpException('Order not found');
+            }
+
+            $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+            $case = $this->casesRepository->find($caseId);
+
+            $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($quote);
+            $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+            $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+            $relatedProductQuoteAbacDto->mapCaseAttributes($case);
+
+            /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTED, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote refund */
+            if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED)) {
+                throw new \Exception('You do not have access to perform this action.');
             }
 
             $lastFlightQuoteFlightBookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $productQuoteChange->pqcPq->flightQuote->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
@@ -758,6 +809,9 @@ class ProductQuoteController extends FController
     public function actionSetRecommended()
     {
         $changeQuoteId = Yii::$app->request->post('quoteId', 0);
+        $caseId = Yii::$app->request->post('case_id', 0);
+        $orderId = Yii::$app->request->post('order_id', 0);
+        $pqcId = Yii::$app->request->post('pqc_id', 0);
 
         $result = [
             'error' => false,
@@ -765,11 +819,24 @@ class ProductQuoteController extends FController
         ];
 
         try {
-            if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE, CasesAbacObject::ACTION_ACCESS)) {
-                throw new \DomainException('You do not have access to perform this action');
+            $changeQuote = $this->productQuoteRepository->find($changeQuoteId);
+
+            if (!$order = Order::findOne($orderId)) {
+                throw new BadRequestHttpException('Order not found');
             }
 
-            $changeQuote = $this->productQuoteRepository->find($changeQuoteId);
+            $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+            $case = $this->casesRepository->find($caseId);
+
+            $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($changeQuote);
+            $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+            $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+            $relatedProductQuoteAbacDto->mapCaseAttributes($case);
+
+            /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Act Flight ReProtection quote recommended */
+            if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_RECOMMENDED)) {
+                throw new \DomainException('You do not have access to perform this action');
+            }
 
             if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByChangeQuote($changeQuote->pq_id)) {
                 throw new NotFoundException('Origin Quote Not Found');
@@ -791,15 +858,29 @@ class ProductQuoteController extends FController
     public function actionAjaxDeclineReprotectionQuote()
     {
         $reprotectionQuoteId = Yii::$app->request->post('quoteId');
+        $caseId = Yii::$app->request->post('case_id', 0);
+        $orderId = Yii::$app->request->post('order_id', 0);
+        $pqcId = Yii::$app->request->post('pqc_id', 0);
 
         if (!$reprotectionQuote = ProductQuote::findOne($reprotectionQuoteId)) {
             throw new BadRequestHttpException('Reprotection quote not found');
         }
 
-        $productQuoteAbacDto = new ProductQuoteAbacDto($reprotectionQuote);
-        /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE, ReProtection quote decline */
-        if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE)) {
-            throw new ForbiddenHttpException('Access denied');
+        if (!$order = Order::findOne($orderId)) {
+            throw new BadRequestHttpException('Order not found');
+        }
+
+        $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+        $case = $this->casesRepository->find($caseId);
+
+        $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($reprotectionQuote);
+        $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+        $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+        $relatedProductQuoteAbacDto->mapCaseAttributes($case);
+
+        /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Act ReProtection quote decline */
+        if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_DECLINE)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action');
         }
 
         $result = [

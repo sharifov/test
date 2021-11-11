@@ -51,7 +51,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
 
-    public const ACTION_DECLINE_RE_PROTECTION_QUOTE = 'declineReProtectionQuote';
+    public const ACTION_DECLINE_RE_PROTECTION_QUOTE = 'declineReProtectionQuote'; /*TODO:: to remove was moved to RelatedProductQuoteAbacObject.php*/
     public const ACTION_ACCESS_DETAILS = 'accessDetails';
     public const ACTION_CREATE_CHANGE = 'createChange';
     public const ACTION_CREATE_VOL_REFUND = 'createVoluntaryRefundQuote';

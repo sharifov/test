@@ -40,6 +40,11 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
     public const ACTION_DELETE  = 'delete';
     public const ACTION_ACCESS_DETAILS = 'accessDetails';
     public const ACTION_SEND_SC_EMAIL = 'sendSCEmail';
+    public const ACTION_ACCESS_DIFF = 'accessDifference';
+    public const ACTION_SET_CONFIRMED = 'setConfirmed';
+    public const ACTION_SET_REFUNDED = 'setRefunded';
+    public const ACTION_SET_RECOMMENDED = 'setRecommended';
+    public const ACTION_SET_DECLINE = 'setDecline';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -47,9 +52,11 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         self::OBJ_RELATED_PRODUCT_QUOTE => [
             self::ACTION_ACCESS_DETAILS,
             self::ACTION_SEND_SC_EMAIL,
-            //self::ACTION_CREATE_CHANGE,
-            //self::ACTION_CREATE_VOL_REFUND,
-            //self::ACTION_DELETE
+            self::ACTION_ACCESS_DIFF,
+            self::ACTION_SET_CONFIRMED,
+            self::ACTION_SET_REFUNDED,
+            self::ACTION_SET_RECOMMENDED,
+            self::ACTION_SET_DECLINE,
         ]
     ];
 

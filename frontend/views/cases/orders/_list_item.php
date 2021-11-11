@@ -695,7 +695,10 @@ $('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotecti
     $.ajax({
         type: 'POST',
         data: {
-            quoteId: btn.data('reprotection-quote-id')
+            quoteId: btn.data('reprotection-quote-id'),
+            case_id: btn.data('case_id'),
+            order_id: btn.data('order_id'),
+            pqc_id: btn.data('pqc_id')
         },
         url: url     
     })
@@ -729,7 +732,10 @@ $('body').off('click', '.btn-reprotection-refund, .btn-reprotection-recommended,
     $.ajax({
         type: 'POST',
         data: {
-            quoteId: btn.data('reprotection-quote-id')
+            quoteId: btn.data('reprotection-quote-id'),
+            case_id: btn.data('case_id'),
+            order_id: btn.data('order_id'),
+            pqc_id: btn.data('pqc_id')
         },
         url: url     
     })

@@ -515,13 +515,25 @@ class FlightQuoteController extends FController
     {
         $originQuoteId = Yii::$app->request->get('origin-quote-id', 0);
         $reprotectionQuoteId = Yii::$app->request->get('reprotection-quote-id', 0);
-
-        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_VIEW_QUOTES_DIFF, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access denied');
-        }
+        $caseId = Yii::$app->request->get('case_id', 0);
+        $orderId = Yii::$app->request->get('order_id', 0);
+        $pqcId = Yii::$app->request->get('pqc_id', 0);
 
         $originQuote = $this->productQuoteRepository->find($originQuoteId);
         $reprotectionQuote = $this->productQuoteRepository->find($reprotectionQuoteId);
+        $case = $this->casesRepository->find($caseId);
+        $order = $this->orderRepository->find($orderId);
+        $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+
+        $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($reprotectionQuote);
+        $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+        $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+        $relatedProductQuoteAbacDto->mapCaseAttributes($case);
+
+        /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL, ReProtection View Difference */
+        if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DIFF)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
 
         $originQuoteDetailsHtml = $this->renderPartial('partial/_quote_view_details', [
             'productQuote' => $originQuote,
