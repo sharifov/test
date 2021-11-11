@@ -19,6 +19,7 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\entities\cases\CaseEventLog;
+use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
@@ -592,7 +593,7 @@ class FlightQuoteExchangeController extends BaseController
                         CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
                         'Request (create Voluntary Exchange) to Back Office is failed'
                     );
-                    throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
+                    throw new BoResponseException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
                 }
                 $dataJson = $flightRequest->fr_data_json;
                 $dataJson['responseBo'] = $responseBo;
@@ -631,6 +632,20 @@ class FlightQuoteExchangeController extends BaseController
                 new DataMessage($dataMessage),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
+        } catch (BoResponseException $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['bookingId'] = $post['bookingId'] ?? null;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionCreate:BoResponseException');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
@@ -638,7 +653,7 @@ class FlightQuoteExchangeController extends BaseController
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
             ];
-            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionCreate:Warning');
 
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
@@ -652,7 +667,7 @@ class FlightQuoteExchangeController extends BaseController
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
             ];
-            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+            \Yii::error($message, 'FlightQuoteExchangeController:actionCreate:Throwable');
 
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
@@ -895,6 +910,20 @@ class FlightQuoteExchangeController extends BaseController
             return new SuccessResponse(
                 new DataMessage($dataMessage),
                 new CodeMessage(ApiCodeException::SUCCESS)
+            );
+        } catch (BoResponseException $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['bookingId'] = $post['bookingId'] ?? null;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionConfirm:BoResponseException');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
             );
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
