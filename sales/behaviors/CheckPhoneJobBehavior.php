@@ -33,7 +33,7 @@ class CheckPhoneJobBehavior extends Behavior
             $job = new CheckPhoneNumberJob();
             $job->client_id = $clientPhone->client_id;
             $job->client_phone_id = $clientPhone->id;
-            Yii::$app->queue_phone_check->priority(10)->push($job);
+            Yii::$app->queue_phone_check->priority(10)->delay(3)->push($job);
         }
     }
 
@@ -47,7 +47,7 @@ class CheckPhoneJobBehavior extends Behavior
                     $job = new CheckPhoneNumberJob();
                     $job->client_id = $clientPhone->client_id;
                     $job->client_phone_id = $clientPhone->id;
-                    Yii::$app->queue_phone_check->priority(100)->push($job);
+                    Yii::$app->queue_phone_check->priority(100)->delay(3)->push($job);
                 }
             }
         }
