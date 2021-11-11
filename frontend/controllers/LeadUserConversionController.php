@@ -76,7 +76,7 @@ class LeadUserConversionController extends FController
                 $leadUserConversionRepository = new LeadUserConversionRepository();
                 try {
                     if ($leadUserConversionRepository->exist($form->leadId, $form->userId)) {
-                        return $this->asJson(['success' => false, 'User conversion for this lead and user is already exist.']);
+                        return $this->asJson(['success' => false, 'message' => 'User conversion for this lead and user is already exist.']);
                     }
                     $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
                     $isAdded = $leadUserConversionService->add(
