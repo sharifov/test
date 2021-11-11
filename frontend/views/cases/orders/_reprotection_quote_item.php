@@ -2,6 +2,7 @@
 
 use common\models\Currency;
 use modules\cases\src\abac\CasesAbacObject;
+use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\order\src\entities\order\Order;
 use modules\product\src\abac\dto\ProductQuoteAbacDto;
 use modules\product\src\abac\ProductQuoteAbacObject;
@@ -10,6 +11,7 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -169,7 +171,6 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                         <th style="width: 140px">Created</th>
                         <th style="width: 60px" title="is Automate">Auto</th>
                         <th>Decision</th>
-                        <th>Penalty</th>
                         <th style="width: 60px">Action</th>
                     </tr>
                     </thead>
@@ -191,9 +192,6 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                             <td>
                                 <?= $changeItem->getDecisionTypeLabel()?><br />
                                 <small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small>
-                            </td>
-                            <td>
-                                <?php echo $changeItem->pqc_penalty_amount ? $changeItem->pqc_penalty_amount . ' ' . Currency::getDefaultCurrencyCode() : '-' ?>
                             </td>
                             <td>
 
@@ -290,7 +288,8 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                             <th style="width: 50px" title="Recommended">Rec</th>
                                           <th>Status</th>
                                           <th style="width: 180px">Created</th>
-                                          <th>Price Diff</th>
+                                          <th>Extra Markup <?php echo Currency::getDefaultCurrencyCode() ?></th>
+                                          <th style="white-space: nowrap;">Price <?php echo Currency::getDefaultCurrencyCode() ?></th>
                                           <th style="width: 60px;">Action</th>
                                         </tr>
                                       </thead>
@@ -308,8 +307,12 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                               <td><small><?=$changeQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeQuote->pq_created_dt)) : '-'?></small></td>
                                               <td>
                                                 <span style="white-space: nowrap;">
-
-                                                    <?php echo $changeQuote->getDifferenceOriginPrice($quote) ?> <?php echo $changeQuote->pq_origin_currency ?>
+                                                    <?php echo FlightQuotePaxPriceHelper::priceFormat($changeQuote->pq_agent_markup) ?>
+                                                </span>
+                                              </td>
+                                              <td>
+                                                <span style="white-space: nowrap;">
+                                                    <?php echo FlightQuotePaxPriceHelper::priceFormat($changeQuote->pq_price) ?>
                                                 </span>
                                               </td>
                                               <td>

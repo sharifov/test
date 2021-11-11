@@ -69,13 +69,9 @@ class FlightQuotePaxPriceHelper
             foreach ($newPrices as $key => $value) {
                 if ((int) $oldPrice['paxCodeId'] === (int) $value['paxCodeId']) {
                     if ((float) $oldPrice['fare'] !== (float) $value['fare']) {
-                        //$systemMarkUp = (float) $createQuoteForm->serviceFeeAmount - (float) $value['fare'] - (float) $value['taxes'];
-                        //$value['systemMarkUp'] = ProductQuoteHelper::roundPrice($systemMarkUp);
                         $selling = (float) $value['fare'] + (float) $value['taxes'] + $value['systemMarkUp'] + (float) $value['markup'];
                         $value['selling'] = ProductQuoteHelper::roundPrice($selling);
                     } elseif ((float) $oldPrice['taxes'] !== (float) $value['taxes']) {
-                        //$systemMarkUp = (float) $createQuoteForm->serviceFeeAmount - (float) $value['fare'] - (float) $value['taxes'];
-                        //$value['systemMarkUp'] = ProductQuoteHelper::roundPrice($systemMarkUp);
                         $selling = (float) $value['fare'] + (float) $value['taxes'] + (float) $value['systemMarkUp'] + (float) $value['markup'];
                         $value['selling'] = ProductQuoteHelper::roundPrice($selling);
                     } elseif ((float) $oldPrice['markup'] !== (float) $value['markup']) {
@@ -112,5 +108,10 @@ class FlightQuotePaxPriceHelper
             'markup' => $markup,
             'price' => $price,
         ];
+    }
+
+    public static function priceFormat(float $price, int $precision = 2): string
+    {
+        return number_format(ProductQuoteHelper::roundPrice($price, $precision), $precision);
     }
 }

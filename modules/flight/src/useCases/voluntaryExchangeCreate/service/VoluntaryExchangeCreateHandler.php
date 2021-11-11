@@ -168,20 +168,10 @@ class VoluntaryExchangeCreateHandler
         }
 
         try {
-            $boPrepareService = new VoluntaryExchangeBOPrepareService($this->case->project, $this->originProductQuote);
-            $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
-
-            $clientPenaltyAmount = ($this->originProductQuote->pq_client_currency_rate && $voluntaryExchangeBOService->getServiceFeeAmount() !== null) ?
-                $voluntaryExchangeBOService->getServiceFeeAmount() * $this->originProductQuote->pq_client_currency_rate : null;
-
             $this->productQuoteChange = ProductQuoteChange::createVoluntaryExchange(
                 $this->originProductQuote->pq_id,
                 $this->case->cs_id,
-                false,
-                $voluntaryExchangeBOService->getServiceFeeAmount(),
-                $this->originProductQuote->pq_client_currency,
-                $this->originProductQuote->pq_client_currency_rate,
-                $clientPenaltyAmount
+                false
             );
             $this->productQuoteChange->setDataJson($flightProductQuoteData);
             $this->productQuoteChange->statusToPending();

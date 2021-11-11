@@ -36,10 +36,6 @@ use yii\helpers\ArrayHelper;
  * @property int|null $pqc_type_id
  * @property array|null $pqc_data_json
  * @property string $pqc_gid
- * @property float|null $pqc_penalty_amount
- * @property float|null $pqc_client_penalty_amount
- * @property string|null $pqc_client_currency
- * @property float|null $pqc_client_currency_rate
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
@@ -202,11 +198,6 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             ['pqc_data_json', CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true],
 
             ['pqc_gid', 'string', 'max' => 32],
-
-            [['pqc_client_currency'], 'string', 'max' => 3],
-            [['pqc_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pqc_client_currency' => 'cur_code']],
-
-            [['pqc_penalty_amount', 'pqc_client_penalty_amount', 'pqc_client_currency_rate'], 'number', 'min' => 0, 'max' => 999999.99],
         ];
     }
 
@@ -229,10 +220,6 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_type_id' => 'Type ID',
             'pqc_data_json' => 'Data Json',
             'pqc_gid' => 'Gid',
-            'pqc_client_currency' => 'Client currency',
-            'pqc_penalty_amount' => 'Penalty amount',
-            'pqc_client_penalty_amount' => 'Client Penalty Amount',
-            'pqc_client_currency_rate' => 'Client currency rate',
         ];
     }
 
@@ -297,18 +284,10 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public static function createVoluntaryExchange(
         int $productQuoteId,
         ?int $caseId,
-        ?bool $isAutomate = null,
-        ?float $penaltyAmount = null,
-        ?string $clientCurrency = null,
-        ?float $clientCurrencyRate = null,
-        ?float $clientPenaltyAmount = null
+        ?bool $isAutomate = null
     ): ProductQuoteChange {
         $model = self::createNew($productQuoteId, $caseId, $isAutomate);
         $model->pqc_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
-        $model->pqc_penalty_amount = $penaltyAmount;
-        $model->pqc_client_currency = $clientCurrency;
-        $model->pqc_client_penalty_amount = $clientPenaltyAmount;
-        $model->pqc_client_currency_rate = $clientCurrencyRate;
         return $model;
     }
 

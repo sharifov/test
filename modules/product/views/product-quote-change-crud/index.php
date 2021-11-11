@@ -86,7 +86,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
-            'pqc_penalty_amount',
             [
                 'attribute' => 'pqc_created_dt',
                 'class' => DateTimeColumn::class
