@@ -483,8 +483,6 @@ class FlightQuoteController extends FController
         if (!$lead) {
             $case = $this->casesRepository->find($caseId);
             $order = $this->orderRepository->find($orderId);
-            $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
-
             if (!$productQuote->relateParent) {
                 $productQuoteAbacDto = new ProductQuoteAbacDto($productQuote);
                 $productQuoteAbacDto->mapCaseAttributes($case);
@@ -494,6 +492,7 @@ class FlightQuoteController extends FController
                     throw new ForbiddenHttpException('Access denied');
                 }
             } else {
+                $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
                 $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($productQuote);
                 $relatedProductQuoteAbacDto->mapOrderAttributes($order);
                 $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
