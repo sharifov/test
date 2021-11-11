@@ -174,6 +174,13 @@ class FlightQuoteRefundController extends ApiBaseController
      *   "code": 13107,
      *   "type": "app"
      * }
+     * @apiErrorExample {html} Codes designation
+     * [
+     *      13104 - Request is not POST
+     *      13106 - Post has not loaded
+     *      13107 - Validation Failed
+     *      13112 - ProductQuoteRefund not found by BookingId
+     * ]
      */
     public function actionInfo()
     {
@@ -440,6 +447,30 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "errors": [],
      *      "type": "app_bo"
      * }
+     * @apiErrorExample {html} Codes designation
+     * [
+     *      13101 - Api User has no related project
+     *      13104 - Request is not POST
+     *      13106 - Post has not loaded
+     *      13107 - Validation Failed
+     *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *
+     *      15401 - Case creation failed; This is system crm error
+     *      15402 - Case Sale creation failed; This is system crm error
+     *      15403 - Client creation failed; This is system crm error
+     *      15404 - Order creation failed; This is system crm error
+     *      15405 - Origin Product Quote creation failed; This is system crm error
+     *      15409 - Quote not available for refund due to exists active refund or change
+     *      15410 - Quote not available for refund due to status of product quote not in changeable list
+     *      15411 - Request to BO failed; See tab "Error From BO"
+     *      15412 - BO endpoint is not set; This is system crm error
+     *      150001 - Flight Request saving failed; This is system crm error
+     *
+     *      601 - BO Server Error: i.e. request timeout
+     *      602 - BO response body is empty
+     *      603 - BO response type is invalid (not array)
+     * ]
+     *
      */
     public function actionCreate()
     {
@@ -484,7 +515,8 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         }
 
-        $hash = FlightRequest::generateHashFromDataJson($post);
+        $filteredPost = $voluntaryRefundCreateForm->getFilteredData();
+        $hash = FlightRequest::generateHashFromDataJson($filteredPost);
         if (FlightRequestQuery::existActiveRequestByHash($hash)) {
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage('FlightRequest (hash: ' . $hash . ') already processing'),
@@ -498,10 +530,11 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundCreateForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_REFUND_CREATE,
-                $voluntaryRefundCreateForm->getFilteredData(),
+                $filteredPost,
                 $project->id,
                 $this->apiUser->au_id
             );
+            $flightRequest->statusToPending();
             $flightRequest = $this->flightRequestRepository->save($flightRequest);
 
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->bookingId)) {
@@ -510,7 +543,7 @@ class FlightQuoteRefundController extends ApiBaseController
                         throw new \DomainException('Quote not available for refund due to exists active refund or change', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
                     }
                 } else {
-                    throw new \DomainException('Quote not available for refund due to status of product quote not in changeable list', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
+                    throw new \DomainException('Quote not available for refund due to status of product quote not in changeable list', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE_CHG_LIST);
                 }
                 $refundResult = $this->voluntaryRefundService
                     ->processProductQuote($productQuote)
@@ -703,10 +736,15 @@ class FlightQuoteRefundController extends ApiBaseController
      * }
      * @apiErrorExample {html} Codes designation
      * [
-     *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *      13101 - Api User has no related project
+     *      13104 - Request is not POST
+     *      13106 - Post has not loaded
      *      13107 - Validation Failed
      *      13112 - Not found refund in pending status by booking and gid
-     *      15411 - Bo request failed; See tab "Error From BO"
+     *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *      15411 - Request to BO failed; See tab "Error From BO"
+     *      15412 - BO endpoint is not set; This is system crm error
+     *      150001 - Flight Request saving failed; This is system crm error
      *      601 - BO Server Error: i.e. request timeout
      *      602 - BO response body is empty
      *      603 - BO response type is invalid (not array)
@@ -754,19 +792,27 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         }
 
-        try {
-            $hash = FlightRequest::generateHashFromDataJson($post);
-            if (FlightRequestQuery::existActiveRequestByHash($hash)) {
-                throw new \DomainException('FlightRequest (hash: ' . $hash . ') already processing', ApiCodeException::REQUEST_ALREADY_PROCESSED);
-            }
+        $filteredPost = $voluntaryRefundConfirmForm->getFilteredData();
+        $hash = FlightRequest::generateHashFromDataJson($filteredPost);
+        if (FlightRequestQuery::existActiveRequestByHash($hash)) {
+            return $this->endApiLog(new ErrorResponse(
+                new MessageMessage('FlightRequest (hash: ' . $hash . ') already processing'),
+                new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new CodeMessage((int)ApiCodeException::REQUEST_ALREADY_PROCESSED),
+                new TypeMessage('app')
+            ));
+        }
 
+        try {
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundConfirmForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_REFUND_CONFIRM,
-                $voluntaryRefundConfirmForm->getFilteredData(),
+                $filteredPost,
                 $project->id,
                 $this->apiUser->au_id
             );
+            $flightRequest->statusToPending();
             $flightRequest = $this->flightRequestRepository->save($flightRequest);
 
             $productQuoteRefund = ProductQuoteRefundQuery::getByBookingIdGidStatuses($voluntaryRefundConfirmForm->bookingId, $voluntaryRefundConfirmForm->refundGid, [ProductQuoteRefundStatus::PENDING]);
@@ -787,11 +833,7 @@ class FlightQuoteRefundController extends ApiBaseController
 
             $boDataRequest = BoRequestDataHelper::getDataForVoluntaryRefundConfirm($project->api_key, $voluntaryRefundConfirmForm, $productQuoteRefund);
             $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
-            \Yii::info([
-                'sentData' => $boDataRequest,
-                'response' => $result
-            ], 'info\BoConfirmRequest');
-            $boRequestConfirmResult = true;
+
             if (mb_strtolower($result['status']) === 'failed') {
                 $productQuoteRefund->error();
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
@@ -829,7 +871,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->save();
             \Yii::error(
                 AppHelper::throwableLog($e, true),
-                'FlightQuoteRefundController:actionCreate:BoResponseException'
+                'FlightQuoteRefundController:actionConfirm:BoResponseException'
             );
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage($e->getMessage()),

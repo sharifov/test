@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteChange\search;
 
+use common\models\Currency;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;

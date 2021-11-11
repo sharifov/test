@@ -25,6 +25,7 @@ use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\service\ReProtectionQuoteManualCreateService;
@@ -929,7 +930,7 @@ class FlightQuoteController extends FController
         return $this->render('partial/_add_change', $params);
     }
 
-    public function actionCreateVoluntaryQuote()
+    public function actionCreateVoluntaryQuote(): string
     {
         $flightId = Yii::$app->request->get('flight_id', 0);
         $caseId = Yii::$app->request->get('case_id', 0);
@@ -966,7 +967,10 @@ class FlightQuoteController extends FController
                 throw new \RuntimeException('Exchange is not allowed');
             }
 
-            $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight);
+            $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
+            $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());
+            $form->setServiceFeeCurrency($voluntaryExchangeBOService->getServiceFeeCurrency());
+            $form->setServiceFeeAmount($voluntaryExchangeBOService->getServiceFeeAmount());
         } catch (\RuntimeException | \DomainException $exception) {
             Yii::warning(AppHelper::throwableLog($exception), 'FlightQuoteController:actionCreateVoluntaryQuote:Exception');
             return $exception->getMessage();
@@ -1057,7 +1061,7 @@ class FlightQuoteController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionRefreshVoluntaryPrice()
+    public function actionRefreshVoluntaryPrice(): array
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1077,7 +1081,7 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException('VoluntaryQuoteCreateForm not loaded');
                 }
 
-                $createQuoteForm = FlightQuoteHelper::refreshChangeQuotePrice($createQuoteForm);
+                $createQuoteForm = FlightQuotePaxPriceHelper::refreshChangeQuotePrice($createQuoteForm);
 
                 $response['data'] = $this->renderAjax('partial/_flight_quote_pax_price', [
                     'originProductQuote' => $originProductQuote,
@@ -1098,7 +1102,7 @@ class FlightQuoteController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionCreateReProtectionQuote()
+    public function actionCreateReProtectionQuote(): string
     {
         $flightId = Yii::$app->request->get('flight_id', 0);
         $flight = $this->flightRepository->find($flightId);
@@ -1140,7 +1144,7 @@ class FlightQuoteController extends FController
         return $this->render('partial/_add_re_protection_manual', $params);
     }
 
-    public function actionAjaxSaveReProtection()
+    public function actionAjaxSaveReProtection(): array
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;

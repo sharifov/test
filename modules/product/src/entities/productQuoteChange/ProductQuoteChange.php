@@ -3,6 +3,7 @@
 namespace modules\product\src\entities\productQuoteChange;
 
 use common\components\validators\CheckAndConvertToJsonValidator;
+use common\models\Currency;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionConfirmEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
@@ -280,8 +281,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return $model;
     }
 
-    public static function createVoluntaryExchange(int $productQuoteId, ?int $caseId, ?bool $isAutomate = null): ProductQuoteChange
-    {
+    public static function createVoluntaryExchange(
+        int $productQuoteId,
+        ?int $caseId,
+        ?bool $isAutomate = null
+    ): ProductQuoteChange {
         $model = self::createNew($productQuoteId, $caseId, $isAutomate);
         $model->pqc_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
         return $model;

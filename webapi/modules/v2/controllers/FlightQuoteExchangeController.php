@@ -19,6 +19,7 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\entities\cases\CaseEventLog;
+use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\setting\SettingHelper;
@@ -189,13 +190,13 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{2}}                    billing.country_id           Country code (for example "US")
      * @apiParam {string}                       billing.country              Country name
      * @apiParam {string{10}}                   [billing.zip]                Zip
-     * @apiParam {string{20}}                   [billing.contact_phone]      Contact phone
-     * @apiParam {string{160}}                  [billing.contact_email]      Contact email
+     * @apiParam {string{20}}                   billing.contact_phone      Contact phone
+     * @apiParam {string{160}}                  billing.contact_email      Contact email
      * @apiParam {string{60}}                   [billing.contact_name]       Contact name
      * @apiParam {object}                       [payment_request]                                   Payment request
      * @apiParam {number}                       payment_request.amount                              Customer must pay for initiate refund process
      * @apiParam {string{3}}                    payment_request.currency                            Currency code
-     * @apiParam {string{2}}                    payment_request.method_key                          Method key (for example "cc")
+     * @apiParam {string{50}}                   payment_request.method_key                          Method key (for example "card")
      * @apiParam {object}                       payment_request.method_data                         Method data
      * @apiParam {object}                       payment_request.method_data.card                    Card (for credit card)
      * @apiParam {string{..20}}                 payment_request.method_data.card.number             Number
@@ -592,7 +593,7 @@ class FlightQuoteExchangeController extends BaseController
                         CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
                         'Request (create Voluntary Exchange) to Back Office is failed'
                     );
-                    throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
+                    throw new BoResponseException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
                 }
                 $dataJson = $flightRequest->fr_data_json;
                 $dataJson['responseBo'] = $responseBo;
@@ -631,6 +632,20 @@ class FlightQuoteExchangeController extends BaseController
                 new DataMessage($dataMessage),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
+        } catch (BoResponseException $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['bookingId'] = $post['bookingId'] ?? null;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionCreate:BoResponseException');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
+            );
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
@@ -638,7 +653,7 @@ class FlightQuoteExchangeController extends BaseController
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
             ];
-            \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionCreate:Warning');
 
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
@@ -652,7 +667,7 @@ class FlightQuoteExchangeController extends BaseController
                 'username' => $this->auth->au_api_username ?? null,
                 'project' => $this->auth->auProject->project_key ?? null,
             ];
-            \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
+            \Yii::error($message, 'FlightQuoteExchangeController:actionCreate:Throwable');
 
             return new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR),
@@ -690,13 +705,13 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{2}}                    billing.country_id           Country code (for example "US")
      * @apiParam {string}                       billing.country              Country name
      * @apiParam {string{10}}                   [billing.zip]                Zip
-     * @apiParam {string{20}}                   [billing.contact_phone]      Contact phone
-     * @apiParam {string{160}}                  [billing.contact_email]      Contact email
+     * @apiParam {string{20}}                   billing.contact_phone           Contact phone
+     * @apiParam {string{160}}                  billing.contact_email           Contact email
      * @apiParam {string{60}}                   [billing.contact_name]       Contact name
      * @apiParam {object}                       [payment_request]                                   Payment request
      * @apiParam {number}                       payment_request.amount                              Customer must pay for initiate refund process
      * @apiParam {string{3}}                    payment_request.currency                            Currency code
-     * @apiParam {string{2}}                    payment_request.method_key                          Method key (for example "cc")
+     * @apiParam {string{50}}                   payment_request.method_key                          Method key (for example "card")
      * @apiParam {object}                       payment_request.method_data                         Method data
      * @apiParam {object}                       payment_request.method_data.card                    Card (for credit card)
      * @apiParam {string{..20}}                 payment_request.method_data.card.number             Number
@@ -895,6 +910,20 @@ class FlightQuoteExchangeController extends BaseController
             return new SuccessResponse(
                 new DataMessage($dataMessage),
                 new CodeMessage(ApiCodeException::SUCCESS)
+            );
+        } catch (BoResponseException $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['bookingId'] = $post['bookingId'] ?? null;
+            $message['apiUser'] = [
+                'username' => $this->auth->au_api_username ?? null,
+                'project' => $this->auth->auProject->project_key ?? null,
+            ];
+            \Yii::warning($message, 'FlightQuoteExchangeController:actionConfirm:BoResponseException');
+
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY),
+                new ErrorsMessage($throwable->getMessage()),
+                new CodeMessage($throwable->getCode())
             );
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);

@@ -257,9 +257,9 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializa
 
     public function calculateSystemPrices(): void
     {
-        $this->pqor_client_penalty_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_penalty_amount, $this->clientCurrency->cur_base_rate);
-        $this->pqor_client_processing_fee_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_processing_fee_amount, $this->clientCurrency->cur_base_rate);
-        $this->pqor_client_refund_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_refund_amount, $this->clientCurrency->cur_base_rate);
-        $this->pqor_client_selling_price = CurrencyHelper::convertToBaseCurrency($this->pqor_client_selling_price, $this->clientCurrency->cur_base_rate);
+        $this->pqor_penalty_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_penalty_amount, $this->clientCurrency->cur_base_rate);
+        $this->pqor_processing_fee_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_processing_fee_amount, $this->clientCurrency->cur_base_rate);
+        $this->pqor_refund_amount = CurrencyHelper::convertToBaseCurrency($this->pqor_client_refund_amount, $this->clientCurrency->cur_base_rate);
+        $this->pqor_selling_price = CurrencyHelper::convertToBaseCurrency($this->pqor_client_selling_price, $this->clientCurrency->cur_base_rate);
     }
 }

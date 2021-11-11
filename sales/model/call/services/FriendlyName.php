@@ -13,6 +13,6 @@ class FriendlyName
 
     public static function nextWithSid(string $sid): string
     {
-        return substr($sid, 0, 16) . substr(str_replace('-', '', UuidHelper::uuid()), 0, 16);
+        return substr($sid, 0, 5) . substr(str_replace('-', '', UuidHelper::uuid()), 0, 27);
     }
 }

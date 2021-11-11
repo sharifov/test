@@ -70,7 +70,7 @@ $js = <<<JS
         btnObj.prop('disabled', true);
     });
 
-    $('#{$pjaxId}}').on('pjax:end', function (data, xhr) {
+    $('#{$pjaxId}').on('pjax:end', function (data, xhr) {
         btnObj.prop('disabled', true);
         btnObj.html(btnHtml);
         if (xhr.status !== 200) {
@@ -79,4 +79,3 @@ $js = <<<JS
     });
 JS;
 $this->registerJs($js);
-?>

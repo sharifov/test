@@ -42,6 +42,18 @@ $pjaxId = 'pjax-container-vc';
 ]) ?>
 <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'add-quote-form', 'enableClientValidation' => true]) ?>
 
+     <div class="row">
+        <div class="col-md-12">
+            <?php if (!empty($createQuoteForm->customerPackage)) : ?>
+                <?php $customerPackage = unserialize($createQuoteForm->customerPackage, ['allowed_classes' => false]) ?>
+                <b>Customer Package Data:</b> <br />
+                Processing Fee - <?php echo $createQuoteForm->serviceFeeAmount ?> <?php echo $createQuoteForm->serviceFeeCurrency . ' (per pax)' ?? '' ?><br />
+                Without Penalty - <small><?php echo Yii::$app->formatter->asBooleanByLabel($customerPackage['withoutPenalty']) ?></small><br />
+                Without Price Difference - <small><?php echo Yii::$app->formatter->asBooleanByLabel($customerPackage['withoutPriceDiff']) ?></small>
+            <?php endif ?>
+        </div>
+    </div>
+
     <div id="box_quote_pax_price">
         <?php echo $this->render('_flight_quote_pax_price', [
             'originProductQuote' => $originProductQuote,
@@ -52,13 +64,13 @@ $pjaxId = 'pjax-container-vc';
 
     <div class="row">
         <div class="col-md-12">
+
             <div id="box_segments"></div>
         </div>
     </div>
     <hr />
     <div class="row">
         <div class="col-md-12">
-
 
             <div class="_form-fields-wrapper">
                 <div id="error_summary_box">
@@ -68,11 +80,12 @@ $pjaxId = 'pjax-container-vc';
                 <?php echo Html::hiddenInput('change_id', $changeId, ['id' => 'changeId'])?>
                 <?php echo Html::hiddenInput('origin_quote_id', $originQuoteId, ['id' => 'originQuoteId'])?>
                 <?php echo Html::hiddenInput('case_id', $changeId, ['id' => 'caseId'])?>
-
-
                 <?php echo Html::hiddenInput('keyTripList', null, ['id' => 'keyTripList']) ?>
 
                 <?php echo $form->field($createQuoteForm, 'flightId')->hiddenInput()->label(false) ?>
+                <?php echo $form->field($createQuoteForm, 'customerPackage')->hiddenInput()->label(false) ?>
+                <?php echo $form->field($createQuoteForm, 'serviceFeeAmount')->hiddenInput()->label(false) ?>
+                <?php echo $form->field($createQuoteForm, 'serviceFeeCurrency')->hiddenInput()->label(false) ?>
 
                 <div class="row">
                     <div class="col-md-12">
@@ -168,9 +181,18 @@ $pjaxId = 'pjax-container-vc';
     });
 
     addVoluntaryQuoteForm.on('change', '.alt-quote-price', function (event) {
+        if (typeof $(this).attr('min') !== 'undefined') {
+            let min = parseFloat($(this).attr('min'));
+            let val = parseFloat($(this).val());
+            if (val < min) {
+                $(this).val(min);
+                return false;
+            }
+        }
+
         $('#box_loading').html('<span class="spinner-border spinner-border-sm"></span>');
         $('.alt-quote-price').prop('readonly', true);
-
+        
         $.ajax({
             url: '{$urlRefreshPrice}',
             type: 'POST',

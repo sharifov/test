@@ -43,4 +43,22 @@ class VoluntaryExchangeBOService
     {
         return $this->result;
     }
+
+    public function getServiceFeeAmount(): ?float
+    {
+        return $this->result['exchange']['customerPackage']['serviceFee']['amount'] ?? null;
+    }
+
+    public function getServiceFeeCurrency(): ?string
+    {
+        return $this->result['exchange']['customerPackage']['serviceFee']['currency'] ?? null;
+    }
+
+    public function getCustomerPackage(bool $asSerialize = true): ?string
+    {
+        if (($customerPackage = $this->result['exchange']['customerPackage'] ?? null) && $asSerialize) {
+            return serialize($customerPackage);
+        }
+        return $customerPackage;
+    }
 }

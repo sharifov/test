@@ -30,8 +30,8 @@ class BoWebhook
     public const FORM_LIST = [
         self::TYPE_REPROTECTION_UPDATE => ReprotectionUpdateForm::class,
         self::TYPE_FLIGHT_REFUND_UPDATE => FlightRefundUpdateForm::class,
-        self::TYPE_VOLUNTARY_EXCHANGE_UPDATE => FlightVoluntaryExchangeUpdateForm::class,
         self::TYPE_VOLUNTARY_REFUND_UPDATE => VoluntaryRefundUpdateForm::class,
+        self::TYPE_VOLUNTARY_EXCHANGE_UPDATE => FlightVoluntaryExchangeUpdateForm::class,
     ];
 
     public const SERVICE_LIST = [

@@ -276,7 +276,7 @@ class VoluntaryQuoteManualCreateService
         $sellingSum = 0;
         if (!empty($form->getFlightQuotePaxPriceForms())) {
             foreach ($form->getFlightQuotePaxPriceForms() as $key => $flightQuotePaxPriceForm) {
-                $paxPrice = FlightQuotePaxPrice::createByFlightQuotePaxPriceForm(
+                $paxPrice = FlightQuotePaxPrice::createByVoluntaryQuotePaxPriceForm(
                     $flightQuotePaxPriceForm,
                     $flightQuote->getId(),
                     $productQuote->pq_origin_currency

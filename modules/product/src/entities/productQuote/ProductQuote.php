@@ -1107,4 +1107,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         }
         return $this->pq_owner_user_id === $userId;
     }
+
+    public function getDifferenceOriginPrice(ProductQuote $originProductQuote): ?float
+    {
+        /* TODO:: waiting formula */
+        $diffPrice = ($this->pq_origin_price - $originProductQuote->pq_origin_price) + $this->pq_agent_markup;
+        $diffPrice = $diffPrice < 0 ? 0.00 : $diffPrice;
+        return ProductQuoteHelper::roundPrice($diffPrice, 2);
+    }
 }
