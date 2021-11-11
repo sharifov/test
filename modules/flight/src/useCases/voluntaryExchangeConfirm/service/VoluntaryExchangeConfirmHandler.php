@@ -109,7 +109,7 @@ class VoluntaryExchangeConfirmHandler
                 $data['tickets'][$key]['numRef'] = $key + 1 . '.1';
             }
         }
-        
+
         $data['passengers'] = null;
         if ($flightQuotePaxPrices = $this->voluntaryExchangeQuote->flightQuote->flightQuotePaxPrices ?? null) {
             foreach ($flightQuotePaxPrices as $key => $flightQuotePaxPrice) {
