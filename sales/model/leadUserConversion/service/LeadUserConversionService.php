@@ -36,9 +36,9 @@ class LeadUserConversionService
         ?string $description = null,
         ?int $createdUserId = null,
         bool $validateUsers = true
-    ): bool {
+    ): void {
         if ($validateUsers && $createdUserId !== null && $createdUserId !== $userId) {
-            return false;
+            return;
         }
 
         $leadWasFollowUp = LeadFlow::find()
@@ -50,7 +50,7 @@ class LeadUserConversionService
             ])
             ->exists();
         if ($leadWasFollowUp) {
-            return false;
+            return;
         }
 
         $leadUserConversion = LeadUserConversion::create(
@@ -60,7 +60,5 @@ class LeadUserConversionService
             $createdUserId
         );
         $this->leadUserConversionRepository->save($leadUserConversion);
-
-        return true;
     }
 }

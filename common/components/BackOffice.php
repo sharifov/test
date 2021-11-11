@@ -446,13 +446,6 @@ class BackOffice
                 ], 'BackOffice:voluntaryRefund:dataIsInvalid');
             throw new BoResponseException('BO voluntaryRefund response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
         }
-        if (!empty($data['message']) && mb_stripos($data['message'], 'page not found') !== false) {
-            \Yii::error([
-                'message' => 'BO wrong endpoint: ' . $endpoint,
-                'content' => VarDumper::dumpAsString($response->content),
-            ], 'BackOffice:voluntaryRefund:wrongEndpoint');
-            throw new BoResponseException('BO wrong endpoint', BoResponseException::BO_WRONG_ENDPOINT);
-        }
         return $data;
     }
 

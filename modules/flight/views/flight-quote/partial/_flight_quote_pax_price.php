@@ -23,12 +23,11 @@ use yii\helpers\Html;
             <tr >
                 <th>Pax Type</th>
                 <th>X</th>
-                <th>Fare</th>
-                <th>Taxes</th>
-                <th>Extra Markup</th>
-                <th>SFP, %</th>
-                <th>Net</th>
-                <th>Selling Price, <?php echo $originProductQuote->pq_origin_currency ?><span id="box_loading"></span></th>
+                <th>Price Difference</th>
+                <th>Airline Penalty</th>
+                <th>Processing Fee</th>
+                <th>Agent Markup</th>
+                <th>Price <?php echo $originProductQuote->pq_origin_currency ?><span id="box_loading"></span></th>
             </tr>
             </thead>
             <tbody>
@@ -62,25 +61,27 @@ use yii\helpers\Html;
                         ])->label(false) ?>
                     </td>
                     <td class="td-input">
+                        <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][systemMarkUp]')->input('number', [
+                            'class' => 'form-control alt-quote-price',
+                            'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+                            'step' => 0.01,
+                            'readonly' => true,
+                        ])->label(false) ?>
+                    </td>
+                    <td class="td-input">
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][markup]')->input('number', [
-                            'class' => 'form-control alt-quote-price mark-up',
-                            'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
+                            'class' => 'form-control alt-quote-price',
                             'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
                             'step' => 0.01
                         ])->label(false) ?>
-                    </td>
-                    <td>
-                        <?php echo $createQuoteForm->serviceFee ?>
-                    </td>
-                    <td>
-                        <?php echo $price['net'] ?>
                     </td>
                     <td class="text-right">
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][selling]')->input('number', [
                             'class' => 'form-control alt-quote-price',
                             'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
                             'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
-                            'step' => 0.01
+                            'step' => 0.01,
+                            'readonly' => true,
                         ])->label(false) ?>
                     </td>
                 </tr>

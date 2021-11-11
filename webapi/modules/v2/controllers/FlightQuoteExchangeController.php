@@ -189,13 +189,13 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{2}}                    billing.country_id           Country code (for example "US")
      * @apiParam {string}                       billing.country              Country name
      * @apiParam {string{10}}                   [billing.zip]                Zip
-     * @apiParam {string{20}}                   [billing.contact_phone]      Contact phone
-     * @apiParam {string{160}}                  [billing.contact_email]      Contact email
+     * @apiParam {string{20}}                   billing.contact_phone      Contact phone
+     * @apiParam {string{160}}                  billing.contact_email      Contact email
      * @apiParam {string{60}}                   [billing.contact_name]       Contact name
      * @apiParam {object}                       [payment_request]                                   Payment request
      * @apiParam {number}                       payment_request.amount                              Customer must pay for initiate refund process
      * @apiParam {string{3}}                    payment_request.currency                            Currency code
-     * @apiParam {string{2}}                    payment_request.method_key                          Method key (for example "cc")
+     * @apiParam {string{50}}                   payment_request.method_key                          Method key (for example "card")
      * @apiParam {object}                       payment_request.method_data                         Method data
      * @apiParam {object}                       payment_request.method_data.card                    Card (for credit card)
      * @apiParam {string{..20}}                 payment_request.method_data.card.number             Number
@@ -690,13 +690,13 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{2}}                    billing.country_id           Country code (for example "US")
      * @apiParam {string}                       billing.country              Country name
      * @apiParam {string{10}}                   [billing.zip]                Zip
-     * @apiParam {string{20}}                   [billing.contact_phone]      Contact phone
-     * @apiParam {string{160}}                  [billing.contact_email]      Contact email
+     * @apiParam {string{20}}                   billing.contact_phone           Contact phone
+     * @apiParam {string{160}}                  billing.contact_email           Contact email
      * @apiParam {string{60}}                   [billing.contact_name]       Contact name
      * @apiParam {object}                       [payment_request]                                   Payment request
      * @apiParam {number}                       payment_request.amount                              Customer must pay for initiate refund process
      * @apiParam {string{3}}                    payment_request.currency                            Currency code
-     * @apiParam {string{2}}                    payment_request.method_key                          Method key (for example "cc")
+     * @apiParam {string{50}}                   payment_request.method_key                          Method key (for example "card")
      * @apiParam {object}                       payment_request.method_data                         Method data
      * @apiParam {object}                       payment_request.method_data.card                    Card (for credit card)
      * @apiParam {string{..20}}                 payment_request.method_data.card.number             Number

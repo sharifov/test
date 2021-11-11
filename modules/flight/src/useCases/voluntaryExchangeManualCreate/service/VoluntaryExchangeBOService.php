@@ -53,4 +53,12 @@ class VoluntaryExchangeBOService
     {
         return $this->result['exchange']['customerPackage']['serviceFee']['currency'] ?? null;
     }
+
+    public function getCustomerPackage(bool $asSerialize = true): ?string
+    {
+        if (($customerPackage = $this->result['exchange']['customerPackage'] ?? null) && $asSerialize) {
+            return serialize($customerPackage);
+        }
+        return $customerPackage;
+    }
 }

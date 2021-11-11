@@ -4422,7 +4422,7 @@
             "group": "Parameter",
             "type": "string",
             "size": "20",
-            "optional": true,
+            "optional": false,
             "field": "billing.contact_phone",
             "description": "<p>Contact phone</p>"
           },
@@ -4430,7 +4430,7 @@
             "group": "Parameter",
             "type": "string",
             "size": "160",
-            "optional": true,
+            "optional": false,
             "field": "billing.contact_email",
             "description": "<p>Contact email</p>"
           },
@@ -4467,10 +4467,10 @@
           {
             "group": "Parameter",
             "type": "string",
-            "size": "2",
+            "size": "50",
             "optional": false,
             "field": "payment_request.method_key",
-            "description": "<p>Method key (for example &quot;cc&quot;)</p>"
+            "description": "<p>Method key (for example &quot;card&quot;)</p>"
           },
           {
             "group": "Parameter",
@@ -5281,7 +5281,7 @@
             "group": "Parameter",
             "type": "string",
             "size": "20",
-            "optional": true,
+            "optional": false,
             "field": "billing.contact_phone",
             "description": "<p>Contact phone</p>"
           },
@@ -5289,7 +5289,7 @@
             "group": "Parameter",
             "type": "string",
             "size": "160",
-            "optional": true,
+            "optional": false,
             "field": "billing.contact_email",
             "description": "<p>Contact email</p>"
           },
@@ -5326,10 +5326,10 @@
           {
             "group": "Parameter",
             "type": "string",
-            "size": "2",
+            "size": "50",
             "optional": false,
             "field": "payment_request.method_key",
-            "description": "<p>Method key (for example &quot;cc&quot;)</p>"
+            "description": "<p>Method key (for example &quot;card&quot;)</p>"
           },
           {
             "group": "Parameter",

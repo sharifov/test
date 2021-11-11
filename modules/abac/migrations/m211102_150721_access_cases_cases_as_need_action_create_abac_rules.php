@@ -59,7 +59,7 @@ class m211102_150721_access_cases_cases_as_need_action_create_abac_rules extends
 
         $this->insert('{{%abac_policy}}', [
             'ap_rule_type' => 'p',
-            'ap_subject' => '("admin" in r.sub.env.user.roles || "exchange_senior" in r.sub.env.user.roles || "support_qa" in r.sub.env.user.roles || "support_senior" in r.sub.env.user.roles) && (r.sub.env.req.action == "cases-q/need-action")',
+            'ap_subject' => '("exchange_senior" in r.sub.env.user.roles || "support_qa" in r.sub.env.user.roles || "support_senior" in r.sub.env.user.roles) && (r.sub.env.req.action == "cases-q/need-action")',
             'ap_subject_json' => '{"condition":"AND","rules":[{"id":"env_user_multi_roles","field":"env.user.roles","type":"string","input":"select","operator":"contains","value":["exchange_senior","support_qa","support_senior"]},{"id":"env_action","field":"env.req.action","type":"string","input":"text","operator":"==","value":"cases-q/need-action"}],"valid":true}',
             'ap_object' => 'case/case/sql/queue',
             'ap_action' => '(allAccess)',

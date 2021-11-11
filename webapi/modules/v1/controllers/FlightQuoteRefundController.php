@@ -829,6 +829,10 @@ class FlightQuoteRefundController extends ApiBaseController
 
             $boDataRequest = BoRequestDataHelper::getDataForVoluntaryRefundConfirm($project->api_key, $voluntaryRefundConfirmForm, $productQuoteRefund);
             $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+            \Yii::info([
+                'sentData' => $boDataRequest,
+                'response' => $result
+            ], 'info\BoConfirmRequest');
             if (mb_strtolower($result['status']) === 'failed') {
                 $productQuoteRefund->error();
                 $this->productQuoteRefundRepository->save($productQuoteRefund);

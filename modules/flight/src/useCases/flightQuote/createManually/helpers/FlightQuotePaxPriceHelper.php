@@ -6,6 +6,9 @@ use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 
+/**
+ * Class FlightQuotePaxPriceHelper
+ */
 class FlightQuotePaxPriceHelper
 {
     public static function getQuotePaxPriceFormCollection(Flight $flight): array
@@ -19,6 +22,36 @@ class FlightQuotePaxPriceHelper
         }
         if ($flight->fl_infants) {
             $prices[] = new FlightQuotePaxPriceForm(FlightPax::PAX_INFANT, FlightPax::getPaxId(FlightPax::PAX_INFANT), $flight->fl_infants);
+        }
+        return $prices;
+    }
+
+    public static function getVoluntaryQuotePaxPriceFormCollection(Flight $flight, ?float $systemMarkUp = null): array
+    {
+        $prices = [];
+        if ($flight->fl_adults) {
+            $prices[] = new FlightQuotePaxPriceForm(
+                FlightPax::PAX_ADULT,
+                FlightPax::getPaxId(FlightPax::PAX_ADULT),
+                $flight->fl_adults,
+                $systemMarkUp
+            );
+        }
+        if ($flight->fl_children) {
+            $prices[] = new FlightQuotePaxPriceForm(
+                FlightPax::PAX_CHILD,
+                FlightPax::getPaxId(FlightPax::PAX_CHILD),
+                $flight->fl_children,
+                $systemMarkUp
+            );
+        }
+        if ($flight->fl_infants) {
+            $prices[] = new FlightQuotePaxPriceForm(
+                FlightPax::PAX_INFANT,
+                FlightPax::getPaxId(FlightPax::PAX_INFANT),
+                $flight->fl_infants,
+                $systemMarkUp
+            );
         }
         return $prices;
     }

@@ -11,6 +11,7 @@ use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
+use modules\flight\src\useCases\flightQuote\createManually\VoluntaryQuotePaxPriceForm;
 use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use sales\helpers\ErrorsToStringHelper;
@@ -76,21 +77,31 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
     private array $flightQuotePaxPriceForms = [];
     private bool $defaultPrices;
 
+    public ?string $customerPackage = null;
+    public ?float $serviceFeeAmount = null;
+    public ?string $serviceFeeCurrency = null;
+
     /**
      * @param int|null $creatorId
      * @param Flight|null $flight
      * @param bool $defaultPrices
+     * @param float|null $systemMarkUp
      * @param array $config
      */
-    public function __construct(?int $creatorId = null, ?Flight $flight = null, bool $defaultPrices = true, $config = [])
-    {
+    public function __construct(
+        ?int $creatorId = null,
+        ?Flight $flight = null,
+        bool $defaultPrices = true,
+        ?float $systemMarkUp = null,
+        $config = []
+    ) {
         $this->quoteCreator = $creatorId;
         $this->flightId = $flight->fl_id ?? null;
         $this->defaultPrices = $defaultPrices;
 
         if ($flight) {
             if ($this->defaultPrices) {
-                $this->prices = FlightQuotePaxPriceHelper::getQuotePaxPriceFormCollection($flight);
+                $this->prices = FlightQuotePaxPriceHelper::getVoluntaryQuotePaxPriceFormCollection($flight, $systemMarkUp);
                 $this->oldPrices = serialize(ArrayHelper::toArray($this->prices));
             }
 
@@ -105,7 +116,7 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
     {
         return [
             [['gds', 'pcc', 'tripType', 'cabin', 'validatingCarrier', 'fareType', 'reservationDump'], 'string'],
-            [['gds', 'validatingCarrier', 'cabin', 'tripType', 'fareType', 'reservationDump', 'quoteCreator', 'keyTripList'], 'required'],
+            [['gds', 'validatingCarrier', 'cabin', 'tripType', 'fareType', 'reservationDump', 'quoteCreator', 'keyTripList', 'pcc'], 'required'],
             ['quoteCreator', 'integer'],
 
             [['reservationDump'], 'string'],
@@ -132,7 +143,7 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
             [['prices'], IsArrayValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
             [['prices'], 'priceProcessing'],
 
-            [['oldPrices'], 'safe'],
+            [['oldPrices', 'customerPackage', 'serviceFeeAmount', 'serviceFeeCurrency'], 'safe'],
         ];
     }
 
@@ -140,12 +151,12 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
     {
         if (!$this->defaultPrices && !empty($this->prices)) {
             foreach ($this->prices as $key => $price) {
-                $form = new FlightQuotePaxPriceForm($price['paxCode'], (int) $price['paxCodeId'], (int) $price['cnt']);
+                $form = new VoluntaryQuotePaxPriceForm($price['paxCode'], (int) $price['paxCodeId'], (int) $price['cnt']);
                 $form->setFormName('');
                 if (!$form->load($price)) {
-                    $this->addError($attribute, 'FlightQuotePaxPriceForm[' . $key . '] not loaded');
+                    $this->addError($attribute, 'VoluntaryQuotePaxPriceForm[' . $key . '] not loaded');
                 } elseif (!$form->validate()) {
-                    $this->addError($attribute, 'FlightQuotePaxPriceForm[' . $key . '] ' . ErrorsToStringHelper::extractFromModel($form, ' '));
+                    $this->addError($attribute, 'VoluntaryQuotePaxPriceForm[' . $key . '] ' . ErrorsToStringHelper::extractFromModel($form, ' '));
                 } else {
                     $this->flightQuotePaxPriceForms[] = $form;
                 }
@@ -198,5 +209,20 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
     public function getFlightQuotePaxPriceForms(): array
     {
         return $this->flightQuotePaxPriceForms;
+    }
+
+    public function setCustomerPackage(?string $customerPackage): void
+    {
+        $this->customerPackage = $customerPackage;
+    }
+
+    public function setServiceFeeCurrency(?string $serviceFeeCurrency): void
+    {
+        $this->serviceFeeCurrency = $serviceFeeCurrency;
+    }
+
+    public function setServiceFeeAmount(?float $serviceFeeAmount): void
+    {
+        $this->serviceFeeAmount = $serviceFeeAmount;
     }
 }

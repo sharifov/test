@@ -826,25 +826,20 @@ class FlightQuoteHelper
         foreach ($oldPrices as $oldPrice) {
             foreach ($newPrices as $key => $value) {
                 if ((int) $oldPrice['paxCodeId'] === (int) $value['paxCodeId']) {
-                    if ((float) $oldPrice['selling'] !== (float) $value['selling']) {
-                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice(((float) $value['selling'] * $createQuoteForm->serviceFee) / 100);
-                        $value['markup'] = ProductQuoteHelper::roundPrice((float) $value['selling'] - (float) $value['systemMarkUp'] - (float) $value['net']);
-                    } elseif ((float) $oldPrice['fare'] !== (float) $value['fare']) {
-                        $value['net'] = ProductQuoteHelper::roundPrice((float) $value['fare'] + (float) $value['taxes']);
-                        $sellingWoFee = (float) $value['net'] + (float) $value['markup'];
-                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice(($sellingWoFee * $createQuoteForm->serviceFee) / 100);
-                        $value['selling'] = ProductQuoteHelper::roundPrice($sellingWoFee + (float) $value['systemMarkUp']);
+                    if ((float) $oldPrice['fare'] !== (float) $value['fare']) {
+                        $systemMarkUp = (float) $createQuoteForm->serviceFeeAmount - (float) $value['fare'] - (float) $value['taxes'];
+                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice($systemMarkUp);
+                        $selling = (float) $value['fare'] + (float) $value['taxes'] + $value['systemMarkUp'] + (float) $value['markup'];
+                        $value['selling'] = ProductQuoteHelper::roundPrice($selling);
                     } elseif ((float) $oldPrice['taxes'] !== (float) $value['taxes']) {
-                        $value['net'] = ProductQuoteHelper::roundPrice((float) $value['fare'] + (float) $value['taxes']);
-                        $sellingWoFee = (float) $value['net'] + (float) $value['markup'];
-                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice(($sellingWoFee * $createQuoteForm->serviceFee) / 100);
-                        $value['selling'] = ProductQuoteHelper::roundPrice($sellingWoFee + (float) $value['systemMarkUp']);
+                        $systemMarkUp = (float) $createQuoteForm->serviceFeeAmount - (float) $value['fare'] - (float) $value['taxes'];
+                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice($systemMarkUp);
+                        $selling = (float) $value['fare'] + (float) $value['taxes'] + (float) $value['systemMarkUp'] + (float) $value['markup'];
+                        $value['selling'] = ProductQuoteHelper::roundPrice($selling);
                     } elseif ((float) $oldPrice['markup'] !== (float) $value['markup']) {
-                        $sellingWoFee = (float) $value['net'] + (float) $value['markup'];
-                        $value['systemMarkUp'] = ProductQuoteHelper::roundPrice(($sellingWoFee * $createQuoteForm->serviceFee) / 100);
-                        $value['selling'] = ProductQuoteHelper::roundPrice($sellingWoFee + (float) $value['systemMarkUp']);
+                        $selling = (float)$value['fare'] + (float)$value['taxes'] + (float)$value['systemMarkUp'] + (float)$value['markup'];
+                        $value['selling'] = ProductQuoteHelper::roundPrice($selling);
                     }
-
                     $createQuoteForm->prices[$key] = $value;
                 }
             }

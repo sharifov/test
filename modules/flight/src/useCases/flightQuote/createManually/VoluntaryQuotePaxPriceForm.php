@@ -6,56 +6,24 @@ use modules\flight\models\FlightPax;
 use sales\traits\FormNameModelTrait;
 use yii\base\Model;
 
-class FlightQuotePaxPriceForm extends Model
+/**
+ * Class VoluntaryQuotePaxPriceForm
+ */
+class VoluntaryQuotePaxPriceForm extends Model
 {
     use FormNameModelTrait;
 
-    private const MAX_DECIMAL_VAL = 99999999.99;
-    private const MIN_DECIMAL_VAL = 0;
+    public const MAX_DECIMAL_VAL = 99999999.99;
+    public const MIN_DECIMAL_VAL = 0;
 
-    /**
-     * @var float
-     */
     public $selling;
-
-    /**
-     * @var float
-     */
     public $net;
-
-    /**
-     * @var float
-     */
     public $fare;
-
-    /**
-     * @var float
-     */
     public $taxes;
-
-    /**
-     * @var float
-     */
     public $markup;
-
-    /**
-     * @var string
-     */
     public $paxCode;
-
-    /**
-     * @var integer
-     */
     public $cnt;
-
-    /**
-     * @var float
-     */
     public $clientSelling;
-
-    /**
-     * @var int
-     */
     public $paxCodeId;
     public $systemMarkUp;
 
@@ -91,8 +59,8 @@ class FlightQuotePaxPriceForm extends Model
         return [
             [['paxCode'], 'string'],
             [['selling', 'net', 'fare', 'taxes', 'markup', 'clientSelling', 'systemMarkUp'], 'filter', 'filter' => 'floatval'],
-            [['selling', 'net', 'fare', 'markup', 'clientSelling'], 'number', 'max' => self::MAX_DECIMAL_VAL, 'min' => self::MIN_DECIMAL_VAL],
-            [['taxes'], 'number', 'max' => self::MAX_DECIMAL_VAL, 'min' => 0.01],
+            [['selling', 'fare', 'taxes'], 'number', 'max' => self::MAX_DECIMAL_VAL, 'min' => self::MIN_DECIMAL_VAL],
+
             [['paxCodeId'], 'integer'],
             [['paxCodeId'], 'in', 'range' => FlightPax::getPaxListId()],
             [['paxCode'], 'in', 'range' => FlightPax::getPaxList()],
