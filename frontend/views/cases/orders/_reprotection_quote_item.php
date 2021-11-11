@@ -394,21 +394,23 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                             <?php endif; ?>
                                                       <?php endif ?>
 
-                                                      <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTED, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote refund*/ ?>
-                                                      <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED)) : ?>
-                                                            <?= Html::a('<i class="fa fa-reply"></i> set Refunded', null, [
-                                                              'class' => 'dropdown-item btn-reprotection-refund',
-                                                              'data-url' => Url::to(['/product/product-quote/flight-reprotection-refund']),
-                                                              'data-reprotection-quote-id' => $changeQuote->pq_id,
-                                                              'data-case_id' => $case->cs_id,
-                                                              'data-order_id' => $order->or_id,
-                                                              'data-pqc_id' => $changeItem->pqc_id,
-                                                              'data-title' => 'ReProtection Refund',
-                                                              'data-toggle' => 'tooltip',
-                                                              'data-placement' => 'right',
-                                                              'title' => 'Set Refund status ReProtection quote'
-                                                          ]); ?>
-                                                      <?php endif; ?>
+                                                      <?php if ($changeItem->isTypeReProtection()) : ?>
+                                                          <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTED, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote refund*/ ?>
+                                                          <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED)) : ?>
+                                                                <?= Html::a('<i class="fa fa-reply"></i> set Refunded', null, [
+                                                                  'class' => 'dropdown-item btn-reprotection-refund',
+                                                                  'data-url' => Url::to(['/product/product-quote/flight-reprotection-refund']),
+                                                                  'data-reprotection-quote-id' => $changeQuote->pq_id,
+                                                                  'data-case_id' => $case->cs_id,
+                                                                  'data-order_id' => $order->or_id,
+                                                                  'data-pqc_id' => $changeItem->pqc_id,
+                                                                  'data-title' => 'ReProtection Refund',
+                                                                  'data-toggle' => 'tooltip',
+                                                                  'data-placement' => 'right',
+                                                                  'title' => 'Set Refund status ReProtection quote'
+                                                              ]); ?>
+                                                          <?php endif; ?>
+                                                      <?php endif ?>
 
                                                       <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote recommended */ ?>
                                                       <?php if (!$isRecommended && Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_RECOMMENDED)) : ?>
