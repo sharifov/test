@@ -612,6 +612,7 @@ class CasesSaleService
                     $caseSale = new CaseSale();
                     $caseSale->css_cs_id = $csId;
                     $caseSale->css_sale_id = $saleId;
+                    $caseSale->css_sale_book_id = $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
