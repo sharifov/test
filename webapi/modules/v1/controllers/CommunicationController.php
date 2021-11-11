@@ -1219,11 +1219,11 @@ class CommunicationController extends ApiBaseController
             $response['status'] = 'Success';
             return $response;
         } catch (CallFinishedException $e) {
-            //todo change to Info level
-            Yii::error([
+            Yii::info([
                 'message' => $e->getMessage(),
+                'callSid' => $e->callSid,
                 'post' => $post,
-            ], 'CallCallBackProcessingError');
+            ], 'log\CallCallBackProcessingError');
             $response['status'] = 'Success';
             return $response;
         } catch (\Throwable $e) {
