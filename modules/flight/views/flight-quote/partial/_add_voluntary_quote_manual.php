@@ -42,17 +42,26 @@ $pjaxId = 'pjax-container-vc';
 ]) ?>
 <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'add-quote-form', 'enableClientValidation' => true]) ?>
 
-     <div class="row">
-        <div class="col-md-12">
-            <?php if (!empty($createQuoteForm->customerPackage)) : ?>
+    <?php if (!empty($createQuoteForm->customerPackage)) : ?>
+        <div class="row">
+            <div class="col-md-12">
                 <?php $customerPackage = unserialize($createQuoteForm->customerPackage, ['allowed_classes' => false]) ?>
                 <b>Customer Package Data:</b> <br />
-                Processing Fee - <?php echo $createQuoteForm->serviceFeeAmount ?> <?php echo $createQuoteForm->serviceFeeCurrency . ' (per pax)' ?? '' ?><br />
-                Without Penalty - <small><?php echo Yii::$app->formatter->asBooleanByLabel($customerPackage['withoutPenalty']) ?></small><br />
-                Without Price Difference - <small><?php echo Yii::$app->formatter->asBooleanByLabel($customerPackage['withoutPriceDiff']) ?></small>
-            <?php endif ?>
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <th>Processing Fee</th>
+                        <th>Without Penalty</th>
+                        <th>Without Price Difference</th>
+                    </tr>
+                    <tr>
+                        <td><?php echo $createQuoteForm->serviceFeeAmount ?> <?php echo $createQuoteForm->serviceFeeCurrency . ' (per pax)' ?? '' ?></td>
+                        <td><small><?php echo Yii::$app->formatter->asBooleanByLabel($customerPackage['withoutPenalty']) ?></small></td>
+                        <td><small><?php echo Yii::$app->formatter->asBooleanByLabel($customerPackage['withoutPriceDiff']) ?></small></td>
+                    </tr>
+                </table>
+            </div>
         </div>
-    </div>
+    <?php endif ?>
 
     <div id="box_quote_pax_price">
         <?php echo $this->render('_flight_quote_pax_price', [
