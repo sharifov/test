@@ -9,8 +9,13 @@ use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductTypeQuery;
+use sales\entities\cases\CaseCategory;
+use sales\entities\cases\CasesStatus;
 
 class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
 {
@@ -34,13 +39,14 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
     public const ACTION_ACCESS_DETAILS = 'accessDetails';
+    public const ACTION_SEND_SC_EMAIL = 'sendSCEmail';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
 
         self::OBJ_RELATED_PRODUCT_QUOTE => [
             self::ACTION_ACCESS_DETAILS,
-            //self::ACTION_DECLINE_RE_PROTECTION_QUOTE,
+            self::ACTION_SEND_SC_EMAIL,
             //self::ACTION_CREATE_CHANGE,
             //self::ACTION_CREATE_VOL_REFUND,
             //self::ACTION_DELETE
@@ -260,6 +266,135 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_PQC_TYPE = [
+        'optgroup' => 'PRODUCT QUOTE CHANGE',
+        'id' => self::NS . 'pqcTypeId',
+        'field' => 'pqcTypeId',
+        'label' => 'Type',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_PQC_STATUS = [
+        'optgroup' => 'PRODUCT QUOTE CHANGE',
+        'id' => self::NS . 'pqcStatusId',
+        'field' => 'pqcStatusId',
+        'label' => 'Status',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_IS_AUTOMATE_PQC = [
+        'optgroup' => 'PRODUCT QUOTE CHANGE',
+        'id' => self::NS . 'isAutomatePqc',
+        'field' => 'isAutomatePqc',
+        'label' => 'Is Automate',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_PQC_DECISION = [
+        'optgroup' => 'PRODUCT QUOTE CHANGE',
+        'id' => self::NS . 'pqcDecisionId',
+        'field' => 'pqcDecisionId',
+        'label' => 'Decision',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_CASE_CATEGORY = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'csCategoryId',
+        'field' => 'csCategoryId',
+        'label' => 'Category',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_CASE_OWNER = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'isCaseOwner',
+        'field' => 'isCaseOwner',
+        'label' => 'Owner',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_IS_COMMON_GROUP = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'isCommonGroup',
+        'field' => 'isCommonGroup',
+        'label' => 'Is Common Group',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_IS_AUTOMATE_CASE = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'isAutomateCase',
+        'field' => 'isAutomateCase',
+        'label' => 'Is Automate',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_CASE_PROJECT = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'csProjectId',
+        'field' => 'csProjectId',
+        'label' => 'Project',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_CASE_STATUS = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'csStatusId',
+        'field' => 'csStatusId',
+        'label' => 'Status',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::OBJ_RELATED_PRODUCT_QUOTE => [
@@ -271,7 +406,10 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
             self::ATTR_PARENT_QUOTE_HAS_PQR_ACTIVE,
             self::ATTR_PARENT_QUOTE_HAS_PQC_ACTIVE,
             self::ATTR_ORDER_OWNER,
-            //self::ATTR_HAS_PQC_ACTIVE
+            self::ATTR_IS_AUTOMATE_PQC,
+            self::ATTR_CASE_OWNER,
+            self::ATTR_IS_COMMON_GROUP,
+            self::ATTR_IS_AUTOMATE_CASE
         ]
     ];
 
@@ -299,6 +437,12 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         $attrOrderStatusList = self::ATTR_ORDER_STATUS;
         $attrOrderPayStatusList = self::ATTR_ORDER_PAY_STATUS;
         $attrOrderTypeList = self::ATTR_ORDER_TYPE;
+        $attrPqcTypeList = self::ATTR_PQC_TYPE;
+        $attrPqcStatusList = self::ATTR_PQC_STATUS;
+        $attrPqcDecisionList = self::ATTR_PQC_DECISION;
+        $attrCaseCategoryList = self::ATTR_CASE_CATEGORY;
+        $attrCaseProjectList = self::ATTR_CASE_PROJECT;
+        $attrCaseStatusList = self::ATTR_CASE_STATUS;
 
         $attrRelQtStatusList['values'] = $productQuoteStatuses;
         $attrRelationTypeList['values'] = ProductQuoteRelation::TYPE_LIST;
@@ -309,6 +453,12 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         $attrOrderStatusList['values'] = OrderStatus::getList();
         $attrOrderPayStatusList['values'] = OrderPayStatus::getList();
         $attrOrderTypeList['values'] = OrderSourceType::LIST;
+        $attrPqcTypeList['values'] = ProductQuoteChange::TYPE_LIST;
+        $attrPqcStatusList['values'] = ProductQuoteChangeStatus::getList();
+        $attrPqcDecisionList['values'] = ProductQuoteChangeDecisionType::getList();
+        $attrCaseCategoryList['values'] = CaseCategory::getList();
+        $attrCaseProjectList['values'] = $projects;
+        $attrCaseStatusList['values'] = CasesStatus::STATUS_LIST;
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
@@ -321,6 +471,12 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrOrderStatusList;
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrOrderPayStatusList;
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrOrderTypeList;
+        $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrPqcTypeList;
+        $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrPqcStatusList;
+        $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrPqcDecisionList;
+        $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseCategoryList;
+        $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseProjectList;
+        $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseStatusList;
 
         return $attributeList;
     }

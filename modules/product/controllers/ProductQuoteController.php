@@ -51,6 +51,8 @@ use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
+use modules\product\src\abac\RelatedProductQuoteAbacObject;
 
 /**
  * Class ProductQuoteController
@@ -61,6 +63,7 @@ use yii\web\Response;
  * @property CasesRepository $casesRepository
  * @property CasesCommunicationService $casesCommunicationService
  * @property ProductQuoteDataManageService $productQuoteDataManageService
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  */
 class ProductQuoteController extends FController
 {
@@ -85,6 +88,7 @@ class ProductQuoteController extends FController
      * @var ProductQuoteDataManageService
      */
     private ProductQuoteDataManageService $productQuoteDataManageService;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     /**
      * ProductQuoteController constructor.
@@ -107,6 +111,7 @@ class ProductQuoteController extends FController
         CasesRepository $casesRepository,
         CasesCommunicationService $casesCommunicationService,
         ProductQuoteDataManageService $productQuoteDataManageService,
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -116,6 +121,7 @@ class ProductQuoteController extends FController
         $this->casesRepository = $casesRepository;
         $this->casesCommunicationService = $casesCommunicationService;
         $this->productQuoteDataManageService = $productQuoteDataManageService;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
     /**
@@ -429,6 +435,7 @@ class ProductQuoteController extends FController
         $caseId = Yii::$app->request->get('case-id');
         $quoteId = Yii::$app->request->get('reprotection-quote-id');
         $orderId = Yii::$app->request->get('order-id');
+        $pqcId = Yii::$app->request->get('pqc_id');
 
         $form = new ReprotectionQuoteSendEmailForm();
 
@@ -440,6 +447,8 @@ class ProductQuoteController extends FController
             throw new BadRequestHttpException('Order not found');
         }
 
+        $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $quote = $this->productQuoteRepository->find($form->quoteId);
@@ -448,9 +457,13 @@ class ProductQuoteController extends FController
                     throw new \RuntimeException('Original quote not found');
                 }
 
-                $caseAbacDto = new CasesAbacDto($case);
-                $caseAbacDto->pqc_status = $originalQuote->productQuoteLastChange->pqc_status_id;
-                if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                $relatedPrQtAbacDto = new RelatedProductQuoteAbacDto($quote);
+                $relatedPrQtAbacDto->mapOrderAttributes($order);
+                $relatedPrQtAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+                $relatedPrQtAbacDto->mapCaseAttributes($case);
+
+                /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, CRelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL, ReProtection Quote preview email */
+                if (!Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL)) {
                     throw new ForbiddenHttpException('You do not have access to perform this action', 403);
                 }
 
@@ -493,6 +506,8 @@ class ProductQuoteController extends FController
                     $previewEmailForm = new ReprotectionQuotePreviewEmailForm($previewEmailResult['data']);
                     $previewEmailForm->email_from_name = $emailFromName;
                     $previewEmailForm->productQuoteId = $quote->pq_id;
+                    $previewEmailForm->orderId = $orderId;
+                    $previewEmailForm->pqcId = $pqcId;
 
                     $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $emailTemplateType]);
                     if ($emailTemplateType) {
@@ -513,6 +528,8 @@ class ProductQuoteController extends FController
 
         $form->caseId = $caseId;
         $form->quoteId = $quoteId;
+        $form->orderId = $orderId;
+        $form->pqcId = $pqcId;
 
         return $this->renderAjax('partial/_reprotection_quote_choose_client_email', [
             'form' => $form,
@@ -530,15 +547,24 @@ class ProductQuoteController extends FController
                 throw new BadRequestHttpException('Case Not Found');
             }
 
+            if (!$order = Order::findOne($previewEmailForm->orderId)) {
+                throw new BadRequestHttpException('Order not found');
+            }
+
             $reprotectionQuote = $this->productQuoteRepository->find($previewEmailForm->productQuoteId);
             $originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id);
+            $productQuoteChange = $this->productQuoteChangeRepository->find($previewEmailForm->pqcId);
 
-            $caseAbacDto = new CasesAbacDto($case);
-            $caseAbacDto->pqc_status = $originQuote->productQuoteLastChange->pqc_status_id;
+            $relatedPrQtAbacDto = new RelatedProductQuoteAbacDto($reprotectionQuote);
+            $relatedPrQtAbacDto->mapOrderAttributes($order);
+            $relatedPrQtAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+            $relatedPrQtAbacDto->mapCaseAttributes($case);
 
-            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+            /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, CRelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL, ReProtection Quote preview email */
+            if (!Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL)) {
                 throw new ForbiddenHttpException('You do not have access to perform this action', 403);
             }
+
             if ($previewEmailForm->validate()) {
                 try {
                     if (!$originQuote) {

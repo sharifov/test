@@ -293,6 +293,8 @@ $productQuoteAbacDto->mapOrderAttributes($order);
 
                                             $relatedPrQtAbacDto = new RelatedProductQuoteAbacDto($changeQuote);
                                             $relatedPrQtAbacDto->mapOrderAttributes($order);
+                                            $relatedPrQtAbacDto->mapProductQuoteChangeAttributes($changeItem);
+                                            $relatedPrQtAbacDto->mapCaseAttributes($case);
                                             ?>
                                             <tr>
                                               <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>"><?=($key + 1)?></td>
@@ -316,7 +318,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                     <i class="fa fa-bars"></i>
                                                   </button>
                                                   <div class="dropdown-menu">
-                                                      <?php /** @abac $relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS, ReProtection Quote View Details */ ?>
+                                                      <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS, ReProtection Quote View Details */ ?>
                                                       <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) : ?>
                                                             <?= Html::a('<i class="fas fa-info-circle" title=""></i> view Details', null, [
                                                               'data-product-quote-gid' => $changeQuote->pq_gid,
@@ -325,7 +327,8 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                                   $changeQuote->getQuoteDetailsPageUrl(),
                                                                   'id' => $changeQuote->pq_id,
                                                                   'case_id' => $case->cs_id,
-                                                                  'order_id' => $order->or_id
+                                                                  'order_id' => $order->or_id,
+                                                                  'pqc_id' => $changeItem->pqc_id
                                                               ]),
                                                               'data-toggle' => 'tooltip',
                                                               'data-placement' => 'right',
@@ -333,16 +336,16 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                           ]) ?>
                                                       <?php endif; ?>
                                                       <?php
-                                                        $caseAbacDto->pqc_status = $quote->productQuoteLastChange->pqc_status_id ?? null;
-                                                        /** @abac new $caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS, Action Reprotection Quote send email */
-                                                        if ($changeItem->isTypeReProtection() && !$changeQuote->isDeclined() && Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_REPROTECTION_QUOTE_SEND_EMAIL, CasesAbacObject::ACTION_ACCESS)) {
+                                                        /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, CRelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL, ReProtection Quote send email */
+                                                        if ($changeItem->isTypeReProtection() && !$changeQuote->isDeclined() && Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL)) {
                                                             echo Html::a('<i class="fa fa-envelope"></i> send SC Email', null, [
                                                                 'class' => 'dropdown-item btn-send-reprotection-quote-email',
                                                                 'data-url' => Url::to([
                                                                     '/product/product-quote/preview-reprotection-quote-email',
                                                                     'reprotection-quote-id' => $changeQuote->pq_id,
                                                                     'case-id' => $case->cs_id,
-                                                                    'order-id' => $order->or_id
+                                                                    'order-id' => $order->or_id,
+                                                                    'pqc_id' => $changeItem->pqc_id
                                                                 ]),
                                                                 'data-toggle' => 'tooltip',
                                                                 'data-placement' => 'right',

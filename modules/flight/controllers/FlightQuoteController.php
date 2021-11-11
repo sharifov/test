@@ -469,6 +469,7 @@ class FlightQuoteController extends FController
         $productQuoteId = Yii::$app->request->get('id');
         $caseId = Yii::$app->request->get('case_id');
         $orderId = Yii::$app->request->get('order_id');
+        $pqcId = Yii::$app->request->get('pqc_id');
 
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
 
@@ -481,6 +482,7 @@ class FlightQuoteController extends FController
         if (!$lead) {
             $case = $this->casesRepository->find($caseId);
             $order = $this->orderRepository->find($orderId);
+            $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
 
             if (!$productQuote->relateParent) {
                 $productQuoteAbacDto = new ProductQuoteAbacDto($productQuote);
@@ -493,6 +495,8 @@ class FlightQuoteController extends FController
             } else {
                 $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($productQuote);
                 $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+                $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+                $relatedProductQuoteAbacDto->mapCaseAttributes($case);
 
                 /** @abac $relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS, ReProtection Quote View Details */
                 if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {

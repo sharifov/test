@@ -4,7 +4,10 @@ namespace modules\product\src\abac\dto;
 
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use sales\access\EmployeeGroupAccess;
 use sales\auth\Auth;
+use sales\entities\cases\Cases;
 use stdClass;
 
 /**
@@ -23,6 +26,10 @@ use stdClass;
  * @property bool $parPqIsChangeable
  * @property bool $parPqHasPqrActive
  * @property bool $parPqHasPqcActive
+ * @property int|null $pqcTypeId
+ * @property int|null $pqcStatusId
+ * @property bool $isAutomatePqc
+ * @property int|null $pqcDecisionId
  */
 
 class RelatedProductQuoteAbacDto extends stdClass
@@ -41,12 +48,22 @@ class RelatedProductQuoteAbacDto extends stdClass
     public bool $parPqHasPqcActive;
     public int $parPrTypeId;
     public ?int $parPrProjectId;
-    public ?int $orProjectId;
-    public ?int $orStatusId;
-    public ?int $orPayStatusId;
+    public ?int $orProjectId = null;
+    public ?int $orStatusId = null;
+    public ?int $orPayStatusId = null;
     public ?bool $isOrderOwner = false;
-    public ?int $orTypeId;
+    public ?int $orTypeId = null;
     public int $userId;
+    public ?int $pqcTypeId = null;
+    public ?int $pqcStatusId = null;
+    public bool $isAutomatePqc = false;
+    public ?int $pqcDecisionId = null;
+    public ?int $csCategoryId = null;
+    public bool $isCaseOwner = false;
+    public bool $isCommonGroup = false;
+    public ?int $csStatusId = null;
+    public bool $isAutomateCase;
+    public ?int $csProjectId = null;
 
     public function __construct(?ProductQuote $relatedPrQt)
     {
@@ -68,14 +85,9 @@ class RelatedProductQuoteAbacDto extends stdClass
             $this->parPqIsChangeable = $parentPrQt->isChangeable();
             $this->parPqHasPqrActive = (bool)$parentPrQt->productQuoteRefundsActive;
             $this->parPqHasPqcActive = (bool)$parentPrQt->productQuoteChangesActive;
+
             $this->parPrTypeId = $parentPrQt->pqProduct->pr_type_id;
             $this->parPrProjectId = $parentPrQt->pqProduct->pr_project_id;
-
-            /*$this->orProjectId = $parentPrQt->pqOrder->or_project_id;
-            $this->orStatusId = $parentPrQt->pqOrder->or_status_id;
-            $this->orPayStatusId = $parentPrQt->pqOrder->or_pay_status_id;
-            $this->isOrderOwner = $parentPrQt->pqOrder->isOwner($userId);
-            $this->orTypeId  = $parentPrQt->pqOrder->or_type_id;*/
         }
     }
 
@@ -87,6 +99,32 @@ class RelatedProductQuoteAbacDto extends stdClass
             $this->orPayStatusId = $order->or_pay_status_id;
             $this->isOrderOwner = $order->isOwner($this->userId);
             $this->orTypeId  = $order->or_type_id;
+        }
+    }
+
+    public function mapProductQuoteChangeAttributes(?ProductQuoteChange $productQuoteChange)
+    {
+        if ($productQuoteChange) {
+            $this->pqcTypeId = $productQuoteChange->pqc_type_id;
+            $this->pqcStatusId = $productQuoteChange->pqc_status_id;
+            $this->isAutomatePqc = $productQuoteChange->isAutomate();
+            $this->pqcDecisionId = $productQuoteChange->pqc_decision_type_id;
+        }
+    }
+
+    public function mapCaseAttributes(?Cases $case)
+    {
+        if ($case) {
+            $this->csCategoryId = $case->cs_category_id;
+            $this->isCaseOwner = $case->isOwner($this->userId);
+
+            if ($case->hasOwner()) {
+                $this->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup($this->userId, $case->cs_user_id);
+            }
+
+            $this->csStatusId = $case->cs_status;
+            $this->isAutomateCase = $case->isAutomate();
+            $this->csProjectId = $case->cs_project_id;
         }
     }
 }

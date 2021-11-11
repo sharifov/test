@@ -40,6 +40,8 @@ echo $activeForm->errorSummary($form);
 
 <?= $activeForm->field($form, 'caseId')->hiddenInput()->label(false) ?>
 <?= $activeForm->field($form, 'quoteId')->hiddenInput()->label(false) ?>
+<?= $activeForm->field($form, 'orderId')->hiddenInput()->label(false) ?>
+<?= $activeForm->field($form, 'pqcId')->hiddenInput()->label(false) ?>
     <div class="row">
         <div class="col-sm-12 form-group">
             <?= $activeForm->field($form, 'clientEmail')->dropDownList($clientEmails) ?>
