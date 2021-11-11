@@ -70,7 +70,11 @@ class VoluntaryQuotePaxPriceForm extends Model
     public function attributeLabels()
     {
         return [
-            'markup' => 'Extra Markup',
+            'markup' => 'Agent Markup',
+            'selling' => 'Price',
+            'fare' => 'Price Difference',
+            'tax' => 'Airline Penalty',
+            'systemMarkUp' => 'Processing Fee',
         ];
     }
 

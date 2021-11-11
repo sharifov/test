@@ -15,7 +15,7 @@
   </div>
 
   <div class="col-md-6">
-    <h4>Reprotection Quote</h4>
+    <h4>Change Quote</h4>
     <div style="margin-left: -20px">
       <?= $reprotectionQuoteHtml ?>
     </div>

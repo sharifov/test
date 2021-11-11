@@ -154,9 +154,9 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
                 $form = new VoluntaryQuotePaxPriceForm($price['paxCode'], (int) $price['paxCodeId'], (int) $price['cnt']);
                 $form->setFormName('');
                 if (!$form->load($price)) {
-                    $this->addError($attribute, 'VoluntaryQuotePaxPriceForm[' . $key . '] not loaded');
+                    $this->addError($attribute, 'PaxPriceForm[' . $price['paxCode'] . '] not loaded');
                 } elseif (!$form->validate()) {
-                    $this->addError($attribute, 'VoluntaryQuotePaxPriceForm[' . $key . '] ' . ErrorsToStringHelper::extractFromModel($form, ' '));
+                    $this->addError($attribute, 'PaxPriceForm[' . $price['paxCode'] . '] ' . ErrorsToStringHelper::extractFromModel($form, ' '));
                 } else {
                     $this->flightQuotePaxPriceForms[] = $form;
                 }
