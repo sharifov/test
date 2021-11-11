@@ -95,12 +95,12 @@ use yii\widgets\Pjax;
                 </tr>
                 </thead>
                 <tbody>
+                <?= Html::hiddenInput('' . $form->formName() . '[tickets]') ?>
                 <?php foreach ($form->tickets as $key => $ticketForm) : ?>
-                    <?= $activeForm->field($ticketForm, 'id')->hiddenInput([
-                        'name' => '' . $form->formName() . '[tickets][' . $key . '][id]'
-                    ])->label(false) ?>
-                    <?= Html::hiddenInput('' . $form->formName() . '[tickets]') ?>
                     <tr>
+                        <?= $activeForm->field($ticketForm, 'id')->hiddenInput([
+                            'name' => '' . $form->formName() . '[tickets][' . $key . '][id]'
+                        ])->label(false) ?>
                         <td><?= $ticketForm->number ?></td>
                         <td><?= $activeForm->field($ticketForm, 'selling')->input('number', [
                                 'name' => '' . $form->formName() . '[tickets][' . $key . '][selling]',
