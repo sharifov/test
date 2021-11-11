@@ -3,6 +3,7 @@
 use common\components\SearchService;
 use common\models\Airline;
 use modules\flight\models\Flight;
+use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
 
@@ -16,6 +17,29 @@ use modules\product\src\entities\productQuote\ProductQuote;
     <div class="trip">
         <div class="trip__item">
             <?php if ($flightQuote) : ?>
+                <?php if ($flightQuotePaxPrices = $flightQuote->flightQuotePaxPrices) : ?>
+                    <table class="table table-striped table-bordered">
+                        <tr>
+                            <th>Pax Type</th>
+                            <th>X</th>
+                            <th>Fare</th>
+                            <th>Taxes</th>
+                            <th>Extra Markup</th>
+                            <th>System Markup</th>
+                        </tr>
+                        <?php foreach ($flightQuotePaxPrices as $flightQuotePaxPrice) : ?>
+                            <tr>
+                                <td><?php echo FlightPax::getPaxTypeById($flightQuotePaxPrice->qpp_flight_pax_code_id) ?></td>
+                                <td><?php echo $flightQuotePaxPrice->qpp_cnt ?></td>
+                                <td><?php echo $flightQuotePaxPrice->qpp_fare ?></td>
+                                <td><?php echo $flightQuotePaxPrice->qpp_tax ?></td>
+                                <td><?php echo $flightQuotePaxPrice->qpp_agent_mark_up ?></td>
+                                <td><?php echo $flightQuotePaxPrice->qpp_system_mark_up ?></td>
+                            </tr>
+                        <?php endforeach ?>
+                    </table>
+                <?php endif ?>
+
                 <?php foreach ($flightQuote->flightQuoteTrips as $tripKey => $trip) :?>
                     <?php $segments = $trip->flightQuoteSegments;?>
                     <?php if ($segments) : ?>
