@@ -363,9 +363,10 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                                             ]);
                                                         }
                                                         ?>
-                                                      <?php if ($changeItem->isTypeReProtection()) : ?>
-                                                          <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS, Action Flight Reprotection quote confirm */ ?>
-                                                          <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) : ?>
+
+                                                        <?php if ($changeItem->isTypeReProtection()) : ?>
+                                                            <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS, Action Flight Reprotection quote confirm */ ?>
+                                                            <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_CONFIRM, CasesAbacObject::ACTION_ACCESS)) : ?>
                                                                 <?= Html::a('<i class="fa fa-check-circle-o"></i> set Confirmed', null, [
                                                                   'class' => 'dropdown-item btn-reprotection-confirm',
                                                                   'data-url' => Url::to(['/product/product-quote/flight-reprotection-confirm']),
@@ -374,8 +375,9 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                                                   'data-placement' => 'right',
                                                                   'title' => 'Set Confirm status Reprotection quote'
                                                               ]); ?>
-                                                          <?php endif; ?>
-                                                      <?php endif ?>
+                                                            <?php endif; ?>
+                                                        <?php endif ?>
+
                                                       <?php /** @abac new $caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS, Action Flight Reprotection quote refund*/ ?>
                                                       <?php if (Yii::$app->abac->can($caseAbacDto, CasesAbacObject::ACT_FLIGHT_REPROTECTION_REFUND, CasesAbacObject::ACTION_ACCESS)) : ?>
                                                             <?= Html::a('<i class="fa fa-reply"></i> set Refunded', null, [
