@@ -716,7 +716,10 @@ $('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotecti
 });
 $('body').off('click', '.btn-reprotection-refund, .btn-reprotection-recommended, .btn-reprotection-decline').on('click', '.btn-reprotection-refund, .btn-reprotection-recommended, .btn-reprotection-decline', function (e) {
     e.preventDefault();
-    
+    if(!confirm('Are you sure?')) {
+        return false;
+    } 
+
     let btn = $(this);
     let btnIconHtml = btn.find('i')[0];
     let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';

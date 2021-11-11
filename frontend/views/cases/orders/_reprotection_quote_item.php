@@ -406,10 +406,10 @@ $productQuoteAbacDto->csProjectId = $case->cs_project_id;
                                                               'class' => 'dropdown-item btn-reprotection-decline',
                                                               'data-url' => Url::to(['/product/product-quote/ajax-decline-reprotection-quote']),
                                                               'data-reprotection-quote-id' => $changeQuote->pq_id,
-                                                              'data-title' => 'Decline Reprotection',
+                                                              'data-title' => 'Decline Change Quote',
                                                               'data-toggle' => 'tooltip',
                                                               'data-placement' => 'right',
-                                                              'title' => 'Decline Reprotection quote'
+                                                              'title' => 'Decline Change quote'
                                                           ]); ?>
                                                       <?php endif; ?>
 

@@ -764,13 +764,13 @@ class ProductQuoteController extends FController
 
     public function actionAjaxDeclineReprotectionQuote()
     {
-        $reprotectionQuoteId = Yii::$app->request->post('quoteId');
+        $changeQuoteId = Yii::$app->request->post('quoteId');
 
-        if (!$reprotectionQuote = ProductQuote::findOne($reprotectionQuoteId)) {
+        if (!$changeQuote = ProductQuote::findOne($changeQuoteId)) {
             throw new BadRequestHttpException('Reprotection quote not found');
         }
 
-        $productQuoteAbacDto = new ProductQuoteAbacDto($reprotectionQuote);
+        $productQuoteAbacDto = new ProductQuoteAbacDto($changeQuote);
         /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE, ReProtection quote decline */
         if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DECLINE_RE_PROTECTION_QUOTE)) {
             throw new ForbiddenHttpException('Access denied');
@@ -782,12 +782,12 @@ class ProductQuoteController extends FController
         ];
 
         try {
-            if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($reprotectionQuote->pq_id)) {
+            if (!$originQuote = ProductQuoteQuery::getOriginProductQuoteByChangeQuote($changeQuote->pq_id)) {
                 throw new NotFoundException('Origin Quote Not Found');
             }
 
-            $reprotectionQuote->declined(Auth::id());
-            $this->productQuoteRepository->save($reprotectionQuote);
+            $changeQuote->declined(Auth::id());
+            $this->productQuoteRepository->save($changeQuote);
 
             $lastReProtectionQuote = ProductQuote::find()
                 ->with('productQuoteDataRecommended')
@@ -805,7 +805,7 @@ class ProductQuoteController extends FController
                     $lastReProtectionQuote->pq_id
                 );
             }
-        } catch (\RuntimeException $e) {
+        } catch (\RuntimeException | \DomainException | NotFoundException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();
         } catch (\Throwable $e) {
