@@ -51,7 +51,7 @@ use sales\access\EmployeeDepartmentAccess;
                             'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                         ]
                     ])->label('Created DateTime Range');
-?>
+                    ?>
                 </div>
                 <div class="col-md-2">
                     <?= $form->field($model, 'depID')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-']) ?>
