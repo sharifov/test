@@ -1161,7 +1161,7 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException('Sorry, reProtection quote could not be created because originalQuote does not pricing');
                 }
                 if (!($productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) || !$productQuoteChange->isTypeReProtection()) {
-                    throw new \RuntimeException('ProductQuoteLastChange is not type ReProtection');
+                    throw new \RuntimeException('ProductQuoteChange is not type ReProtection');
                 }
 
                 /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE, Act Flight Create Reprotection quote from dump*/
