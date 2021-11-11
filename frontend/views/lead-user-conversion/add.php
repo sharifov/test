@@ -29,7 +29,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
             null,
             'lead-user-conversion-add_submit_btn'
         ),
-        'enableAjaxValidation' => true,
+        'enableAjaxValidation' => false,
     ]);
     ?>
 
