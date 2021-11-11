@@ -395,8 +395,8 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                       <?php endif ?>
 
                                                       <?php if ($changeItem->isTypeReProtection()) : ?>
-                                                          <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTED, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote refund*/ ?>
-                                                          <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED)) : ?>
+                                                            <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTED, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote refund*/ ?>
+                                                            <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED)) : ?>
                                                                 <?= Html::a('<i class="fa fa-reply"></i> set Refunded', null, [
                                                                   'class' => 'dropdown-item btn-reprotection-refund',
                                                                   'data-url' => Url::to(['/product/product-quote/flight-reprotection-refund']),
@@ -409,7 +409,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                                   'data-placement' => 'right',
                                                                   'title' => 'Set Refund status ReProtection quote'
                                                               ]); ?>
-                                                          <?php endif; ?>
+                                                            <?php endif; ?>
                                                       <?php endif ?>
 
                                                       <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_REFUNDED, Flight ReProtection quote recommended */ ?>
