@@ -43,6 +43,8 @@ echo $activeForm->errorSummary($previewEmailForm);
 
             <?= $activeForm->field($previewEmailForm, 'case_id')->hiddenInput()->label(false); ?>
             <?= $activeForm->field($previewEmailForm, 'productQuoteId')->hiddenInput()->label(false); ?>
+            <?= $activeForm->field($previewEmailForm, 'orderId')->hiddenInput()->label(false); ?>
+            <?= $activeForm->field($previewEmailForm, 'pqcId')->hiddenInput()->label(false); ?>
             <?= $activeForm->field($previewEmailForm, 'language_id')->hiddenInput()->label(false); ?>
             <?= $activeForm->field($previewEmailForm, 'email_tpl_id')->hiddenInput()->label(false); ?>
         </div>

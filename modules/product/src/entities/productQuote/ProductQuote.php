@@ -111,6 +111,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteData|null $productQuoteDataRecommended
  * @property ProductQuoteChangeRelation[]|null $productQuoteChangeRelations
  * @property ProductQuoteChangeRelation|null $productQuoteChangeLastRelation
+ * @property ProductQuoteRelation|null $pqRelation
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
@@ -268,6 +269,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->hasOne(static::class, ['pq_id' => 'pqr_parent_pq_id'])
             ->viaTable('product_quote_relation', ['pqr_related_pq_id' => 'pq_id']);
+    }
+
+    public function getPqRelation(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteRelation::class, ['pqr_related_pq_id' => 'pq_id']);
     }
 
     public function getProductQuoteLastChange(): ActiveQuery

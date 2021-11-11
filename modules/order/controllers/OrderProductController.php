@@ -166,26 +166,17 @@ class OrderProductController extends FController
         $productQuoteId = (int) Yii::$app->request->post('product_quote_id');
         $caseId = (int) Yii::$app->request->post('case_id');
 
-        /*if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_REMOVE, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access denied');
-        }*/
-
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db->beginTransaction();
 
         $model = $this->productQuoteRepository->find($productQuoteId);
 
         $case = Cases::findOne(['cs_id' => $caseId]);
+        $order = Order::findOne(['or_id' => $orderId]);
 
         $productQuoteAbacDto = new ProductQuoteAbacDto($model);
-        $productQuoteAbacDto->csCategoryId = $case->cs_category_id;
-        $productQuoteAbacDto->isCaseOwner = $case->isOwner(Auth::id());
-        if ($case->hasOwner()) {
-            $productQuoteAbacDto->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup(Auth::id(), $case->cs_user_id);
-        }
-        $productQuoteAbacDto->csStatusId = $case->cs_status;
-        $productQuoteAbacDto->isAutomateCase = $case->isAutomate();
-        $productQuoteAbacDto->csProjectId = $case->cs_project_id;
+        $productQuoteAbacDto->mapCaseAttributes($case);
+        $productQuoteAbacDto->mapOrderAttributes($order);
 
         /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DELETE, Remove Product quote  */
         if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DELETE)) {

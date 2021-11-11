@@ -14,6 +14,7 @@ class AddChangeForm extends \yii\base\Model
     public $case_id;
     public $origin_quote_id;
     public $type_id;
+    public $order_id;
 
     public function rules(): array
     {
@@ -32,6 +33,7 @@ class AddChangeForm extends \yii\base\Model
             [['type_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             [['type_id'], 'in', 'range' => array_keys(ProductQuoteChange::TYPE_LIST)],
             [['type_id'], 'default', 'value' => ProductQuoteChange::TYPE_RE_PROTECTION],
+            [['order_id'], 'safe'],
         ];
     }
 

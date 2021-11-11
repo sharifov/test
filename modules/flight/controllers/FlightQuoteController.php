@@ -79,6 +79,8 @@ use yii\web\Response;
 use yii\widgets\ActiveForm;
 use modules\product\src\abac\ProductQuoteChangeAbacObject;
 use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
+use modules\product\src\abac\RelatedProductQuoteAbacObject;
+use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
 use sales\repositories\cases\CasesRepository;
 use sales\access\EmployeeGroupAccess;
 
@@ -467,23 +469,10 @@ class FlightQuoteController extends FController
     {
         $productQuoteId = Yii::$app->request->get('id');
         $caseId = Yii::$app->request->get('case_id');
-
-        /*if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access denied');
-        }*/
+        $orderId = Yii::$app->request->get('order_id');
+        $pqcId = Yii::$app->request->get('pqc_id');
 
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
-        $case = $this->casesRepository->find($caseId);
-
-        $productQuoteAbacDto = new ProductQuoteAbacDto($productQuote);
-        $productQuoteAbacDto->csCategoryId = $case->cs_category_id;
-        $productQuoteAbacDto->isCaseOwner = $case->isOwner(Auth::id());
-        if ($case->hasOwner()) {
-            $productQuoteAbacDto->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup(Auth::id(), $case->cs_user_id);
-        }
-        $productQuoteAbacDto->csStatusId = $case->cs_status;
-        $productQuoteAbacDto->isAutomateCase = $case->isAutomate();
-        $productQuoteAbacDto->csProjectId = $case->cs_project_id;
 
         $lead = $productQuote->pqProduct->prLead;
 
@@ -492,9 +481,28 @@ class FlightQuoteController extends FController
         }
 
         if (!$lead) {
-            /** @abac new ProductQuoteAbacDto($productQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
-            if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
-                throw new ForbiddenHttpException('Access denied');
+            $case = $this->casesRepository->find($caseId);
+            $order = $this->orderRepository->find($orderId);
+            $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+
+            if (!$productQuote->relateParent) {
+                $productQuoteAbacDto = new ProductQuoteAbacDto($productQuote);
+                $productQuoteAbacDto->mapCaseAttributes($case);
+                $productQuoteAbacDto->mapOrderAttributes($order);
+                /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
+                if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
+                    throw new ForbiddenHttpException('Access denied');
+                }
+            } else {
+                $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($productQuote);
+                $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+                $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+                $relatedProductQuoteAbacDto->mapCaseAttributes($case);
+
+                /** @abac $relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS, ReProtection Quote View Details */
+                if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
+                    throw new ForbiddenHttpException('Access denied');
+                }
             }
         }
 
@@ -508,13 +516,25 @@ class FlightQuoteController extends FController
     {
         $originQuoteId = Yii::$app->request->get('origin-quote-id', 0);
         $reprotectionQuoteId = Yii::$app->request->get('reprotection-quote-id', 0);
-
-        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_VIEW_QUOTES_DIFF, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access denied');
-        }
+        $caseId = Yii::$app->request->get('case_id', 0);
+        $orderId = Yii::$app->request->get('order_id', 0);
+        $pqcId = Yii::$app->request->get('pqc_id', 0);
 
         $originQuote = $this->productQuoteRepository->find($originQuoteId);
         $reprotectionQuote = $this->productQuoteRepository->find($reprotectionQuoteId);
+        $case = $this->casesRepository->find($caseId);
+        $order = $this->orderRepository->find($orderId);
+        $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+
+        $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($reprotectionQuote);
+        $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+        $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+        $relatedProductQuoteAbacDto->mapCaseAttributes($case);
+
+        /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SEND_SC_EMAIL, ReProtection View Difference */
+        if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DIFF)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
 
         $originQuoteDetailsHtml = $this->renderPartial('partial/_quote_view_details', [
             'productQuote' => $originQuote,
@@ -852,16 +872,11 @@ class FlightQuoteController extends FController
 
         $originProductQuote = ProductQuote::findOne(['pq_id' => $addChangeForm->origin_quote_id]);
         $case = Cases::findOne(['cs_id' => $addChangeForm->case_id]);
+        $order = $this->orderRepository->find($addChangeForm->order_id);
 
         $productQuoteAbacDto = new ProductQuoteAbacDto($originProductQuote);
-        $productQuoteAbacDto->csCategoryId = $case->cs_category_id;
-        $productQuoteAbacDto->isCaseOwner = $case->isOwner(Auth::id());
-        if ($case->hasOwner()) {
-            $productQuoteAbacDto->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup(Auth::id(), $case->cs_user_id);
-        }
-        $productQuoteAbacDto->csStatusId = $case->cs_status;
-        $productQuoteAbacDto->isAutomateCase = $case->isAutomate();
-        $productQuoteAbacDto->csProjectId = $case->cs_project_id;
+        $productQuoteAbacDto->mapCaseAttributes($case);
+        $productQuoteAbacDto->mapOrderAttributes($order);
 
         /** @abac new ProductQuoteAbacDto($originProductQuote), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_CHANGE, Product quote add change */
         if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_CHANGE)) {
@@ -1363,16 +1378,11 @@ class FlightQuoteController extends FController
             $productQuote = $this->productQuoteRepository->find($originProductQuoteId);
 
             $case = $this->casesRepository->find($caseId);
+            $order = $this->orderRepository->find($orderId);
 
             $productQuoteAbacDto = new ProductQuoteAbacDto($productQuote);
-            $productQuoteAbacDto->csCategoryId = $case->cs_category_id;
-            $productQuoteAbacDto->isCaseOwner = $case->isOwner(Auth::id());
-            if ($case->hasOwner()) {
-                $productQuoteAbacDto->isCommonGroup = EmployeeGroupAccess::isUserInCommonGroup(Auth::id(), $case->cs_user_id);
-            }
-            $productQuoteAbacDto->csStatusId = $case->cs_status;
-            $productQuoteAbacDto->isAutomateCase = $case->isAutomate();
-            $productQuoteAbacDto->csProjectId = $case->cs_project_id;
+            $productQuoteAbacDto->mapCaseAttributes($case);
+            $productQuoteAbacDto->mapOrderAttributes($order);
 
             /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND, Create Voluntary Quote Refund */
             if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND)) {
