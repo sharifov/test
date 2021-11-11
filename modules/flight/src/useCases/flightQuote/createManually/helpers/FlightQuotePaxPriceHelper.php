@@ -5,6 +5,7 @@ namespace modules\flight\src\useCases\flightQuote\createManually\helpers;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\flight\src\useCases\flightQuote\createManually\VoluntaryQuotePaxPriceForm;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuoteCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\helpers\product\ProductQuoteHelper;
@@ -34,7 +35,7 @@ class FlightQuotePaxPriceHelper
     {
         $prices = [];
         if ($flight->fl_adults) {
-            $prices[] = new FlightQuotePaxPriceForm(
+            $prices[] = new VoluntaryQuotePaxPriceForm(
                 FlightPax::PAX_ADULT,
                 FlightPax::getPaxId(FlightPax::PAX_ADULT),
                 $flight->fl_adults,
@@ -42,7 +43,7 @@ class FlightQuotePaxPriceHelper
             );
         }
         if ($flight->fl_children) {
-            $prices[] = new FlightQuotePaxPriceForm(
+            $prices[] = new VoluntaryQuotePaxPriceForm(
                 FlightPax::PAX_CHILD,
                 FlightPax::getPaxId(FlightPax::PAX_CHILD),
                 $flight->fl_children,
@@ -50,7 +51,7 @@ class FlightQuotePaxPriceHelper
             );
         }
         if ($flight->fl_infants) {
-            $prices[] = new FlightQuotePaxPriceForm(
+            $prices[] = new VoluntaryQuotePaxPriceForm(
                 FlightPax::PAX_INFANT,
                 FlightPax::getPaxId(FlightPax::PAX_INFANT),
                 $flight->fl_infants,

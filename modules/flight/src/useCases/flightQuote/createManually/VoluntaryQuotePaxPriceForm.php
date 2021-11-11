@@ -47,7 +47,7 @@ class VoluntaryQuotePaxPriceForm extends Model
         $this->taxes = 0.00;
         $this->markup = 0.00;
         $this->clientSelling = 0.00;
-        $this->systemMarkUp = $systemMarkUp ?? 0.00;
+        $this->systemMarkUp = $systemMarkUp ? $systemMarkUp * $cnt : 0.00;
         $this->paxCode = $paxCode;
         $this->paxCodeId = $paxCodeId;
         $this->cnt = $cnt;

@@ -47,7 +47,7 @@ $pjaxId = 'pjax-container-vc';
             <?php if (!empty($createQuoteForm->customerPackage)) : ?>
                 <?php $customerPackage = unserialize($createQuoteForm->customerPackage, ['allowed_classes' => false]) ?>
                 <b>Customer Package Data:</b> <br />
-                Processing Fee - <?php echo $createQuoteForm->serviceFeeAmount ?> <?php echo $createQuoteForm->serviceFeeCurrency ?? '' ?><br />
+                Processing Fee - <?php echo $createQuoteForm->serviceFeeAmount ?> <?php echo $createQuoteForm->serviceFeeCurrency . ' (per pax)' ?? '' ?><br />
                 Without Penalty - <small><?php echo Yii::$app->formatter->asBooleanByLabel($customerPackage['withoutPenalty']) ?></small><br />
                 Without Price Difference - <small><?php echo Yii::$app->formatter->asBooleanByLabel($customerPackage['withoutPriceDiff']) ?></small>
             <?php endif ?>
