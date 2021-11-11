@@ -6,6 +6,7 @@ use common\components\purifier\Purifier;
 use common\models\CaseSale;
 use common\models\Notifications;
 use frontend\helpers\JsonHelper;
+use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
@@ -106,6 +107,18 @@ class VoluntaryExchangeConfirmHandler
                 $data['tickets'][$key]['paxType'] = $flightPax->fp_pax_type;
                 $data['tickets'][$key]['number'] = $flightPax->flightQuoteTicket->fqt_ticket_number ?? null;
                 $data['tickets'][$key]['numRef'] = $key + 1 . '.1';
+            }
+        }
+        
+        $data['passengers'] = null;
+        if ($flightQuotePaxPrices = $this->voluntaryExchangeQuote->flightQuote->flightQuotePaxPrices ?? null) {
+            foreach ($flightQuotePaxPrices as $key => $flightQuotePaxPrice) {
+                $data['passengers'][$key]['codeAs'] = FlightPax::getPaxTypeById($flightQuotePaxPrice->qpp_flight_pax_code_id);
+                $data['passengers'][$key]['cnt'] = $flightQuotePaxPrice->qpp_cnt;
+                $data['passengers'][$key]['baseFare'] = $flightQuotePaxPrice->qpp_fare;
+                $data['passengers'][$key]['baseTax'] = $flightQuotePaxPrice->qpp_tax;
+                $data['passengers'][$key]['markup'] = $mark_up = $flightQuotePaxPrice->qpp_agent_mark_up + $flightQuotePaxPrice->qpp_system_mark_up;
+                $data['passengers'][$key]['price'] = $flightQuotePaxPrice->qpp_fare + $flightQuotePaxPrice->qpp_tax + $mark_up;
             }
         }
 
