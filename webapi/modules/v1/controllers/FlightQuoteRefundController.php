@@ -515,7 +515,8 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         }
 
-        $hash = FlightRequest::generateHashFromDataJson($post);
+        $filteredPost = $voluntaryRefundCreateForm->getFilteredData();
+        $hash = FlightRequest::generateHashFromDataJson($filteredPost);
         if (FlightRequestQuery::existActiveRequestByHash($hash)) {
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage('FlightRequest (hash: ' . $hash . ') already processing'),
@@ -529,10 +530,11 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundCreateForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_REFUND_CREATE,
-                $voluntaryRefundCreateForm->getFilteredData(),
+                $filteredPost,
                 $project->id,
                 $this->apiUser->au_id
             );
+            $flightRequest->statusToPending();
             $flightRequest = $this->flightRequestRepository->save($flightRequest);
 
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->bookingId)) {
@@ -790,7 +792,8 @@ class FlightQuoteRefundController extends ApiBaseController
             ));
         }
 
-        $hash = FlightRequest::generateHashFromDataJson($post);
+        $filteredPost = $voluntaryRefundConfirmForm->getFilteredData();
+        $hash = FlightRequest::generateHashFromDataJson($filteredPost);
         if (FlightRequestQuery::existActiveRequestByHash($hash)) {
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage('FlightRequest (hash: ' . $hash . ') already processing'),
@@ -805,10 +808,11 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest = FlightRequest::create(
                 $voluntaryRefundConfirmForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_REFUND_CONFIRM,
-                $voluntaryRefundConfirmForm->getFilteredData(),
+                $filteredPost,
                 $project->id,
                 $this->apiUser->au_id
             );
+            $flightRequest->statusToPending();
             $flightRequest = $this->flightRequestRepository->save($flightRequest);
 
             $productQuoteRefund = ProductQuoteRefundQuery::getByBookingIdGidStatuses($voluntaryRefundConfirmForm->bookingId, $voluntaryRefundConfirmForm->refundGid, [ProductQuoteRefundStatus::PENDING]);
