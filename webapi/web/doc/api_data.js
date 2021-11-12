@@ -4554,6 +4554,11 @@ define({ "api": [
           "title": "Error-Response:",
           "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13101 - Api User has no related project\n     13104 - Request is not POST\n     13106 - Post has not loaded\n     13107 - Validation Failed\n\n     13113 - Product Quote not available for exchange\n     13130 - Request to Back Office is failed\n\n     150406 - Prepare Data for Request is failed; CRM processing errors\n\n     601 - BO Server Error: i.e. request timeout\n     602 - BO response body is empty\n     603 - BO response type is invalid (not array)\n     604 - BO wrong endpoint\n]",
+          "type": "html"
         }
       ]
     },

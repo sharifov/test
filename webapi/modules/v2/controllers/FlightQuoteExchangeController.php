@@ -822,6 +822,24 @@ class FlightQuoteExchangeController extends BaseController
      *           ...
      *        }
      * }
+     *
+     * @apiErrorExample {html} Codes designation
+     * [
+     *      13101 - Api User has no related project
+     *      13104 - Request is not POST
+     *      13106 - Post has not loaded
+     *      13107 - Validation Failed
+     *
+     *      13113 - Product Quote not available for exchange
+     *      13130 - Request to Back Office is failed
+     *
+     *      150406 - Prepare Data for Request is failed; CRM processing errors
+     *
+     *      601 - BO Server Error: i.e. request timeout
+     *      602 - BO response body is empty
+     *      603 - BO response type is invalid (not array)
+     *      604 - BO wrong endpoint
+     * ]
      */
     public function actionConfirm()
     {
@@ -878,7 +896,16 @@ class FlightQuoteExchangeController extends BaseController
 
         try {
             $requestData = $voluntaryExchangeConfirmHandler->prepareRequest();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:prepareRequest:Throwable');
+            $voluntaryExchangeConfirmHandler->failProcess($throwable->getMessage());
+            throw new \RuntimeException(
+                'Prepare Data for Request is failed',
+                VoluntaryExchangeCodeException::PREPARE_DATA_FAILED
+            );
+        }
 
+        try {
             try {
                 if (!$responseBo = $this->boRequestVoluntaryExchangeService->sendVoluntaryConfirm($requestData)) {
                     throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);

@@ -14,4 +14,6 @@ class VoluntaryExchangeCodeException
     public const CLIENT_CREATION_FAILED = Module::FLIGHT . 403;
     public const ORDER_CREATION_FAILED = Module::FLIGHT . 404;
     public const ORIGIN_PRODUCT_QUOTE_CREATION_FAILED = Module::FLIGHT . 405;
+
+    public const PREPARE_DATA_FAILED = Module::FLIGHT . 406;
 }
