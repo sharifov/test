@@ -101,6 +101,7 @@ class CommunicationController extends ApiBaseController
     public const TYPE_VOIP_GATHER       = 'voip_gather';
     public const TYPE_VOIP_CLIENT       = 'voip_client';
     public const TYPE_VOIP_FINISH       = 'voip_finish';
+    public const TYPE_VOIP_JOIN_TO_WRONG_CONFERENCE = 'voip_join_to_wrong_conference';
 
     public const TYPE_VOIP_CONFERENCE   = 'voip_conference';
     public const TYPE_VOIP_CONFERENCE_RECORD   = 'voip_conference_record';
@@ -308,6 +309,9 @@ class CommunicationController extends ApiBaseController
                 break;
             case self::TYPE_VOIP_RECORD:
                 $response = $this->voiceRecord($post);
+                break;
+            case self::TYPE_VOIP_JOIN_TO_WRONG_CONFERENCE:
+                $response = $this->actionCallJoinedToWrongConference($post);
                 break;
             default:
                 $response = $this->voiceDefault($post);
@@ -3391,5 +3395,13 @@ class CommunicationController extends ApiBaseController
         $data = JsonHelper::decode($model->c_data_json);
         $data['logExecutionTime'] = $logExecutionTimeResult;
         $model->c_data_json = JsonHelper::encode($data);
+    }
+
+    public function actionCallJoinedToWrongConference($post)
+    {
+        $response = new VoiceResponse();
+        $response->say('Server error.');
+
+        return $this->getResponseChownData($response);
     }
 }

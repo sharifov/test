@@ -832,7 +832,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'from' => $from,
             'to' => $to,
             'call_recording_disabled' => $callRecordingDisabled,
-            'phone_list_id' => $phoneListId
+            'phone_list_id' => $phoneListId,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/forward', $data);
@@ -861,6 +862,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'phone_list_id' => $phoneListId,
             'to_number' => $toNumber,
             'friendly_name' => $friendlyName,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);
@@ -895,6 +897,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'dep_id' => $dep_id,
             'old_call_owner_id' => $oldCallOwnerId,
             'call_group_id' => $callGroupId,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-warm-transfer-call', $data);
@@ -1049,7 +1052,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'user_id' => $user_id,
             'call_recording_disabled' => $callRecordingDisabled,
             'phone_list_id' => $phoneListId,
-            'to_number' => $toNumber
+            'to_number' => $toNumber,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/join-to-conference', $data);
