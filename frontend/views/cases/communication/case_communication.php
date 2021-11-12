@@ -797,22 +797,24 @@ $js = <<<JS
         var obj = document.getElementById('object-email-view');
         obj.data = '/email/view?id='+id+'&preview=1';
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
-        $(".view-mail").replaceWith( '<div id="mail_headers"><h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files + '<hr>' + $(".view-mail").html() + '</div>');
+        $(".view-mail").replaceWith('<div id="mail_headers"><h6><div id="email_info" class="float-left">' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + files + '<br><br></div>' + '</h6><button id="print_button" title="Allow popups in your browser if this doesn`t work." data-toggle="mail_tooltip" class="btn btn-warning float-right"><i class="fa fa-print"></i> Print</button><div class="clearfix"></div><hr>' + '</div>'+ $(".view-mail").html() );
         var popup = $('#modal-email-view');
-        popup.find('#modal-email-view-label').replaceWith('<button class="btn btn-default" id="clipboard_button" title="Text copied!" data-toggle="mail_tooltip">Copy email to clipboard</button>');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
     });
     
-    $('body').on('click', '#clipboard_button', function () {
-        var mail = $('#object-email-view').contents()[0].body.innerText;
-        mail = mail.replace('/<(\w+)/g', '', mail);
-        navigator.clipboard.writeText($("#mail_headers").text() + mail);
-         $('[data-toggle="mail_tooltip"]').tooltip({trigger: 'manual'}).tooltip('show');
-    });
-    $('body').on('mouseleave', '#clipboard_button', function () {
-        $('[data-toggle="mail_tooltip"]').tooltip('hide');
+    $('body').on('click', '#print_button', function () {
+        let w = window.open();
+        let js_timer = document.createElement("script");
+        js_timer.innerHTML = 'setTimeout( function() { window.print(); window.close(); }, 3000);'; 
+        w.document.head.append(js_timer);
+        $(w.document.body).html($('#object-email-view').contents()[0].body.innerHTML);
+        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
+        w.document.head.append('<style>@media print { #modal-email-view, #modal-email-view * { visibility: visible !important; } body, body * { visibility: hidden; }  }</style>');
+        let mail_headers = document.createElement("div");
+        mail_headers.innerHTML = $('#email_info').html();
+        w.document.body.prepend(mail_headers);
     });
 
     $('body').on('change', '.quotes-uid', function() {
