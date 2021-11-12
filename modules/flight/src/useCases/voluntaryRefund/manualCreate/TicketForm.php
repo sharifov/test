@@ -2,6 +2,8 @@
 
 namespace modules\flight\src\useCases\voluntaryRefund\manualCreate;
 
+use common\components\validators\CheckIsNumberValidator;
+
 /**
  * Class TicketForm
  * @package modules\flight\src\useCases\api\voluntaryRefundCreate
@@ -32,7 +34,8 @@ class TicketForm extends \yii\base\Model
         return [
             [['number', 'airlinePenalty', 'processingFee', 'refundable', 'selling', 'status'], 'required'],
             [['number'], 'string', 'max' => 50],
-            [['airlinePenalty', 'processingFee', 'refundable', 'selling'], 'number'],
+            [['airlinePenalty', 'processingFee', 'refundable', 'selling'], CheckIsNumberValidator::class],
+            [['airlinePenalty', 'refundable', 'selling'], 'number', 'min' => 0, 'skipOnError' => true],
             [['status'], 'string', 'max' => 20]
         ];
     }

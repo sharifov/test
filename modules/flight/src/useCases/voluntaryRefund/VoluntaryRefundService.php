@@ -124,7 +124,6 @@ class VoluntaryRefundService
                 $this->productQuoteObjectRefundRepository->save($productQuoteObjectRefund);
             }
 
-
             foreach ($form->getRefundForm()->auxiliaryOptionsForms as $auxiliaryOptionsForm) {
                 $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuote->pq_id, $auxiliaryOptionsForm->type);
 

@@ -57,6 +57,8 @@ class VoluntaryRefundForm extends Model
             [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'refundCost'], 'filter', 'filter' => 'floatval'],
             [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'refundCost'], CheckIsNumberValidator::class, 'allowInt' => true],
 
+            [['totalPaid', 'totalAirlinePenalty', 'totalRefundable', 'refundCost'], 'number', 'min' => 0],
+
             ['tickets', IsArrayValidator::class, 'skipOnEmpty' => false],
 
             ['auxiliaryOptions', IsArrayValidator::class, 'skipOnEmpty' => true],

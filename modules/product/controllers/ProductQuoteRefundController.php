@@ -318,7 +318,6 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 'VoluntaryRefundUpdateForm',
                 ['tickets' => 'TicketForm']
             );
-            echo '<pre>';
             if ($form->load($data['post']) && $form->validate()) {
                 try {
                     $this->voluntaryRefundService->updateManual($productQuoteRefund, $form);
