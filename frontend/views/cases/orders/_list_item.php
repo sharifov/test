@@ -669,7 +669,7 @@ $('body').off('click', '.btn-origin-reprotection-quote-diff').on('click', '.btn-
     btn.addClass('disabled');
     
     let modal = $('#modal-lg');
-    $('#modal-lg-label').html('Origin And Reprotection Quotes Difference');
+    $('#modal-lg-label').html('Origin And Change Quotes Difference');
     modal.find('.modal-body').html('');
     modal.find('.modal-body').load(url, function( response, status, xhr ) {
         if(status === 'error') {

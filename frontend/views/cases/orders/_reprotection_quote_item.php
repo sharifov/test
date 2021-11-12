@@ -372,7 +372,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                                 ]),
                                                                 'data-toggle' => 'tooltip',
                                                                 'data-placement' => 'right',
-                                                                'title' => 'View Origin and Reprotection quotes Difference'
+                                                                'title' => 'View Origin and Change quotes Difference'
                                                             ]);
                                                         }
                                                         ?>
