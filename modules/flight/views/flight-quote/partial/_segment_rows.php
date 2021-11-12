@@ -85,7 +85,6 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
         </div>
 
         <?php if ($withBaggageForm) : ?>
-
         <div class="row">
             <div class="col-8">
                 <?php
@@ -196,38 +195,38 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
         </div>
         <br />
 
-        <?php
-        $js = <<<JS
-        var formBaggage = $('#{$formName}');
-        
-        formBaggage.on('ajaxBeforeSend', function(event, jqXHR, settings) {        
-            $('#$formName .form-control').removeClass('border-danger').prop('title', '');       
-        }); 
-        
-        formBaggage.on('ajaxComplete', function(event, jqXHR, textStatus) {        
-            $.each(jqXHR.responseJSON, function(keyEl, msgs) {
-                
-                var splitKeyEl = keyEl.split('-'); 
-                splitKeyEl[0] = splitKeyEl[0] + '-baggagedata';
-                var elementId = splitKeyEl.join('-');
-                
-                if (msgs.length) {
-                    var message = msgs.join(',');
-                    $('#' + elementId).addClass('border-danger').prop('title', message);
-                }           
+            <?php
+            $js = <<<JS
+            var formBaggage = $('#{$formName}');
+            
+            formBaggage.on('ajaxBeforeSend', function(event, jqXHR, settings) {        
+                $('#$formName .form-control').removeClass('border-danger').prop('title', '');       
+            }); 
+            
+            formBaggage.on('ajaxComplete', function(event, jqXHR, textStatus) {        
+                $.each(jqXHR.responseJSON, function(keyEl, msgs) {
+                    
+                    var splitKeyEl = keyEl.split('-'); 
+                    splitKeyEl[0] = splitKeyEl[0] + '-baggagedata';
+                    var elementId = splitKeyEl.join('-');
+                    
+                    if (msgs.length) {
+                        var message = msgs.join(',');
+                        $('#' + elementId).addClass('border-danger').prop('title', message);
+                    }           
+                });      
+            });  
+            
+            $('#$multipleInputId').on('afterAddRow', function() {
+                $('.ui-autocomplete-input')
+                    .addClass('form-control')
+                    .focus(function () {
+                        $(this).autocomplete("search");
+                    }); 
             });      
-        });  
-        
-        $('#$multipleInputId').on('afterAddRow', function() {
-            $('.ui-autocomplete-input')
-                .addClass('form-control')
-                .focus(function () {
-                    $(this).autocomplete("search");
-                }); 
-        });      
 JS;
-        $this->registerJs($js);
-        ?>
+            $this->registerJs($js);
+            ?>
         <?php endif ?>
     <?php endforeach; ?>
 <?php endforeach; ?>
