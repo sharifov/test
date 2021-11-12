@@ -53,6 +53,8 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
 use modules\product\src\abac\RelatedProductQuoteAbacObject;
+use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
+use modules\product\src\abac\ProductQuoteChangeAbacObject;
 
 /**
  * Class ProductQuoteController
@@ -221,6 +223,11 @@ class ProductQuoteController extends FController
             throw new BadRequestHttpException('ProductQuoteChange not found');
         }
 
+        /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL, Act preview offer exchange email*/
+        if (!Yii::$app->abac->can(new ProductQuoteChangeAbacDto($productQuoteChange), ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action.');
+        }
+
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $originalQuote = ProductQuote::findOne(['pq_id' => $originQuoteId]);
@@ -310,8 +317,10 @@ class ProductQuoteController extends FController
                 throw new BadRequestHttpException('ProductQuoteChange Not Found');
             }
 
-            $caseAbacDto = new CasesAbacDto($case);
-            $caseAbacDto->pqc_status = $productQuoteChange->pqc_status_id;
+            /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL, Act send offer exchange email*/
+            if (!Yii::$app->abac->can(new ProductQuoteChangeAbacDto($productQuoteChange), ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL)) {
+                throw new ForbiddenHttpException('You do not have access to perform this action.');
+            }
 
             if ($previewEmailForm->validate()) {
                 try {

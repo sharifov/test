@@ -51,8 +51,12 @@ class m211111_113415_add_abac_rules_related_product_quote extends Migration
     public function safeDown()
     {
         $this->delete('{{%abac_policy}}', ['AND', ['IN', 'ap_object', [
-            'product/product-quote-refund/obj/product-quote-refund',
-        ]], ['IN', 'ap_action', ['(update)']]]);
+            'product/product-quote/obj/related-product-quote',
+        ]], ['IN', 'ap_action', ['(accessDetails)|(accessDifference)']]]);
+
+        $this->delete('{{%abac_policy}}', ['AND', ['IN', 'ap_object', [
+            'product/product-quote/obj/related-product-quote',
+        ]], ['IN', 'ap_action', ['(sendSCEmail)|(setConfirmed)|(setRefunded)|(setRecommended)|(setDecline)']]]);
         \Yii::$app->abac->invalidatePolicyCache();
     }
 }
