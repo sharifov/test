@@ -242,6 +242,8 @@ use yii\queue\Queue;
 use yii\web\ConflictHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use modules\notification\src\abac\NotificationAbacObject;
+use modules\notification\src\abac\dto\NotificationAbacDto;
 
 /**
  * Test controller
@@ -1298,6 +1300,23 @@ class TestController extends FController
     {
         Notifications::create(Yii::$app->user->id, 'Test ' . date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
         //Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
+    }
+    public function actionNotify3()
+    {
+        /*$notification = new Notifications();
+        $notification->n_title = 'New General Line Call';
+        $notification->n_type_id = Notifications::TYPE_SUCCESS;
+        $notification->n_user_id = 658;
+
+        $notificationAbacDto = new NotificationAbacDto($notification);
+
+        if (Yii::$app->abac->can($notificationAbacDto, NotificationAbacObject::OBJ_NOTIFICATION, NotificationAbacObject::ACTION_ACCESS)) {
+            $message = 'New General Line Call';
+            if ($ntf = Notifications::create($notification->n_user_id, 'New General Line Call', $message, Notifications::TYPE_SUCCESS, true)) {
+                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::publish('getNewNotification', ['user_id' => $notification->n_user_id], $dataNotification);
+            }
+        }*/
     }
 
     public function actionTest3()
