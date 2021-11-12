@@ -39,12 +39,14 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
     public const ACTION_DELETE  = 'delete';
     public const ACTION_CREATE_RE_PROTECTION_QUOTE = 'createReProtectionQuote';
     public const ACTION_CREATE_VOLUNTARY_QUOTE = 'createVoluntaryQuote';
+    public const ACTION_SEND_OFFER_EXCHANGE_EMAIL = 'sendOfferExchangeEmail';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::OBJ_PRODUCT_QUOTE_CHANGE => [
             self::ACTION_CREATE_RE_PROTECTION_QUOTE,
             self::ACTION_CREATE_VOLUNTARY_QUOTE,
+            self::ACTION_SEND_OFFER_EXCHANGE_EMAIL,
         ],
     ];
 
