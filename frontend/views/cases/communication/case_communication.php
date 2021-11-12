@@ -811,7 +811,7 @@ $js = <<<JS
         w.document.head.append(js_timer);
         $(w.document.body).html($('#object-email-view').contents()[0].body.innerHTML);
         // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
-        w.document.head.append('<style>@media print { #modal-email-view, #modal-email-view * { visibility: visible !important; } body, body * { visibility: hidden; }  }</style>');
+        w.document.head.append('<style>@media print { body background-color:#FFFFFF; background-image:none; color:#000000 }  }</style>');
         let mail_headers = document.createElement("div");
         mail_headers.innerHTML = $('#email_info').html();
         w.document.body.prepend(mail_headers);
