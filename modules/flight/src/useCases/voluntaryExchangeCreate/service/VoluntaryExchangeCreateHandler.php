@@ -7,6 +7,7 @@ use common\models\CaseSale;
 use common\models\Notifications;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\voluntaryExchange\codeException\VoluntaryExchangeCodeException;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
 use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
@@ -96,7 +97,8 @@ class VoluntaryExchangeCreateHandler
                 $caseSale = $this->voluntaryExchangeService->createCaseSale($saleData, $this->case);
             } catch (\Throwable $throwable) {
                 $this->caseHandler->caseToPendingManual('Case sale not created');
-                throw $throwable;
+                \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateHandler:processing:case');
+                throw new \RuntimeException('Case Sale creation failed', VoluntaryExchangeCodeException::CASE_SALE_CREATION_FAILED);
             }
             $this->addCaseEventLog(
                 'Api Create. CaseSale created'
@@ -110,7 +112,8 @@ class VoluntaryExchangeCreateHandler
                 $this->caseHandler->addClient($client->id);
             } catch (\Throwable $throwable) {
                 $this->caseHandler->caseToPendingManual('Client not created');
-                throw $throwable;
+                \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateHandler:processing:client');
+                throw new \RuntimeException('Client creation failed', VoluntaryExchangeCodeException::CLIENT_CREATION_FAILED);
             }
 
             try {
@@ -122,7 +125,8 @@ class VoluntaryExchangeCreateHandler
                 );
             } catch (\Throwable $throwable) {
                 $this->caseHandler->caseToPendingManual('Order not created');
-                throw $throwable;
+                \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateHandler:processing:order');
+                throw new \RuntimeException('Order creation failed', VoluntaryExchangeCodeException::ORDER_CREATION_FAILED);
             }
             $this->addCaseEventLog(
                 'Api Create. Order created',
@@ -138,7 +142,8 @@ class VoluntaryExchangeCreateHandler
                 );
             } catch (\Throwable $throwable) {
                 $this->caseHandler->caseToPendingManual('OriginProductQuote not created');
-                throw $throwable;
+                \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateHandler:processing:originProductQuote');
+                throw new \RuntimeException('Origin Product Quote creation failed', VoluntaryExchangeCodeException::ORIGIN_PRODUCT_QUOTE_CREATION_FAILED);
             }
             $this->addCaseEventLog(
                 'Api Create. OriginProductQuote created',

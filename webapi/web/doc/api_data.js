@@ -5421,12 +5421,7 @@ define({ "api": [
         },
         {
           "title": "Error-Response (Unprocessable entity):",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed\"\n     ],\n     \"code\": \"13113\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
-          "type": "json"
-        },
-        {
-          "title": "Error-Response (Unprocessable entity):",
-          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Quote not available for exchange\"\n     ],\n     \"code\": \"13113\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Product Quote not available for exchange\"\n     ],\n     \"code\": \"13113\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
         },
         {
@@ -5438,6 +5433,11 @@ define({ "api": [
           "title": "Error-Response (Internal Server Error):",
           "content": "HTTP/1.1 500 Internal Server Error\n{\n     \"status\": 500,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Server Error\"\n     ],\n     \"code\": 0,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
           "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13101 - Api User has no related project\n     13104 - Request is not POST\n     13106 - Post has not loaded\n     13107 - Validation Failed\n\n     13113 - Product Quote not available for exchange\n\n     15401 - Case creation failed; CRM processing error\n     15402 - Case Sale creation failed; CRM processing error\n     15403 - Client creation failed; CRM processing error\n     15404 - Order creation failed; CRM processing error\n     15405 - Origin Product Quote creation failed; CRM processing errors\n\n     601 - BO Server Error: i.e. request timeout\n     602 - BO response body is empty\n     603 - BO response type is invalid (not array)\n     604 - BO wrong endpoint\n]",
+          "type": "html"
         }
       ]
     },

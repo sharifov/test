@@ -4,6 +4,7 @@ namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\VoluntaryExchangeCreateJob;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\voluntaryExchange\codeException\VoluntaryExchangeCodeException;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
 use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
@@ -448,24 +449,7 @@ class FlightQuoteExchangeController extends BaseController
      *      "status": 422,
      *      "message": "Error",
      *      "errors": [
-     *          "FlightRequest (hash: df578e1ac5bc11b34eb7eaea8714c5e4) already processed"
-     *      ],
-     *      "code": "13113",
-     *      "technical": {
-     *         ...
-     *      },
-     *      "request": {
-     *         ...
-     *      }
-     * }
-     *
-     * @apiErrorExample {json} Error-Response (Unprocessable entity):
-     * HTTP/1.1 422 Unprocessable entity
-     * {
-     *      "status": 422,
-     *      "message": "Error",
-     *      "errors": [
-     *          "Quote not available for exchange"
+     *          "Product Quote not available for exchange"
      *      ],
      *      "code": "13113",
      *      "technical": {
@@ -509,6 +493,27 @@ class FlightQuoteExchangeController extends BaseController
      *         ...
      *      }
      * }
+     *
+     * @apiErrorExample {html} Codes designation
+     * [
+     *      13101 - Api User has no related project
+     *      13104 - Request is not POST
+     *      13106 - Post has not loaded
+     *      13107 - Validation Failed
+     *
+     *      13113 - Product Quote not available for exchange
+     *
+     *      15401 - Case creation failed; CRM processing error
+     *      15402 - Case Sale creation failed; CRM processing error
+     *      15403 - Client creation failed; CRM processing error
+     *      15404 - Order creation failed; CRM processing error
+     *      15405 - Origin Product Quote creation failed; CRM processing errors
+     *
+     *      601 - BO Server Error: i.e. request timeout
+     *      602 - BO response body is empty
+     *      603 - BO response type is invalid (not array)
+     *      604 - BO wrong endpoint
+     * ]
      */
     public function actionCreate()
     {
@@ -553,11 +558,11 @@ class FlightQuoteExchangeController extends BaseController
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryExchangeCreateForm->bookingId)) {
                 if ($productQuote->isChangeable()) {
                     if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
-                        throw new \DomainException('Product Quote not available for exchange');
+                        throw new \DomainException('Product Quote not available for exchange', ApiCodeException::REQUEST_ALREADY_PROCESSED);
                     }
                 } else {
                     throw new \DomainException('Product Quote not available for exchange. Status(' .
-                        ProductQuoteStatus::getName($productQuote->pq_status_id) . ')');
+                        ProductQuoteStatus::getName($productQuote->pq_status_id) . ')', ApiCodeException::REQUEST_ALREADY_PROCESSED);
                 }
             }
 
@@ -570,14 +575,19 @@ class FlightQuoteExchangeController extends BaseController
             );
             $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
-            if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
-                $case = CaseService::createCase(
-                    $flightRequest->fr_booking_id,
-                    $flightRequest->fr_project_id,
-                    true,
-                    $this->objectCollection
-                );
+            try {
+                if (!$case = CaseService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
+                    $case = CaseService::createCase(
+                        $flightRequest->fr_booking_id,
+                        $flightRequest->fr_project_id,
+                        true,
+                        $this->objectCollection
+                    );
+                }
+            } catch (\Throwable $throwable) {
+                throw new \RuntimeException('Case creation Failed', VoluntaryExchangeCodeException::CASE_CREATION_FAILED);
             }
+
 
             $voluntaryExchangeCreateHandler = new VoluntaryExchangeCreateHandler($case, $flightRequest, $this->objectCollection);
             try {
