@@ -497,7 +497,7 @@ $js = <<<JS
         btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
         
         modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Create from dump');
+        modal.find('.modal-title').html('Create Voluntary Quote from dump');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             if (status === 'error' && xhr.status !== 403) {
                 createNotify('Error', xhr.responseText, 'error');

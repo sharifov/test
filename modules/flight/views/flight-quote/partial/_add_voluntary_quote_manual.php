@@ -171,7 +171,11 @@ $pjaxId = 'pjax-container-vc';
 
 <?php Pjax::end() ?>
     <?php
-    $urlPrepareDump = \yii\helpers\Url::to(['/flight/flight-quote/ajax-prepare-dump', 'flight_id' => $flight->getId()]);
+    $urlPrepareDump = \yii\helpers\Url::to([
+        '/flight/flight-quote/ajax-prepare-dump',
+        'flight_id' => $flight->getId(),
+        'change_id' => $changeId,
+    ]);
     $urlSave = \yii\helpers\Url::to(['/flight/flight-quote/save-voluntary-quote', 'flight_id' => $flight->getId()]);
     $urlRefreshPrice = \yii\helpers\Url::to(
         [

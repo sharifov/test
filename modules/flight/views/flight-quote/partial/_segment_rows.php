@@ -6,6 +6,7 @@
  * @var $sourceHeight []
  * @var $sourceWeight []
  * @var array|null $defaultBaggage
+ * @var bool $withBaggageForm
  */
 
 use common\models\Airports;
@@ -25,7 +26,7 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
 ?>
 
 <?php foreach ($trips as $keyTrip => $trip) : ?>
-    <h6 >Trip: <?php echo $keyTrip ?></h6>
+    <br /><h6 >Trip: <?php echo $keyTrip ?></h6>
     <?php foreach ($trip['segments'] as $key => $segment) : ?>
         <div class="row">
             <div class="col- border p-1">
@@ -82,6 +83,8 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
                 <b><?php echo $segment['arrivalAirport'] ?></b>
             </div>
         </div>
+
+        <?php if ($withBaggageForm) : ?>
 
         <div class="row">
             <div class="col-8">
@@ -225,7 +228,7 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
 JS;
         $this->registerJs($js);
         ?>
-
+        <?php endif ?>
     <?php endforeach; ?>
 <?php endforeach; ?>
 

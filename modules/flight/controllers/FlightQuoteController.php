@@ -1049,10 +1049,10 @@ class FlightQuoteController extends FController
                 $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {
-                Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionAjaxPrepareDump:Exception');
+                Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionSaveVoluntaryQuote:Exception');
                 $response['message'] = VarDumper::dumpAsString($exception->getMessage());
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxPrepareDump:Throwable');
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionSaveVoluntaryQuote:Throwable');
                 $response['message'] = 'Internal Server Error';
             }
             return $response;
@@ -1220,8 +1220,14 @@ class FlightQuoteController extends FController
             $response = ['message' => '', 'status' => 0, 'reservation_dump' => [], 'segments' => '', 'key_trip_list' => ''];
             $originSegmentsBaggage = [];
             $defaultBaggage = null;
+            $withBaggageForm = true;
             $flightId = Yii::$app->request->get('flight_id', 0);
             $tripType = (int) Yii::$app->request->post('tripType', 0);
+            $changeId = Yii::$app->request->get('change_id');
+
+            if (($productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) && $productQuoteChange->isTypeVoluntary()) {
+                $withBaggageForm = false;
+            }
 
             try {
                 if (!$dump = Yii::$app->request->post('reservationDump')) {
@@ -1301,6 +1307,7 @@ class FlightQuoteController extends FController
                     'sourceHeight' => BaggageHelper::getBaggageHeightValuesCombine(),
                     'sourceWeight' => BaggageHelper::getBaggageWeightValuesCombine(),
                     'defaultBaggage' => $defaultBaggage,
+                    'withBaggageForm' => $withBaggageForm,
                 ]);
 
                 $response['key_trip_list'] = implode(',', array_keys($trips));
