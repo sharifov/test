@@ -224,7 +224,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
 
                                         <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL, Btn Send offer exchange email*/ ?>
                                         <?php if (Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL)) : ?>
-                                            <?php if ($changeItem->productQuoteChangeRelations) : ?>
+                                            <?php if ($changeItem->productQuoteChangeRelations && $flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
                                                 <?php echo Html::a('<i class="fas fa-envelope"></i> Send offer exchange email', null, [
                                                     'data-flight-id' => $flight->getId(),
                                                     'class' => 'dropdown-item btn_voluntary_offer_email',
