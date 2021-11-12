@@ -18,7 +18,8 @@ return [
         'user-flow-widget' => \frontend\widgets\frontendWidgetList\userflow\abac\UserFlowWidgetObject::class,
         'product-quote-change' => \modules\product\src\abac\ProductQuoteChangeAbacObject::class,
         'product-quote-refund' => \modules\product\src\abac\ProductQuoteRefundAbacObject::class,
-        'related-product-quote' => \modules\product\src\abac\RelatedProductQuoteAbacObject::class
+        'related-product-quote' => \modules\product\src\abac\RelatedProductQuoteAbacObject::class,
+        'notification' => \modules\notification\src\abac\NotificationAbacObject::class
     ],
     'scanDirs' => [
         '/modules/',
