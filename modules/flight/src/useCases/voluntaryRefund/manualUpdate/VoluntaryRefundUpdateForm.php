@@ -17,6 +17,7 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
  * @property float $totalPaid
  * @property float $refundCost
  * @property TicketForm[] $tickets
+ * @property AuxiliaryOptionForm[] $options
  */
 class VoluntaryRefundUpdateForm extends \sales\forms\CompositeForm
 {
@@ -44,6 +45,10 @@ class VoluntaryRefundUpdateForm extends \sales\forms\CompositeForm
             return new TicketForm($productQuoteObjectRefund);
         }, $productQuoteRefund->productQuoteObjectRefunds);
 
+        $this->options = array_map(function ($productQuoteOptionRefund) {
+            return new AuxiliaryOptionForm($productQuoteOptionRefund);
+        }, $productQuoteRefund->productQuoteOptionRefunds);
+
         parent::__construct($config);
     }
 
@@ -52,7 +57,7 @@ class VoluntaryRefundUpdateForm extends \sales\forms\CompositeForm
      */
     protected function internalForms(): array
     {
-        return ['tickets'];
+        return ['tickets', 'options'];
     }
 
     public function rules(): array

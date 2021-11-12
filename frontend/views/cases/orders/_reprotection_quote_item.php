@@ -119,7 +119,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
             <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND, Product quote add voluntary refund */ ?>
             <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_CREATE_VOL_REFUND)) : ?>
                 <?php if ($flight = ArrayHelper::getValue($quote, 'flightQuote.fqFlight')) : ?>
-                    <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Voluntary Refund Quote', null, [
+                    <?php echo Html::a('<i class="fas fa-plus-circle"></i> Add Refund', null, [
                         'data-flight-id' => $flight->getId(),
                         'class' => 'dropdown-item btn_create_voluntary_refund',
                         'data-url' => Url::to([
