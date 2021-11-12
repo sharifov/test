@@ -7,7 +7,6 @@ use common\models\Employee;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\email\form\EmailSendForm;
 use http\Url;
-use kartik\mpdf\Pdf;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 use sales\auth\Auth;
@@ -21,7 +20,6 @@ use common\models\search\EmailSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -343,15 +341,6 @@ class EmailController extends FController
 
         if (!Yii::$app->abac->can(new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access denied.');
-        }
-
-        if (Yii::$app->request->get('print')) {
-            $emailHeaders = $this->renderPartial('_headers', [
-                'mail' => $model,
-            ]);
-            $emailBody = $model->getEmailBodyHtml();
-            strpos($emailBody, '<body');
-            return $emailHeaders . $emailBody;
         }
 
         if (Yii::$app->request->get('preview')) {
