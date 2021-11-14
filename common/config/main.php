@@ -194,10 +194,15 @@ return [
             'tube' => 'queue_virtual_cron',
         ],
         'queue_lead_redial' => [
-            'class' => \yii\queue\beanstalk\Queue::class,
+            'class' => \common\components\queue\beanstalk\QueueMutex::class,
             'host' => $commonParams['queue']['host'],
             'port' => $commonParams['queue']['port'],
             'tube' => 'queue_lead_redial',
+            'mutex' => [
+                'class' => \yii\redis\Mutex::class,
+                'redis' => 'redis',
+                'expire' => 60,
+            ],
         ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,

@@ -26,25 +26,19 @@ class LeadRedialExpiredAccessJob extends BaseJob implements JobInterface
     {
         $this->waitingTimeRegister();
 
-        $timeStart = microtime(true);
-
         try {
             $unAssigner = \Yii::createObject(LeadRedialUnAssigner::class);
             $unAssigner->unAssignByLeadWithTimeExpired($this->leadId, new \DateTimeImmutable());
         } catch (\Throwable $e) {
-            \Yii::error([
-                'message' => 'Processing expired access error',
-                'leadId' => $this->leadId,
-                'exception' => AppHelper::throwableLog($e, false),
-            ], 'LeadRedialExpiredAccessJob');
+            \Yii::error(
+                array_merge(
+                    AppHelper::throwableLog($e, false),
+                    [
+                        'leadId' => $this->leadId,
+                    ]
+                ),
+                'LeadRedialExpiredAccessJob'
+            );
         }
-
-        \Yii::info([
-            'timePushToQueue' => $this->timeStart,
-            'timeRunJob' => $timeStart,
-            'timeDiffPushAndRun' => round($timeStart - $this->timeStart, 1),
-            'timeExecuteJob' => round(microtime(true) - $timeStart, 1),
-            'leadId' => $this->leadId,
-        ], 'info\LeadRedialExpiredAccessJob');
     }
 }

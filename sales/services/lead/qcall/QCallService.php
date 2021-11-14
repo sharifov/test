@@ -137,7 +137,7 @@ class QCallService
 
         $this->leadQcallRepository->save($qCall);
 
-        \Yii::$app->queue_lead_redial->priority(1)->push(new LeadRedialAssignToUsersJob($qCall->lqc_lead_id, 0));
+        \Yii::$app->queue_lead_redial->priority(1)->push(new LeadRedialAssignToUsersJob($qCall->lqc_lead_id));
 
         return $qCall->lqc_lead_id;
     }

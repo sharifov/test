@@ -179,6 +179,7 @@ services:
       - psql
       - beanstalkd
       - centrifugo
+      - redis
     networks:
       - default
       - sales-communication
@@ -197,6 +198,7 @@ services:
       - mysql
       - psql
       - beanstalkd
+      - redis
     networks:
       - default
       - sales-communication
