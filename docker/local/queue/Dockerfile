@@ -13,4 +13,6 @@ ARG APP_ROOT
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 RUN echo "files = $APP_ROOT/www/common/config/supervisor/*.conf" >> /etc/supervisor/supervisord.conf
 
+WORKDIR /var/www/sales/www
+
 CMD ["/usr/bin/supervisord"]

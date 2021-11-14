@@ -5,6 +5,8 @@ namespace sales\model\leadRedial\job;
 use yii\redis\Connection;
 
 /**
+ * @deprecated
+ *
  * Class Locker
  *
  * @property Connection $connection
