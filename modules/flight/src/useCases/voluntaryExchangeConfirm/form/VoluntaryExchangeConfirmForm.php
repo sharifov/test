@@ -87,10 +87,7 @@ class VoluntaryExchangeConfirmForm extends Model
                 throw new ValidationException('ProductQuote not found');
             }
             if (!in_array($this->changeQuote->pq_status_id, SettingHelper::getExchangeQuoteConfirmStatusList(), false)) {
-                $processingList = [];
-                foreach (SettingHelper::getExchangeQuoteConfirmStatusList() as $statusId) {
-                    $processingList[] = ProductQuoteStatus::getName($statusId);
-                }
+                $processingList = ProductQuoteStatus::getNames(SettingHelper::getExchangeQuoteConfirmStatusList());
                 throw new ValidationException('ProductQuote not in processing statuses(' . implode(',', $processingList) . '). Current status(' .
                     ProductQuoteStatus::getName($this->changeQuote->pq_status_id) . ')');
             }

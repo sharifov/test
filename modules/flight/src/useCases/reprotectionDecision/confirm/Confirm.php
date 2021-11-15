@@ -4,11 +4,13 @@ namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 
 use modules\flight\src\useCases\reprotectionDecision\CancelOtherReprotectionQuotes;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use sales\entities\cases\CaseEventLog;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 
@@ -45,8 +47,10 @@ class Confirm
         if (!$reprotectionQuote->flightQuote->isTypeReProtection()) {
             throw new \DomainException('Quote is not reprotection quote.');
         }
-        if ($reprotectionQuote->isApplied()) {
-            throw new \DomainException('Quote is already applied.');
+        if (!in_array($reprotectionQuote->pq_status_id, SettingHelper::getExchangeQuoteConfirmStatusList(), false)) {
+            $processingList = ProductQuoteStatus::getNames(SettingHelper::getExchangeQuoteConfirmStatusList());
+            throw new \DomainException('Quote not in confirmation statuses(' . implode(',', $processingList) . '). ' .
+                'Current status(' . ProductQuoteStatus::getName($reprotectionQuote->pq_status_id) . ')');
         }
 
         $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote);

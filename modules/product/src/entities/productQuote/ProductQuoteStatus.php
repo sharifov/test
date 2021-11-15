@@ -152,6 +152,15 @@ class ProductQuoteStatus
         return self::LIST[$value] ?? 'Undefined';
     }
 
+    public static function getNames(array $statusIds): array
+    {
+        $result = [];
+        foreach ($statusIds as $value) {
+            $result[] = self::getName($value);
+        }
+        return $result;
+    }
+
     private static function getClassName(?int $value): string
     {
         return self::CLASS_LIST[$value] ?? 'secondary';
