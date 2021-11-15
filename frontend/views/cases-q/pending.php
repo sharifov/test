@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="cases-q-pending">
 
-    <?php Pjax::begin(['id' => 'cases-q-pending-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'cases-q-pending-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -143,13 +143,3 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end() ?>
 
 </div>
-
-<?php
-$js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#pending-gv').position().top }, 400);
-    })
-JS;
-
-$this->registerJs($js, $this::POS_END);
-?>

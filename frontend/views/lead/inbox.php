@@ -119,7 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="clearfix"></div>
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
 
     <div class="row">
@@ -489,16 +489,6 @@ echo '<div class="table-responsive">' . GridView::widget([
 <?php //if($isAccessNewLead):?>
     <?php $this->registerJs('$(".knob_element").knob();', \yii\web\View::POS_READY); ?>
 <?php //endif; ?>
-
-<?php
-$js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-inbox-gv').position().top }, 400);
-    })
-JS;
-
-$this->registerJs($js, $this::POS_END);
-?>
 
 <?php
 $js = '

@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="lead-index">
 
-    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET'], 'scrollTo' => 0]); ?>
 
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 <p>
@@ -411,13 +411,3 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
-
-<?php
-$js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-sold-gv').position().top }, 400);
-    })
-JS;
-
-$this->registerJs($js, $this::POS_END);
-?>

@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-bonus">
 
-    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET']]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET'], 'scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
     <?= $this->render('_search_bonus', ['model' => $searchModel]); ?>
 
     <?php
@@ -395,9 +395,6 @@ $js = <<<JS
         }
     });
 
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-bonus-gv').position().top }, 400);
-    })
 JS;
 $this->registerJs($js);
 

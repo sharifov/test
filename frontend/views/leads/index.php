@@ -74,7 +74,7 @@ $this->registerJs($js);
 ?>
 
 
-    <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true, 'scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 
     <div class="x_panel">
         <div class="x_title">
@@ -631,10 +631,6 @@ $js = <<<JS
 
     $('[data-toggle="tooltip"]').tooltip({html:true});
    
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#' + '$gridId').position().top }, 400);
-    })
-
 JS;
     $this->registerJs($js, View::POS_READY);
 ?>

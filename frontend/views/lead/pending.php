@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="lead-pending">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
     $gridColumns = [
@@ -451,16 +451,6 @@ echo GridView::widget([
 ?>
 <?php Pjax::end(); ?>
 </div>
-
-<?php
-$js = <<<JS
-    $(document).on('pjax:success', function() {
-        $("html, body").animate({ scrollTop: $('#lead-pending-gv').position().top }, 400);
-    })
-JS;
-
-$this->registerJs($js, $this::POS_END);
-?>
 
 <?php
 /*$js = '
