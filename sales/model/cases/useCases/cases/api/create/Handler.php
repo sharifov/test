@@ -3,6 +3,7 @@
 namespace sales\model\cases\useCases\cases\api\create;
 
 use common\models\Client;
+use sales\entities\cases\CaseCategory;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
@@ -39,9 +40,9 @@ class Handler
         $this->transactionManager = $transactionManager;
     }
 
-    public function handle(Command $command): Result
+    public function handle(Command $command, ?CaseCategory $caseCategory = null): Result
     {
-        $category = $this->categoryRepository->find($command->category_id);
+        $category = $caseCategory ?? $this->categoryRepository->find($command->category_id);
 
         /** @var Result $result */
         $result = $this->transactionManager->wrap(function () use ($command, $category) {
@@ -74,7 +75,7 @@ class Handler
                 $command->order_uid,
                 $command->subject,
                 $this->processDescription($command->order_info, $command->description),
-                $command->category_id
+                $category->cc_id
             );
 
             $this->casesRepository->save($case);

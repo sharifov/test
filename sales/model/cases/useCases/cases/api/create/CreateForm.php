@@ -5,6 +5,7 @@ namespace sales\model\cases\useCases\cases\api\create;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
+use sales\repositories\NotFoundException;
 use sales\services\client\InternalPhoneValidator;
 use common\components\validators\IsArrayValidator;
 use yii\base\Model;
@@ -23,6 +24,7 @@ use yii\base\Model;
  * @property string|null $project_key
  * @property string|null $chat_visitor_id
  * @property string|null $contact_name
+ * @property $category_key
  */
 class CreateForm extends Model
 {
@@ -37,6 +39,7 @@ class CreateForm extends Model
     public $project_key;
     public $chat_visitor_id;
     public $contact_name;
+    public $category_key;
 
     public function formName(): string
     {
@@ -74,12 +77,21 @@ class CreateForm extends Model
                 'skipOnError' => true, 'skipOnEmpty' => true,
                 'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']],
 
-            ['category_id', 'required'],
-            ['category_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['category_id', 'required', 'when' => function ($model) {
+                return empty($model->category_key);
+            }],
+            ['category_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true,],
             ['category_id', 'exist', 'targetClass' => CaseCategory::class,
-                'targetAttribute' => ['category_id' => 'cc_id']],
+                'targetAttribute' => ['category_id' => 'cc_id'], 'skipOnEmpty' => true, 'skipOnError' => true,],
 
-//            ['order_uid', 'required'],
+            ['category_key', 'required', 'when' => function ($model) {
+                return empty($model->category_id);
+            }],
+            ['category_key', 'string', 'max' => 50],
+            ['category_key', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true, 'skipOnError' => true,],
+            ['category_key', 'exist', 'targetClass' => CaseCategory::class,
+                'targetAttribute' => ['category_key' => 'cc_key'], 'skipOnEmpty' => true, 'skipOnError' => true,],
+
             ['order_uid', 'string', 'min' => 5, 'max' => 7],
             ['order_uid', 'match', 'pattern' => '/^[a-zA-Z0-9]+$/'],
 
@@ -124,7 +136,6 @@ class CreateForm extends Model
      */
     public function getDto(): Command
     {
-
         if (empty($this->project_id) && $this->project_key) {
             $this->project_id = Project::find()
                 ->select('id')
@@ -154,5 +165,16 @@ class CreateForm extends Model
             return false;
         }
         return true;
+    }
+
+    public function getCaseCategory(): CaseCategory
+    {
+        if ($this->category_key && $caseCategory = CaseCategory::findOne(['cc_key' => $this->category_key])) {
+            return $caseCategory;
+        }
+        if ($this->category_id && $caseCategory = CaseCategory::findOne(['cc_id' => $this->category_id])) {
+            return $caseCategory;
+        }
+        throw new NotFoundException('CaseCategory not found');
     }
 }
