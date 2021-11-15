@@ -277,11 +277,11 @@ $keyId = md5($result['key']);
                 <tr>
                     <th>Pax</th>
                     <th>Q</th>
-                    <th>NP, $</th>
                     <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                        ?><th>MU, $</th><?php
+                        ?><th class="text-right">MU, $</th><?php
                     endif;?>
-                    <th>Ex Mkp, $</th>
+                    <th  class="text-right">Ex Mkp, $</th>
+                    <th class="text-right">SP, $</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -290,11 +290,10 @@ $keyId = md5($result['key']);
                     <tr><?php $paxTotal += $pax['cnt'];?>
                         <th><?= $paxCode?></th>
                         <td>x <?= $pax['cnt']?></td>
-                        <td><?= $pax['price']?></td>
                         <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                            ?><td><?= (isset($pax['markup'])) ? $pax['markup'] : ''?></td><?php
+                            ?><td class="text-right"><?= (isset($pax['markup'])) ? $pax['markup'] : ''?></td><?php
                         endif;?>
-                        <td class="box_ex_markup_<?php echo $keyId ?>">
+                        <td class="box_ex_markup_<?php echo $keyId ?> text-right">
                             <?php $readonly = $isQuoteAssignedToFlight ? 'readonly="1"' : '' ?>
                             <?php $border = $isQuoteAssignedToFlight ? ' border: 0; ' : '' ?>
                     <?php
@@ -319,6 +318,7 @@ $keyId = md5($result['key']);
                                 autocomplete="off"
                                 style="width: 56px; <?php echo $border ?>" />
                         </td>
+                        <td class="text-right"><?= $pax['price']?></td>
                     </tr>
                 <?php endforeach;?>
                 </tbody>
@@ -326,11 +326,11 @@ $keyId = md5($result['key']);
                 <tr>
                     <th>Total</th>
                     <td><?= $paxTotal?></td>
-                    <td><?= $result['prices']['totalPrice']?></td>
                     <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                        ?><td><?= $result['prices']['markup']?></td><?php
+                        ?><td class="text-right"><?= $result['prices']['markup']?></td><?php
                     endif;?>
                     <td></td>
+                    <td class="text-right"><?= $result['prices']['totalPrice']?></td>
                 </tr>
                 </tfoot>
             </table>
