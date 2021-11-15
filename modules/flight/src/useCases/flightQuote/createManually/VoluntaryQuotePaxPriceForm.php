@@ -41,7 +41,7 @@ class VoluntaryQuotePaxPriceForm extends Model
         ?float $systemMarkUp = null,
         $config = []
     ) {
-        $this->selling = 0.00;
+        $this->selling = $systemMarkUp ? $systemMarkUp * $cnt : 0.00;
         $this->net = 0.00;
         $this->fare = 0.00;
         $this->taxes = 0.00;
