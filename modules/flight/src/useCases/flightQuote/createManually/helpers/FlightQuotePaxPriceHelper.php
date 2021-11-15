@@ -99,7 +99,8 @@ class FlightQuotePaxPriceHelper
                 $baseFare += $flightQuotePaxPrice->qpp_fare;
                 $baseTax += $flightQuotePaxPrice->qpp_tax;
                 $markup += ($flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up);
-                $price += $baseFare + $baseTax + $markup;
+                $price += $flightQuotePaxPrice->qpp_fare + $flightQuotePaxPrice->qpp_tax +
+                    ($flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up);
             }
         }
 
