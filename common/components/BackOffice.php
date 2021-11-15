@@ -396,24 +396,24 @@ class BackOffice
             if (!isset($response->content) || !$content = JsonHelper::decode($response->content)) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange server error. Content not found',
-                    'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($response),
+                    'request' => (new CreditCardFilter())->filterData($request),
                 ], 'BackOffice:voluntaryExchange:serverError');
                 throw new BoResponseException('BO voluntaryExchange server error. Content not found', BoResponseException::BO_DATA_IS_EMPTY);
             }
             if (!$response->isOk) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange server error',
-                    'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($content),
+                    'request' => (new CreditCardFilter())->filterData($request),
                 ], 'BackOffice:voluntaryExchange:serverError');
                 return $content;
             }
             if (!isset($content['status'])) {
                 \Yii::error([
                     'message' => 'BO voluntaryExchange response - status not found in response',
-                    'request' => (new CreditCardFilter())->filterData($request),
                     'content' => VarDumper::dumpAsString($content),
+                    'request' => (new CreditCardFilter())->filterData($request),
                 ], 'BackOffice:voluntaryExchange:statusNotFound');
                 throw new BoResponseException('BO voluntaryExchange response - status not found in response', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
             }

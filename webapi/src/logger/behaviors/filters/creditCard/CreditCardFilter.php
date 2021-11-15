@@ -31,4 +31,17 @@ class CreditCardFilter implements Filterable
         }
         return $data;
     }
+
+    /**
+     * @param mixed $source
+     * @param string $substitute
+     * @return mixed
+     */
+    public static function replaceSource($source, string $substitute = '*')
+    {
+        if (!is_string($source)) {
+            return $source;
+        }
+        return str_repeat($substitute, strlen($source));
+    }
 }
