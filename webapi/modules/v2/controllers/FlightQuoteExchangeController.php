@@ -497,7 +497,6 @@ class FlightQuoteExchangeController extends BaseController
      * @apiErrorExample {html} Codes designation
      * [
      *      13101 - Api User has no related project
-     *      13104 - Request is not POST
      *      13106 - Post has not loaded
      *      13107 - Validation Failed
      *
@@ -826,7 +825,6 @@ class FlightQuoteExchangeController extends BaseController
      * @apiErrorExample {html} Codes designation
      * [
      *      13101 - Api User has no related project
-     *      13104 - Request is not POST
      *      13106 - Post has not loaded
      *      13107 - Validation Failed
      *
