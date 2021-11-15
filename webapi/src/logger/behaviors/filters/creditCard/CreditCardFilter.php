@@ -35,13 +35,23 @@ class CreditCardFilter implements Filterable
     /**
      * @param mixed $source
      * @param string $substitute
+     * @param int $maxLen
      * @return mixed
      */
-    public static function replaceSource($source, string $substitute = '*')
+    public static function replaceSource($source, string $substitute = '*', int $maxLen = 3)
     {
         if (!is_string($source)) {
             return $source;
         }
-        return str_repeat($substitute, strlen($source));
+        $length = strlen($source);
+        $middle = str_repeat($substitute, $length);
+        if ($length <= $maxLen) {
+            return $middle;
+        }
+
+        $first = $source[0];
+        $last = substr($source, -1);
+
+        return $first . $middle . $last;
     }
 }
