@@ -771,11 +771,24 @@ $js = <<<JS
         
         let popup = $('#modal-email-view');
         
-        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files);
+        $(".view-mail").replaceWith('<div id="mail_headers"><h6><div id="email_info" class="float-left">' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + files + '<br><br></div>' + '</h6><button id="print_button" title="Allow popups in your browser if this doesn`t work." data-toggle="mail_tooltip" class="btn btn-warning float-right"><i class="fa fa-print"></i> Print</button><div class="clearfix"></div><hr>' + '</div>'+ $(".view-mail").html() );
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
-    });      
+    });
+    
+    $('body').on('click', '#print_button', function () {
+        let w = window.open();
+        let js_timer = document.createElement("script");
+        js_timer.innerHTML = 'setTimeout( function() { window.print(); window.close(); }, 3000);'; 
+        w.document.head.append(js_timer);
+        $(w.document.body).html($('#object-email-view').contents()[0].body.innerHTML);
+        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
+        w.document.head.append('<style>@media print { body background-color:#FFFFFF; background-image:none; color:#000000 }  }</style>');
+        let mail_headers = document.createElement("div");
+        mail_headers.innerHTML = $('#email_info').html();
+        w.document.body.prepend(mail_headers);
+    });
     
     $('body').on('change', '.quotes-uid', function() {
         
