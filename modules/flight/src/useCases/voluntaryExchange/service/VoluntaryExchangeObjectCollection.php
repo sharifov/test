@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\voluntaryExchange\service;
 
+use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\flight\src\repositories\flightQuoteSegment\FlightQuoteSegmentRepository;
@@ -60,6 +61,14 @@ class VoluntaryExchangeObjectCollection
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
     private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
     private PaymentRequestVoluntaryService $paymentRequestVoluntaryService;
+    private FlightQuoteFlightRepository $flightQuoteFlightRepository;
+
+    public function getFlightQuoteFlightRepository(): FlightQuoteFlightRepository
+    {
+        return $this->flightQuoteFlightRepository ?? ($this->flightQuoteFlightRepository = Yii::createObject(
+            FlightQuoteFlightRepository::class
+        ));
+    }
 
     public function getPaymentRequestVoluntaryService(): PaymentRequestVoluntaryService
     {

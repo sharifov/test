@@ -166,6 +166,11 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             $this->voluntaryQuote->bookedChangeFlow();
             $this->objectCollection->getProductQuoteRepository()->save($this->voluntaryQuote);
 
+            if ($flightQuoteFlight = $this->voluntaryQuote->flightQuote->flightQuoteFlight ?? null) {
+                $flightQuoteFlight->fqf_booking_id = $this->form->booking_id;
+                $this->objectCollection->getFlightQuoteFlightRepository()->save($flightQuoteFlight);
+            }
+
             VoluntaryExchangeCreateService::bookingProductQuotePostProcessing($this->voluntaryQuote);
             $transaction->commit();
         } catch (\Throwable $throwable) {
