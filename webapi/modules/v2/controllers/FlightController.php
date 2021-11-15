@@ -12,8 +12,10 @@ use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
 use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeForm;
 use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchangeService;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\NotFoundException;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -1959,11 +1961,14 @@ class FlightController extends BaseController
             if ($form->withQuoteList()) {
                 $quoteList = [];
                 $relationQuotes = ProductQuoteRelation::find()
+                    ->innerJoin(ProductQuote::tableName(), 'pqr_related_pq_id = pq_id')
                     ->leftJoinRecommended()
                     ->byParentQuoteId($productQuote->pq_id)
                     ->byType([ProductQuoteRelation::TYPE_REPROTECTION, ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE])
                     ->orderByRecommendedDesc()
+                    ->andWhere(['IN', 'pq_status_id', SettingHelper::getExchangeQuoteConfirmStatusList()])
                     ->all();
+
                 foreach ($relationQuotes as $relationQuote) {
                     $changeProductQuote = $relationQuote->pqrRelatedPq;
                     $data = $changeProductQuote->toArray();

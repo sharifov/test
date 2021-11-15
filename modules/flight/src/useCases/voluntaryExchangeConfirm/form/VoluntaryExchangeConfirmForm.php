@@ -11,6 +11,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use sales\entities\cases\Cases;
 use sales\exception\ValidationException;
 use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\setting\SettingHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
 use yii\base\Model;
@@ -85,9 +86,9 @@ class VoluntaryExchangeConfirmForm extends Model
             if (!$this->changeQuote = ProductQuote::findOne(['pq_gid' => $this->quote_gid])) {
                 throw new ValidationException('ProductQuote not found');
             }
-            if (!in_array($this->changeQuote->pq_status_id, self::PQ_ALLOW_STATUS_LIST, false)) {
+            if (!in_array($this->changeQuote->pq_status_id, SettingHelper::getExchangeQuoteConfirmStatusList(), false)) {
                 $processingList = [];
-                foreach (self::PQ_ALLOW_STATUS_LIST as $statusId) {
+                foreach (SettingHelper::getExchangeQuoteConfirmStatusList() as $statusId) {
                     $processingList[] = ProductQuoteStatus::getName($statusId);
                 }
                 throw new ValidationException('ProductQuote not in processing statuses(' . implode(',', $processingList) . '). Current status(' .

@@ -698,6 +698,11 @@ class SettingHelper
         return self::prePareStatusIds(Yii::$app->params['settings']['finished_quote_refund_statuses']);
     }
 
+    public static function getExchangeQuoteConfirmStatusList(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['exchange_quote_confirm_status_list']);
+    }
+
     public static function getVoluntaryExchangeBoEndpoint(): ?string
     {
         return Yii::$app->params['settings']['voluntary_exchange_bo_endpoint'] ?? null;
