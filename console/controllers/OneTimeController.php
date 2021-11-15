@@ -19,7 +19,9 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\PhoneBlacklist;
+use common\models\Project;
 use common\models\Sms;
+use common\models\Sources;
 use common\models\UserProjectParams;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
@@ -1435,5 +1437,94 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionSaveLeadsForRecoverySource()
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $leads = $this->getLeadsForRecoverySources();
+        Yii::warning([
+            'leads' => array_column($leads, 'id'),
+        ], 'RecoverySourceLeads');
+
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionRecoveryLeadSource()
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $processed = 0;
+        $time_start = microtime(true);
+
+        $leads = $this->getLeadsForRecoverySources();
+
+        $count = count($leads);
+        Console::startProgress(0, $count);
+
+        $defaultSources = [];
+        foreach (Project::find()->all() as $project) {
+            $source = Sources::getByProjectId($project->id);
+            if ($source) {
+                $defaultSources[(int)$project->id] = $source->id;
+            }
+        }
+
+        Yii::warning([
+            'message' => 'Found ' . $count . ' leads for update source'
+        ], 'RecoverySourceLeads');
+
+        $countUpdated = 0;
+        foreach ($leads as $lead) {
+            $sourceId = $defaultSources[(int)$lead['project_id']] ?? null;
+            if ($sourceId) {
+                try {
+                    Lead::updateAll(['source_id' => $sourceId], 'id = ' . (int)$lead['id']);
+                    $countUpdated++;
+                } catch (\Throwable $e) {
+                    Yii::error([
+                        'message' => $e->getMessage(),
+                        'leadId' => $lead['id'],
+                    ], 'RecoverySourceLeads');
+                }
+            } else {
+                Yii::error([
+                    'message' => 'Not found Source',
+                    'leadId' => $lead['id'],
+                    'projectId' => $lead['project_id'],
+                ], 'RecoverySourceLeads');
+            }
+            $processed++;
+            Console::updateProgress($processed, $count);
+        }
+
+        Yii::warning([
+            'message' => $countUpdated . ' from ' . $count . ' leads updated source',
+        ], 'RecoverySourceLeads');
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    private function getLeadsForRecoverySources()
+    {
+        return (new Query())
+            ->select(['leads.id', 'leads.project_id'])
+            ->from('leads')
+            ->leftJoin('projects', 'projects.id = leads.project_id')
+            ->leftJoin('sources', 'sources.id = leads.source_id')
+            ->andWhere([
+                'OR',
+                'leads.project_id != sources.project_id',
+                'leads.source_id is null'
+            ])
+            ->all();
     }
 }
