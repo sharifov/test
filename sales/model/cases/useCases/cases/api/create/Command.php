@@ -34,7 +34,7 @@ class Command
     public function __construct(
         ?string $contact_email,
         ?string $contact_phone,
-        int $category_id,
+        ?int $category_id,
         ?string $order_uid,
         array $order_info,
         int $project_id,
