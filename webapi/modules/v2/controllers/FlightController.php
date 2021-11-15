@@ -1931,6 +1931,10 @@ class FlightController extends BaseController
             "errors": []
         }
      *
+     * @apiErrorExample {html} Note:
+     * [
+     *      In "quote_list" show by status restriction from settings - "exchange_quote_confirm_status_list"
+     * ]
      */
     public function actionProductQuoteGet()
     {

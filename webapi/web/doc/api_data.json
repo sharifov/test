@@ -3702,6 +3702,11 @@
           "title": "Error-Response (500):",
           "content": "HTTP/1.1 200 Ok\n{\n            \"status\": 500,\n            \"message\": \"Internal Server Error\",\n            \"errors\": []\n        }",
           "type": "json"
+        },
+        {
+          "title": "Note:",
+          "content": "[\n     In \"quote_list\" show by status restriction from settings - \"exchange_quote_confirm_status_list\"\n]",
+          "type": "html"
         }
       ]
     },
