@@ -1,5 +1,6 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
 use modules\hotel\HotelModule;
 use yii\log\FileTarget;
@@ -128,7 +129,7 @@ return [
                     'db' => 'db_postgres'
                 ],
                 [
-                    'class' => \common\components\logger\FilebeatTarget::class,
+                    'class' => FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -142,7 +143,7 @@ return [
                     'logFile' => '@runtime/logs/stash.log'
                 ],
                 'file-fb-log' => [
-                    'class' => \common\components\logger\FilebeatTarget::class,
+                    'class' => FilebeatTarget::class,
                     'levels' => ['info'],
                     'categories' => ['log\*', 'elk\*'],
                     'logVars' => [],

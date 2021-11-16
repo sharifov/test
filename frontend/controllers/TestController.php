@@ -2618,8 +2618,9 @@ class TestController extends FController
             ],
         ];
 
-        Yii::info($message, 'analytics\test1');
-        Yii::info($message, 'AS\test2');
+        Yii::info($message, 'analytics\analytics-test');
+        Yii::info($message, 'AS\AS-test');
+        Yii::info($message, 'elk\test-elk');
 
         return date('Y-m-d H:i:s');
     }
