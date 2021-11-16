@@ -1272,7 +1272,7 @@ class FlightController extends BaseController
      *        "message": "Error",
      *        "data": [
      *              "success": false,
-     *              "error": "Product Quote Change status is not in \"Decision pending\". Current status Canceled"
+     *              "error": "Product Quote Change status is not in \"pending\". Current status Canceled"
      *        ],
      *        "code": 101,
      *        "errors": [],
@@ -2103,7 +2103,7 @@ class FlightController extends BaseController
      *        "message": "Error",
      *        "data": [
      *              "success": false,
-     *              "error": "Product Quote Change status is not in \"Decision pending\". Current status Canceled"
+     *              "error": "Product Quote Change status is not in \"pending\". Current status Canceled"
      *        ],
      *        "code": 101,
      *        "errors": [],
