@@ -22,10 +22,10 @@ abstract class AbstractBaseRepository
         $this->model = $model;
     }
 
-    public function save(bool $runValidation = false): AbstractBaseRepository
+    public function save(bool $runValidation = false, string $glue = ' '): AbstractBaseRepository
     {
         if (!$this->model->save($runValidation)) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($this->model));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($this->model, $glue));
         }
         return $this;
     }
