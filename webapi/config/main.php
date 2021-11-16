@@ -96,12 +96,12 @@ return [
         'log' => [
             'traceLevel' => 0,
             'targets' => [
-                [
+                'file' => [
                     'class' => FileTarget::class,
                     'levels' => ['error', 'warning'],
                     //'logVars' => [],
                 ],
-                [
+                'db-error' => [
                     'class' => DbTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
@@ -115,8 +115,8 @@ return [
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => \yii\log\DbTarget::class,
+                'db-info' => [
+                    'class' => DbTarget::class,
                     'levels' => ['info'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -128,7 +128,7 @@ return [
                     },
                     'db' => 'db_postgres'
                 ],
-                [
+                'file-fb-error' => [
                     'class' => FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
@@ -149,6 +149,16 @@ return [
                     'logVars' => [],
                     'prefix' => static function () {
                         return LogHelper::getWebapiPrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+                'analytics-fb-log' => [
+                    'class' => FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['analytics\*', 'AS\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getAnalyticPrefixData();
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],

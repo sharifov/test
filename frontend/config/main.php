@@ -1,5 +1,6 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
 use frontend\assets\groups\BootstrapGroupAsset;
 use kartik\daterange\MomentAsset;
@@ -20,6 +21,8 @@ use modules\product\ProductModule;
 use modules\qaTask\QaTaskModule;
 use common\components\i18n\Formatter;
 use modules\rentCar\RentCarModule;
+use yii\log\DbTarget;
+use yii\log\FileTarget;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
@@ -74,20 +77,19 @@ return [
         ],*/
 
         'session' => [
-            // this is the name of the session cookie used for login on the frontend
             'name' => 'advanced-crm',
         ],
 
         'log' => [
             'traceLevel' => 0,
             'targets' => [
-                [
-                    'class' => 'yii\log\FileTarget',
+                'file' => [
+                    'class' => FileTarget::class,
                     'logVars' => [],
                     'levels' => ['error', 'warning'],
                 ],
-                [
-                    'class' => 'yii\log\DbTarget',
+                'db-error' => [
+                    'class' => DbTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -100,8 +102,8 @@ return [
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => 'yii\log\DbTarget',
+                'db-info' => [
+                    'class' => DbTarget::class,
                     'levels' => ['info'],
                     'logVars' => [],
                     'categories' => ['info\*', 'log\*'],
@@ -110,8 +112,8 @@ return [
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => \common\components\logger\FilebeatTarget::class,
+                'file-fb-error' => [
+                    'class' => FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -124,13 +126,23 @@ return [
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
-                [
-                    'class' => \common\components\logger\FilebeatTarget::class,
+                'file-fb-info' => [
+                    'class' => FilebeatTarget::class,
                     'levels' => ['info'],
                     'categories' => ['log\*', 'elk\*'],
                     'logVars' => [],
                     'prefix' => static function () {
                         return LogHelper::getFrontendPrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+                'analytics-fb-log' => [
+                    'class' => FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['analytics\*', 'AS\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getAnalyticPrefixData();
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],

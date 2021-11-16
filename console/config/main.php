@@ -1,8 +1,11 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
 use modules\hotel\HotelModule;
 use modules\rentCar\RentCarModule;
+use yii\log\DbTarget;
+use yii\log\FileTarget;
 
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
@@ -56,11 +59,11 @@ return [
             'traceLevel' => 0,
             'targets' => [
                 'file' => [
-                    'class' => 'yii\log\FileTarget',
+                    'class' => FileTarget::class,
                     'levels' => ['error', 'warning'],
                 ],
                 'db-error' => [
-                    'class' => 'yii\log\DbTarget',
+                    'class' => DbTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -72,7 +75,7 @@ return [
                     'db' => 'db_postgres',
                 ],
                 'db-info' => [
-                    'class' => \yii\log\DbTarget::class,
+                    'class' => DbTarget::class,
                     'levels' => ['info'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -84,8 +87,8 @@ return [
                     },
                     'db' => 'db_postgres',
                 ],
-                'file-air' => [
-                    'class' => \common\components\logger\FilebeatTarget::class,
+                'file-fb-error' => [
+                    'class' => FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -98,12 +101,22 @@ return [
                     'logFile' => '@runtime/logs/stash.log',
                 ],
                 'file-fb-log' => [
-                    'class' => \common\components\logger\FilebeatTarget::class,
+                    'class' => FilebeatTarget::class,
                     'levels' => ['info'],
                     'categories' => ['log\*', 'elk\*'],
                     'logVars' => [],
                     'prefix' => static function () {
                         return LogHelper::getConsolePrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+                'analytics-fb-log' => [
+                    'class' => FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['analytics\*', 'AS\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getAnalyticPrefixData();
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],

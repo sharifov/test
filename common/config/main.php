@@ -59,7 +59,7 @@ return [
         ],
         'log' => [
             'targets' => [
-                'analytic-fb-log' => [
+                'analytics-fb-log' => [
                     'class' => FilebeatTarget::class,
                     'levels' => ['info'],
                     'categories' => ['analytics\*', 'AS\*'],
