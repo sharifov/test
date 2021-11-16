@@ -28,7 +28,7 @@ class BillingInfoDTO
 
     public function fillByVoluntaryForm(
         BillingInfoForm $billingInfoForm,
-        int $orderId,
+        ?int $orderId,
         ?int $creditCardId,
         ?int $paymentMethodId
     ): BillingInfoDTO {

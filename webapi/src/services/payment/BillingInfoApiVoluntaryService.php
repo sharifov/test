@@ -43,7 +43,7 @@ class BillingInfoApiVoluntaryService
             ->one();
     }
 
-    public static function createBillingInfo(BillingInfoForm $form, int $orderId, ?int $creditCardId, ?int $paymentMethodId): BillingInfo
+    public static function createBillingInfo(BillingInfoForm $form, ?int $orderId, ?int $creditCardId, ?int $paymentMethodId): BillingInfo
     {
         $billingInfoDTO = (new BillingInfoDTO())->fillByVoluntaryForm($form, $orderId, $creditCardId, $paymentMethodId);
         $billingInfo = BillingInfo::createByDto($billingInfoDTO);
