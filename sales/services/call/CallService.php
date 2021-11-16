@@ -99,6 +99,7 @@ class CallService
                 Call::getStirStatusByVerstatKey($data['StirVerstat'] ?? '')
             );
             $call->setDataCreatedParams($data);
+            $call->setDataCreatorType((int)($data['creator_type_id'] ?? null));
         }
 
         if (!$call->save()) {

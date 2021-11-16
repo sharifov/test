@@ -1068,13 +1068,17 @@ $js = <<<JS
                 }, 'json');
                 
             } else {
-                if (data && data.is_on_call === true) {
-                    freeDialButton();
-				    window.sendCommandUpdatePhoneWidgetCurrentCalls(null, userId, window.generalLinePriorityIsEnabled);
-				    alert('New Call Error: You have an active call. If the message is shown by mistake please contact Administrator.');
-                }
-                if (data && data.is_offline === true) {
-                    alert('You status is offline.');
+                if (data) {
+                    if (data.is_on_call === true) {
+                        freeDialButton();
+                        if (data.phone_widget_data) {
+                            window.PhoneWidgetCall.updateCurrentCalls(data.phone_widget_data.data, data.phone_widget_data.userStatus);
+                        }
+                        new PNotify({title: "Make call", type: "error", text: data.message, hide: true});
+				    }
+                    if (data.is_offline === true) {
+                        new PNotify({title: "Make call", type: "error", text: 'You status is offline.', hide: true});
+                    }
                 }
                 return false;
             }

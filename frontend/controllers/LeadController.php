@@ -2371,6 +2371,10 @@ class LeadController extends FController
             throw new NotFoundHttpException('Call not found');
         }
 
+        if ($call->isInternal()) {
+            return 'Call is internal.';
+        }
+
         if (!$this->clientOnCallIsInvalid($call)) {
             return 'Client already is Valid.';
         }

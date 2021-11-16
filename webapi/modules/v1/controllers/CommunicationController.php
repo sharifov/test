@@ -1004,6 +1004,8 @@ class CommunicationController extends ApiBaseController
                 // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
 
                 $call->c_recording_disabled = (bool) ($callOriginalData['call_recording_disabled'] ?? false);
+
+                $call->setDataCreatorType((int)($callOriginalData['creator_type_id'] ?? null));
             }
 
             if (!empty($callOriginalData['CallStatus'])) {
@@ -1383,6 +1385,7 @@ class CommunicationController extends ApiBaseController
             $call->setDataPriority($priority);
             $call->setDataCreatedParams($calData);
             $call->setDataPhoneListId($phoneListId);
+            $call->setDataCreatorType((int)($calData['creator_type_id'] ?? null));
 
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');
@@ -1603,6 +1606,7 @@ class CommunicationController extends ApiBaseController
             self::copyDataFromCustomParams($call, $customParameters);
 
             $call->setDataCreatedParams($callData);
+            $call->setDataCreatorType((int)($callData['creator_type_id'] ?? null));
         }
 
         $preCallStatus = $call->c_call_status;
