@@ -110,16 +110,16 @@ return [
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
-                'analytics-fb-log' => [
-                    'class' => FilebeatTarget::class,
-                    'levels' => ['info'],
-                    'categories' => ['analytics\*', 'AS\*'],
-                    'logVars' => [],
-                    'prefix' => static function () {
-                        return LogHelper::getAnalyticPrefixData();
-                    },
-                    'logFile' => '@runtime/logs/stash.log'
-                ],
+//                'analytics-fb-log' => [
+//                    'class' => FilebeatTarget::class,
+//                    'levels' => ['info'],
+//                    'categories' => ['analytics\*', 'AS\*'],
+//                    'logVars' => [],
+//                    'prefix' => static function () {
+//                        return LogHelper::getAnalyticPrefixData();
+//                    },
+//                    'logFile' => '@runtime/logs/stash.log'
+//                ],
             ],
         ],
         'i18n' => [

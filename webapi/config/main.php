@@ -152,16 +152,16 @@ return [
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
-                'analytics-fb-log' => [
-                    'class' => FilebeatTarget::class,
-                    'levels' => ['info'],
-                    'categories' => ['analytics\*', 'AS\*'],
-                    'logVars' => [],
-                    'prefix' => static function () {
-                        return LogHelper::getAnalyticPrefixData();
-                    },
-                    'logFile' => '@runtime/logs/stash.log'
-                ],
+//                'analytics-fb-log' => [
+//                    'class' => FilebeatTarget::class,
+//                    'levels' => ['info'],
+//                    'categories' => ['analytics\*', 'AS\*'],
+//                    'logVars' => [],
+//                    'prefix' => static function () {
+//                        return LogHelper::getAnalyticPrefixData();
+//                    },
+//                    'logFile' => '@runtime/logs/stash.log'
+//                ],
                 /*[
                     'class'         => \primipilus\log\TelegramTarget::class,
                     'levels'        => ['error'],
