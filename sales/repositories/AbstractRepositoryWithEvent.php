@@ -27,10 +27,10 @@ abstract class AbstractRepositoryWithEvent extends AbstractBaseRepository
         ));
     }
 
-    public function save(bool $runValidation = false): AbstractBaseRepository
+    public function save(bool $runValidation = false, string $glue = ' '): AbstractBaseRepository
     {
         if (!$this->model->save($runValidation)) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($this->model));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($this->model, $glue));
         }
         if (method_exists($this->model, 'releaseEvents')) {
             $this->getEventDispatcher()->dispatchAll($this->model->releaseEvents());
