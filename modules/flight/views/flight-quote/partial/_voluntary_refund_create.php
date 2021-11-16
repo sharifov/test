@@ -16,6 +16,7 @@ use modules\product\src\entities\productOption\ProductOptionQuery;
 use yii\bootstrap4\Alert;
 use yii\grid\SerialColumn;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 ?>
@@ -58,7 +59,18 @@ use yii\widgets\Pjax;
     <?= \common\widgets\Alert::widget() ?>
   <div class="row">
     <div class="col-md-12">
-      <h6><b>Tickets</b></h6>
+        <div class="d-flex justify-content-between align-items-center">
+          <h6><b>Tickets</b></h6>
+          <span data-toggle="collapse" href="#collapseResponseBO" role="button" aria-expanded="false" aria-controls="collapseExample">
+            <i class="fas fa-info-circle"></i> Origin Data From BO
+          </span>
+        </div>
+        <div id="collapseResponseBO" class="collapse">
+          <div class="card-body card">
+            <h4>Search Query Params</h4>
+            <pre><?= Html::encode(VarDumper::dumpAsString($form->originData)) ?></pre>
+          </div>
+        </div>
         <?php $dataProvider = new \yii\data\ArrayDataProvider([
             'allModels' => $form->getRefundForm()->getTicketForms(),
             'totalCount' => 0,
@@ -194,7 +206,7 @@ use yii\widgets\Pjax;
                     }
                       $content .= $model->details ?
                           '<pre id="data_' . $model->type . '" style="display: none;">' .
-                          \yii\helpers\VarDumper::dumpAsString(JsonHelper::decode($model->details), 10, true) . '</pre>' : '-';
+                          VarDumper::dumpAsString(JsonHelper::decode($model->details), 10, true) . '</pre>' : '-';
 
                       return $content;
                   },

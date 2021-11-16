@@ -1424,6 +1424,7 @@ class FlightQuoteController extends FController
                 $form->originProductQuoteId = $originProductQuoteId;
                 $form->orderId = $orderId;
                 $form->caseId = $caseId;
+                $form->originData = $result;
 
                 if (!$form->airlineAllow) {
                     throw new \RuntimeException('Refund not allowed by Airline');

@@ -26,6 +26,8 @@ class VoluntaryRefundCreateForm extends Model
 
     private ?VoluntaryRefundForm $refundForm = null;
 
+    public array $originData = [];
+
     public function rules(): array
     {
         return [
