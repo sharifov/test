@@ -251,6 +251,32 @@ class ApiLog extends \yii\db\ActiveRecord
             }
         }
 
+        $logData = [];
+
+        $logData['type']                = 'apilog';
+
+        $reqData['request_data']        = @json_decode($this->al_request_data);
+        $reqData['request_dt']          = $this->al_request_dt;
+        $reqData['ip_address']          = $this->al_ip_address;
+        $reqData['user_id']             = $this->al_user_id;
+        $reqData['action']              = $this->al_action;
+
+        $logData['request']             = $reqData;
+
+        $respData['response_data']      = $responseData;
+        $respData['response_id']        = $this->al_id;
+        $respData['response_dt']        = $this->al_response_dt;
+
+        $logData['response'] = $respData;
+
+        $logData['execution_time']     = $this->al_execution_time;
+        $logData['memory_usage']       = $this->al_memory_usage;
+        $logData['db_execution_time']       = $this->al_db_execution_time;
+        $logData['db_query_count']       = $this->al_db_query_count;
+
+        Yii::info($logData, 'elk/' . $this->al_action);
+        unset($logData, $reqData, $respData);
+
 
         //VarDumper::dump($profiling);exit;
 

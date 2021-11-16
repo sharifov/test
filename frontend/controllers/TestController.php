@@ -2594,4 +2594,33 @@ class TestController extends FController
 
         exit;
     }
+
+    public function actionAt()
+    {
+
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => '1111',
+                'b2' => '222',
+                'b3' => [
+                    'message' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => '222',
+                ],
+            ],
+        ];
+
+        Yii::info($message, 'analytics\test1');
+        Yii::info($message, 'AS\test2');
+
+        return date('Y-m-d H:i:s');
+    }
 }

@@ -1,5 +1,8 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
+use common\helpers\LogHelper;
+
 $commonParams = yii\helpers\ArrayHelper::merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -53,6 +56,24 @@ return [
 
             'thousandSeparator' => ',',
             'decimalSeparator' => '.',
+        ],
+        'log' => [
+            'targets' => [
+                'analytic-fb-log' => [
+                    'class' => FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['analytics\*', 'AS\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getAnalyticPrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+//                [
+//                    'class' => 'yii\log\DbTarget',
+//                    'levels' => ['error', 'warning'],
+//                ]
+            ],
         ],
         'formatter_search' => [
             'class' => 'yii\i18n\Formatter',

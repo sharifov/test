@@ -69,6 +69,26 @@ class LogHelper
     }
 
     /**
+     * @return array
+     */
+    public static function getAnalyticPrefixData(): array
+    {
+        try {
+            return [
+//                'hostname' => self::getHostname(),
+//                'version' => self::getReleaseVersion(),
+//                'gitBranch' => self::getShortGitBranch(),
+//                'type'   => 'console',
+                'srv_name' => 'analytics',
+//                'srv_type' => ''
+            ];
+        } catch (\Throwable $throwable) {
+            return [];
+        }
+    }
+
+
+    /**
      * @return string
      */
     public static function getFrontendPrefixDB(): string
