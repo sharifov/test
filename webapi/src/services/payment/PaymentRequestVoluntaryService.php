@@ -26,9 +26,9 @@ class PaymentRequestVoluntaryService
     private CreditCardRepository $creditCardRepository;
     private InvoiceRepository $invoiceRepository;
 
-    private ?PaymentMethod $paymentMethod;
-    private ?Invoice $invoice;
-    private ?CreditCard $creditCard;
+    private ?PaymentMethod $paymentMethod = null;
+    private ?Invoice $invoice = null;
+    private ?CreditCard $creditCard = null;
 
     /**
      * @param CreditCardRepository $creditCardRepository
@@ -49,18 +49,20 @@ class PaymentRequestVoluntaryService
         }
         $this->paymentMethod = $paymentMethod;
 
-        $invoice = Invoice::create(
-            $order ? $order->getId() : null,
-            (float) $paymentRequestForm->amount,
-            $paymentRequestForm->currency,
-            $description,
-            null
-        );
-        if (!$invoice->validate()) {
-            throw new \RuntimeException('Invoice not saved. ' . ErrorsToStringHelper::extractFromModel($invoice));
+        if ($order) {
+            $invoice = Invoice::create(
+                $order ? $order->getId() : null,
+                (float) $paymentRequestForm->amount,
+                $paymentRequestForm->currency,
+                $description,
+                null
+            );
+            if (!$invoice->validate()) {
+                throw new \RuntimeException('Invoice not saved. ' . ErrorsToStringHelper::extractFromModel($invoice));
+            }
+            $this->invoiceRepository->save($invoice);
+            $this->invoice = $invoice;
         }
-        $this->invoiceRepository->save($invoice);
-        $this->invoice = $invoice;
 
         if ($creditCardForm = $paymentRequestForm->getCreditCardForm()) {
             $creditCard = CreditCard::create(
