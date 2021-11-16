@@ -568,6 +568,8 @@ class FlightQuoteHelper
                 $segment['cabin'] = SearchService::getCabinRealCode($segment['cabin']);
                 if (!empty($operationAirlineCode)) {
                     $segment['operatingAirline'] = $operationAirlineCode;
+                    $operatingAirline = Airline::findIdentity($operationAirlineCode);
+                    $segment['operatingAirlineName'] = $operatingAirline->name ?? $operationAirlineCode;
                 }
                 if (count($data) != 0 && isset($data[count($data) - 1])) {
                     $previewSegment = $data[count($data) - 1];
