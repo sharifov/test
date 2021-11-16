@@ -138,6 +138,11 @@ trait TargetTrait
 
         if (!empty($text['trace']) && empty($data['@trace'])) {
             $data['@trace'] = $text['trace'];
+
+            if (is_array($data['@trace'])) {
+                $data['@trace'] = @json_encode($data['@trace']);
+            }
+
             if (isset($data['@app.data']['trace'])) {
                 unset($data['@app.data']['trace']);
             }
@@ -208,6 +213,9 @@ trait TargetTrait
 
         if (!empty($dataList['trace']) && empty($data['@trace'])) {
             $data['@trace'] = $dataList['trace'];
+            if (is_array($data['@trace'])) {
+                $data['@trace'] = @json_encode($dataList['trace']);
+            }
         }
 
         if (!empty($dataList['line']) && empty($data['@line'])) {
