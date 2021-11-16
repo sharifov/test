@@ -46,7 +46,7 @@ $pjaxId = 'pjax-container-vc';
         <div class="row">
             <div class="col-md-12">
                 <?php $customerPackage = unserialize($createQuoteForm->customerPackage, ['allowed_classes' => false]) ?>
-                <b>Customer Package Data:</b> <br />
+                <h6>Customer Package Data:</h6>
                 <table class="table table-striped table-bordered">
                     <tr>
                         <th>Processing Fee</th>
