@@ -50,9 +50,22 @@ class NotificationAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN, self::OP_MATCH]
     ];
 
+    protected const ATTR_NOTIFICATION_USER_ID = [
+        'optgroup' => 'NOTIFICATION',
+        'id' => self::NS . 'userId',
+        'field' => 'userId',
+        'label' => 'User ID',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
     /** --------------- ATTRIBUTE LIST ------------------------ */
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::OBJ_NOTIFICATION  =>  [self::ATTR_NOTIFICATION_TITLE]
+        self::OBJ_NOTIFICATION  =>  [
+            self::ATTR_NOTIFICATION_TITLE,
+            self::ATTR_NOTIFICATION_USER_ID
+            ]
     ];
 
     public static function getObjectList(): array
