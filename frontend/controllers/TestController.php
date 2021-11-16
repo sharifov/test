@@ -1303,7 +1303,7 @@ class TestController extends FController
     }
     public function actionNotify3()
     {
-        /*$notification = new Notifications();
+        $notification = new Notifications();
         $notification->n_title = 'New General Line Call';
         $notification->n_type_id = Notifications::TYPE_SUCCESS;
         $notification->n_user_id = 658;
@@ -1316,7 +1316,7 @@ class TestController extends FController
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $notification->n_user_id], $dataNotification);
             }
-        }*/
+        }
     }
 
     public function actionTest3()

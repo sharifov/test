@@ -222,6 +222,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     $notification = new Notifications();
                     $notification->n_title = 'New General Line Call';
                     $notification->n_type_id = Notifications::TYPE_SUCCESS;
+                    $notification->n_user_id = $this->cua_user_id;
 
                     $notificationAbacDto = new NotificationAbacDto($notification);
 
