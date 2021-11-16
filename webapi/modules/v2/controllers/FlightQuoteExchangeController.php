@@ -616,11 +616,10 @@ class FlightQuoteExchangeController extends BaseController
             }
 
             if (!$responseBoStatus) {
-                $voluntaryExchangeCreateHandler->failProcess('Response from Back Office is failed, status (' . $responseBo['status']  . ')');
-                throw new \RuntimeException(
-                    'Request to Back Office is failed, status (' . $responseBo['status']  . ')',
-                    ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR
-                );
+                $message = $responseBo['message'] ?? '';
+                $description = 'Response from Back Office is failed, status(' . $responseBo['status']  . ') ' . $message;
+                $voluntaryExchangeCreateHandler->failProcess($description);
+                throw new \RuntimeException($description, ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
             }
 
             try {
@@ -920,11 +919,10 @@ class FlightQuoteExchangeController extends BaseController
             }
 
             if (!$responseBoStatus) {
-                $voluntaryExchangeConfirmHandler->failProcess('Response from Back Office is failed, status (' . $responseBo['status']  . ')');
-                throw new \RuntimeException(
-                    'Request to Back Office is failed, status (' . $responseBo['status']  . ')',
-                    ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR
-                );
+                $message = $responseBo['message'] ?? '';
+                $description = 'Request to Back Office is failed, status (' . $responseBo['status']  . ') ' . $message;
+                $voluntaryExchangeConfirmHandler->failProcess($description);
+                throw new \RuntimeException($description, ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
             }
 
             try {
