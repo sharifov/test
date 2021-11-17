@@ -310,19 +310,20 @@ class ClientChatController extends FController
         try {
             $memory = memory_get_usage();
             $employee = Auth::user();
-            $chatsRestriction = ClientChat::find()
-                ->select(['cch_id'])
+
+            $clientChat = ClientChat::find()
+                ->byId($id)
                 ->andProjectEmployee($employee)
                 ->andChannelEmployee($employee)
                 ->orOwner($employee)
-                ->column();
-            $clientChat = ClientChat::find()->byId($id)->andWhere(['IN', 'cch_id', $chatsRestriction])->one();
+                ->one();
 
             if (!$clientChat) {
                 throw new NotFoundHttpException('Client chat not found.');
             }
 
-            $message = $this->prepareLog($memory, 'clientChat');
+            $message = 'ClientChatId (' . $clientChat->cch_id . ')<br />';
+            $message .= $this->prepareLog($memory, 'clientChat');
             $memory = memory_get_usage();
 
             if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
