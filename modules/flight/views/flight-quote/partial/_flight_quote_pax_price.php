@@ -38,7 +38,7 @@ use yii\helpers\Html;
             <?php
             foreach ($createQuoteForm->prices as $index => $price) : ?>
                 <tr class="pax-type-<?php echo $price['paxCode'] ?>" id="price-index-<?php echo $index ?>">
-                    <td>
+                    <td style="padding-top: 14px;">
                         <?= ($index + 1) ?>.
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][paxCode]')->hiddenInput()->label(false) ?>
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][paxCodeId]')->hiddenInput()->label(false) ?>
@@ -46,10 +46,12 @@ use yii\helpers\Html;
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][net]')->hiddenInput()->label(false) ?>
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][systemMarkUp]')->hiddenInput()->label(false) ?>
                     </td>
-                    <td>
+                    <td style="padding-top: 14px;">
                         <?php echo $price['paxCode'] ?>
                     </td>
-                    <td><?php echo $price['cnt'] ?></td>
+                    <td style="padding-top: 14px;">
+                        <?php echo $price['cnt'] ?>
+                    </td>
                     <td>
                         <?php echo $form->field($createQuoteForm, 'prices[' . $index . '][fare]')->input('number', [
                             'class' => 'form-control alt-quote-price',
