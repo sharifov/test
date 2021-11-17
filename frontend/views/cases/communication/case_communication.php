@@ -807,7 +807,7 @@ $js = <<<JS
     $('body').on('click', '#print_button', function () {
         let w = window.open();
         let js_timer = document.createElement("script");
-        js_timer.innerHTML = 'setTimeout( function() { window.print(); window.close(); }, 3000);'; 
+        js_timer.innerHTML = 'setTimeout( "window.print()", 3000);'; 
         w.document.body.append(js_timer);
         $(w.document.body).html($('#object-email-view').contents()[0].body.innerHTML);
         // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
