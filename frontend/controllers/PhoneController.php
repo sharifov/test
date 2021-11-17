@@ -391,11 +391,16 @@ class PhoneController extends FController
                 if ($calls->outgoing || $calls->active) {
                     $result['is_ready'] = false;
                     $result['is_on_call'] = true;
-                    $result['message'] = 'You have an active call';
+                    $result['message'] = 'You have an active call, please refresh the page or contact system administrator if the issue persist.';
                     $result['phone_widget_data'] = [
                         'data' => $calls->toArray(),
                         'userStatus' => (int)($userStatusType['us_type_id'] ?? UserCallStatus::STATUS_TYPE_OCCUPIED),
                     ];
+                    Yii::error([
+                        'message' => 'User wanted to make a call with active calls',
+                        'userId' => $userId,
+                        'calls' => $calls->toArray(),
+                    ], 'UserIsOnCall');
                 } else {
                     Yii::error([
                         'message' => 'Was wrong value(is_on_call = true) in DB',
