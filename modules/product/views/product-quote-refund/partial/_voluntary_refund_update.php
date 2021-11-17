@@ -150,7 +150,6 @@ use yii\widgets\Pjax;
                     [
                         'attribute' => 'type',
                     ],
-                    'amount',
                     [
                         'attribute' => 'amount',
                         'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm, $form) {

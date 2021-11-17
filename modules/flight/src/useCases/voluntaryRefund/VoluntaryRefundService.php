@@ -134,7 +134,7 @@ class VoluntaryRefundService
                     CurrencyHelper::convertToBaseCurrency($auxiliaryOptionsForm->amount, $order->orClientCurrency->cur_base_rate),
                     null,
                     null,
-                    $auxiliaryOptionsForm->amount,
+                    CurrencyHelper::convertToBaseCurrency($auxiliaryOptionsForm->refundable, $order->orClientCurrency->cur_base_rate),
                     $form->getRefundForm()->currency,
                     $order->or_client_currency_rate,
                     $auxiliaryOptionsForm->amount,
