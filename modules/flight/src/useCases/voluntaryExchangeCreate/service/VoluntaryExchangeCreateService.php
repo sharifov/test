@@ -102,14 +102,4 @@ class VoluntaryExchangeCreateService
             ->orderBy(['pq_id' => SORT_DESC])
             ->one();
     }
-
-    public static function bookingProductQuotePostProcessing(ProductQuote $voluntaryQuote): void
-    {
-        ProductQuoteRelation::deleteAll([
-            'pqr_related_pq_id' => $voluntaryQuote->pq_id,
-            'pqr_type_id' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
-        ]);
-
-        ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $voluntaryQuote->pq_id]);
-    }
 }

@@ -18,7 +18,9 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
@@ -171,7 +173,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
                 $this->objectCollection->getFlightQuoteFlightRepository()->save($flightQuoteFlight);
             }
 
-            VoluntaryExchangeCreateService::bookingProductQuotePostProcessing($this->voluntaryQuote);
+            $this->bookingProductQuotePostProcessing($this->voluntaryQuote);
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
@@ -202,5 +204,16 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
 
     private function handleProcessing(): void
     {
+    }
+
+    private function bookingProductQuotePostProcessing(
+        ProductQuote $voluntaryQuote
+    ): void {
+        ProductQuoteRelation::deleteAll([
+            'pqr_related_pq_id' => $voluntaryQuote->pq_id,
+            'pqr_type_id' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
+        ]);
+
+        ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $voluntaryQuote->pq_id]);
     }
 }
