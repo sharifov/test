@@ -101,7 +101,7 @@ class AbacComponent extends Component
         $request->controller = Yii::$app->controller->uniqueId;
         $request->action = Yii::$app->controller->action->uniqueId;
 
-        if (Yii::$app->request instanceof \yii\base\Request) {
+        if (Yii::$app->request instanceof \yii\base\Request && !Yii::$app->request->isConsoleRequest) {
             $request->url = Yii::$app->request->url ?? null;
             $request->ip = Yii::$app->request->getUserIP() ?? null;
         }
