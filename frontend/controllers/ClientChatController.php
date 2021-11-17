@@ -11,6 +11,7 @@ use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
+use common\models\Sms;
 use common\models\UserConnection;
 use common\models\UserProfile;
 use common\models\VisitorLog;
@@ -23,6 +24,7 @@ use Markdownify\Converter;
 use Markdownify\ConverterExtra;
 use modules\offer\src\entities\offer\OfferQuery;
 use modules\offer\src\entities\offer\search\OfferSearch;
+use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\CasesSearch;
@@ -111,6 +113,7 @@ use yii\web\ForbiddenHttpException;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\web\UnprocessableEntityHttpException;
 use yii\widgets\ActiveForm;
 
 /**
@@ -307,53 +310,41 @@ class ClientChatController extends FController
 
     public function actionDetail(int $id): string
     {
+        $employee = Auth::user();
+        $clientChat = ClientChat::find()
+            ->byId($id)
+            ->andWhere([
+                'OR',
+                    ['cch_owner_user_id' => $employee->getId()],
+                    [
+                        'AND',
+                         ['IN', 'cch_channel_id', ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($employee->getId())->column()],
+                         ['IN', 'cch_project_id', array_keys(EmployeeProjectAccess::getProjects($employee))]
+                    ],
+            ])
+            ->one();
+
+        if (!$clientChat) {
+            throw new NotFoundHttpException('Client chat not found.');
+        }
+
         try {
-            $memory = memory_get_usage();
-            $employee = Auth::user();
-
-            $clientChat = ClientChat::find()
-                ->byId($id)
-                ->andProjectEmployee($employee)
-                ->andChannelEmployee($employee)
-                ->orOwner($employee)
-                ->one();
-
-            if (!$clientChat) {
-                throw new NotFoundHttpException('Client chat not found.');
-            }
-
-            $message = 'ClientChatId (' . $clientChat->cch_id . ')<br />';
-            $message .= $this->prepareLog($memory, 'clientChat');
-            $memory = memory_get_usage();
-
             if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
                 throw new ForbiddenHttpException('Access denied.');
             }
 
-            $message .= $this->prepareLog($memory, 'Access verification');
-            $memory = memory_get_usage();
-
             $searchModel = new ClientChatMessageSearch();
             $data[$searchModel->formName()]['ccm_cch_id'] = $id;
             $dataProvider = $searchModel->search($data);
-
-            $message .= $this->prepareLog($memory, 'ClientChatMessageSearch');
-            $memory = memory_get_usage();
 
             $searchModelNotes = new ClientChatNoteSearch();
             $data[$searchModelNotes->formName()]['ccn_chat_id'] = $id;
             $dataProviderNotes = $searchModelNotes->search($data);
             $dataProviderNotes->setPagination(['pageSize' => 20]);
 
-            $message .= $this->prepareLog($memory, 'ClientChatNoteSearch');
-            $memory = memory_get_usage();
-
             if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
                 $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
             }
-
-            $message .= $this->prepareLog($memory, 'VisitorLog');
-            $memory = memory_get_usage();
 
             $requestSearch = new ClientChatRequestSearch();
             $visitorId = '';
@@ -365,17 +356,17 @@ class ClientChatController extends FController
             $dataProviderRequest = $requestSearch->search($data);
             $dataProviderRequest->setPagination(['pageSize' => 10]);
 
-            $message .= $this->prepareLog($memory, 'ClientChatRequestSearch');
-            $memory = memory_get_usage();
-
             $searchModelFeedback = new ClientChatFeedbackSearch();
             $data[$searchModelFeedback->formName()]['ccf_client_chat_id'] = $id;
             $dataProviderFeedback = $searchModelFeedback->search($data);
             $dataProviderFeedback->setPagination(['pageSize' => 20]);
 
-            $message .= $this->prepareLog($memory, 'ClientChatFeedbackSearch');
-            $message .= '<br>Pick: ' . round(memory_get_peak_usage() / (1024 * 1024), 2) . 'MB';
-            $message .= '<br>Total: ' . round(memory_get_usage() / (1024 * 1024), 2) . 'MB';
+            $message = [
+                'message' => 'Chat detail memory info',
+                'clientChatId' => $clientChat->cch_id,
+                'pick' => round(memory_get_peak_usage() / (1024 * 1024), 2) . 'MB',
+                'total' =>  round(memory_get_usage() / (1024 * 1024), 2) . 'MB',
+            ];
             Yii::info($message, 'info\ClientChatController::actionDetail');
 
             return $this->render('detail', [
@@ -390,10 +381,10 @@ class ClientChatController extends FController
             ]);
         } catch (\Exception $exception) {
             Yii::error(
-                AppHelper::throwableFormatter($exception),
+                AppHelper::throwableLog($exception),
                 'ClientChatController::actionDetail'
             );
-            return false;
+            throw new UnprocessableEntityHttpException($exception->getMessage(), $exception->getCode());
         }
     }
 
