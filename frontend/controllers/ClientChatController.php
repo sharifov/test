@@ -311,6 +311,7 @@ class ClientChatController extends FController
     public function actionDetail(int $id): string
     {
         $employee = Auth::user();
+        $chanelListIds = ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($employee->getId())->cache(30)->column();
         $clientChat = ClientChat::find()
             ->byId($id)
             ->andWhere([
@@ -318,7 +319,7 @@ class ClientChatController extends FController
                     ['cch_owner_user_id' => $employee->getId()],
                     [
                         'AND',
-                         ['IN', 'cch_channel_id', ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($employee->getId())->column()],
+                         ['IN', 'cch_channel_id', $chanelListIds],
                          ['IN', 'cch_project_id', array_keys(EmployeeProjectAccess::getProjects($employee))]
                     ],
             ])
