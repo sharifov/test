@@ -226,7 +226,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
 
                     $notificationAbacDto = new NotificationAbacDto($notification);
 
-                    if (Yii::$app->abac->can($notificationAbacDto, NotificationAbacObject::OBJ_NOTIFICATION, NotificationAbacObject::ACTION_ACCESS)) {
+                    if (Yii::$app->abac->can($notificationAbacDto, NotificationAbacObject::OBJ_NOTIFICATION, NotificationAbacObject::ACTION_ACCESS, $this->cuaUser)) {
                         if ($ntf = Notifications::create($this->cua_user_id, 'New General Line Call', $message, Notifications::TYPE_SUCCESS, true)) {
                             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                             Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
