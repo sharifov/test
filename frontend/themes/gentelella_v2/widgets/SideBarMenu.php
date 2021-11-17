@@ -799,6 +799,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => 'javascript:',
             'icon' => 'cog',
             'items' => [
+                ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs text-success'],
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bug text-warning'],
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
@@ -823,7 +824,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 $menuLanguages,
 
                 ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'list'],
-                ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+
                 ['label' => 'Virtual cron', 'url' => ['/virtual-cron/cron-scheduler/index'], 'icon' => 'cogs'],
                 ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
                 ['label' => 'Call Terminate Log', 'url' => ['/call-terminate-log-crud/index'], 'icon' => 'list'],
