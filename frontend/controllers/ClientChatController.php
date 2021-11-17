@@ -322,7 +322,8 @@ class ClientChatController extends FController
                 throw new NotFoundHttpException('Client chat not found.');
             }
 
-            $message = $this->prepareLog($memory, 'clientChat');
+            $message = 'ClientChatId (' . $clientChat->cch_id . ')<br />';
+            $message .= $this->prepareLog($memory, 'clientChat');
             $memory = memory_get_usage();
 
             if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
