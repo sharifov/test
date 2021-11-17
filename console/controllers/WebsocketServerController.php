@@ -29,9 +29,9 @@ class WebsocketServerController extends Controller
         \Yii::$app->log->targets['file']->exportInterval = 1;
         \Yii::$app->log->targets['db-error']->exportInterval = 1;
         \Yii::$app->log->targets['db-info']->exportInterval = 1;
-        if (!empty(\Yii::$app->log->targets['file-air'])) {
+        /*if (!empty(\Yii::$app->log->targets['file-air'])) {
             \Yii::$app->log->targets['file-air']->exportInterval = 1;
-        }
+        }*/
         if (!empty(\Yii::$app->log->targets['file-fb-error'])) {
             \Yii::$app->log->targets['file-fb-error']->exportInterval = 1;
         }
