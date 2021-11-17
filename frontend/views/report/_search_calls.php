@@ -40,7 +40,7 @@ use common\models\Employee;
                             ]
                         ]
                     ])->label('Call Log Created Date');
-                    ?>
+?>
                 </div>
             </div>
         </div>
