@@ -311,7 +311,7 @@ class ClientChatController extends FController
     public function actionDetail(int $id): string
     {
         $employee = Auth::user();
-        $chanelListIds = ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($employee->getId())->cache(30)->column();
+        $chanelListIds = ClientChatUserChannel::find()->select(['ccuc_channel_id'])->byUserId($employee->getId())->column();
         $clientChat = ClientChat::find()
             ->byId($id)
             ->andWhere([
