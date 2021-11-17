@@ -780,7 +780,6 @@ $js = <<<JS
     $('body').on('click', '#print_button', function () {
         let w = window.open();
         $(w.document.body).html($('#object-email-view').contents()[0].body.innerHTML);
-        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
         w.document.head.append('<style>@media print { body background-color:#FFFFFF; background-image:none; color:#000000 }  }</style>');
         let mail_headers = document.createElement("div");
         mail_headers.innerHTML = $('#email_info').html();
@@ -788,6 +787,7 @@ $js = <<<JS
         let js_timer = document.createElement("script");
         js_timer.innerHTML = 'setTimeout( "window.print(); window.close();", 3000);'; 
         w.document.head.append(js_timer);
+        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
     });
     
     $('body').on('change', '.quotes-uid', function() {
