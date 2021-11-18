@@ -117,30 +117,33 @@ class FlightQuoteRefundController extends ApiBaseController
      *               "currency": "USD",
      *               "tickets": [
      *                   {
-     *                       "number": "",
-     *                       "airlinePenalty": 70.4,
+     *                       "number": "fake-22222",
+     *                       "airlinePenalty": 345.47,
      *                       "processingFee": 0,
-     *                       "refundable": 115,
-     *                       "selling": 115,
-     *                       "clientCurrency": "USD",
-     *                       "status": ""
+     *                       "refundable": 128,
+     *                       "selling": 473.47,
+     *                       "currency": "USD",
+     *                       "status": "refunded",
+     *                       "refundAllowed": false
      *                   }
      *               ],
      *               "auxiliaryOptions": [
      *                   {
-     *                       "type": "",
-     *                       "amount": 50,
-     *                       "refundable": 20,
+     *                       "type": "auto_check_in",
+     *                       "amount": 21.9,
+     *                       "amountPerPax": [],
+     *                       "refundable": 21.9,
      *                       "details": [],
-     *                       "status": "",
-     *                       "refundAllow": false
+     *                       "status": "paid",
+     *                       "refundAllow": true
      *                   },
      *                   {
-     *                       "type": "",
-     *                       "amount": 25,
-     *                       "refundable": 25,
+     *                       "type": "flexible_ticket",
+     *                       "amount": 106.06,
+     *                       "amountPerPax": [],
+     *                       "refundable": 0,
      *                       "details": [],
-     *                       "status": "",
+     *                       "status": "paid",
      *                       "refundAllow": false
      *                   }
      *               ]
