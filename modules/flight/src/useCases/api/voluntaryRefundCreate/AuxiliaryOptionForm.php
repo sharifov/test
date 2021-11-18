@@ -36,7 +36,7 @@ class AuxiliaryOptionForm extends \yii\base\Model
     public function rules(): array
     {
         return [
-            [['type', 'amount', 'refundable', 'status', 'refundAllow', 'amountPerPax'], 'required'],
+            [['type', 'amount', 'refundable', 'status', 'refundAllow'], 'required'],
             [['type', 'status'], 'string', 'max' => 50],
             [['refundAllow'], CheckIsBooleanValidator::class],
             [['refundable', 'amount'], CheckIsNumberValidator::class, 'allowInt' => true],

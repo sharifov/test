@@ -307,7 +307,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string}               refund.auxiliaryOptions.status     Status For BO
      * @apiParam {bool}                 refund.auxiliaryOptions.refundAllow  Refund Allowed
      * @apiParam {object}               [refund.auxiliaryOptions.details]  Details
-     * @apiParam {object}               refund.auxiliaryOptions.amountPerPax  Amount Per Pax
+     * @apiParam {object}               [refund.auxiliaryOptions.amountPerPax]  Amount Per Pax
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
