@@ -202,6 +202,7 @@ return [
                 'class' => \yii\redis\Mutex::class,
                 'redis' => 'redis',
                 'expire' => 60,
+                'retryDelay' => 500,
             ],
         ],
         'telegram' => [
