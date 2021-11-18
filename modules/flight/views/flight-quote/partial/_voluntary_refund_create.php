@@ -151,6 +151,15 @@ use yii\widgets\Pjax;
                   'format' => 'raw'
               ],
               [
+                  'attribute' => 'status',
+                  'content' => static function (TicketForm $model, $index) use ($activeForm) {
+                      $inputOptions = [
+                          'name' => 'refund[tickets][' . $index . '][status]',
+                      ];
+                      return $activeForm->field($model, 'status')->hiddenInput($inputOptions)->label(false) . $model->status;
+                  }
+              ],
+              [
                   'attribute' => 'refundAllowed',
                   'content' => static function (TicketForm $model, $index) use ($activeForm) {
                       $format = new Formatter();
@@ -203,7 +212,7 @@ use yii\widgets\Pjax;
                   }
               ],
               [
-                  'attribute' => 'refundable',
+                  'attribute' => 'status',
                   'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
                       $inputOptions = [
                           'name' => 'refund[auxiliaryOptions][' . $index . '][status]',

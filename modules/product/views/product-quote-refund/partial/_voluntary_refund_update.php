@@ -133,6 +133,7 @@ use yii\widgets\Pjax;
                         },
                         'format' => 'raw'
                     ],
+                    'status',
                     'refundAllowed:boolean',
                 ]
             ]) ?>
