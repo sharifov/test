@@ -328,12 +328,11 @@ class ClientChatController extends FController
         if (!$clientChat) {
             throw new NotFoundHttpException('Client chat not found.');
         }
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
 
         try {
-            if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
-                throw new ForbiddenHttpException('Access denied.');
-            }
-
             $searchModel = new ClientChatMessageSearch();
             $data[$searchModel->formName()]['ccm_cch_id'] = $id;
             $dataProvider = $searchModel->search($data);
@@ -365,8 +364,8 @@ class ClientChatController extends FController
             $message = [
                 'message' => 'Chat detail memory info',
                 'clientChatId' => $clientChat->cch_id,
-                'pick' => round(memory_get_peak_usage() / (1024 * 1024), 2) . 'MB',
-                'total' =>  round(memory_get_usage() / (1024 * 1024), 2) . 'MB',
+                'pick' => Yii::$app->formatter->asShortSize(memory_get_peak_usage(), 2),
+                'total' => Yii::$app->formatter->asShortSize(memory_get_usage(), 2),
             ];
             Yii::info($message, 'info\ClientChatController::actionDetail');
 
