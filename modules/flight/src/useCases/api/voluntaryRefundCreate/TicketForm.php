@@ -2,6 +2,8 @@
 
 namespace modules\flight\src\useCases\api\voluntaryRefundCreate;
 
+use common\components\validators\CheckIsBooleanValidator;
+
 /**
  * Class TicketForm
  * @package modules\flight\src\useCases\api\voluntaryRefundCreate
@@ -11,6 +13,7 @@ namespace modules\flight\src\useCases\api\voluntaryRefundCreate;
  * @property float $processingFee
  * @property float $refundAmount
  * @property float $sellingPrice
+ * @property bool $refundAllowed
  * @property string|null $status
  */
 class TicketForm extends \yii\base\Model
@@ -27,13 +30,16 @@ class TicketForm extends \yii\base\Model
 
     public $status;
 
+    public $refundAllowed;
+
     public function rules(): array
     {
         return [
-            [['number', 'airlinePenalty', 'processingFee', 'refundAmount', 'sellingPrice', 'status'], 'required'],
+            [['number', 'airlinePenalty', 'processingFee', 'refundAmount', 'sellingPrice', 'status', 'refundAllowed'], 'required'],
             [['number'], 'string', 'max' => 50],
             [['airlinePenalty', 'processingFee', 'refundAmount', 'sellingPrice'], 'number'],
-            [['status'], 'string', 'max' => 20]
+            [['status'], 'string', 'max' => 20],
+            [['refundAllowed'], CheckIsBooleanValidator::class]
         ];
     }
 

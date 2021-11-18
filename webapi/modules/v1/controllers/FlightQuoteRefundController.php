@@ -299,13 +299,15 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {number}               refund.tickets.refundAmount       Refund amount
      * @apiParam {number}               refund.tickets.sellingPrice       Selling price
      * @apiParam {string}               refund.tickets.status             Status For BO
+     * @apiParam {bool}                 refund.tickets.refundAllowed        Refund Allowed
      * @apiParam {object}               refund.auxiliaryOptions             Auxiliary Options Array
      * @apiParam {string}               refund.auxiliaryOptions.type        Auxiliary Options Type
      * @apiParam {number}               refund.auxiliaryOptions.amount      Selling price
      * @apiParam {number}               refund.auxiliaryOptions.refundable  Refundable price
      * @apiParam {string}               refund.auxiliaryOptions.status     Status For BO
      * @apiParam {bool}                 refund.auxiliaryOptions.refundAllow  Refund Allowed
-     * @apiParam {object}                 [refund.auxiliaryOptions.details]  Details
+     * @apiParam {object}               [refund.auxiliaryOptions.details]  Details
+     * @apiParam {object}               refund.auxiliaryOptions.amountPerPax  Amount Per Pax
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -350,7 +352,8 @@ class FlightQuoteRefundController extends ApiBaseController
      *                  "processingFee": 25,
      *                  "refundAmount": 52.65,
      *                  "sellingPrice": 150,
-     *                  "status": "issued"
+     *                  "status": "issued",
+     *                  "refundAllowed": true
      *              }
      *          ],
      *          "auxiliaryOptions": [
@@ -360,7 +363,10 @@ class FlightQuoteRefundController extends ApiBaseController
      *                  "refundable": 15.00,
      *                  "status": "paid",
      *                  "refundAllow": true,
-     *                  "details": {}
+     *                  "details": {},
+     *                  "amountPerPax": {
+     *                      "1111111111": 5.45
+     *                  }
      *              }
      *          ]
      *      },
