@@ -16,6 +16,7 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
@@ -79,10 +80,10 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->form->booking_id)) {
             throw new \RuntimeException('OriginProductQuote not found by booking_id(' . $this->form->booking_id . ')');
         }
-        if (!$this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId((int) $this->originProductQuote->pq_id)) {
+        if (!$this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId((int) $this->originProductQuote->pq_id, [ProductQuoteChangeStatus::IN_PROGRESS])) {
             throw new \RuntimeException('ProductQuoteChange not found by pqID(' . $this->originProductQuote->pq_id . ')');
         }
-        if (!$this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange((int) $this->productQuoteChange->pqc_id)) {
+        if (!$this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange((int) $this->productQuoteChange->pqc_id, [ProductQuoteStatus::IN_PROGRESS])) {
             throw new \RuntimeException('voluntaryQuote not found by pqcID(' . $this->productQuoteChange->pqc_id . ')');
         }
         if (!$this->project = Project::findOne(['project_key' => $this->form->project_key])) {
