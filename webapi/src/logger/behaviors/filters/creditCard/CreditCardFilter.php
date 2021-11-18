@@ -40,6 +40,9 @@ class CreditCardFilter implements Filterable
      */
     public static function replaceSource($source, string $substitute = '*', int $maxLen = 3)
     {
+        if (is_numeric($source)) {
+            $source = (string) $source;
+        }
         if (!is_string($source)) {
             return $source;
         }
