@@ -375,7 +375,7 @@ ALTER SEQUENCE public.file_share_fsh_id_seq OWNED BY public.file_share.fsh_id;
 CREATE TABLE public.file_storage (
     fs_id integer NOT NULL,
     fs_uid character varying(32),
-    fs_mime_type character varying(127),
+    fs_mime_type character varying(200),
     fs_name character varying(100),
     fs_title character varying(100),
     fs_path character varying(250),
