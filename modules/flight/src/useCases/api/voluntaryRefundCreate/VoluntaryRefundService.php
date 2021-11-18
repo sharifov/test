@@ -231,12 +231,13 @@ class VoluntaryRefundService
             throw new \RuntimeException('BO endpoint is not set', VoluntaryRefundCodeException::BO_REQUEST_IS_NO_SEND);
         }
 
-        $boDataRequest = BoRequestDataHelper::getDataForVoluntaryCreateByForm($project->api_key, $voluntaryRefundCreateForm);
-        $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
-        if (mb_strtolower($result['status']) === 'failed') {
-            $this->errorHandler($case, null, 'BO returns an error', null);
-            throw new BoResponseException($result['message'] ?? '', VoluntaryRefundCodeException::BO_REQUEST_FAILED);
-        }
+//        $boDataRequest = BoRequestDataHelper::getDataForVoluntaryCreateByForm($project->api_key, $voluntaryRefundCreateForm);
+//        $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);
+//        if (mb_strtolower($result['status']) === 'failed') {
+//            $this->errorHandler($case, null, 'BO returns an error', null);
+//            throw new BoResponseException($result['message'] ?? '', VoluntaryRefundCodeException::BO_REQUEST_FAILED);
+//        }
+        $result = [];
 
         try {
             $orderRefund = OrderRefund::createByVoluntaryRefund(
