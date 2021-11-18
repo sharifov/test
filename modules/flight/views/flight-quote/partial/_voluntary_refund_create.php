@@ -138,6 +138,15 @@ use yii\widgets\Pjax;
                   },
                   'format' => 'raw'
               ],
+              [
+                  'attribute' => 'refundAllowed',
+                  'content' => static function (TicketForm $model, $index) use ($activeForm) {
+                      $format = new Formatter();
+                      return $activeForm->field($model, 'refundAllowed')->hiddenInput([
+                              'name' => 'refund[tickets][' . $index . '][refundAllowed]'
+                          ])->label(false) . $format->asBoolean($model->refundAllowed);
+                  }
+              ],
 
           ]
       ]) ?>
@@ -177,7 +186,15 @@ use yii\widgets\Pjax;
                       ])->label(false) . $model->refundable;
                   }
               ],
-              'status',
+              [
+                  'attribute' => 'refundable',
+                  'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
+                      $inputOptions = [
+                          'name' => 'refund[auxiliaryOptions][' . $index . '][status]',
+                      ];
+                      return $activeForm->field($model, 'status')->hiddenInput($inputOptions)->label(false) . $model->status;
+                  }
+              ],
               [
                   'attribute' => 'refundAllow',
                   'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
@@ -207,6 +224,35 @@ use yii\widgets\Pjax;
                       $content .= $model->details ?
                           '<pre id="data_' . $model->type . '" style="display: none;">' .
                           VarDumper::dumpAsString(JsonHelper::decode($model->details), 10, true) . '</pre>' : '-';
+
+                      return $content;
+                  },
+                  'format' => 'raw',
+                  'contentOptions' => [
+                      'style' => ['max-width' => '800px', 'word-wrap' => 'break-word !important'],
+                  ],
+              ],
+              [
+                  'attribute' => 'amountPerPax',
+                  'value' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
+                      $content = $activeForm->field($model, 'amountPerPax')->hiddenInput([
+                          'name' => 'refund[auxiliaryOptions][' . $index . '][amountPerPax]'
+                      ])->label(false);
+                      $hash = md5($model->amountPerPax);
+                    if ($model->amountPerPax) {
+                        $content .= Html::a(
+                            '<i class="fas fa-eye"></i> details</a>',
+                            null,
+                            [
+                                'class' => 'btn btn-sm btn-success',
+                                'data-pjax' => 0,
+                                'onclick' => '(function ( $event ) { $("#data_' . $hash . '").toggle(); })();',
+                            ]
+                        );
+                    }
+                      $content .= $model->amountPerPax ?
+                          '<pre id="data_' . $hash . '" style="display: none;">' .
+                          VarDumper::dumpAsString(JsonHelper::decode($model->amountPerPax), 10, true) . '</pre>' : '-';
 
                       return $content;
                   },

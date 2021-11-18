@@ -18,6 +18,7 @@ use yii\helpers\Json;
  * @property string $status
  * @property bool $refundAllow
  * @property string $details
+ * @property string $amountPerPax
  */
 class AuxiliaryOptionForm extends \yii\base\Model
 {
@@ -33,6 +34,8 @@ class AuxiliaryOptionForm extends \yii\base\Model
 
     public $details;
 
+    public $amountPerPax;
+
     public function rules(): array
     {
         return [
@@ -40,7 +43,8 @@ class AuxiliaryOptionForm extends \yii\base\Model
             [['type', 'status'], 'string', 'max' => 50],
             [['refundAllow'], CheckIsBooleanValidator::class],
             [['refundable', 'amount'], CheckIsNumberValidator::class, 'allowInt' => true],
-            [['details'], CheckJsonValidator::class]
+            [['details', 'amountPerPax'], CheckJsonValidator::class],
+            [['refundAllow'], 'filter', 'filter' => 'boolval']
         ];
     }
 

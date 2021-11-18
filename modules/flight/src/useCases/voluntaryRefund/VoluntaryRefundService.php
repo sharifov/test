@@ -127,6 +127,8 @@ class VoluntaryRefundService
             foreach ($form->getRefundForm()->auxiliaryOptionsForms as $auxiliaryOptionsForm) {
                 $productQuoteOption = ProductQuoteOptionsQuery::getByProductQuoteIdOptionKey($originProductQuote->pq_id, $auxiliaryOptionsForm->type);
 
+                $auxiliaryOptionsForm->details = Json::decode($auxiliaryOptionsForm->details);
+                $auxiliaryOptionsForm->amountPerPax = Json::decode($auxiliaryOptionsForm->amountPerPax);
                 $productQuoteOptionRefund = ProductQuoteOptionRefund::create(
                     $orderRefund->orr_id,
                     $productQuoteRefund->pqr_id,
@@ -140,7 +142,7 @@ class VoluntaryRefundService
                     $auxiliaryOptionsForm->amount,
                     $auxiliaryOptionsForm->refundable,
                     $auxiliaryOptionsForm->refundAllow,
-                    Json::decode($auxiliaryOptionsForm->details)
+                    $auxiliaryOptionsForm->toArray()
                 );
                 $productQuoteOptionRefund->new();
                 $this->productQuoteOptionRefundRepository->save($productQuoteOptionRefund);

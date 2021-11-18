@@ -296,8 +296,8 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string}               refund.tickets.number             Ticket Number
      * @apiParam {number}               refund.tickets.airlinePenalty     Airline penalty
      * @apiParam {number}               refund.tickets.processingFee      Processing fee
-     * @apiParam {number}               refund.tickets.refundAmount       Refund amount
-     * @apiParam {number}               refund.tickets.sellingPrice       Selling price
+     * @apiParam {number}               refund.tickets.refundable         Refund amount
+     * @apiParam {number}               refund.tickets.selling            Selling price
      * @apiParam {string}               refund.tickets.status             Status For BO
      * @apiParam {bool}                 refund.tickets.refundAllowed        Refund Allowed
      * @apiParam {object}               refund.auxiliaryOptions             Auxiliary Options Array
@@ -350,8 +350,8 @@ class FlightQuoteRefundController extends ApiBaseController
      *                  "number": "465723459",
      *                  "airlinePenalty": 25.36,
      *                  "processingFee": 25,
-     *                  "refundAmount": 52.65,
-     *                  "sellingPrice": 150,
+     *                  "refundable": 52.65,
+     *                  "selling": 150,
      *                  "status": "issued",
      *                  "refundAllowed": true
      *              }

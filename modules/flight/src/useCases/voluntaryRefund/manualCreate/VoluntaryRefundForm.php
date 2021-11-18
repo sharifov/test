@@ -84,6 +84,7 @@ class VoluntaryRefundForm extends Model
                 $auxiliaryOptionForm = new AuxiliaryOptionForm();
                 $auxiliaryOptionForm->load($auxiliaryOption);
                 $auxiliaryOptionForm->details = JsonHelper::encode($auxiliaryOptionForm->details);
+                $auxiliaryOptionForm->amountPerPax = JsonHelper::encode($auxiliaryOptionForm->amountPerPax);
                 $this->auxiliaryOptionsForms[] = $auxiliaryOptionForm;
             }
         }
