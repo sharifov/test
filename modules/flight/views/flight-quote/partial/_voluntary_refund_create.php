@@ -83,7 +83,9 @@ use yii\widgets\Pjax;
               [
                   'attribute' => 'number',
                   'content' => static function (TicketForm $model, $index) use ($activeForm) {
-                      return $activeForm->field($model, 'number')->hiddenInput([
+                      return $activeForm->field($model, 'refundAllowed')->hiddenInput([
+                          'name' => 'refund[tickets][' . $index . '][refundAllowed]'
+                      ])->label(false) . $activeForm->field($model, 'number')->hiddenInput([
                           'name' => 'refund[tickets][' . $index . '][number]'
                       ])->label(false) . $model->number;
                   }
@@ -159,15 +161,6 @@ use yii\widgets\Pjax;
                       return $activeForm->field($model, 'status')->hiddenInput($inputOptions)->label(false) . $model->status;
                   }
               ],
-              [
-                  'attribute' => 'refundAllowed',
-                  'content' => static function (TicketForm $model, $index) use ($activeForm) {
-                      $format = new Formatter();
-                      return $activeForm->field($model, 'refundAllowed')->hiddenInput([
-                              'name' => 'refund[tickets][' . $index . '][refundAllowed]'
-                          ])->label(false) . $format->asBoolean($model->refundAllowed);
-                  }
-              ],
 
           ]
       ]) ?>
@@ -185,7 +178,7 @@ use yii\widgets\Pjax;
               [
                   'attribute' => 'type',
                   'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
-                      $type = ProductOptionQuery::getNameByRegexKey($model->type) ?: $model->type;
+                      $type = $model->type;
                       return $activeForm->field($model, 'type')->hiddenInput([
                           'name' => 'refund[auxiliaryOptions][' . $index . '][type]'
                       ])->label(false) . $type;

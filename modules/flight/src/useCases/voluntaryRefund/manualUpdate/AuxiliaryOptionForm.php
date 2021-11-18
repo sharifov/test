@@ -45,7 +45,7 @@ class AuxiliaryOptionForm extends \yii\base\Model
     public function __construct(ProductQuoteOptionRefund $option, $config = [])
     {
         $this->id = $option->pqor_id;
-        $this->type = $option->productQuoteOption->pqoProductOption->po_name ?? '';
+        $this->type = $option->pqor_data_json['type'] ?? '';
         $this->amount = $option->pqor_client_selling_price;
         $this->refundable = $option->pqor_client_refund_amount;
         $this->refundAllow = $option->pqor_refund_allow;
