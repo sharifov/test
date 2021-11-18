@@ -302,7 +302,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {number}               refund.tickets.refundable         Refund amount
      * @apiParam {number}               refund.tickets.selling            Selling price
      * @apiParam {string}               refund.tickets.status             Status For BO
-     * @apiParam {bool}                 refund.tickets.refundAllowed        Refund Allowed
+     * @apiParam {bool}                 [refund.tickets.refundAllowed]        Refund Allowed
      * @apiParam {object}               refund.auxiliaryOptions             Auxiliary Options Array
      * @apiParam {string}               refund.auxiliaryOptions.type        Auxiliary Options Type
      * @apiParam {number}               refund.auxiliaryOptions.amount      Selling price
