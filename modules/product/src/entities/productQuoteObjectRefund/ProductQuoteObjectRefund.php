@@ -199,9 +199,12 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializa
             "selling" => static function (self $model) {
                 return (float)$model->pqor_client_selling_price;
             },
-            "clientCurrency" => 'pqor_client_currency',
+            "currency" => 'pqor_client_currency',
             "status" => static function (self $model) {
                 return JsonHelper::decode($model->pqor_data_json)['status'] ?? '';
+            },
+            'refundAllowed' => static function (self $model) {
+                return (bool)(JsonHelper::decode($model->pqor_data_json)['refundAllowed'] ?? null);
             }
         ];
     }
