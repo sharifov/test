@@ -938,7 +938,6 @@ class FlightQuoteExchangeController extends BaseController
             $dataMessage['changeQuoteGid'] = $voluntaryExchangeConfirmForm->getChangeQuote()->pq_gid ?? null;
             $dataMessage['productQuoteChangeGid'] = $voluntaryExchangeConfirmForm->getProductQuoteChange()->pqc_gid ?? null;
             $dataMessage['caseGid'] = $voluntaryExchangeConfirmForm->getCase()->cs_gid ?? null;
-            $dataMessage['requestData'] = $requestData;
 
             return new SuccessResponse(
                 new DataMessage($dataMessage),
