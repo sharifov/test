@@ -732,4 +732,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['lead_redial_is_on_call_check_time'] ?? 20;
     }
+
+    public static function isClientChatLeadAutoTakeOnChatAccept(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['client_chat_lead_auto_take']['on_chat_accept'] ?? false);
+    }
 }

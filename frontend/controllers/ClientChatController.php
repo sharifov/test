@@ -57,6 +57,7 @@ use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChat\useCase\close\ClientChatCloseForm;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\hold\ClientChatHoldForm;
+use sales\model\clientChat\useCase\leadAutoTake\ClientChatLeadAutoTakeService;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
 use sales\model\clientChat\useCase\sendOffer\SendOfferForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
@@ -864,6 +865,10 @@ class ClientChatController extends FController
             if ($userAccess->ccua_status_id === $accessAction) {
                 $eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($userAccess->ccuaCch, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $userAccess->ccua_user_id);
                 $result['widgetData']['data'] = $this->clientChatUserAccessRepository->getUserAccessWidgetCommandData($userAccess->ccua_cch_id, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey());
+                if ($accessAction === ClientChatUserAccess::STATUS_ACCEPT) {
+                    $clientChatLeadAutoTakeService = Yii::createObject(ClientChatLeadAutoTakeService::class);
+                    $clientChatLeadAutoTakeService->byAcceptFromWidget($userAccess->ccua_cch_id, Auth::id());
+                }
             } else {
                 $result['error'] = true;
                 $result['message'] = 'The action was performed incorrectly, please try again';

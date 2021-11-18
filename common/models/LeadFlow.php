@@ -35,6 +35,7 @@ class LeadFlow extends \yii\db\ActiveRecord
     public const DESCRIPTION_CLIENT_CHAT_CREATE = 'Client chat create';
     public const DESCRIPTION_CALL_AUTO_CREATED_LEAD = 'Call AutoCreated Lead';
     public const DESCRIPTION_MANUAL_FROM_CALL = 'Manual from call';
+    public const DESCRIPTION_CLIENT_CHAT_AUTO_ASSIGN = 'Client Chat Auto Assign';
 
     public const REASON_CREATED_BY_API = 'Created by API';
 
