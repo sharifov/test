@@ -26,7 +26,7 @@ class BoRequestDataHelper
                 'number' => $ticket->number,
                 'airlinePenalty' => $ticket->airlinePenalty,
                 'processingFee' => $ticket->processingFee,
-                'refundable' => $ticket->refundAmount
+                'refundable' => $ticket->refundable
             ];
         }
         if ($form->billingInfoForm) {

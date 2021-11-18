@@ -285,16 +285,16 @@ class VoluntaryRefundService
                 $productQuoteObjectRefund = ProductQuoteObjectRefund::create(
                     $productQuoteRefund->pqr_id,
                     $flightQuoteTicketRefund->fqtr_id,
-                    CurrencyHelper::convertToBaseCurrency($ticketForm->sellingPrice, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->selling, $order->orClientCurrency->cur_base_rate),
                     CurrencyHelper::convertToBaseCurrency($ticketForm->airlinePenalty, $order->orClientCurrency->cur_base_rate),
                     CurrencyHelper::convertToBaseCurrency($ticketForm->processingFee, $order->orClientCurrency->cur_base_rate),
-                    CurrencyHelper::convertToBaseCurrency($ticketForm->refundAmount, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->refundable, $order->orClientCurrency->cur_base_rate),
                     $voluntaryRefundCreateForm->refundForm->currency,
                     $order->or_client_currency_rate,
-                    $ticketForm->sellingPrice,
+                    $ticketForm->selling,
                     $ticketForm->airlinePenalty,
                     $ticketForm->processingFee,
-                    $ticketForm->refundAmount,
+                    $ticketForm->refundable,
                     null,
                     $ticketForm->toArray()
                 );

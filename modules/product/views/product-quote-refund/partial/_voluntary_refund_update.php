@@ -133,7 +133,7 @@ use yii\widgets\Pjax;
                         },
                         'format' => 'raw'
                     ],
-
+                    'refundAllowed:boolean',
                 ]
             ]) ?>
 
@@ -192,6 +192,33 @@ use yii\widgets\Pjax;
                             $content .= $model->details ?
                                 '<pre id="data_' . $type . '" style="display: none;">' .
                                 \yii\helpers\VarDumper::dumpAsString(JsonHelper::decode($model->details), 10, true) . '</pre>' : '-';
+
+                            return $content;
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => [
+                            'style' => ['max-width' => '800px', 'word-wrap' => 'break-word !important'],
+                        ],
+                    ],
+                    [
+                        'attribute' => 'amountPerPax',
+                        'value' => static function (AuxiliaryOptionForm $model) {
+                            $content = '';
+                            $type = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '', $model->type));
+                            if ($model->amountPerPax) {
+                                $content = Html::a(
+                                    '<i class="fas fa-eye"></i> details</a>',
+                                    null,
+                                    [
+                                        'class' => 'btn btn-sm btn-success',
+                                        'data-pjax' => 0,
+                                        'onclick' => '(function ( $event ) { $("#data_' . $type . '").toggle(); })();',
+                                    ]
+                                );
+                            }
+                            $content .= $model->amountPerPax ?
+                                '<pre id="data_' . $type . '" style="display: none;">' .
+                                \yii\helpers\VarDumper::dumpAsString(JsonHelper::decode($model->amountPerPax), 10, true) . '</pre>' : '-';
 
                             return $content;
                         },

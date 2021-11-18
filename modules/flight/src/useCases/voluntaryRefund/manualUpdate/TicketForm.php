@@ -15,6 +15,7 @@ use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefu
  * @property float $processingFee
  * @property float $refundable
  * @property float $selling
+ * @property bool $refundAllowed
  */
 class TicketForm extends \yii\base\Model
 {
@@ -30,6 +31,8 @@ class TicketForm extends \yii\base\Model
 
     public $selling;
 
+    public $refundAllowed;
+
     public function __construct(ProductQuoteObjectRefund $productQuoteObjectRefund, $config = [])
     {
         $this->id = $productQuoteObjectRefund->pqor_id;
@@ -38,6 +41,7 @@ class TicketForm extends \yii\base\Model
         $this->refundable = (float)$productQuoteObjectRefund->pqor_client_refund_amount;
         $this->selling = (float)$productQuoteObjectRefund->pqor_client_selling_price;
         $this->number = FlightQuoteTicketRefund::findOne(['fqtr_id' => $productQuoteObjectRefund->pqor_quote_object_id])->fqtr_ticket_number ?? null;
+        $this->refundAllowed = $productQuoteObjectRefund->pqor_data_json['refundAllowed'] ?? null;
         parent::__construct($config);
     }
 
