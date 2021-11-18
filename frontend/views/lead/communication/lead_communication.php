@@ -573,6 +573,7 @@ JS;
                             $js = <<<JS
     
         function initializeMessageType(messageType) {
+            
             if (messageType == 2) {
                 $('.message-field-phone').hide();
                 $('.message-field-email').hide();
@@ -719,11 +720,9 @@ $js = <<<JS
     });
     
     $('body').on("change", '#c_email_tpl_key', function () {
-                
-        //var type_id = $('#c_type_id').val();        
-        //alert($(this).val());
+        let type_id = $('#c_type_id').val();
         
-        //if(type_id != 2) {
+        if(parseInt(type_id) === 1) { // Email
             if($(this).val() == tpl_email_blank_key) {
                 $('#email-textarea-div').show();
                 $('#email-subtitle-group').show();
@@ -731,7 +730,7 @@ $js = <<<JS
                 $('#email-textarea-div').hide();
                 $('#email-subtitle-group').hide();
             }
-        //}
+        }
     });
     
     $('body').on("change", '#email', function () {
