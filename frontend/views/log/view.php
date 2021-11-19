@@ -28,7 +28,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'level',
             'category',
-            'log_time:datetime',
+            [
+                'attribute' => 'log_time',
+                'value' => static function (\frontend\models\Log $model) {
+                    return Yii::$app->formatter->asDatetime($model->log_time, 'php:d-M-Y [H:i:s]');
+                },
+                'format' => 'raw',
+            ],
             'prefix:ntext',
             //'message:ntext',
             [
