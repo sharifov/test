@@ -381,7 +381,7 @@ class FlightFromSaleService
         $optionApiForm->pqo_name = $data['title'] ?? $optionKey;
         $optionApiForm->pqo_price = $data['amount'] ?? null;
         $optionApiForm->pqo_markup = 0.00;
-        $optionApiForm->pqo_description = '';
+        $optionApiForm->pqo_description = null;
         $optionApiForm->pqo_request_data = $data;
 
         if (!$optionApiForm->validate()) {
