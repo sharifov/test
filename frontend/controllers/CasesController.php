@@ -107,6 +107,8 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 
 /**
  * Class CasesController
@@ -290,6 +292,10 @@ class CasesController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
+        $caseAbacDto = new CasesAbacDto($model);
+        /** @abac $caseAbacDto, CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK, Disable mask client data on Case view*/
+        $disableMasking = Yii::$app->abac->can($caseAbacDto, CasesAbacObject::LOGIC_CLIENT_DATA, CasesAbacObject::ACTION_UNMASK);
+
         /** @var Employee $userModel */
         $userModel = Yii::$app->user->identity;
 
@@ -336,7 +342,7 @@ class CasesController extends FController
 
                     if (isset($mailResponse['error']) && $mailResponse['error']) {
                         //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to, $disableMasking) . '</strong>');
                         Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'CaseController:view:Email:sendMail');
                     } else {
                         //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
@@ -359,7 +365,7 @@ class CasesController extends FController
                             }
                         }
 
-                        Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
+                        Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to, $disableMasking) . '</strong>');
                     }
 
                     $this->refresh(); //'#communication-form'
