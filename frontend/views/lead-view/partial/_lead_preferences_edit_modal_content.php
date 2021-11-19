@@ -52,7 +52,7 @@ use yii\web\View;
 
         <div class="row">
             <div class="col-md-12">
-                <?= $form->field($leadPreferencesForm, 'delayedCharge')->checkbox(['disabled' => true]) ?>
+                <?= $form->field($leadPreferencesForm, 'delayedCharge')->checkbox(['disabled' => true, 'label' => false])->hiddenInput() ?>
             </div>
         </div>
 
