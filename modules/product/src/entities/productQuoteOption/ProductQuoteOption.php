@@ -204,7 +204,7 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
         int $productQuoteId,
         int $productOptionId,
         string $name,
-        string $description,
+        ?string $description,
         float $price,
         float $clientPrice,
         ?float $extraMarkup,
