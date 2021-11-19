@@ -368,8 +368,11 @@ class FlightFromSaleService
         return (array_key_exists($optionKey, $saleData) && is_array($saleData[$optionKey]) && !empty($saleData[$optionKey]));
     }
 
-    public function createOption(string $optionKey, array $data, FlightQuote $flightQuote): ?ProductQuoteOption
-    {
+    public function createOption(
+        string $optionKey,
+        array $data,
+        FlightQuote $flightQuote
+    ): ?ProductQuoteOption {
         if (ArrayHelper::getValue($data, 'isActivated', false) !== true) {
             return null;
         }
@@ -378,7 +381,7 @@ class FlightFromSaleService
         $optionApiForm->pqo_name = $data['title'] ?? $optionKey;
         $optionApiForm->pqo_price = $data['amount'] ?? null;
         $optionApiForm->pqo_markup = 0.00;
-        $optionApiForm->pqo_description = 'from ReProtection request';
+        $optionApiForm->pqo_description = '';
         $optionApiForm->pqo_request_data = $data;
 
         if (!$optionApiForm->validate()) {
