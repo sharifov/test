@@ -18,7 +18,10 @@
             'recordingDisableUrl': '',
             'acceptPriorityCallUrl': '',
             'acceptWarmTransferCallUrl': '',
-            'addPhoneBlackListUrl': ''
+            'addPhoneBlackListUrl': '',
+            'ajaxCallTransferUrl': '',
+            'ajaxWarmTransferToUserUrl': '',
+            'ajaxCallRedirectUrl': ''
         };
 
         this.init = function (settings) {
@@ -215,6 +218,30 @@
                 })
         };
 
+        this.hangup = function (call) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': call.data.callSid,
+                },
+                url: this.settings.ajaxHangupUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Hangup', data.message, 'error');
+                        call.unSetHangupRequestState();
+                    }
+                    if (typeof data.result !== 'undefined' && typeof data.result.status !== 'undefined' && data.result.status === 'completed') {
+                        PhoneWidgetCall.completeCall(callSid);
+                    }
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Hangup', message, 'error');
+                    call.unSetHangupRequestState();
+                })
+        };
+
         this.addNote = function (call, note, $container) {
             $.ajax({
                 type: 'post',
@@ -262,7 +289,7 @@
                 });
         };
 
-        this.acceptInternalCall = function (call, connection) {
+        this.acceptInternalCall = function (call, twilioCall) {
             $.ajax({
                 type: 'post',
                 data: {},
@@ -274,7 +301,7 @@
                         createNotify('Prepare current call', data.message, 'error');
                         call.unSetAcceptCallRequestState();
                     } else {
-                        connection.accept();
+                        twilioCall.accept();
                     }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
@@ -447,6 +474,72 @@
                     window.phoneWidget.notifier.on(key);
                     PhoneWidgetCall.audio.incoming.on(key);
                 })
+        };
+
+        this.transfer = function (callSid, objValue, objType, modal) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': callSid,
+                    'id': objValue,
+                    'type': objType
+                },
+                url: this.settings.ajaxCallTransferUrl,
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.message);
+                    }
+                    modal.modal('hide').find('.modal-body').html('');
+                },
+                error: function (error) {
+                    console.error(error);
+                    modal.modal('hide').find('.modal-body').html('');
+                }
+            });
+        };
+
+        this.warmTransferToUser = function (callSid, userId, modal) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'callSid': callSid,
+                    'userId': userId
+                },
+                url: this.settings.ajaxWarmTransferToUserUrl,
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.message);
+                    }
+                    modal.modal('hide').find('.modal-body').html('');
+                },
+                error: function (error) {
+                    console.error(error);
+                    modal.modal('hide').find('.modal-body').html('');
+                }
+            });
+        };
+
+        this.transferNumber = function (callSid, type, from, to, modal) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': callSid,
+                    'type': type,
+                    'from': from,
+                    'to': to,
+                },
+                url: this.settings.ajaxCallRedirectUrl,
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.message);
+                    }
+                    modal.modal('hide').find('.modal-body').html('');
+                },
+                error: function (error) {
+                    console.error(error);
+                    modal.modal('hide').find('.modal-body').html('');
+                }
+            });
         };
     }
 

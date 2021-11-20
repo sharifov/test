@@ -235,7 +235,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'muteCall') {
                         if (typeof obj.data !== 'undefined') {
-                            muteEvent(obj.data);
+                            PhoneWidgetCall.socket(obj.data);
                         }
                     }
 

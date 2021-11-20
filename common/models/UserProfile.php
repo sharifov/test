@@ -112,6 +112,11 @@ class UserProfile extends \yii\db\ActiveRecord
         return $this->up_call_type_id !== self::CALL_TYPE_OFF;
     }
 
+    public function canWebCall(): bool
+    {
+        return $this->up_call_type_id === self::CALL_TYPE_WEB;
+    }
+
     /**
      * {@inheritdoc}
      */

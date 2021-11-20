@@ -126,7 +126,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\SimpleAsset::register($this);
         </div>
     </div>
 </div>
-<?= frontend\widgets\WebPhone::widget() ?>
+<?= frontend\widgets\webPhone\WebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 <?php if (Auth::can('PhoneWidget')) : ?>
     <?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 <?php endif; ?>

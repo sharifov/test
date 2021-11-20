@@ -318,7 +318,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
         <div class="preloader__text">Loading...</div>
     </div>
 </div>
-<?= frontend\widgets\WebPhone::widget() ?>
+<?= frontend\widgets\webPhone\WebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 <?php if (Auth::can('PhoneWidget')) : ?>
     <?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 <?php endif; ?>

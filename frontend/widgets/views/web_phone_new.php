@@ -324,7 +324,6 @@ $js = <<<JS
                                                 console.log('create call with params:');
                                                 console.log(params);
                                                 // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-                                                updateAgentStatus(connection, false, 0);
                                                 connection = device.connect(params);
                                             }
                                         }, 'json');
