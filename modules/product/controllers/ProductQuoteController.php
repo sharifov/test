@@ -24,6 +24,8 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\forms\ChangeQuoteSendEmailForm;
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;
@@ -466,6 +468,15 @@ class ProductQuoteController extends FController
                     throw new \RuntimeException('Original quote not found');
                 }
 
+                $notClosedRefunds = ProductQuoteRefund::find()
+                    ->andWhere(['pqr_product_quote_id' => $originalQuote->pq_id])
+                    ->andWhere(['pqr_type_id' => ProductQuoteRefund::typeVoluntary()])
+                    ->andWhere(['NOT IN', 'pqr_status_id', [ProductQuoteRefundStatus::DECLINED, ProductQuoteRefundStatus::CANCELED]])
+                    ->exists();
+                if ($notClosedRefunds) {
+                    throw new \RuntimeException('Voluntary Refund - processing is not complete');
+                }
+
                 $relatedPrQtAbacDto = new RelatedProductQuoteAbacDto($quote);
                 $relatedPrQtAbacDto->mapOrderAttributes($order);
                 $relatedPrQtAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
@@ -578,6 +589,15 @@ class ProductQuoteController extends FController
                 try {
                     if (!$originQuote) {
                         throw new \RuntimeException('Origin quote not found');
+                    }
+
+                    $notClosedRefunds = ProductQuoteRefund::find()
+                        ->andWhere(['pqr_product_quote_id' => $originQuote->pq_id])
+                        ->andWhere(['pqr_type_id' => ProductQuoteRefund::typeVoluntary()])
+                        ->andWhere(['NOT IN', 'pqr_status_id', [ProductQuoteRefundStatus::DECLINED, ProductQuoteRefundStatus::CANCELED]])
+                        ->exists();
+                    if ($notClosedRefunds) {
+                        throw new \RuntimeException('Voluntary Refund - processing is not complete');
                     }
 
                     $mail = new Email();

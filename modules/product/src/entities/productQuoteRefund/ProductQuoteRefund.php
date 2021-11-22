@@ -532,4 +532,14 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         $this->pqr_client_penalty_amount = CurrencyHelper::convertToBaseCurrency($this->pqr_client_penalty_amount, $this->clientCurrency->cur_base_rate);
         $this->pqr_client_refund_amount = CurrencyHelper::convertToBaseCurrency($this->pqr_client_refund_amount, $this->clientCurrency->cur_base_rate);
     }
+
+    public static function typeVoluntary(): int
+    {
+        return self::TYPE_VOLUNTARY_REFUND;
+    }
+
+    public static function typeReProtection(): int
+    {
+        return self::TYPE_RE_PROTECTION;
+    }
 }
