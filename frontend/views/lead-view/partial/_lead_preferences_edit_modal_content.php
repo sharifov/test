@@ -5,6 +5,7 @@
  * @var $this View
  * @var $leadPreferencesForm LeadPreferencesForm
  * @var $gid string
+ * @var $delayChargeAccess bool
  */
 
 use sales\forms\lead\LeadPreferencesForm;
@@ -49,13 +50,13 @@ use yii\web\View;
                 <?= $form->field($leadPreferencesForm, 'clientLang')->dropDownList(\common\models\Language::getList(), ['prompt' => '-']) ?>
             </div>
         </div>
-
+        <?php if ($delayChargeAccess) :?>
         <div class="row">
             <div class="col-md-12">
-                <?= $form->field($leadPreferencesForm, 'delayedCharge')->checkbox(['disabled' => true, 'label' => false])->hiddenInput() ?>
+                <?= $form->field($leadPreferencesForm, 'delayedCharge')->checkbox() ?>
             </div>
         </div>
-
+        <?php endif; ?>
         <div class="row">
             <div class="col-md-12">
                 <?= $form->field($leadPreferencesForm, 'notesForExperts')->textarea([

@@ -4762,10 +4762,14 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     /**
      * @param int $delayedCharged
      * @param string $notesForExperts
+     * @param bool $delayChargeAccess
      */
-    public function editDelayedChargeAndNote(int $delayedCharged, string $notesForExperts): void
+    public function editDelayedChargeAndNote(int $delayedCharged, string $notesForExperts, bool $delayChargeAccess): void
     {
-        $this->l_delayed_charge = $delayedCharged;
+        if ($delayChargeAccess) {
+            $this->l_delayed_charge = $delayedCharged;
+        }
+
         $this->notes_for_experts = strip_tags($notesForExperts);
     }
 
