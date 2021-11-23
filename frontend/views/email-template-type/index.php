@@ -49,11 +49,28 @@ $this->params['breadcrumbs'][] = $this->title;
             'etp_hidden:boolean',
 
             [
+                'label' => 'Department (deprecated)',
                 'attribute' => 'etp_dep_id',
                 'value' => static function (\common\models\EmailTemplateType $model) {
                     return $model->etpDep ? $model->etpDep->dep_name : '-';
                 },
-                'filter' => \common\models\Department::getList()
+                'filter' => false
+            ],
+
+            [
+                'label' => 'Departments',
+                'attribute' => 'etp_dep_id',
+                'value' => static function (\common\models\EmailTemplateType $model) {
+                    $valueArr = [];
+
+                    foreach ($model->emailTemplateTypeDepartments as $item) {
+                        $valueArr[] = Html::tag('div', Html::encode($item->ettdDepartment->dep_name), ['class' => 'label label-default']) ;
+                    }
+
+                    return $valueArr ? implode('<br>', $valueArr)  : '-';
+                },
+                'filter' => \common\models\Department::getList(),
+                'format' => 'raw'
             ],
 
             ['class' => BooleanColumn::class, 'attribute' => 'etp_ignore_unsubscribe'],

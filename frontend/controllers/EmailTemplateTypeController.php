@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\EmailTemplateTypeDepartment;
 use Yii;
 use common\models\EmailTemplateType;
 use common\models\search\EmailTemplateTypeSearch;
@@ -89,8 +90,21 @@ class EmailTemplateTypeController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            EmailTemplateTypeDepartment::deleteAll(['ettd_etp_id' => $model->etp_id]);
+
+            if ($model->departmentIds) {
+                foreach ($model->departmentIds as $depId) {
+                    $ettDep = new EmailTemplateTypeDepartment();
+                    $ettDep->ettd_etp_id = $model->etp_id;
+                    $ettDep->ettd_department_id = $depId;
+                    $ettDep->save();
+                }
+            }
+
             return $this->redirect(['view', 'id' => $model->etp_id]);
         }
+
+        $model->departmentIds = ArrayHelper::map($model->emailTemplateTypeDepartments, 'ettd_department_id', 'ettd_department_id');
 
         return $this->render('update', [
             'model' => $model,
