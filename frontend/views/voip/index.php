@@ -76,55 +76,6 @@ $js = <<<JS
             logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
         }
     }
-
-    function IncomingTwilioCalls() {
-        this.calls = [];
-
-        this.add = function (call) {
-            if (typeof call.parameters === 'undefined') {
-                console.error('Not found Parameters. Call: ' + JSON.stringify(call));
-                return;
-            }
-            if (typeof call.parameters.CallSid === 'undefined') {
-                console.error('Not found CallSid. Call: ' + JSON.stringify(call));
-                return;
-            }
-            this.calls.push(call);
-        };
-
-        this.get = function (callSid) {
-            let index = this.getIndex(callSid);
-            if (index !== null) {
-                return this.calls[index];
-            }
-            console.error('Not found Call. CallSid: ' + callSid);
-            return null;
-        };
-
-        this.getIndex = function (callSid) {
-            let index = null;
-            this.calls.forEach(function (call, i) {
-                if (call.parameters.CallSid === callSid) {
-                    index = i;
-                    return false;
-                }
-            });
-            return index;
-        };
-
-        this.remove = function (callSid) {
-            let index = this.getIndex(callSid);
-            if (index !== null) {
-                this.calls.splice(index, 1);
-            }
-        };
-
-        this.all = function () {
-            console.log(JSON.stringify(this.calls));
-        };
-    }
-
-    window.incomingTwilioCalls = new IncomingTwilioCalls();
     
     function startupTwilioClient() {
         console.log("Requesting Twilio Access Token...");
@@ -177,12 +128,12 @@ $js = <<<JS
             });
         
             window.TwilioDevice.on("incoming", call => {     
-                window.incomingTwilioCalls.add(call);
+                PhoneWidgetCall.incomingTwilioCalls.add(call);
                 window.TwilioCall = call;
                 PhoneWidgetCall.incomingSoundOff();
                 
                 call.on('accept', call => {
-                    window.incomingTwilioCalls.remove(call.parameters.CallSid);
+                    PhoneWidgetCall.incomingTwilioCalls.remove(call.parameters.CallSid);
                     window.TwilioCall = call;
                     
                     console.log('The incoming call was accepted.');
@@ -199,14 +150,14 @@ $js = <<<JS
                     console.log('The call has been canceled.');
                     PhoneWidgetCall.freeDialButton();
                     if (window.TwilioCall) {
-                        window.incomingTwilioCalls.remove(window.TwilioCall.parameters.CallSid);
+                        PhoneWidgetCall.incomingTwilioCalls.remove(window.TwilioCall.parameters.CallSid);
                     }
                     PhoneWidgetCall.incomingSoundOff();
                 });
                 call.on('disconnect', call => {
                     console.log('The call has been disconnected.');
                     PhoneWidgetCall.freeDialButton();
-                    window.incomingTwilioCalls.remove(call.parameters.CallSid);
+                    PhoneWidgetCall.incomingTwilioCalls.remove(call.parameters.CallSid);
                     window.TwilioCall = call;
                     // will remove after move device to one tab
                     if (call.parameters.CallSid === PhoneWidgetCall.getActiveCallSid()) {
@@ -248,12 +199,12 @@ $js = <<<JS
                          PhoneWidgetCall.refreshCallStatus(callObj);        
                     }
                 } else {
-                    if (document.visibilityState === 'visible') {
+                    // if (document.visibilityState === 'visible') {
                         call.accept();
                         console.log("Accepted incoming call.");
-                    } else {
-                        PhoneWidgetCall.startTimerSoundIncomingCall();
-                    }
+                    // } else {
+                    //     PhoneWidgetCall.startTimerSoundIncomingCall();
+                    // }
                 }
             });
         

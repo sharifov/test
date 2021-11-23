@@ -1,3 +1,54 @@
+(function () {
+    function IncomingTwilioCalls() {
+        this.calls = [];
+
+        this.add = function (call) {
+            if (typeof call.parameters === 'undefined') {
+                console.error('Not found Parameters. Call: ' + JSON.stringify(call));
+                return;
+            }
+            if (typeof call.parameters.CallSid === 'undefined') {
+                console.error('Not found CallSid. Call: ' + JSON.stringify(call));
+                return;
+            }
+            this.calls.push(call);
+        };
+
+        this.get = function (callSid) {
+            let index = this.getIndex(callSid);
+            if (index !== null) {
+                return this.calls[index];
+            }
+            console.error('Not found Call. CallSid: ' + callSid);
+            return null;
+        };
+
+        this.getIndex = function (callSid) {
+            let index = null;
+            this.calls.forEach(function (call, i) {
+                if (call.parameters.CallSid === callSid) {
+                    index = i;
+                    return false;
+                }
+            });
+            return index;
+        };
+
+        this.remove = function (callSid) {
+            let index = this.getIndex(callSid);
+            if (index !== null) {
+                this.calls.splice(index, 1);
+            }
+        };
+
+        this.all = function () {
+            console.log(JSON.stringify(this.calls));
+        };
+    }
+
+    window.phoneWidget.incomingTwilioCalls = new IncomingTwilioCalls();
+})();
+
 var PhoneWidgetCall = function () {
     let statusCheckbox = null;
 
@@ -68,6 +119,8 @@ var PhoneWidgetCall = function () {
     let leadViewPageShortUrl = '';
 
     let phoneNumbers = null;
+
+    let incomingTwilioCalls = window.phoneWidget.incomingTwilioCalls;
 
     function init(options)
     {
@@ -1684,7 +1737,7 @@ var PhoneWidgetCall = function () {
         }
 
         let callSid = call.data.callSid;
-        let twilioCall = window.incomingTwilioCalls.get(callSid);
+        let twilioCall = incomingTwilioCalls.get(callSid);
 
         if (twilioCall === null) {
             createNotify('Accept internal Call', 'Not found CallSid on Collections of IncomingTwilioCalls', 'error');
@@ -1697,7 +1750,7 @@ var PhoneWidgetCall = function () {
 
     function rejectInternalCall(call) {
         let callSid = call.data.callSid;
-        let twilioCall = window.incomingTwilioCalls.get(callSid);
+        let twilioCall = incomingTwilioCalls.get(callSid);
 
         if (twilioCall === null) {
             createNotify('Reject Internal Call', 'Not found CallSid on Collections of IncomingTwilioCalls', 'error');
@@ -1705,7 +1758,7 @@ var PhoneWidgetCall = function () {
         }
 
         call.setRejectInternalRequest();
-        window.incomingTwilioCalls.remove(twilioCall.parameters.CallSid);
+        incomingTwilioCalls.remove(twilioCall.parameters.CallSid);
         twilioCall.reject();
         incomingSoundOff();
     }
@@ -2091,7 +2144,8 @@ var PhoneWidgetCall = function () {
         joinCoach: joinCoach,
         joinBarge: joinBarge,
         leadViewPageShortUrl: leadViewPageShortUrl,
-        freeDialButton: freeDialButton
+        freeDialButton: freeDialButton,
+        incomingTwilioCalls: incomingTwilioCalls
     };
 }();
 
