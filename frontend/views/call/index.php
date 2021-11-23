@@ -93,8 +93,7 @@ $pjaxListId = 'pjax-call-index';
                     },
                     'join' => static function (Call $model, $key, $index) use ($user) {
                         return
-                            ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false)
-                            && Auth::can('/phone/ajax-join-to-conference'))
+                            Auth::can('/phone/ajax-join-to-conference')
                             && (int)$model['cp_type_id'] === ConferenceParticipant::TYPE_AGENT
                             && ($model->isIn() || $model->isOut() || $model->isReturn())
                             && $model->isStatusInProgress();

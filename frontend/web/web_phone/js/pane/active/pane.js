@@ -83,13 +83,6 @@ var PhoneWidgetPaneActive = function () {
             controls.addPerson.active = false;
             controls.dialpad.active = false;
         }
-
-        if (!conferenceBase) {
-            controls.hold.active = false;
-            controls.transfer.active = true;
-            controls.addPerson.active = false;
-            controls.dialpad.active = false;
-        }
         return controls;
     }
 

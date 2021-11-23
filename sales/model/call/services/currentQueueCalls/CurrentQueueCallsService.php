@@ -91,53 +91,18 @@ class CurrentQueueCallsService
         $calls = [];
         $last_time = 0;
 
-        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
+        $query = Call::find()
+            ->with(['cProject', 'cClient'])
+            ->joinWith(['currentParticipant'])
+            ->byCreatedUser($this->userId)
+            ->inProgress()
+            ->andWhere(['cp_type_id' => [ConferenceParticipant::TYPE_AGENT, ConferenceParticipant::TYPE_USER]]);
 
-        if ($conferenceBase) {
-            $query = Call::find()
-                ->with(['cProject', 'cClient'])
-                ->joinWith(['currentParticipant'])
-                ->byCreatedUser($this->userId)
-                ->inProgress()
-                ->andWhere(['cp_type_id' => [ConferenceParticipant::TYPE_AGENT, ConferenceParticipant::TYPE_USER]]);
-
-            if ($excludeCallSid) {
-                $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
-            }
-
-            $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
-        } else {
-            $query = Call::find()
-                ->with(['cProject', 'cClient'])
-                ->byCreatedUser($this->userId)
-                ->andWhere([
-                    'OR',
-                    ['c_status_id' => Call::STATUS_IN_PROGRESS],
-                    ['c_status_id' => Call::STATUS_RINGING]
-                ]);
-
-            if ($excludeCallSid) {
-                $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
-            }
-
-            $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
-            foreach ($queue as $key => $call) {
-                if ($call->isStatusRinging()) {
-                    if ($call->isIn()) {
-                        unset($queue[$key]);
-                    }
-                    if ($call->isOut()) {
-                        $child = Call::find()->firstChild($call->c_id)->inProgress()->one();
-                        if (!$child) {
-                            unset($queue[$key]);
-                        }
-                    }
-                }
-                if ($call->isOut() && $call->isStatusInProgress()) {
-                    unset($queue[$key]);
-                }
-            }
+        if ($excludeCallSid) {
+            $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
         }
+
+        $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
 
         foreach ($queue as $call) {
             if ($call->isIn() || $call->isOut() || $call->isReturn()) {
@@ -280,46 +245,19 @@ class CurrentQueueCallsService
         $calls = [];
         $last_time = 0;
 
-        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
+        $query = Call::find()
+            ->with(['cProject', 'cClient'])
+            ->joinWith(['currentParticipant'])
+            ->byCreatedUser($this->userId)
+            ->out()
+            ->ringing()
+            ->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT]);
 
-        if ($conferenceBase) {
-            $query = Call::find()
-                ->with(['cProject', 'cClient'])
-                ->joinWith(['currentParticipant'])
-                ->byCreatedUser($this->userId)
-                ->out()
-                ->ringing()
-                ->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT]);
-
-            if ($excludeCallSid) {
-                $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
-            }
-
-            $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
-        } else {
-            $query = Call::find()
-                ->with(['cProject', 'cClient'])
-                ->byCreatedUser($this->userId)
-                ->out()
-                ->ringing();
-
-            if ($excludeCallSid) {
-                $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
-            }
-
-            $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
-
-            foreach ($queue as $key => $call) {
-                if (!$call->isGeneralParent()) {
-                    unset($queue[$key]);
-                    continue;
-                }
-                $child = Call::find()->firstChild($call->c_id)->inProgress()->one();
-                if ($child) {
-                    unset($queue[$key]);
-                }
-            }
+        if ($excludeCallSid) {
+            $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
         }
+
+        $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
 
         foreach ($queue as $call) {
             $callAntiSpamData = $this->getTrustSpamData($call);

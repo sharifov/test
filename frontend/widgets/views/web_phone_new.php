@@ -42,11 +42,6 @@ $getUserByPhoneUrl = Url::to(['/phone/get-user-by-phone']);
 $getCallHistoryFromNumberUrl = Url::to(['/phone/get-call-history-from-number']);
 $ajaxCheckRecording = Url::to(['/phone/ajax-check-recording']);
 
-$conferenceBase = 0;
-if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
-    $conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
-}
-
 $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
@@ -69,7 +64,7 @@ $js = <<<JS
 	    'source_type_id': '',
 	    'lead_id': '',
 	    'case_id': ''	    ,
-	    'is_conference_call': conferenceBase,
+	    'is_conference_call': 1,
 	    'nickname': '',
 	};
 */
@@ -276,26 +271,7 @@ $js = <<<JS
                                 
                                 if (device) {
         
-                                    if (conferenceBase && callOutBackendSide) {
-                                        let createCallParams = {
-                                            '{$csrf_param}' : '{$csrf_token}',
-                                            'called': dialData.to, 
-                                            'from': dialData.from, 
-                                            'project_id': dialData.project_id,
-                                        };
-                                        $.post('{$ajaxCreateCallUrl}', createCallParams, function(data) {
-                                            if (data.error) {
-                                                freeDialButton();
-                                                var text = 'Error. Try again later';
-                                                if (data.message) {
-                                                    text = data.message;
-                                                }
-                                                new PNotify({title: "Make call", type: "error", text: text, hide: true});
-                                            } else {
-                                                console.log('webCall success');
-                                            }
-                                        }, 'json');								
-                                    } else { 
+                                     
                                         $.post(ajaxGetPhoneListIdUrl, {'phone': filterCallParams(dialData.from)}, function(data) {
                                             if (data.error) {
                                                 var text = 'Error. Try again later';
@@ -315,7 +291,7 @@ $js = <<<JS
                                                     'c_type': 'call-web', 
                                                     'c_user_id': userId, 
                                                     'user_identity': window.userIdentity, 
-                                                    'is_conference_call': conferenceBase,
+                                                    'is_conference_call': 1,
                                                     'c_client_id': filterCallParams(dialData.client_id),
                                                     'c_source_type_id': filterCallParams(dialData.source_type_id),
                                                     'call_recording_disabled': dataRecording.value,
@@ -327,7 +303,6 @@ $js = <<<JS
                                                 connection = device.connect(params);
                                             }
                                         }, 'json');
-                                    }
                                 } else {
                                     freeDialButton();
                                 }

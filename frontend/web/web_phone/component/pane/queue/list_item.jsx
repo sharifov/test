@@ -137,14 +137,10 @@ function ListItemMenu(props) {
              ? <ListItemBtnTransfer call={call}/>
              : ''
             }
-            {conferenceBase
-                ?
-                <React.Fragment>
-                    <ListItemBtnHold call={call}/>
-                    <ListItemBtnMute call={call}/>
-                </React.Fragment>
-                : ''
-            }
+            <React.Fragment>
+                <ListItemBtnHold call={call}/>
+                <ListItemBtnMute call={call}/>
+            </React.Fragment>
         </ul>
     );
 }

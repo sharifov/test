@@ -801,10 +801,7 @@ class CommunicationController extends ApiBaseController
                     $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
                     if ($logEnable) {
                         if ($call->c_recording_sid) {
-//                            $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
-//                            if (!$conferenceBase || ($conferenceBase && !$call->c_conference_id)) {
                             (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
-//                            }
                         }
                     }
                 }

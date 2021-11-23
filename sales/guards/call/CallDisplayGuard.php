@@ -24,7 +24,6 @@ class CallDisplayGuard
         $participant = $call->currentParticipant;
         $callIsTypeAgent = $participant && $participant->isAgent();
         $this->canDisplayJoinUserBtn = $callIsTypeAgent
-            && (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false)
             && $user->can('/phone/ajax-join-to-conference')
             && ($call->isIn() || $call->isOut() || $call->isReturn())
             && $call->isStatusInProgress();

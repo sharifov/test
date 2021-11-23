@@ -23,7 +23,6 @@ class CallUpdateMessage
 {
     public function create(Call $call, bool $isChangedStatus, int $userId): array
     {
-        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
         $fromInternal = PhoneList::find()->byPhone($call->c_from)->enabled()->exists();
         $name = '';
         $phone = '';
@@ -108,13 +107,6 @@ class CallUpdateMessage
 
         $callSid = $call->c_call_sid;
         $callId = $call->c_id;
-
-        if (!$conferenceBase) {
-            if ($isChangedStatus && $call->isStatusInProgress() && $call->isOut() && $call->c_parent_id) {
-                $callSid = $call->c_parent_call_sid ?: $call->cParent->c_call_sid;
-                $callId = $call->c_parent_call_sid ?: $call->cParent->c_id;
-            }
-        }
 
         if ($call->isJoin()) {
             $source = $call->c_parent_call_sid ? $call->cParent->getSourceName() : '';
@@ -214,15 +206,9 @@ class CallUpdateMessage
 
     public function getContactData(Call $call, int $userId): array
     {
-        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
         $name = '';
 
         $callSid = $call->c_call_sid;
-        if (!$conferenceBase) {
-            if ($call->isStatusInProgress() && $call->isOut() && $call->c_parent_id) {
-                $callSid = $call->c_parent_call_sid ?: $call->cParent->c_call_sid;
-            }
-        }
 
         if ($call->isJoin()) {
             if ($call->cParent && $call->cParent->cCreatedUser) {

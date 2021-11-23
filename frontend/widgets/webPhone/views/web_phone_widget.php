@@ -33,10 +33,6 @@ $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
 $redialSourceType = Call::SOURCE_REDIAL_CALL;
 $leadViewPageShortUrl = Url::to(['/lead/view'], true);
 
-$conferenceBase = 0;
-if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
-    $conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
-}
 
 $callOutBackendSide = 0;
 if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
@@ -50,7 +46,6 @@ $js = <<<JS
     const ajaxPhoneDialUrl = '{$ajaxPhoneDialUrl}';
     const ajaxBlackList = '{$ajaxBlackList}';
     const ajaxUnholdConferenceDoubleCall = '{$ajaxUnholdConferenceDoubleCall}';
-    window.conferenceBase = parseInt('{$conferenceBase}');
     const ajaxJoinToConferenceUrl = '{$ajaxJoinToConferenceUrl}';
     const ajaxHangupUrl = '{$ajaxHangupUrl}';
     const ajaxCreateCallUrl = '{$ajaxCreateCallUrl}';
@@ -398,7 +393,7 @@ $js = <<<JS
                     'case_id': case_id,
                     'c_type': type,
                     'c_user_id': userId,
-                    'is_conference_call': conferenceBase,
+                    'is_conference_call': 1,
                     'c_source_type_id': source_type_id,
                     'phone_list_id': data.phone_list_id
                 };
@@ -454,32 +449,6 @@ $js = <<<JS
     }
 
     function webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type, c_source_type_id) {
-
-        if (conferenceBase && callOutBackendSide) {
-
-            let createCallParams = {
-                '<?= $csrf_param ?>' : '<?= $csrf_token ?>',
-                'called': phone_to,
-                'from': phone_from,
-                'project_id': project_id,
-                'lead_id': lead_id,
-                'source_type_id': c_source_type_id,
-            };
-
-            $.post(ajaxCreateCallUrl, createCallParams, function(data) {
-                if (data.error) {
-                    var text = 'Error. Try again later';
-                    if (data.message) {
-                        text = data.message;
-                    }
-                    new PNotify({title: "Make call", type: "error", text: text, hide: true});
-                } else {
-                    console.log('webCall success');
-                }
-            }, 'json');
-
-            return;
-        }
         $.post(ajaxGetPhoneListIdUrl, {'phone': phone_from}, function(data) {
             if (data.error) {
                 var text = 'Error. Try again later';
@@ -496,7 +465,7 @@ $js = <<<JS
                     'c_type': type,
                     'c_user_id': userId,
                     'c_source_type_id': c_source_type_id,
-                    'is_conference_call': conferenceBase,
+                    'is_conference_call': 1,
                     'user_identity': window.userIdentity,
                     'phone_list_id': data.phone_list_id
                 };
@@ -520,7 +489,7 @@ $js = <<<JS
             'c_type': 'web-call',
             'c_user_id': userId,
             'c_source_type_id': redialSourceType,
-            'is_conference_call': conferenceBase,
+            'is_conference_call': 1,
             'user_identity': window.userIdentity,
             'phone_list_id': redialCallInfo.phoneListId,
             'is_redial_call': true

@@ -1095,10 +1095,6 @@ var PhoneWidgetCall = function () {
 
     function holdClickEvent() {
         $(document).on('click', '#wg-hold-call', function(e) {
-            if (!conferenceBase) {
-                return false;
-            }
-
             let callSid = $(this).attr('data-call-sid');
             if (!callSid) {
                 createNotify('Error', 'Not found Call SID', 'error');
@@ -1122,10 +1118,6 @@ var PhoneWidgetCall = function () {
             }
         });
         $(document).on('click', '.list_item_hold', function(e) {
-            if (!conferenceBase) {
-                return false;
-            }
-
             let callSid = $(this).attr('data-call-sid');
             if (!callSid) {
                 createNotify('Error', 'Not found Call SID', 'error');
@@ -1152,10 +1144,6 @@ var PhoneWidgetCall = function () {
 
     function recordingClickEvent() {
         $(document).on('click', '#wg-call-record', function(e) {
-            if (!conferenceBase) {
-                return false;
-            }
-
             let callSid = $(this).attr('data-call-sid');
             if (!callSid) {
                 createNotify('Error', 'Not found Call SID', 'error');

@@ -2106,9 +2106,9 @@ var Device = /** @class */ (function (_super) {
          * Whether each sound is enabled.
          */
         _this._enabledSounds = (_a = {},
-            _a[Device.SoundName.Disconnect] = true,
-            _a[Device.SoundName.Incoming] = true,
-            _a[Device.SoundName.Outgoing] = true,
+            _a[Device.SoundName.Disconnect] = false,
+            _a[Device.SoundName.Incoming] = false,
+            _a[Device.SoundName.Outgoing] = false,
             _a);
         /**
          * An instance of Logger to use.
