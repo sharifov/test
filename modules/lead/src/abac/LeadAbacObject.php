@@ -62,6 +62,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const QUERY_SOLD_IS_OWNER = self::NS . 'query/sold/is_owner';
     public const QUERY_SOLD_IS_EMPTY_OWNER = self::NS . 'query/sold/is_empty_owner';
 
+    /** OBJECT PERMISSION */
+    public const OBJ_LEAD_PREFERENCES    = self::NS . 'obj/lead_preferences';
+
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ACT_USER_CONVERSION   => self::ACT_USER_CONVERSION,
@@ -95,6 +98,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CREATE_FROM_PHONE_WIDGET => self::ACT_CREATE_FROM_PHONE_WIDGET,
         self::ACT_LINK_TO_CALL => self::ACT_LINK_TO_CALL,
         self::ACT_TAKE_LEAD_FROM_CALL => self::ACT_TAKE_LEAD_FROM_CALL,
+        self::OBJ_LEAD_PREFERENCES => self::OBJ_LEAD_PREFERENCES,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -106,6 +110,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_UNMASK  = 'unmask';
     public const ACTION_QUERY_AND  = 'and';
     public const ACTION_QUERY_OR  = 'or';
+    public const ACTION_SET_DELAY_CHARGE  = 'setDelayedCharge';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -140,6 +145,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CREATE_FROM_PHONE_WIDGET => [self::ACTION_CREATE],
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
+        self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -352,6 +358,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_LEAD_HAS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+
         self::ACT_TAKE_LEAD    => [
             self::ATTR_IS_EMPLOYEE_SHIFT_TIME,
             self::ATTR_IS_IN_PROJECT,
@@ -359,8 +366,16 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_APPLIED_QUOTE,
             self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
             self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES
+            self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES,
         ],
+
+        self::OBJ_LEAD_PREFERENCES    => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
+
+        ],
+
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ATTR_LEAD_IS_OWNER],
@@ -409,6 +424,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_USER_SAME_EMAIL_INFO][] = $attrStatus;
         $attributeList[self::ACT_SEARCH_LEADS_BY_IP][] = $attrStatus;
         $attributeList[self::ACT_TAKE_LEAD_FROM_CALL][] = $attrStatus;
+        $attributeList[self::OBJ_LEAD_PREFERENCES][] = $attrStatus;
 
         return $attributeList;
     }

@@ -365,6 +365,7 @@ class ClientChatController extends FController
             $message = [
                 'message' => 'Chat detail memory info',
                 'clientChatId' => $clientChat->cch_id,
+
                 'pick' => Yii::$app->formatter->asShortSize(memory_get_peak_usage(), 2),
                 'total' => Yii::$app->formatter->asShortSize(memory_get_usage(), 2),
             ];
