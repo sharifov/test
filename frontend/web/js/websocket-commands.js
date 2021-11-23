@@ -527,10 +527,12 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'leadRedialAutoTake') {
-                        if (obj.data.callSid === window.connectCallSid) {
-                            //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
-                            let windowObjectReference = window.open(leadViewPageShortUrl + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
-                            windowObjectReference.focus();
+                        if (typeof PhoneWidgetCall === 'object') {
+                            if (obj.data.callSid === PhoneWidgetCall.getActiveCallSid()) {
+                                //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
+                                let windowObjectReference = window.open(leadViewPageShortUrl + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
+                                windowObjectReference.focus();
+                            }
                         }
                     }
                 }

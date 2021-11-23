@@ -41,6 +41,8 @@ var PhoneWidgetCall = function () {
 
     let incomingSoundInterval = null;
 
+    let activeCallSid = null;
+
     function init(options)
     {
         callRequester.init(options);
@@ -1633,6 +1635,18 @@ var PhoneWidgetCall = function () {
         }));
     }
 
+    function setActiveCallSid(callSid) {
+        activeCallSid = callSid;
+    }
+
+    function removeActiveCallSid() {
+        activeCallSid = null;
+    }
+
+    function getActiveCallSid() {
+        return activeCallSid;
+    }
+
     function acceptInternalCall(call) {
         if (call.isSentAcceptCallRequestState()) {
             return;
@@ -1704,7 +1718,10 @@ var PhoneWidgetCall = function () {
         acceptInternalCall: acceptInternalCall,
         rejectInternalCall: rejectInternalCall,
         startTimerSoundIncomingCall: startTimerSoundIncomingCall,
-        incomingSoundOff: incomingSoundOff
+        incomingSoundOff: incomingSoundOff,
+        getActiveCallSid: getActiveCallSid,
+        setActiveCallSid: setActiveCallSid,
+        removeActiveCallSid: removeActiveCallSid
     };
 }();
 

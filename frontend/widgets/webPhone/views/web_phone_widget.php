@@ -128,8 +128,6 @@ $js = <<<JS
             logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
         }
     }
-    
-    window.connectCallSid = null;
 
     function IncomingTwilioCalls() {
         this.calls = [];
@@ -236,17 +234,17 @@ $js = <<<JS
                 PhoneWidgetCall.incomingSoundOff();
                 
                 call.on('accept', call => {
+                    window.incomingTwilioCalls.remove(call.parameters.CallSid);
                     window.TwilioCall = call;
                     
                     console.log('The incoming call was accepted.');
                     freeDialButton();
-                    window.incomingTwilioCalls.remove(call.parameters.CallSid);
-
-                    bindVolumeIndicators(call);
+                    
                     PhoneWidgetCall.setActiveCall(call);
-
-                    window.connectCallSid = call.parameters.CallSid;
+                    PhoneWidgetCall.setActiveCallSid(call.parameters.CallSid);
                     PhoneWidgetCall.incomingSoundOff();
+                    
+                    bindVolumeIndicators(call);
                     soundConnect();
                 });
                 call.on('cancel', () => {
@@ -262,8 +260,10 @@ $js = <<<JS
                     freeDialButton();
                     window.incomingTwilioCalls.remove(call.parameters.CallSid);
                     window.TwilioCall = call;
-                    if (window.connectCallSid === call.parameters.CallSid) {
+                    // will remove after move device to one tab
+                    if (call.parameters.CallSid === PhoneWidgetCall.getActiveCallSid()) {
                         soundDisconnect();
+                        PhoneWidgetCall.removeActiveCallSid();
                     }
                     PhoneWidgetCall.incomingSoundOff();
                     window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, userId, window.generalLinePriorityIsEnabled);
