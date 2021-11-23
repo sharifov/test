@@ -128,8 +128,10 @@ $pjaxListId = 'pjax-log';
 
                     [
                         'attribute' => 'log_time',
-                        'value' => 'log_time',
-                        'format' => 'datetime',
+                        'value' => static function (\frontend\models\Log $model) {
+                            return Yii::$app->formatter->asDatetime($model->log_time, 'php:d-M-Y [H:i:s]');
+                        },
+                        'format' => 'raw',
                         'filter' => DatePicker::widget([
                             'model' => $searchModel,
                             'attribute' => 'log_time',
