@@ -9,6 +9,7 @@ use yii\web\View;
 /** @var array $userPhones */
 /** @var array $userEmails */
 /** @var int $countMissedCalls */
+/** @var array $formattedPhoneProject */
 
 ?>
 
@@ -121,6 +122,7 @@ use yii\web\View;
     <?= $this->render('tab/call', [
       'userCallStatus' => $userCallStatus,
       'countMissedCalls' => $countMissedCalls,
+      'formattedPhoneProject' => $formattedPhoneProject
     ]); ?>
     <?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
     <?= $this->render('tab/history'); ?>

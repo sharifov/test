@@ -283,7 +283,7 @@ class PhoneController extends FController
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         //sleep(1);
         try {
-            $userId = (int)Yii::$app->request->post('user_id');
+            $userId = Auth::id();
             $isReady = false;
 
             if ($userId) {

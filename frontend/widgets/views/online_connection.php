@@ -25,9 +25,10 @@ $js = <<<JS
     window.socket = null;
     window.socketConnectionId = null;
     window.userIdentity = '$userIdentity';
+    window.userId = '$userId';
     window.generalLinePriorityIsEnabled = {$generalLinePriorityIsEnabled};
     
-    let userId = '$userId';
+    
     let wsUrl = '$wsUrl';
     let ccNotificationUpdateUrl = '$ccNotificationUpdateUrl';
     let discardUnreadMessageUrl = '$discardUnreadMessageUrl';

@@ -21,7 +21,12 @@
             'addPhoneBlackListUrl': '',
             'ajaxCallTransferUrl': '',
             'ajaxWarmTransferToUserUrl': '',
-            'ajaxCallRedirectUrl': ''
+            'ajaxCallRedirectUrl': '',
+            'ajaxJoinToConferenceUrl': '',
+            'csrf_param': '',
+            'csrf_token': '',
+            'ajaxGetPhoneListIdUrl': '',
+            'createInternalCallUrl': ''
         };
 
         this.init = function (settings) {
@@ -460,7 +465,7 @@
                         PhoneWidgetCall.panes.queue.hide();
                         PhoneWidgetCall.openCallTab();
                         PhoneWidgetCall.showCallingPanel();
-                        webCallLeadRedialPriority(data.redialCall);
+                        PhoneWidgetCall.webCallLeadRedialPriority(data.redialCall);
                     } else {
                         PhoneWidgetCall.audio.incoming.on(key);
                     }
@@ -540,6 +545,80 @@
                     modal.modal('hide').find('.modal-body').html('');
                 }
             });
+        };
+
+        this.joinConference = function (source_type, source_type_id, call_sid) {
+            let data = {
+                'call_sid': call_sid,
+                'source_type_id': source_type_id
+            };
+            data[this.settings.csrf_param] = this.settings.csrf_token;
+            $.ajax({
+                type: 'post',
+                data: data,
+                url: this.settings.ajaxJoinToConferenceUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        new PNotify({title: source_type, type: "error", text: data.message, hide: true});
+                    }
+                })
+                .fail(function (error) {
+                    new PNotify({title: source_type, type: "error", text: "Server error", hide: true});
+                    console.error(error);
+                })
+        };
+
+        this.webCallLeadRedial = function (phone_from, phone_to, project_id, lead_id, type, c_source_type_id) {
+            $.post(this.settings.ajaxGetPhoneListIdUrl, {'phone': phone_from}, function (data) {
+                if (data.error) {
+                    var text = 'Error. Try again later';
+                    if (data.message) {
+                        text = data.message;
+                    }
+                    new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                } else {
+                    let params = {
+                        params: {
+                            'To': phone_to,
+                            'FromAgentPhone': phone_from,
+                            'c_project_id': project_id,
+                            'lead_id': lead_id,
+                            'c_type': type,
+                            'c_user_id': window.userId,
+                            'c_source_type_id': c_source_type_id,
+                            'is_conference_call': 1,
+                            'user_identity': window.userIdentity,
+                            'phone_list_id': data.phone_list_id
+                        }
+                    };
+
+                    if (window.TwilioDevice) {
+                        console.log('Calling ' + params.params.To + '...');
+                        connection = window.TwilioDevice.connect(params);
+                    }
+                }
+            }, 'json');
+        };
+
+        this.createInternalCall = function (toUserId, nickname) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'user_id': toUserId
+                },
+                url: this.settings.createInternalCallUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Create Internal Call', data.message, 'error');
+                        PhoneWidgetCall.freeDialButton();
+                    }
+                })
+                .fail(function () {
+                    createNotify('Create Internal Call', 'Server error', 'error');
+                    PhoneWidgetCall.freeDialButton();
+                })
         };
     }
 

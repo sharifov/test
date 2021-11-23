@@ -1,10 +1,12 @@
 <?php
 
+use common\models\Call;
 use sales\auth\Auth;
 
 /** @var View $this */
 /** @var \common\models\UserCallStatus $userCallStatus */
 /** @var int $countMissedCalls */
+/** @var array $formattedPhoneProject */
 
 $canDialpad = true;
 if (!Auth::can('PhoneWidget_Dialpad')) {
@@ -221,6 +223,15 @@ $ajaxClientGetInfoJsonUrl = Url::to('/client/ajax-get-info-json');
 $ajaxCallTransferUrl = Url::to(['/phone/ajax-call-transfer']);
 $ajaxWarmTransferToUserUrl = Url::to(['/phone/ajax-warm-transfer-to-user']);
 $ajaxCallRedirectUrl = Url::to(['/phone/ajax-call-redirect']);
+$ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
+$ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
+$leadViewPageShortUrl = Url::to(['/lead/view'], true);
+$createInternalCallUrl = Url::to(['/phone/create-internal-call']);
+$getCallHistoryFromNumberUrl = Url::to(['/phone/get-call-history-from-number']);
+$ajaxCheckRecording = Url::to(['/phone/ajax-check-recording']);
+$getUserByPhoneUrl = Url::to(['/phone/get-user-by-phone']);
+$ajaxBlackList = Url::to(['/phone/check-black-phone']);
+$ajaxCheckUserForCallUrl = Url::to(['/phone/ajax-check-user-for-call']);
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
@@ -229,7 +240,25 @@ $btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
 $canRecordingDisabled = Auth::can('PhoneWidget_CallRecordingDisabled') ? 'true' : 'false';
 $canAddBlockList = PhoneBlackListGuard::canAdd(Auth::id()) ? 'true' : 'false';
 
+$redialSourceType = Call::SOURCE_REDIAL_CALL;
 
+$conferenceSources = json_encode([
+    'listen' => [
+        'name' => Call::SOURCE_LIST[Call::SOURCE_LISTEN],
+        'id' => Call::SOURCE_LISTEN,
+    ],
+    'barge' => [
+        'name' => Call::SOURCE_LIST[Call::SOURCE_BARGE],
+        'id' => Call::SOURCE_BARGE,
+    ],
+    'coach' => [
+        'name' => Call::SOURCE_LIST[Call::SOURCE_COACH],
+        'id' => Call::SOURCE_COACH,
+    ],
+]);
+
+$csrf_param = Yii::$app->request->csrfParam;
+$csrf_token = Yii::$app->request->csrfToken;
 
 $js = <<<JS
 PhoneWidgetCall.init({
@@ -266,7 +295,21 @@ PhoneWidgetCall.init({
     'ajaxCreateLeadWithInvalidClientUrl': '$ajaxCreateLeadWithInvalidClientUrl',
     'ajaxCallTransferUrl': '$ajaxCallTransferUrl',
     'ajaxWarmTransferToUserUrl': '$ajaxWarmTransferToUserUrl',
-    'ajaxCallRedirectUrl': '$ajaxCallRedirectUrl'
+    'ajaxCallRedirectUrl': '$ajaxCallRedirectUrl',
+    'ajaxGetPhoneListIdUrl': '$ajaxGetPhoneListIdUrl',
+    'redialSourceType': parseInt('$redialSourceType'),
+    'conferenceSources': $conferenceSources,
+    'ajaxJoinToConferenceUrl': '$ajaxJoinToConferenceUrl',
+    'csrf_param': '$csrf_param',
+    'csrf_token': '$csrf_token',
+    'leadViewPageShortUrl': '$leadViewPageShortUrl',
+    'createInternalCallUrl': '$createInternalCallUrl',
+    'getCallHistoryFromNumberUrl': '$getCallHistoryFromNumberUrl',
+    'ajaxCheckRecording': '$ajaxCheckRecording',
+    'getUserByPhoneUrl': '$getUserByPhoneUrl',
+    'ajaxBlackList': '$ajaxBlackList',
+    'ajaxCheckUserForCallUrl': '$ajaxCheckUserForCallUrl',
+    'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}'))
 });
 JS;
 $this->registerJs($js);

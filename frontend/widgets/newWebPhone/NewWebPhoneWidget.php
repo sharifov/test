@@ -1,9 +1,8 @@
 <?php
 
-namespace frontend\widgets;
+namespace frontend\widgets\newWebPhone;
 
 use common\models\Call;
-use common\models\DepartmentEmailProjectUserGroup;
 use common\models\DepartmentPhoneProject;
 use common\models\DepartmentPhoneProjectUserGroup;
 use common\models\Employee;
@@ -17,8 +16,6 @@ use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
 use sales\model\phoneList\entity\PhoneList;
 use yii\bootstrap\Widget;
-use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 
 /**
  * Class NewWebPhoneWidget
@@ -32,7 +29,8 @@ class NewWebPhoneWidget extends Widget
     public function run(): string
     {
         $userProfile = UserProfile::find()->where(['up_user_id' => $this->userId])->limit(1)->one();
-        if (!$userProfile || (int) $userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB) {
+
+        if (!$userProfile || !$userProfile->canWebCall()) {
             return '';
         }
 

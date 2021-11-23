@@ -476,7 +476,7 @@ let PhoneWidgetContacts = function () {
                 $.ajax({
                     url: getUrlFullList(),
                     type: 'post',
-                    data: {page: page, uid: userId},
+                    data: {page: page},
                     dataType: 'json',
                     beforeSend: function () {
                         showPreloader();

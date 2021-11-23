@@ -163,16 +163,6 @@ function resetDialNumberData() {
         .attr('data-case-id', '');
 }
 
-function reserveDialButton()
-{
-    $('#btn-new-make-call').html('<i class="fa fa-spinner fa-spin"> </i>').attr('disabled', true);
-}
-
-function freeDialButton()
-{
-    $('#btn-new-make-call').html('<i class="fas fa-phone"> </i>').attr('disabled', false);
-}
-
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {
     let audio = new Audio('/js/sounds/' + fileName + '.mp3');
     audio.volume = volume;

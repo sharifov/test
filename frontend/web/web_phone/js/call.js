@@ -8,6 +8,13 @@ var PhoneWidgetCall = function () {
         'ajaxCreateLeadUrl': '',
         'ajaxClientGetInfoJsonUrl': '/client/ajax-get-info-json',
         'ajaxCreateLeadWithInvalidClientUrl': '',
+        'redialSourceType': null,
+        'getCallHistoryFromNumberUrl': '',
+        'ajaxCheckRecording': '',
+        'getUserByPhoneUrl': '',
+        'ajaxBlackList': '',
+        'ajaxCheckUserForCallUrl': '',
+        'ajaxGetPhoneListIdUrl': ''
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -43,11 +50,34 @@ var PhoneWidgetCall = function () {
 
     let activeCallSid = null;
 
+    let conferenceSources = {
+        "listen": {
+            "name": null,
+            "id": null
+        },
+        "barge": {
+            "name": null,
+            "id": null
+        },
+        "coach": {
+            "name": null,
+            "id": null
+        }
+    };
+
+    let leadViewPageShortUrl = '';
+
+    let phoneNumbers = null;
+
     function init(options)
     {
         callRequester.init(options);
 
         Object.assign(settings, options);
+
+        conferenceSources = options.conferenceSources;
+        leadViewPageShortUrl = options.leadViewPageShortUrl;
+        phoneNumbers = options.phoneNumbers;
 
         statusCheckbox = new widgetStatus('.call-status-switcher', options.updateStatusUrl);
         statusCheckbox.setStatus(options.status);
@@ -79,6 +109,7 @@ var PhoneWidgetCall = function () {
         btnTransferEvent();
         btnWarmTransferToUserEvent();
         btnTransferNumberEvent();
+        btnMakeCallEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -1691,6 +1722,338 @@ var PhoneWidgetCall = function () {
         incomingAudio.pause();
     }
 
+    function webCallLeadRedialPriority(redialCallInfo) {
+        let params = {
+            params: {
+                'To': redialCallInfo.phoneTo,
+                'FromAgentPhone': redialCallInfo.phoneFrom,
+                'c_project_id': redialCallInfo.projectId,
+                'lead_id': redialCallInfo.leadId,
+                'c_type': 'web-call',
+                'c_user_id': window.userId,
+                'c_source_type_id': settings.redialSourceType,
+                'is_conference_call': 1,
+                'user_identity': window.userIdentity,
+                'phone_list_id': redialCallInfo.phoneListId,
+                'is_redial_call': true
+            }
+        };
+
+        console.log(params);
+        if (window.TwilioDevice) {
+            console.log('Calling ' + params.params.To + '...');
+            connection = window.TwilioDevice.connect(params);
+        }
+    }
+
+    function webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type, c_source_type_id) {
+        callRequester.webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type, c_source_type_id);
+    }
+
+    function joinListen(call_sid) {
+        callRequester.joinConference(conferenceSources.listen.name, conferenceSources.listen.id, call_sid);
+    }
+
+    function joinCoach(call_sid) {
+        callRequester.joinConference(conferenceSources.coach.name, conferenceSources.coach.id, call_sid);
+    }
+
+    function joinBarge(call_sid) {
+        callRequester.joinConference(conferenceSources.barge.name, conferenceSources.barge.id, call_sid);
+    }
+
+    function createInternalCall(toUserId, nickname) {
+        callRequester.createInternalCall(toUserId, nickname);
+    }
+
+    function freeDialButton() {
+        $('#btn-new-make-call').html('<i class="fas fa-phone"> </i>').attr('disabled', false);
+    }
+
+    function reserveDialButton() {
+        $('#btn-new-make-call').html('<i class="fa fa-spinner fa-spin"> </i>').attr('disabled', true);
+    }
+
+    function filterCallParams(param) {
+        if (typeof param === 'undefined') {
+            return '';
+        }
+        return param;
+    }
+
+    function prepareExternalCall(data) {
+        if (data.is_request_from && data.is_request_from === 'true') {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': data.request_call_sid
+                },
+                url: settings.getCallHistoryFromNumberUrl
+            })
+                .done(function (result) {
+                    if (result.error) {
+                        createNotify('Create Call', result.message, 'error');
+                        freeDialButton();
+                        return false;
+                    }
+                    data.from = result.phone;
+                    createExternalCall(data);
+                })
+                .fail(function () {
+                    createNotify('Create Call', 'Server error', 'error');
+                    freeDialButton();
+                });
+            return false;
+        }
+
+        createExternalCall(data);
+    }
+
+    function createCall(data) {
+        if (data.user_id) {
+            reserveDialButton();
+            createInternalCall(data.user_id, data.nickname);
+            return false;
+        }
+
+        if (!data.to) {
+            freeDialButton();
+            new PNotify({title: "Create call", type: "error", text: 'Phone number not entered', hide: true});
+            return false;
+        }
+
+        if (!(new RegExp('^[+]{1}[0-9]{9,15}$')).test(data.to)) {
+            freeDialButton();
+            new PNotify({title: "Create call", type: "error", text: 'Entered phone number is not correct. Phone number should contain only numbers and +', hide: true});
+            return false;
+        }
+
+        reserveDialButton();
+
+        $.ajax({
+            type: 'post',
+            data: {
+                'phone': data.to
+            },
+            url: settings.getUserByPhoneUrl
+        })
+            .done(function (result) {
+                if (result.error) {
+                    createNotify('Create Call', result.message, 'error');
+                    freeDialButton();
+                    return false;
+                }
+                if (result.userId) {
+                    createInternalCall(result.userId, result.nickname);
+                    return false;
+                }
+                prepareExternalCall(data);
+            })
+            .fail(function () {
+                createNotify('Create Call', 'Server error', 'error');
+                freeDialButton();
+            });
+    }
+
+    function createExternalCall(dialData) {
+
+        if (!dialData.from) {
+            createNotify('Make call', 'Not found From phone', 'error');
+            freeDialButton();
+            return false;
+        }
+
+        $.post(settings.ajaxCheckUserForCallUrl, {}, function(data) {
+
+            if(data && data.is_ready) {
+
+                $.post(settings.ajaxBlackList, {phone: dialData.to}, function(data) {
+                    if (data.success) {
+
+                        $.post(settings.ajaxCheckRecording,
+                            {
+                                'toPhone': filterCallParams(dialData.to),
+                                'fromPhone': dialData.from,
+                                'projectId': dialData.project_id,
+                                'departmentId': dialData.department_id,
+                                'contactId': dialData.client_id
+                            }, function(dataRecording) {
+
+                                if (dataRecording.success) {
+                                    if (window.TwilioDevice) {
+                                        $.post(settings.ajaxGetPhoneListIdUrl, {'phone': filterCallParams(dialData.from)}, function(data) {
+                                            if (data.error) {
+                                                var text = 'Error. Try again later';
+                                                if (data.message) {
+                                                    text = data.message;
+                                                }
+                                                new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                                                freeDialButton();
+                                            } else {
+                                                let params = {
+                                                    params: {
+                                                        'To': filterCallParams(dialData.to),
+                                                        'FromAgentPhone': filterCallParams(dialData.from),
+                                                        'c_project_id': filterCallParams(dialData.project_id),
+                                                        'c_dep_id': filterCallParams(dialData.department_id),
+                                                        'lead_id': filterCallParams(dialData.lead_id),
+                                                        'case_id': filterCallParams(dialData.case_id),
+                                                        'c_type': 'call-web',
+                                                        'c_user_id': window.userId,
+                                                        'user_identity': window.userIdentity,
+                                                        'is_conference_call': 1,
+                                                        'c_client_id': filterCallParams(dialData.client_id),
+                                                        'c_source_type_id': filterCallParams(dialData.source_type_id),
+                                                        'call_recording_disabled': dataRecording.value,
+                                                        'phone_list_id': data.phone_list_id
+                                                    }
+                                                };
+                                                console.log('create call with params:');
+                                                console.log(params);
+                                                connection = window.TwilioDevice.connect(params);
+                                            }
+                                        }, 'json');
+                                    } else {
+                                        freeDialButton();
+                                    }
+                                } else {
+                                    freeDialButton();
+                                    var text = 'Error. Try again later';
+                                    if (dataRecording.message) {
+                                        text = dataRecording.message;
+                                    }
+                                    new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                                }
+                            }, 'json');
+
+                    } else {
+                        freeDialButton();
+                        var text = 'Error. Try again later';
+                        if (data.message) {
+                            text = data.message;
+                        }
+                        new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                    }
+
+                    phoneNumbers.clearPrimaryData();
+                }, 'json');
+
+            } else {
+                if (data && data.is_on_call === true) {
+                    freeDialButton();
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls(null, window.userId, window.generalLinePriorityIsEnabled);
+                    alert('New Call Error: You have an active call. If the message is shown by mistake please contact Administrator.');
+                }
+                if (data && data.is_offline === true) {
+                    alert('You status is offline.');
+                }
+                return false;
+            }
+        }, 'json');
+    }
+
+    function makeCallFromPhoneWidget() {
+        let value = $('#call-pane__dial-number-value');
+        let to = $('#call-pane__dial-number').val();
+        let data = {
+            'user_id': value.attr('data-user-id'),
+            'from': value.attr('data-phone-from') || (phoneNumbers.getPrimaryData.value || phoneNumbers.getData.value),
+            'is_request_from': value.attr('data-is-request-from'),
+            'request_call_sid': value.attr('data-request-call-sid'),
+            'to': to,
+            'project_id': value.attr('data-project-id') || (phoneNumbers.getPrimaryData.projectId || phoneNumbers.getData.projectId),
+            'department_id': value.attr('data-department-id'),
+            'client_id': value.attr('data-client-id'),
+            'source_type_id': value.attr('data-source-type-id'),
+            'lead_id': value.attr('data-lead-id'),
+            'case_id': value.attr('data-case-id')
+        };
+
+        if (data.user_id) {
+            let nickname = $('#call-to-label').html();
+            if (!nickname) {
+                nickname = to;
+            }
+            data.nickname = nickname;
+        }
+
+        createCall(data);
+    }
+
+    function btnMakeCallEvent() {
+        $(document).on('click', '#btn-make-call-communication-block', function (e) {
+            e.preventDefault();
+
+            let to = $('#call-to-number').val();
+            let from = $('#call-from-number').val();
+
+            if (!to) {
+                createNotify('Make call', 'Please select Phone number', 'error');
+                return false;
+            }
+
+            if (!from) {
+                createNotify('Make call', 'Please select Phone from', 'error');
+                return false;
+            }
+
+            insertPhoneNumber({
+                'formatted': to,
+                'title': $('#call-client-name').val(),
+                'user_id': '',
+                'phone_to': to,
+                'phone_from': from,
+                'project_id': $('#call-project-id').val(),
+                'department_id': $('#call-department-id').val(),
+                'client_id': $('#call-client-id').val(),
+                'source_type_id': $('#call-source-type-id').val(),
+                'lead_id': $('#call-lead-id').val(),
+                'case_id': $('#call-case-id').val(),
+            });
+
+            $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+            $('.phone-widget__tab').removeClass('is_active');
+            $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+            $('#tab-phone').addClass('is_active');
+            $('.phone-widget').addClass('is_active');
+
+            reserveDialButton();
+            makeCallFromPhoneWidget();
+        });
+
+        $(document).on('click', '.phone-dial-history', function(e) {
+            e.preventDefault();
+
+            let data = $(this);
+            let isInternal = !!data.data('user-id');
+            $(".widget-phone__contact-info-modal").hide();
+            $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+            $('.phone-widget__tab').removeClass('is_active');
+            $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+            $('#tab-phone').addClass('is_active');
+
+            insertPhoneNumber({
+                'formatted': data.data('phone'),
+                'title': isInternal ? '' : data.data('title'),
+                'user_id': data.data('user-id'),
+                'phone_to': data.data('phone'),
+                'is_request_from': !isInternal ? true : '',
+                'request_call_sid': !isInternal ? data.data('call-sid') : '',
+                'project_id': data.data('project-id'),
+                'department_id': data.data('department-id'),
+                'client_id': data.data('client-id'),
+                'source_type_id': data.data('source-type-id'),
+                'lead_id': data.data('lead-id'),
+                'case_id': data.data('case-id'),
+            });
+        });
+
+        $(document).on('click', '#btn-new-make-call', function(e) {
+            e.preventDefault();
+            makeCallFromPhoneWidget();
+        });
+    }
+
     return {
         init: init,
         volumeIndicatorsChange: volumeIndicatorsChange,
@@ -1721,7 +2084,14 @@ var PhoneWidgetCall = function () {
         incomingSoundOff: incomingSoundOff,
         getActiveCallSid: getActiveCallSid,
         setActiveCallSid: setActiveCallSid,
-        removeActiveCallSid: removeActiveCallSid
+        removeActiveCallSid: removeActiveCallSid,
+        webCallLeadRedialPriority: webCallLeadRedialPriority,
+        webCallLeadRedial: webCallLeadRedial,
+        joinListen: joinListen,
+        joinCoach: joinCoach,
+        joinBarge: joinBarge,
+        leadViewPageShortUrl: leadViewPageShortUrl,
+        freeDialButton: freeDialButton
     };
 }();
 

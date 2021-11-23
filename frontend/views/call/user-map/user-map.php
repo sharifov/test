@@ -199,9 +199,9 @@ function getJoinTemplate($model)
                 <i class="fa fa-phone"></i>
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item conference-coach" href="#" onclick="joinListen('<?= $model->c_call_sid ?>');">Listen</a>
-                <a class="dropdown-item conference-coach" href="#" onclick="joinCoach('<?= $model->c_call_sid ?>');">Coach</a>
-                <a class="dropdown-item conference-coach" href="#" onclick="joinBarge('<?= $model->c_call_sid ?>');">Barge</a>
+                <a class="dropdown-item conference-coach" href="#" onclick="PhoneWidgetCall.joinListen('<?= $model->c_call_sid ?>');">Listen</a>
+                <a class="dropdown-item conference-coach" href="#" onclick="PhoneWidgetCall.joinCoach('<?= $model->c_call_sid ?>');">Coach</a>
+                <a class="dropdown-item conference-coach" href="#" onclick="PhoneWidgetCall.joinBarge('<?= $model->c_call_sid ?>');">Barge</a>
             </div>
         </div>
         <?php
