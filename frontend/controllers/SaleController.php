@@ -153,9 +153,6 @@ class SaleController extends FController
             if ($sale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
                 try {
                     if ($order = Order::findOne(['or_sale_id' => $saleId])) {
-                        $order->or_sale_id = null;
-                        $order->update();
-
                         if ($caseOrder = CaseOrder::findOne(['co_order_id' => $order->getId(), 'co_case_id' => $csId])) {
                             $caseOrder->delete();
                         }
