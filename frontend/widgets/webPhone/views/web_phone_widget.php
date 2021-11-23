@@ -20,7 +20,6 @@ Modal::end();
 $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
-$ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxCheckUserForCallUrl = Url::to(['phone/ajax-check-user-for-call']);
 $ajaxBlackList = Url::to(['phone/check-black-phone']);
@@ -40,7 +39,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
 $js = <<<JS
     const ajaxCheckUserForCallUrl = '{$ajaxCheckUserForCallUrl}';
-    const ajaxSaveCallUrl = '{$ajaxSaveCallUrl}';
     const ajaxCallRedirectGetAgents = '{$ajaxCallRedirectGetAgents}';
     const ajaxBlackList = '{$ajaxBlackList}';
     const ajaxUnholdConferenceDoubleCall = '{$ajaxUnholdConferenceDoubleCall}';
@@ -281,31 +279,42 @@ $js = <<<JS
                 window.incomingTwilioCalls.add(call);
                 window.twilioCall = call;
                 incomingSoundOff();
-                //todo check connection message
-                // if ("autoAccept" in connection.message && connection.message.autoAccept === 'false') {
-                //     if ("isInternal" in connection.message && connection.message.isInternal === 'true') {
-                //         let call = JSON.parse(atob(connection.message.requestCall), function (k, v) {
-                //             if (v === 'false') {
-                //                 return false;
-                //             } else if (v === 'true') {
-                //                 return true;
-                //             }
-                //             return v;
-                //         });
-                //         call.callSid = connection.parameters.CallSid;
-                //         PhoneWidgetCall.refreshCallStatus(call);
-                //     }
-                //     // startTimerSoundIncomingCall();
-                // } else {
-                //     if (document.visibilityState === 'visible') {
-                //         call.accept();
-                //         console.log("Accepted incoming call.");
-                //     } else {
-                //         startTimerSoundIncomingCall();
-                //     }
-                // }
-                call.accept();
-                console.log("Accepted incoming call.");
+                
+                let autoAccept = null;
+                let isInternal = null;
+                let requestCall = null;
+                
+                call.customParameters.forEach(function (value, key) {
+                    if (key === 'autoAccept' && value === 'false') {
+                        autoAccept = false;   
+                    } else if (key === 'isInternal' && value === 'true') {
+                        isInternal = true;   
+                    } else if (key === 'requestCall') {
+                       requestCall = value;
+                    } 
+                 });
+                
+                if (autoAccept === false) {
+                    if (isInternal === true && requestCall !== null) {
+                         let callObj = JSON.parse(atob(requestCall), function (k, v) {
+                            if (v === 'false') {
+                                return false;
+                            } else if (v === 'true') {
+                                return true;
+                            }
+                            return v;
+                         });
+                         callObj.callSid = call.parameters.CallSid;
+                         PhoneWidgetCall.refreshCallStatus(callObj);        
+                    }
+                } else {
+                    if (document.visibilityState === 'visible') {
+                        call.accept();
+                        console.log("Accepted incoming call.");
+                    } else {
+                        startTimerSoundIncomingCall();
+                    }
+                }
             });
         
             device.on('error', (twilioError, call) => {
@@ -486,55 +495,6 @@ $js = <<<JS
     }
 JS;
 
-$jsNext = <<<JS
-            
-    $(document).on('click', '.btn-make-call', function(e) {
-        e.preventDefault();
-        
-        $.post(ajaxCheckUserForCallUrl, {user_id: userId}, function(data) {
-            
-            if(data && data.is_ready) {
-                let phone_to = $('#call-to-number').val();
-                let phone_from = $('#call-from-number').val();
-                
-                let project_id = $('#call-project-id').val();
-                let lead_id = $('#call-lead-id').val();
-                let case_id = $('#call-case-id').val();
-                let source_type_id = $('#call-source-type-id').val();
-                
-                $('#web-phone-dial-modal').modal('hide');
-                //alert(phone_from + ' - ' + phone_to);
-
-                $.post(ajaxBlackList, {phone: phone_to}, function(data) {
-                    if (data.success) {
-                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call', source_type_id);        
-                    } else {
-                        var text = 'Error. Try again later';
-                        if (data.message) {
-                            text = data.message;
-                        }
-                        new PNotify({title: "Make call", type: "error", text: text, hide: true});
-                    }
-                }, 'json');
-                
-            } else {
-                if (data && data.is_on_call === true) {
-                    freeDialButton();
-				    window.sendCommandUpdatePhoneWidgetCurrentCalls(null, userId, window.generalLinePriorityIsEnabled);
-				    alert('New Call Error: You have an active call. If the message is shown by mistake please contact Administrator.');
-                }
-                if (data && data.is_offline === true) {
-                    alert('You status is offline.');
-                }
-                return false;
-            }
-        }, 'json');
-        
-    });
-
-JS;
-
 if (Yii::$app->controller->module->id != 'user-management') {
     $this->registerJs($js, \yii\web\View::POS_READY);
-    $this->registerJs($jsNext, \yii\web\View::POS_READY);
 }

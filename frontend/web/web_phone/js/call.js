@@ -7,7 +7,6 @@ var PhoneWidgetCall = function () {
     let settings = {
         'ajaxCallRedirectGetAgents': '',
         'callStatusUrl': '',
-        'ajaxSaveCallUrl': '',
         'clearMissedCallsUrl': '',
         'ajaxCreateLeadUrl': '',
         'ajaxClientGetInfoJsonUrl': '/client/ajax-get-info-json',
@@ -401,7 +400,6 @@ var PhoneWidgetCall = function () {
             e.preventDefault();
             if (window.twilioCall) {
                 window.twilioCall.reject();
-                // $.get(settings.ajaxSaveCallUrl + '?sid=' + window.twilioCall.parameters.CallSid);
             }
         })
     }
@@ -1671,9 +1669,6 @@ var PhoneWidgetCall = function () {
         window.incomingTwilioCalls.remove(twilioCall.parameters.CallSid);
         twilioCall.reject();
         incomingSoundOff();
-        // $.get(ajaxSaveCallUrl + '?sid=' + twilioCall.parameters.CallSid, function (r) {
-        //     console.log(r);
-        // });
     }
 
     return {

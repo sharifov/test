@@ -196,7 +196,6 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 $ajaxCallRedirectGetAgents = Url::to(['/phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['/call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
-$ajaxSaveCallUrl = Url::to(['/phone/ajax-save-call']);
 $ajaxMuteUrl = Url::to(['/phone/ajax-mute-participant']);
 $ajaxUnMuteUrl = Url::to(['/phone/ajax-unmute-participant']);
 $ajaxCallAddNoteUrl = Url::to(['/call/ajax-add-note']);
@@ -236,7 +235,6 @@ PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',
     'acceptCallUrl': '$ajaxAcceptIncomingCall',
     'callStatusUrl': '$callStatusUrl',
-    'ajaxSaveCallUrl': '$ajaxSaveCallUrl',
     'muteUrl': '$ajaxMuteUrl',
     'unMuteUrl': '$ajaxUnMuteUrl',
     'callAddNoteUrl': '$ajaxCallAddNoteUrl',
