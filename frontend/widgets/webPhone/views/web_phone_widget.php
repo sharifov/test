@@ -50,8 +50,6 @@ $js = <<<JS
     const redialSourceType = parseInt('{$redialSourceType}');
     const leadViewPageShortUrl = '{$leadViewPageShortUrl}';
     
-    window.twilioCall;
-
     const speakerDevices = document.getElementById("speaker-devices");
     const ringtoneDevices = document.getElementById("ringtone-devices");
     
@@ -229,36 +227,41 @@ $js = <<<JS
             window.TwilioDevice.on('unregistered', function () {
                 console.log("Twilio.Device unregistered!");
                 PhoneWidgetCall.incomingSoundOff();
+                window.TwilioCall = null;
             });
         
-            window.TwilioDevice.on("incoming", call => {                     
+            window.TwilioDevice.on("incoming", call => {     
+                window.incomingTwilioCalls.add(call);
+                window.TwilioCall = call;
+                PhoneWidgetCall.incomingSoundOff();
+                
                 call.on('accept', call => {
+                    window.TwilioCall = call;
+                    
                     console.log('The incoming call was accepted.');
                     freeDialButton();
                     window.incomingTwilioCalls.remove(call.parameters.CallSid);
 
-                    window.twilioCall = call;
-
                     bindVolumeIndicators(call);
-                    PhoneWidgetCall.updateTwilioCall(call);
                     PhoneWidgetCall.setActiveCall(call);
 
                     window.connectCallSid = call.parameters.CallSid;
                     PhoneWidgetCall.incomingSoundOff();
                     soundConnect();
                 });
-                call.on('cancel', call => {
+                call.on('cancel', () => {
                     console.log('The call has been canceled.');
                     freeDialButton();
-                    window.incomingTwilioCalls.remove(call.parameters.CallSid);
-                    window.twilioCall = call;
+                    if (window.TwilioCall) {
+                        window.incomingTwilioCalls.remove(window.TwilioCall.parameters.CallSid);
+                    }
                     PhoneWidgetCall.incomingSoundOff();
                 });
                 call.on('disconnect', call => {
                     console.log('The call has been disconnected.');
                     freeDialButton();
                     window.incomingTwilioCalls.remove(call.parameters.CallSid);
-                    window.twilioCall = call;
+                    window.TwilioCall = call;
                     if (window.connectCallSid === call.parameters.CallSid) {
                         soundDisconnect();
                     }
@@ -268,10 +271,6 @@ $js = <<<JS
                 call.on('error', (error) => {
                     console.log('An error has occurred: ', error);
                 });
-                
-                window.incomingTwilioCalls.add(call);
-                window.twilioCall = call;
-                PhoneWidgetCall.incomingSoundOff();
                 
                 let autoAccept = null;
                 let isInternal = null;

@@ -1,7 +1,4 @@
 var PhoneWidgetCall = function () {
-
-    this.twilioCall = '';
-
     let statusCheckbox = null;
 
     let settings = {
@@ -357,7 +354,6 @@ var PhoneWidgetCall = function () {
         if (panes.active.isEqual(callSid)) {
             panes.active.removeCallSid();
             panes.active.removeCallInProgressIndicator();
-            window.twilioCall = '';
             if (panes.active.isActive()) {
                 needRefresh = true;
             }
@@ -401,8 +397,8 @@ var PhoneWidgetCall = function () {
     {
         $(document).on('click', '#reject-incoming-call', function(e) {
             e.preventDefault();
-            if (window.twilioCall) {
-                window.twilioCall.reject();
+            if (window.TwilioCall) {
+                window.TwilioCall.reject();
             }
         })
     }
@@ -530,11 +526,6 @@ var PhoneWidgetCall = function () {
                 callRequester.mute(call);
             }
         });
-    }
-
-    function updateTwilioCall(call)
-    {
-        this.twilioCall = call;
     }
 
     function transferCallBtnClickEvent()
@@ -707,8 +698,8 @@ var PhoneWidgetCall = function () {
              return false;
         }
 
-        if (fromInternal !== 'false' && window.twilioCall) {
-            window.twilioCall.accept();
+        if (fromInternal !== 'false' && window.TwilioCall) {
+            window.TwilioCall.accept();
             showCallingPanel();
         } else {
             let call = waitQueue.one(callSid);
@@ -1689,7 +1680,6 @@ var PhoneWidgetCall = function () {
     return {
         init: init,
         volumeIndicatorsChange: volumeIndicatorsChange,
-        updateTwilioCall: updateTwilioCall,
         refreshCallStatus: refreshCallStatus,
         panes: panes,
         requestIncomingCall: requestIncomingCall,
