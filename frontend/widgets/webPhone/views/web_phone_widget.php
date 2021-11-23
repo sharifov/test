@@ -23,7 +23,6 @@ $csrf_token = Yii::$app->request->csrfToken;
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxCheckUserForCallUrl = Url::to(['phone/ajax-check-user-for-call']);
-$ajaxPhoneDialUrl = Url::to(['phone/ajax-phone-dial']);
 $ajaxBlackList = Url::to(['phone/check-black-phone']);
 $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
 $ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
@@ -43,7 +42,6 @@ $js = <<<JS
     const ajaxCheckUserForCallUrl = '{$ajaxCheckUserForCallUrl}';
     const ajaxSaveCallUrl = '{$ajaxSaveCallUrl}';
     const ajaxCallRedirectGetAgents = '{$ajaxCallRedirectGetAgents}';
-    const ajaxPhoneDialUrl = '{$ajaxPhoneDialUrl}';
     const ajaxBlackList = '{$ajaxBlackList}';
     const ajaxUnholdConferenceDoubleCall = '{$ajaxUnholdConferenceDoubleCall}';
     const ajaxJoinToConferenceUrl = '{$ajaxJoinToConferenceUrl}';
@@ -115,9 +113,7 @@ $js = <<<JS
 
       function bindVolumeIndicators(call) {
         call.on("volume", function (inputVolume, outputVolume) {
-             if (typeof PhoneWidgetCall === 'object') {
-                PhoneWidgetCall.volumeIndicatorsChange(inputVolume, outputVolume)
-            }
+            PhoneWidgetCall.volumeIndicatorsChange(inputVolume, outputVolume)
         });
       }
       
@@ -137,20 +133,7 @@ $js = <<<JS
             logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
         }
     }
-
-    function renewTwDevice() {
-        console.log(device.status());
-        if (!device) {
-            initDevice();
-        } else {
-            let status = device.status();
-            let device_statuses = ['pending', 'closed', 'offline', 'error'];
-            if (device_statuses.inArray(status)) {
-                initDevice();
-            }
-        }
-    }
-
+    
     window.connectCallSid = null;
 
     function IncomingTwilioCalls() {
