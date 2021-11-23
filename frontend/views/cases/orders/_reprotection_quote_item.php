@@ -79,6 +79,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
 
     <td><?=Html::encode($quote->getBookingId())?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
+    <td><?= ($quote->getProductQuoteOptionsCount() ?: '-') ?></td>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
     <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
     <td>
@@ -155,7 +156,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
     <?php if ($quote->productQuoteChanges) : ?>
         <tr>
             <td></td>
-            <td colspan="5">
+            <td colspan="6">
                 <p><b>Change List:</b></p>
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
@@ -289,7 +290,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                               <th style="width: 60px;">Nr</th>
                                               <th style="width: 50px" title="Recommended">Rec</th>
                                               <th>Status</th>
-                                              <th style="width: 60px;" title="Product Quote Options">Opt</th>
+                                              <th style="width: 45px;" title="Product Quote Options">Opt</th>
                                               <th style="width: 130px">Created</th>
                                               <th>Extra Markup, <?php echo Currency::getDefaultCurrencyCode() ?></th>
                                               <th style="white-space: nowrap;">Price, <?php echo Currency::getDefaultCurrencyCode() ?></th>
@@ -481,7 +482,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
     <?php if ($quote->productQuoteRefunds) : ?>
         <tr>
             <td></td>
-            <td colspan="5">
+            <td colspan="6">
                 <p><b>Refund List:</b></p>
                 <table class="table table-bordered table-striped">
                     <thead>
