@@ -230,6 +230,7 @@ $canRecordingDisabled = Auth::can('PhoneWidget_CallRecordingDisabled') ? 'true' 
 $canAddBlockList = PhoneBlackListGuard::canAdd(Auth::id()) ? 'true' : 'false';
 
 
+
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',

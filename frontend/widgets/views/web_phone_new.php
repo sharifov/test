@@ -268,20 +268,18 @@ $js = <<<JS
                             }, function(dataRecording) {
                         
                             if (dataRecording.success) {
-                                
-                                if (device) {
-        
-                                     
-                                        $.post(ajaxGetPhoneListIdUrl, {'phone': filterCallParams(dialData.from)}, function(data) {
-                                            if (data.error) {
-                                                var text = 'Error. Try again later';
-                                                if (data.message) {
-                                                    text = data.message;
-                                                }
-                                                new PNotify({title: "Make call", type: "error", text: text, hide: true});
-                                                freeDialButton();
-                                            } else {
-                                                let params = {
+                                if (window.TwilioDevice) {
+                                    $.post(ajaxGetPhoneListIdUrl, {'phone': filterCallParams(dialData.from)}, function(data) {
+                                        if (data.error) {
+                                            var text = 'Error. Try again later';
+                                            if (data.message) {
+                                                text = data.message;
+                                            }
+                                            new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                                            freeDialButton();
+                                        } else {
+                                            let params = {
+                                                params: {
                                                     'To': filterCallParams(dialData.to), 
                                                     'FromAgentPhone': filterCallParams(dialData.from), 
                                                     'c_project_id': filterCallParams(dialData.project_id),
@@ -296,13 +294,13 @@ $js = <<<JS
                                                     'c_source_type_id': filterCallParams(dialData.source_type_id),
                                                     'call_recording_disabled': dataRecording.value,
                                                     'phone_list_id': data.phone_list_id
-                                                };
-                                                console.log('create call with params:');
-                                                console.log(params);
-                                                // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-                                                connection = device.connect(params);
-                                            }
-                                        }, 'json');
+                                                }
+                                            };
+                                            console.log('create call with params:');
+                                            console.log(params);
+                                            connection = window.TwilioDevice.connect(params);
+                                        }
+                                    }, 'json');
                                 } else {
                                     freeDialButton();
                                 }

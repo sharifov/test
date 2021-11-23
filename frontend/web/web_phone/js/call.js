@@ -42,6 +42,8 @@ var PhoneWidgetCall = function () {
         'incoming': new window.phoneWidget.audio.Incoming(queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing)
     };
 
+    let incomingSoundInterval = null;
+
     function init(options)
     {
         callRequester.init(options);
@@ -384,6 +386,7 @@ var PhoneWidgetCall = function () {
 
         if (needRefresh || incomingDeleted) {
             refreshPanes();
+            audio.incoming.refresh();
         } else {
              if (panes.incoming.isActive()) {
                  panes.incoming.initWidgetIcon((queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
@@ -691,18 +694,18 @@ var PhoneWidgetCall = function () {
     }
 
     function checkDevice(title) {
-        if (typeof device == "undefined" || device == null || (device && device.state !== 'registered')) {
-            createNotify(title, 'Please try again after some seconds. Device is not ready.', 'warning');
-            return false;
+        if (window.TwilioDevice !== null && window.TwilioDevice.state === "registered") {
+            return true;
         }
-        return true;
+        createNotify(title, 'Please try again after some seconds. Device is not ready.', 'warning');
+        return false;
     }
 
     function acceptCall(callSid, fromInternal)
     {
-        // if (!checkDevice('Accept Call')) {
-        //     return false;
-        // }
+        if (!checkDevice('Accept Call')) {
+             return false;
+        }
 
         if (fromInternal !== 'false' && window.twilioCall) {
             window.twilioCall.accept();
@@ -1671,6 +1674,18 @@ var PhoneWidgetCall = function () {
         incomingSoundOff();
     }
 
+    function startTimerSoundIncomingCall() {
+        incomingSoundInterval = setInterval(function () {
+            incomingAudio.play();
+            clearInterval(incomingSoundInterval);
+        }, 2500);
+    }
+
+    function incomingSoundOff() {
+        clearInterval(incomingSoundInterval);
+        incomingAudio.pause();
+    }
+
     return {
         init: init,
         volumeIndicatorsChange: volumeIndicatorsChange,
@@ -1697,7 +1712,9 @@ var PhoneWidgetCall = function () {
         hidePhoneNotifications: hidePhoneNotifications,
         setActiveCall: setActiveCall,
         acceptInternalCall: acceptInternalCall,
-        rejectInternalCall: rejectInternalCall
+        rejectInternalCall: rejectInternalCall,
+        startTimerSoundIncomingCall: startTimerSoundIncomingCall,
+        incomingSoundOff: incomingSoundOff
     };
 }();
 

@@ -49,8 +49,7 @@ $js = <<<JS
     const callOutBackendSide = parseInt('{$callOutBackendSide}');
     const redialSourceType = parseInt('{$redialSourceType}');
     const leadViewPageShortUrl = '{$leadViewPageShortUrl}';
-
-    window.device;
+    
     window.twilioCall;
 
     const speakerDevices = document.getElementById("speaker-devices");
@@ -64,7 +63,7 @@ $js = <<<JS
             .filter((node) => node.selected)
             .map((node) => node.getAttribute("data-id"));
         
-        device.audio.speakerDevices.set(selectedDevices);
+        window.TwilioDevice.audio.speakerDevices.set(selectedDevices);
     }
     
     function updateRingtoneDevice() {
@@ -72,13 +71,13 @@ $js = <<<JS
             .filter((node) => node.selected)
             .map((node) => node.getAttribute("data-id"));
         
-        device.audio.ringtoneDevices.set(selectedDevices);
+        window.TwilioDevice.audio.ringtoneDevices.set(selectedDevices);
     }
     
     function updateDevices(selectEl, selectedDevices) {
         selectEl.innerHTML = '';
 
-        device.audio.availableOutputDevices.forEach(function (device, id) {
+        window.TwilioDevice.audio.availableOutputDevices.forEach(function (device, id) {
             let isActive = (selectedDevices.size === 0 && id === 'default');
             selectedDevices.forEach(function (device) {
                 if (device.deviceId === id) {
@@ -97,9 +96,9 @@ $js = <<<JS
     }
     
     function updateAllAudioDevices() {
-        if (device) {
-            updateDevices(speakerDevices, device.audio.speakerDevices.get());
-            updateDevices(ringtoneDevices, device.audio.ringtoneDevices.get());
+        if (window.TwilioDevice) {
+            updateDevices(speakerDevices, window.TwilioDevice.audio.speakerDevices.get());
+            updateDevices(ringtoneDevices, window.TwilioDevice.audio.ringtoneDevices.get());
         }
     }
 
@@ -200,16 +199,11 @@ $js = <<<JS
 
     function initDevice(token) {
             console.log("Init Twilio Device...");
-            device = new Twilio.Device(token, { 
+            window.TwilioDevice = new Twilio.Device(token, { 
                 logLevel: 1,
                 //edge: 'ashburn',
                 closeProtection: true,
-                codecPreferences: ["opus", "pcmu"],
-                sounds: {
-                    incoming: false,
-                    outgoing: false,
-                    disconnect: false
-                }
+                codecPreferences: ["opus", "pcmu"]
             });
             // todo
 //            setInterval(async () => {
@@ -224,21 +218,20 @@ $js = <<<JS
 //                    });
 //            }, ttl - refreshBuffer);
             
-            device.on('registering', function () {
+            window.TwilioDevice.on('registering', function () {
                 console.log("Twilio.Device Registering...");
             });
         
-            device.on("registered", function () {
+            window.TwilioDevice.on("registered", function () {
                 console.log("Twilio.Device Ready!");
             });
             
-            device.on('unregistered', function () {
+            window.TwilioDevice.on('unregistered', function () {
                 console.log("Twilio.Device unregistered!");
-                //createNotify('Status Offline', 'Phone device: status Offline', 'error');
-                incomingSoundOff();
+                PhoneWidgetCall.incomingSoundOff();
             });
         
-            device.on("incoming", call => {                     
+            window.TwilioDevice.on("incoming", call => {                     
                 call.on('accept', call => {
                     console.log('The incoming call was accepted.');
                     freeDialButton();
@@ -251,7 +244,7 @@ $js = <<<JS
                     PhoneWidgetCall.setActiveCall(call);
 
                     window.connectCallSid = call.parameters.CallSid;
-                    incomingSoundOff();
+                    PhoneWidgetCall.incomingSoundOff();
                     soundConnect();
                 });
                 call.on('cancel', call => {
@@ -259,7 +252,7 @@ $js = <<<JS
                     freeDialButton();
                     window.incomingTwilioCalls.remove(call.parameters.CallSid);
                     window.twilioCall = call;
-                    incomingSoundOff();
+                    PhoneWidgetCall.incomingSoundOff();
                 });
                 call.on('disconnect', call => {
                     console.log('The call has been disconnected.');
@@ -269,7 +262,7 @@ $js = <<<JS
                     if (window.connectCallSid === call.parameters.CallSid) {
                         soundDisconnect();
                     }
-                    incomingSoundOff();
+                    PhoneWidgetCall.incomingSoundOff();
                     window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, userId, window.generalLinePriorityIsEnabled);
                 });
                 call.on('error', (error) => {
@@ -278,7 +271,7 @@ $js = <<<JS
                 
                 window.incomingTwilioCalls.add(call);
                 window.twilioCall = call;
-                incomingSoundOff();
+                PhoneWidgetCall.incomingSoundOff();
                 
                 let autoAccept = null;
                 let isInternal = null;
@@ -312,12 +305,12 @@ $js = <<<JS
                         call.accept();
                         console.log("Accepted incoming call.");
                     } else {
-                        startTimerSoundIncomingCall();
+                        PhoneWidgetCall.startTimerSoundIncomingCall();
                     }
                 }
             });
         
-            device.on('error', (twilioError, call) => {
+            window.TwilioDevice.on('error', (twilioError, call) => {
                  console.log('An error has occurred: ', twilioError);
                  if (twilioError.code === 20104) {
                     console.log('Twilio JWT Token Expired');
@@ -325,7 +318,7 @@ $js = <<<JS
                      $.getJSON('/phone/get-token')
                         .then(function (response) {
                             console.log("Got a Twilio Access token.");
-                            device.updateToken(response.data.token);
+                            window.TwilioDevice.updateToken(response.data.token);
                         })
                         .catch(function (err) {
                             console.log(err);
@@ -335,13 +328,13 @@ $js = <<<JS
                 }
                 freeDialButton();
                 log('Twilio.Device Error: ' + twilioError.message);
-                incomingSoundOff();
+                PhoneWidgetCall.incomingSoundOff();
                 createNotify(twilioError.description, twilioError.explanation, 'error');
             });
             
-             device.audio.on("deviceChange", updateAllAudioDevices.bind(device));
+             window.TwilioDevice.audio.on("deviceChange", updateAllAudioDevices.bind(window.TwilioDevice));
 
-            if (device.audio.isOutputSelectionSupported) {
+            if (window.TwilioDevice.audio.isOutputSelectionSupported) {
                 $('#output-selection').show();
             } else {
                 $(document).find('.phone-widget__additional-bar .tabs__nav.tab-nav .wp-tab-device').hide();
@@ -350,23 +343,9 @@ $js = <<<JS
                 $(document).find('.phone-widget__additional-bar #tab-logs').show();
             }
             
-            device.register();
+            window.TwilioDevice.register();
     }
-
-    var incomingSoundInterval = null;
-
-    function startTimerSoundIncomingCall() {
-        incomingSoundInterval = setInterval(function () {
-            incomingAudio.play();
-            clearInterval(incomingSoundInterval);
-        }, 2500);
-    }
-
-    function incomingSoundOff() {
-        clearInterval(incomingSoundInterval);
-        incomingAudio.pause();
-    }
-    
+        
     function webCall(phone_from, phone_to, project_id, lead_id, case_id, type, source_type_id) {
 
         $.post(ajaxGetPhoneListIdUrl, {'phone': phone_from}, function(data) {
@@ -378,24 +357,23 @@ $js = <<<JS
                 new PNotify({title: "Make call", type: "error", text: text, hide: true});
             } else {
                 let params = {
-                    'To': phone_to,
-                    'FromAgentPhone': phone_from,
-                    'c_project_id': project_id,
-                    'lead_id': lead_id,
-                    'case_id': case_id,
-                    'c_type': type,
-                    'c_user_id': userId,
-                    'is_conference_call': 1,
-                    'c_source_type_id': source_type_id,
-                    'phone_list_id': data.phone_list_id
+                    params: {
+                        'To': phone_to,
+                        'FromAgentPhone': phone_from,
+                        'c_project_id': project_id,
+                        'lead_id': lead_id,
+                        'case_id': case_id,
+                        'c_type': type,
+                        'c_user_id': userId,
+                        'is_conference_call': 1,
+                        'c_source_type_id': source_type_id,
+                        'phone_list_id': data.phone_list_id
+                    }
                 };
-
-                // console.log(params);
-
-                if (device) {
-                    console.log('Calling ' + params.To + '...');
-                    // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-                    connection = device.connect(params);
+                
+                if (window.TwilioDevice) {
+                    console.log('Calling ' + params.params.To + '...');
+                    connection = window.TwilioDevice.connect(params);
                 }
             }
         }, 'json');
@@ -450,22 +428,23 @@ $js = <<<JS
                 new PNotify({title: "Make call", type: "error", text: text, hide: true});
             } else {
                 let params = {
-                    'To': phone_to,
-                    'FromAgentPhone': phone_from,
-                    'c_project_id': project_id,
-                    'lead_id': lead_id,
-                    'c_type': type,
-                    'c_user_id': userId,
-                    'c_source_type_id': c_source_type_id,
-                    'is_conference_call': 1,
-                    'user_identity': window.userIdentity,
-                    'phone_list_id': data.phone_list_id
+                    params: {
+                        'To': phone_to,
+                        'FromAgentPhone': phone_from,
+                        'c_project_id': project_id,
+                        'lead_id': lead_id,
+                        'c_type': type,
+                        'c_user_id': userId,
+                        'c_source_type_id': c_source_type_id,
+                        'is_conference_call': 1,
+                        'user_identity': window.userIdentity,
+                        'phone_list_id': data.phone_list_id
+                    }
                 };
 
-                if (device) {
-                    console.log('Calling ' + params.To + '...');
-                    // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-                    connection = device.connect(params);
+                if (window.TwilioDevice) {
+                    console.log('Calling ' + params.params.To + '...');
+                    connection = window.TwilioDevice.connect(params);
                 }
             }
         }, 'json');
@@ -474,23 +453,25 @@ $js = <<<JS
 
     function webCallLeadRedialPriority(redialCallInfo) {
         let params = {
-            'To': redialCallInfo.phoneTo,
-            'FromAgentPhone': redialCallInfo.phoneFrom,
-            'c_project_id': redialCallInfo.projectId,
-            'lead_id': redialCallInfo.leadId,
-            'c_type': 'web-call',
-            'c_user_id': userId,
-            'c_source_type_id': redialSourceType,
-            'is_conference_call': 1,
-            'user_identity': window.userIdentity,
-            'phone_list_id': redialCallInfo.phoneListId,
-            'is_redial_call': true
+            params: {
+                'To': redialCallInfo.phoneTo,
+                'FromAgentPhone': redialCallInfo.phoneFrom,
+                'c_project_id': redialCallInfo.projectId,
+                'lead_id': redialCallInfo.leadId,
+                'c_type': 'web-call',
+                'c_user_id': userId,
+                'c_source_type_id': redialSourceType,
+                'is_conference_call': 1,
+                'user_identity': window.userIdentity,
+                'phone_list_id': redialCallInfo.phoneListId,
+                'is_redial_call': true
+            }
         };
 
         console.log(params);
-        if (device) {
-            console.log('Calling ' + params.To + '...');
-            connection = device.connect(params);
+        if (window.TwilioDevice) {
+            console.log('Calling ' + params.params.To + '...');
+            connection = window.TwilioDevice.connect(params);
         }
     }
 JS;
