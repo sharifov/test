@@ -79,9 +79,11 @@ $js = <<<JS
     
     function startupTwilioClient() {
         console.log("Requesting Twilio Access Token...");
+        log("Requesting Twilio Access Token...");
         $.getJSON('/phone/get-token')
             .then(function (response) {
                 console.log("Got a Twilio Access token.");
+                log("Got a Twilio Access token.");
                 initDevice(response.data.token);
             })
             .catch(function (err) {
@@ -94,6 +96,7 @@ $js = <<<JS
 
     function initDevice(token) {
             console.log("Init Twilio Device...");
+            log("Init Twilio Device...");
             window.TwilioDevice = new Twilio.Device(token, { 
                 logLevel: 1,
                 //edge: 'ashburn',
@@ -115,14 +118,17 @@ $js = <<<JS
             
             window.TwilioDevice.on('registering', function () {
                 console.log("Twilio.Device Registering...");
+                log("Twilio.Device Registering...");
             });
         
             window.TwilioDevice.on("registered", function () {
                 console.log("Twilio.Device Ready!");
+                log("Twilio.Device Ready!");
             });
             
             window.TwilioDevice.on('unregistered', function () {
                 console.log("Twilio.Device unregistered!");
+                log("Twilio.Device unregistered!");
                 PhoneWidgetCall.incomingSoundOff();
                 window.TwilioCall = null;
             });
@@ -212,10 +218,13 @@ $js = <<<JS
                  console.log('An error has occurred: ', twilioError);
                  if (twilioError.code === 20104) {
                     console.log('Twilio JWT Token Expired');
+                    log('Twilio JWT Token Expired');
                     console.log("Requesting New Twilio Access Token...");
+                    log("Requesting New Twilio Access Token...");
                      $.getJSON('/phone/get-token')
                         .then(function (response) {
                             console.log("Got a Twilio Access token.");
+                            log("Got a Twilio Access token.");
                             window.TwilioDevice.updateToken(response.data.token);
                         })
                         .catch(function (err) {

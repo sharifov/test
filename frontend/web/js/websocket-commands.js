@@ -60,7 +60,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
             // console.log(e);
 
-            window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
+            if (typeof PhoneWidgetCall === 'object') {
+                window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
+            }
 
         };
 
