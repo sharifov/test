@@ -44,6 +44,8 @@ class EmailTemplateTypeSearch extends EmailTemplateType
     public function search($params)
     {
         $query = EmailTemplateType::find()->with('etpCreatedUser', 'etpUpdatedUser');
+        $query->joinWith(['emailTemplateTypeDepartments']);
+        $query->groupBy(['etp_id']);
 
         // add conditions that should always apply here
 
@@ -75,7 +77,7 @@ class EmailTemplateTypeSearch extends EmailTemplateType
             'etp_hidden' => $this->etp_hidden,
             'etp_created_user_id' => $this->etp_created_user_id,
             'etp_updated_user_id' => $this->etp_updated_user_id,
-            'etp_dep_id'    => $this->etp_dep_id
+            'ettd_department_id'    => $this->etp_dep_id
         ]);
 
         $query->andFilterWhere(['like', 'etp_key', $this->etp_key])

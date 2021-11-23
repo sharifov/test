@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Json;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\EmailTemplateType */
@@ -20,7 +21,18 @@ use yii\helpers\Json;
 
     <?= $form->field($model, 'etp_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'etp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
+    <?php // $form->field($model, 'etp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
+
+        <?= $form->field($model, 'departmentIds')->widget(Select2::class, [
+            'data' => \common\models\Department::getList(),
+            'size' => Select2::SMALL,
+            'options' => [
+                'placeholder' => 'Select project',
+                'multiple' => true,
+            ],
+            'pluginOptions' => ['allowClear' => true],
+        ]);
+?>
 
     <?= $form->field($model, 'etp_ignore_unsubscribe')->checkbox() ?>
 
