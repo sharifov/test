@@ -1115,4 +1115,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $diffPrice = $diffPrice < 0 ? 0.00 : $diffPrice;
         return ProductQuoteHelper::roundPrice($diffPrice, 2);
     }
+
+    /**
+     * @return int
+     */
+    public function getProductQuoteOptionsCount(): int
+    {
+        return $this->productQuoteOptions ? count($this->productQuoteOptions) : 0;
+    }
 }
