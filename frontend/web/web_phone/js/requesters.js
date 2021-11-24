@@ -601,7 +601,7 @@
             }, 'json');
         };
 
-        this.createInternalCall = function (toUserId, nickname) {
+        this.createInternalCall = function (toUserId) {
             $.ajax({
                 type: 'post',
                 data: {

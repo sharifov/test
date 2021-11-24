@@ -1815,8 +1815,8 @@ var PhoneWidgetCall = function () {
         callRequester.joinConference(conferenceSources.barge.name, conferenceSources.barge.id, call_sid);
     }
 
-    function createInternalCall(toUserId, nickname) {
-        callRequester.createInternalCall(toUserId, nickname);
+    function createInternalCall(toUserId) {
+        callRequester.createInternalCall(toUserId);
     }
 
     function freeDialButton() {
@@ -1865,7 +1865,7 @@ var PhoneWidgetCall = function () {
     function createCall(data) {
         if (data.user_id) {
             reserveDialButton();
-            createInternalCall(data.user_id, data.nickname);
+            createInternalCall(data.user_id);
             return false;
         }
 
@@ -1897,7 +1897,7 @@ var PhoneWidgetCall = function () {
                     return false;
                 }
                 if (result.userId) {
-                    createInternalCall(result.userId, result.nickname);
+                    createInternalCall(result.userId);
                     return false;
                 }
                 prepareExternalCall(data);
@@ -2021,14 +2021,6 @@ var PhoneWidgetCall = function () {
             'lead_id': value.attr('data-lead-id'),
             'case_id': value.attr('data-case-id')
         };
-
-        if (data.user_id) {
-            let nickname = $('#call-to-label').html();
-            if (!nickname) {
-                nickname = to;
-            }
-            data.nickname = nickname;
-        }
 
         createCall(data);
     }
