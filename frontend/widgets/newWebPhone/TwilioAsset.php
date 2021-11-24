@@ -9,6 +9,7 @@ class TwilioAsset extends \yii\web\AssetBundle
 
     public $js = [
         'twilio/twilio-2.0.1.js',
+        'web_phone/device/device.js',
     ];
 
     public $depends = [
