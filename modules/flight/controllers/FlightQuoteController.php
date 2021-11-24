@@ -1371,7 +1371,7 @@ class FlightQuoteController extends FController
             return $this->renderAjax('partial/_voluntary_refund_create', [
                 'message' => '',
                 'errors' => [],
-                'form' => $form
+                'refundForm' => $form
             ]);
         }
 
@@ -1452,7 +1452,7 @@ class FlightQuoteController extends FController
             return $this->renderAjax('partial/_voluntary_refund_create', [
                 'message' => $message,
                 'errors' => $errors,
-                'form' => $form
+                'refundForm' => $form
             ]);
         }
         throw new BadRequestHttpException('Method not allowed');

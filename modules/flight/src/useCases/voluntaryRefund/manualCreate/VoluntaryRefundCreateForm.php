@@ -9,6 +9,12 @@ use sales\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 use common\components\validators\CheckIsBooleanValidator;
 
+/**
+ * Class VoluntaryRefundCreateForm
+ *
+ * @property bool $refundDataReadOnly
+ * @property bool $ticketDataReadOnly
+ */
 class VoluntaryRefundCreateForm extends Model
 {
     public $bookingId;
