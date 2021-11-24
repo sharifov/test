@@ -483,7 +483,7 @@ class FlightController extends BaseController
         if (FlightRequest::find()->where(['fr_hash' => $hash])->andWhere(['fr_status_id' => FlightRequest::STATUS_NEW])->exists()) {
             return new ErrorResponse(
                 new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage('FlightRequest already exist. Hash(' . $hash . ')'),
+                new ErrorsMessage('Flight request already exists in the "NEW" status. Hash (' . $hash . ')'),
             );
         }
 
