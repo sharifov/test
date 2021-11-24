@@ -27,6 +27,16 @@ use kartik\select2\Select2;
             'data' => \common\models\Department::getList(),
             'size' => Select2::SMALL,
             'options' => [
+                'placeholder' => 'Select department',
+                'multiple' => true,
+            ],
+            'pluginOptions' => ['allowClear' => true],
+        ]);
+?>
+        <?= $form->field($model, 'projectIds')->widget(Select2::class, [
+            'data' => \common\models\Project::getList(),
+            'size' => Select2::SMALL,
+            'options' => [
                 'placeholder' => 'Select project',
                 'multiple' => true,
             ],

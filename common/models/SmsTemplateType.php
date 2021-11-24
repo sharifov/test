@@ -31,10 +31,13 @@ use yii\helpers\VarDumper;
  * @property Employee $stpUpdatedUser
  * @property SmsTemplateTypeDepartment[] $smsTemplateTypeDepartments
  * @property Department[] $sttdDepartments
+ * @property SmsTemplateTypeProject[] $smsTemplateTypeProjects
+ * @property Project[] $sttpProjects
  */
 class SmsTemplateType extends \yii\db\ActiveRecord
 {
     public $departmentIds;
+    public $projectIds;
 
     /**
      * {@inheritdoc}
@@ -52,7 +55,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
         return [
             [['stp_key', 'stp_origin_name', 'stp_name'], 'required'],
             [['stp_hidden', 'stp_created_user_id', 'stp_updated_user_id', 'stp_dep_id'], 'integer'],
-            [['stp_created_dt', 'stp_updated_dt', 'departmentIds'], 'safe'],
+            [['stp_created_dt', 'stp_updated_dt', 'departmentIds', 'projectIds'], 'safe'],
             [['stp_key'], 'string', 'max' => 50],
             [['stp_origin_name', 'stp_name'], 'string', 'max' => 100],
             [['stp_key'], 'unique'],
@@ -78,7 +81,8 @@ class SmsTemplateType extends \yii\db\ActiveRecord
             'stp_created_dt' => 'Created Dt',
             'stp_updated_dt' => 'Updated Dt',
             'stp_dep_id' => 'Department',
-            'departmentIds' => 'Departments'
+            'departmentIds' => 'Departments',
+            'projectIds' => 'Projects'
         ];
     }
 
@@ -127,7 +131,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
      */
     public function getSmsTemplateTypeDepartments()
     {
-        return $this->hasMany(SmsTemplateTypeDepartment::className(), ['sttd_stp_id' => 'stp_id']);
+        return $this->hasMany(SmsTemplateTypeDepartment::class, ['sttd_stp_id' => 'stp_id']);
     }
 
     /**
@@ -137,7 +141,27 @@ class SmsTemplateType extends \yii\db\ActiveRecord
      */
     public function getSttdDepartments()
     {
-        return $this->hasMany(Department::className(), ['dep_id' => 'sttd_department_id'])->viaTable('sms_template_type_department', ['sttd_stp_id' => 'stp_id']);
+        return $this->hasMany(Department::class, ['dep_id' => 'sttd_department_id'])->viaTable('sms_template_type_department', ['sttd_stp_id' => 'stp_id']);
+    }
+
+    /**
+     * Gets query for [[SmsTemplateTypeProjects]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSmsTemplateTypeProjects()
+    {
+        return $this->hasMany(SmsTemplateTypeProject::class, ['sttp_stp_id' => 'stp_id']);
+    }
+
+    /**
+     * Gets query for [[SttpProjects]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSttpProjects()
+    {
+        return $this->hasMany(Project::class, ['id' => 'sttp_project_id'])->viaTable('sms_template_type_project', ['sttp_stp_id' => 'stp_id']);
     }
 
     /**
@@ -237,10 +261,13 @@ class SmsTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getKeyList($withHidden = true, ?int $dep_id = null): array
+    public static function getKeyList($withHidden = true, ?int $dep_id = null, ?int $pr_id = null): array
     {
         $query = self::find()->orderBy(['stp_name' => SORT_ASC]);
         $query->joinWith(['smsTemplateTypeDepartments']);
+        $query->joinWith(['smsTemplateTypeProjects']);
+        $query->groupBy(['stp_id', 'sttp_project_id']);
+
         if (!$withHidden) {
             $query->andWhere(['stp_hidden' => false]);
         }
@@ -248,6 +275,12 @@ class SmsTemplateType extends \yii\db\ActiveRecord
         if ($dep_id !== null) {
             $query->andWhere(['sttd_department_id' => $dep_id]);
         }
+
+        if ($pr_id !== null) {
+            $query->orHaving(['sttp_project_id' => $pr_id]);
+            $query->orHaving(['=', 'COUNT(sttp_project_id)', 0]);
+        }
+
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'stp_key', 'stp_name');
     }
