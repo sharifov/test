@@ -7,6 +7,7 @@ use common\models\Project;
 use common\models\UserGroup;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\helpers\setting\SettingHelper;
+use sales\model\call\useCase\createCall\CreateCallForm;
 use sales\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
@@ -65,12 +66,14 @@ use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\model\department\department\DefaultPhoneType;
 use sales\model\leadRedial\assign\LeadRedialAccessChecker;
 use sales\model\leadRedial\assign\Users;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\leadRedial\priorityLevel\ConversionFetcher;
 use sales\model\leadRedial\queue\CallNextLeads;
+use sales\model\phone\AvailablePhoneList;
 use sales\model\project\entity\params\Params;
 use sales\model\user\reports\stats\UserStatsReport;
 use sales\services\clientChatMessage\ClientChatMessageService;
@@ -89,6 +92,27 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
+    public function actionVoip()
+    {
+        $list = new AvailablePhoneList(
+            295,
+            2,
+            1,
+            new DefaultPhoneType('Only general')
+        );
+        VarDumper::dump($list->getList());
+
+        die;
+        $form = new CreateCallForm(295);
+        $form->load([
+            'toUserId' => '1',
+            'to' => '+14157693509',
+        ]);
+        $form->validate();
+        VarDumper::dump($form->getErrors());
+        VarDumper::dump($form->getAttributes());
+    }
+
     public function actionMmm()
     {
         $user = Employee::findOne(295);

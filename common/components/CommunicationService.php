@@ -1064,7 +1064,13 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     public function createCall(CreateCallForm $form): array
     {
-        $response = $this->sendRequest('twilio-conference/create-call', $form->getAttributes());
+        $response = $this->sendRequest(
+            'twilio-conference/create-call',
+            array_merge(
+                $form->getAttributes(),
+                ['voipApiUsername' => $this->voipApiUsername]
+            )
+        );
 
         return $this->processConferenceResponse($response);
     }

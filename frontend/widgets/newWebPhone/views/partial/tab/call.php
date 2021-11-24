@@ -232,6 +232,7 @@ $ajaxCheckRecording = Url::to(['/phone/ajax-check-recording']);
 $getUserByPhoneUrl = Url::to(['/phone/get-user-by-phone']);
 $ajaxBlackList = Url::to(['/phone/check-black-phone']);
 $ajaxCheckUserForCallUrl = Url::to(['/phone/ajax-check-user-for-call']);
+$createCallUrl = Url::to(['/voip/create-call']);
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
@@ -309,7 +310,8 @@ PhoneWidgetCall.init({
     'getUserByPhoneUrl': '$getUserByPhoneUrl',
     'ajaxBlackList': '$ajaxBlackList',
     'ajaxCheckUserForCallUrl': '$ajaxCheckUserForCallUrl',
-    'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}'))
+    'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
+    'createCallUrl': '$createCallUrl'
 });
 JS;
 $this->registerJs($js);

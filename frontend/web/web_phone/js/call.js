@@ -2009,20 +2009,21 @@ var PhoneWidgetCall = function () {
         let value = $('#call-pane__dial-number-value');
         let to = $('#call-pane__dial-number').val();
         let data = {
-            'user_id': value.attr('data-user-id'),
+            'toUserId': value.attr('data-user-id'),
             'from': value.attr('data-phone-from') || (phoneNumbers.getPrimaryData.value || phoneNumbers.getData.value),
-            'is_request_from': value.attr('data-is-request-from'),
-            'request_call_sid': value.attr('data-request-call-sid'),
             'to': to,
-            'project_id': value.attr('data-project-id') || (phoneNumbers.getPrimaryData.projectId || phoneNumbers.getData.projectId),
-            'department_id': value.attr('data-department-id'),
-            'client_id': value.attr('data-client-id'),
-            'source_type_id': value.attr('data-source-type-id'),
-            'lead_id': value.attr('data-lead-id'),
-            'case_id': value.attr('data-case-id')
+            'historyCallSid': value.attr('data-history-call-sid'),
+            'projectId': value.attr('data-project-id') || (phoneNumbers.getPrimaryData.projectId || phoneNumbers.getData.projectId),
+            'departmentId': value.attr('data-department-id'),
+            'clientId': value.attr('data-client-id'),
+            'sourceTypeId': value.attr('data-source-type-id'),
+            'leadId': value.attr('data-lead-id'),
+            'caseId': value.attr('data-case-id')
         };
 
-        createCall(data);
+        reserveDialButton();
+        callRequester.createCall(data);
+        // createCall(data);
     }
 
     function btnMakeCallEvent() {
@@ -2082,8 +2083,7 @@ var PhoneWidgetCall = function () {
                 'title': isInternal ? '' : data.data('title'),
                 'user_id': data.data('user-id'),
                 'phone_to': data.data('phone'),
-                'is_request_from': !isInternal ? true : '',
-                'request_call_sid': !isInternal ? data.data('call-sid') : '',
+                'history_call_sid': !isInternal ? data.data('call-sid') : '',
                 'project_id': data.data('project-id'),
                 'department_id': data.data('department-id'),
                 'client_id': data.data('client-id'),

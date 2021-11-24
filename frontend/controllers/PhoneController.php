@@ -1496,37 +1496,6 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
-    public function actionAjaxCreateCall()
-    {
-        try {
-            $isOnCall = UserStatus::findOne(['us_user_id' => Auth::id(), 'us_is_on_call' => true]);
-            if ($isOnCall) {
-                throw new BadRequestHttpException('Already exist active call');
-            }
-
-            $form = new CreateCallForm();
-
-            if (!$form->load(Yii::$app->request->post())) {
-                throw new BadRequestHttpException('Cant load data');
-            }
-
-            $form->user_id = Auth::id();
-            $form->caller = UserCallIdentity::getClientId(Auth::id());
-
-            if (!$form->validate()) {
-                throw new BadRequestHttpException('Request error: ' . VarDumper::dumpAsString($form->getErrors()));
-            }
-
-            $result = Yii::$app->communication->createCall($form);
-        } catch (\Throwable $e) {
-            $result = [
-                'error' => true,
-                'message' => $e->getMessage(),
-            ];
-        }
-        return $this->asJson($result);
-    }
-
     public function actionAjaxMuteParticipant(): Response
     {
         try {
@@ -2096,13 +2065,13 @@ class PhoneController extends FController
             if ($call->isOut()) {
                 if (UserCallIdentity::canParse($call->cl_phone_from)) {
                     $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
-                    $phone = $list->getFirst();
+                    $phone = $list->getFirst()['phone'] ?? null;
                 } else {
                     $phone = $call->cl_phone_from;
                 }
             } elseif ($call->isIn()) {
                 $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
-                $phone = $list->getFirst();
+                $phone = $list->getFirst()['phone'] ?? null;
             }
 
             if ($phone) {

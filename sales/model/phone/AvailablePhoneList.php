@@ -46,7 +46,7 @@ class AvailablePhoneList
         }
 
         $this->list = (new Query())
-            ->select(['project_id', 'phone', 'type_id', 'type', Project::tableName() . '.name as project', 'department_id'])
+            ->select(['project_id', 'phone_list_id', 'phone', 'type_id', 'type', Project::tableName() . '.name as project', 'department_id'])
             ->from($this->getUserPhones($userId, $projectId)->union($this->getDepartmentPhones($projectId, $departmentId)))
             ->innerJoin(Project::tableName(), 'id = project_id')
             ->orderBy(['type_id' => $defaultPhoneType->isGeneralFirst() ? SORT_DESC : SORT_ASC])
@@ -58,15 +58,21 @@ class AvailablePhoneList
         return $this->list;
     }
 
-    public function getFirst(): ?string
+    public function getFirst(): array
     {
-        return $this->list[0]['phone'] ?? null;
+        if (isset($this->list[0]['phone'])) {
+            return [
+                'phone' => $this->list[0]['phone'],
+                'phoneListId' => $this->list[0]['phone_list_id']
+            ];
+        }
+        return [];
     }
 
     private function getDepartmentPhones(int $projectId, int $departmentId): DepartmentPhoneProjectQuery
     {
         return DepartmentPhoneProject::find()
-            ->select(['dpp_project_id as project_id', 'dpp_phone_list_id', 'pl_phone_number as phone', 'dpp_dep_id as department_id'])
+            ->select(['dpp_project_id as project_id', 'dpp_phone_list_id as phone_list_id', 'pl_phone_number as phone', 'dpp_dep_id as department_id'])
             ->addSelect(new Expression(self::GENERAL_ID . ' as type_id, "' . self::GENERAL . '" as type'))
             ->innerJoin(PhoneList::tableName(), 'pl_id = dpp_phone_list_id')
             ->andWhere(['dpp_project_id' => $projectId, 'dpp_dep_id' => $departmentId, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE]);
@@ -75,7 +81,7 @@ class AvailablePhoneList
     private function getUserPhones(int $userId, int $projectId): UserProjectParamsQuery
     {
         return UserProjectParams::find()
-            ->select(['upp_project_id as project_id', 'upp_phone_list_id', 'pl_phone_number as phone', 'upp_dep_id as department_id'])
+            ->select(['upp_project_id as project_id', 'upp_phone_list_id as phone_list_id', 'pl_phone_number as phone', 'upp_dep_id as department_id'])
             ->addSelect(new Expression(self::PERSONAL_ID . ' as type_id, "' . self::PERSONAL . '" as type'))
             ->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id')
             ->andWhere(['upp_user_id' => $userId, 'upp_project_id' => $projectId]);

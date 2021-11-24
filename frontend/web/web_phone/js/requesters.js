@@ -26,7 +26,8 @@
             'csrf_param': '',
             'csrf_token': '',
             'ajaxGetPhoneListIdUrl': '',
-            'createInternalCallUrl': ''
+            'createInternalCallUrl': '',
+            'createCallUrl': ''
         };
 
         this.init = function (settings) {
@@ -617,6 +618,29 @@
                 })
                 .fail(function () {
                     createNotify('Create Internal Call', 'Server error', 'error');
+                    PhoneWidgetCall.freeDialButton();
+                })
+        };
+
+        this.createCall = function (data) {
+            $.ajax({
+                type: 'post',
+                data: data,
+                url: this.settings.createCallUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        PhoneWidgetCall.freeDialButton();
+                        createNotify('Create Call', data.message, 'error');
+                        if (data.is_on_call === true) {
+                            PhoneWidgetCall.updateCurrentCalls(data.phone_widget_data.calls, data.phone_widget_data.userStatus);
+                        }
+                        return;
+                    }
+                    createNotify('Create Call', 'Request received', 'success');
+                })
+                .fail(function () {
+                    createNotify('Create Call', 'Server error', 'error');
                     PhoneWidgetCall.freeDialButton();
                 })
         };
