@@ -34,4 +34,12 @@ class FlightQuoteFlightRepository
         }
         return $removedIds;
     }
+
+    public static function getLastByBookingId(string $bookingId): ?FlightQuoteFlight
+    {
+        return FlightQuoteFlight::find()
+            ->andWhere(['fqf_booking_id' => $bookingId])
+            ->orderBy(['fqf_id' => SORT_DESC])
+            ->one();
+    }
 }
