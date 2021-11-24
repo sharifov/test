@@ -99,8 +99,8 @@ class CurrentQueueCallsService
                 $childIsRinging = Call::find()->byParentId($call->c_id)->ringing()->exists();
                 if ($childIsRinging) {
                     unset($queue[$key]);
-        		}
-        	}
+                }
+            }
         }
 
         foreach ($queue as $call) {
@@ -160,8 +160,8 @@ class CurrentQueueCallsService
                     }
                 } else {
                     unset($queue[$key]);
-        		}
-        	}
+                }
+            }
         }
 
         foreach ($queue as $call) {
