@@ -93,7 +93,8 @@ return [
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
-                        'yii\web\HttpException:403'
+                        'yii\web\HttpException:403',
+                        'yii\web\HttpException:400',
                     ],
 //                    'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
@@ -117,7 +118,7 @@ return [
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
-                        'yii\web\HttpException:403'
+//                        'yii\web\HttpException:403'
                     ],
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
