@@ -60,7 +60,7 @@ class CreateCallForm extends Model
             ['toUserId', 'default', 'value' => null],
             ['toUserId', 'integer'],
             ['toUserId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
-            ['toUserId', function($attribute) {
+            ['toUserId', function ($attribute) {
                 if ($this->{$attribute} === $this->createdUserId) {
                     $this->addError($attribute, 'User is invalid');
                 }

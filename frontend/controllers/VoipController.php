@@ -254,7 +254,7 @@ class VoipController extends Controller
 
             $recordingManager = RecordManager::toUser($createdUser->id);
 
-            $result =\Yii::$app->communication->callToUser(
+            $result = \Yii::$app->communication->callToUser(
                 UserCallIdentity::getClientId($createdUser->id),
                 UserCallIdentity::getClientId($toUserId),
                 $toUserId,
