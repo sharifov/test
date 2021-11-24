@@ -13,6 +13,7 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
+use modules\order\src\services\OrderManageService;
 use sales\entities\cases\Cases;
 use sales\exception\BoResponseException;
 use sales\forms\caseSale\CaseSaleRequestBoForm;
@@ -627,7 +628,7 @@ class CasesSaleService
                     if ($caseSale && SettingHelper::isEnableOrderFromSale()) {
                         $transaction = new Transaction(['db' => Yii::$app->db]);
                         try {
-                            if (!$order = Order::findOne(['or_sale_id' => $caseSale->css_sale_id])) {
+                            if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $refreshSaleData['bookingId'])) {
                                 $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                                 if (!$orderCreateFromSaleForm->load($refreshSaleData)) {
                                     throw new \RuntimeException('OrderCreateFromSaleForm not loaded');

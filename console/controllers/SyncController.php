@@ -28,6 +28,7 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
+use modules\order\src\services\OrderManageService;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
@@ -566,7 +567,7 @@ class SyncController extends Controller
 
             $transactionOrder = new Transaction(['db' => Yii::$app->db]);
             try {
-                if (!$order = Order::findOne(['or_sale_id' => $saleId])) {
+                if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $saleData['bookingId'])) {
                     $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                     if (!$orderCreateFromSaleForm->load($saleData)) {
                         throw new \RuntimeException('OrderCreateFromSaleForm not loaded');

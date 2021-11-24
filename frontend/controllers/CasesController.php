@@ -41,6 +41,7 @@ use modules\order\src\payment\helpers\PaymentHelper;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
+use modules\order\src\services\OrderManageService;
 use sales\auth\Auth;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\CaseEventLogSearch;
@@ -979,7 +980,7 @@ class CasesController extends FController
             $transactionOrder = new Transaction(['db' => Yii::$app->db]);
             try {
                 if (empty($out['error']) && !empty($saleData)) {
-                    if (!$order = Order::findOne(['or_sale_id' => $saleId])) {
+                    if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, $saleData['bookingId'])) {
                         $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                         if (!$orderCreateFromSaleForm->load($saleData)) {
                             throw new \RuntimeException('OrderCreateFromSaleForm not loaded');
