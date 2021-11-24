@@ -69,7 +69,7 @@ class ReprotectionCreateForm extends Model
     {
         $hash = FlightRequest::generateHashFromDataJson($this->getAttributes());
         if (FlightRequest::findOne(['fr_hash' => $hash])) {
-            $this->addError($attribute, 'FlightRequest already exist. Hash(' . $hash . ')');
+            $this->addError($attribute, 'Flight Request already exist. Hash (' . $hash . ')');
         }
     }
 

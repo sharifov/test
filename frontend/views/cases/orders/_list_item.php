@@ -207,6 +207,7 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Product</th>
                     <th>Booking ID</th>
                     <th>Status</th>
+                    <th title="Product Quote Options" style="width: 50px">Opt</th>
                     <th>Created</th>
                     <th>Client Price</th>
                     <th></th>
@@ -260,7 +261,7 @@ $orderAbacDto = new OrderAbacDto($order);
                 </tr>
  */ ?>
                 <tr title="From DB">
-                    <th class="text-right" colspan="5">Total (price + opt + tips): </th>
+                    <th class="text-right" colspan="6">Total (price + opt + tips): </th>
                     <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <td></td>
                 </tr>

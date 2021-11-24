@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\SmsTemplateTypeDepartment;
 use Yii;
 use common\models\SmsTemplateType;
 use common\models\search\SmsTemplateTypeSearch;
@@ -88,8 +89,20 @@ class SmsTemplateTypeController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            SmsTemplateTypeDepartment::deleteAll(['sttd_stp_id' => $model->stp_id]);
+
+            if ($model->departmentIds) {
+                foreach ($model->departmentIds as $depId) {
+                    $sttDep = new SmsTemplateTypeDepartment();
+                    $sttDep->sttd_stp_id = $model->stp_id;
+                    $sttDep->sttd_department_id = $depId;
+                    $sttDep->save();
+                }
+            }
             return $this->redirect(['view', 'id' => $model->stp_id]);
         }
+
+        $model->departmentIds = ArrayHelper::map($model->smsTemplateTypeDepartments, 'sttd_department_id', 'sttd_department_id');
 
         return $this->render('update', [
             'model' => $model,

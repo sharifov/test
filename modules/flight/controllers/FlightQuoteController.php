@@ -915,6 +915,7 @@ class FlightQuoteController extends FController
                     return "<script> $('#modal-sm').modal('hide'); pjaxReload({container: '#pjax-case-orders'});</script>";
                 }
             } catch (\Throwable $throwable) {
+                \Yii::warning(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAddChange:Warning');
                 $errors[] = $throwable->getMessage();
             }
         }

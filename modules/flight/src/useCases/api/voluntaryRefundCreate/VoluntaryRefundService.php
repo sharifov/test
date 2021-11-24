@@ -17,6 +17,7 @@ use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
+use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
@@ -185,7 +186,10 @@ class VoluntaryRefundService
         }
 
         try {
-            if (!$originProductQuote || !$order = $originProductQuote->pqOrder) {
+            if (
+                (!$originProductQuote || !$order = $originProductQuote->pqOrder) ||
+                (!$order = OrderManageService::getBySaleIdOrBookingId((int) $saleData['saleId'], $saleData['bookingId']))
+            ) {
                 $order = $this->createOrder(
                     $orderCreateSaleForm,
                     $orderContactForm,

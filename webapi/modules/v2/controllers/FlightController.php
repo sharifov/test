@@ -482,6 +482,14 @@ class FlightController extends BaseController
             );
         }
 
+        $hash = FlightRequest::generateHashFromDataJson($post);
+        if (FlightRequest::find()->where(['fr_hash' => $hash])->andWhere(['fr_status_id' => FlightRequest::STATUS_NEW])->exists()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage('Flight request already exists in the "NEW" status. Hash (' . $hash . ')'),
+            );
+        }
+
         if ($reprotectionCreateForm->is_automate && empty($reprotectionCreateForm->flight_quote)) {
             $reprotectionCreateForm->is_automate = false;
             $dataMessage['warning'] = '"is_automate" parameter set to FALSE because "flight_quote" is empty';

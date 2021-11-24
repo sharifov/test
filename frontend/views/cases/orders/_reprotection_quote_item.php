@@ -79,6 +79,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
 
     <td><?=Html::encode($quote->getBookingId())?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
+    <td><?= ($quote->getProductQuoteOptionsCount() ?: '-') ?></td>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
     <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
     <td>
@@ -155,12 +156,12 @@ $productQuoteAbacDto->mapOrderAttributes($order);
     <?php if ($quote->productQuoteChanges) : ?>
         <tr>
             <td></td>
-            <td colspan="5">
-                <p><b>Change Quote List:</b></p>
+            <td colspan="6">
+                <p><b>Change List:</b></p>
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
                     <tr>
-                        <th style="width: 30px;">Nr</th>
+                        <th style="width: 55px;">Nr</th>
                         <th style="width: 60px;">Type</th>
                         <th>Status</th>
                         <th title="Client Status mapping from SiteSettings for OTA" data-toggle="tooltip">Client Status</th>
@@ -175,7 +176,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                         <?php $pqcAbacDto = new ProductQuoteChangeAbacDto($changeItem) ?>
                         <tr>
                             <td data-toggle="tooltip" data-html="true" title="Change ID: <?=Html::encode($changeItem->pqc_id)?> <br> Change GID: <?=Html::encode($changeItem->pqc_gid)?>">
-                                <?=($nr + 1)?>
+                                <small>Ch. <?=($nr + 1)?></small>
                             </td>
                             <td>
                                 <?= Html::tag('span', $changeItem->getShortTypeName(), ['class' => 'badge badge-light', 'title' => $changeItem->getTypeName()]); ?>
@@ -282,16 +283,18 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                             <tr>
                                 <td></td>
                                 <td colspan="7">
+                                    <p><b>Change Product Quote List:</b></p>
                                     <table class="table table-bordered table-striped table-hover">
                                       <thead>
                                         <tr>
-                                          <th style="width: 40px;">Nr</th>
-                                            <th style="width: 50px" title="Recommended">Rec</th>
-                                          <th>Status</th>
-                                          <th style="width: 180px">Created</th>
-                                          <th>Extra Markup <?php echo Currency::getDefaultCurrencyCode() ?></th>
-                                          <th style="white-space: nowrap;">Price <?php echo Currency::getDefaultCurrencyCode() ?></th>
-                                          <th style="width: 60px;">Action</th>
+                                              <th style="width: 60px;">Nr</th>
+                                              <th style="width: 50px" title="Recommended">Rec</th>
+                                              <th>Status</th>
+                                              <th style="width: 45px;" title="Product Quote Options">Opt</th>
+                                              <th style="width: 130px">Created</th>
+                                              <th>Extra Markup, <?php echo Currency::getDefaultCurrencyCode() ?></th>
+                                              <th style="white-space: nowrap;">Price, <?php echo Currency::getDefaultCurrencyCode() ?></th>
+                                              <th style="width: 60px;">Action</th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -306,16 +309,21 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                             $relatedPrQtAbacDto->mapCaseAttributes($case);
                                             ?>
                                             <tr>
-                                              <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>"><?=($key + 1)?></td>
-                                                <td><?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star warning', 'title' => 'Recommended']) : '-' ?></td>
+                                                <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>">
+                                                    <small>Pq <?=($nr + 1)?>.<?=($key + 1)?></small>
+                                                </td>
+                                                <td>
+                                                    <?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star warning', 'title' => 'Recommended']) : '-' ?>
+                                                </td>
                                               <td><?= ProductQuoteStatus::asFormat($changeQuote->pq_status_id)?></td>
+                                              <td><?= ($changeQuote->getProductQuoteOptionsCount() ?: '-') ?></td>
                                               <td><small><?=$changeQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeQuote->pq_created_dt)) : '-'?></small></td>
-                                              <td>
+                                              <td class="text-right">
                                                 <span style="white-space: nowrap;">
                                                     <?php echo FlightQuotePaxPriceHelper::priceFormat($changeQuote->pq_agent_markup) ?>
                                                 </span>
                                               </td>
-                                              <td>
+                                              <td class="text-right">
                                                 <span style="white-space: nowrap;">
                                                     <?php echo FlightQuotePaxPriceHelper::priceFormat($changeQuote->pq_price) ?>
                                                 </span>
@@ -474,7 +482,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
     <?php if ($quote->productQuoteRefunds) : ?>
         <tr>
             <td></td>
-            <td colspan="5">
+            <td colspan="6">
                 <p><b>Refund List:</b></p>
                 <table class="table table-bordered table-striped">
                     <thead>

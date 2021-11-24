@@ -19,7 +19,7 @@ class SmsTemplateTypeSearch extends SmsTemplateType
     public function rules()
     {
         return [
-            [['stp_id', 'stp_hidden', 'stp_created_user_id', 'stp_updated_user_id'], 'integer'],
+            [['stp_id', 'stp_hidden', 'stp_created_user_id', 'stp_updated_user_id', 'stp_dep_id'], 'integer'],
             [['stp_key', 'stp_origin_name', 'stp_name'], 'safe'],
             [['stp_created_dt', 'stp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -44,6 +44,8 @@ class SmsTemplateTypeSearch extends SmsTemplateType
     public function search($params)
     {
         $query = SmsTemplateType::find()->with('stpCreatedUser', 'stpUpdatedUser');
+        $query->joinWith(['smsTemplateTypeDepartments']);
+        $query->groupBy(['stp_id']);
 
         // add conditions that should always apply here
 
@@ -75,6 +77,7 @@ class SmsTemplateTypeSearch extends SmsTemplateType
             'stp_hidden' => $this->stp_hidden,
             'stp_created_user_id' => $this->stp_created_user_id,
             'stp_updated_user_id' => $this->stp_updated_user_id,
+            'sttd_department_id'    => $this->stp_dep_id
         ]);
 
         $query->andFilterWhere(['like', 'stp_key', $this->stp_key])

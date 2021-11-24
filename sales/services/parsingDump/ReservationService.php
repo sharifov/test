@@ -80,6 +80,8 @@ class ReservationService
                 );
                 $this->parseResult[$i]['layoverDuration'] = $this->getLayoverDuration($this->parseResult, $i);
 
+                $this->parseResult[$i]['operatingAirlineCode'] = $parseData['operated'] ?? null;
+
                 if ($airline = Airline::findIdentity($parseData['airline'])) {
                     $this->parseResult[$i]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
                 }
@@ -154,6 +156,6 @@ class ReservationService
     private function getAirlineName(string $code, bool $onView): string
     {
         $airline = (!$onView) ? Airline::findIdentity($code) : null;
-        return $airline ? $airline->name : $code;
+        return $airline->name ?? $code;
     }
 }
