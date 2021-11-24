@@ -71,6 +71,22 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'label' => 'Projects',
+                'attribute' => 'projectId',
+                'value' => static function (\common\models\SmsTemplateType $model) {
+                    $valueArr = [];
+
+                    foreach ($model->smsTemplateTypeProjects as $item) {
+                        $valueArr[] = Html::tag('div', Html::encode($item->sttpProject->name), ['class' => 'label label-info']) ;
+                    }
+
+                    return $valueArr ? implode('<br>', $valueArr)  : '-';
+                },
+                'filter' => \common\models\Project::getList(),
+                'format' => 'raw'
+            ],
+
+            [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'stp_updated_user_id',
                 'relation' => 'stpUpdatedUser',
