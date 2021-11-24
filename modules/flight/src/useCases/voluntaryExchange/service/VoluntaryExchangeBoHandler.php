@@ -166,6 +166,11 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             $this->originProductQuote->cancelled(null, 'Exchanged from BackOffice request');
             $this->objectCollection->getProductQuoteRepository()->save($this->originProductQuote);
 
+            if ($originFlightQuoteFlight = $this->originProductQuote->flightQuote->flightQuoteFlight ?? null) {
+                $originFlightQuoteFlight->fqf_booking_id = null;
+                $this->objectCollection->getFlightQuoteFlightRepository()->save($originFlightQuoteFlight);
+            }
+
             $this->voluntaryQuote->bookedChangeFlow();
             $this->objectCollection->getProductQuoteRepository()->save($this->voluntaryQuote);
 

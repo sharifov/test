@@ -8,6 +8,7 @@ use modules\flight\src\entities\flightQuotePaxPrice\serializer\FlightQuotePaxPri
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\flight\src\useCases\flightQuote\createManually\VoluntaryQuotePaxPriceForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\exchange\ExchangePassengerForm;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -186,7 +187,6 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
     public static function createWithDefaultValues(int $paxCodeId): self
     {
         $paxPrice = new self();
-
         $paxPrice->qpp_fare = 0;
         $paxPrice->qpp_tax = 0;
         $paxPrice->qpp_system_mark_up = 0;
@@ -196,6 +196,8 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         $paxPrice->qpp_client_fare = 0;
         $paxPrice->qpp_client_tax = 0;
         $paxPrice->qpp_flight_pax_code_id = $paxCodeId;
+        $paxPrice->qpp_created_dt = date('Y-m-d H:i:s');
+        $paxPrice->qpp_updated_dt = date('Y-m-d H:i:s');
 
         return $paxPrice;
     }
@@ -282,6 +284,24 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         $model->qpp_origin_fare = $form->fare;
         $model->qpp_origin_currency = $currency;
         $model->qpp_origin_tax = $form->taxes;
+
+        return $model;
+    }
+
+    public static function createByExchangePassengerForm(
+        ExchangePassengerForm $form,
+        int $flightQuoteId,
+        string $currency
+    ): self {
+        $model = self::createWithDefaultValues($form->paxCodeId);
+        $model->qpp_flight_quote_id = $flightQuoteId;
+        $model->qpp_cnt = $form->cnt;
+        $model->qpp_fare = $form->baseFare;
+        $model->qpp_tax = $form->baseTax;
+        $model->qpp_system_mark_up = $form->markup;
+        $model->qpp_origin_fare = $form->baseFare;
+        $model->qpp_origin_tax = $form->baseTax;
+        $model->qpp_origin_currency = $currency;
 
         return $model;
     }
