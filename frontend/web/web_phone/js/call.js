@@ -167,7 +167,6 @@ var PhoneWidgetCall = function () {
         btnWarmTransferToUserEvent();
         btnTransferNumberEvent();
         btnMakeCallEvent();
-        inputNumberEvents();
     }
 
     function removeIncomingRequest(callSid) {
@@ -1249,32 +1248,35 @@ var PhoneWidgetCall = function () {
     }
 
     function insertPhoneNumberEvent() {
-        $(document).on('click', '.phone-dial-contacts', function(e) {
-            e.preventDefault();
-            phoneDialInsertNumber(this);
+        $(document).on('input', '#call-pane__dial-number', function (e) {
+            resetDialNumberData();
         });
 
-        function phoneDialInsertNumber(self) {
-            let data = $(self);
-            let isInternal = !!data.data('user-id');
-            $(".widget-phone__contact-info-modal").hide();
+        $(document).on('click', "li.call-contact-card", function () {
+            let phone = $(this).data('phone');
+            let title = $(this).data('title');
+            let userId = $(this).data('user-id');
+            insertPhoneNumber({
+                'formatted': phone,
+                'title': title,
+                'user_id': userId,
+                'phone_to': phone
+            });
+            $('.suggested-contacts').removeClass('is_active');
+        });
+
+        $(document).on('click', ".contact-dial-to-user", function () {
+            let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
+            insertPhoneNumber({
+                'formatted': contact.name,
+                'title': '',
+                'user_id': contact.id
+            });
             $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
             $('.phone-widget__tab').removeClass('is_active');
             $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
             $('#tab-phone').addClass('is_active');
-            insertPhoneNumber({
-                'formatted': data.data('phone'),
-                'title': isInternal ? '' : data.data('title'),
-                'user_id': data.data('user-id'),
-                'phone_to': data.data('phone'),
-                'project_id': data.data('project-id'),
-                'department_id': data.data('department-id'),
-                'client_id': data.data('client-id'),
-                'source_type_id': data.data('source-type-id'),
-                'lead_id': data.data('lead-id'),
-                'case_id': data.data('case-id'),
-            });
-        }
+        });
     }
 
     function hideNotificationEvent() {
@@ -1833,15 +1835,16 @@ var PhoneWidgetCall = function () {
         let to = $('#call-pane__dial-number').val();
         let data = {
             'toUserId': value.attr('data-user-id'),
-            'from': value.attr('data-phone-from') || (phoneNumbers.getPrimaryData.value || phoneNumbers.getData.value),
+            'from': value.attr('data-phone-from') || phoneNumbers.getData.value,
             'to': to,
             'historyCallSid': value.attr('data-history-call-sid'),
-            'projectId': value.attr('data-project-id') || (phoneNumbers.getPrimaryData.projectId || phoneNumbers.getData.projectId),
-            'departmentId': value.attr('data-department-id'),
+            'projectId': value.attr('data-project-id') || phoneNumbers.getData.projectId,
             'clientId': value.attr('data-client-id'),
-            'sourceTypeId': value.attr('data-source-type-id'),
             'leadId': value.attr('data-lead-id'),
-            'caseId': value.attr('data-case-id')
+            'caseId': value.attr('data-case-id'),
+            'fromCase': value.attr('data-from-case'),
+            'fromLead': value.attr('data-from-lead'),
+            'fromContacts': value.attr('data-from-contacts')
         };
 
         reserveDialButton();
@@ -1849,7 +1852,7 @@ var PhoneWidgetCall = function () {
     }
 
     function btnMakeCallEvent() {
-        $(document).on('click', '#btn-make-call-communication-block', function (e) {
+        $(document).on('click', '#btn-make-call-case-communication-block', function (e) {
             e.preventDefault();
 
             let to = $('#call-to-number').val();
@@ -1868,15 +1871,10 @@ var PhoneWidgetCall = function () {
             insertPhoneNumber({
                 'formatted': to,
                 'title': $('#call-client-name').val(),
-                'user_id': '',
                 'phone_to': to,
                 'phone_from': from,
-                'project_id': $('#call-project-id').val(),
-                'department_id': $('#call-department-id').val(),
-                'client_id': $('#call-client-id').val(),
-                'source_type_id': $('#call-source-type-id').val(),
-                'lead_id': $('#call-lead-id').val(),
                 'case_id': $('#call-case-id').val(),
+                'from_case': true
             });
 
             $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
@@ -1885,11 +1883,89 @@ var PhoneWidgetCall = function () {
             $('#tab-phone').addClass('is_active');
             $('.phone-widget').addClass('is_active');
 
-            reserveDialButton();
+            makeCallFromPhoneWidget();
+        });
+        $(document).on('click', '#btn-make-call-lead-communication-block', function (e) {
+            e.preventDefault();
+
+            let to = $('#call-to-number').val();
+            let from = $('#call-from-number').val();
+
+            if (!to) {
+                createNotify('Make call', 'Please select Phone number', 'error');
+                return false;
+            }
+
+            if (!from) {
+                createNotify('Make call', 'Please select Phone from', 'error');
+                return false;
+            }
+
+            insertPhoneNumber({
+                'formatted': to,
+                'title': $('#call-client-name').val(),
+                'phone_to': to,
+                'phone_from': from,
+                'lead_id': $('#call-lead-id').val(),
+                'from_lead': true
+            });
+
+            $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+            $('.phone-widget__tab').removeClass('is_active');
+            $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+            $('#tab-phone').addClass('is_active');
+            $('.phone-widget').addClass('is_active');
+
             makeCallFromPhoneWidget();
         });
 
         $(document).on('click', '.phone-dial-history', function(e) {
+            e.preventDefault();
+            let data = $(this);
+            let isInternal = !!data.data('user-id');
+            $(".widget-phone__contact-info-modal").hide();
+            $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+            $('.phone-widget__tab').removeClass('is_active');
+            $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+            $('#tab-phone').addClass('is_active');
+
+            insertPhoneNumber({
+                'formatted': data.data('phone'),
+                'title': isInternal ? '' : data.data('title'),
+                'user_id': data.data('user-id'),
+                'phone_to': data.data('phone'),
+                'history_call_sid': isInternal ? '' : data.data('call-sid'),
+            });
+        });
+
+        $(document).on('click', '#btn-new-make-call', function(e) {
+            e.preventDefault();
+            makeCallFromPhoneWidget();
+        });
+
+        $(document).on('click', '.btn-contacts-call', function (e) {
+            e.preventDefault();
+
+            let phone = $(this).data('phone-number');
+            let title = $(this).data('title');
+            let userId = $(this).data('user-id');
+            let clientId = $(this).data('contact-id');
+            let widgetBtn = $('.js-toggle-phone-widget');
+            if (widgetBtn.length) {
+                $('.phone-widget').addClass('is_active')
+                $('.js-toggle-phone-widget').addClass('is-mirror');
+                insertPhoneNumber({
+                    'formatted': phone,
+                    'title': title,
+                    'user_id': userId,
+                    'phone_to': phone,
+                    'client_id': clientId,
+                    'from_contacts': true
+                });
+            }
+        });
+
+        $(document).on('click', '.phone-dial-contacts', function(e) {
             e.preventDefault();
 
             let data = $(this);
@@ -1905,38 +1981,9 @@ var PhoneWidgetCall = function () {
                 'title': isInternal ? '' : data.data('title'),
                 'user_id': data.data('user-id'),
                 'phone_to': data.data('phone'),
-                'history_call_sid': !isInternal ? data.data('call-sid') : '',
-                'project_id': data.data('project-id'),
-                'department_id': data.data('department-id'),
-                'client_id': data.data('client-id'),
-                'source_type_id': data.data('source-type-id'),
-                'lead_id': data.data('lead-id'),
-                'case_id': data.data('case-id'),
+                'client_id': data.data('contact-id'),
+                'from_contacts': true
             });
-        });
-
-        $(document).on('click', '#btn-new-make-call', function(e) {
-            e.preventDefault();
-            makeCallFromPhoneWidget();
-        });
-
-        $(document).on('click', '.wg-call', function (e) {
-            e.preventDefault();
-
-            let phone = $(this).data('phone-number');
-            let title = $(this).data('title');
-            let userId = $(this).data('user-id');
-            let widgetBtn = $('.js-toggle-phone-widget');
-            if (widgetBtn.length) {
-                $('.phone-widget').addClass('is_active')
-                $('.js-toggle-phone-widget').addClass('is-mirror');
-                insertPhoneNumber({
-                    'formatted': phone,
-                    'title': title,
-                    'user_id': userId,
-                    'phone_to': phone
-                });
-            }
         });
     }
 
@@ -1953,21 +2000,16 @@ var PhoneWidgetCall = function () {
             .attr('data-phone-from', data.phone_from ? data.phone_from : '')
             .attr('data-history-call-sid', data.history_call_sid ? data.history_call_sid : '')
             .attr('data-project-id', data.project_id ? data.project_id : '')
-            .attr('data-department-id', data.department_id ? data.department_id : '')
             .attr('data-client-id', data.client_id ? data.client_id : '')
-            .attr('data-source-type-id', data.source_type_id ? data.source_type_id : '')
             .attr('data-lead-id', data.lead_id ? data.lead_id : '')
-            .attr('data-case-id', data.case_id ? data.case_id : '');
+            .attr('data-case-id', data.case_id ? data.case_id : '')
+            .attr('data-from-case', data.from_case ? data.from_case : '')
+            .attr('data-from-lead', data.from_lead ? data.from_lead : '')
+            .attr('data-from-contacts', data.from_contacts ? data.from_contacts : '');
 
         soundNotification("button_tiny");
         $('.dialpad_btn_init').attr('disabled', 'disabled').addClass('disabled');
         $('.call-pane__correction').attr('disabled', 'disabled');
-    }
-
-    function inputNumberEvents() {
-        $(document).on('input', '#call-pane__dial-number', function (e) {
-            resetDialNumberData();
-        });
     }
 
     function soundDisconnect() {
@@ -1985,11 +2027,12 @@ var PhoneWidgetCall = function () {
             .attr('data-phone-from', '')
             .attr('data-history-call-sid', '')
             .attr('data-project-id', '')
-            .attr('data-department-id', '')
             .attr('data-client-id', '')
-            .attr('data-source-type-id', '')
             .attr('data-lead-id', '')
-            .attr('data-case-id', '');
+            .attr('data-case-id', '')
+            .attr('data-from-case', '')
+            .attr('data-from-lead', '')
+            .attr('data-from-contacts', '');
     }
 
     return {
@@ -2135,29 +2178,4 @@ var PhoneWidgetCall = function () {
         return content;
     }
 
-    // function loadNotFound() {
-    //     let content = '<li class="calls-history__item contact-info-card">' +
-    //         '<div class="collapsible-toggler">' +
-    //         '<div class="contact-info-card__details">' +
-    //         '<div class="contact-info-card__line history-details">' +
-    //         '<strong class="contact-info-card__name">No results found</strong>' +
-    //         '</div>' +
-    //         '</div>' +
-    //         '</div>' +
-    //         '</li>';
-    //     return content;
-    // }
-
-    $(document).on('click', "li.call-contact-card", function () {
-        let phone = $(this).data('phone');
-        let title = $(this).data('title');
-        let userId = $(this).data('user-id');
-        PhoneWidgetCall.insertPhoneNumber({
-            'formatted': phone,
-            'title': title,
-            'user_id': userId,
-            'phone_to': phone
-        });
-        $('.suggested-contacts').removeClass('is_active');
-    });
 })();

@@ -867,12 +867,6 @@ function toSelect(elem, obj, cb) {
         projectId: obj.selected.projectId
     }
 
-    this.primaryData = {
-        value: obj.primary ? obj.primary.value || null : null,
-        project: obj.primary ? obj.primary.project || null : null,
-        projectId: obj.primary ? obj.primary.projectId || null : null
-    };
-
     // nodes
     function selectedNode(value, project, id, projectId, length) {
         let chevronDown = '';
@@ -943,28 +937,6 @@ function toSelect(elem, obj, cb) {
         }.bind(this);
     }
 
-    this.setPrimaryData = function () {
-        return function (obj) {
-            console.log(obj);
-            this.primaryData.value = obj.value;
-            this.primaryData.project = obj.project;
-            this.primaryData.projectId = obj.projectId;
-        }.bind(this);
-    }
-
-    this.getPrimaryData = function () {
-        return this.primaryData;
-    }
-
-    this.clearPrimaryData = function () {
-        return function () {
-            this.primaryData.value = null;
-            this.primaryData.project = null;
-            this.primaryData.projectId = null;
-            return this;
-        }.bind(this);
-    }
-
     generateSelect(obj)
 
     $($element).on(selected, $($toggle), function(e) {
@@ -989,10 +961,7 @@ function toSelect(elem, obj, cb) {
 
     return {
         getData: this.getData(),
-        setData: this.setData(),
-        setPrimaryData: this.setPrimaryData(),
-        getPrimaryData: this.getPrimaryData(),
-        clearPrimaryData: this.clearPrimaryData()
+        setData: this.setData()
     }
 
 }

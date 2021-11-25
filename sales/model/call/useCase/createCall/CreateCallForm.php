@@ -3,13 +3,10 @@
 namespace sales\model\call\useCase\createCall;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use common\models\Call;
 use common\models\Client;
-use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\PhoneBlacklist;
-use common\models\Project;
 use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -25,12 +22,12 @@ use yii\base\Model;
  * @property $from
  * @property $to
  * @property $historyCallSid
- * @property $projectId
- * @property $departmentId
  * @property $clientId
- * @property $sourceTypeId
  * @property $leadId
  * @property $caseId
+ * @property $fromCase
+ * @property $fromLead
+ * @property $fromContacts
  */
 class CreateCallForm extends Model
 {
@@ -41,12 +38,12 @@ class CreateCallForm extends Model
     public $from;
     public $to;
     public $historyCallSid;
-    public $projectId;
-    public $departmentId;
     public $clientId;
-    public $sourceTypeId;
     public $leadId;
     public $caseId;
+    public $fromCase;
+    public $fromLead;
+    public $fromContacts;
 
     public function __construct(int $createdUserId, $config = [])
     {
@@ -57,6 +54,12 @@ class CreateCallForm extends Model
     public function rules(): array
     {
         return [
+            ['fromCase', 'boolean'],
+
+            ['fromLead', 'boolean'],
+
+            ['fromContacts', 'boolean'],
+
             ['toUserId', 'default', 'value' => null],
             ['toUserId', 'integer'],
             ['toUserId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
@@ -90,7 +93,7 @@ class CreateCallForm extends Model
 
             ['from', 'string'],
             ['from', 'filter', 'filter' => 'trim'],
-            ['from', 'required', 'when' => fn () => !$this->toUserId && !$this->historyCallSid, 'skipOnEmpty' => false, 'skipOnError' => true],
+            ['from', 'required', 'when' => fn () => !$this->isInternalCall() && !$this->fromHistoryCall(), 'skipOnEmpty' => false, 'skipOnError' => true],
             ['from', function ($attribute) {
                 $phoneList = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $this->{$attribute}])->asArray()->one();
                 if ($phoneList) {
@@ -100,36 +103,39 @@ class CreateCallForm extends Model
                 $this->addError($attribute, 'Not found phone in Phone List.');
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['projectId', 'default', 'value' => null],
-            ['projectId', 'integer'],
-            ['projectId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
-            ['projectId', 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['projectId' => 'id'], 'skipOnEmpty' => true, 'skipOnError' => true],
-
-            ['departmentId', 'default', 'value' => null],
-            ['departmentId', 'integer'],
-            ['departmentId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
-            ['departmentId', 'exist', 'targetClass' => Department::class, 'targetAttribute' => ['departmentId' => 'dep_id'], 'skipOnEmpty' => true, 'skipOnError' => true],
-
             ['clientId', 'default', 'value' => null],
+            ['clientId', 'required', 'when' => fn () => $this->isFromContacts(), 'skipOnError' => true, 'skipOnEmpty' => false],
             ['clientId', 'integer'],
             ['clientId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             ['clientId', 'exist', 'targetClass' => Client::class, 'targetAttribute' => ['clientId' => 'id'], 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['sourceTypeId', 'default', 'value' => null],
-            ['sourceTypeId', 'integer'],
-            ['sourceTypeId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
-            ['sourceTypeId', 'in', 'range' => array_keys(Call::SOURCE_LIST)],
-
             ['leadId', 'default', 'value' => null],
+            ['leadId', 'required', 'when' => fn () => $this->isFromLead(), 'skipOnError' => true, 'skipOnEmpty' => false],
             ['leadId', 'integer'],
             ['leadId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             ['leadId', 'exist', 'targetClass' => Lead::class, 'targetAttribute' => ['leadId' => 'id'], 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['caseId', 'default', 'value' => null],
+            ['caseId', 'required', 'when' => fn () => $this->isFromCase(), 'skipOnError' => true, 'skipOnEmpty' => false],
             ['caseId', 'integer'],
             ['caseId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             ['caseId', 'exist', 'targetClass' => Cases::class, 'targetAttribute' => ['caseId' => 'cs_id'], 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
+    }
+
+    public function isFromCase(): bool
+    {
+        return $this->fromCase ? true : false;
+    }
+
+    public function isFromLead(): bool
+    {
+        return $this->fromLead ? true : false;
+    }
+
+    public function isFromContacts(): bool
+    {
+        return $this->fromContacts ? true : false;
     }
 
     public function fromHistoryCall(): bool
