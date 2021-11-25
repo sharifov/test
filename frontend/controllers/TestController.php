@@ -108,6 +108,7 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
+use modules\webEngage\src\service\WebEngageRequestService;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\CallAccess;
@@ -2190,13 +2191,30 @@ class TestController extends FController
 
     public function actionZ()
     {
-        /*Notifications::createAndPublish(
-            Auth::id(),
-            'Test',
-            'Test message',
-            Notifications::TYPE_INFO,
-            true
-        );*/
+        try {
+            $webEngageRequestService = new WebEngageRequestService();
+
+            $data = [
+                'anonymousId' => 'test' . random_int(1, 9999),
+                'eventName' => 'Added to Cart1',
+                "eventTime" => date('Y-m-d\TH:i:sO'),
+                'eventData' => [
+                    "Product ID" => 1337,
+                    "Price" => 39.80,
+                    "Quantity" => 1,
+                    "Product" => "Givenchy Pour Homme Cologne",
+                    "Category" => "Fragrance",
+                    "Currency" => "USD",
+                ]
+            ];
+
+            $x = $webEngageRequestService->addEvent($data);
+
+            \yii\helpers\VarDumper::dump($x, 20, true);
+            exit();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), ':Throwable');
+        }
 
         return $this->render('z');
     }
