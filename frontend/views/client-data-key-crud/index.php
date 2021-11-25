@@ -41,7 +41,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'cdk_name',
             'cdk_description',
-            'cdk_enable:booleanByLabel',
             [
                 'attribute' => 'cdk_enable',
                 'format' => 'booleanByLabel',
