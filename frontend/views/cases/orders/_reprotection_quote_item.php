@@ -25,6 +25,7 @@ use modules\product\src\abac\RelatedProductQuoteAbacObject;
 use yii\web\ForbiddenHttpException;
 use sales\access\EmployeeGroupAccess;
 use sales\auth\Auth;
+use sales\helpers\setting\SettingHelper;
 
 /**
  * @var Order $order
@@ -173,7 +174,20 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                     </thead>
                     <tbody>
                     <?php foreach ($quote->productQuoteChanges as $nr => $changeItem) : ?>
-                        <?php $pqcAbacDto = new ProductQuoteChangeAbacDto($changeItem) ?>
+                        <?php
+                        $quoteChangeRelations = $changeItem->productQuoteChangeRelations;
+                        $pqcAbacDto = new ProductQuoteChangeAbacDto($changeItem);
+
+                        if ($quoteChangeRelations) {
+                            $quotesCnt = 0;
+                            foreach ($quoteChangeRelations as $quoteRelation) {
+                                if (in_array($quoteRelation->pqcrPq->pq_status_id, SettingHelper::getExchangeQuoteConfirmStatusList())) {
+                                    $quotesCnt++;
+                                }
+                            }
+                            $pqcAbacDto->maxConfirmableQuotesCnt = $quotesCnt;
+                        }
+                        ?>
                         <tr>
                             <td data-toggle="tooltip" data-html="true" title="Change ID: <?=Html::encode($changeItem->pqc_id)?> <br> Change GID: <?=Html::encode($changeItem->pqc_gid)?>">
                                 <small>Ch. <?=($nr + 1)?></small>
@@ -279,7 +293,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                             </td>
                         </tr>
 
-                        <?php if ($quoteChangeRelations = $changeItem->productQuoteChangeRelations) : ?>
+                        <?php if ($quoteChangeRelations) : ?>
                             <tr>
                                 <td></td>
                                 <td colspan="7">
