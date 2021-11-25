@@ -135,7 +135,17 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                         'title' => 'Add Voluntary Refund Quote'
                     ]) ?>
                 <?php endif ?>
-            <?php endif ?>
+            <?php endif; ?>
+
+            <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_SHOW_STATUS_LOG, Action Show status logs */ ?>
+            <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_SHOW_STATUS_LOG)) : ?>
+                <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                    'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
+                    'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $quote->pq_gid]),
+                    'data-gid' => $quote->pq_gid,
+                    'title' => 'View status log'
+                ]) ?>
+            <?php endif; ?>
 
             <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DELETE, Action Remove product from order */ ?>
             <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_DELETE)) : ?>
@@ -321,6 +331,10 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                             $relatedPrQtAbacDto->mapOrderAttributes($order);
                                             $relatedPrQtAbacDto->mapProductQuoteChangeAttributes($changeItem);
                                             $relatedPrQtAbacDto->mapCaseAttributes($case);
+
+                                            $productQuoteAbacDto = new ProductQuoteAbacDto($changeQuote);
+                                            $productQuoteAbacDto->mapCaseAttributes($case);
+                                            $productQuoteAbacDto->mapOrderAttributes($order);
                                             ?>
                                             <tr>
                                                 <td data-toggle="tooltip" data-original-title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>" title="Product QuoteID: <?=Html::encode($changeQuote->pq_id)?>, GID: <?=Html::encode($changeQuote->pq_gid)?>">
@@ -455,6 +469,16 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                         ]); ?>
                                                       <?php endif; ?>
 
+                                                      <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_SHOW_STATUS_LOG, Action Show status logs */ ?>
+                                                      <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_SHOW_STATUS_LOG)) : ?>
+                                                            <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                                                              'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
+                                                              'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $changeQuote->pq_gid]),
+                                                              'data-gid' => $changeQuote->pq_gid,
+                                                              'title' => 'View status log'
+                                                          ]) ?>
+                                                      <?php endif; ?>
+
                                                       <?php /** @abac $relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_DECLINE, ReProtection quote decline */ ?>
                                                       <?php if (Yii::$app->abac->can($relatedPrQtAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_SET_DECLINE)) : ?>
                                                             <?= Html::a('<i class="fas fa-times text-danger"></i> set Decline', null, [
@@ -473,7 +497,6 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                               'data-placement' => 'right',
                                                           ]); ?>
                                                       <?php endif; ?>
-
                                                   </div>
                                                 </div>
                                               </td>
