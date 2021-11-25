@@ -145,7 +145,7 @@
                 PhoneWidgetCall.incomingSoundOff();
 
                 bindVolumeIndicators(call);
-                soundConnect();
+                PhoneWidgetCall.soundConnect();
             });
             call.on('cancel', () => {
                 console.log('The call has been canceled.');
@@ -162,7 +162,7 @@
                 window.TwilioCall = call;
                 // will remove after move device to one tab
                 if (call.parameters.CallSid === PhoneWidgetCall.getActiveCallSid()) {
-                    soundDisconnect();
+                    PhoneWidgetCall.soundDisconnect();
                     PhoneWidgetCall.removeActiveCallSid();
                 }
                 PhoneWidgetCall.incomingSoundOff();

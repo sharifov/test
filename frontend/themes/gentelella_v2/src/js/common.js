@@ -176,14 +176,6 @@ function soundNotification(fileName = 'button_tiny', volume = 0.3) {
     }
 }
 
-function soundDisconnect() {
-    soundNotification('disconnect_sound', 0.3);
-}
-
-function soundConnect() {
-    soundNotification('connect_sound', 0.99);
-}
-
 let incomingAudio = new Audio('/js/sounds/incoming_call.mp3');
 incomingAudio.volume = 0.3;
 incomingAudio.loop = true;

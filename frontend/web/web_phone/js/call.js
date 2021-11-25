@@ -2099,6 +2099,14 @@ var PhoneWidgetCall = function () {
         });
     }
 
+    function soundDisconnect() {
+        soundNotification('disconnect_sound', 0.3);
+    }
+
+    function soundConnect() {
+        soundNotification('connect_sound', 0.99);
+    }
+
     return {
         init: init,
         volumeIndicatorsChange: volumeIndicatorsChange,
@@ -2137,7 +2145,9 @@ var PhoneWidgetCall = function () {
         joinBarge: joinBarge,
         leadViewPageShortUrl: leadViewPageShortUrl,
         freeDialButton: freeDialButton,
-        incomingTwilioCalls: incomingTwilioCalls
+        incomingTwilioCalls: incomingTwilioCalls,
+        soundDisconnect: soundDisconnect,
+        soundConnect: soundConnect
     };
 }();
 
