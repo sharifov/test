@@ -1516,6 +1516,7 @@ class CommunicationController extends ApiBaseController
         }
 
         $call->c_recording_disabled = $customParameters->call_recording_disabled;
+
         if ($customParameters->phone_list_id) {
             $call->setDataPhoneListId($customParameters->phone_list_id);
         }
@@ -1531,6 +1532,10 @@ class CommunicationController extends ApiBaseController
 
         if ($customParameters->client_id) {
             $call->c_client_id = $customParameters->client_id;
+        }
+
+        if ($customParameters->creator_type_id) {
+            $call->setDataCreatorType($customParameters->creator_type_id);
         }
     }
 
@@ -1617,7 +1622,6 @@ class CommunicationController extends ApiBaseController
             self::copyDataFromCustomParams($call, $customParameters);
 
             $call->setDataCreatedParams($callData);
-            $call->setDataCreatorType((int)($callData['creator_type_id'] ?? null));
         }
 
         $preCallStatus = $call->c_call_status;

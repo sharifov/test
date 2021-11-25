@@ -94,15 +94,13 @@ class TestController extends Controller
 {
     public function actionVoip()
     {
-//        $list = new AvailablePhoneList(
-//            295,
-//            2,
-//            1,
-//            new DefaultPhoneType('Only general')
-//        );
-//        VarDumper::dump($list->getList());
-//
-//        die;
+
+        $list = new \frontend\widgets\newWebPhone\AvailablePhones(
+            295
+        );
+        VarDumper::dump($list->getPhones());
+
+        die;
         $form = new CreateCallForm(295);
         $form->load([
             //'toUserId' => '1',

@@ -4,9 +4,11 @@ namespace frontend\controllers;
 
 use common\models\Call;
 use common\models\Client;
+use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\UserCallStatus;
+use frontend\widgets\newWebPhone\AvailablePhones;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\ErrorsToStringHelper;
@@ -17,6 +19,7 @@ use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\useCase\createCall\CreateCallForm;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\web\Controller;
@@ -25,15 +28,23 @@ use yii\web\Controller;
  * Class VoipController
  *
  * @property CurrentQueueCallsService $currentQueueCallsService
+ * @property LeadRedialUnAssigner $leadRedialUnAssigner
  */
 class VoipController extends Controller
 {
     private CurrentQueueCallsService $currentQueueCallsService;
+    private LeadRedialUnAssigner $leadRedialUnAssigner;
 
-    public function __construct($id, $module, CurrentQueueCallsService $currentQueueCallsService, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        CurrentQueueCallsService $currentQueueCallsService,
+        LeadRedialUnAssigner $leadRedialUnAssigner,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->currentQueueCallsService = $currentQueueCallsService;
+        $this->leadRedialUnAssigner = $leadRedialUnAssigner;
     }
 
     public function actionIndex()
@@ -81,6 +92,8 @@ class VoipController extends Controller
         $form = new CreateCallForm($createdUser->id);
 
         if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            $this->leadRedialUnAssigner->createCall($form->getCreatedUserId());
+
             if ($form->isInternalCall()) {
                 $result = $this->createInternalCall($createdUser, $form->toUserId);
                 return $this->asJson($result);
@@ -114,12 +127,26 @@ class VoipController extends Controller
     private function createSimpleCall(CreateCallForm $form): array
     {
         try {
+            $availablePhones = new AvailablePhones($form->getCreatedUserId());
+            $phone = $availablePhones->getPhone($form->from);
+            if (!$phone) {
+                throw new \DomainException('Phone From (' . $form->from . ') is not available.');
+            }
+
+            $clientId = null;
+            $clientPhone = ClientPhone::find()->select(['client_id'])->where(['phone' => $form->to])->orderBy(['id' => SORT_DESC])->limit(1)->scalar();
+            if ($clientPhone && $clientPhone['client_id']) {
+                $clientId = (int)$clientPhone['client_id'];
+            }
+
+            //todo: validate can created user simple call
+
             $recordDisabled = (RecordManager::createCall(
                 Auth::id(),
-                null, //todo
-                null,
+                $phone['projectId'],
+                $phone['departmentId'],
                 $form->from,
-                null,
+                $clientId,
             ))->isDisabledRecord();
 
             $result = \Yii::$app->communication->createCall(
@@ -129,7 +156,9 @@ class VoipController extends Controller
                     'to_number' => $form->to,
                     'from_number' => $form->from,
                     'phone_list_id' => $form->getPhoneListId(),
-                    'project_id' => null, //todo
+                    'project_id' => $phone['projectId'],
+                    'department_id' => $phone['departmentId'],
+                    'client_id' => $clientId,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),
                 ])
@@ -147,14 +176,22 @@ class VoipController extends Controller
     private function createCallFromContacts(CreateCallForm $form): array
     {
         try {
+            $availablePhones = new AvailablePhones($form->getCreatedUserId());
+            $phone = $availablePhones->getPhone($form->from);
+            if (!$phone) {
+                throw new \DomainException('Phone From (' . $form->from . ') is not available.');
+            }
+
             if (!$client = Client::findOne(['id' => $form->clientId])) {
                 throw new \DomainException('Not found Client. ID: ' . $form->clientId);
             }
 
+            //todo: validate can created user call to this contact?
+
             $recordDisabled = (RecordManager::createCall(
                 Auth::id(),
-                null, //todo
-                null,
+                $phone['projectId'],
+                $phone['departmentId'],
                 $form->from,
                 $client->id
             ))->isDisabledRecord();
@@ -166,7 +203,8 @@ class VoipController extends Controller
                     'to_number' => $form->to,
                     'from_number' => $form->from,
                     'phone_list_id' => $form->getPhoneListId(),
-                    'project_id' => null, //todo
+                    'project_id' => $phone['projectId'],
+                    'department_id' => $phone['departmentId'],
                     'client_id' => $client->id,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),
@@ -189,12 +227,24 @@ class VoipController extends Controller
                 throw new \DomainException('Not found Case. ID: ' . $form->caseId);
             }
 
+            //todo: validate can created user call from this case?
+
             if (!$case->cs_project_id) {
                 throw new \DomainException('Not found Project. Case ID: ' . $case->cs_id);
             }
 
             if (!$case->cs_dep_id) {
                 throw new \DomainException('Not found Department. Case ID: ' . $case->cs_id);
+            }
+
+            $departmentParams = $case->department->getParams();
+            if (!$departmentParams) {
+                throw new \DomainException('Not found Department parameters. DepartmentId: ' . $case->cs_dep_id);
+            }
+
+            $availablePhones = new AvailablePhoneList($form->getCreatedUserId(), $case->cs_project_id, $case->cs_dep_id, $departmentParams->defaultPhoneType);
+            if (!$availablePhones->isExist($form->from)) {
+                throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }
 
             $recordDisabled = (RecordManager::createCall(
@@ -238,12 +288,24 @@ class VoipController extends Controller
                 throw new \DomainException('Not found Lead. ID: ' . $form->leadId);
             }
 
+            //todo: validate can created user call from this lead?
+
             if (!$lead->project_id) {
                 throw new \DomainException('Not found Project. Lead ID: ' . $lead->id);
             }
 
             if (!$lead->l_dep_id) {
                 throw new \DomainException('Not found Department. Lead ID: ' . $lead->id);
+            }
+
+            $departmentParams = $lead->lDep->getParams();
+            if (!$departmentParams) {
+                throw new \DomainException('Not found Department parameters. DepartmentId: ' . $lead->l_dep_id);
+            }
+
+            $availablePhones = new AvailablePhoneList($form->getCreatedUserId(), $lead->project_id, $lead->l_dep_id, $departmentParams->defaultPhoneType);
+            if (!$availablePhones->isExist($form->from)) {
+                throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }
 
             $recordDisabled = (RecordManager::createCall(
@@ -287,6 +349,8 @@ class VoipController extends Controller
                 throw new \DomainException('Not found Call. History Call SID: ' . $form->historyCallSid);
             }
 
+            //todo: validate can created user call from this history call?
+
             if (!$call->cl_project_id) {
                 throw new \DomainException('Not found Project. History Call SID: ' . $form->historyCallSid);
             }
@@ -307,7 +371,12 @@ class VoipController extends Controller
             if ($call->isOut()) {
                 if (UserCallIdentity::canParse($call->cl_phone_from)) {
                     $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
-                    $phoneFrom = $list->getFirst();
+                    if ($firstPhone = $list->getFirst()) {
+                        $phoneFrom = [
+                            'phone' => $firstPhone->phone,
+                            'phoneListId' => $firstPhone->phoneListId,
+                        ];
+                    }
                 } else {
                     $phoneFrom = [
                         'phone' => $call->cl_phone_from,
@@ -316,7 +385,12 @@ class VoipController extends Controller
                 }
             } elseif ($call->isIn()) {
                 $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
-                $phoneFrom = $list->getFirst();
+                if ($firstPhone = $list->getFirst()) {
+                    $phoneFrom = [
+                        'phone' => $firstPhone->phone,
+                        'phoneListId' => $firstPhone->phoneListId,
+                    ];
+                }
             }
 
             if (!$phoneFrom['phone']) {
@@ -388,6 +462,8 @@ class VoipController extends Controller
     private function createInternalCall(Employee $createdUser, int $toUserId): array
     {
         try {
+            //todo: validate can created user cal to other user?
+
             $key = 'call_user_to_user_' . $createdUser->id;
 
             if ($result = \Yii::$app->cache->get($key)) {

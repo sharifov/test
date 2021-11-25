@@ -2174,6 +2174,11 @@ class Call extends \yii\db\ActiveRecord
         $this->c_call_type_id = self::CALL_TYPE_JOIN;
     }
 
+    public function setType(int $type): void
+    {
+        $this->c_call_type_id = $type;
+    }
+
     public function isJoin(): bool
     {
         return (int) $this->c_call_type_id === self::CALL_TYPE_JOIN;

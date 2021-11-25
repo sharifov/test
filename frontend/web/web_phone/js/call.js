@@ -157,7 +157,6 @@ var PhoneWidgetCall = function () {
         callLogInfoEvent();
         callInfoEvent();
         clientInfoEvent();
-        insertPhoneNumberEvent();
         hideNotificationEvent();
         muteIncomingAudioEvent();
         recordingClickEvent();
@@ -1247,38 +1246,6 @@ var PhoneWidgetCall = function () {
         });
     }
 
-    function insertPhoneNumberEvent() {
-        $(document).on('input', '#call-pane__dial-number', function (e) {
-            resetDialNumberData();
-        });
-
-        $(document).on('click', "li.call-contact-card", function () {
-            let phone = $(this).data('phone');
-            let title = $(this).data('title');
-            let userId = $(this).data('user-id');
-            insertPhoneNumber({
-                'formatted': phone,
-                'title': title,
-                'user_id': userId,
-                'phone_to': phone
-            });
-            $('.suggested-contacts').removeClass('is_active');
-        });
-
-        $(document).on('click', ".contact-dial-to-user", function () {
-            let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
-            insertPhoneNumber({
-                'formatted': contact.name,
-                'title': '',
-                'user_id': contact.id
-            });
-            $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
-            $('.phone-widget__tab').removeClass('is_active');
-            $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
-            $('#tab-phone').addClass('is_active');
-        });
-    }
-
     function hideNotificationEvent() {
         $(document).on('click', '.pw-notification-hide', function(e) {
             e.preventDefault();
@@ -1885,6 +1852,7 @@ var PhoneWidgetCall = function () {
 
             makeCallFromPhoneWidget();
         });
+
         $(document).on('click', '#btn-make-call-lead-communication-block', function (e) {
             e.preventDefault();
 
@@ -1984,6 +1952,39 @@ var PhoneWidgetCall = function () {
                 'client_id': data.data('contact-id'),
                 'from_contacts': true
             });
+        });
+
+        $(document).on('input', '#call-pane__dial-number', function (e) {
+            resetDialNumberData();
+        });
+
+        $(document).on('click', "li.call-contact-card", function () {
+            let phone = $(this).data('phone');
+            let title = $(this).data('title');
+            let userId = $(this).data('user-id');
+            let contactId = $(this).data('contact-id');
+            insertPhoneNumber({
+                'formatted': phone,
+                'title': title,
+                'user_id': userId,
+                'phone_to': phone,
+                'client_id': contactId,
+                'from_contacts': true
+            });
+            $('.suggested-contacts').removeClass('is_active');
+        });
+
+        $(document).on('click', ".contact-dial-to-user", function () {
+            let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
+            insertPhoneNumber({
+                'formatted': contact.name,
+                'title': '',
+                'user_id': contact.id
+            });
+            $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+            $('.phone-widget__tab').removeClass('is_active');
+            $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+            $('#tab-phone').addClass('is_active');
         });
     }
 
@@ -2165,7 +2166,7 @@ var PhoneWidgetCall = function () {
                 '</div>';
         }
         let dataUserId = contact.type === 3 ? contact.id : '';
-        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['title'] : contact['phone']) + '" data-title="' + (dataUserId ? '' : contact['title']) + '">' +
+        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-contact-id="' + contact.id + '" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['title'] : contact['phone']) + '" data-title="' + (dataUserId ? '' : contact['title']) + '">' +
             '<div class="collapsible-toggler">' +
             contactIcon
             + '<div class="contact-info-card__details">' +
