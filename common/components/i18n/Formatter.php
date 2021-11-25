@@ -987,4 +987,12 @@ class Formatter extends \yii\i18n\Formatter
 
         return \sales\model\userData\entity\UserDataKey::asFormat($value);
     }
+
+    public function asLabel($value, string $class = 'label label-default'): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('span', $value, ['class' => $class]);
+    }
 }
