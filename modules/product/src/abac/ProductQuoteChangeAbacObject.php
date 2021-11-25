@@ -40,7 +40,6 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
     public const ACTION_CREATE_RE_PROTECTION_QUOTE = 'createReProtectionQuote';
     public const ACTION_CREATE_VOLUNTARY_QUOTE = 'createVoluntaryQuote';
     public const ACTION_SEND_OFFER_EXCHANGE_EMAIL = 'sendOfferExchangeEmail';
-
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::OBJ_PRODUCT_QUOTE_CHANGE => [
@@ -330,6 +329,16 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_MAX_CONFIRMABLE_QUOTES_CNT = [
+        'optgroup' => 'PRODUCT QUOTE CHANGE',
+        'id' => self::NS . 'maxConfirmableQuotesCnt',
+        'field' => 'maxConfirmableQuotesCnt',
+        'label' => 'Confirmable Quotes Count',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
     public const OBJECT_ATTRIBUTE_LIST = [
         self::OBJ_PRODUCT_QUOTE_CHANGE      => [
             self::ATTR_IS_AUTOMATE_PQC,
@@ -341,6 +350,7 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
             self::ATTR_HAS_PQR_ACTIVE,
             self::ATTR_HAS_PQC_ACTIVE,
             self::ATTR_ORDER_OWNER,
+            self::ATTR_MAX_CONFIRMABLE_QUOTES_CNT
         ],
     ];
 
