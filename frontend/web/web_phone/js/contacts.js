@@ -578,7 +578,7 @@ $(document).on('click', ".js-toggle-contact-info", function () {
 
 $(document).on('click', ".contact-dial-to-user", function () {
     let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
-    insertPhoneNumber({
+    PhoneWidgetCall.insertPhoneNumber({
         'formatted': contact.name,
         'title': '',
         'user_id': contact.id

@@ -372,7 +372,7 @@ $(document).ready(function() {
     $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
         $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
-        resetDialNumberData();
+        PhoneWidgetCall.resetDialNumberData();
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
 
@@ -385,7 +385,7 @@ $(document).ready(function() {
         $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
-        resetDialNumberData();
+        PhoneWidgetCall.resetDialNumberData();
     });
 
     $('.call-pane__correction').on('click', function(e) {

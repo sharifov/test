@@ -122,6 +122,10 @@ var PhoneWidgetCall = function () {
 
     let incomingTwilioCalls = window.phoneWidget.incomingTwilioCalls;
 
+    let incomingAudio = new Audio('/js/sounds/incoming_call.mp3');
+    incomingAudio.volume = 0.3;
+    incomingAudio.loop = true;
+
     function init(options)
     {
         callRequester.init(options);
@@ -163,6 +167,7 @@ var PhoneWidgetCall = function () {
         btnWarmTransferToUserEvent();
         btnTransferNumberEvent();
         btnMakeCallEvent();
+        inputNumberEvents();
     }
 
     function removeIncomingRequest(callSid) {
@@ -2097,6 +2102,55 @@ var PhoneWidgetCall = function () {
             e.preventDefault();
             makeCallFromPhoneWidget();
         });
+
+        $(document).on('click', '.wg-call', function (e) {
+            e.preventDefault();
+
+            let phone = $(this).data('phone-number');
+            let title = $(this).data('title');
+            let userId = $(this).data('user-id');
+            let widgetBtn = $('.js-toggle-phone-widget');
+            if (widgetBtn.length) {
+                $('.phone-widget').addClass('is_active')
+                $('.js-toggle-phone-widget').addClass('is-mirror');
+                insertPhoneNumber({
+                    'formatted': phone,
+                    'title': title,
+                    'user_id': userId,
+                    'phone_to': phone
+                });
+            }
+        });
+    }
+
+    function insertPhoneNumber(data) {
+        $('#call-pane__dial-number').val((data.formatted ? data.formatted : '')).attr('readonly', 'readonly');
+        if (data.title && data.title.length > 0) {
+            $("#call-to-label").text(data.title);
+        } else {
+            $("#call-to-label").text('');
+        }
+        $('#call-pane__dial-number-value')
+            .attr('data-user-id', data.user_id ? data.user_id : '')
+            .attr('data-phone-to', data.phone_to ? data.phone_to : '')
+            .attr('data-phone-from', data.phone_from ? data.phone_from : '')
+            .attr('data-history-call-sid', data.history_call_sid ? data.history_call_sid : '')
+            .attr('data-project-id', data.project_id ? data.project_id : '')
+            .attr('data-department-id', data.department_id ? data.department_id : '')
+            .attr('data-client-id', data.client_id ? data.client_id : '')
+            .attr('data-source-type-id', data.source_type_id ? data.source_type_id : '')
+            .attr('data-lead-id', data.lead_id ? data.lead_id : '')
+            .attr('data-case-id', data.case_id ? data.case_id : '');
+
+        soundNotification("button_tiny");
+        $('.dialpad_btn_init').attr('disabled', 'disabled').addClass('disabled');
+        $('.call-pane__correction').attr('disabled', 'disabled');
+    }
+
+    function inputNumberEvents() {
+        $(document).on('input', '#call-pane__dial-number', function (e) {
+            resetDialNumberData();
+        });
     }
 
     function soundDisconnect() {
@@ -2105,6 +2159,20 @@ var PhoneWidgetCall = function () {
 
     function soundConnect() {
         soundNotification('connect_sound', 0.99);
+    }
+
+    function resetDialNumberData() {
+        $('#call-pane__dial-number-value')
+            .attr('data-user-id', '')
+            .attr('data-phone-to', '')
+            .attr('data-phone-from', '')
+            .attr('data-history-call-sid', '')
+            .attr('data-project-id', '')
+            .attr('data-department-id', '')
+            .attr('data-client-id', '')
+            .attr('data-source-type-id', '')
+            .attr('data-lead-id', '')
+            .attr('data-case-id', '');
     }
 
     return {
@@ -2147,7 +2215,8 @@ var PhoneWidgetCall = function () {
         freeDialButton: freeDialButton,
         incomingTwilioCalls: incomingTwilioCalls,
         soundDisconnect: soundDisconnect,
-        soundConnect: soundConnect
+        soundConnect: soundConnect,
+        resetDialNumberData: resetDialNumberData
     };
 }();
 
@@ -2266,7 +2335,7 @@ var PhoneWidgetCall = function () {
         let phone = $(this).data('phone');
         let title = $(this).data('title');
         let userId = $(this).data('user-id');
-        insertPhoneNumber({
+        PhoneWidgetCall.insertPhoneNumber({
             'formatted': phone,
             'title': title,
             'user_id': userId,
