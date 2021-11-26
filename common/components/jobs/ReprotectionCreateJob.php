@@ -91,6 +91,18 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             $flightRequestService->setFlightRequest($flightRequest);
 
             $originProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($flightRequest->fr_booking_id);
+
+            if ($originProductQuote && $reProtectionCreateService::isVoluntaryExist($originProductQuote)) {
+                if ($lastCase = $caseReProtectionService::getLastCaseByBookingId($flightRequest->fr_booking_id, null)) {
+                    $lastCase->addEventLog(
+                        CaseEventLog::RE_PROTECTION_CREATE,
+                        'ReProtection request is declined. Voluntary processing exist',
+                        ['booking_id' => $flightRequest->fr_booking_id],
+                        CaseEventLog::CATEGORY_WARNING
+                    );
+                }
+            }
+
             if ($originProductQuote && ProductQuoteChangeQuery::existsByQuoteIdAndStatuses($originProductQuote->pq_id, ProductQuoteChangeStatus::PROCESSING_LIST)) {
                 $statusNames = implode(', ', ProductQuoteChangeStatus::getNames(ProductQuoteChangeStatus::PROCESSING_LIST));
                 $flightRequestService->error('Reason: Product Quote Change exist in status (' . $statusNames . ')');
