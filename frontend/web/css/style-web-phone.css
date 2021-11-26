@@ -143,3 +143,21 @@ div#call-controls input {
   max-width: 200px;
   padding: 5px;
 }
+.phone-widget-icon .widget-icon-inner:after {
+  content: "";
+  width: 23px;
+  height: 23px;
+  border: 3px solid #fff;
+  background-color: #D15151;
+  position: absolute;
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  left: 50px;
+  top: 50px;
+}
+.phone-widget-icon .widget-icon-inner[data-device-status="registered"]:after {
+  background-color: #53e93a;
+}
+.phone-widget-icon .widget-icon-inner[data-device-status="unregistered"]:after {
+  background-color: #D15151;
+}

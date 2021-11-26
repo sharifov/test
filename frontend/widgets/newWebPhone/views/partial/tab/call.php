@@ -312,7 +312,10 @@ PhoneWidgetCall.init({
     'ajaxCheckUserForCallUrl': '$ajaxCheckUserForCallUrl',
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
-    'isDevicePage': window.isDevicePage
+    'isDevicePage': window.isTwilioDevicePage
 });
+if (window.isTwilioDevicePage === true) { 
+    window.phoneWidget.device.initialize.Init();
+}
 JS;
 $this->registerJs($js);

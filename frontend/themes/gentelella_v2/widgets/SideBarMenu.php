@@ -60,6 +60,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 //        }
 
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/dashboard/index'], 'icon' => 'area-chart'];
+        $menuItems[] = ['label' => 'Voip', 'url' => ['/voip/index'], 'icon' => 'phone'];
 
         $menuLItems = [];
 

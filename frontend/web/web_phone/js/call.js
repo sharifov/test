@@ -128,6 +128,8 @@ var PhoneWidgetCall = function () {
 
     let isDevicePage = false;
 
+    let deviceStatus = {};
+
     function init(options)
     {
         callRequester.init(options);
@@ -135,6 +137,7 @@ var PhoneWidgetCall = function () {
         isDevicePage = options.isDevicePage;
 
         audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
+        deviceStatus = new window.phoneWidget.device.status.Init(isDevicePage);
 
         Object.assign(settings, options);
 
@@ -172,6 +175,10 @@ var PhoneWidgetCall = function () {
         btnWarmTransferToUserEvent();
         btnTransferNumberEvent();
         btnMakeCallEvent();
+    }
+
+    function getDeviceStatus() {
+        return deviceStatus;
     }
 
     function getLeadViewPageShortUrl() {
@@ -325,6 +332,7 @@ var PhoneWidgetCall = function () {
         } else {
             call = new window.phoneWidget.call.Call(data);
         }
+        PhoneWidgetCall.freeDialButton();
         panes.outgoing.init(call);
         openWidget();
         openCallTab();
@@ -349,6 +357,7 @@ var PhoneWidgetCall = function () {
             console.log('Call is already exist in Active Queue');
             return false;
         }
+        PhoneWidgetCall.freeDialButton();
         audio.incoming.refresh();
 
         if (panes.outgoing.isEqual(call.data.callSid)) {
@@ -784,11 +793,7 @@ var PhoneWidgetCall = function () {
     }
 
     function checkDevice(title) {
-        //todo sync device status between tabs
-        if (!isDevicePage) {
-            return true;
-        }
-        if (window.TwilioDevice !== null && window.TwilioDevice.state === "registered") {
+        if (deviceStatus.isReady()) {
             return true;
         }
         createNotify(title, 'Please try again after some seconds. Device is not ready.', 'warning');
@@ -1788,6 +1793,10 @@ var PhoneWidgetCall = function () {
     }
 
     function makeCallFromPhoneWidget() {
+        if (!checkDevice('Create Call')) {
+            return false;
+        }
+
         let value = $('#call-pane__dial-number-value');
         let to = $('#call-pane__dial-number').val();
         let data = {
@@ -2066,7 +2075,8 @@ var PhoneWidgetCall = function () {
         incomingTwilioCalls: incomingTwilioCalls,
         soundDisconnect: soundDisconnect,
         soundConnect: soundConnect,
-        resetDialNumberData: resetDialNumberData
+        resetDialNumberData: resetDialNumberData,
+        getDeviceStatus: getDeviceStatus
     };
 }();
 
