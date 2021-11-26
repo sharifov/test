@@ -44,19 +44,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php $columns = [
         [
-            'label' => 'Avatar',
-            'value' => static function ($model) {
-                $result = '<div style="width: 60px;">';
-                $result .= Html::img(GravatarHelper::getUrlByEmail($model['email']), ['alt' => 'avatar', 'class' => 'img-circle profile_img']);
-                $result .= '</div>';
-                return $result;
-            },
-            'format' => 'raw',
-            'contentOptions' => [
-                'style' => ['width' => '80px;']
-            ],
-        ],
-        [
             'attribute' => 'id',
             'value' => static function ($model) {
                 return Html::a(
@@ -85,52 +72,136 @@ $this->params['breadcrumbs'][] = $this->title;
             'filter' => false,
             'enableSorting' => false,
         ],
-        [
-            'label' => 'Shift Hours',
-            'format' => 'raw',
-            'filter' => false,
-            'enableSorting' => false,
-            'value' => static function ($model) {
-                if (empty($model['up_work_start_tm'])) {
-                    return 'Work start: ' . Yii::$app->formatter->nullDisplay;
-                }
-                if (empty($model['up_work_minutes'])) {
-                    return 'Work minutes: ' . Yii::$app->formatter->nullDisplay;
-                }
-
-                $startDateTime = new DateTime($model['up_work_start_tm']);
-                $startTime = $startDateTime->format('H:i');
-                $endDateTime = $startDateTime->modify('+' . $model['up_work_minutes'] . ' minutes');
-                $endTime = $endDateTime->format('H:i');
-                return $startTime . ' - ' . $endTime;
-            },
-        ],
-        [
-            'label' => 'Shift Time',
-            'format' => 'raw',
-            'filter' => false,
-            'enableSorting' => false,
-            'value' => static function ($model) {
-                if ((!$user = Employee::findOne($model['id'])) || !$user->checkShiftTime()) {
-                    return '';
-                }
-                try {
-                    $startDateTime = new DateTime($user->shiftTime->startUtcDt);
-                    $nowDateTime = new DateTime('now');
-                    $diffTime = $nowDateTime->diff($startDateTime);
-                    return $diffTime->format('%H:%i');
-                } catch (\Throwable $throwable) {
-                    return '';
-                }
-            },
-        ]
     ] ?>
 
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_AVATAR)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_AVATAR);
+        $rowField['value'] = static function ($model) {
+            $result = '<div style="width: 60px;">';
+            $result .= Html::img(GravatarHelper::getUrlByEmail($model['email']), ['alt' => 'avatar', 'class' => 'img-circle profile_img']);
+            $result .= '</div>';
+            return $result;
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_SHIFT_HOURS)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_SHIFT_HOURS);
+        $rowField['filter'] = false;
+        $rowField['enableSorting'] = false;
+        $rowField['value'] = static function ($model) {
+            if (empty($model['up_work_start_tm'])) {
+                return 'Work start: ' . Yii::$app->formatter->nullDisplay;
+            }
+            if (empty($model['up_work_minutes'])) {
+                return 'Work minutes: ' . Yii::$app->formatter->nullDisplay;
+            }
+
+            $startDateTime = new DateTime($model['up_work_start_tm']);
+            $startTime = $startDateTime->format('H:i');
+            $endDateTime = $startDateTime->modify('+' . $model['up_work_minutes'] . ' minutes');
+            $endTime = $endDateTime->format('H:i');
+            return $startTime . ' - ' . $endTime;
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_SHIFT_TIME)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_SHIFT_TIME);
+        $rowField['filter'] = false;
+        $rowField['enableSorting'] = false;
+        $rowField['value'] = static function ($model) {
+            if ((!$user = Employee::findOne($model['id'])) || !$user->checkShiftTime()) {
+                return '';
+            }
+            try {
+                $startDateTime = new DateTime($user->shiftTime->startUtcDt);
+                $nowDateTime = new DateTime('now');
+                $diffTime = $nowDateTime->diff($startDateTime);
+                return $diffTime->format('%H:%i');
+            } catch (\Throwable $throwable) {
+                return '';
+            }
+        };
+        $columns[] = $rowField;
+    }
+    ?>
     <?php
     if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_NICKNAME)) {
         $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_NICKNAME);
         $rowField['value'] = static function ($model) {
             return Html::encode($model[UserModelSettingDictionary::FIELD_NICKNAME]);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_SALES_CONVERSION)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_SALES_CONVERSION);
+        $rowField['value'] = static function ($model) {
+            $sumShare = $model[UserModelSettingDictionary::FIELD_SPLIT_SHARE];
+            $qualifiedLeadsTakenCount = $model[UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT];
+            $result = $qualifiedLeadsTakenCount > 0 ? round(($sumShare * 100) / $qualifiedLeadsTakenCount, 2) : 0;
+
+            return Html::encode($result);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_SUM_GROSS_PROFIT)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_SUM_GROSS_PROFIT);
+        $rowField['value'] = static function ($model) {
+            return Html::encode($model[UserModelSettingDictionary::FIELD_SUM_GROSS_PROFIT]);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT);
+        $rowField['value'] = static function ($model) {
+            return Html::encode($model[UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT]);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT);
+        $rowField['value'] = function ($model) {
+            return Html::encode($model[UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT]);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_SPLIT_SHARE)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_SPLIT_SHARE);
+        $rowField['value'] = function ($model) {
+            return Html::encode(round($model[UserModelSettingDictionary::FIELD_SPLIT_SHARE], 2));
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT);
+        $rowField['value'] = function ($model) {
+            return Html::encode($model[UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT]);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_PHONE)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_CLIENT_PHONE);
+        $rowField['value'] = function ($model) {
+            $clientPhone = $model[UserModelSettingDictionary::FIELD_CLIENT_PHONE];
+            return Html::encode($clientPhone ? 'ready' : 'busy');
         };
         $columns[] = $rowField;
     }
