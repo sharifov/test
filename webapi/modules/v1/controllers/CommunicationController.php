@@ -1626,7 +1626,9 @@ class CommunicationController extends ApiBaseController
 
         $preCallStatus = $call->c_call_status;
 
-        if (!empty($callData['Command']) && $callData['Command'] === 'change_call_status') {
+        $isManualChangeStatus = !empty($callData['Command']) && $callData['Command'] === 'change_call_status';
+
+        if ($isManualChangeStatus) {
             if ($call->isStatusRinging()) {
                 $call->c_call_status = $callData['CallStatus'];
             }
@@ -1641,7 +1643,11 @@ class CommunicationController extends ApiBaseController
             $call->c_call_status = Call::TW_STATUS_IN_PROGRESS;
         }
 
-        $call->setStatusByTwilioStatus($call->c_call_status);
+        if (!$isManualChangeStatus && $call->c_call_status === Call::TW_STATUS_IN_PROGRESS && $call->creatorTypeIsAgent() && $call->isOut()) {
+            $call->setStatusRinging();
+        } else {
+            $call->setStatusByTwilioStatus($call->c_call_status);
+        }
 
         $agentId = null;
 

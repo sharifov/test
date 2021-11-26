@@ -2317,6 +2317,14 @@ class Call extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return int
+     */
+    public function setStatusRinging(): int
+    {
+        return $this->c_status_id = self::STATUS_RINGING;
+    }
+
+    /**
      * @return bool
      */
     public function isStatusBusy(): bool
@@ -2718,6 +2726,11 @@ class Call extends \yii\db\ActiveRecord
     public function getDataCreatorType(): CreatorType
     {
         return $this->getData()->creatorType;
+    }
+
+    public function creatorTypeIsAgent(): bool
+    {
+        return $this->getDataCreatorType()->isAgent();
     }
 
     /**

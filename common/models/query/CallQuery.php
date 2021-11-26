@@ -99,7 +99,7 @@ class CallQuery extends \yii\db\ActiveQuery
 
     /**
      * @param null $db
-     * @return array|Call[]
+     * @return Call[]|array
      */
     public function all($db = null)
     {
