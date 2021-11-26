@@ -1,4 +1,6 @@
 (function () {
+    window.isDevicePage = true;
+
     const speakerDevices = document.getElementById("speaker-devices");
     const ringtoneDevices = document.getElementById("ringtone-devices");
 
@@ -166,7 +168,7 @@
                     PhoneWidgetCall.removeActiveCallSid();
                 }
                 PhoneWidgetCall.incomingSoundOff();
-                window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, userId, window.generalLinePriorityIsEnabled);
+                window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled);
             });
             call.on('error', (error) => {
                 console.log('An error has occurred: ', error);

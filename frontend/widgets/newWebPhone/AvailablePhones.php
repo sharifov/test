@@ -105,7 +105,7 @@ class AvailablePhones
                 ['IS', 'dug_ug_id', null],
                 ['dug_ug_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])]
             ])
-            ->groupBy('pl_phone_number')
+            ->groupBy(['pl_phone_number', 'dpp_dep_id'])
             ->asArray()
             ->all();
     }

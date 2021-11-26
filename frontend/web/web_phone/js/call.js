@@ -94,7 +94,7 @@ var PhoneWidgetCall = function () {
     };
 
     let audio = {
-        'incoming': new window.phoneWidget.audio.Incoming(queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing)
+        'incoming': {}
     };
 
     let incomingSoundInterval = null;
@@ -126,9 +126,15 @@ var PhoneWidgetCall = function () {
     incomingAudio.volume = 0.3;
     incomingAudio.loop = true;
 
+    let isDevicePage = false;
+
     function init(options)
     {
         callRequester.init(options);
+
+        isDevicePage = options.isDevicePage;
+
+        audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
 
         Object.assign(settings, options);
 
@@ -774,6 +780,10 @@ var PhoneWidgetCall = function () {
     }
 
     function checkDevice(title) {
+        //todo sync device status between tabs
+        if (!isDevicePage) {
+            return true;
+        }
         if (window.TwilioDevice !== null && window.TwilioDevice.state === "registered") {
             return true;
         }

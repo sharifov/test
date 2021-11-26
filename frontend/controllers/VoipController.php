@@ -22,6 +22,7 @@ use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 
 /**
@@ -133,10 +134,9 @@ class VoipController extends Controller
                 throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }
 
-            $clientId = null;
-            $clientPhone = ClientPhone::find()->select(['client_id'])->where(['phone' => $form->to])->orderBy(['id' => SORT_DESC])->limit(1)->scalar();
-            if ($clientPhone && $clientPhone['client_id']) {
-                $clientId = (int)$clientPhone['client_id'];
+            $clientId = ClientPhone::find()->select(['client_id'])->where(['phone' => $form->to])->orderBy(['id' => SORT_DESC])->limit(1)->scalar();
+            if ($clientId) {
+                $clientId = (int)$clientId;
             }
 
             //todo: validate can created user simple call

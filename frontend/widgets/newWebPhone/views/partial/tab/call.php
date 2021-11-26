@@ -311,7 +311,8 @@ PhoneWidgetCall.init({
     'ajaxBlackList': '$ajaxBlackList',
     'ajaxCheckUserForCallUrl': '$ajaxCheckUserForCallUrl',
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
-    'createCallUrl': '$createCallUrl'
+    'createCallUrl': '$createCallUrl',
+    'isDevicePage': window.isDevicePage
 });
 JS;
 $this->registerJs($js);

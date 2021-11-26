@@ -1,6 +1,6 @@
 (function () {
 
-    function Incoming(queues, notifier, incomingPane, outgoingPane) {
+    function RealIncoming(queues, notifier, incomingPane, outgoingPane) {
         this.queues = queues;
         this.notifier = notifier;
         this.incomingPane = incomingPane;
@@ -14,11 +14,7 @@
         this.offKey = null;
 
         this.play = function () {
-            if (document.visibilityState === 'visible') {
-                this.audio.play();
-                return;
-            }
-            this.stop();
+            this.audio.play();
         };
 
         this.stop = function () {
@@ -87,6 +83,27 @@
         this.isOff = function () {
             return this.isOn === false;
         };
+    }
+
+    function EmptyIncoming(queues, notifier, incomingPane, outgoingPane) {
+        this.play = function () {};
+        this.stop = function () {};
+        this.muted = function () {};
+        this.unMuted = function () {};
+        this.isMuted = function () {};
+        this.refresh = function () {};
+        this.indicatorMuted = function () {};
+        this.indicatorUnMuted = function () {};
+        this.on = function (key) {};
+        this.off = function (key) {};
+        this.isOff = function () {};
+    }
+
+    function Incoming(isDevicePage, queues, notifier, incomingPane, outgoingPane) {
+        if (isDevicePage === true) {
+            return new RealIncoming(queues, notifier, incomingPane, outgoingPane);
+        }
+        return new EmptyIncoming(queues, notifier, incomingPane, outgoingPane);
     }
 
     window.phoneWidget.audio = {
