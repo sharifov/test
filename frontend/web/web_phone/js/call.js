@@ -174,6 +174,10 @@ var PhoneWidgetCall = function () {
         btnMakeCallEvent();
     }
 
+    function getLeadViewPageShortUrl() {
+        return leadViewPageShortUrl;
+    }
+
     function removeIncomingRequest(callSid) {
         let isRemoved = waitQueue.remove(callSid);
         panes.queue.refresh();
@@ -1759,30 +1763,6 @@ var PhoneWidgetCall = function () {
         incomingAudio.pause();
     }
 
-    function webCallLeadRedialPriority(redialCallInfo) {
-        let params = {
-            params: {
-                'To': redialCallInfo.phoneTo,
-                'FromAgentPhone': redialCallInfo.phoneFrom,
-                'c_project_id': redialCallInfo.projectId,
-                'lead_id': redialCallInfo.leadId,
-                'c_type': 'web-call',
-                'c_user_id': window.userId,
-                'c_source_type_id': settings.redialSourceType,
-                'is_conference_call': 1,
-                'user_identity': window.userIdentity,
-                'phone_list_id': redialCallInfo.phoneListId,
-                'is_redial_call': true
-            }
-        };
-
-        console.log(params);
-        if (window.TwilioDevice) {
-            console.log('Calling ' + params.params.To + '...');
-            connection = window.TwilioDevice.connect(params);
-        }
-    }
-
     function webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type, c_source_type_id) {
         callRequester.webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type, c_source_type_id);
     }
@@ -2077,12 +2057,11 @@ var PhoneWidgetCall = function () {
         getActiveCallSid: getActiveCallSid,
         setActiveCallSid: setActiveCallSid,
         removeActiveCallSid: removeActiveCallSid,
-        webCallLeadRedialPriority: webCallLeadRedialPriority,
         webCallLeadRedial: webCallLeadRedial,
         joinListen: joinListen,
         joinCoach: joinCoach,
         joinBarge: joinBarge,
-        leadViewPageShortUrl: leadViewPageShortUrl,
+        getLeadViewPageShortUrl: getLeadViewPageShortUrl,
         freeDialButton: freeDialButton,
         incomingTwilioCalls: incomingTwilioCalls,
         soundDisconnect: soundDisconnect,

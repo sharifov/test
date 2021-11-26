@@ -37,6 +37,7 @@ use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\call\services\reserve\CallReserver;
 use sales\model\call\services\reserve\Key;
 use sales\model\call\useCase\assignUsers\UsersForm;
+use sales\model\call\useCase\createCall\CreateRedialCall;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogQuery;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
@@ -1051,7 +1052,16 @@ class CallController extends FController
                             Yii::createObject(LeadRedialUnAssigner::class)->acceptRedialCall($userId, $redialCall->leadId);
                             \Yii::$app->queue_job->delay(SettingHelper::getRedialCheckIsOnCallTime())->push(new CheckUserIsOnRedialCallJob($userId, $redialCall->leadId, date('Y-m-d H:i:s')));
                             $response['isRedialCall'] = true;
-                            $response['redialCall'] = $redialCall->toArray();
+                            try {
+                                $result = (new CreateRedialCall())($redialCall);
+                                if ($result['error']) {
+                                    $response['redialError'] = $result['message'];
+                                }
+                            } catch (\Throwable $t) {
+                                $response['redialError'] = $t->getMessage();
+                                UserStatus::isOnCallOff($userId);
+                                Yii::error(AppHelper::mergeThrowableWithData($t, ['userId' => $redialCall->userId, 'leadId' => $redialCall->leadId]), 'RedialCallAccepted');
+                            }
                         } else {
                             $response['error'] = true;
                             $response['message'] = 'Processing current call error. Please try again.';

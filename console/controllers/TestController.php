@@ -8,6 +8,7 @@ use common\models\UserGroup;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\createCall\CreateCallForm;
+use sales\model\call\useCase\createCall\CreateRedialCall;
 use sales\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
@@ -73,6 +74,7 @@ use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\leadRedial\priorityLevel\ConversionFetcher;
 use sales\model\leadRedial\queue\CallNextLeads;
+use sales\model\leadRedial\queue\RedialCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\project\entity\params\Params;
 use sales\model\user\reports\stats\UserStatsReport;
@@ -95,6 +97,8 @@ class TestController extends Controller
     public function actionVoip()
     {
 
+        (new CreateRedialCall())(new RedialCall(295, '+14157693509', 1468, '+14154296676', 2, 3, 513226, 472988));
+        die;
         $list = new \frontend\widgets\newWebPhone\AvailablePhones(
             295
         );

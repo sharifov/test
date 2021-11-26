@@ -462,11 +462,14 @@
                         createNotify('Accept Call', data.message, 'error');
                     }
                     if (data.isRedialCall) {
-                        window.phoneWidget.notifier.notifiers.phone.reset();
-                        PhoneWidgetCall.panes.queue.hide();
-                        PhoneWidgetCall.openCallTab();
-                        PhoneWidgetCall.showCallingPanel();
-                        PhoneWidgetCall.webCallLeadRedialPriority(data.redialCall);
+                        if (data.redialError) {
+                            createNotify('Accept Call', data.redialError, 'error');
+                        } else {
+                            window.phoneWidget.notifier.notifiers.phone.reset();
+                            PhoneWidgetCall.panes.queue.hide();
+                            PhoneWidgetCall.openCallTab();
+                            PhoneWidgetCall.showCallingPanel();
+                        }
                     } else {
                         PhoneWidgetCall.audio.incoming.on(key);
                     }

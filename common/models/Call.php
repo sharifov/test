@@ -1376,7 +1376,7 @@ class Call extends \yii\db\ActiveRecord
 //            }
 //        }
 
-        if ($this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->getDataCreatorType()->isAgent()) {
+        if ($this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->creatorTypeIsAgent()) {
             if ($this->isStatusRinging() && !$this->isOut()) {
             } else {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
@@ -1391,8 +1391,6 @@ class Call extends \yii\db\ActiveRecord
         }
 
         if ($this->c_created_user_id && $this->getDataCreatorType()->isUser()) {
-            $isChangedStatus = array_key_exists('c_status_id', $changedAttributes);
-
             if ($this->isOut() && ($insert || $isChangedStatus) && $this->isStatusRinging()) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);

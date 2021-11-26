@@ -20,6 +20,7 @@ use yii\base\Model;
  * @property int $source_type_id
  * @property bool $call_recording_disabled
  * @property string $friendly_name
+ * @property bool $is_redial_call
  */
 class CreateCallForm extends Model
 {
@@ -36,6 +37,7 @@ class CreateCallForm extends Model
     public $source_type_id;
     public $call_recording_disabled;
     public $friendly_name;
+    public $is_redial_call;
 
     public function rules(): array
     {
@@ -73,6 +75,9 @@ class CreateCallForm extends Model
 
             ['friendly_name', 'required'],
             ['friendly_name', 'string'],
+
+            ['is_redial_call', 'default', 'value' => false],
+            ['is_redial_call', 'boolean'],
         ];
     }
 

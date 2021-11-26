@@ -98,11 +98,14 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
             \Yii::$app->queue_job->delay(self::LEAD_PREPARE_DELAY)->push(new LeadCallPrepareCheckerJob($lead->id));
 
             return new RedialCall(
+                $user->id,
                 $agentPhone,
                 $agentPhoneId,
                 $clientPhone,
                 $lead->project_id,
-                $lead->id
+                $lead->l_dep_id,
+                $lead->id,
+                $lead->client_id
             );
         }
 

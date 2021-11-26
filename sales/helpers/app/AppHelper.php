@@ -45,6 +45,11 @@ class AppHelper
         return $data;
     }
 
+    public static function mergeThrowableWithData(\Throwable $t, array $data, bool $trace = false): array
+    {
+        return array_merge(self::throwableLog($t, $trace), $data);
+    }
+
     /**
      * @param Throwable $throwable
      * @param string $category
