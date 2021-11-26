@@ -11,6 +11,7 @@ use modules\flight\models\Flight;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -65,6 +66,16 @@ class VoluntaryExchangeService
         Cases $case,
         int $projectId
     ): Order {
+        if ($order = OrderManageService::getBySaleIdOrBookingId($orderCreateFromSaleForm->saleId, $orderCreateFromSaleForm->bookingId)) {
+            $this->objectCollection->getOrderCreateFromSaleService()->caseOrderRelation($order->getId(), $case->cs_id);
+            $case->addEventLog(
+                CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
+                'Order linked. Gid:' . $order->or_gid,
+                ['order_gid' => $order->or_gid]
+            );
+            return $order;
+        }
+
         $order = $this->objectCollection->getOrderCreateFromSaleService()->orderCreate($orderCreateFromSaleForm);
         if (!$order->validate()) {
             throw new DomainException(ErrorsToStringHelper::extractFromModel($order));

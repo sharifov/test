@@ -795,10 +795,15 @@ class LeadViewController extends FController
         if (Yii::$app->request->isAjax) {
             $gid = Yii::$app->request->get('gid');
             if ($lead = $this->findLeadByGid($gid)) {
+
+                /** @abac new LeadAbacDto($lead), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE, Lead preferences update Delay Charge access */
+                $delayChargeAccess = Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE);
+
                 $leadPreferencesForm = new LeadPreferencesForm($lead);
                 return $this->renderAjax('partial/_lead_preferences_edit_modal_content', [
                     'leadPreferencesForm' => $leadPreferencesForm,
-                    'gid' => $lead->gid
+                    'gid' => $lead->gid,
+                    'delayChargeAccess' => $delayChargeAccess
                 ]);
             }
         }

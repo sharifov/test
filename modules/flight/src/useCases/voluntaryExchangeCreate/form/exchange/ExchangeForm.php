@@ -34,6 +34,7 @@ class ExchangeForm extends Model
 
     private array $tripForms = [];
     private ?VoluntaryExchangePriceForm $voluntaryExchangePriceForm = null;
+    private array $exchangePassengerForm = [];
 
     public function rules(): array
     {
@@ -64,11 +65,30 @@ class ExchangeForm extends Model
             [['trips'], CheckAndConvertToJsonValidator::class, 'skipOnError' => true],
             [['trips'], 'tripsProcessing'],
 
-            [['passengers'], 'safe'],
+            [['passengers'], CheckAndConvertToJsonValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
+            [['passengers'], 'passengersProcessing'],
 
             [['tickets'], 'required'],
             [['tickets'], CheckAndConvertToJsonValidator::class, 'skipOnError' => true],
         ];
+    }
+
+    public function passengersProcessing(string $attribute): void
+    {
+        if (!empty($this->passengers)) {
+            foreach ($this->passengers as $paxCode => $paxPrice) {
+                $exchangePassengerForm = new ExchangePassengerForm($paxCode);
+                $exchangePassengerForm->setFormName('');
+                if (!$exchangePassengerForm->load($paxPrice)) {
+                    $this->addError($attribute, 'ExchangePassengerForm not loaded');
+                } elseif (!$exchangePassengerForm->validate()) {
+                    $this->addError($attribute, 'ExchangePassengerForm.' . $paxCode . '.' .
+                        ErrorsToStringHelper::extractFromModel($exchangePassengerForm, ' '));
+                } else {
+                    $this->exchangePassengerForm[] = $exchangePassengerForm;
+                }
+            }
+        }
     }
 
     public function tripsProcessing(string $attribute): void

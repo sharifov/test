@@ -34,11 +34,37 @@ $this->params['breadcrumbs'][] = $this->title;
                     'etp_origin_name',
                     'etp_name',
                     'etp_hidden:boolean',
-                    [
+                    /*[
                         'attribute' => 'etp_dep_id',
                         'value' => static function (\common\models\EmailTemplateType $model) {
                             return $model->etpDep ? $model->etpDep->dep_name : '-';
                         },
+                    ],*/
+                    [
+                        'label' => 'Departments',
+                        'value' => static function (\common\models\EmailTemplateType $model) {
+                            $valueArr = [];
+
+                            foreach ($model->emailTemplateTypeDepartments as $item) {
+                                $valueArr[] = Html::tag('div', Html::encode($item->ettdDepartment->dep_name), ['class' => 'label label-success']);
+                            }
+
+                            return $valueArr ?  implode(' ', $valueArr) : '-';
+                        },
+                        'format' => 'raw'
+                    ],
+                    [
+                        'label' => 'Projects',
+                        'value' => static function (\common\models\EmailTemplateType $model) {
+                            $valueArr = [];
+
+                            foreach ($model->emailTemplateTypeProjects as $item) {
+                                $valueArr[] = Html::tag('div', Html::encode($item->ettpProject->name), ['class' => 'label label-info']);
+                            }
+
+                            return $valueArr ?  implode(' ', $valueArr) : '-';
+                        },
+                        'format' => 'raw'
                     ],
                     'etp_ignore_unsubscribe:boolean',
                     [

@@ -12,6 +12,7 @@ namespace common\components;
 use common\models\Call;
 use common\models\Project;
 use sales\helpers\setting\SettingHelper;
+use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use thamtech\uuid\helpers\UuidHelper;
@@ -1408,6 +1409,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
                     'type_id' => Call::CALL_TYPE_OUT,
                     'voip_api_username' => $this->voipApiUsername,
                     'source_type_id' => Call::SOURCE_CLIENT_NOTIFICATION,
+                    'creator_type_id' => CreatorType::CLIENT,
                 ],
                 $callCustomParameters
             ),

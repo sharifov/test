@@ -331,7 +331,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 }
             }
             return $this->renderAjax('partial/_voluntary_refund_update', [
-                'form' => $form,
+                'refundForm' => $form,
                 'message' => '',
                 'errors' => []
             ]);
@@ -341,7 +341,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
             $form = new VoluntaryRefundUpdateForm($productQuoteRefund);
 
             return $this->renderAjax('partial/_voluntary_refund_update', [
-                'form' => $form,
+                'refundForm' => $form,
                 'message' => '',
                 'errors' => []
             ]);

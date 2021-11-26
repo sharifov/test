@@ -109,6 +109,11 @@ class OrderCreateFromSaleService
         $this->orderContactRepository = $orderContactRepository;
     }
 
+    /**
+     * @param OrderCreateFromSaleForm $form
+     * @param int $payStatusId
+     * @return Order
+     */
     public function orderCreate(
         OrderCreateFromSaleForm $form,
         $payStatusId = OrderPayStatus::PAID
@@ -124,12 +129,11 @@ class OrderCreateFromSaleService
             null,
             null,
             null,
-            null
+            $form->saleId
         );
         $order = (new Order())->create($dto);
         $order->or_pay_status_id = $payStatusId;
         $order->or_client_currency_rate = $form->currency === Currency::DEFAULT_CURRENCY ? Currency::DEFAULT_CURRENCY_CLIENT_RATE : null;
-
         return $order;
     }
 

@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\flightQuote;
 
+use common\models\Currency;
 use common\models\Lead;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuoteBooking;
@@ -24,6 +25,7 @@ use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\exchange\ExchangePassengerForm;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\services\OfferPriceUpdater;
 use modules\order\src\exceptions\OrderC2BDtoException;
@@ -688,17 +690,29 @@ class FlightQuoteManageService implements ProductQuoteService
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
             $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
-            $this->calcProductQuotePrice($productQuote, $flightQuote);
-
             $this->createFlightTrip($flightQuote, $quote);
 
-            if ($originProductQuote && $originProductQuote->isFlight()) {
-                if ($flightQuotePaxPrices = $originProductQuote->flightQuote->flightQuotePaxPrices ?? null) {
-                    foreach ($flightQuotePaxPrices as $originalPaxPrice) {
-                        $paxPrice = FlightQuotePaxPrice::clone($originalPaxPrice, $flightQuote->fq_id);
-                        $this->flightQuotePaxPriceRepository->save($paxPrice);
+            if (($passengers = $quote['passengers'] ?? null) && is_array($passengers)) {
+                foreach ($passengers as $paxCode => $paxPrice) {
+                    $exchangePassengerForm = new ExchangePassengerForm($paxCode);
+                    $exchangePassengerForm->setFormName('');
+
+                    if (!$exchangePassengerForm->load($paxPrice)) {
+                        throw new \RuntimeException('ExchangePassengerForm not loaded');
                     }
+                    if (!$exchangePassengerForm->validate()) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($exchangePassengerForm));
+                    }
+                    $flightQuotePaxPrice = FlightQuotePaxPrice::createByExchangePassengerForm(
+                        $exchangePassengerForm,
+                        $flightQuote->fq_id,
+                        Currency::getDefaultCurrencyCode()
+                    );
+                    $this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
                 }
+            }
+
+            if ($originProductQuote && $originProductQuote->isFlight()) {
                 if ($originProductQuote->productQuoteOptions) {
                     foreach ($originProductQuote->productQuoteOptions as $originalProductQuoteOption) {
                         $productQuoteOption = ProductQuoteOption::copy($originalProductQuoteOption, $productQuote->pq_id);
@@ -717,6 +731,8 @@ class FlightQuoteManageService implements ProductQuoteService
 
                 $this->cloneFlightQuoteBaggage($originProductQuote->flightQuote, $flightQuote);
             }
+
+            $this->calcProductQuotePrice($productQuote, $flightQuote);
 
             $flightQuoteFlight = $this->createFlightQuoteFlight($flightQuote, null);
             $flightQuoteBooking = FlightQuoteBooking::create(

@@ -83,6 +83,7 @@ use modules\product\src\abac\RelatedProductQuoteAbacObject;
 use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
 use sales\repositories\cases\CasesRepository;
 use sales\access\EmployeeGroupAccess;
+use sales\helpers\setting\SettingHelper;
 
 /**
  * FlightQuoteController implements the CRUD actions for FlightQuote model.
@@ -915,6 +916,7 @@ class FlightQuoteController extends FController
                     return "<script> $('#modal-sm').modal('hide'); pjaxReload({container: '#pjax-case-orders'});</script>";
                 }
             } catch (\Throwable $throwable) {
+                \Yii::warning(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAddChange:Warning');
                 $errors[] = $throwable->getMessage();
             }
         }
@@ -940,8 +942,20 @@ class FlightQuoteController extends FController
 
         $productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId]);
 
-        /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Act Flight Create Voluntary quote*/
+        $quoteChangeRelations = $productQuoteChange->productQuoteChangeRelations;
         $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
+
+        if ($quoteChangeRelations) {
+            $quotesCnt = 0;
+            foreach ($quoteChangeRelations as $quoteRelation) {
+                if (in_array($quoteRelation->pqcrPq->pq_status_id, SettingHelper::getExchangeQuoteConfirmStatusList())) {
+                    $quotesCnt++;
+                }
+            }
+            $pqcAbacDto->maxConfirmableQuotesCnt = $quotesCnt;
+        }
+
+        /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Act Flight Create Voluntary quote*/
         if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE)) {
             throw new ForbiddenHttpException('You do not have access to perform this action.');
         }
@@ -1118,8 +1132,21 @@ class FlightQuoteController extends FController
                 throw new \RuntimeException('ProductQuoteChange not found');
             }
 
-            /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE, Flight Create Reprotection quote from dump*/
+            $quoteChangeRelations = $productQuoteChange->productQuoteChangeRelations;
+
             $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
+
+            if ($quoteChangeRelations) {
+                $quotesCnt = 0;
+                foreach ($quoteChangeRelations as $quoteRelation) {
+                    if (in_array($quoteRelation->pqcrPq->pq_status_id, SettingHelper::getExchangeQuoteConfirmStatusList())) {
+                        $quotesCnt++;
+                    }
+                }
+                $pqcAbacDto->maxConfirmableQuotesCnt = $quotesCnt;
+            }
+
+            /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE, Act Flight Create Reprotection quote from dump*/
             if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE)) {
                 throw new ForbiddenHttpException('You do not have access to perform this action.');
             }
@@ -1164,8 +1191,20 @@ class FlightQuoteController extends FController
                     throw new \RuntimeException('ProductQuoteChange is not type ReProtection');
                 }
 
-                /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE, Act Flight Create Reprotection quote from dump*/
+                $quoteChangeRelations = $productQuoteChange->productQuoteChangeRelations;
                 $pqcAbacDto = new ProductQuoteChangeAbacDto($productQuoteChange);
+
+                if ($quoteChangeRelations) {
+                    $quotesCnt = 0;
+                    foreach ($quoteChangeRelations as $quoteRelation) {
+                        if (in_array($quoteRelation->pqcrPq->pq_status_id, SettingHelper::getExchangeQuoteConfirmStatusList())) {
+                            $quotesCnt++;
+                        }
+                    }
+                    $pqcAbacDto->maxConfirmableQuotesCnt = $quotesCnt;
+                }
+
+                /** @abac $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE, Act Flight Create Reprotection quote from dump*/
                 if (!Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_RE_PROTECTION_QUOTE)) {
                     throw new ForbiddenHttpException('You do not have access to perform this action.');
                 }
@@ -1370,7 +1409,7 @@ class FlightQuoteController extends FController
             return $this->renderAjax('partial/_voluntary_refund_create', [
                 'message' => '',
                 'errors' => [],
-                'form' => $form
+                'refundForm' => $form
             ]);
         }
 
@@ -1451,7 +1490,7 @@ class FlightQuoteController extends FController
             return $this->renderAjax('partial/_voluntary_refund_create', [
                 'message' => $message,
                 'errors' => $errors,
-                'form' => $form
+                'refundForm' => $form
             ]);
         }
         throw new BadRequestHttpException('Method not allowed');

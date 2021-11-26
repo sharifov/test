@@ -4,14 +4,18 @@ namespace sales\services\lead;
 
 use common\models\Lead;
 use common\models\LeadPreferences;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\order\src\entities\orderData\OrderData;
 use modules\order\src\entities\orderData\OrderDataRepository;
+use sales\auth\Auth;
 use sales\forms\lead\LeadPreferencesForm;
 use sales\model\leadOrder\entity\LeadOrder;
 use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
+use Yii;
 
 /**
  * Class LeadPreferencesManageService
@@ -63,7 +67,9 @@ class LeadPreferencesManageService
         $leadPreferences = $lead->leadPreferences;
 
         $this->transactionManager->wrap(function () use ($form, $lead, $leadPreferences) {
-            $lead->editDelayedChargeAndNote($form->delayedCharge, $form->notesForExperts);
+            /** @abac new LeadAbacDto($lead), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE, Lead preferences update Delay Charge access */
+            $delayChargeAccess = Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE);
+            $lead->editDelayedChargeAndNote($form->delayedCharge, $form->notesForExperts, $delayChargeAccess);
             if ($lead->l_client_lang !== $form->clientLang) {
                 $lead->l_client_lang = $form->clientLang;
 //                $this->processOrderData($lead->id, $lead->l_client_lang);

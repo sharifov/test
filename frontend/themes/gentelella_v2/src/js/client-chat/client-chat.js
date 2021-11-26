@@ -67,7 +67,7 @@
         window.history.replaceState({}, '', loadChannelsUrl + '?' + filterParams + '&' + otherUrlParams.toString());
 
         $('.cc_btn_read_filter').removeClass('active');
-        pjaxReload({container: '#pjax-client-chat-channel-list'});
+        //pjaxReload({container: '#pjax-client-chat-channel-list'});
         window.refreshChannelList();
         window.allDialogsLoaded = false;
     };

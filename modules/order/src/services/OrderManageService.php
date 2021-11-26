@@ -2,6 +2,8 @@
 
 namespace modules\order\src\services;
 
+use modules\flight\models\FlightQuoteFlight;
+use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderData\OrderData;
@@ -100,5 +102,16 @@ class OrderManageService
 
             return $newOrder;
         });
+    }
+
+    public static function getBySaleIdOrBookingId(int $saleId, string $bookingId): ?Order
+    {
+        if ($saleId && $order = Order::find()->where(['or_sale_id' => $saleId])->orderBy(['or_id' => SORT_DESC])->one()) {
+            return $order;
+        }
+        if (!$flightQuoteFlight = FlightQuoteFlightRepository::getLastByBookingId($bookingId)) {
+            return null;
+        }
+        return $flightQuoteFlight->fqfFq->getOrder();
     }
 }
