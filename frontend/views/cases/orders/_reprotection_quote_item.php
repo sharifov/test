@@ -140,7 +140,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
             <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_SHOW_STATUS_LOG, Action Show status logs */ ?>
             <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_SHOW_STATUS_LOG)) : ?>
                 <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
-                    'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
+                    'class' => 'dropdown-item btn-product-quote-status-log',
                     'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $quote->pq_gid]),
                     'data-gid' => $quote->pq_gid,
                     'title' => 'View status log'
@@ -472,7 +472,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                       <?php /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_SHOW_STATUS_LOG, Action Show status logs */ ?>
                                                       <?php if (Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_SHOW_STATUS_LOG)) : ?>
                                                             <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
-                                                              'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
+                                                              'class' => 'dropdown-item btn-product-quote-status-log',
                                                               'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $changeQuote->pq_gid]),
                                                               'data-gid' => $changeQuote->pq_gid,
                                                               'title' => 'View status log'
