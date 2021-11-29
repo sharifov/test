@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Quote;
+use common\models\Airports;
 use frontend\helpers\QuoteHelper;
 use kartik\select2\Select2;
 use sales\forms\api\searchQuote\FlightQuoteSearchForm;
@@ -22,17 +23,14 @@ use yii\bootstrap4\Html;
     <div class="col-md-12">
         <?php $form = ActiveForm::begin([
                 'options' => [
-                    'data-pjax' => 1
+                    'data-pjax' => 1,
+                    'id' => 'quote-search-filters'
                 ],
         ]) ?>
 
         <div class="row">
             <div class="col-md-3">
-                <?= $form->field($searchFrom, 'fareType', [
-                    'labelOptions' => [
-                        'class' => 'control-label',
-                    ]
-                ])->widget(Select2::class, [
+                <?= $form->field($searchFrom, 'fareType')->widget(Select2::class, [
                     'options' => [
                         'placeholder' => $searchFrom->getAttributeLabel('fareType'),
                         'multiple' => true,
@@ -44,11 +42,7 @@ use yii\bootstrap4\Html;
             </div>
 
             <div class="col-md-9">
-                <?= $form->field($searchFrom, 'airlines', [
-                    'labelOptions' => [
-                        'class' => 'control-label'
-                    ]
-                ])->widget(Select2::class, [
+                <?= $form->field($searchFrom, 'airlines')->widget(Select2::class, [
                     'options' => [
                         'placeholder' => $searchFrom->getAttributeLabel('airlines'),
                         'multiple' => true,
@@ -59,7 +53,7 @@ use yii\bootstrap4\Html;
                 ]) ?>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-6">
                 <?php /*$form->field($searchFrom, 'price', [
                     'labelOptions' => [
                         'class' => 'control-label'
@@ -73,7 +67,7 @@ use yii\bootstrap4\Html;
 
               <div class="form-group">
                 <div class="d-flex align-items-center justify-content-between">
-                  <label for="" class="control-label">Max Price</label>
+                  <label for="">Max Price</label>
                   <span id="search-quote-price-value"></span>
                 </div>
                 <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
@@ -108,39 +102,26 @@ use yii\bootstrap4\Html;
             </div>
 
             <div class="col-md-2">
-                <?= $form->field($searchFrom, 'stops', [
-                    'labelOptions' => [
-                        'class' => 'control-label'
-                    ],
-                ])->dropDownList(Quote::getStopsLIst(), [
+                <?= $form->field($searchFrom, 'stops')->dropDownList(Quote::getStopsLIst(), [
                                  'prompt' => '--'
                 ]) ?>
             </div>
 
             <div class="col-md-2">
-                <?= $form->field($searchFrom, 'airportChange', [
-                    'labelOptions' => [
-                        'class' => 'control-label'
-                    ]
-                ])->dropDownList(Quote::getChangeAirportList()) ?>
+                <?= $form->field($searchFrom, 'airportChange')->dropDownList(Quote::getChangeAirportList()) ?>
             </div>
-
             <div class="col-md-2">
-                <?= $form->field($searchFrom, 'baggage', [
-                    'labelOptions' => [
-                        'class' => 'control-label'
-                    ]
-                ])->dropDownList(Quote::getBaggageList()) ?>
+                <?= $form->field($searchFrom, 'baggage')->dropDownList(Quote::getBaggageList()) ?>
             </div>
 
         </div>
 
         <div class="row">
 
-            <div class="col-md-5" id="search-quote-rank-slider-filter">
+            <div class="col-md-3" id="search-quote-rank-slider-filter">
                 <div class="form-group">
                     <div class="d-flex align-items-center justify-content-between">
-                        <label for="" class="control-label">Rank</label>
+                        <label for="">Rank</label>
                         <span id="search-quote-current-rank-value"></span>
                         <?= $form->field($searchFrom, 'rank')->hiddenInput()->label(false) ?>
                     </div>
@@ -181,90 +162,82 @@ use yii\bootstrap4\Html;
                 </script>
             </div>
 
+            <div class="col-md-5">
+                <?= $form->field($searchFrom, 'excludeConnectionAirports')->widget(Select2::class, [
+                    'options' => [
+                        'placeholder' => 'Exclude Connection airports',
+                        'multiple' => true,
+                        'id' => 'search-quote-exclude-connection-airports'
+                    ],
+                    'data' => $connectionAirports,
+                    'size' => Select2::SIZE_SMALL
+                ]) ?>
+            </div>
+
             <div class="col-md-2">
-                <?= $form->field($searchFrom, 'topCriteria', [
-                    'labelOptions' => [
-                        'class' => 'control-label'
-                    ]
-                ])->dropDownList(QuoteHelper::TOP_META_LIST, [
+                <?= $form->field($searchFrom, 'topCriteria')->dropDownList(QuoteHelper::TOP_META_LIST, [
                                  'prompt' => '--'
                 ]) ?>
             </div>
 
             <div class="col-md-2">
-                <?= $form->field($searchFrom, 'sortBy', [
-                    'labelOptions' => [
-                        'class' => 'control-label'
-                    ]
-                ])->dropDownList(Quote::getSortList(), ['prompt' => '--']) ?>
+                <?= $form->field($searchFrom, 'sortBy')->dropDownList(Quote::getSortList(), ['prompt' => '--']) ?>
             </div>
 
         </div>
 
-        <?php foreach ($lead->leadFlightSegments as $segment) : ?>
+        <?php foreach ($lead->leadFlightSegments as $key => $segment) : ?>
         <div class="row">
+            <div class="col-md-2">
+                <p style="padding-top: 24px;"><?= $key + 1 ?>. <?= Airports::findByIata($segment->origin)->cityName. ' ' . $segment->origin . ' - ' . Airports::findByIata($segment->destination)->cityName . ' ' . $segment->destination ?></p>
+            </div>
+            <?php if (isset($tripsMinDurationsInMinutes[$key]) && isset($tripsMaxDurationsInMinutes[$key]) && $tripsMinDurationsInMinutes[$key] > 0 && $tripsMaxDurationsInMinutes[$key] > 0) { ?>
             <div class="col-md-3">
                 <div class="form-group">
                     <div class="d-flex align-items-center justify-content-between">
-                        <label for="" class="control-label">Max Trip Duration</label>
-                        <span id="search-quote-current-duration-value<?= $segment->id ?>"></span>
+                        <label for="">Max duration</label>
                     </div>
-                    <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
-                        <div class="search-filters__slider" id="search-quote-duration-slider-filter<?= $segment->id ?>"></div>
+                    <div class="d-flex align-items-left" style="vertical-align: bottom;">
+                        <div>
+                        <?php
+                        $rangeHoursArray = range(floor($tripsMinDurationsInMinutes[$key]/60), $tripMaxDurationRoundHours[$key]);
+                        $rangeMinutesArray = range(0, 50, 10);
+                        ?>
+                        <?= $form->field($searchFrom, 'tripMaxDurationHours[' . $key . ']')->dropDownList(array_combine($rangeHoursArray, $rangeHoursArray), ['options' => [$searchFrom->tripMaxDurationHours[$key] ?? $tripMaxDurationRoundHours[$key] => ['Selected'=>'selected']], 'style' => 'width:55px; float: left; margin-right: 7px;'])->label('hours');
+                        ?>
+                        </div>
+                        <?= $form->field($searchFrom, 'tripMaxDurationMinutes[' . $key . ']')->dropDownList(array_combine($rangeMinutesArray, $rangeMinutesArray), ['options' => [$searchFrom->tripMaxDurationMinutes[$key] ?? $tripMaxDurationRoundMinutes[$key] => ['Selected'=>'selected']], 'style' => 'width:55px; float: left; margin-right: 7px; margin-left: 10px;'])->label('minutes') ?>
                     </div>
-
-                    <script>
-                        var min = <?= $minTotalDuration ?? 0 ?>;
-                        var max = <?= $maxTotalDuration ?? 0 ?>;
-                        var start = '<?= $searchFrom->tripDuration[$segment->id] ?? 0 ?>' || max;
-                        durationFilter(<?=$segment->id ?>, min, max, start);
-                    </script>
+                    <div>
+                        <small>allowable: <?= floor($tripsMinDurationsInMinutes[$key]/60) . ' h ' . $tripsMinDurationsInMinutes[$key] % 60 . ' m -' . floor($tripsMaxDurationsInMinutes[$key]/60) . ' h ' . $tripsMaxDurationsInMinutes[$key] % 60 . ' m'?></small>
+                    </div>
                 </div>
             </div>
-          <div class="col-md-3">
-            <div class="form-group">
-              <div class="d-flex align-items-center justify-content-between">
-                <label for="" class="control-label">Departure</label>
-                <span id="search-quote-departure-value<?= $segment->id ?>"></span>
-              </div>
-              <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
-                <div class="search-filters__slider" id="search-quote-departure-filter<?= $segment->id ?>"></div>
-              </div>
-                <?= $form->field($searchFrom, 'departure')->hiddenInput()->label(false) ?>
-              <script>
-                  var min = <?= $searchFrom->arrivalMin ?>;
-                  var max = <?= $searchFrom->arrivalMax ?>;
-
-                  var end = '<?= $searchFrom->arrivalEnd ?>' || max;
-                  var start = '<?= $searchFrom->arrivalStart ?>' || min;
-                  departureFilter(<?=$segment->id ?>, min, max, start, end);
-              </script>
+            <?php } ?>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <label for="">Departure</label>
+                    </div>
+                    <div class="d-flex align-items-left" style="vertical-align: bottom;">
+                        <?= $form->field($searchFrom, 'departureStartTimeList[' . $key . ']')->textInput(['type' => 'time', 'style' => 'width: 110px; float: left; margin: 10px;', 'pattern' => '[0-9]{2}:[0-9]{2}'])->label(false) ?> - <?= $form->field($searchFrom, 'departureEndTimeList[' . $key . ']')->textInput(['type' => 'time', 'style' => 'width: 110px; float: left; margin: 10px;', 'pattern' => '[0-9]{2}:[0-9]{2}'])->label(false) ?>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <div class="col-md-3">
-            <div class="form-group">
-              <div class="d-flex align-items-center justify-content-between">
-                <label for="" class="control-label">Arrival</label>
-                <span id="search-quote-arrival-value<?= $segment->id ?>"></span>
-              </div>
-              <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
-                <div class="search-filters__slider" id="search-quote-arrival-filter<?= $segment->id ?>"></div>
-              </div>
-                <?= $form->field($searchFrom, 'arrival')->hiddenInput()->label(false) ?>
-              <script>
-                  var min = <?= $searchFrom->departureMin ?>;
-                  var max = <?= $searchFrom->departureMax ?>;
-
-                  var end = '<?= $searchFrom->departureEnd ?>' || max;
-                  var start = '<?= $searchFrom->departureStart ?>' || min;
-                  arrivalFilter(<?=$segment->id ?>, min, max, start, end);
-              </script>
+            <div class="col-md-3">
+                  <div class="form-group">
+                      <div class="d-flex align-items-center justify-content-between">
+                          <label for="">Arrival</label>
+                      </div>
+                      <div class="d-flex align-items-left" style="vertical-align: bottom;">
+                    <?= $form->field($searchFrom, 'arrivalStartTimeList[' . $key . ']')->textInput(['type' => 'time', 'style' => 'width: 110px; float: left; margin: 10px;', 'pattern' => '[0-9]{2}:[0-9]{2}'])->label(false) ?> - <?= $form->field($searchFrom, 'arrivalEndTimeList[' . $key . ']')->textInput(['type' => 'time', 'style' => 'width: 110px; float: left; margin: 10px;', 'pattern' => '[0-9]{2}:[0-9]{2}'])->label(false) ?>
+                      </div>
+                  </div>
             </div>
-          </div>
-          <div class="col-md-3">
-              <p style="padding-top: 24px;"><?= $segment->origin . '-' . $segment->destination;?></p>
-          </div>
+            <div class="col-md-1">
+                <?= $form->field($searchFrom, 'excludeNearbyAirports[' . $key . ']')->checkbox(['id' => $segment->id])?>
+            </div>
         </div>
         <?php endforeach; ?>
 

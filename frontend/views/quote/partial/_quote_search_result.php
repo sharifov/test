@@ -77,13 +77,23 @@ JS;
         }
     }
     ?>
+    <div class="row">
+        <div class="col-md-12 d-flex align-items-center justify-content-center">
+            <?= Html::button('<i class="fa fa-filter"></i> Show/Hide filter', [
+                'class' => 'btn btn-success',
+                'id' => 'quote-search-show-filter',
+            ]) ?>
+        </div>
+    </div>
+
+
     <script>
         pjaxOffFormSubmit('#pjax-search-quote-filter');
     </script>
     <?php Pjax::begin(['timeout' => 20000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false, 'id' => 'pjax-search-quote-filter']); ?>
 
     <?php
-        $js = <<<JS
+/*        $js = <<<JS
         function durationFilter(segmentId, min, max, start) {
             console.log(segmentId, min, max, start);
             noUiSlider.create($('#search-quote-duration-slider-filter'+segmentId)[0], {
@@ -100,8 +110,8 @@ JS;
                     'max': max
                 }
             });
-    
             $('#search-quote-duration-slider-filter'+segmentId)[0].noUiSlider.on('update', function (values, handle) {
+                console.log(values[handle]);
                 $('#search-quote-duration-slider-filter'+segmentId).closest('.form-group').find('input').val(values[handle]);
                 $('#search-quote-duration-slider-filter'+segmentId).closest('.form-group').find('#search-quote-current-duration-value'+segmentId).html(window.helper.toHHMM(values[handle] * 60));
             });
@@ -164,14 +174,19 @@ JS;
         }
     JS;
     $this->registerJs($js, View::POS_BEGIN);
-    ?>
+*/    ?>
 
     <?= $this->render('_quote_filters', [
     'minPrice' => $quotes['minPrice'],
     'maxPrice' => $quotes['maxPrice'],
     'airlines' => $airlines,
+    'connectionAirports' => $quotes['connectionAirports'],
     'lead' => $lead,
     'searchFrom' => $searchForm,
+    'tripMaxDurationRoundHours' => $quotes['tripMaxDurationRoundHours'],
+    'tripMaxDurationRoundMinutes' => $quotes['tripMaxDurationRoundMinutes'],
+    'tripsMinDurationsInMinutes' => $quotes['tripsMinDurationsInMinutes'],
+    'tripsMaxDurationsInMinutes' => $quotes['tripsMaxDurationsInMinutes'],
     'minTotalDuration' => min($quotes['totalDuration']),
     'maxTotalDuration' => max($quotes['totalDuration'])
 ]) ?>
@@ -191,7 +206,7 @@ JS;
         <?php endif; ?>
         <?= ListView::widget([
             'dataProvider' => $dataProvider,
-            'emptyText' => '<div class="text-center">Not found quotes</div><br>',
+            'emptyText' => '<div class="text-center">Quotes not found!</div><br>',
             'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes, $keyCache, $lead) {
                 return $this->render(
                     '_quote_search_item',
@@ -265,3 +280,13 @@ JS;
         <?php endif; ?>
     </div>
 <?php endif;?>
+
+<script>
+    $(document).on('click', '#quote-search-show-filter', function(e) {
+        $('#quote-search-filters').toggle();
+    });
+    $(document).ready(function() {
+        $('#quote-search-filters').hide();
+    });
+
+</script>

@@ -154,7 +154,7 @@ class QuoteController extends FController
                         throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'No search results', self::RUNTIME_ERROR_QUOTES_NO_RESULTS);
                     }
                 }
-//                VarDumper::dump($quotes);die;
+//                VarDumper::dump($quotes, 9, true);die;
 
                 $form = new FlightQuoteSearchForm();
                 $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
@@ -165,8 +165,7 @@ class QuoteController extends FController
 
                 $viewData = SearchService::getAirlineLocationInfo($quotes);
 
-                $quotes = $form->applyFilters($quotes);
-//                VarDumper::dump(ArrayHelper::toArray($form));die;
+                $quotes = $form->applyFilters($quotes, $lead->leadFlightSegments);
 
                 $dataProvider = new ArrayDataProvider([
                     'allModels' => $quotes['results'] ?? [],
