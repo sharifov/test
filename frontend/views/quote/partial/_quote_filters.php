@@ -175,8 +175,14 @@ use yii\bootstrap4\Html;
             </div>
 
             <div class="col-md-2">
-                <?= $form->field($searchFrom, 'topCriteria')->dropDownList(QuoteHelper::TOP_META_LIST, [
-                                 'prompt' => '--'
+                <?= $form->field($searchFrom, 'topCriteria')->widget(Select2::class, [
+                    'options' => [
+                        'placeholder' => '--', #$searchFrom->getAttributeLabel('fareType'),
+                        'multiple' => true,
+                        'id' => 'fareType'
+                        ],
+                    'data' => QuoteHelper::TOP_META_LIST,
+                    'size' => Select2::SIZE_SMALL
                 ]) ?>
             </div>
 
