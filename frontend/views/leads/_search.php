@@ -162,7 +162,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Created Date From / To');
-                            ?>
+?>
                         </div>
                     <!--</div>
                     <div class="row">-->
@@ -183,7 +183,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Status Date From / To');
-                            ?>
+?>
                         </div>
                     <!--</div>
                     <div class="row">-->
@@ -204,7 +204,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Updated Date From / To');
-                            ?>
+?>
                         </div>
                    <!-- </div>
                     <div class="row">-->
@@ -225,7 +225,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Last Action From / To');
-                            ?>
+?>
                         </div>
                         <div class="col-md-2">
                             <?php echo $form->field($model, 'expiration_dt', [
