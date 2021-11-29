@@ -154,12 +154,13 @@ class FlightQuoteSearchForm extends Model
             $quotes['results'] = array_filter($quotes['results'], function ($item) use (&$leadFlight) {
                 $item['showed'] = true;
                 foreach ($leadFlight as $tripKey => $queryTrip) {
-                    if (!empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
+                    if (
+                        !empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
                         && $this->excludeNearbyAirports[$tripKey]
                         && !empty($item['trips'][$tripKey]['segments'])
                         && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
                         || $item['trips'][$tripKey]['segments'][count($item['trips'][$tripKey]['segments']) - 1]['arrivalAirportCode'] != $queryTrip->destination)
-                        ) {
+                    ) {
                             $item['showed'] = false;
                     }
                 }
@@ -226,8 +227,8 @@ class FlightQuoteSearchForm extends Model
                     if ($time['departure'] && $this->departureStartTimeList[$tripKey] != '' && $this->departureEndTimeList[$tripKey] != '') {
                         $departureDate = new \DateTime($time['departure']);
                         $departureMinutesOfDay = (int)$departureDate->format('i') + (int)$departureDate->format('H') * 60;
-                        $departureStartMinutesOfDay = substr($this->departureStartTimeList[$tripKey], 0, 2)*60 + substr($this->departureStartTimeList[$tripKey], 3, 2);
-                        $departureEndMinutesOfDay = substr($this->departureEndTimeList[$tripKey], 0, 2)*60 + substr($this->departureEndTimeList[$tripKey], 3, 2);
+                        $departureStartMinutesOfDay = substr($this->departureStartTimeList[$tripKey], 0, 2) * 60 + substr($this->departureStartTimeList[$tripKey], 3, 2);
+                        $departureEndMinutesOfDay = substr($this->departureEndTimeList[$tripKey], 0, 2) * 60 + substr($this->departureEndTimeList[$tripKey], 3, 2);
                         if ($departureMinutesOfDay < $departureStartMinutesOfDay || $departureMinutesOfDay > $departureEndMinutesOfDay) {
                             return false;
                         }
@@ -243,8 +244,8 @@ class FlightQuoteSearchForm extends Model
                     if ($time['arrival'] && $this->arrivalStartTimeList[$tripKey] != '' && $this->arrivalEndTimeList[$tripKey] != '') {
                         $arrivalDate = new \DateTime($time['arrival']);
                         $arrivalMinutesOfDay = (int)$arrivalDate->format('i') + (int)$arrivalDate->format('H') * 60;
-                        $arrivalStartMinutesOfDay = substr($this->arrivalStartTimeList[$tripKey], 0, 2)*60 + substr($this->arrivalStartTimeList[$tripKey], 3, 2);
-                        $arrivalEndMinutesOfDay = substr($this->arrivalEndTimeList[$tripKey], 0, 2)*60 + substr($this->arrivalEndTimeList[$tripKey], 3, 2);
+                        $arrivalStartMinutesOfDay = substr($this->arrivalStartTimeList[$tripKey], 0, 2) * 60 + substr($this->arrivalStartTimeList[$tripKey], 3, 2);
+                        $arrivalEndMinutesOfDay = substr($this->arrivalEndTimeList[$tripKey], 0, 2) * 60 + substr($this->arrivalEndTimeList[$tripKey], 3, 2);
                         if ($arrivalMinutesOfDay < $arrivalStartMinutesOfDay || $arrivalMinutesOfDay > $arrivalEndMinutesOfDay) {
                             return false;
                         }

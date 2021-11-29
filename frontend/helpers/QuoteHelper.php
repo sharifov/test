@@ -264,11 +264,11 @@ class QuoteHelper
             foreach ($quotes['tripsDurations'] as $key => $tripDurations) {
                 $quotes['tripsMinDurationsInMinutes'][$key] = min($tripDurations) > 0 ? min($tripDurations) : 0;
                 $quotes['tripsMaxDurationsInMinutes'][$key] = max($tripDurations) > 0 ? max($tripDurations) : 0;
-                $quotes['tripMaxDurationRoundHours'][$key] = floor($quotes['tripsMaxDurationsInMinutes'][$key]/60);
+                $quotes['tripMaxDurationRoundHours'][$key] = floor($quotes['tripsMaxDurationsInMinutes'][$key] / 60);
                 if ($quotes['tripsMaxDurationsInMinutes'][$key] % 60 > 50) {
                     $quotes['tripMaxDurationRoundHours'][$key]++;
                 }
-                $quotes['tripMaxDurationRoundMinutes'][$key] = ceil($quotes['tripsMaxDurationsInMinutes'][$key]/10)*10 % 60;
+                $quotes['tripMaxDurationRoundMinutes'][$key] = ceil($quotes['tripsMaxDurationsInMinutes'][$key] / 10) * 10 % 60;
             }
         }
 

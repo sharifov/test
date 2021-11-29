@@ -189,7 +189,7 @@ use yii\bootstrap4\Html;
         <?php foreach ($lead->leadFlightSegments as $key => $segment) : ?>
         <div class="row">
             <div class="col-md-2">
-                <p style="padding-top: 24px;"><?= $key + 1 ?>. <?= Airports::findByIata($segment->origin)->cityName. ' ' . $segment->origin . ' - ' . Airports::findByIata($segment->destination)->cityName . ' ' . $segment->destination ?></p>
+                <p style="padding-top: 24px;"><?= $key + 1 ?>. <?= Airports::findByIata($segment->origin)->cityName . ' ' . $segment->origin . ' - ' . Airports::findByIata($segment->destination)->cityName . ' ' . $segment->destination ?></p>
             </div>
             <?php if (isset($tripsMinDurationsInMinutes[$key]) && isset($tripsMaxDurationsInMinutes[$key]) && $tripsMinDurationsInMinutes[$key] > 0 && $tripsMaxDurationsInMinutes[$key] > 0) { ?>
             <div class="col-md-3">
@@ -200,16 +200,16 @@ use yii\bootstrap4\Html;
                     <div class="d-flex align-items-left" style="vertical-align: bottom;">
                         <div>
                         <?php
-                        $rangeHoursArray = range(floor($tripsMinDurationsInMinutes[$key]/60), $tripMaxDurationRoundHours[$key]);
+                        $rangeHoursArray = range(floor($tripsMinDurationsInMinutes[$key] / 60), $tripMaxDurationRoundHours[$key]);
                         $rangeMinutesArray = range(0, 50, 10);
                         ?>
-                        <?= $form->field($searchFrom, 'tripMaxDurationHours[' . $key . ']')->dropDownList(array_combine($rangeHoursArray, $rangeHoursArray), ['options' => [$searchFrom->tripMaxDurationHours[$key] ?? $tripMaxDurationRoundHours[$key] => ['Selected'=>'selected']], 'style' => 'width:55px; float: left; margin-right: 7px;'])->label('hours');
+                        <?= $form->field($searchFrom, 'tripMaxDurationHours[' . $key . ']')->dropDownList(array_combine($rangeHoursArray, $rangeHoursArray), ['options' => [$searchFrom->tripMaxDurationHours[$key] ?? $tripMaxDurationRoundHours[$key] => ['Selected' => 'selected']], 'style' => 'width:55px; float: left; margin-right: 7px;'])->label('hours');
                         ?>
                         </div>
-                        <?= $form->field($searchFrom, 'tripMaxDurationMinutes[' . $key . ']')->dropDownList(array_combine($rangeMinutesArray, $rangeMinutesArray), ['options' => [$searchFrom->tripMaxDurationMinutes[$key] ?? $tripMaxDurationRoundMinutes[$key] => ['Selected'=>'selected']], 'style' => 'width:55px; float: left; margin-right: 7px; margin-left: 10px;'])->label('minutes') ?>
+                        <?= $form->field($searchFrom, 'tripMaxDurationMinutes[' . $key . ']')->dropDownList(array_combine($rangeMinutesArray, $rangeMinutesArray), ['options' => [$searchFrom->tripMaxDurationMinutes[$key] ?? $tripMaxDurationRoundMinutes[$key] => ['Selected' => 'selected']], 'style' => 'width:55px; float: left; margin-right: 7px; margin-left: 10px;'])->label('minutes') ?>
                     </div>
                     <div>
-                        <small>allowable: <?= floor($tripsMinDurationsInMinutes[$key]/60) . ' h ' . $tripsMinDurationsInMinutes[$key] % 60 . ' m -' . floor($tripsMaxDurationsInMinutes[$key]/60) . ' h ' . $tripsMaxDurationsInMinutes[$key] % 60 . ' m'?></small>
+                        <small>allowable: <?= floor($tripsMinDurationsInMinutes[$key] / 60) . ' h ' . $tripsMinDurationsInMinutes[$key] % 60 . ' m -' . floor($tripsMaxDurationsInMinutes[$key] / 60) . ' h ' . $tripsMaxDurationsInMinutes[$key] % 60 . ' m'?></small>
                     </div>
                 </div>
             </div>
