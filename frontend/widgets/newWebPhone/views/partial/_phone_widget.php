@@ -467,21 +467,29 @@ use yii\web\View;
     <div class="additional-bar__body tabs">
         <ul class="tabs__nav tab-nav">
             <li class="wp-tab-device"><a href="#tab-device" class="tab-trigger active-tab">Devices</a></li>
+            <li><a href="#tab-device-status" class="tab-trigger">Devices status</a></li>
             <li><a href="#tab-logs" class="tab-trigger wp-devices-tab-log">Logs</a></li>
         </ul>
         <ul class="tabs__container tab-container">
             <li class="tabs__item" id="tab-device">
                 <div id="output-selection">
-                <label>Ringtone Devices</label>
-                <select id="ringtone-devices" class="ringtone-devices form-control" multiple></select>
-                <label>Speaker Devices</label>
-                <select id="speaker-devices" class="speaker-devices form-control" multiple></select><br/>
+                    <label>Microphone Devices</label>
+                    <select id="microphone-devices" class="ringtone-devices form-control" multiple></select>
+                    <label>Ringtone Devices</label>
+                    <select id="ringtone-devices" class="ringtone-devices form-control" multiple></select>
+                    <label>Speaker Devices</label>
+                    <select id="speaker-devices" class="speaker-devices form-control" multiple></select><br/>
                 </div>
             </li>
+            <li class="tabs__item" id="tab-device-status">
+                <span class="tab-device-status-twilio"></span><br>
+                <span class="tab-device-status-speaker"></span><br>
+                <span class="tab-device-status-ringtone"></span><br>
+                <span class="tab-device-status-microphone"></span><br>
+            </li>
             <li class="tabs__item" id="tab-logs">
-            <pre class="logs-block">
-
-            </pre>
+                <pre class="logs-block">
+                </pre>
             </li>
         </ul>
        

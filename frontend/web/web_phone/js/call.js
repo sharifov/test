@@ -1,55 +1,4 @@
-(function () {
-    function IncomingTwilioCalls() {
-        this.calls = [];
-
-        this.add = function (call) {
-            if (typeof call.parameters === 'undefined') {
-                console.error('Not found Parameters. Call: ' + JSON.stringify(call));
-                return;
-            }
-            if (typeof call.parameters.CallSid === 'undefined') {
-                console.error('Not found CallSid. Call: ' + JSON.stringify(call));
-                return;
-            }
-            this.calls.push(call);
-        };
-
-        this.get = function (callSid) {
-            let index = this.getIndex(callSid);
-            if (index !== null) {
-                return this.calls[index];
-            }
-            console.error('Not found Call. CallSid: ' + callSid);
-            return null;
-        };
-
-        this.getIndex = function (callSid) {
-            let index = null;
-            this.calls.forEach(function (call, i) {
-                if (call.parameters.CallSid === callSid) {
-                    index = i;
-                    return false;
-                }
-            });
-            return index;
-        };
-
-        this.remove = function (callSid) {
-            let index = this.getIndex(callSid);
-            if (index !== null) {
-                this.calls.splice(index, 1);
-            }
-        };
-
-        this.all = function () {
-            console.log(JSON.stringify(this.calls));
-        };
-    }
-
-    window.phoneWidget.incomingTwilioCalls = new IncomingTwilioCalls();
-})();
-
-var PhoneWidgetCall = function () {
+var PhoneWidget = function () {
     let statusCheckbox = null;
 
     let settings = {
@@ -97,8 +46,6 @@ var PhoneWidgetCall = function () {
         'incoming': {}
     };
 
-    let incomingSoundInterval = null;
-
     let activeCallSid = null;
 
     let conferenceSources = {
@@ -120,8 +67,6 @@ var PhoneWidgetCall = function () {
 
     let phoneNumbers = null;
 
-    let incomingTwilioCalls = window.phoneWidget.incomingTwilioCalls;
-
     let incomingAudio = new Audio('/js/sounds/incoming_call.mp3');
     incomingAudio.volume = 0.3;
     incomingAudio.loop = true;
@@ -130,14 +75,23 @@ var PhoneWidgetCall = function () {
 
     let deviceStatus = {};
 
+    let logger = {};
+
+    let twilioInternalIncomingConnection = null;
+
     function init(options)
     {
+        if (!options.isDevicePage) {
+            $('.phone-widget__settings.header-action-small.toggle-bar-settings').css('display', 'none');
+        }
+
         callRequester.init(options);
+        logger = new window.phoneWidget.logger.Logger();
 
         isDevicePage = options.isDevicePage;
 
         audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
-        deviceStatus = new window.phoneWidget.device.status.Init(isDevicePage);
+        deviceStatus = new window.phoneWidget.device.status.Init(isDevicePage, logger);
 
         Object.assign(settings, options);
 
@@ -156,7 +110,6 @@ var PhoneWidgetCall = function () {
         muteBtnClickEvent();
         transferCallBtnClickEvent();
         acceptCallBtnClickEvent();
-        rejectIncomingCallClickEvent();
         hideIncomingCallClickEvent();
         callAddNoteCLickEvent();
         dialpadCLickEvent();
@@ -175,6 +128,14 @@ var PhoneWidgetCall = function () {
         btnWarmTransferToUserEvent();
         btnTransferNumberEvent();
         btnMakeCallEvent();
+    }
+
+    function addLog(message) {
+        return logger.add(message);
+    }
+
+    function clearLog(message) {
+        return logger.clear();
     }
 
     function getDeviceStatus() {
@@ -332,7 +293,7 @@ var PhoneWidgetCall = function () {
         } else {
             call = new window.phoneWidget.call.Call(data);
         }
-        PhoneWidgetCall.freeDialButton();
+        PhoneWidget.freeDialButton();
         panes.outgoing.init(call);
         openWidget();
         openCallTab();
@@ -357,7 +318,7 @@ var PhoneWidgetCall = function () {
             console.log('Call is already exist in Active Queue');
             return false;
         }
-        PhoneWidgetCall.freeDialButton();
+        PhoneWidget.freeDialButton();
         audio.incoming.refresh();
 
         if (panes.outgoing.isEqual(call.data.callSid)) {
@@ -499,16 +460,6 @@ var PhoneWidgetCall = function () {
         if (queues.active.count() === 0 && queues.hold.count() === 0 && (queues.direct.count() > 0 || queues.general.count() > 0)) {
             audio.incoming.refresh();
         }
-    }
-
-    function rejectIncomingCallClickEvent()
-    {
-        $(document).on('click', '#reject-incoming-call', function(e) {
-            e.preventDefault();
-            if (window.TwilioCall) {
-                window.TwilioCall.reject();
-            }
-        })
     }
 
     function hideIncomingCallClickEvent()
@@ -728,7 +679,7 @@ var PhoneWidgetCall = function () {
                 return false;
             }
             if (action === 'accept') {
-                acceptCall(btn.attr('data-call-sid'), btn.attr('data-from-internal'));
+                acceptCall(btn.attr('data-call-sid'));
                 return false;
             }
             console.log('Undefined type action');
@@ -738,7 +689,7 @@ var PhoneWidgetCall = function () {
             let action = $(this).attr('data-type-action');
 
             if (action === 'accept') {
-                acceptCall(btn.attr('data-call-sid'), btn.attr('data-from-internal'));
+                acceptCall(btn.attr('data-call-sid'));
                 return false;
             }
 
@@ -800,28 +751,23 @@ var PhoneWidgetCall = function () {
         return false;
     }
 
-    function acceptCall(callSid, fromInternal)
+    function acceptCall(callSid)
     {
         if (!checkDevice('Accept Call')) {
              return false;
         }
 
-        if (fromInternal !== 'false' && window.TwilioCall) {
-            window.TwilioCall.accept();
-            showCallingPanel();
-        } else {
-            let call = waitQueue.one(callSid);
-            if (call === null) {
-                createNotify('Error', 'Not found call on Wait Queue', 'error');
-                return false;
-            }
-
-            if (!call.setAcceptCallRequestState()) {
-                return false;
-            }
-
-            callRequester.accept(call);
+        let call = waitQueue.one(callSid);
+        if (call === null) {
+            createNotify('Error', 'Not found call on Wait Queue', 'error');
+            return false;
         }
+
+        if (!call.setAcceptCallRequestState()) {
+            return false;
+        }
+
+        callRequester.accept(call);
     }
 
     function acceptWarmTransfer(callSid)
@@ -1729,42 +1675,42 @@ var PhoneWidgetCall = function () {
             return;
         }
 
-        let callSid = call.data.callSid;
-        let twilioCall = incomingTwilioCalls.get(callSid);
+        if (twilioInternalIncomingConnection === null) {
+            createNotify('Accept internal Call', 'Not found twilioInternalIncomingConnection', 'error');
+            return;
+        }
 
-        if (twilioCall === null) {
-            createNotify('Accept internal Call', 'Not found CallSid on Collections of IncomingTwilioCalls', 'error');
+        let callSid = call.data.callSid;
+
+        if (twilioInternalIncomingConnection.parameters.CallSid !== callSid) {
+            createNotify('Accept internal Call', 'Accepted Call Sid(' + callSid + ') is not equal twilioInternalIncomingConnection CallSid(' + twilioInternalIncomingConnection.parameters.CallSid + ')', 'error');
             return;
         }
 
         call.setAcceptCallRequestState();
-        callRequester.acceptInternalCall(call, twilioCall);
+        callRequester.acceptInternalCall(call, twilioInternalIncomingConnection);
     }
 
     function rejectInternalCall(call) {
-        let callSid = call.data.callSid;
-        let twilioCall = incomingTwilioCalls.get(callSid);
+        if (twilioInternalIncomingConnection === null) {
+            createNotify('Reject internal Call', 'Not found twilioInternalIncomingConnection', 'error');
+            return;
+        }
 
-        if (twilioCall === null) {
-            createNotify('Reject Internal Call', 'Not found CallSid on Collections of IncomingTwilioCalls', 'error');
+        let callSid = call.data.callSid;
+
+        if (twilioInternalIncomingConnection.parameters.CallSid !== callSid) {
+            createNotify('Reject internal Call', 'Rejected Call Sid(' + callSid + ') is not equal twilioInternalIncomingConnection CallSid(' + twilioInternalIncomingConnection.parameters.CallSid + ')', 'error');
             return;
         }
 
         call.setRejectInternalRequest();
-        incomingTwilioCalls.remove(twilioCall.parameters.CallSid);
-        twilioCall.reject();
+        twilioInternalIncomingConnection.reject();
+        removeTwilioInternalIncomingConnection();
         incomingSoundOff();
     }
 
-    function startTimerSoundIncomingCall() {
-        incomingSoundInterval = setInterval(function () {
-            incomingAudio.play();
-            clearInterval(incomingSoundInterval);
-        }, 2500);
-    }
-
     function incomingSoundOff() {
-        clearInterval(incomingSoundInterval);
         incomingAudio.pause();
     }
 
@@ -2035,6 +1981,14 @@ var PhoneWidgetCall = function () {
             .attr('data-from-contacts', '');
     }
 
+    function setTwilioInternalIncomingConnection(connection) {
+        twilioInternalIncomingConnection = connection;
+    }
+
+    function removeTwilioInternalIncomingConnection() {
+        twilioInternalIncomingConnection = null;
+    }
+
     return {
         init: init,
         volumeIndicatorsChange: volumeIndicatorsChange,
@@ -2061,7 +2015,6 @@ var PhoneWidgetCall = function () {
         setActiveCall: setActiveCall,
         acceptInternalCall: acceptInternalCall,
         rejectInternalCall: rejectInternalCall,
-        startTimerSoundIncomingCall: startTimerSoundIncomingCall,
         incomingSoundOff: incomingSoundOff,
         getActiveCallSid: getActiveCallSid,
         setActiveCallSid: setActiveCallSid,
@@ -2072,11 +2025,15 @@ var PhoneWidgetCall = function () {
         joinBarge: joinBarge,
         getLeadViewPageShortUrl: getLeadViewPageShortUrl,
         freeDialButton: freeDialButton,
-        incomingTwilioCalls: incomingTwilioCalls,
         soundDisconnect: soundDisconnect,
         soundConnect: soundConnect,
         resetDialNumberData: resetDialNumberData,
-        getDeviceStatus: getDeviceStatus
+        getDeviceStatus: getDeviceStatus,
+        addLog: addLog,
+        clearLog: clearLog,
+        setTwilioInternalIncomingConnection: setTwilioInternalIncomingConnection,
+        removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection
+
     };
 }();
 

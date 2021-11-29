@@ -262,7 +262,7 @@ $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
 $js = <<<JS
-PhoneWidgetCall.init({
+PhoneWidget.init({
     'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',
     'acceptCallUrl': '$ajaxAcceptIncomingCall',
     'callStatusUrl': '$callStatusUrl',

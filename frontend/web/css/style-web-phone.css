@@ -155,9 +155,9 @@ div#call-controls input {
   left: 50px;
   top: 50px;
 }
-.phone-widget-icon .widget-icon-inner[data-device-status="registered"]:after {
+.phone-widget-icon .widget-icon-inner[data-phone-device-status="ready"]:after {
   background-color: #53e93a;
 }
-.phone-widget-icon .widget-icon-inner[data-device-status="unregistered"]:after {
+.phone-widget-icon .widget-icon-inner[data-phone-device-status="not-ready"]:after {
   background-color: #D15151;
 }

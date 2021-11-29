@@ -156,7 +156,7 @@ function hideActionBlock() {
 function leadRedialCall(phoneFrom, phoneTo) {
     $("#redial-lead-call-status-block-text").html('Processing ...');
     $('#redial-lead-call-status-block').show();
-    PhoneWidgetCall.webCallLeadRedial(phoneFrom, phoneTo, {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
+    PhoneWidget.webCallLeadRedial(phoneFrom, phoneTo, {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
 }
 
 function callInProgress() {

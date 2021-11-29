@@ -78,7 +78,7 @@
 
         this.accept = function (call) {
             window.phoneWidget.notifier.off(call.data.callSid);
-            PhoneWidgetCall.audio.incoming.off(call.data.callSid);
+            PhoneWidget.audio.incoming.off(call.data.callSid);
             $.ajax({
                 type: 'post',
                 url: this.settings.acceptCallUrl,
@@ -93,7 +93,7 @@
                         createNotify('Accept Call', data.message, 'error');
                         call.unSetAcceptCallRequestState();
                         window.phoneWidget.notifier.on(call.data.callSid);
-                        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                        PhoneWidget.audio.incoming.on(call.data.callSid);
                     }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
@@ -101,13 +101,13 @@
                     createNotify('Accept Call', message, 'error');
                     call.unSetAcceptCallRequestState();
                     window.phoneWidget.notifier.on(call.data.callSid);
-                    PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                    PhoneWidget.audio.incoming.on(call.data.callSid);
                 })
         };
 
         this.acceptWarmTransfer = function (call) {
             window.phoneWidget.notifier.off(call.data.callSid);
-            PhoneWidgetCall.audio.incoming.off(call.data.callSid);
+            PhoneWidget.audio.incoming.off(call.data.callSid);
             $.ajax({
                 type: 'post',
                 url: this.settings.acceptWarmTransferCallUrl,
@@ -121,7 +121,7 @@
                         createNotify('Accept Call', data.message, 'error');
                         call.unSetAcceptCallRequestState();
                         window.phoneWidget.notifier.on(call.data.callSid);
-                        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                        PhoneWidget.audio.incoming.on(call.data.callSid);
                     }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
@@ -129,7 +129,7 @@
                     createNotify('Accept Call', message, 'error');
                     call.unSetAcceptCallRequestState();
                     window.phoneWidget.notifier.on(call.data.callSid);
-                    PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                    PhoneWidget.audio.incoming.on(call.data.callSid);
                 })
         };
 
@@ -177,7 +177,7 @@
 
         this.returnHoldCall = function (call) {
             window.phoneWidget.notifier.off(call.data.callSid);
-            PhoneWidgetCall.audio.incoming.off(call.data.callSid);
+            PhoneWidget.audio.incoming.off(call.data.callSid);
             $.ajax({
                 type: 'post',
                 url: this.settings.returnHoldCallUrl,
@@ -191,7 +191,7 @@
                         createNotify('Return Hold Call', data.message, 'error');
                         call.unSetReturnHoldCallRequestState();
                         window.phoneWidget.notifier.on(call.data.callSid);
-                        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                        PhoneWidget.audio.incoming.on(call.data.callSid);
                     }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
@@ -199,7 +199,7 @@
                     createNotify('Return Hold Call', message, 'error');
                     call.unSetReturnHoldCallRequestState();
                     window.phoneWidget.notifier.on(call.data.callSid);
-                    PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                    PhoneWidget.audio.incoming.on(call.data.callSid);
                 })
         };
 
@@ -238,7 +238,7 @@
                         call.unSetHangupRequestState();
                     }
                     if (typeof data.result !== 'undefined' && typeof data.result.status !== 'undefined' && data.result.status === 'completed') {
-                        PhoneWidgetCall.completeCall(callSid);
+                        PhoneWidget.completeCall(callSid);
                     }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
@@ -446,9 +446,9 @@
         };
 
         this.acceptPriorityCall = function (key) {
-            PhoneWidgetCall.queues.priority.accept();
+            PhoneWidget.queues.priority.accept();
             window.phoneWidget.notifier.off(key);
-            PhoneWidgetCall.audio.incoming.off(key);
+            PhoneWidget.audio.incoming.off(key);
             $.ajax({
                 type: 'post',
                 url: this.settings.acceptPriorityCallUrl,
@@ -466,22 +466,22 @@
                             createNotify('Accept Call', data.redialError, 'error');
                         } else {
                             window.phoneWidget.notifier.notifiers.phone.reset();
-                            PhoneWidgetCall.panes.queue.hide();
-                            PhoneWidgetCall.openCallTab();
-                            PhoneWidgetCall.showCallingPanel();
+                            PhoneWidget.panes.queue.hide();
+                            PhoneWidget.openCallTab();
+                            PhoneWidget.showCallingPanel();
                         }
                     } else {
-                        PhoneWidgetCall.audio.incoming.on(key);
+                        PhoneWidget.audio.incoming.on(key);
                     }
-                    PhoneWidgetCall.queues.priority.unAccept();
+                    PhoneWidget.queues.priority.unAccept();
                     window.phoneWidget.notifier.on(key);
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
                     var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
                     createNotify('Accept Call', message, 'error');
-                    PhoneWidgetCall.queues.priority.unAccept();
+                    PhoneWidget.queues.priority.unAccept();
                     window.phoneWidget.notifier.on(key);
-                    PhoneWidgetCall.audio.incoming.on(key);
+                    PhoneWidget.audio.incoming.on(key);
                 })
         };
 
@@ -616,12 +616,12 @@
                 .done(function (data) {
                     if (data.error) {
                         createNotify('Create Internal Call', data.message, 'error');
-                        PhoneWidgetCall.freeDialButton();
+                        PhoneWidget.freeDialButton();
                     }
                 })
                 .fail(function () {
                     createNotify('Create Internal Call', 'Server error', 'error');
-                    PhoneWidgetCall.freeDialButton();
+                    PhoneWidget.freeDialButton();
                 })
         };
 
@@ -633,10 +633,10 @@
             })
                 .done(function (data) {
                     if (data.error) {
-                        PhoneWidgetCall.freeDialButton();
+                        PhoneWidget.freeDialButton();
                         createNotify('Create Call', data.message, 'error');
                         if (data.is_on_call === true) {
-                            PhoneWidgetCall.updateCurrentCalls(data.phone_widget_data.calls, data.phone_widget_data.userStatus);
+                            PhoneWidget.updateCurrentCalls(data.phone_widget_data.calls, data.phone_widget_data.userStatus);
                         }
                         return;
                     }
@@ -644,7 +644,7 @@
                 })
                 .fail(function () {
                     createNotify('Create Call', 'Server error', 'error');
-                    PhoneWidgetCall.freeDialButton();
+                    PhoneWidget.freeDialButton();
                 })
         };
     }

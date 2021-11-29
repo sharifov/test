@@ -56,6 +56,7 @@ class NewWebPhoneGroupAsset extends AssetBundle
 
         '/web_phone/js/audio.js',
 
+        '/web_phone/js/logger.js',
         '/web_phone/js/device_status.js',
         '/web_phone/js/status.js',
         '/web_phone/js/call.js',

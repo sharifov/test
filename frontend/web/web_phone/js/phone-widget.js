@@ -57,7 +57,7 @@ $(document).ready(function() {
             }
             let countMissedCalls = parseInt($(this).attr('data-missed-calls'));
             if (countMissedCalls > 0) {
-                PhoneWidgetCall.requestClearMissedCalls();
+                PhoneWidget.requestClearMissedCalls();
             }
         }
 
@@ -353,7 +353,7 @@ $(document).ready(function() {
         $('.call-pane__dial-clear-all').addClass('is-shown');
         $('#call-pane__dial-number_active_dialpad').focus();
 
-        PhoneWidgetCall.callRequester.sendDigit(conferenceSid, keyPressed);
+        PhoneWidget.callRequester.sendDigit(conferenceSid, keyPressed);
     });
 
     $(window).on("mouseup touchend", function(){
@@ -372,7 +372,7 @@ $(document).ready(function() {
     $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
         $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
-        PhoneWidgetCall.resetDialNumberData();
+        PhoneWidget.resetDialNumberData();
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
 
@@ -385,7 +385,7 @@ $(document).ready(function() {
         $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
-        PhoneWidgetCall.resetDialNumberData();
+        PhoneWidget.resetDialNumberData();
     });
 
     $('.call-pane__correction').on('click', function(e) {
