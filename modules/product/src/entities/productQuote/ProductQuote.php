@@ -7,6 +7,7 @@ use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
@@ -783,6 +784,17 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function bookedChangeFlow(): void
     {
         if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
+            $this->recordEvent(
+                new ProductQuoteStatusChangeEvent(
+                    $this->pq_id,
+                    $this->pq_status_id,
+                    ProductQuoteStatus::BOOKED,
+                    'Exchange API flow',
+                    null,
+                    null,
+                    null
+                )
+            );
             $this->setStatus(ProductQuoteStatus::BOOKED);
         }
     }
