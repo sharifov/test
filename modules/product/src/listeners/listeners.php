@@ -4,6 +4,7 @@ use modules\order\src\listeners\order\OrderPrepareListener;
 use modules\order\src\processManager;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteBookedChangeFlowEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteExpiredEvent;
@@ -15,6 +16,7 @@ use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDec
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionRefundEvent;
 use modules\product\src\entities\productQuoteOption\events\ProductQuoteOptionCloneCreatedEvent;
+use modules\product\src\listeners\productQuote\ProductQuoteBookedChangeFlowListener;
 use modules\product\src\listeners\productQuote\ProductQuoteDeclinedEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteExpiredEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateChildrenProfitAmountListener;
@@ -98,5 +100,8 @@ return [
 
     ProductQuoteChangeDecisionModifyEvent::class => [
         \sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
+    ],
+    ProductQuoteBookedChangeFlowEvent::class => [
+        ProductQuoteBookedChangeFlowListener::class
     ],
 ];

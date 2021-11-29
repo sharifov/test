@@ -6,6 +6,7 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
+use modules\product\src\entities\productQuote\events\ProductQuoteBookedChangeFlowEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -785,14 +786,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
             $this->recordEvent(
-                new ProductQuoteStatusChangeEvent(
+                new ProductQuoteBookedChangeFlowEvent(
                     $this->pq_id,
                     $this->pq_status_id,
                     ProductQuoteStatus::BOOKED,
                     'Exchange API flow',
-                    null,
-                    null,
-                    null
+                    $this->pq_owner_user_id
                 )
             );
             $this->setStatus(ProductQuoteStatus::BOOKED);
