@@ -8,11 +8,9 @@ use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use sales\model\contactPhoneData\service\ContactPhoneDataService;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
 use Yii;
-use sales\services\lead\LeadFlowLogService;
 
 /**
- *
- * @property LeadFlowLogService $leadFlowLogService
+ * Class LeadPhoneTrustListener
  */
 class LeadPhoneTrustListener
 {

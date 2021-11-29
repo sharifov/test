@@ -219,7 +219,7 @@ use yii\helpers\VarDumper;
  * @property null|Quote $appliedAlternativeQuotes
  * @property mixed $flowTransition
  * @property mixed $sumPercentTipsSplit
- * @property ActiveQuery $appliedQuote
+ * @property null|Quote $appliedQuote
  * @property ActiveQuery $psUsers
  * @property mixed $allProfitSplits
  * @property null|string $lastReasonFromLeadFlow
