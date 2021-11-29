@@ -64,7 +64,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                 window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
             }
 
-            if (window.isTwilioDevicePage && !window.deviceInitalized) {
+            if (window.isTwilioDevicePage) {
                 socketSend('Voip', 'Device', {
                     'userId': userId
                 });
