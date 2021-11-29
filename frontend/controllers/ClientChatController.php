@@ -866,10 +866,6 @@ class ClientChatController extends FController
             if ($userAccess->ccua_status_id === $accessAction) {
                 $eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($userAccess->ccuaCch, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $userAccess->ccua_user_id);
                 $result['widgetData']['data'] = $this->clientChatUserAccessRepository->getUserAccessWidgetCommandData($userAccess->ccua_cch_id, $userAccess->ccua_user_id, $userAccess->ccua_status_id, $userAccess->getPrimaryKey());
-                if ($accessAction === ClientChatUserAccess::STATUS_ACCEPT) {
-                    $clientChatLeadAutoTakeService = Yii::createObject(ClientChatLeadAutoTakeService::class);
-                    $clientChatLeadAutoTakeService->byAcceptFromWidget($userAccess->ccua_cch_id, Auth::id());
-                }
             } else {
                 $result['error'] = true;
                 $result['message'] = 'The action was performed incorrectly, please try again';
