@@ -20,7 +20,6 @@ use webapi\src\forms\boWebhook\FlightVoluntaryExchangeUpdateForm;
 use yii\base\Model;
 use yii\db\Transaction;
 
-
 /**
  * Class VoluntaryExchangeBoHandler
  *

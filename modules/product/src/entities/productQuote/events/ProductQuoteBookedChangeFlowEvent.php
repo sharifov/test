@@ -28,7 +28,7 @@ class ProductQuoteBookedChangeFlowEvent
         ?int $endStatusId,
         ?string $description,
         ?int $ownerId = null,
-        ?int $creatorId  = null
+        ?int $creatorId = null
     ) {
         $this->productQuoteId = $productQuoteId;
         $this->startStatusId = $startStatusId;
