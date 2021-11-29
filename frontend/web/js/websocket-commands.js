@@ -64,6 +64,11 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                 window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
             }
 
+            if (window.isTwilioDevicePage && !window.deviceInitalized) {
+                socketSend('Voip', 'Device', {
+                    'userId': userId
+                });
+            }
         };
 
         socket.onmessage = function (e) {
@@ -532,6 +537,14 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                                 let windowObjectReference = window.open(PhoneWidget.getLeadViewPageShortUrl() + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
                                 windowObjectReference.focus();
                             }
+                        }
+                    }
+
+                    if (obj.cmd === 'initPhoneDevices') {
+                        if (obj.error) {
+                            createNotify('Phone Widget', obj.msg, 'error')
+                        } else {
+                            window.phoneWidget.device.initialize.Init();
                         }
                     }
                 }

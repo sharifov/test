@@ -1,5 +1,10 @@
 (function () {
     function Init() {
+        if (deviceInitialized) {
+            console.log('device already initialized');
+            return;
+        }
+
         // console.log("Requesting Twilio Access Token...");
         PhoneWidget.addLog("Requesting Twilio Access Token...");
         $.getJSON('/phone/get-token')
@@ -19,11 +24,13 @@
             PhoneWidget.addLog("Init Twilio Device...");
 
             const device = new Twilio.Device(token, {
-               logLevel: 1,
+               //logLevel: 1,
                 //edge: 'ashburn',
                 closeProtection: true,
                 codecPreferences: ["opus", "pcmu"]
             });
+
+            deviceInitialized = true;
 
             const speakerDevices = document.getElementById("speaker-devices");
             const ringtoneDevices = document.getElementById("ringtone-devices");
@@ -282,6 +289,8 @@
             device.register();
         }
     }
+
+    let deviceInitialized = false;
 
     window.phoneWidget.device.initialize = {
         Init: Init

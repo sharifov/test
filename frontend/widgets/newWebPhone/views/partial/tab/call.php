@@ -314,8 +314,5 @@ PhoneWidget.init({
     'createCallUrl': '$createCallUrl',
     'isDevicePage': window.isTwilioDevicePage
 });
-if (window.isTwilioDevicePage === true) { 
-    window.phoneWidget.device.initialize.Init();
-}
 JS;
 $this->registerJs($js);

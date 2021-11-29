@@ -640,6 +640,26 @@ class WebsocketServerController extends Controller
             $out['dt'] = date('Y-m-d H:i:s');
         }
 
+        if ($controller === 'Voip' && $action === 'Device') {
+            $countVoipPages = (int)UserConnection::find()->andWhere([
+                'uc_user_id' => (int)$params['userId'],
+                'uc_controller_id' => 'voip',
+                'uc_action_id' => 'index'
+            ])->count();
+            if ($countVoipPages === 1) {
+                $out['cmd'] = 'initPhoneDevices';
+                $out['error'] = false;
+            } elseif ($countVoipPages > 1) {
+                $out['cmd'] = 'initPhoneDevices';
+                $out['error'] = true;
+                $out['msg'] = 'Voip page is already opened. Please close this page and reload old voip page!';
+            } else {
+                $out['cmd'] = 'initPhoneDevices';
+                $out['error'] = true;
+                $out['msg'] = 'Not found voip page connections.';
+            }
+        }
+
         if ($controller = $this->resolveController($controller, $action)) {
             try {
                 $out = $controller($params);
