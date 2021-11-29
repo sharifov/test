@@ -277,8 +277,9 @@ $keyId = md5($result['key']);
                 <tr>
                     <th>Pax</th>
                     <th>Q</th>
-                    <th class="text-right" title="Net price">NP, $</th>
-                    <th class="text-right" title="Markup">Mkp, $</th>
+                    <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
+                        ?><th class="text-right">MU, $</th><?php
+                    endif;?>
                     <th  class="text-right">Ex Mkp, $</th>
                     <th class="text-right">SP, $</th>
                 </tr>
@@ -289,8 +290,9 @@ $keyId = md5($result['key']);
                     <tr><?php $paxTotal += $pax['cnt'];?>
                         <th><?= $paxCode?></th>
                         <td>x <?= $pax['cnt']?></td>
-                        <td class="text-right"><?= $pax['price'] - $pax['markup'] ?? 0 ?></td>
-                        <td class="text-right"><?= (isset($pax['markup'])) ? $pax['markup'] : 0 ?></td>
+                        <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
+                            ?><td class="text-right"><?= (isset($pax['markup'])) ? $pax['markup'] : ''?></td><?php
+                        endif;?>
                         <td class="box_ex_markup_<?php echo $keyId ?> text-right">
                             <?php $readonly = $isQuoteAssignedToFlight ? 'readonly="1"' : '' ?>
                             <?php $border = $isQuoteAssignedToFlight ? ' border: 0; ' : '' ?>
@@ -324,8 +326,9 @@ $keyId = md5($result['key']);
                 <tr>
                     <th>Total</th>
                     <td><?= $paxTotal?></td>
-                    <td  class="text-right"><?= $result['prices']['totalPrice'] - $result['prices']['markup'] ?? 0 ?></td>
-                    <td  class="text-right"><?= $result['prices']['markup']?></td>
+                    <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
+                        ?><td class="text-right"><?= $result['prices']['markup']?></td><?php
+                    endif;?>
                     <td></td>
                     <td class="text-right"><?= $result['prices']['totalPrice']?></td>
                 </tr>

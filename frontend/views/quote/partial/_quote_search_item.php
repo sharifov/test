@@ -262,9 +262,8 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                 <tr>
                     <th>Pax</th>
                     <th>Q</th>
-                    <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                        ?><th class="text-right" title="Markup">MU, $</th><?php
-                    endif;?>
+                    <th class="text-right" title="Net price">NP, $</th>
+                    <th class="text-right" title="Markup">Mkp, $</th>
                     <th class="text-right" title="Selling price">SP, $</th>
                 </tr>
                 </thead>
@@ -274,9 +273,8 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                     <tr><?php $paxTotal += $pax['cnt'];?>
                         <th><?= $paxCode?></th>
                         <td>x <?= $pax['cnt']?></td>
-                        <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                            ?><td  class="text-right"><?= (isset($pax['markup'])) ? $pax['markup'] : ''?></td><?php
-                        endif;?>
+                        <td class="text-right"><?= $pax['price'] - $pax['markup'] ?? 0 ?></td>
+                        <td class="text-right"><?= (isset($pax['markup'])) ? $pax['markup'] : 0 ?></td>
                         <td  class="text-right"><?= $pax['price']?></td>
                     </tr>
                 <?php endforeach;?>
@@ -285,9 +283,8 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                 <tr>
                     <th>Total</th>
                     <td><?= $paxTotal?></td>
-                    <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                        ?><td  class="text-right"><?= $result['prices']['markup']?></td><?php
-                    endif;?>
+                    <td  class="text-right"><?= $result['prices']['totalPrice'] - $result['prices']['markup'] ?? 0 ?></td>
+                    <td  class="text-right"><?= $result['prices']['markup']?></td>
                     <td  class="text-right"><?= $result['prices']['totalPrice']?></td>
                 </tr>
                 </tfoot>

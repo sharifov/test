@@ -75,9 +75,9 @@ class FlightQuoteSearchForm extends Model
             [
                 [
                     'fareType', 'airlines', 'tripMaxDurationHours', 'tripMaxDurationMinutes', 'stops',
-                    'baggage', 'airportChange', 'excludeNearbyAirports', 'minTripTotalDuration', 'maxTripTotalDuration',
-                    'excludeConnectionAirports', 'sortBy', 'topCriteria', 'rank', 'departureStartTimeList',
-                    'departureEndTimeList', 'arrivalStartTimeList', 'arrivalEndTimeList'
+                    'baggage', 'airportChange', 'excludeNearbyAirports', 'excludeConnectionAirports', 'sortBy',
+                    'topCriteria', 'rank', 'departureStartTimeList','departureEndTimeList', 'arrivalStartTimeList',
+                    'arrivalEndTimeList'
                 ], 'safe'],
             ['price', 'filter', 'filter' => 'intval'],
         ];
@@ -154,8 +154,7 @@ class FlightQuoteSearchForm extends Model
             $quotes['results'] = array_filter($quotes['results'], function ($item) use (&$leadFlight) {
                 $item['showed'] = true;
                 foreach ($leadFlight as $tripKey => $queryTrip) {
-                    if (
-                        !empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
+                    if (!empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
                         && $this->excludeNearbyAirports[$tripKey]
                         && !empty($item['trips'][$tripKey]['segments'])
                         && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
