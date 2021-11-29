@@ -199,6 +199,15 @@ class VoluntaryExchangeConfirmHandler
 
         $this->flightRequestService->done('FlightRequest successfully processed');
 
+        foreach ($this->productQuoteChange->productQuoteChangeRelations as $changeRelation) {
+            $relatedProductQuote = $changeRelation->pqcrPq;
+            if ($relatedProductQuote->pq_id === $this->voluntaryExchangeQuote->pq_id) {
+                continue;
+            }
+            $relatedProductQuote->cancelled(null, 'Voluntary Exchange Confirm api processing');
+            $this->objectCollection->getProductQuoteRepository()->save($relatedProductQuote);
+        }
+
         if ($this->case->cs_user_id) {
             $linkToCase = Purifier::createCaseShortLink($this->case);
             Notifications::createAndPublish(

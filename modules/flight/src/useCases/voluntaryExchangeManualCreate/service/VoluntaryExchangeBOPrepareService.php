@@ -49,7 +49,7 @@ class VoluntaryExchangeBOPrepareService
         }
 
         foreach ($flightPaxes as $key => $flightPax) {
-            if ($ticketNumber = $flightPax->flightQuoteTicket->fqt_ticket_number) {
+            if ($ticketNumber = $flightPax->flightQuoteTicket->fqt_ticket_number ?? null) {
                 $this->tickets[] = $ticketNumber;
             }
         }

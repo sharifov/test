@@ -482,6 +482,14 @@ class FlightController extends BaseController
             );
         }
 
+        $hash = FlightRequest::generateHashFromDataJson($post);
+        if (FlightRequest::find()->where(['fr_hash' => $hash])->andWhere(['fr_status_id' => FlightRequest::STATUS_NEW])->exists()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage('Flight request already exists in the "NEW" status. Hash (' . $hash . ')'),
+            );
+        }
+
         if ($reprotectionCreateForm->is_automate && empty($reprotectionCreateForm->flight_quote)) {
             $reprotectionCreateForm->is_automate = false;
             $dataMessage['warning'] = '"is_automate" parameter set to FALSE because "flight_quote" is empty';
@@ -1272,7 +1280,7 @@ class FlightController extends BaseController
      *        "message": "Error",
      *        "data": [
      *              "success": false,
-     *              "error": "Product Quote Change status is not in \"Decision pending\". Current status Canceled"
+     *              "error": "Product Quote Change status is not in \"pending\". Current status Canceled"
      *        ],
      *        "code": 101,
      *        "errors": [],
@@ -2103,7 +2111,7 @@ class FlightController extends BaseController
      *        "message": "Error",
      *        "data": [
      *              "success": false,
-     *              "error": "Product Quote Change status is not in \"Decision pending\". Current status Canceled"
+     *              "error": "Product Quote Change status is not in \"pending\". Current status Canceled"
      *        ],
      *        "code": 101,
      *        "errors": [],

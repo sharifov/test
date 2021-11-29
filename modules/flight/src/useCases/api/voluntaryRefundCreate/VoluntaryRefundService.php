@@ -17,6 +17,7 @@ use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
+use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
@@ -185,7 +186,10 @@ class VoluntaryRefundService
         }
 
         try {
-            if (!$originProductQuote || !$order = $originProductQuote->pqOrder) {
+            if (
+                (!$originProductQuote || !$order = $originProductQuote->pqOrder) ||
+                (!$order = OrderManageService::getBySaleIdOrBookingId((int) $saleData['saleId'], $saleData['bookingId']))
+            ) {
                 $order = $this->createOrder(
                     $orderCreateSaleForm,
                     $orderContactForm,
@@ -285,16 +289,16 @@ class VoluntaryRefundService
                 $productQuoteObjectRefund = ProductQuoteObjectRefund::create(
                     $productQuoteRefund->pqr_id,
                     $flightQuoteTicketRefund->fqtr_id,
-                    CurrencyHelper::convertToBaseCurrency($ticketForm->sellingPrice, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->selling, $order->orClientCurrency->cur_base_rate),
                     CurrencyHelper::convertToBaseCurrency($ticketForm->airlinePenalty, $order->orClientCurrency->cur_base_rate),
                     CurrencyHelper::convertToBaseCurrency($ticketForm->processingFee, $order->orClientCurrency->cur_base_rate),
-                    CurrencyHelper::convertToBaseCurrency($ticketForm->refundAmount, $order->orClientCurrency->cur_base_rate),
+                    CurrencyHelper::convertToBaseCurrency($ticketForm->refundable, $order->orClientCurrency->cur_base_rate),
                     $voluntaryRefundCreateForm->refundForm->currency,
                     $order->or_client_currency_rate,
-                    $ticketForm->sellingPrice,
+                    $ticketForm->selling,
                     $ticketForm->airlinePenalty,
                     $ticketForm->processingFee,
-                    $ticketForm->refundAmount,
+                    $ticketForm->refundable,
                     null,
                     $ticketForm->toArray()
                 );
@@ -313,7 +317,7 @@ class VoluntaryRefundService
                     CurrencyHelper::convertToBaseCurrency($auxiliaryOptionsForm->amount, $order->orClientCurrency->cur_base_rate),
                     null,
                     null,
-                    $auxiliaryOptionsForm->amount,
+                    CurrencyHelper::convertToBaseCurrency($auxiliaryOptionsForm->refundable, $order->orClientCurrency->cur_base_rate),
                     $voluntaryRefundCreateForm->refundForm->currency,
                     $order->or_client_currency_rate,
                     $auxiliaryOptionsForm->amount,

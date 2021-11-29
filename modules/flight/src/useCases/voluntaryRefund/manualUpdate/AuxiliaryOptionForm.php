@@ -22,6 +22,7 @@ use yii\helpers\Json;
  * @property string $status
  * @property bool $refundAllow
  * @property string $details
+ * @property string $amountPerPax
  */
 class AuxiliaryOptionForm extends \yii\base\Model
 {
@@ -39,15 +40,18 @@ class AuxiliaryOptionForm extends \yii\base\Model
 
     public $details;
 
+    public $amountPerPax;
+
     public function __construct(ProductQuoteOptionRefund $option, $config = [])
     {
         $this->id = $option->pqor_id;
-        $this->type = $option->productQuoteOption->pqoProductOption->po_name ?? '';
+        $this->type = $option->pqor_data_json['type'] ?? '';
         $this->amount = $option->pqor_client_selling_price;
         $this->refundable = $option->pqor_client_refund_amount;
         $this->refundAllow = $option->pqor_refund_allow;
         $this->status = ArrayHelper::getValue(JsonHelper::decode($option->pqor_data_json), 'status');
-        $this->details = $option->pqor_data_json;
+        $this->details = $option->pqor_data_json['details'] ?? [];
+        $this->amountPerPax = $option->pqor_data_json['amountPerPax'] ?? [];
         parent::__construct($config);
     }
 

@@ -24,7 +24,7 @@ class BillingInfoApiVoluntaryService
         return self::createBillingInfo($form, $orderId, $creditCardId, $paymentMethodId);
     }
 
-    public static function findBillingInfo(BillingInfoForm $form, int $orderId, ?int $creditCardId = null): ?BillingInfo
+    public static function findBillingInfo(BillingInfoForm $form, ?int $orderId, ?int $creditCardId = null): ?BillingInfo
     {
         return BillingInfo::find()
             ->where(['bi_first_name' => $form->first_name])
@@ -43,7 +43,7 @@ class BillingInfoApiVoluntaryService
             ->one();
     }
 
-    public static function createBillingInfo(BillingInfoForm $form, int $orderId, ?int $creditCardId, ?int $paymentMethodId): BillingInfo
+    public static function createBillingInfo(BillingInfoForm $form, ?int $orderId, ?int $creditCardId, ?int $paymentMethodId): BillingInfo
     {
         $billingInfoDTO = (new BillingInfoDTO())->fillByVoluntaryForm($form, $orderId, $creditCardId, $paymentMethodId);
         $billingInfo = BillingInfo::createByDto($billingInfoDTO);

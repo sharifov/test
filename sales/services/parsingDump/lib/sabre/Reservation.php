@@ -61,7 +61,20 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
     {
         $row = trim($row);
         preg_match(self::getPatternRow(), $row, $matches);
-        return count($matches) > 12 ? $matches : [];
+        if ($result =  count($matches) > 12 ? $matches : null) {
+            $result['operated'] = self::getOperated($row);
+            return $result;
+        }
+        return [];
+    }
+
+    private static function getOperated(string $row): ?string
+    {
+        $position = stripos($row, "OPERATED BY");
+        $operatedBySource = trim(substr($row, $position));
+        preg_match('/^(OPERATED\s+BY\s+)([A-Z]{2})/x', $operatedBySource, $matches);
+
+        return $matches[2] ?? null;
     }
 
     /**
@@ -109,6 +122,7 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $result['arrival_date_day'] = $data[18];
             $result['arrival_date_month'] = $data[19];
         }
+        $result['operated'] = $data['operated'];
         return $result;
     }
 

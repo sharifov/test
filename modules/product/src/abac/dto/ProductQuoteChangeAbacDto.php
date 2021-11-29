@@ -61,6 +61,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
     public ?int $orPayStatusId = null;
     public bool $isOrderOwner;
     public ?int $orTypeId = null;
+    public ?int $maxConfirmableQuotesCnt = null;
 
     public function __construct(?ProductQuoteChange $productQuoteChange)
     {

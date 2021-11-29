@@ -70,7 +70,11 @@ class FilebeatTarget extends \yii\log\FileTarget
         $prefix = $this->getMessagePrefix($context);
         if ($prefix && is_array($prefix)) {
             foreach ($prefix as $pkey => $pval) {
-                $data['@app.' . $pkey] = $pval;
+                if ($pkey === 'srv_name' || $pkey === 'srv_type') {
+                    $data[$pkey] = $pval;
+                } else {
+                    $data['@app.' . $pkey] = $pval;
+                }
             }
         }
 

@@ -108,6 +108,8 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
+use modules\webEngage\src\service\webEngageEventData\lead\LeadEventDataService;
+use modules\webEngage\src\service\WebEngageRequestService;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\CallAccess;
@@ -2190,13 +2192,30 @@ class TestController extends FController
 
     public function actionZ()
     {
-        /*Notifications::createAndPublish(
-            Auth::id(),
-            'Test',
-            'Test message',
-            Notifications::TYPE_INFO,
-            true
-        );*/
+        try {
+            $webEngageRequestService = new WebEngageRequestService();
+
+            $data = [
+                'anonymousId' => 'test',
+                'eventName' => 'Added to Cart1',
+                "eventTime" => date('Y-m-d\TH:i:sO'),
+                'eventData' => [
+                    "Product ID" => 1337,
+                    "Price" => 39.80,
+                    "Quantity" => 1,
+                    "Product" => "Givenchy Pour Homme Cologne",
+                    "Category" => "Fragrance",
+                    "Currency" => "USD",
+                ]
+            ];
+
+            $x = $webEngageRequestService->addEvent($data);
+
+            \yii\helpers\VarDumper::dump($x, 20, true);
+            exit();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), ':Throwable');
+        }
 
         return $this->render('z');
     }
@@ -2593,5 +2612,35 @@ class TestController extends FController
 
 
         exit;
+    }
+
+    public function actionAt()
+    {
+
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => '1111',
+                'b2' => '222',
+                'b3' => [
+                    'message' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => '222',
+                ],
+            ],
+        ];
+
+        Yii::info($message, 'analytics\analytics-test');
+        Yii::info($message, 'AS\AS-test');
+        Yii::info($message, 'elk\test-elk');
+
+        return date('Y-m-d H:i:s');
     }
 }

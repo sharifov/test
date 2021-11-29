@@ -4,36 +4,21 @@ namespace modules\flight\src\useCases\voluntaryExchange\service;
 
 use common\components\hybrid\HybridWhData;
 use common\components\purifier\Purifier;
-use common\models\CaseSale;
-use common\models\Client;
 use common\models\Notifications;
 use common\models\Project;
-use DomainException;
-use modules\flight\models\Flight;
-use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
-use modules\order\src\entities\order\Order;
-use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
-use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
-use sales\forms\lead\EmailCreateForm;
-use sales\forms\lead\PhoneCreateForm;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\setting\SettingHelper;
 use sales\interfaces\BoWebhookService;
-use sales\services\client\ClientCreateForm;
-use Throwable;
 use webapi\src\forms\boWebhook\FlightVoluntaryExchangeUpdateForm;
-use Yii;
 use yii\base\Model;
 use yii\db\Transaction;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class VoluntaryExchangeBoHandler
@@ -77,12 +62,23 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->form->booking_id)) {
             throw new \RuntimeException('OriginProductQuote not found by booking_id(' . $this->form->booking_id . ')');
         }
-        if (!$this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId((int) $this->originProductQuote->pq_id)) {
+
+        $this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId(
+            (int) $this->originProductQuote->pq_id,
+            [ProductQuoteChangeStatus::IN_PROGRESS]
+        );
+        if (!$this->productQuoteChange) {
             throw new \RuntimeException('ProductQuoteChange not found by pqID(' . $this->originProductQuote->pq_id . ')');
         }
-        if (!$this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange((int) $this->productQuoteChange->pqc_id)) {
+
+        $this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange(
+            (int) $this->productQuoteChange->pqc_id,
+            [ProductQuoteStatus::IN_PROGRESS]
+        );
+        if (!$this->voluntaryQuote) {
             throw new \RuntimeException('voluntaryQuote not found by pqcID(' . $this->productQuoteChange->pqc_id . ')');
         }
+
         if (!$this->project = Project::findOne(['project_key' => $this->form->project_key])) {
             throw new \RuntimeException('Project not found by key(' . $this->form->project_key . ')');
         }
@@ -163,6 +159,11 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             $this->originProductQuote->cancelled(null, 'Exchanged from BackOffice request');
             $this->objectCollection->getProductQuoteRepository()->save($this->originProductQuote);
 
+            if ($originFlightQuoteFlight = $this->originProductQuote->flightQuote->flightQuoteFlight ?? null) {
+                $originFlightQuoteFlight->fqf_booking_id = null;
+                $this->objectCollection->getFlightQuoteFlightRepository()->save($originFlightQuoteFlight);
+            }
+
             $this->voluntaryQuote->bookedChangeFlow();
             $this->objectCollection->getProductQuoteRepository()->save($this->voluntaryQuote);
 
@@ -171,7 +172,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
                 $this->objectCollection->getFlightQuoteFlightRepository()->save($flightQuoteFlight);
             }
 
-            VoluntaryExchangeCreateService::bookingProductQuotePostProcessing($this->voluntaryQuote);
+            $this->bookingProductQuotePostProcessing($this->voluntaryQuote);
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
@@ -202,5 +203,16 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
 
     private function handleProcessing(): void
     {
+    }
+
+    private function bookingProductQuotePostProcessing(
+        ProductQuote $voluntaryQuote
+    ): void {
+        ProductQuoteRelation::deleteAll([
+            'pqr_related_pq_id' => $voluntaryQuote->pq_id,
+            'pqr_type_id' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
+        ]);
+
+        ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $voluntaryQuote->pq_id]);
     }
 }

@@ -121,6 +121,18 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_RELATED_QUOTE_IS_CHANGEABLE = [
+        'optgroup' => 'RELATED QUOTE',
+        'id' => self::NS . 'relPqIsChangeable',
+        'field' => 'relPqIsChangeable',
+        'label' => 'Is Changeable',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_RELATION_TYPE = [
         'optgroup' => 'RELATION',
         'id' => self::NS . 'relationType',
@@ -176,6 +188,18 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         'id' => self::NS . 'parPqHasPqcActive',
         'field' => 'parPqHasPqcActive',
         'label' => 'Has Active Change',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_PARENT_QUOTE_IS_CHANGEABLE = [
+        'optgroup' => 'PARENT QUOTE',
+        'id' => self::NS . 'parPqIsChangeable',
+        'field' => 'parPqIsChangeable',
+        'label' => 'Is Changeable',
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
@@ -416,7 +440,9 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
             self::ATTR_IS_AUTOMATE_PQC,
             self::ATTR_CASE_OWNER,
             self::ATTR_IS_COMMON_GROUP,
-            self::ATTR_IS_AUTOMATE_CASE
+            self::ATTR_IS_AUTOMATE_CASE,
+            self::ATTR_RELATED_QUOTE_IS_CHANGEABLE,
+            self::ATTR_PARENT_QUOTE_IS_CHANGEABLE
         ]
     ];
 

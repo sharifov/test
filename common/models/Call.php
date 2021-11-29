@@ -12,6 +12,7 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\entity\call\data\Data;
 use sales\model\call\entity\call\data\QueueLongTime;
 use sales\model\call\entity\call\data\Repeat;
@@ -1351,53 +1352,52 @@ class Call extends \yii\db\ActiveRecord
         }
 
 
-        if (
-            $this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude)
-            && (!($this->isIn() && $this->isStatusQueue()))
-            && (!($this->isIn() && $this->isStatusDelay()))
-            && (!$this->isInternal() || $this->isEnded())
-//            && (!($this->isIn() && $this->isStatusRinging() && $this->isInternal()))
-            && (!($this->isOut() && $this->isChild()))
-            && (!($this->isIn() && $this->isChild() && $this->isStatusRinging()))
-        ) {
-            if (
-                $this->isEnded()
-                || !$this->currentParticipant
-                || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
-            ) {
-                $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
-
-//                $infoData = [];
-//                $infoData['user_id'] = $this->c_created_user_id;
-//                $infoData['attributes'] = $this->getAttributes();
+//        if (
+//            $this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude)
+//            && (!($this->isIn() && $this->isStatusQueue()))
+//            && (!($this->isIn() && $this->isStatusDelay()))
+//            && (!$this->isInternal() || $this->isEnded())
+////            && (!($this->isIn() && $this->isStatusRinging() && $this->isInternal()))
+//            && (!($this->isOut() && $this->isChild()))
+//            && (!($this->isIn() && $this->isChild() && $this->isStatusRinging()))
+//        ) {
+//            if (
+//                $this->isEnded()
+//                || !$this->currentParticipant
+//                || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
+//            ) {
+//                $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
 //
-//                //$infoData['message'] = $message;
-//
-//                if ($this->c_created_user_id == 843) {
-//                    Yii::info($infoData, 'info\Call:callUpdate\user-' . $this->c_created_user_id);
-//                    $infoData['message'] = $message;
-//                    Yii::info($infoData, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
-//                    //Yii::info(VarDumper::dumpAsString($message, 10), 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
-//                    //Yii::info($message, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
+//                Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+//                if ($this->isActiveStatus()) {
+//                    UserStatus::isOnCallOn($this->c_created_user_id);
+//                } else {
+//                    UserStatus::isOnCallOff($this->c_created_user_id);
 //                }
+//            }
+//        }
+
+        if ($this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->getDataCreatorType()->isAgent()) {
+            if ($this->isStatusRinging() && !$this->isOut()) {
+            } else {
+                $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
-                if ($this->isActiveStatus()) {
-                    UserStatus::isOnCallOn($this->c_created_user_id);
-                } else {
-                    UserStatus::isOnCallOff($this->c_created_user_id);
-                }
+            }
+
+            if ($this->isActiveStatus()) {
+                UserStatus::isOnCallOn($this->c_created_user_id);
+            } else {
+                UserStatus::isOnCallOff($this->c_created_user_id);
             }
         }
 
-        if ($this->c_created_user_id && $this->isInternal()) {
+        if ($this->c_created_user_id && $this->getDataCreatorType()->isUser()) {
             $isChangedStatus = array_key_exists('c_status_id', $changedAttributes);
 
             if ($this->isOut() && ($insert || $isChangedStatus) && $this->isStatusRinging()) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
-                if ($this->isActiveStatus()) {
-                    UserStatus::isOnCallOn($this->c_created_user_id);
-                }
+                UserStatus::isOnCallOn($this->c_created_user_id);
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusRinging()) {
@@ -1423,6 +1423,12 @@ class Call extends \yii\db\ActiveRecord
                 if ($this->isActiveStatus()) {
                     UserStatus::isOnCallOn($this->c_created_user_id);
                 }
+            }
+
+            if (($insert || $isChangedStatus) && !$this->isActiveStatus()) {
+                $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
+                Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+                UserStatus::isOnCallOff($this->c_created_user_id);
             }
         }
 
@@ -2723,6 +2729,20 @@ class Call extends \yii\db\ActiveRecord
         $data = $this->getData();
         $data->queueLongTime->reset();
         $this->setData($data);
+    }
+
+    public function setDataCreatorType(?int $id): void
+    {
+        $data = $this->getData();
+        $data->creatorType = new CreatorType([
+            'id' => $id,
+        ]);
+        $this->setData($data);
+    }
+
+    public function getDataCreatorType(): CreatorType
+    {
+        return $this->getData()->creatorType;
     }
 
     /**

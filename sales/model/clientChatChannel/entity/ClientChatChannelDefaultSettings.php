@@ -2,6 +2,8 @@
 
 namespace sales\model\clientChatChannel\entity;
 
+use common\models\Lead;
+
 class ClientChatChannelDefaultSettings
 {
     private static array $settings = [
@@ -68,7 +70,14 @@ class ClientChatChannelDefaultSettings
                 'autoCloseRoom' => false
             ],
             'searchAndCacheFlightQuotesOnAcceptChat' => false
-        ]
+        ],
+        'leadAutoTake' => [
+            'onChatAccept' => null,
+            'availableStatuses' => [
+                Lead::STATUS_LIST[Lead::STATUS_PENDING],
+                Lead::STATUS_LIST[Lead::STATUS_NEW],
+            ],
+        ],
     ];
 
     public static function getAll(): array

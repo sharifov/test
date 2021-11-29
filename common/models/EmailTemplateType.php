@@ -31,9 +31,16 @@ use yii\helpers\VarDumper;
  * @property Employee $etpCreatedUser
  * @property Employee $etpUpdatedUser
  * @property Department $etpDep
+ * @property EmailTemplateTypeDepartment[] $emailTemplateTypeDepartments
+ * @property Department[] $ettdDepartments
+ * @property EmailTemplateTypeProject[] $emailTemplateTypeProjects
+ * @property Project[] $ettpProjects
  */
 class EmailTemplateType extends \yii\db\ActiveRecord
 {
+    public $departmentIds;
+    public $projectIds;
+
     public function __construct(array $config = [])
     {
         parent::__construct($config);
@@ -68,7 +75,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         return [
             [['etp_key', 'etp_name', 'etp_origin_name'], 'required'],
             [['etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id', 'etp_ignore_unsubscribe'], 'integer'],
-            [['etp_created_dt', 'etp_updated_dt', 'etp_params_json'], 'safe'],
+            [['etp_created_dt', 'etp_updated_dt', 'etp_params_json', 'departmentIds', 'projectIds'], 'safe'],
             [['etp_key'], 'string', 'max' => 50],
             [['etp_name', 'etp_origin_name'], 'string', 'max' => 100],
             [['etp_key'], 'unique'],
@@ -97,6 +104,8 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             'etp_dep_id' => 'Department',
             'etp_ignore_unsubscribe' => 'Ignore Unsubscribe',
             'etp_params_json' => 'Params',
+            'departmentIds' => 'Departments',
+            'projectIds' => 'Projects'
         ];
     }
 
@@ -163,6 +172,45 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         return new EmailTemplateTypeQuery(static::class);
     }
 
+    /**
+     * Gets query for [[EmailTemplateTypeDepartments]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmailTemplateTypeDepartments()
+    {
+        return $this->hasMany(EmailTemplateTypeDepartment::class, ['ettd_etp_id' => 'etp_id']);
+    }
+
+    /**
+     * Gets query for [[EttdDepartments]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEttdDepartments()
+    {
+        return $this->hasMany(Department::class, ['dep_id' => 'ettd_department_id'])->viaTable('email_template_type_department', ['ettd_ett_id' => 'etp_id']);
+    }
+
+    /**
+     * Gets query for [[EmailTemplateTypeProjects]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmailTemplateTypeProjects(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(EmailTemplateTypeProject::class, ['ettp_etp_id' => 'etp_id']);
+    }
+
+    /**
+     * Gets query for [[EttpProjects]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEttpProjects(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(Project::class, ['id' => 'ettp_project_id'])->viaTable('email_template_type_project', ['ettp_etp_id' => 'etp_id']);
+    }
 
     /**
      * @return array
@@ -262,15 +310,24 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getEmailTemplateTypesList(bool $withHidden, ?int $dep_id): array
+    public static function getEmailTemplateTypesList(bool $withHidden, ?int $dep_id, ?int $pr_id): array
     {
-        $query = self::find()->select(['etp_key', 'etp_name', 'etp_ignore_unsubscribe'])->orderBy(['etp_name' => SORT_ASC]);
+        $query = self::find()->select(['etp_id', 'etp_key', 'etp_name', 'etp_ignore_unsubscribe'])->orderBy(['etp_name' => SORT_ASC]);
+        $query->joinWith(['emailTemplateTypeDepartments']);
+        $query->joinWith(['emailTemplateTypeProjects']);
+        $query->groupBy(['etp_id', 'ettp_project_id']);
+
         if (!$withHidden) {
             $query->andWhere(['etp_hidden' => false]);
         }
 
         if ($dep_id !== null) {
-            $query->andWhere(['etp_dep_id' => $dep_id]);
+            $query->andWhere(['ettd_department_id' => $dep_id]);
+        }
+
+        if ($pr_id !== null) {
+            $query->orHaving(['ettp_project_id' => $pr_id]);
+            $query->orHaving(['=', 'COUNT(ettp_project_id)', 0]);
         }
 
         return $query->asArray()->all();

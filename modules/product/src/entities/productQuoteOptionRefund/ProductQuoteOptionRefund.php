@@ -198,10 +198,13 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord implements Serializa
     {
         return [
             "type" => static function (self $model) {
-                return $model->productQuoteOption->pqoProductOption->po_key ?? '';
+                return JsonHelper::decode($model->pqor_data_json)['type'] ?? '';
             },
             "amount" => static function (self $model) {
                 return (float)$model->pqor_client_selling_price;
+            },
+            'amountPerPax' => static function (self $model) {
+                return JsonHelper::decode($model->pqor_data_json)['amountPerPax'] ?? [];
             },
             "refundable" => static function (self $model) {
                 return (float)$model->pqor_client_refund_amount;

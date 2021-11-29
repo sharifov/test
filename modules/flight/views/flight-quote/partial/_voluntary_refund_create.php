@@ -3,7 +3,7 @@
 /**
  * @var string $message
  * @var array $errors
- * @var \modules\flight\src\useCases\voluntaryRefund\manualCreate\VoluntaryRefundCreateForm $form
+ * @var \modules\flight\src\useCases\voluntaryRefund\manualCreate\VoluntaryRefundCreateForm $refundForm
  */
 
 use common\components\i18n\Formatter;
@@ -12,7 +12,6 @@ use frontend\helpers\JsonHelper;
 use kartik\form\ActiveForm;
 use modules\flight\src\useCases\voluntaryRefund\manualCreate\AuxiliaryOptionForm;
 use modules\flight\src\useCases\voluntaryRefund\manualCreate\TicketForm;
-use modules\product\src\entities\productOption\ProductOptionQuery;
 use yii\bootstrap4\Alert;
 use yii\grid\SerialColumn;
 use yii\helpers\Html;
@@ -32,7 +31,7 @@ use yii\widgets\Pjax;
   <script>
       pjaxOffFormSubmit('#voluntary_refund_create_pjax');
   </script>
-    <?php $currency = (CurrencyQuery::getCurrencySymbolByCode($form->getRefundForm()->currency) ?: $form->getRefundForm()->currency); ?>
+    <?php $currency = (CurrencyQuery::getCurrencySymbolByCode($refundForm->getRefundForm()->currency) ?: $refundForm->getRefundForm()->currency); ?>
     <?php Pjax::begin([
     'id' => 'voluntary_refund_create_pjax',
         'timeout' => 5000,
@@ -49,13 +48,13 @@ use yii\widgets\Pjax;
     'enableClientValidation' => false
     ]) ?>
 
-    <?php echo $activeForm->errorSummary($form); ?>
+    <?php echo $activeForm->errorSummary($refundForm); ?>
 
-    <?= $activeForm->field($form, 'bookingId')->hiddenInput()->label(false) ?>
-    <?= $activeForm->field($form, 'originProductQuoteId')->hiddenInput()->label(false) ?>
-    <?= $activeForm->field($form, 'orderId')->hiddenInput()->label(false) ?>
-    <?= $activeForm->field($form, 'caseId')->hiddenInput()->label(false) ?>
-    <?= $activeForm->field($form->getRefundForm(), 'currency')->hiddenInput()->label(false) ?>
+    <?= $activeForm->field($refundForm, 'bookingId')->hiddenInput()->label(false) ?>
+    <?= $activeForm->field($refundForm, 'originProductQuoteId')->hiddenInput()->label(false) ?>
+    <?= $activeForm->field($refundForm, 'orderId')->hiddenInput()->label(false) ?>
+    <?= $activeForm->field($refundForm, 'caseId')->hiddenInput()->label(false) ?>
+    <?= $activeForm->field($refundForm->getRefundForm(), 'currency')->hiddenInput()->label(false) ?>
     <?= \common\widgets\Alert::widget() ?>
   <div class="row">
     <div class="col-md-12">
@@ -68,11 +67,11 @@ use yii\widgets\Pjax;
         <div id="collapseResponseBO" class="collapse">
           <div class="card-body card">
             <h4>Search Query Params</h4>
-            <pre><?= Html::encode(VarDumper::dumpAsString($form->originData)) ?></pre>
+            <pre><?= Html::encode(VarDumper::dumpAsString($refundForm->originData)) ?></pre>
           </div>
         </div>
         <?php $dataProvider = new \yii\data\ArrayDataProvider([
-            'allModels' => $form->getRefundForm()->getTicketForms(),
+            'allModels' => $refundForm->getRefundForm()->getTicketForms(),
             'totalCount' => 0,
             'pagination' => false
         ]) ?>
@@ -83,60 +82,83 @@ use yii\widgets\Pjax;
               [
                   'attribute' => 'number',
                   'content' => static function (TicketForm $model, $index) use ($activeForm) {
-                      return $activeForm->field($model, 'number')->hiddenInput([
+                      return $activeForm->field($model, 'refundAllowed')->hiddenInput([
+                          'name' => 'refund[tickets][' . $index . '][refundAllowed]'
+                      ])->label(false) . $activeForm->field($model, 'number')->hiddenInput([
                           'name' => 'refund[tickets][' . $index . '][number]'
                       ])->label(false) . $model->number;
                   }
               ],
               [
                   'attribute' => 'selling',
-                  'content' => static function (TicketForm $model, $index) use ($activeForm, $form, $currency) {
+                  'content' => static function (TicketForm $model, $index) use ($activeForm, $refundForm, $currency) {
                       return $activeForm->field($model, 'selling', [
                           'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
                       ])->input('number', [
-                          'readonly' => $form->ticketDataReadOnly,
+                          'readonly' => $refundForm->ticketDataReadOnly,
                           'name' => 'refund[tickets][' . $index . '][selling]',
-                          'step' => 0.01
+                          'step' => 0.01,
+                          'data-total-input-row-attr' => 'refund[tickets][' . $index . '][refundable]',
+                          'data-calc-input-rows-attr' => 'refund[tickets][' . $index . '][selling],refund[tickets][' . $index . '][airlinePenalty],refund[tickets][' . $index . '][processingFee]',
                       ])->label(false);
                   },
                   'format' => 'raw'
               ],
               [
                   'attribute' => 'airlinePenalty',
-                  'content' => static function (TicketForm $model, $index) use ($activeForm, $form, $currency) {
+                  'content' => static function (TicketForm $model, $index) use ($activeForm, $refundForm, $currency) {
                       return $activeForm->field($model, 'airlinePenalty', [
                           'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
                       ])->input('number', [
                           'name' => 'refund[tickets][' . $index . '][airlinePenalty]',
-                          'step' => 0.01
+                          'step' => 0.01,
+                          'class' => 'totalCalc',
+                          'data-total-input-id' => 'totalAirlinePenalty',
+                          'data-total-input-row-attr' => 'refund[tickets][' . $index . '][refundable]',
+                          'data-calc-input-rows-attr' => 'refund[tickets][' . $index . '][selling],refund[tickets][' . $index . '][airlinePenalty],refund[tickets][' . $index . '][processingFee]',
                       ])->label(false);
                   },
                   'format' => 'raw'
               ],
               [
                   'attribute' => 'processingFee',
-                  'content' => static function (TicketForm $model, $index) use ($activeForm, $form, $currency) {
+                  'content' => static function (TicketForm $model, $index) use ($activeForm, $refundForm, $currency) {
                       return $activeForm->field($model, 'processingFee', [
                           'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
                       ])->input('number', [
                           'name' => 'refund[tickets][' . $index . '][processingFee]',
-                          'step' => 0.01
+                          'step' => 0.01,
+                          'class' => 'totalCalc',
+                          'data-total-input-id' => 'totalProcessingFee',
+                          'data-total-input-row-attr' => 'refund[tickets][' . $index . '][refundable]',
+                          'data-calc-input-rows-attr' => 'refund[tickets][' . $index . '][selling],refund[tickets][' . $index . '][airlinePenalty],refund[tickets][' . $index . '][processingFee]',
                       ])->label(false);
                   },
                   'format' => 'raw'
               ],
               [
                   'attribute' => 'refundable',
-                  'content' => static function (TicketForm $model, $index) use ($activeForm, $form, $currency) {
+                  'content' => static function (TicketForm $model, $index) use ($activeForm, $refundForm, $currency) {
                       return $activeForm->field($model, 'refundable', [
                           'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
                       ])->input('number', [
-                          'readonly' => $form->ticketDataReadOnly,
+                          'readonly' => $refundForm->ticketDataReadOnly,
                           'name' => 'refund[tickets][' . $index . '][refundable]',
-                          'step' => 0.01
+                          'step' => 0.01,
+                          'class' => 'totalCalc',
+                          'data-total-input-id' => 'totalRefundable',
                       ])->label(false);
                   },
                   'format' => 'raw'
+              ],
+              [
+                  'attribute' => 'status',
+                  'content' => static function (TicketForm $model, $index) use ($activeForm) {
+                      $inputOptions = [
+                          'name' => 'refund[tickets][' . $index . '][status]',
+                      ];
+                      return $activeForm->field($model, 'status')->hiddenInput($inputOptions)->label(false) . $model->status;
+                  }
               ],
 
           ]
@@ -144,7 +166,7 @@ use yii\widgets\Pjax;
 
       <h6><b>Options</b></h6>
       <?php $dataProvider = new \yii\data\ArrayDataProvider([
-          'allModels' => $form->getRefundForm()->getAuxiliaryOptionsForms(),
+          'allModels' => $refundForm->getRefundForm()->getAuxiliaryOptionsForms(),
           'totalCount' => 0,
           'pagination' => false
       ]) ?>
@@ -155,7 +177,7 @@ use yii\widgets\Pjax;
               [
                   'attribute' => 'type',
                   'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
-                      $type = ProductOptionQuery::getNameByRegexKey($model->type) ?: $model->type;
+                      $type = $model->type;
                       return $activeForm->field($model, 'type')->hiddenInput([
                           'name' => 'refund[auxiliaryOptions][' . $index . '][type]'
                       ])->label(false) . $type;
@@ -172,12 +194,24 @@ use yii\widgets\Pjax;
               [
                   'attribute' => 'refundable',
                   'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
-                      return $activeForm->field($model, 'refundable')->hiddenInput([
-                          'name' => 'refund[auxiliaryOptions][' . $index . '][refundable]'
-                      ])->label(false) . $model->refundable;
+                      $inputOptions = [
+                          'name' => 'refund[auxiliaryOptions][' . $index . '][refundable]',
+                      ];
+                      if ($model->refundAllow) {
+                          $inputOptions['data-total-input-id'] = 'totalRefundable';
+                      }
+                      return $activeForm->field($model, 'refundable')->hiddenInput($inputOptions)->label(false) . $model->refundable;
                   }
               ],
-              'status',
+              [
+                  'attribute' => 'status',
+                  'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
+                      $inputOptions = [
+                          'name' => 'refund[auxiliaryOptions][' . $index . '][status]',
+                      ];
+                      return $activeForm->field($model, 'status')->hiddenInput($inputOptions)->label(false) . $model->status;
+                  }
+              ],
               [
                   'attribute' => 'refundAllow',
                   'content' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
@@ -198,15 +232,44 @@ use yii\widgets\Pjax;
                             '<i class="fas fa-eye"></i> details</a>',
                             null,
                             [
-                              'class' => 'btn btn-sm btn-success',
-                              'data-pjax' => 0,
-                              'onclick' => '(function ( $event ) { $("#data_' . $model->type . '").toggle(); })();',
-                              ]
+                            'class' => 'btn btn-sm btn-success',
+                            'data-pjax' => 0,
+                            'onclick' => '(function ( $event ) { $("#data_' . $model->type . '").toggle(); })();',
+                            ]
                         );
                     }
                       $content .= $model->details ?
                           '<pre id="data_' . $model->type . '" style="display: none;">' .
                           VarDumper::dumpAsString(JsonHelper::decode($model->details), 10, true) . '</pre>' : '-';
+
+                      return $content;
+                  },
+                  'format' => 'raw',
+                  'contentOptions' => [
+                      'style' => ['max-width' => '800px', 'word-wrap' => 'break-word !important'],
+                  ],
+              ],
+              [
+                  'attribute' => 'amountPerPax',
+                  'value' => static function (AuxiliaryOptionForm $model, $index) use ($activeForm) {
+                      $content = $activeForm->field($model, 'amountPerPax')->hiddenInput([
+                          'name' => 'refund[auxiliaryOptions][' . $index . '][amountPerPax]'
+                      ])->label(false);
+                      $hash = md5($model->amountPerPax);
+                    if ($model->amountPerPax) {
+                        $content .= Html::a(
+                            '<i class="fas fa-eye"></i> details</a>',
+                            null,
+                            [
+                                'class' => 'btn btn-sm btn-success',
+                                'data-pjax' => 0,
+                                'onclick' => '(function ( $event ) { $("#data_' . $hash . '").toggle(); })();',
+                            ]
+                        );
+                    }
+                      $content .= $model->amountPerPax ?
+                          '<pre id="data_' . $hash . '" style="display: none;">' .
+                          VarDumper::dumpAsString(JsonHelper::decode($model->amountPerPax), 10, true) . '</pre>' : '-';
 
                       return $content;
                   },
@@ -233,34 +296,37 @@ use yii\widgets\Pjax;
         </thead>
         <tbody>
         <tr>
-          <td><?= $form->bookingId ?></td>
-          <td><?= $form->getRefundForm()->currency ?></td>
+          <td><?= $refundForm->bookingId ?></td>
+          <td><?= $refundForm->getRefundForm()->currency ?></td>
 
-          <td><?= $activeForm->field($form->getRefundForm(), 'totalPaid', [
+          <td><?= $activeForm->field($refundForm->getRefundForm(), 'totalPaid', [
                   'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
               ])->input('number', [
-                  'readonly' => $form->refundDataReadOnly,
+                  'readonly' => $refundForm->refundDataReadOnly,
                   'step' => 0.01
               ])->label(false) ?></td>
-          <td><?= $activeForm->field($form->getRefundForm(), 'totalAirlinePenalty', [
+          <td><?= $activeForm->field($refundForm->getRefundForm(), 'totalAirlinePenalty', [
                   'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
               ])->input('number', [
-                  'readonly' => $form->refundDataReadOnly,
-                  'step' => 0.01
+                  'readonly' => $refundForm->refundDataReadOnly,
+                  'step' => 0.01,
+                  'id' => 'totalAirlinePenalty'
               ])->label(false) ?></td>
-          <td><?= $activeForm->field($form->getRefundForm(), 'totalProcessingFee', [
+          <td><?= $activeForm->field($refundForm->getRefundForm(), 'totalProcessingFee', [
                   'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
               ])->input('number', [
-                  'readonly' => $form->refundDataReadOnly,
-                  'step' => 0.01
+                  'readonly' => $refundForm->refundDataReadOnly,
+                  'step' => 0.01,
+                  'id' => 'totalProcessingFee'
               ])->label(false) ?></td>
-          <td><?= $activeForm->field($form->getRefundForm(), 'totalRefundable', [
+          <td><?= $activeForm->field($refundForm->getRefundForm(), 'totalRefundable', [
                   'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
               ])->input('number', [
-                  'readonly' => $form->refundDataReadOnly,
-                  'step' => 0.01
+                  'readonly' => $refundForm->refundDataReadOnly,
+                  'step' => 0.01,
+                  'id' => 'totalRefundable'
               ])->label(false) ?></td>
-          <td><?= $activeForm->field($form->getRefundForm(), 'refundCost', [
+          <td><?= $activeForm->field($refundForm->getRefundForm(), 'refundCost', [
                   'addon' => ['prepend' => ['content' => $currency, 'options' => [ 'class' => 'alert-success', 'style' => 'padding-top: 0; padding-bottom: 0;']]]
               ])->input('number', [
                   'step' => 0.01
@@ -283,14 +349,47 @@ use yii\widgets\Pjax;
     </div>
   </div>
     <?php ActiveForm::end(); ?>
-    <?php Pjax::end() ?>
-<?php endif; ?>
 
-<?php
-$js = <<<JS
+    <?php
+    $js = <<<JS
 $("#voluntary_refund_create_pjax").on("pjax:start", function() {
     $('#voluntary_refund_create_btn_submit').find('i').replaceWith('<i class="fa fa-spin fa-spinner"></i>');
     $('#voluntary_refund_create_btn_submit').addClass('disabled').prop('disabled', true);
 });
+
+(function () {
+  $(document).on('input', '.totalCalc', function (e) {
+      let _self = $(this);
+      let targetInputId = _self.attr('data-total-input-id');
+      
+      if (_self.attr('data-calc-input-rows-attr') && _self.attr('data-total-input-row-attr')) {
+          let totalRow = 0;
+          let calcInputRowsNames = _self.attr('data-calc-input-rows-attr').split(',');
+          let targetInputRow = $('#voluntary_refund_create_form').find("input[name='"+_self.attr('data-total-input-row-attr')+"']");
+          
+          calcInputRowsNames.forEach(function (value, i) {
+             if (i === 0) {
+                 totalRow = +$('#voluntary_refund_create_form').find("input[name='"+value+"']").val();
+             } else {
+                 totalRow -= +$('#voluntary_refund_create_form').find("input[name='"+value+"']").val();
+             }
+          });
+          targetInputRow.val((Math.round(totalRow * 100) / 100).toFixed(2));
+          calcTotal(targetInputRow.attr('data-total-input-id'));
+      }
+      
+      calcTotal(targetInputId);
+  });
+  
+  function calcTotal(targetInputId) {
+      let total = 0;
+      $('#voluntary_refund_create_form').find("[data-total-input-id='"+targetInputId+"']").each(function (i, e) {
+          total += +$(e).val();
+      });
+      $('#'+targetInputId).val((Math.round(total * 100) / 100).toFixed(2));
+  }
+})();
 JS;
-$this->registerJs($js);
+    $this->registerJs($js);
+    Pjax::end();
+endif; ?>

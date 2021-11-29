@@ -31,6 +31,8 @@ class AuxiliaryOptionForm extends \yii\base\Model
 
     public $details;
 
+    public $amountPerPax;
+
     public function rules(): array
     {
         return [
@@ -38,7 +40,7 @@ class AuxiliaryOptionForm extends \yii\base\Model
             [['type', 'status'], 'string', 'max' => 50],
             [['refundAllow'], CheckIsBooleanValidator::class],
             [['refundable', 'amount'], CheckIsNumberValidator::class, 'allowInt' => true],
-            [['details'], IsArrayValidator::class]
+            [['details', 'amountPerPax'], IsArrayValidator::class]
         ];
     }
 

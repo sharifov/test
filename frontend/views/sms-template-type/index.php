@@ -46,11 +46,44 @@ $this->params['breadcrumbs'][] = $this->title;
             'stp_name',
             'stp_hidden:boolean',
             [
+                'label' => 'Department (deprecated)',
                 'attribute' => 'stp_dep_id',
                 'value' => static function (\common\models\SmsTemplateType $model) {
                     return $model->stpDep ? $model->stpDep->dep_name : '-';
                 },
-                'filter' => \common\models\Department::getList()
+                'filter' => false
+            ],
+
+            [
+                'label' => 'Departments',
+                'attribute' => 'stp_dep_id',
+                'value' => static function (\common\models\SmsTemplateType $model) {
+                    $valueArr = [];
+
+                    foreach ($model->smsTemplateTypeDepartments as $item) {
+                        $valueArr[] = Html::tag('div', Html::encode($item->sttdDepartment->dep_name), ['class' => 'label label-default']) ;
+                    }
+
+                    return $valueArr ? implode('<br>', $valueArr)  : '-';
+                },
+                'filter' => \common\models\Department::getList(),
+                'format' => 'raw'
+            ],
+
+            [
+                'label' => 'Projects',
+                'attribute' => 'projectId',
+                'value' => static function (\common\models\SmsTemplateType $model) {
+                    $valueArr = [];
+
+                    foreach ($model->smsTemplateTypeProjects as $item) {
+                        $valueArr[] = Html::tag('div', Html::encode($item->sttpProject->name), ['class' => 'label label-info']) ;
+                    }
+
+                    return $valueArr ? implode('<br>', $valueArr)  : '-';
+                },
+                'filter' => \common\models\Project::getList(),
+                'format' => 'raw'
             ],
 
             [

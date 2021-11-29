@@ -34,7 +34,7 @@ class Metrics extends Component
     private array $counterList = [];
     private array $histogramList = [];
     private array $gaugeList = [];
-    private ?CollectorRegistry $registry;
+    private ?CollectorRegistry $registry = null;
     private bool $isMetricsEnabled = false;
     private array $defaultBuckets = [0.2, 0.4, 0.6, 0.8, 1, 3, 5, 7, 10, 15];
 

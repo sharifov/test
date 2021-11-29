@@ -14,6 +14,7 @@ use common\components\validators\CheckIsNumberValidator;
  * @property float $refundable
  * @property float $selling
  * @property string|null $status
+ * @property bool $refundAllowed
  */
 class TicketForm extends \yii\base\Model
 {
@@ -29,10 +30,12 @@ class TicketForm extends \yii\base\Model
 
     public $status;
 
+    public $refundAllowed;
+
     public function rules(): array
     {
         return [
-            [['number', 'airlinePenalty', 'processingFee', 'refundable', 'selling', 'status'], 'required'],
+            [['number', 'airlinePenalty', 'processingFee', 'refundable', 'selling', 'status', 'refundAllowed'], 'required'],
             [['number'], 'string', 'max' => 50],
             [['airlinePenalty', 'processingFee', 'refundable', 'selling'], CheckIsNumberValidator::class],
             [['airlinePenalty', 'refundable', 'selling'], 'number', 'min' => 0, 'skipOnError' => true],

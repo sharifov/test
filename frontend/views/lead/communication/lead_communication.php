@@ -34,6 +34,7 @@ use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use common\models\EmailTemplateType;
 
 $c_type_id = $comForm->c_type_id;
 
@@ -41,7 +42,7 @@ $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabl
 $pjaxContainerIdForm = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log-form' : 'pjax-lead-communication-form';
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 $unsubscribedEmails = @json_encode($unsubscribedEmails);
-$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES);
+$emailTemplateTypes = EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id);
 $emailTemplateTypes = @json_encode($emailTemplateTypes);
 ?>
 
@@ -413,7 +414,7 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
                                 <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
                                     <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
-                                    <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
+                                    <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
@@ -573,6 +574,7 @@ JS;
                             $js = <<<JS
     
         function initializeMessageType(messageType) {
+            
             if (messageType == 2) {
                 $('.message-field-phone').hide();
                 $('.message-field-email').hide();
@@ -719,11 +721,9 @@ $js = <<<JS
     });
     
     $('body').on("change", '#c_email_tpl_key', function () {
-                
-        //var type_id = $('#c_type_id').val();        
-        //alert($(this).val());
+        let type_id = $('#c_type_id').val();
         
-        //if(type_id != 2) {
+        if(parseInt(type_id) === 1) { // Email
             if($(this).val() == tpl_email_blank_key) {
                 $('#email-textarea-div').show();
                 $('#email-subtitle-group').show();
@@ -731,7 +731,7 @@ $js = <<<JS
                 $('#email-textarea-div').hide();
                 $('#email-subtitle-group').hide();
             }
-        //}
+        }
     });
     
     $('body').on("change", '#email', function () {
@@ -779,15 +779,15 @@ $js = <<<JS
     
     $('body').on('click', '#print_button', function () {
         let w = window.open();
-        let js_timer = document.createElement("script");
-        js_timer.innerHTML = 'setTimeout( function() { window.print(); window.close(); }, 3000);'; 
-        w.document.head.append(js_timer);
         $(w.document.body).html($('#object-email-view').contents()[0].body.innerHTML);
-        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
         w.document.head.append('<style>@media print { body background-color:#FFFFFF; background-image:none; color:#000000 }  }</style>');
         let mail_headers = document.createElement("div");
         mail_headers.innerHTML = $('#email_info').html();
         w.document.body.prepend(mail_headers);
+        let js_timer = document.createElement("script");
+        js_timer.innerHTML = 'setTimeout( "window.print(); window.close();", 3000);'; 
+        w.document.head.append(js_timer);
+        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
     });
     
     $('body').on('change', '.quotes-uid', function() {

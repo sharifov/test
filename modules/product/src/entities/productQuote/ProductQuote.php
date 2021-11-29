@@ -6,6 +6,7 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
+use modules\product\src\entities\productQuote\events\ProductQuoteBookedChangeFlowEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
@@ -783,6 +784,15 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function bookedChangeFlow(): void
     {
         if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
+            $this->recordEvent(
+                new ProductQuoteBookedChangeFlowEvent(
+                    $this->pq_id,
+                    $this->pq_status_id,
+                    ProductQuoteStatus::BOOKED,
+                    'Exchange API flow',
+                    $this->pq_owner_user_id
+                )
+            );
             $this->setStatus(ProductQuoteStatus::BOOKED);
         }
     }
@@ -1114,5 +1124,13 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $diffPrice = ($this->pq_origin_price - $originProductQuote->pq_origin_price) + $this->pq_agent_markup;
         $diffPrice = $diffPrice < 0 ? 0.00 : $diffPrice;
         return ProductQuoteHelper::roundPrice($diffPrice, 2);
+    }
+
+    /**
+     * @return int
+     */
+    public function getProductQuoteOptionsCount(): int
+    {
+        return $this->productQuoteOptions ? count($this->productQuoteOptions) : 0;
     }
 }

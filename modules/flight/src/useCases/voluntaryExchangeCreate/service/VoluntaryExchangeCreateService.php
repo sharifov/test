@@ -71,13 +71,19 @@ class VoluntaryExchangeCreateService
 
     public static function getLastProductQuoteChangeByPqId(
         string $productQuoteId,
+        ?array $statuses = null,
         array $typeIds = [ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE]
     ): ?ProductQuoteChange {
-        return ProductQuoteChange::find()
+        $query = ProductQuoteChange::find()
             ->where(['pqc_pq_id' => $productQuoteId])
             ->andWhere(['IN', 'pqc_type_id', $typeIds])
-            ->orderBy(['pqc_id' => SORT_DESC])
-            ->one();
+            ->orderBy(['pqc_id' => SORT_DESC]);
+
+        if ($statuses) {
+            $query->andWhere(['IN', 'pqc_status_id', $statuses]);
+        }
+
+        return $query->one();
     }
 
     public static function getOriginProductQuote(
@@ -93,23 +99,19 @@ class VoluntaryExchangeCreateService
     }
 
     public static function getProductQuoteByProductQuoteChange(
-        int $productQuoteChangeId
+        int $productQuoteChangeId,
+        ?array $statuses = null
     ): ?ProductQuote {
-        return ProductQuote::find()
+        $query = ProductQuote::find()
             ->select(ProductQuote::tableName() . '.*')
             ->innerJoin(ProductQuoteChangeRelation::tableName(), 'pq_id = pqcr_pq_id')
             ->where(['pqcr_pqc_id' => $productQuoteChangeId])
-            ->orderBy(['pq_id' => SORT_DESC])
-            ->one();
-    }
+            ->orderBy(['pq_id' => SORT_DESC]);
 
-    public static function bookingProductQuotePostProcessing(ProductQuote $voluntaryQuote): void
-    {
-        ProductQuoteRelation::deleteAll([
-            'pqr_related_pq_id' => $voluntaryQuote->pq_id,
-            'pqr_type_id' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
-        ]);
+        if ($statuses) {
+            $query->andWhere(['IN', 'pq_status_id', $statuses]);
+        }
 
-        ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $voluntaryQuote->pq_id]);
+        return $query->one();
     }
 }

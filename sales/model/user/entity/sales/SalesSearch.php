@@ -211,16 +211,16 @@ class SalesSearch extends Model
             $query->andWhere(['=', 'id', $this->id]);
         }
 
-        if ($this->final_profit) {
-            $query->andWhere(['=', 'gross_profit', $this->final_profit]);
-        }
-
         if ($this->l_status_dt) {
             $query->andWhere(['=', 'DATE(l_status_dt)', $this->l_status_dt]);
         }
 
         if ($this->created) {
             $query->andWhere(['=', 'DATE(created)', $this->created]);
+        }
+
+        if ($this->final_profit) {
+            $query->andHaving(['=', 'gross_profit', $this->final_profit]);
         }
 
         $query->cache($cacheDuration);

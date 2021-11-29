@@ -170,9 +170,9 @@ class HybridService extends Component
         if (!$response->isOk) {
             \Yii::error([
                 'message' => 'Hybrid Webhook server error',
+                'content' => VarDumper::dumpAsString($response->content),
                 'type' => $type,
                 'data' => $data,
-                'content' => VarDumper::dumpAsString($response->content),
             ], 'Hybrid:wh');
             throw new \DomainException('Hybrid Webhook server error.');
         }
@@ -182,9 +182,9 @@ class HybridService extends Component
         if (!$data) {
             \Yii::error([
                 'message' => 'Hybrid response Data is empty',
+                'content' => VarDumper::dumpAsString($response->content),
                 'type' => $type,
                 'data' => $data,
-                'content' => VarDumper::dumpAsString($response->content),
             ], 'Hybrid:wh');
             throw new \DomainException('Hybrid response Data is empty.');
         }
@@ -192,9 +192,9 @@ class HybridService extends Component
         if (!is_array($data)) {
             \Yii::error([
                 'message' => 'Hybrid response Data type is invalid',
+                'content' => VarDumper::dumpAsString($response->content),
                 'type' => $type,
                 'data' => $data,
-                'content' => VarDumper::dumpAsString($response->content),
             ], 'Hybrid:wh');
             throw new \DomainException('Hybrid response Data type is invalid.');
         }

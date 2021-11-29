@@ -24,8 +24,11 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\exception\ValidationException;
@@ -332,5 +335,31 @@ class ReprotectionCreateService
         } else {
             Yii::error($message, $category);
         }
+    }
+
+    public static function isVoluntaryExist(ProductQuote $originProductQuote): bool
+    {
+        return ProductQuote::find()
+            ->leftJoin([
+                'change' => ProductQuoteChange::find()
+                    ->select(['pqc_pq_id'])
+                    ->where(['NOT IN', 'pqc_status_id', [ProductQuoteChangeStatus::CANCELED, ProductQuoteChangeStatus::DECLINED]])
+                    ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE])
+                    ->groupBy(['pqc_pq_id'])
+            ], 'change.pqc_pq_id = pq_id')
+            ->leftJoin([
+                'refund' => ProductQuoteRefund::find()
+                    ->select(['pqr_product_quote_id'])
+                    ->where(['NOT IN', 'pqr_status_id', [ProductQuoteRefundStatus::CANCELED, ProductQuoteRefundStatus::DECLINED]])
+                    ->andWhere(['pqr_type_id' => ProductQuoteRefund::typeVoluntary()])
+                    ->groupBy(['pqr_product_quote_id'])
+            ], 'refund.pqr_product_quote_id = pq_id')
+            ->where(['pq_id' => $originProductQuote->pq_id])
+            ->andWhere([
+                'OR',
+                ['IS NOT', 'change.pqc_pq_id', null],
+                ['IS NOT', 'refund.pqr_product_quote_id', null],
+            ])
+            ->exists();
     }
 }

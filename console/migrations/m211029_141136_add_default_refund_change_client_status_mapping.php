@@ -23,7 +23,7 @@ class m211029_141136_add_default_refund_change_client_status_mapping extends Mig
                 "processing" => "processing",
                 "completed" => "exchanged",
                 "canceled" => "",
-                "declined" => "cancelled",
+                "declined" => "canceled",
                 "error" => ""
             ]);
             $setting->save();
@@ -39,7 +39,7 @@ class m211029_141136_add_default_refund_change_client_status_mapping extends Mig
                 "processing" => "processing",
                 "completed" => "refunded",
                 "canceled" => "",
-                "declined" => "cancelled",
+                "declined" => "canceled",
                 "error" => ""
             ]);
             $setting->save();

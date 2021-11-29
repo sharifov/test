@@ -41,7 +41,7 @@ $pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 
 $pjaxContainerIdForm = $isCommunicationLogEnabled ? 'pjax-case-communication-log-form' : 'pjax-case-communication-form';
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
 $unsubscribedEmails =  @json_encode($unsubscribedEmails);
-$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id);
+$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id, $model->cs_project_id);
 ?>
 
 <div class="x_panel">
@@ -417,7 +417,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
 
                             <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
                                 <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
-                                <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
+                                <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id, $model->cs_project_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
@@ -741,12 +741,9 @@ $js = <<<JS
     });
     
     $('body').on("change", '#c_email_tpl_key', function () {
-                
-        //var type_id = $('#c_type_id').val();
-        
-        //alert($(this).val());
-        
-        //if(type_id != 2) {
+        let type_id = $('#c_type_id').val();
+
+        if(parseInt(type_id) === 1) { // Email
             if($(this).val() == tpl_email_blank_key) {
                 $('#email-textarea-div').show();
                 $('#email-subtitle-group').show();
@@ -760,7 +757,7 @@ $js = <<<JS
                 $('#email-textarea-div').hide();
                 $('#email-subtitle-group').hide();
             }
-        //}
+        }
     });
 
     $('body').on("change", '#email', function () {
@@ -806,15 +803,15 @@ $js = <<<JS
     
     $('body').on('click', '#print_button', function () {
         let w = window.open();
-        let js_timer = document.createElement("script");
-        js_timer.innerHTML = 'setTimeout( function() { window.print(); window.close(); }, 3000);'; 
-        w.document.head.append(js_timer);
         $(w.document.body).html($('#object-email-view').contents()[0].body.innerHTML);
-        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
         w.document.head.append('<style>@media print { body background-color:#FFFFFF; background-image:none; color:#000000 }  }</style>');
         let mail_headers = document.createElement("div");
         mail_headers.innerHTML = $('#email_info').html();
         w.document.body.prepend(mail_headers);
+        let js_timer = document.createElement("script");
+        js_timer.innerHTML = 'setTimeout( "window.print(); window.close();", 3000);'; 
+        w.document.head.append(js_timer);
+        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
     });
 
     $('body').on('change', '.quotes-uid', function() {

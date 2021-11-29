@@ -117,30 +117,33 @@ class FlightQuoteRefundController extends ApiBaseController
      *               "currency": "USD",
      *               "tickets": [
      *                   {
-     *                       "number": "",
-     *                       "airlinePenalty": 70.4,
+     *                       "number": "fake-22222",
+     *                       "airlinePenalty": 345.47,
      *                       "processingFee": 0,
-     *                       "refundable": 115,
-     *                       "selling": 115,
-     *                       "clientCurrency": "USD",
-     *                       "status": ""
+     *                       "refundable": 128,
+     *                       "selling": 473.47,
+     *                       "currency": "USD",
+     *                       "status": "refunded",
+     *                       "refundAllowed": false
      *                   }
      *               ],
      *               "auxiliaryOptions": [
      *                   {
-     *                       "type": "",
-     *                       "amount": 50,
-     *                       "refundable": 20,
+     *                       "type": "auto_check_in",
+     *                       "amount": 21.9,
+     *                       "amountPerPax": [],
+     *                       "refundable": 21.9,
      *                       "details": [],
-     *                       "status": "",
-     *                       "refundAllow": false
+     *                       "status": "paid",
+     *                       "refundAllow": true
      *                   },
      *                   {
-     *                       "type": "",
-     *                       "amount": 25,
-     *                       "refundable": 25,
+     *                       "type": "flexible_ticket",
+     *                       "amount": 106.06,
+     *                       "amountPerPax": [],
+     *                       "refundable": 0,
      *                       "details": [],
-     *                       "status": "",
+     *                       "status": "paid",
      *                       "refundAllow": false
      *                   }
      *               ]
@@ -296,16 +299,18 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string}               refund.tickets.number             Ticket Number
      * @apiParam {number}               refund.tickets.airlinePenalty     Airline penalty
      * @apiParam {number}               refund.tickets.processingFee      Processing fee
-     * @apiParam {number}               refund.tickets.refundAmount       Refund amount
-     * @apiParam {number}               refund.tickets.sellingPrice       Selling price
+     * @apiParam {number}               refund.tickets.refundable         Refund amount
+     * @apiParam {number}               refund.tickets.selling            Selling price
      * @apiParam {string}               refund.tickets.status             Status For BO
+     * @apiParam {bool}                 [refund.tickets.refundAllowed]        Refund Allowed
      * @apiParam {object}               refund.auxiliaryOptions             Auxiliary Options Array
      * @apiParam {string}               refund.auxiliaryOptions.type        Auxiliary Options Type
      * @apiParam {number}               refund.auxiliaryOptions.amount      Selling price
      * @apiParam {number}               refund.auxiliaryOptions.refundable  Refundable price
      * @apiParam {string}               refund.auxiliaryOptions.status     Status For BO
      * @apiParam {bool}                 refund.auxiliaryOptions.refundAllow  Refund Allowed
-     * @apiParam {object}                 [refund.auxiliaryOptions.details]  Details
+     * @apiParam {object}               [refund.auxiliaryOptions.details]  Details
+     * @apiParam {object}               [refund.auxiliaryOptions.amountPerPax]  Amount Per Pax
      * @apiParam {object}               billing                      Billing
      * @apiParam {string{30}}           billing.first_name           First name
      * @apiParam {string{30}}           billing.last_name            Last name
@@ -348,9 +353,10 @@ class FlightQuoteRefundController extends ApiBaseController
      *                  "number": "465723459",
      *                  "airlinePenalty": 25.36,
      *                  "processingFee": 25,
-     *                  "refundAmount": 52.65,
-     *                  "sellingPrice": 150,
-     *                  "status": "issued"
+     *                  "refundable": 52.65,
+     *                  "selling": 150,
+     *                  "status": "issued",
+     *                  "refundAllowed": true
      *              }
      *          ],
      *          "auxiliaryOptions": [
@@ -360,7 +366,10 @@ class FlightQuoteRefundController extends ApiBaseController
      *                  "refundable": 15.00,
      *                  "status": "paid",
      *                  "refundAllow": true,
-     *                  "details": {}
+     *                  "details": {},
+     *                  "amountPerPax": {
+     *                      "1111111111": 5.45
+     *                  }
      *              }
      *          ]
      *      },

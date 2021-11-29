@@ -1,5 +1,6 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
 use modules\hotel\HotelModule;
 use yii\log\FileTarget;
@@ -95,12 +96,12 @@ return [
         'log' => [
             'traceLevel' => 0,
             'targets' => [
-                [
+                'file' => [
                     'class' => FileTarget::class,
                     'levels' => ['error', 'warning'],
                     //'logVars' => [],
                 ],
-                [
+                'db-error' => [
                     'class' => DbTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
@@ -114,8 +115,8 @@ return [
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => \yii\log\DbTarget::class,
+                'db-info' => [
+                    'class' => DbTarget::class,
                     'levels' => ['info'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -127,8 +128,8 @@ return [
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => \common\components\logger\FilebeatTarget::class,
+                'file-fb-error' => [
+                    'class' => FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
@@ -142,7 +143,7 @@ return [
                     'logFile' => '@runtime/logs/stash.log'
                 ],
                 'file-fb-log' => [
-                    'class' => \common\components\logger\FilebeatTarget::class,
+                    'class' => FilebeatTarget::class,
                     'levels' => ['info'],
                     'categories' => ['log\*', 'elk\*'],
                     'logVars' => [],
@@ -151,6 +152,16 @@ return [
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
+//                'analytics-fb-log' => [
+//                    'class' => FilebeatTarget::class,
+//                    'levels' => ['info'],
+//                    'categories' => ['analytics\*', 'AS\*'],
+//                    'logVars' => [],
+//                    'prefix' => static function () {
+//                        return LogHelper::getAnalyticPrefixData();
+//                    },
+//                    'logFile' => '@runtime/logs/stash.log'
+//                ],
                 /*[
                     'class'         => \primipilus\log\TelegramTarget::class,
                     'levels'        => ['error'],

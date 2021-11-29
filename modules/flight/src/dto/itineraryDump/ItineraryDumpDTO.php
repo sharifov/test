@@ -58,9 +58,9 @@ class ItineraryDumpDTO
         $this->departureTime = $segment['departureDateTime']->format('Y-m-d H:i:s');
         $this->arrivalTime = $segment['arrivalDateTime']->format('Y-m-d H:i:s');
         $this->arrivalAirportCode = $segment['arrivalAirport'] ?? null;
-        $this->operationAirlineCode = $segment['carrier'] ?? null;
         $this->marketingAirlineCode = $segment['carrier'] ?? null;
-        $this->operationAirline = $segment['carrier'] ?? null;
+        $this->operationAirlineCode = $segment['operatingAirline'] ?? $this->marketingAirlineCode;
+        $this->operationAirline = $segment['operatingAirlineName'] ?? null;
         $this->marketingAirline = $segment['carrier'] ?? null;
         $this->duration = $segment['flightDuration'] ?? null;
         return $this;
