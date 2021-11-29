@@ -286,20 +286,20 @@ class UserStatsSearch extends Model
                     ->select(['COUNT(id)'])
                     ->from(Lead::tableName())
                     ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
-                    ->where(['status' => Lead::STATUS_SOLD])
                     ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT => (new Query())
-                    ->select([
-                        new Expression(
-                            $dataProvider->totalCount . " AS " . UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT
-                        )
-                    ])->from(Lead::tableName())->limit(1)
+                    ->select(['COUNT(id)'])
+                    ->from(Lead::tableName())
+                    ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
+                    ->where(['status' => Lead::STATUS_SOLD])
+                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
             ]);
         }
+
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_SUM_GROSS_PROFIT)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_SUM_GROSS_PROFIT => (new Query())
