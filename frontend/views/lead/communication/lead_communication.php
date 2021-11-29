@@ -34,6 +34,7 @@ use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use common\models\EmailTemplateType;
 
 $c_type_id = $comForm->c_type_id;
 
@@ -41,7 +42,7 @@ $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabl
 $pjaxContainerIdForm = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log-form' : 'pjax-lead-communication-form';
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 $unsubscribedEmails = @json_encode($unsubscribedEmails);
-$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES);
+$emailTemplateTypes = EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id);
 $emailTemplateTypes = @json_encode($emailTemplateTypes);
 ?>
 
@@ -413,7 +414,7 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
                                 <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
                                     <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
-                                    <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
+                                    <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">

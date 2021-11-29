@@ -5,6 +5,7 @@ namespace sales\model\clientChatUserAccess\useCase\manageRequest;
 use common\components\jobs\clientChat\ChatDataRequestSearchFlightQuotesJob;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
+use sales\model\clientChat\useCase\leadAutoTake\ClientChatLeadAutoTakeService;
 use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
 use sales\model\clientChatDataRequest\form\FlightSearchDataRequestForm;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -19,6 +20,7 @@ use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
  * @property int $accessStatusId
  * @property ClientChatUserAccessService $accessService
  * @property ClientChatActionPermission $actionPermission
+ * @property ClientChatLeadAutoTakeService $leadAutoTakeService
  */
 class UserAccessAcceptPending implements UserAccessManageRequestInterface
 {
@@ -27,6 +29,7 @@ class UserAccessAcceptPending implements UserAccessManageRequestInterface
     private int $accessStatusId;
     private ClientChatUserAccessService $accessService;
     private ClientChatActionPermission $actionPermission;
+    private ClientChatLeadAutoTakeService $leadAutoTakeService;
 
     public function __construct(ClientChat $chat, ClientChatUserAccess $access, int $accessStatusId)
     {
@@ -35,6 +38,7 @@ class UserAccessAcceptPending implements UserAccessManageRequestInterface
         $this->accessStatusId = $accessStatusId;
         $this->accessService = \Yii::createObject(ClientChatUserAccessService::class);
         $this->actionPermission = \Yii::createObject(ClientChatActionPermission::class);
+        $this->leadAutoTakeService = \Yii::createObject(ClientChatLeadAutoTakeService::class);
     }
 
     public function handle(): void
@@ -43,6 +47,8 @@ class UserAccessAcceptPending implements UserAccessManageRequestInterface
             throw new \DomainException('Action is not allowed');
         }
         $this->accessService->acceptPending($this->chat, $this->access, $this->accessStatusId);
+
+        $this->leadAutoTakeService->byAcceptFromWidget($this->chat->cch_id, $this->access->ccua_user_id);
 
         $chatDataRequest = ClientChatDataRequest::find()->byChatId($this->chat->cch_id)->one();
 

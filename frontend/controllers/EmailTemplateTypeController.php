@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\EmailTemplateTypeDepartment;
+use common\models\EmailTemplateTypeProject;
 use Yii;
 use common\models\EmailTemplateType;
 use common\models\search\EmailTemplateTypeSearch;
@@ -91,6 +92,7 @@ class EmailTemplateTypeController extends FController
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             EmailTemplateTypeDepartment::deleteAll(['ettd_etp_id' => $model->etp_id]);
+            EmailTemplateTypeProject::deleteAll(['ettp_etp_id' => $model->etp_id]);
 
             if ($model->departmentIds) {
                 foreach ($model->departmentIds as $depId) {
@@ -101,10 +103,20 @@ class EmailTemplateTypeController extends FController
                 }
             }
 
+            if ($model->projectIds) {
+                foreach ($model->projectIds as $prId) {
+                    $ettPr = new EmailTemplateTypeProject();
+                    $ettPr->ettp_etp_id = $model->etp_id;
+                    $ettPr->ettp_project_id = $prId;
+                    $ettPr->save();
+                }
+            }
+
             return $this->redirect(['view', 'id' => $model->etp_id]);
         }
 
         $model->departmentIds = ArrayHelper::map($model->emailTemplateTypeDepartments, 'ettd_department_id', 'ettd_department_id');
+        $model->projectIds = ArrayHelper::map($model->emailTemplateTypeProjects, 'ettp_project_id', 'ettp_project_id');
 
         return $this->render('update', [
             'model' => $model,

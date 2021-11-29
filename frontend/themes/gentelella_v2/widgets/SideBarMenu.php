@@ -386,8 +386,17 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Phone', 'url' => ['/client-notification-phone-list/index']],
                         ['label' => 'Sms', 'url' => ['/client-notification-sms-list/index']],
                     ]
-                ]
-            ]
+                ],
+                [
+                    'label' => 'Client Data',
+                    'url' => 'javascript:',
+                    'icon' => 'th-list',
+                    'items' => [
+                        ['label' => 'Client Data Key', 'url' => ['/client-data-key-crud/index'], 'icon' => 'key'],
+                        ['label' => 'Client Data', 'url' => ['/client-data-crud/index'], 'icon' => 'list'],
+                    ]
+                ],
+            ],
         ];
 
         $menuNewData = [

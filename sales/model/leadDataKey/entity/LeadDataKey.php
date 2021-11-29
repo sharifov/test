@@ -3,6 +3,7 @@
 namespace sales\model\leadDataKey\entity;
 
 use common\models\Employee;
+use sales\behaviors\cache\CleanCacheBehavior;
 use sales\behaviors\cache\CleanCacheFileBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -83,7 +84,7 @@ class LeadDataKey extends ActiveRecord
                 'slugAttribute' => 'ldk_key',
             ],
             'cleanCache' => [
-                'class' => CleanCacheFileBehavior::class,
+                'class' => CleanCacheBehavior::class,
                 'tags' => [self::CACHE_TAG],
             ],
         ];

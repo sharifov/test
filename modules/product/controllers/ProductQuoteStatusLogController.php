@@ -7,10 +7,26 @@ use frontend\controllers\FController;
 use modules\product\src\entities\productQuoteStatusLog\search\ProductQuoteStatusLogSearch;
 use sales\auth\Auth;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 
 class ProductQuoteStatusLogController extends FController
 {
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'show',
+                ]
+            ]
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     public function actionShow(): string
     {
         $productQuote = $this->findModel((string)Yii::$app->request->get('gid'));

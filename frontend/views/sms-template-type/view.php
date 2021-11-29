@@ -54,6 +54,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             [
+                'label' => 'Projects',
+                'value' => static function (\common\models\SmsTemplateType $model) {
+                    $valueArr = [];
+
+                    foreach ($model->smsTemplateTypeProjects as $item) {
+                        $valueArr[] = Html::tag('div', Html::encode($item->sttpProject->name), ['class' => 'label label-info']);
+                    }
+
+                    return $valueArr ?  implode(' ', $valueArr) : '-';
+                },
+                'format' => 'raw'
+            ],
+            [
                 'attribute' => 'stp_updated_user_id',
                 'value' => static function (\common\models\SmsTemplateType $model) {
                     return ($model->stpUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->stpUpdatedUser->username) : $model->stp_updated_user_id);

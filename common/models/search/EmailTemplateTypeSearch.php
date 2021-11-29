@@ -13,13 +13,15 @@ use common\models\EmailTemplateType;
  */
 class EmailTemplateTypeSearch extends EmailTemplateType
 {
+    public $projectId;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['etp_id', 'etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id'], 'integer'],
+            [['etp_id', 'etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id', 'projectId'], 'integer'],
             [['etp_key', 'etp_name', 'etp_origin_name', 'etp_hidden'], 'safe'],
             [['etp_created_dt', 'etp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -45,6 +47,7 @@ class EmailTemplateTypeSearch extends EmailTemplateType
     {
         $query = EmailTemplateType::find()->with('etpCreatedUser', 'etpUpdatedUser');
         $query->joinWith(['emailTemplateTypeDepartments']);
+        $query->joinWith(['emailTemplateTypeProjects']);
         $query->groupBy(['etp_id']);
 
         // add conditions that should always apply here
@@ -77,7 +80,8 @@ class EmailTemplateTypeSearch extends EmailTemplateType
             'etp_hidden' => $this->etp_hidden,
             'etp_created_user_id' => $this->etp_created_user_id,
             'etp_updated_user_id' => $this->etp_updated_user_id,
-            'ettd_department_id'    => $this->etp_dep_id
+            'ettd_department_id'    => $this->etp_dep_id,
+            'ettp_project_id'     => $this->projectId
         ]);
 
         $query->andFilterWhere(['like', 'etp_key', $this->etp_key])

@@ -11,11 +11,15 @@ use yii\helpers\Inflector;
  *
  * @property string $donorColumn
  * @property string $targetColumn
+ * @property string $replacement
+ * @property string $lowercase
  */
 class SlugBehavior extends Behavior
 {
     public $donorColumn;
     public $targetColumn;
+    public string $replacement = '_';
+    public bool $lowercase = true;
 
     /**
      * @return array
@@ -30,7 +34,11 @@ class SlugBehavior extends Behavior
     public function slugGenerate(): void
     {
         if (!empty($this->owner->{$this->donorColumn}) && empty($this->owner->{$this->targetColumn})) {
-            $this->owner->{$this->targetColumn} = Inflector::slug($this->owner->{$this->donorColumn}, '_');
+            $this->owner->{$this->targetColumn} = Inflector::slug(
+                $this->owner->{$this->donorColumn},
+                $this->replacement,
+                $this->lowercase
+            );
         }
     }
 }

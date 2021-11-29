@@ -906,7 +906,7 @@ $js = <<<JS
                   } else {
                       
                       // pjaxReload({container: '#pjax-lead-orders', timout: 2000});
-                      pjaxReload({container: '#pjax-lead-orders'});
+                      pjaxReload({container: '#pjax-case-orders'});
                       new PNotify({
                             title: 'Quote was successfully deleted',
                             type: 'success',
@@ -923,6 +923,27 @@ $js = <<<JS
                 $('#preloader').addClass('d-none');
             });
     });
+    
+    $(document).on('click', '.btn-product-quote-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Product quote [' + gid + '] status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+     });
 JS;
 
 $this->registerJs($js, View::POS_READY, 'case-order-js');

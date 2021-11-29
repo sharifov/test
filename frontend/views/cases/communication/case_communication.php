@@ -41,7 +41,7 @@ $pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 
 $pjaxContainerIdForm = $isCommunicationLogEnabled ? 'pjax-case-communication-log-form' : 'pjax-case-communication-form';
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
 $unsubscribedEmails =  @json_encode($unsubscribedEmails);
-$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id);
+$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id, $model->cs_project_id);
 ?>
 
 <div class="x_panel">
@@ -417,7 +417,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
 
                             <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
                                 <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
-                                <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
+                                <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id, $model->cs_project_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
