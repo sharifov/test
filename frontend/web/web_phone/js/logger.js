@@ -8,7 +8,8 @@
                     'PhoneWidgetLog',
                     JSON.stringify({
                         "message": message,
-                        "color": color
+                        "color": color,
+                        "time": Date.now()
                     })
                 );
             }

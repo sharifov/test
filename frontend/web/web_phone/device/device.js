@@ -13,7 +13,7 @@
             .then(function (response) {
                 // console.log("Got a Twilio Access token.");
                 PhoneWidget.addLog("Got a Twilio Access token.");
-                initDevice(response.data.token);
+                initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime});
             })
             .catch(function (err) {
                 PhoneWidget.addLog("Get Twilio Access token error. Reload page!");
@@ -25,7 +25,7 @@
             // console.log("Init Twilio Device...");
             PhoneWidget.addLog("Init Twilio Device...");
 
-            const device = new Twilio.Device(token, {
+            const device = new Twilio.Device(token.token, {
                //logLevel: 1,
                 //edge: 'ashburn',
                 closeProtection: true,
@@ -104,18 +104,23 @@
                 updateOutputDevices(ringtoneDevices, this.audio.ringtoneDevices.get());
             }
 
-            // todo
-//            setInterval(async () => {
-//                $.getJSON('/phone/get-token')
-//                    .then(function (response) {
-//                        console.log("Got a New Twilio token.");
-//                        device.updateToken(response.data.token);
-//                    })
-//                    .catch(function (err) {
-//                        console.log(err);
-//                        createNotify('Call Token error!', 'Could not get a token from server!', 'error');
-//                    });
-//            }, ttl - refreshBuffer);
+            const updateToken = () => {
+                PhoneWidget.addLog("Update Twilio Access Token...");
+                $.getJSON('/phone/get-token')
+                    .then(function (response) {
+                        //console.log("Got a Twilio Access token.");
+                        PhoneWidget.addLog("Got a Twilio Access token.");
+                        device.updateToken(response.data.token);
+                        setTimeout(async () => updateToken(), response.data.refreshTime * 1000);
+                    })
+                    .catch(function (err) {
+                        PhoneWidget.addLog("Get Twilio Access token error. Reload page!", '#f41b1b');
+                        console.log(err);
+                        createNotify('Twilio Token error!', 'Could not get a token from server! Please reload page!', 'error');
+                    });
+            };
+
+           setTimeout(async () => updateToken(), token.refreshTime * 1000);
 
             device.on('registering', () => {
                 //console.log("Twilio.Device Registering...");
@@ -247,20 +252,10 @@
             device.on('error', (twilioError, call) => {
                 if (twilioError.code === 20104) {
                     //console.log('Twilio JWT Token Expired');
-                    PhoneWidget.addLog('Twilio JWT Token Expired');
+                    PhoneWidget.addLog('Twilio JWT Token Expired', '#f41b1b');
                     //console.log("Requesting New Twilio Access Token...");
                     PhoneWidget.addLog("Requesting New Twilio Access Token...");
-                    $.getJSON('/phone/get-token')
-                        .then(function (response) {
-                            //console.log("Got a Twilio Access token.");
-                            PhoneWidget.addLog("Got a Twilio Access token.");
-                            device.updateToken(response.data.token);
-                        })
-                        .catch(function (err) {
-                            PhoneWidget.addLog("Get Twilio Access token error. Reload page!");
-                            console.log(err);
-                            createNotify('Twilio Token error!', 'Could not get a token from server! Please reload page!', 'error');
-                        });
+                    updateToken();
                     return;
                 }
                 console.log('An error has occurred: ', twilioError);

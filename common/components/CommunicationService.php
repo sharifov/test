@@ -773,17 +773,24 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         if ($out === false) {
             $out = $this->getJwtToken($username);
-
             if ($out && !empty($out['data']['token'])) {
-                $expired = 60 * 5;
-                if (!empty($out['data']['expire'])) {
-                    $expired = strtotime($out['data']['expire']) - time() - 60;
-                }
+                $expired = $this->calculateJwtExpiredSeconds($out['data']['expire']);
                 \Yii::$app->cache->set($cacheKey, $out, $expired);
             }
         }
 
+        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']);
+
         return $out;
+    }
+
+    private function calculateJwtExpiredSeconds(string $expiredDt): int
+    {
+        $expired = strtotime($expiredDt) - time();
+        if ($expired < 1) {
+            return 1;
+        }
+        return $expired;
     }
 
     /**
