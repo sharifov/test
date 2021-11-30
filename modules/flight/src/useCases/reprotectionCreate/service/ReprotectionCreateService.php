@@ -492,7 +492,7 @@ class ReprotectionCreateService
                 }
                 $caseNote = CaseNote::create(
                     $caseRefund->cs_id,
-                    'New Schedule Change happened: (' . $caseRefund->cs_id . '). Refund disabled.',
+                    'New Schedule Change happened: (' . $case->cs_id . '). Refund disabled.',
                     null
                 );
                 $caseNote->detachBehavior('user');
