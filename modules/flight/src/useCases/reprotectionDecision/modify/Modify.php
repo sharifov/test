@@ -10,6 +10,8 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
@@ -61,15 +63,23 @@ class Modify
         $originalProductQuote = $this->getProductQuote($bookingId);
 
         $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($originalProductQuote->pq_id);
-        if (!$productQuoteChange->isPending()) {
+        if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
             throw new \DomainException('Product Quote Change status is not in "pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"', 101);
         }
 
         $quote = $this->transactionManager->wrap(function () use ($originalProductQuote, $newQuote, $productQuoteChange, $userId) {
             $quote = $this->createNewReprotectionQuote($originalProductQuote, $newQuote, $userId);
             $this->markQuoteToApplied($quote);
-            $this->cancelOtherReprotectionQuotes->cancel($quote, $userId);
+            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $userId);
+            $this->inProgressProductQuoteChange($productQuoteChange);
+            $this->confirmProductQuoteChange($productQuoteChange);
             $this->modifyProductQuoteChange($productQuoteChange, $userId);
+
+            $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
+                $productQuoteChange->pqc_id,
+                $quote->pq_id
+            );
+            (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
             return $quote;
         });
 
@@ -96,6 +106,32 @@ class Modify
         $change->customerDecisionModify($userId, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::MODIFY]);
+    }
+
+    private function confirmProductQuoteChange(ProductQuoteChange $change): void
+    {
+        $fromStatus = $change->getClientStatusName();
+        $change->statusToComplete();
+        $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
+            'gid' => $change->pqc_gid,
+            'fromStatus' => $fromStatus,
+            'toStatus' => $change->getClientStatusName(),
+            'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::MODIFY]
+        ], CaseEventLog::CATEGORY_DEBUG);
+    }
+
+    private function inProgressProductQuoteChange(ProductQuoteChange $change): void
+    {
+        $fromStatus = $change->getClientStatusName();
+        $change->inProgress();
+        $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
+            'gid' => $change->pqc_gid,
+            'fromStatus' => $fromStatus,
+            'toStatus' => $change->getClientStatusName(),
+            'decided'  => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::MODIFY]
+        ], CaseEventLog::CATEGORY_DEBUG);
     }
 
     private function createBoRequestJob(ProductQuote $quote, ?int $userId): void

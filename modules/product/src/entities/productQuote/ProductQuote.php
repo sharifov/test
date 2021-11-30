@@ -8,6 +8,7 @@ use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedChangeFlowEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;

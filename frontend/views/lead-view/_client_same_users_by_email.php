@@ -72,7 +72,7 @@ echo GridView::widget([
                 $data = [];
                 if ($leads) {
                     foreach ($leads as $lead) {
-                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
+                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
                     }
                 }
 
@@ -85,6 +85,41 @@ echo GridView::widget([
             },
             'format' => 'raw',
             //'options' => ['style' => 'width:100px']
+        ],
+
+        [
+            'header' => 'Cases',
+            'value' => static function (\common\models\Client $model) {
+                $data = [];
+                if ($cases = $model->cases) {
+                    foreach ($cases as $case) {
+                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('case: ' . $case->cs_id, ['cases/view', 'gid' => $case->cs_gid], ['target' => '_blank', 'data-pjax' => 0]);
+                    }
+                }
+
+                $str = '';
+                if ($data) {
+                    $str = '' . implode('<br>', $data) . '';
+                }
+
+                return $str;
+            },
+            'format' => 'raw',
+        ],
+
+        [
+            'header' => 'Projects',
+            'value' => static function (\common\models\Client $model) {
+                $data = [];
+                if ($projects = $model->clientProjects) {
+                    foreach ($projects as $item) {
+                        $data[] = Html::tag('div', Html::encode($item->cpProject->name), ['class' => 'label label-info']) ;
+                    }
+                }
+
+                return $data ? implode('<br>', $data)  : '-';
+            },
+            'format' => 'raw',
         ],
 
         [

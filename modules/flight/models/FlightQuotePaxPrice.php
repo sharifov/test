@@ -241,6 +241,7 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             'qpp_client_currency',
             'qpp_client_fare',
             'qpp_client_tax',
+            'qpp_cnt',
         ];
         $fields['paxType'] = function () {
             return FlightPax::getPaxTypeById($this->qpp_flight_pax_code_id);

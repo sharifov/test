@@ -31,6 +31,7 @@ class FlightQuotePaxPriceSerializer extends Serializer
             'qpp_client_currency',
             'qpp_client_fare',
             'qpp_client_tax',
+            'qpp_cnt',
         ];
     }
 
