@@ -155,7 +155,8 @@ class FlightQuoteSearchForm extends Model
                 $item['showed'] = true;
                 if (!empty($leadFlight)) {
                     foreach ($leadFlight as $tripKey => $queryTrip) {
-                        if (!empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
+                        if (
+                            !empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
                             && $this->excludeNearbyAirports[$tripKey]
                             && !empty($item['trips'][$tripKey]['segments'])
                             && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
