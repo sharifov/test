@@ -79,6 +79,7 @@ use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use modules\flight\src\services\flightQuoteFlight\FlightQuoteFlightPdfService;
+use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateService;
 use modules\hotel\HotelModule;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
