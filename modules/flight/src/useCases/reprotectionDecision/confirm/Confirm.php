@@ -54,13 +54,13 @@ class Confirm
         }
 
         $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote);
-        if (!$productQuoteChange->isPending()) {
-            throw new \DomainException('Product Quote Change status is not in "pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"', 101);
+        if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
+            throw new \DomainException('Product Quote Change status is not in "pending" or is not Schedule Change. Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"; Current Type: "' . $productQuoteChange->getTypeName() . '"', 101);
         }
 
         $this->transactionManager->wrap(function () use ($reprotectionQuote, $productQuoteChange, $userId) {
             $this->markQuoteToApplied($reprotectionQuote);
-            $this->cancelOtherReprotectionQuotes->cancel($reprotectionQuote, $userId);
+            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $userId);
             $this->confirmProductQuoteChange($productQuoteChange, $userId);
         });
 
