@@ -96,11 +96,11 @@ class FlightQuotePaxPriceHelper
 
         if ($flightQuote = $productQuote->flightQuote) {
             foreach ($flightQuote->flightQuotePaxPrices as $key => $flightQuotePaxPrice) {
-                $baseFare += $flightQuotePaxPrice->qpp_fare;
-                $baseTax += $flightQuotePaxPrice->qpp_tax;
-                $markup += ($flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up);
-                $price += $flightQuotePaxPrice->qpp_fare + $flightQuotePaxPrice->qpp_tax +
-                    ($flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up);
+                $baseFare += $flightQuotePaxPrice->qpp_fare * $flightQuotePaxPrice->qpp_cnt;
+                $baseTax += $flightQuotePaxPrice->qpp_tax * $flightQuotePaxPrice->qpp_cnt;
+                $markup += ($flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up) * $flightQuotePaxPrice->qpp_cnt;
+                $price += ($flightQuotePaxPrice->qpp_fare + $flightQuotePaxPrice->qpp_tax +
+                    ($flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up)) * $flightQuotePaxPrice->qpp_cnt;
             }
         }
 

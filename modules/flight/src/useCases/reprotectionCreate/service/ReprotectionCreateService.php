@@ -426,7 +426,7 @@ class ReprotectionCreateService
         if ($casesVoluntaryChanges = self::getCasesVoluntaryChanges($bookingId, $case->cs_id)) {
             foreach ($casesVoluntaryChanges as $caseVoluntaryChange) {
                 if (!empty($caseVoluntaryChange->cs_user_id)) {
-                    $linkToCase = Purifier::createCaseShortLink($case);
+                    $linkToCase = Purifier::createCaseShortLink($caseVoluntaryChange);
                     Notifications::createAndPublish(
                         $caseVoluntaryChange->cs_user_id,
                         'Exchange Case (' . $case->cs_id . ') update',
@@ -437,7 +437,7 @@ class ReprotectionCreateService
                 }
                 $caseNote = CaseNote::create(
                     $caseVoluntaryChange->cs_id,
-                    'New Schedule Change happened: (' . $case->cs_gid . '). Voluntary Exchange disabled.',
+                    'New Schedule Change happened: (' . $case->cs_id . '). Voluntary Exchange disabled.',
                     null
                 );
                 $caseNote->detachBehavior('user');
@@ -481,7 +481,7 @@ class ReprotectionCreateService
         if ($casesRefund = self::getCasesRefund($bookingId, $case->cs_id)) {
             foreach ($casesRefund as $caseRefund) {
                 if (!empty($caseRefund->cs_user_id)) {
-                    $linkToCase = Purifier::createCaseShortLink($case);
+                    $linkToCase = Purifier::createCaseShortLink($caseRefund);
                     Notifications::createAndPublish(
                         $caseRefund->cs_user_id,
                         'Exchange Case (' . $case->cs_id . ') update',
@@ -492,7 +492,7 @@ class ReprotectionCreateService
                 }
                 $caseNote = CaseNote::create(
                     $caseRefund->cs_id,
-                    'New Schedule Change happened: (' . $caseRefund->cs_gid . '). Refund disabled.',
+                    'New Schedule Change happened: (' . $caseRefund->cs_id . '). Refund disabled.',
                     null
                 );
                 $caseNote->detachBehavior('user');
