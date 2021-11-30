@@ -29,6 +29,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationQueryScopes;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
+use modules\product\src\entities\productQuoteChangeRelation\service\ProductQuoteChangeRelationService;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
@@ -264,13 +265,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
 
             try {
-                if (!ProductQuoteChangeRelationRepository::exist($productQuoteChange->pqc_id, $reProtectionQuote->pq_id)) {
-                    $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
-                        $productQuoteChange->pqc_id,
-                        $reProtectionQuote->pq_id
-                    );
-                    (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
-                }
+                ProductQuoteChangeRelationService::getOrCreate($productQuoteChange->pqc_id, $reProtectionQuote->pq_id);
             } catch (\Throwable $throwable) {
                 Yii::error(AppHelper::throwableLog($throwable), 'ReprotectionCreateJob:ProductQuoteChangeRelation');
             }
