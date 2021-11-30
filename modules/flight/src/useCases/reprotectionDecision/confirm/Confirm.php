@@ -84,7 +84,8 @@ class Confirm
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
             'gid' => $change->pqc_gid,
             'fromStatus' => $fromStatus,
-            'toStatus' => $change->getClientStatusName()
+            'toStatus' => $change->getClientStatusName(),
+            'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]
         ], CaseEventLog::CATEGORY_DEBUG);
     }
 
@@ -96,7 +97,8 @@ class Confirm
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
             'gid' => $change->pqc_gid,
             'fromStatus' => $fromStatus,
-            'toStatus' => $change->getClientStatusName()
+            'toStatus' => $change->getClientStatusName(),
+            'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]
         ], CaseEventLog::CATEGORY_DEBUG);
     }
 
