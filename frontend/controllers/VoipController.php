@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use common\models\UserCallStatus;
-use common\models\UserConnection;
 use sales\auth\Auth;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
@@ -18,7 +17,6 @@ use sales\model\call\useCase\createCall\CreateSimpleCall;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\web\Controller;
-use yii\web\ForbiddenHttpException;
 
 /**
  * Class VoipController
@@ -45,10 +43,6 @@ class VoipController extends Controller
 
     public function actionIndex()
     {
-//        $alreadyOpened = UserConnection::find()->andWhere(['uc_user_id' => Auth::id(), 'uc_controller_id' => 'voip', 'uc_action_id' => 'index'])->exists();
-//        if ($alreadyOpened) {
-//            throw new ForbiddenHttpException('Voip page is already opened.');
-//        }
         return $this->render('index');
     }
 

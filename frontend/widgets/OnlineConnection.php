@@ -60,7 +60,6 @@ class OnlineConnection extends \yii\bootstrap\Widget
         return $this->render('online_connection', [
             'userId' =>  $userId,
             'wsUrl' =>  $wsUrl,
-            'userIdentity' =>  UserCallIdentity::getClientId($userId)
         ]);
     }
 

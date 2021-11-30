@@ -1,9 +1,11 @@
 (function () {
     function Init() {
-        if (deviceInitialized) {
-            console.log('device already initialized');
+        if (initiated) {
+            console.log('device already initiated');
             return;
         }
+
+        initiated = true;
 
         // console.log("Requesting Twilio Access Token...");
         PhoneWidget.addLog("Requesting Twilio Access Token...");
@@ -29,8 +31,6 @@
                 closeProtection: true,
                 codecPreferences: ["opus", "pcmu"]
             });
-
-            deviceInitialized = true;
 
             const speakerDevices = document.getElementById("speaker-devices");
             const ringtoneDevices = document.getElementById("ringtone-devices");
@@ -154,12 +154,9 @@
                     PhoneWidget.removeTwilioInternalIncomingConnection();
                     PhoneWidget.soundDisconnect();
                     PhoneWidget.incomingSoundOff();
-                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled);
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled, true);
                 });
                 call.on('error', error => {
-                    if (error.code === 31402) {
-
-                    }
                     createNotify('Call error', 'More info in logs panel', 'error');
                     console.log('An error has occurred: ', error);
                     PhoneWidget.addLog(error);
@@ -288,7 +285,7 @@
         }
     }
 
-    let deviceInitialized = false;
+    let initiated = false;
 
     window.phoneWidget.device.initialize = {
         Init: Init

@@ -262,7 +262,7 @@ $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
 $js = <<<JS
-PhoneWidget.init({
+window.phoneWidget.initParams = {
     'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',
     'acceptCallUrl': '$ajaxAcceptIncomingCall',
     'callStatusUrl': '$callStatusUrl',
@@ -313,6 +313,6 @@ PhoneWidget.init({
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
     'isDevicePage': window.isTwilioDevicePage
-});
+};
 JS;
 $this->registerJs($js);

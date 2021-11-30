@@ -73,9 +73,11 @@ var PhoneWidget = function () {
 
     let deviceStatus = {};
 
-    let logger = {};
+    let logger = new window.phoneWidget.logger.Logger();
 
     let twilioInternalIncomingConnection = null;
+
+    let initiated = false;
 
     function init(options)
     {
@@ -84,7 +86,6 @@ var PhoneWidget = function () {
         }
 
         callRequester.init(options);
-        logger = new window.phoneWidget.logger.Logger();
 
         isDevicePage = options.isDevicePage;
 
@@ -126,6 +127,8 @@ var PhoneWidget = function () {
         btnWarmTransferToUserEvent();
         btnTransferNumberEvent();
         btnMakeCallEvent();
+
+        initiated = true;
     }
 
     function addLog(message) {
@@ -1975,6 +1978,10 @@ var PhoneWidget = function () {
         twilioInternalIncomingConnection = null;
     }
 
+    function isInitiated() {
+        return initiated === true;
+    }
+
     return {
         init: init,
         volumeIndicatorsChange: volumeIndicatorsChange,
@@ -2015,8 +2022,8 @@ var PhoneWidget = function () {
         addLog: addLog,
         clearLog: clearLog,
         setTwilioInternalIncomingConnection: setTwilioInternalIncomingConnection,
-        removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection
-
+        removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection,
+        isInitiated: isInitiated
     };
 }();
 

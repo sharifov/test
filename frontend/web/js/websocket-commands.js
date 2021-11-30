@@ -37,11 +37,12 @@ function pushDialogOnTop(chatID)
     }
 }
 
-window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled) {
+window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled, isTwilioDevicePage) {
     socketSend('Call', 'GetCurrentQueueCalls', {
         'userId': userId,
         'finishedCallSid': finishedCallSid,
-        'generalLinePriorityIsEnabled': generalLinePriorityIsEnabled
+        'generalLinePriorityIsEnabled': generalLinePriorityIsEnabled,
+        'isTwilioDevicePage': isTwilioDevicePage
     });
 };
 
@@ -61,13 +62,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             // console.log(e);
 
             if (typeof PhoneWidget === 'object') {
-                window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
-            }
-
-            if (window.isTwilioDevicePage) {
-                socketSend('Voip', 'Device', {
-                    'userId': userId
-                });
+                window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled, window.isTwilioDevicePage);
             }
         };
 
@@ -388,7 +383,18 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'updateCurrentCalls') {
                         if (typeof PhoneWidget === "object") {
-                            PhoneWidget.updateCurrentCalls(obj.data, obj.userStatus);
+                            if (obj.twilioDeviceError) {
+                                PhoneWidget.addLog(obj.msg);
+                                createNotify('Phone Widget', obj.msg, 'error')
+                            } else {
+                                if (!PhoneWidget.isInitiated()) {
+                                    PhoneWidget.init(window.phoneWidget.initParams);
+                                    if (window.isTwilioDevicePage) {
+                                        window.phoneWidget.device.initialize.Init();
+                                    }
+                                }
+                                PhoneWidget.updateCurrentCalls(obj.data, obj.userStatus);
+                            }
                         }
                     }
 
@@ -535,14 +541,6 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                             //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
                             let windowObjectReference = window.open(PhoneWidget.getLeadViewPageShortUrl() + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
                             windowObjectReference.focus();
-                        }
-                    }
-
-                    if (obj.cmd === 'initPhoneDevices') {
-                        if (obj.error) {
-                            createNotify('Phone Widget', obj.msg, 'error')
-                        } else {
-                            window.phoneWidget.device.initialize.Init();
                         }
                     }
                 }

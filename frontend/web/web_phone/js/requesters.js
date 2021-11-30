@@ -573,6 +573,7 @@
                 })
         };
 
+        // todo remove and move to backend
         this.webCallLeadRedial = function (phone_from, phone_to, project_id, lead_id, type, c_source_type_id) {
             $.post(this.settings.ajaxGetPhoneListIdUrl, {'phone': phone_from}, function (data) {
                 if (data.error) {

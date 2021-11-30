@@ -5,7 +5,6 @@ use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $userId int */
-/* @var $userIdentity string */
 /* @var $wsUrl string */
 
 \frontend\assets\WebSocketAsset::register($this);
@@ -24,10 +23,8 @@ $js = <<<JS
    
     window.socket = null;
     window.socketConnectionId = null;
-    window.userIdentity = '$userIdentity';
     window.userId = '$userId';
     window.generalLinePriorityIsEnabled = {$generalLinePriorityIsEnabled};
-    
     
     let wsUrl = '$wsUrl';
     let ccNotificationUpdateUrl = '$ccNotificationUpdateUrl';

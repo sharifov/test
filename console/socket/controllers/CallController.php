@@ -3,6 +3,7 @@
 namespace console\socket\controllers;
 
 use common\models\UserCallStatus;
+use common\models\UserConnection;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 
 /**
@@ -29,6 +30,29 @@ class CallController
             ];
         }
         $userId = (int)$params['userId'];
+
+        if (isset($params['isTwilioDevicePage']) && (bool)$params['isTwilioDevicePage']) {
+            $countVoipPages = (int)UserConnection::find()->andWhere([
+                'uc_user_id' => $userId,
+                'uc_controller_id' => 'voip',
+                'uc_action_id' => 'index'
+            ])->count();
+            if ($countVoipPages > 1) {
+                return [
+                    'cmd' => 'updateCurrentCalls',
+                    'twilioDeviceError' => true,
+                    'msg' => 'Voip page is already opened. Please close this page!',
+                ];
+            }
+            if ($countVoipPages < 1) {
+                return [
+                    'cmd' => 'updateCurrentCalls',
+                    'twilioDeviceError' => true,
+                    'msg' => 'Not found voip page connections.',
+                ];
+            }
+        }
+
         $generalLinePriorityIsEnabled = (bool)($params['generalLinePriorityIsEnabled'] ?? false);
         $finishedCallSid = null;
         if (isset($params['finishedCallSid'])) {
