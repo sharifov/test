@@ -246,4 +246,12 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
     {
         $this->pqo_status_id = ProductQuoteOptionStatus::CANCELED;
     }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return \modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus::getName($this->pqo_status_id);
+    }
 }
