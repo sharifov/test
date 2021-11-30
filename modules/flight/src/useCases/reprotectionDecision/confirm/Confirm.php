@@ -59,19 +59,37 @@ class Confirm
         }
 
         $this->transactionManager->wrap(function () use ($reprotectionQuote, $productQuoteChange, $userId) {
+            $this->confirmProductQuoteChange($productQuoteChange);
+            $this->inProgressProductQuoteChange($productQuoteChange);
             $this->markQuoteToApplied($reprotectionQuote);
             $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $userId);
-            $this->confirmProductQuoteChange($productQuoteChange, $userId);
+            $this->processingProductQuoteChange($productQuoteChange, $userId);
         });
 
         $this->createBoRequestJob($reprotectionQuote, $userId);
     }
 
-    private function confirmProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
+    private function processingProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
     {
         $change->customerDecisionConfirm($userId, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]);
+    }
+
+    private function confirmProductQuoteChange(ProductQuoteChange $change): void
+    {
+        $fromStatus = $change->getClientStatusName();
+        $change->statusToComplete();
+        $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status from: ' . $fromStatus . ' to: ' . $change->getClientStatusName());
+    }
+
+    private function inProgressProductQuoteChange(ProductQuoteChange $change): void
+    {
+        $fromStatus = $change->getClientStatusName();
+        $change->inProgress();
+        $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status from: ' . $fromStatus . ' to: ' . $change->getClientStatusName());
     }
 
     private function createBoRequestJob(ProductQuote $quote, ?int $userId): void
