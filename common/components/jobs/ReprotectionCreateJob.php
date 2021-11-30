@@ -182,6 +182,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                             $case,
                             $this->flight_request_is_automate
                         );
+                        $productQuoteChange = $originProductQuote->productQuoteLastChange;
                         $caseReProtectionService->setCaseDeadline($originProductQuote->flightQuote);
                     } catch (Throwable $throwable) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Order not created');
