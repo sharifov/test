@@ -3,6 +3,15 @@
         this.block = $('.logs-block');
 
         this.add = function (message, color) {
+            if (window.isTwilioDevicePage) {
+                localStorage.setItem(
+                    'PhoneWidgetLog',
+                    JSON.stringify({
+                        "message": message,
+                        "color": color
+                    })
+                );
+            }
             if (typeof message === 'string') {
                 let msg = '';
                 if (color) {
@@ -38,6 +47,9 @@
             if (error.description) {
                 msg += '<p>description: ' + error.description + '</p>';
             }
+            if (error.comment) {
+                msg += '<p>comment: ' + error.comment + '</p>';
+            }
             if (error.causes) {
                 msg += '<p style="color: #761c19; font-weight: bold">causes: </p>';
                 error.causes.forEach(function (cause, key) {
@@ -62,6 +74,13 @@
             return `${date}/${month}/${year}` + ' ' + t.getHours() + ':' + t.getMinutes() + ':' + t.getSeconds();
         }
     }
+
+    window.addEventListener('storage', function (event) {
+        if (event.key === 'PhoneWidgetLog') {
+            let value = JSON.parse(event.newValue);
+            PhoneWidget.addLog(value.message, value.color);
+        }
+    });
 
     window.phoneWidget.logger = {
         Logger: Logger

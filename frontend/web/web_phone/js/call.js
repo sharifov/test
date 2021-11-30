@@ -82,7 +82,7 @@ var PhoneWidget = function () {
     function init(options)
     {
         if (!options.isDevicePage) {
-            $('.phone-widget__settings.header-action-small.toggle-bar-settings').css('display', 'none');
+            hideDeviceSettingsTab();
         }
 
         callRequester.init(options);
@@ -131,11 +131,18 @@ var PhoneWidget = function () {
         initiated = true;
     }
 
-    function addLog(message) {
-        return logger.add(message);
+    function hideDeviceSettingsTab() {
+        $(document).find('.phone-widget__additional-bar .tabs__nav.tab-nav .wp-tab-device').hide();
+        $(document).find('.phone-widget__additional-bar .wp-devices-tab-log').addClass('active-tab');
+        $(document).find('.phone-widget__additional-bar #tab-device').hide();
+        $(document).find('.phone-widget__additional-bar #tab-logs').show();
     }
 
-    function clearLog(message) {
+    function addLog(message, color) {
+        return logger.add(message, color);
+    }
+
+    function clearLog() {
         return logger.clear();
     }
 

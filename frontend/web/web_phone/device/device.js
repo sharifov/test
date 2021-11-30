@@ -228,7 +228,7 @@
                         stream.getTracks().forEach(track => track.stop());
                     }).catch(error => {
                         console.log(error);
-                        error.description = 'Microphone error';
+                        error.comment = 'Microphone error';
                         PhoneWidget.addLog(error);
                         PhoneWidget.getDeviceStatus().microphoneUnselected();
                     });
