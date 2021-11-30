@@ -46,8 +46,6 @@ var PhoneWidget = function () {
         'incoming': {}
     };
 
-    let activeCallSid = null;
-
     let conferenceSources = {
         "listen": {
             "name": null,
@@ -1658,18 +1656,6 @@ var PhoneWidget = function () {
         }));
     }
 
-    function setActiveCallSid(callSid) {
-        activeCallSid = callSid;
-    }
-
-    function removeActiveCallSid() {
-        activeCallSid = null;
-    }
-
-    function getActiveCallSid() {
-        return activeCallSid;
-    }
-
     function acceptInternalCall(call) {
         if (call.isSentAcceptCallRequestState()) {
             return;
@@ -2016,9 +2002,6 @@ var PhoneWidget = function () {
         acceptInternalCall: acceptInternalCall,
         rejectInternalCall: rejectInternalCall,
         incomingSoundOff: incomingSoundOff,
-        getActiveCallSid: getActiveCallSid,
-        setActiveCallSid: setActiveCallSid,
-        removeActiveCallSid: removeActiveCallSid,
         webCallLeadRedial: webCallLeadRedial,
         joinListen: joinListen,
         joinCoach: joinCoach,

@@ -130,7 +130,6 @@
                     //console.log('The incoming call was accepted.');
                     PhoneWidget.freeDialButton();
                     PhoneWidget.setActiveCall(call);
-                    PhoneWidget.setActiveCallSid(call.parameters.CallSid);
                     PhoneWidget.incomingSoundOff();
 
                     call.on("volume", function (inputVolume, outputVolume) {
@@ -154,7 +153,6 @@
                     PhoneWidget.freeDialButton();
                     PhoneWidget.removeTwilioInternalIncomingConnection();
                     PhoneWidget.soundDisconnect();
-                    PhoneWidget.removeActiveCallSid();
                     PhoneWidget.incomingSoundOff();
                     window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled);
                 });

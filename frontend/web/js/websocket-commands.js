@@ -531,12 +531,10 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'leadRedialAutoTake') {
-                        if (typeof PhoneWidget === 'object') {
-                            if (obj.data.callSid === PhoneWidget.getActiveCallSid()) {
-                                //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
-                                let windowObjectReference = window.open(PhoneWidget.getLeadViewPageShortUrl() + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
-                                windowObjectReference.focus();
-                            }
+                        if (typeof PhoneWidget === 'object' && window.isTwilioDevicePage) {
+                            //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
+                            let windowObjectReference = window.open(PhoneWidget.getLeadViewPageShortUrl() + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
+                            windowObjectReference.focus();
                         }
                     }
 
