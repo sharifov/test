@@ -81,7 +81,11 @@ class Confirm
         $fromStatus = $change->getClientStatusName();
         $change->statusToComplete();
         $this->productQuoteChangeRepository->save($change);
-        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status from: ' . $fromStatus . ' to: ' . $change->getClientStatusName());
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
+            'gid' => $change->pqc_gid,
+            'fromStatus' => $fromStatus,
+            'toStatus' => $change->getClientStatusName()
+        ], CaseEventLog::CATEGORY_DEBUG);
     }
 
     private function inProgressProductQuoteChange(ProductQuoteChange $change): void
@@ -89,7 +93,11 @@ class Confirm
         $fromStatus = $change->getClientStatusName();
         $change->inProgress();
         $this->productQuoteChangeRepository->save($change);
-        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status from: ' . $fromStatus . ' to: ' . $change->getClientStatusName());
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
+            'gid' => $change->pqc_gid,
+            'fromStatus' => $fromStatus,
+            'toStatus' => $change->getClientStatusName()
+        ], CaseEventLog::CATEGORY_DEBUG);
     }
 
     private function createBoRequestJob(ProductQuote $quote, ?int $userId): void
