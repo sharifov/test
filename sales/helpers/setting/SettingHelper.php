@@ -703,6 +703,11 @@ class SettingHelper
         return self::prePareStatusIds(Yii::$app->params['settings']['exchange_quote_confirm_status_list']);
     }
 
+    public static function getUpdatableInvoluntaryQuoteChange(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['updatable_involuntary_quote_change']);
+    }
+
     public static function getVoluntaryExchangeBoEndpoint(): ?string
     {
         return Yii::$app->params['settings']['voluntary_exchange_bo_endpoint'] ?? null;
