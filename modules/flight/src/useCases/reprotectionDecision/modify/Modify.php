@@ -10,6 +10,8 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
@@ -70,6 +72,12 @@ class Modify
             $this->markQuoteToApplied($quote);
             $this->cancelOtherReprotectionQuotes->cancel($quote, $userId);
             $this->modifyProductQuoteChange($productQuoteChange, $userId);
+
+            $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
+                $productQuoteChange->pqc_id,
+                $quote->pq_id
+            );
+            (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
             return $quote;
         });
 
