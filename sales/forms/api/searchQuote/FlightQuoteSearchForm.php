@@ -118,7 +118,7 @@ class FlightQuoteSearchForm extends Model
      * @return array
      * @throws \Exception
      */
-    public function applyFilters(array $quotes, $leadFlight): array
+    public function applyFilters(array $quotes, $leadFlight = null): array
     {
         if ($this->getSortBy()) {
             ArrayHelper::multisort($quotes['results'], $this->getSortBy(), $this->getSortType());
@@ -153,14 +153,16 @@ class FlightQuoteSearchForm extends Model
         if (!empty($this->excludeNearbyAirports)) {
             $quotes['results'] = array_filter($quotes['results'], function ($item) use (&$leadFlight) {
                 $item['showed'] = true;
-                foreach ($leadFlight as $tripKey => $queryTrip) {
-                    if (!empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
-                        && $this->excludeNearbyAirports[$tripKey]
-                        && !empty($item['trips'][$tripKey]['segments'])
-                        && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
-                        || $item['trips'][$tripKey]['segments'][count($item['trips'][$tripKey]['segments']) - 1]['arrivalAirportCode'] != $queryTrip->destination)
-                    ) {
+                if (!empty($leadFlight)) {
+                    foreach ($leadFlight as $tripKey => $queryTrip) {
+                        if (!empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
+                            && $this->excludeNearbyAirports[$tripKey]
+                            && !empty($item['trips'][$tripKey]['segments'])
+                            && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
+                                || $item['trips'][$tripKey]['segments'][count($item['trips'][$tripKey]['segments']) - 1]['arrivalAirportCode'] != $queryTrip->destination)
+                        ) {
                             $item['showed'] = false;
+                        }
                     }
                 }
                 return $item['showed'];
