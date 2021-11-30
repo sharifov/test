@@ -7,5 +7,8 @@ namespace modules\product\src\entities\productQuoteChangeRelation;
 */
 class ProductQuoteChangeRelationQueryScopes extends \yii\db\ActiveQuery
 {
-
+    public function byChangeId(int $productQuoteChangeId): self
+    {
+        return $this->andWhere(['pqcr_pqc_id' => $productQuoteChangeId]);
+    }
 }
