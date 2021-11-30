@@ -421,15 +421,15 @@ class ReprotectionCreateService
             ->all();
     }
 
-    public static function casesVoluntaryChangesProcessing(string $bookingId, int $caseID): void
+    public static function casesVoluntaryChangesProcessing(string $bookingId, Cases $case): void
     {
-        if ($casesVoluntaryChanges = self::getCasesVoluntaryChanges($bookingId, $caseID)) {
+        if ($casesVoluntaryChanges = self::getCasesVoluntaryChanges($bookingId, $case->cs_id)) {
             foreach ($casesVoluntaryChanges as $caseVoluntaryChange) {
                 if (!empty($caseVoluntaryChange->cs_user_id)) {
-                    $linkToCase = Purifier::createCaseShortLink($caseVoluntaryChange);
+                    $linkToCase = Purifier::createCaseShortLink($case);
                     Notifications::createAndPublish(
                         $caseVoluntaryChange->cs_user_id,
-                        'Exchange Case (' . $caseVoluntaryChange->cs_gid . ') update',
+                        'Exchange Case (' . $case->cs_id . ') update',
                         'New Schedule Change happened: (' . $linkToCase . '). Voluntary Exchange disabled.',
                         Notifications::TYPE_WARNING,
                         true
@@ -437,7 +437,7 @@ class ReprotectionCreateService
                 }
                 $caseNote = CaseNote::create(
                     $caseVoluntaryChange->cs_id,
-                    'New Schedule Change happened: (' . $caseVoluntaryChange->cs_gid . '). Voluntary Exchange disabled.',
+                    'New Schedule Change happened: (' . $case->cs_gid . '). Voluntary Exchange disabled.',
                     null
                 );
                 $caseNote->detachBehavior('user');
@@ -476,15 +476,15 @@ class ReprotectionCreateService
             ->all();
     }
 
-    public static function casesRefundProcessing(string $bookingId, int $caseID): void
+    public static function casesRefundProcessing(string $bookingId, Cases $case): void
     {
-        if ($casesRefund = self::getCasesRefund($bookingId, $caseID)) {
+        if ($casesRefund = self::getCasesRefund($bookingId, $case->cs_id)) {
             foreach ($casesRefund as $caseRefund) {
                 if (!empty($caseRefund->cs_user_id)) {
-                    $linkToCase = Purifier::createCaseShortLink($caseRefund);
+                    $linkToCase = Purifier::createCaseShortLink($case);
                     Notifications::createAndPublish(
                         $caseRefund->cs_user_id,
-                        'Exchange Case (' . $caseRefund->cs_gid . ') update',
+                        'Exchange Case (' . $case->cs_id . ') update',
                         'New Schedule Change happened: (' . $linkToCase . '). Refund disabled.',
                         Notifications::TYPE_WARNING,
                         true
