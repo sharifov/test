@@ -2,7 +2,7 @@
 
 namespace sales\model\call\useCase\createCall;
 
-use common\models\Client;
+use common\models\search\ContactsSearch;
 use frontend\widgets\newWebPhone\AvailablePhones;
 use sales\auth\Auth;
 use sales\helpers\UserCallIdentity;
@@ -20,22 +20,30 @@ class CreateCallFromContacts
                 throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }
 
-            if (!$client = Client::findOne(['id' => $form->clientId])) {
-                throw new \DomainException('Not found Client. ID: ' . $form->clientId);
+            $contactResult = (new ContactsSearch($form->createdUserId))->getClientContactsById($form->clientId);
+            if (!$contactResult) {
+                throw new \DomainException('Not found contact. ID(' . $form->clientId . ')');
             }
-
-            if ($phone->projectId !== $client->cl_project_id) {
-                throw new \DomainException('Phone From project (' . $phone->title . ') is not equal with Client project (' . $client->project->name . ')');
+            $contactPhoneFound = false;
+            foreach ($contactResult as $contact) {
+                if ($contact['phone'] === $form->to) {
+                    if (!$contact['project_id'] || (int)$contact['project_id'] === $phone->projectId) {
+                        $contactPhoneFound = true;
+                        break;
+                    }
+                    throw new \DomainException('Phone From project (' . $phone->projectId . ') is not equal with Client project (' . $contact['project_id'] . ')');
+                }
             }
-
-            //todo: validate can created user call to this contact?
+            if (!$contactPhoneFound) {
+                throw new \DomainException('Not found relation Contact ID (' . $form->clientId . ') with phone ' . $form->to);
+            }
 
             $recordDisabled = (RecordManager::createCall(
                 Auth::id(),
                 $phone->projectId,
                 $phone->departmentId,
                 $form->from,
-                $client->id
+                $form->clientId,
             ))->isDisabledRecord();
 
             $result = \Yii::$app->communication->createCall(
@@ -47,7 +55,7 @@ class CreateCallFromContacts
                     'phone_list_id' => $form->getPhoneListId(),
                     'project_id' => $phone->projectId,
                     'department_id' => $phone->departmentId,
-                    'client_id' => $client->id,
+                    'client_id' => $form->clientId,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),
                 ])

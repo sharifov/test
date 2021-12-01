@@ -2,7 +2,7 @@
 
 namespace sales\model\call\useCase\createCall;
 
-use common\models\ClientPhone;
+use common\models\search\ContactsSearch;
 use frontend\widgets\newWebPhone\AvailablePhones;
 use sales\auth\Auth;
 use sales\helpers\UserCallIdentity;
@@ -20,20 +20,21 @@ class CreateSimpleCall
                 throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }
 
-//            $clientId = ClientPhone::find()->select(['client_id'])->where(['phone' => $form->to])->orderBy(['id' => SORT_DESC])->limit(1)->scalar();
-//            if ($clientId) {
-//                $clientId = (int)$clientId;
-//            }
-
-            $clientId = null;
-            //todo: validate can created user simple call
+            $contactId = null;
+            $contacts = (new ContactsSearch($form->createdUserId))->getClientsContactByPhone($form->to);
+            foreach ($contacts as $contact) {
+                if (!$contact['project_id'] || (int)$contact['project_id'] === $phone->projectId) {
+                    $contactId = (int)$contact['id'];
+                    break;
+                }
+            }
 
             $recordDisabled = (RecordManager::createCall(
                 Auth::id(),
                 $phone->projectId,
                 $phone->departmentId,
                 $form->from,
-                $clientId,
+                $contactId,
             ))->isDisabledRecord();
 
             $result = \Yii::$app->communication->createCall(
@@ -45,7 +46,7 @@ class CreateSimpleCall
                     'phone_list_id' => $form->getPhoneListId(),
                     'project_id' => $phone->projectId,
                     'department_id' => $phone->departmentId,
-                    'client_id' => $clientId,
+                    'client_id' => $contactId,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),
                 ])

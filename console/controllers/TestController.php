@@ -4,8 +4,10 @@ namespace console\controllers;
 
 use common\models\Department;
 use common\models\Project;
+use common\models\search\ContactsSearch;
 use common\models\UserGroup;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\createCall\CreateCallForm;
 use sales\model\call\useCase\createCall\CreateRedialCall;
@@ -99,6 +101,9 @@ class TestController extends Controller
 
 //        (new CreateRedialCall())(new RedialCall(295, '+14157693509', 1468, '+14154296676', 2, 3, 513226, 472988));
 //        die;
+        $contacts = (new ContactsSearch(295))->getClientsContactByPhone('+37368852225');
+        VarDumper::dump($contacts);
+
 
         die;
         $form = new CreateCallForm(295);
