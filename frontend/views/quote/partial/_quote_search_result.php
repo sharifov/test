@@ -80,7 +80,7 @@ JS;
     <div class="row">
         <div class="col-md-12 d-flex align-items-center justify-content-center">
             <?= Html::button('<i class="fa fa-filter"></i> Show filter', [
-                'class' => 'btn btn-success',
+                'class' => 'btn btn-info',
                 'id' => 'quote-search-show-filter',
             ]) ?>
         </div>

@@ -253,8 +253,8 @@ use yii\bootstrap4\Html;
                     'class' => 'btn btn-success',
                     'id' => 'quote-search-submit'
                 ]) ?>
-                <?= Html::button('<i class="fa fa-filter"></i> Hide filter', [
-                    'class' => 'btn fa',
+                <?= Html::button('<i class="fa fa-chevron-up"></i> Hide filter', [
+                    'class' => 'btn',
                     'id' => 'quote-search-hide-filter',
                 ]) ?>
             </div>
@@ -272,3 +272,19 @@ $css = <<<CSS
 CSS;
 $this->registerCss($css);
 
+$js = <<<JS
+
+$(document).on('pjax:success', function() {
+    let quoteSearchFilterIsVisible = localStorage.getItem("quoteSearchFilterIsVisible");
+    if (quoteSearchFilterIsVisible === null || quoteSearchFilterIsVisible == '0') {
+        $('#quote-search-filters').hide();
+        localStorage.setItem("quoteSearchFilterIsVisible", '0');
+    } else {
+        $('#quote-search-show-filter').hide();
+        $('#quote-search-filters').show();
+    }
+});
+
+JS;
+$this->registerJs($js);
+?>
