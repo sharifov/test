@@ -17,7 +17,7 @@ use yii\rbac\ManagerInterface;
  *
  * @property int $userId
  * @property ManagerInterface $authManager
- * @property array|null $phones
+ * @property AvailablePhone[]|null $phones
  */
 class AvailablePhones
 {
@@ -31,7 +31,48 @@ class AvailablePhones
         $this->authManager = \Yii::$app->authManager;
     }
 
-    public function getPhones(): array
+    public function getPhone(string $number): ?AvailablePhone
+    {
+        foreach ($this->getPhones() as $phone) {
+            if ($phone->number === $number) {
+                return $phone;
+            }
+        }
+        return null;
+    }
+
+    public function formatPhonesForSelectList(): array
+    {
+        $result = [
+            'selected' => [],
+            'options' => []
+        ];
+
+        $phones = $this->getPhones();
+
+        if (!$phones) {
+            return $result;
+        }
+
+        foreach ($phones as $phone) {
+            $result['options'][] = [
+                'value' => $phone->number,
+                'project' => $phone->title,
+                'projectId' => $phone->projectId
+            ];
+        }
+
+        $result['selected']['value'] = $phones[0]->number;
+        $result['selected']['project'] = $phones[0]->title;
+        $result['selected']['projectId'] = $phones[0]->projectId;
+
+        return $result;
+    }
+
+    /**
+     * @return AvailablePhone[]
+     */
+    private function getPhones(): array
     {
         if ($this->phones !== null) {
             return $this->phones;
@@ -45,7 +86,7 @@ class AvailablePhones
         $userPhones = self::getUserProjectParams($this->userId);
 
         if (!SettingHelper::isAllowToUseGeneralLinePhones()) {
-            $this->phones = $userPhones;
+            $this->phones = self::createPhonesFromArray($userPhones);
             return $this->phones;
         }
 
@@ -57,22 +98,8 @@ class AvailablePhones
             $hash = $phone['phone_number'];
             $unique_array[$hash] = $phone;
         }
-        $this->phones = array_values($unique_array);
+        $this->phones = self::createPhonesFromArray(array_values($unique_array));
         return $this->phones;
-    }
-
-    public function getPhone(string $number): array
-    {
-        foreach ($this->getPhones() as $phone) {
-            if ($phone['phone_number'] === $number) {
-                return [
-                    'number' => $phone['phone_number'],
-                    'projectId' => (int)$phone['project_id'],
-                    'departmentId' => $phone['department_id'] ? (int)$phone['department_id'] : null,
-                ];
-            }
-        }
-        return [];
     }
 
     private static function getUserProjectParams(int $userId): array
@@ -110,31 +137,21 @@ class AvailablePhones
             ->all();
     }
 
-    public function formatPhonesForSelectList(): array
+    /**
+     * @param array $data
+     * @return AvailablePhone[]
+     */
+    private static function createPhonesFromArray(array $data): array
     {
-        $result = [
-            'selected' => [],
-            'options' => []
-        ];
-
-        $phones = $this->getPhones();
-
-        if (!$phones) {
-            return $result;
+        $phones = [];
+        foreach ($data as $phone) {
+            $phones[] = new AvailablePhone(
+                $phone['phone_number'],
+                (int)$phone['project_id'],
+                $phone['department_id'] ? (int)$phone['department_id'] : null,
+                $phone['title']
+            );
         }
-
-        foreach ($phones as $phone) {
-            $result['options'][] = [
-                'value' => $phone['phone_number'],
-                'project' => $phone['title'],
-                'projectId' => $phone['project_id']
-            ];
-        }
-
-        $result['selected']['value'] = $phones[0]['phone_number'];
-        $result['selected']['project'] = $phones[0]['title'];
-        $result['selected']['projectId'] = $phones[0]['project_id'];
-
-        return $result;
+        return $phones;
     }
 }

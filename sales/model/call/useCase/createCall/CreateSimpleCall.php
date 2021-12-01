@@ -20,17 +20,18 @@ class CreateSimpleCall
                 throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }
 
-            $clientId = ClientPhone::find()->select(['client_id'])->where(['phone' => $form->to])->orderBy(['id' => SORT_DESC])->limit(1)->scalar();
-            if ($clientId) {
-                $clientId = (int)$clientId;
-            }
+//            $clientId = ClientPhone::find()->select(['client_id'])->where(['phone' => $form->to])->orderBy(['id' => SORT_DESC])->limit(1)->scalar();
+//            if ($clientId) {
+//                $clientId = (int)$clientId;
+//            }
 
+            $clientId = null;
             //todo: validate can created user simple call
 
             $recordDisabled = (RecordManager::createCall(
                 Auth::id(),
-                $phone['projectId'],
-                $phone['departmentId'],
+                $phone->projectId,
+                $phone->departmentId,
                 $form->from,
                 $clientId,
             ))->isDisabledRecord();
@@ -42,8 +43,8 @@ class CreateSimpleCall
                     'to_number' => $form->to,
                     'from_number' => $form->from,
                     'phone_list_id' => $form->getPhoneListId(),
-                    'project_id' => $phone['projectId'],
-                    'department_id' => $phone['departmentId'],
+                    'project_id' => $phone->projectId,
+                    'department_id' => $phone->departmentId,
                     'client_id' => $clientId,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),

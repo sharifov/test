@@ -97,12 +97,8 @@ class TestController extends Controller
     public function actionVoip()
     {
 
-        (new CreateRedialCall())(new RedialCall(295, '+14157693509', 1468, '+14154296676', 2, 3, 513226, 472988));
-        die;
-        $list = new \frontend\widgets\newWebPhone\AvailablePhones(
-            295
-        );
-        VarDumper::dump($list->getPhones());
+//        (new CreateRedialCall())(new RedialCall(295, '+14157693509', 1468, '+14154296676', 2, 3, 513226, 472988));
+//        die;
 
         die;
         $form = new CreateCallForm(295);

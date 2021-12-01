@@ -24,12 +24,16 @@ class CreateCallFromContacts
                 throw new \DomainException('Not found Client. ID: ' . $form->clientId);
             }
 
+            if ($phone->projectId !== $client->cl_project_id) {
+                throw new \DomainException('Phone From project (' . $phone->title . ') is not equal with Client project (' . $client->project->name . ')');
+            }
+
             //todo: validate can created user call to this contact?
 
             $recordDisabled = (RecordManager::createCall(
                 Auth::id(),
-                $phone['projectId'],
-                $phone['departmentId'],
+                $phone->projectId,
+                $phone->departmentId,
                 $form->from,
                 $client->id
             ))->isDisabledRecord();
@@ -41,8 +45,8 @@ class CreateCallFromContacts
                     'to_number' => $form->to,
                     'from_number' => $form->from,
                     'phone_list_id' => $form->getPhoneListId(),
-                    'project_id' => $phone['projectId'],
-                    'department_id' => $phone['departmentId'],
+                    'project_id' => $phone->projectId,
+                    'department_id' => $phone->departmentId,
                     'client_id' => $client->id,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),

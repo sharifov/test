@@ -54,11 +54,11 @@ class CreateCallForm extends Model
     public function rules(): array
     {
         return [
-            ['fromCase', 'boolean'],
+            ['fromCase', 'boolean', 'trueValue' => true, 'falseValue' => false],
 
-            ['fromLead', 'boolean'],
+            ['fromLead', 'boolean', 'trueValue' => true, 'falseValue' => false],
 
-            ['fromContacts', 'boolean'],
+            ['fromContacts', 'boolean', 'trueValue' => true, 'falseValue' => false],
 
             ['toUserId', 'default', 'value' => null],
             ['toUserId', 'integer'],
