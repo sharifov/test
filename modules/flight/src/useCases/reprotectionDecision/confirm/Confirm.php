@@ -62,7 +62,7 @@ class Confirm
             $this->confirmProductQuoteChange($productQuoteChange);
             $this->inProgressProductQuoteChange($productQuoteChange);
             $this->markQuoteToApplied($reprotectionQuote);
-            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $userId);
+            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $reprotectionQuote, $userId);
             $this->processingProductQuoteChange($productQuoteChange, $userId);
         });
 
