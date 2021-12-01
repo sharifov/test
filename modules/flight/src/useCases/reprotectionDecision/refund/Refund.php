@@ -78,8 +78,8 @@ class Refund
 
         try {
             [$orderRefundId, $productQuoteRefundId] = $this->transactionManager->wrap(function () use ($productQuote, $productQuoteChange, $userId) {
-                $this->inProgressProductQuoteChange($productQuoteChange);
                 $this->confirmProductQuoteChange($productQuoteChange);
+                $this->inProgressProductQuoteChange($productQuoteChange);
                 $this->refundProductQuoteChange($productQuoteChange, $userId);
                 $this->cancelReprotectionQuotesByProductQuoteChange($productQuoteChange, $userId);
                 return $this->createRefunds($productQuote, $productQuoteChange);
