@@ -46,12 +46,12 @@ class CancelOtherReprotectionQuotes
         }
     }
 
-    public function cancelByQuoteChange(ProductQuoteChange $productQuoteChange, ?int $userId): void
+    public function cancelByQuoteChange(ProductQuoteChange $productQuoteChange, ProductQuote $exceptQuote, ?int $userId): void
     {
         $quotes = ProductQuoteQuery::getProductQuotesByChangeQuote($productQuoteChange->pqc_id);
 
         foreach ($quotes as $productQuote) {
-            if (!$productQuote->isCanceled() && $productQuote->isFlight() && $productQuote->flightQuote->isTypeReProtection()) {
+            if (!$productQuote->isEqual($exceptQuote) && !$productQuote->isCanceled() && $productQuote->isFlight() && $productQuote->flightQuote->isTypeReProtection()) {
                 $productQuote->cancelled($userId, 'Canceled from reProtection');
                 $this->productQuoteRepository->save($productQuote);
             }

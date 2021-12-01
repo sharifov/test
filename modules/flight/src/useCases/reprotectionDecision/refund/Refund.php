@@ -7,6 +7,7 @@ use modules\flight\src\useCases\reprotectionDecision\CancelOtherReprotectionQuot
 use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\entities\orderRefund\OrderRefundRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
@@ -80,8 +81,7 @@ class Refund
                 $this->inProgressProductQuoteChange($productQuoteChange);
                 $this->confirmProductQuoteChange($productQuoteChange);
                 $this->refundProductQuoteChange($productQuoteChange, $userId);
-//                $this->cancelReprotectionQuotes($productQuote, $userId);
-                $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $userId);
+                $this->cancelReprotectionQuotesByProductQuoteChange($productQuoteChange, $userId);
                 return $this->createRefunds($productQuote, $productQuoteChange);
             });
         } catch (\Throwable $e) {
@@ -185,16 +185,9 @@ class Refund
         }
     }
 
-    public function cancelReprotectionQuotes(ProductQuote $quote, ?int $userId): void
+    public function cancelReprotectionQuotesByProductQuoteChange(ProductQuoteChange $productQuoteChange, ?int $userId): void
     {
-        $quotes = ProductQuote::find()
-            ->andWhere([
-                'pq_id' => ProductQuoteRelation::find()
-                    ->select(['pqr_related_pq_id'])
-                    ->byParentQuoteId((int)$quote->pq_id)
-                    ->reprotection()
-            ])
-            ->all();
+        $quotes = ProductQuoteQuery::getProductQuotesByChangeQuote($productQuoteChange->pqc_id);
 
         foreach ($quotes as $productQuote) {
             if (!$productQuote->isCanceled() && $productQuote->isFlight() && $productQuote->flightQuote->isTypeReProtection()) {

@@ -70,7 +70,7 @@ class Modify
         $quote = $this->transactionManager->wrap(function () use ($originalProductQuote, $newQuote, $productQuoteChange, $userId) {
             $quote = $this->createNewReprotectionQuote($originalProductQuote, $newQuote, $userId);
             $this->markQuoteToApplied($quote);
-            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $userId);
+            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $quote, $userId);
             $this->inProgressProductQuoteChange($productQuoteChange);
             $this->confirmProductQuoteChange($productQuoteChange);
             $this->modifyProductQuoteChange($productQuoteChange, $userId);
