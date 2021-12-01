@@ -247,11 +247,15 @@ use yii\bootstrap4\Html;
         </div>
         <?php endforeach; ?>
 
-        <div class="row">
+        <div class="row d-flex">
             <div class="col-md-12 d-flex align-items-center justify-content-center">
                 <?= Html::submitButton('<i class="fa fa-filter"></i> Apply filter', [
                     'class' => 'btn btn-success',
                     'id' => 'quote-search-submit'
+                ]) ?>
+                <?= Html::button('<i class="fa fa-filter"></i> Hide filter', [
+                    'class' => 'btn fa',
+                    'id' => 'quote-search-hide-filter',
                 ]) ?>
             </div>
         </div>

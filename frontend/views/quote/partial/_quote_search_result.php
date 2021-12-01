@@ -79,7 +79,7 @@ JS;
     ?>
     <div class="row">
         <div class="col-md-12 d-flex align-items-center justify-content-center">
-            <?= Html::button('<i class="fa fa-filter"></i> Show/Hide filter', [
+            <?= Html::button('<i class="fa fa-filter"></i> Show filter', [
                 'class' => 'btn btn-success',
                 'id' => 'quote-search-show-filter',
             ]) ?>
@@ -283,10 +283,24 @@ JS;
 
 <script>
     $(document).on('click', '#quote-search-show-filter', function(e) {
-        $('#quote-search-filters').toggle();
+        localStorage.setItem("quoteSearchFilterIsVisible", '1');
+        $('#quote-search-show-filter').hide();
+        $('#quote-search-filters').show();
+    });
+    $(document).on('click', '#quote-search-hide-filter', function(e) {
+        localStorage.setItem("quoteSearchFilterIsVisible", '0');
+        $('#quote-search-filters').hide();
+        $('#quote-search-show-filter').show();
     });
     $(document).ready(function() {
-        $('#quote-search-filters').hide();
+        let quoteSearchFilterIsVisible = localStorage.getItem("quoteSearchFilterIsVisible");
+        if (quoteSearchFilterIsVisible === null || quoteSearchFilterIsVisible == '0') {
+            $('#quote-search-filters').hide();
+            localStorage.setItem("quoteSearchFilterIsVisible", '0');
+        } else {
+            $('#quote-search-show-filter').hide();
+            $('#quote-search-filters').show();
+        }
     });
 
 </script>
