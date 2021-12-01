@@ -60,9 +60,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
 //        }
 
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/dashboard/index'], 'icon' => 'area-chart'];
-        $menuItems[] = ['label' => 'Voip', 'url' => ['/voip/index'], 'icon' => 'phone'];
 
         $menuLItems = [];
+
+        $menuItems[] = ['label' => 'Voip', 'url' => ['/voip/index'], 'icon' => 'phone', 'visible' => Yii::$app->user->can('PhoneWidget')];
 
         if (Auth::can('createLead')) {
             $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];

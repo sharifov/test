@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\UserCallStatus;
+use common\models\UserProfile;
 use sales\auth\Auth;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
@@ -16,7 +17,8 @@ use sales\model\call\useCase\createCall\CreateInternalCall;
 use sales\model\call\useCase\createCall\CreateSimpleCall;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\user\entity\userStatus\UserStatus;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Class VoipController
@@ -24,7 +26,7 @@ use yii\web\Controller;
  * @property CurrentQueueCallsService $currentQueueCallsService
  * @property LeadRedialUnAssigner $leadRedialUnAssigner
  */
-class VoipController extends Controller
+class VoipController extends FController
 {
     private CurrentQueueCallsService $currentQueueCallsService;
     private LeadRedialUnAssigner $leadRedialUnAssigner;
@@ -41,14 +43,46 @@ class VoipController extends Controller
         $this->leadRedialUnAssigner = $leadRedialUnAssigner;
     }
 
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'index',
+                    'created-call',
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     public function actionIndex()
     {
+        if (!Auth::can('PhoneWidget')) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         return $this->render('index');
     }
 
     public function actionCreateCall()
     {
         $createdUser = Auth::user();
+
+        if (!Auth::can('PhoneWidget')) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Access denied.',
+            ]);
+        }
+
+        $userProfile = UserProfile::find()->where(['up_user_id' => $createdUser->id])->limit(1)->one();
+        if (!$userProfile || !$userProfile->canWebCall()) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Access denied.',
+            ]);
+        }
 
         if (!$createdUser->isOnline()) {
             return $this->asJson([
@@ -107,6 +141,13 @@ class VoipController extends Controller
             if ($form->isFromContacts()) {
                 $result = (new CreateCallFromContacts())($form);
                 return $this->asJson($result);
+            }
+
+            if (!Auth::can('PhoneWidget_Dialpad')) {
+                return $this->asJson([
+                    'error' => true,
+                    'message' => 'Access denied.',
+                ]);
             }
             $result = (new CreateSimpleCall())($form);
             return $this->asJson($result);
