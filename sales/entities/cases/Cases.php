@@ -720,7 +720,7 @@ class Cases extends ActiveRecord implements Objectable
 
     public function getProductQuoteChange(): ActiveQuery
     {
-        return $this->hasOne(ProductQuoteChange::class, ['pqc_case_id' => 'cs_id']);
+        return $this->hasOne(ProductQuoteChange::class, ['pqc_case_id' => 'cs_id'])->orderBy(['pqc_id' => SORT_DESC]);
     }
 
     public function getProductQuoteRefund(): ActiveQuery
