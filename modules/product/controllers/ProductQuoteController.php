@@ -638,7 +638,6 @@ class ProductQuoteController extends FController
 
                         $case->addEventLog(null, ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username);
 
-                        $productQuoteChange = ProductQuoteChange::find()->byProductQuote($originQuote->pq_id)->one();
                         if ($productQuoteChange) {
                             $productQuoteChange->statusToPending();
                             if (!$productQuoteChange->save()) {
