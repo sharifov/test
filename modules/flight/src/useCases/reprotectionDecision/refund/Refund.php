@@ -145,26 +145,26 @@ class Refund
 
     private function confirmProductQuoteChange(ProductQuoteChange $change): void
     {
-        $fromStatus = $change->getClientStatusName();
+        $fromStatus = $change->getSystemStatusName();
         $change->statusToComplete();
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
             'gid' => $change->pqc_gid,
             'fromStatus' => $fromStatus,
-            'toStatus' => $change->getClientStatusName(),
+            'toStatus' => $change->getSystemStatusName(),
             'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::REFUND]
         ], CaseEventLog::CATEGORY_DEBUG);
     }
 
     private function inProgressProductQuoteChange(ProductQuoteChange $change): void
     {
-        $fromStatus = $change->getClientStatusName();
+        $fromStatus = $change->getSystemStatusName();
         $change->inProgress();
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
             'gid' => $change->pqc_gid,
             'fromStatus' => $fromStatus,
-            'toStatus' => $change->getClientStatusName(),
+            'toStatus' => $change->getSystemStatusName(),
             'decided'  => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::REFUND]
         ], CaseEventLog::CATEGORY_DEBUG);
     }

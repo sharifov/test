@@ -381,4 +381,9 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     {
         return $this->pqc_status_id ? ProductQuoteChangeStatus::getClientKeyStatusById($this->pqc_status_id) : '-';
     }
+
+    public function getSystemStatusName(): string
+    {
+        return $this->pqc_status_id ? ProductQuoteChangeStatus::getName($this->pqc_status_id) : '-';
+    }
 }
