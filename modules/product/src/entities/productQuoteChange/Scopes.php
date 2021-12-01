@@ -36,6 +36,11 @@ class Scopes extends ActiveQuery
         return $this->andWhere(['NOT IN', 'pqc_status_id', $statuses]);
     }
 
+    public function scheduleChangeType(): self
+    {
+        return $this->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION]);
+    }
+
     /**
      * @param null $db
      * @return ProductQuoteChange[]|array

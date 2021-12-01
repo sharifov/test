@@ -180,8 +180,6 @@ class ReprotectionCreateService
             'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
             ['pq_gid' => $originProductQuote->pq_gid]
         );
-        $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $productQuoteChangeIsAutomate);
-        $this->productQuoteChangeRepository->save($productQuoteChange);
         return $originProductQuote;
     }
 
@@ -492,7 +490,7 @@ class ReprotectionCreateService
                 }
                 $caseNote = CaseNote::create(
                     $caseRefund->cs_id,
-                    'New Schedule Change happened: (' . $caseRefund->cs_id . '). Refund disabled.',
+                    'New Schedule Change happened: (' . $case->cs_id . '). Refund disabled.',
                     null
                 );
                 $caseNote->detachBehavior('user');

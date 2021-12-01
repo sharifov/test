@@ -64,13 +64,13 @@ class Modify
 
         $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($originalProductQuote->pq_id);
         if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
-            throw new \DomainException('Product Quote Change status is not in "pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"', 101);
+            throw new \DomainException('Product Quote Change status is not in "pending" or is not Schedule Change. Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"; Current Type: "' . $productQuoteChange->getTypeName() . '"', 101);
         }
 
         $quote = $this->transactionManager->wrap(function () use ($originalProductQuote, $newQuote, $productQuoteChange, $userId) {
             $quote = $this->createNewReprotectionQuote($originalProductQuote, $newQuote, $userId);
             $this->markQuoteToApplied($quote);
-            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $userId);
+            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $quote, $userId);
             $this->inProgressProductQuoteChange($productQuoteChange);
             $this->confirmProductQuoteChange($productQuoteChange);
             $this->modifyProductQuoteChange($productQuoteChange, $userId);
