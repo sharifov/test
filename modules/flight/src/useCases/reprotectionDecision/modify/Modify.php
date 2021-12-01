@@ -71,8 +71,8 @@ class Modify
             $quote = $this->createNewReprotectionQuote($originalProductQuote, $newQuote, $userId);
             $this->markQuoteToApplied($quote);
             $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $quote, $userId);
-            $this->inProgressProductQuoteChange($productQuoteChange);
             $this->confirmProductQuoteChange($productQuoteChange);
+            $this->inProgressProductQuoteChange($productQuoteChange);
             $this->modifyProductQuoteChange($productQuoteChange, $userId);
 
             $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
