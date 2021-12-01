@@ -30,7 +30,7 @@ class ProductQuoteChangeRepository
 
     public function findByProductQuoteId(int $id): ProductQuoteChange
     {
-        if ($productQuote = ProductQuoteChange::find()->byProductQuote($id)->one()) {
+        if ($productQuote = ProductQuoteChange::find()->byProductQuote($id)->orderBy(['pqc_id' => SORT_DESC])->one()) {
             return $productQuote;
         }
         throw new NotFoundException('Product Quote Change is not found.');
