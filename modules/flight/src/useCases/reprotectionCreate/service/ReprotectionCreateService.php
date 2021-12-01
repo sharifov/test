@@ -180,8 +180,6 @@ class ReprotectionCreateService
             'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
             ['pq_gid' => $originProductQuote->pq_gid]
         );
-        $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $productQuoteChangeIsAutomate);
-        $this->productQuoteChangeRepository->save($productQuoteChange);
         return $originProductQuote;
     }
 
