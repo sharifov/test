@@ -52,14 +52,16 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
             <span class="quote__id"><strong># <?= $resultKey + 1 ?></strong></span>
             <span class="quote__vc">
                 <span class="quote__vc-logo">
-                    <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $result['validatingCarrier'] . '.png' ?>
-                    <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                    <?php if ($result['validatingCarrier']) : ?>
+                        <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $result['validatingCarrier'] . '.png' ?>
                         <span class="quote__vc-logo">
                             <img src="<?php echo $airlineLogo ?>" alt="<?= $result['validatingCarrier']?>" class="quote__vc-img">
                         </span>
                     <?php endif ?>
                 </span>
-                <span class="quote__vc-name"><?= (!isset($airlines[$result['validatingCarrier']])) ?: $airlines[$result['validatingCarrier']];?><strong> [<?= $result['validatingCarrier']?>]</strong></span>
+                <span class="quote__vc-name">
+                    <?= (!isset($airlines[$result['validatingCarrier']])) ?: $airlines[$result['validatingCarrier']];?><strong> [<?= $result['validatingCarrier']?>]</strong>
+                </span>
             </span>
             <?php /* ?>
             <div class="quote__gds">
@@ -94,19 +96,22 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                 <div class="quote__seats">
                     <?php if (is_array($prodTypes)) : ?>
                         <?php foreach ($prodTypes as $label) : ?>
-                            <span class="fa fa-tags text-success" title="<?php echo Html::encode($label) ?>"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
+                            <span class="fa fa-tags text-success" title="<?php echo Html::encode($label) ?>"></span>
+                            <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
                         <?php endforeach ?>
                     <?php else : ?>
-                        <span class="fa fa-tags text-success" title="<?php echo Html::encode($prodTypes) ?>"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
+                        <span class="fa fa-tags text-success" title="<?php echo Html::encode($prodTypes) ?>"></span>
+                        <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
                     <?php endif ?>
                 </div>
             <?php endif;?>
 
         </div>
-        <div class="quote__heading-right text-success">
-            <strong class="quote__quote-price">$<?= $result['price'] ?></strong>
+        <div class="quote__heading-right text-success" title="Price per PAX">
+            <strong class="quote__quote-price">$<?= number_format($result['price'], 2) ?></strong> &nbsp; per ADT
         </div>
     </div>
+
     <div class="quote_search_wrapper">
         <div class="quote__trip">
             <?php $tripsInfo = [];
@@ -164,8 +169,8 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                 <div class="quote__segment">
                     <div class="quote__info">
                         <?php if (count($marketingAirlines) === 1) :?>
-                            <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
-                            <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                            <?php if ($marketingAirlines[0]) : ?>
+                                <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
                                 <span class="quote__vc-logo">
                                     <img src="<?php echo $airlineLogo ?>" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
                                 </span>
@@ -273,9 +278,9 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                     <tr><?php $paxTotal += $pax['cnt'];?>
                         <th><?= $paxCode?></th>
                         <td>x <?= $pax['cnt']?></td>
-                        <td class="text-right"><?= $pax['price'] - $pax['markup'] ?? 0 ?></td>
-                        <td class="text-right"><?= (isset($pax['markup'])) ? $pax['markup'] : 0 ?></td>
-                        <td  class="text-right"><?= $pax['price']?></td>
+                        <td class="text-right"><?= number_format($pax['price'] - $pax['markup'] ?? 0, 2) ?></td>
+                        <td class="text-right"><?= isset($pax['markup']) ? number_format($pax['markup'], 2) : '-' ?></td>
+                        <td  class="text-right"><?= number_format($pax['price'], 2)?></td>
                     </tr>
                 <?php endforeach;?>
                 </tbody>
@@ -283,14 +288,15 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                 <tr>
                     <th>Total</th>
                     <td><?= $paxTotal?></td>
-                    <td  class="text-right"><?= $result['prices']['totalPrice'] - $result['prices']['markup'] ?? 0 ?></td>
-                    <td  class="text-right"><?= $result['prices']['markup']?></td>
-                    <td  class="text-right"><?= $result['prices']['totalPrice']?></td>
+                    <td  class="text-right"><?= number_format($result['prices']['totalPrice'] - $result['prices']['markup'] ?? 0, 2) ?></td>
+                    <td  class="text-right"><?= number_format($result['prices']['markup'], 2)?></td>
+                    <td  class="text-right"><?= number_format($result['prices']['totalPrice'], 2)?></td>
                 </tr>
                 </tfoot>
             </table>
         </div>
     </div>
+
     <div class="quote__details" id="search_result_item_<?= $resultKey?>" style="display:none;">
         <?php /* if (!$isQuoteAssignedToFlight) : ?>
         <div class="text-right">
@@ -437,7 +443,6 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
             </div>
         </div>
     </div>
-
     <div class="quote__footer">
 
 
@@ -492,4 +497,5 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
             <?php endif ?>
         </div>
     </div>
+
 </div>

@@ -229,12 +229,12 @@ JS;
     $('[data-toggle="tooltip"]').tooltip({html:true});
     
     $("#pjax-search-quote-filter").on("pjax:beforeSend", function() {
-        $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-filter').addClass('fa-spin fa-spinner disabled').prop('disabled', true);
+        $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-check').addClass('fa-spin fa-spinner disabled').prop('disabled', true);
         $('.search-results__wrapper').addClass('loading');
     });
 
     $("#pjax-search-quote-filter").on("pjax:complete", function() {
-        $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-spin fa-spinner disabled').addClass('fa-filter').removeAttr('disabled');
+        $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-spin fa-spinner disabled').addClass('fa-check').removeAttr('disabled');
         $('.search-results__wrapper').removeClass('loading');
     });
     
