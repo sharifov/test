@@ -9,7 +9,6 @@ use yii\helpers\Html;
 
 ?>
 
-
 <div class="quote__details">
     <div class="trip">
         <div class="trip__item">

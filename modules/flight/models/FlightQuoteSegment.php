@@ -50,6 +50,7 @@ use yii\helpers\VarDumper;
  * @property FlightQuoteSegmentPaxBaggageCharge[] $flightQuoteSegmentPaxBaggageCharges
  * @property FlightQuoteSegmentStop[] $flightQuoteSegmentStops
  * @property Airline $marketingAirline
+ * @property Airline $operatingAirline
  * @property Airports $departureAirport
  * @property Airports $arrivalAirport
  * @property FlightQuoteFlight $flightQuoteFlight
@@ -107,30 +108,30 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'fqs_id' => 'Fqs ID',
-            'fqs_flight_quote_id' => 'Fqs Flight Quote ID',
-            'fqs_flight_quote_trip_id' => 'Fqs Flight Quote Trip ID',
-            'fqs_departure_dt' => 'Fqs Departure Dt',
-            'fqs_arrival_dt' => 'Fqs Arrival Dt',
-            'fqs_stop' => 'Fqs Stop',
-            'fqs_flight_number' => 'Fqs Flight Number',
-            'fqs_booking_class' => 'Fqs Booking Class',
-            'fqs_duration' => 'Fqs Duration',
-            'fqs_departure_airport_iata' => 'Fqs Departure Airport Iata',
-            'fqs_departure_airport_terminal' => 'Fqs Departure Airport Terminal',
-            'fqs_arrival_airport_iata' => 'Fqs Arrival Airport Iata',
-            'fqs_arrival_airport_terminal' => 'Fqs Arrival Airport Terminal',
-            'fqs_operating_airline' => 'Fqs Operating Airline',
-            'fqs_marketing_airline' => 'Fqs Marketing Airline',
-            'fqs_air_equip_type' => 'Fqs Air Equip Type',
-            'fqs_marriage_group' => 'Fqs Marriage Group',
-            'fqs_cabin_class' => 'Fqs Cabin Class',
-            'fqs_meal' => 'Fqs Meal',
-            'fqs_fare_code' => 'Fqs Fare Code',
-            'fqs_key' => 'Fqs Key',
-            'fqs_ticket_id' => 'Fqs Ticket ID',
-            'fqs_recheck_baggage' => 'Fqs Recheck Baggage',
-            'fqs_mileage' => 'Fqs Mileage',
+            'fqs_id' => 'ID',
+            'fqs_flight_quote_id' => 'Flight Quote ID',
+            'fqs_flight_quote_trip_id' => 'Flight Quote Trip ID',
+            'fqs_departure_dt' => 'Departure Dt',
+            'fqs_arrival_dt' => 'Arrival Dt',
+            'fqs_stop' => 'Stop',
+            'fqs_flight_number' => 'Flight Number',
+            'fqs_booking_class' => 'Booking Class',
+            'fqs_duration' => 'Duration',
+            'fqs_departure_airport_iata' => 'Departure Airport Iata',
+            'fqs_departure_airport_terminal' => 'Departure Airport Terminal',
+            'fqs_arrival_airport_iata' => 'Arrival Airport Iata',
+            'fqs_arrival_airport_terminal' => 'Arrival Airport Terminal',
+            'fqs_operating_airline' => 'Operating Airline',
+            'fqs_marketing_airline' => 'Marketing Airline',
+            'fqs_air_equip_type' => 'Air Equip Type',
+            'fqs_marriage_group' => 'Marriage Group',
+            'fqs_cabin_class' => 'Cabin Class',
+            'fqs_meal' => 'Meal',
+            'fqs_fare_code' => 'Fare Code',
+            'fqs_key' => 'Key',
+            'fqs_ticket_id' => 'Ticket ID',
+            'fqs_recheck_baggage' => 'Recheck Baggage',
+            'fqs_mileage' => 'Mileage',
             'fqs_flight_id' => 'Quote Flight',
         ];
     }
@@ -149,7 +150,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFqsFlightQuote()
     {
@@ -157,7 +158,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFqsFlightQuoteTrip()
     {
@@ -165,7 +166,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getMarketingAirline()
     {
@@ -173,7 +174,15 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
+     */
+    public function getOperatingAirline()
+    {
+        return $this->hasOne(Airline::class, ['iata' => 'fqs_operating_airline']);
+    }
+
+    /**
+     * @return ActiveQuery
      */
     public function getDepartureAirport()
     {
@@ -181,7 +190,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getArrivalAirport()
     {
@@ -189,7 +198,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteSegmentPaxBaggages()
     {
@@ -197,7 +206,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteSegmentPaxBaggageCharges()
     {
@@ -205,7 +214,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteSegmentStops()
     {
@@ -408,5 +417,63 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             };
         }
         return $fields;
+    }
+
+    /**
+     * @return string
+     */
+    public function getArrivalAirportName(): string
+    {
+        return $this->arrivalAirport ? $this->arrivalAirport->name : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getArrivalAirportCity(): string
+    {
+        return $this->arrivalAirport ? $this->arrivalAirport->city : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDepartureAirportName(): string
+    {
+        return $this->departureAirport ? $this->departureAirport->name : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDepartureAirportCity(): string
+    {
+        return $this->departureAirport ? $this->departureAirport->city : '-';
+    }
+
+    /**
+     * @param int $width
+     * @return string
+     */
+    public function getAirlineLogoImg(int $width = 70): string
+    {
+        return $this->fqs_marketing_airline ? '//www.gstatic.com/flights/airline_logos/' . $width . 'px/' .
+            $this->fqs_marketing_airline . '.png' : '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getMarketingAirlineName(): string
+    {
+        return ($this->fqs_marketing_airline && $this->marketingAirline) ? $this->marketingAirline->name : '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getOperatingAirlineName(): string
+    {
+        return ($this->fqs_operating_airline && $this->operatingAirline) ? $this->operatingAirline->name : '';
     }
 }
