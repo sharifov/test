@@ -150,26 +150,6 @@ class FlightQuoteSearchForm extends Model
             }, ARRAY_FILTER_USE_BOTH);
         }
 
-        if (!empty($this->excludeNearbyAirports)) {
-            $quotes['results'] = array_filter($quotes['results'], function ($item) use (&$leadFlight) {
-                $item['showed'] = true;
-                if (!empty($leadFlight)) {
-                    foreach ($leadFlight as $tripKey => $queryTrip) {
-                        if (
-                            !empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
-                            && $this->excludeNearbyAirports[$tripKey]
-                            && !empty($item['trips'][$tripKey]['segments'])
-                            && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
-                                || $item['trips'][$tripKey]['segments'][count($item['trips'][$tripKey]['segments']) - 1]['arrivalAirportCode'] != $queryTrip->destination)
-                        ) {
-                            $item['showed'] = false;
-                        }
-                    }
-                }
-                return $item['showed'];
-            }, ARRAY_FILTER_USE_BOTH);
-        }
-
         if (!empty($this->price)) {
             $quotes['results'] = AppHelper::filterByRange($quotes['results'], 'price', null, $this->price);
         }
@@ -254,6 +234,26 @@ class FlightQuoteSearchForm extends Model
                     }
                 }
                 return true;
+            }, ARRAY_FILTER_USE_BOTH);
+        }
+
+        if (!empty($this->excludeNearbyAirports)) {
+            $quotes['results'] = array_filter($quotes['results'], function ($item) use (&$leadFlight) {
+                $item['showed'] = true;
+                if (!empty($leadFlight)) {
+                    foreach ($leadFlight as $tripKey => $queryTrip) {
+                        if (
+                            !empty($item['trips']) && isset($this->excludeNearbyAirports[$tripKey])
+                            && $this->excludeNearbyAirports[$tripKey]
+                            && !empty($item['trips'][$tripKey]['segments'])
+                            && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
+                                || $item['trips'][$tripKey]['segments'][count($item['trips'][$tripKey]['segments']) - 1]['arrivalAirportCode'] != $queryTrip->destination)
+                        ) {
+                            $item['showed'] = false;
+                        }
+                    }
+                }
+                return $item['showed'];
             }, ARRAY_FILTER_USE_BOTH);
         }
 

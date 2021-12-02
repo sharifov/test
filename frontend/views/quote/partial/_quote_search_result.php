@@ -77,16 +77,6 @@ JS;
         }
     }
     ?>
-    <div class="row">
-        <div class="col-md-12 d-flex align-items-center justify-content-center">
-            <?= Html::button('<i class="fa fa-filter"></i> Show filter', [
-                'class' => 'btn btn-info',
-                'id' => 'quote-search-show-filter',
-            ]) ?>
-        </div>
-    </div>
-
-
     <script>
         pjaxOffFormSubmit('#pjax-search-quote-filter');
     </script>
@@ -282,24 +272,21 @@ JS;
 <?php endif;?>
 
 <script>
-    $(document).on('click', '#quote-search-show-filter', function(e) {
-        localStorage.setItem("quoteSearchFilterIsVisible", '1');
-        $('#quote-search-show-filter').hide();
-        $('#quote-search-filters').show();
-    });
-    $(document).on('click', '#quote-search-hide-filter', function(e) {
-        localStorage.setItem("quoteSearchFilterIsVisible", '0');
-        $('#quote-search-filters').hide();
-        $('#quote-search-show-filter').show();
+    $(document).on('click', '#quote-search-filter-show-hide', function(e) {
+        if (localStorage.getItem("quoteSearchFilterIsVisible") == '1') {
+            localStorage.setItem('quoteSearchFilterIsVisible', '0');
+            $('#quote-search-filter-show-hide').hide();
+        } else {
+            localStorage.setItem('quoteSearchFilterIsVisible', '1');
+            $('#quote-search-filter-show-hide').show();
+        }
     });
     $(document).ready(function() {
         let quoteSearchFilterIsVisible = localStorage.getItem("quoteSearchFilterIsVisible");
-        if (quoteSearchFilterIsVisible === null || quoteSearchFilterIsVisible == '0') {
-            $('#quote-search-filters').hide();
+        if (quoteSearchFilterIsVisible === null) {
             localStorage.setItem("quoteSearchFilterIsVisible", '0');
         } else {
-            $('#quote-search-show-filter').hide();
-            $('#quote-search-filters').show();
+            $('#quote-search-filter-show-hide').show();
         }
     });
 
