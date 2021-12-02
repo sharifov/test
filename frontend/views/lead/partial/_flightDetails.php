@@ -130,10 +130,10 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                         <?php if (Yii::$app->user->can('updateLead', ['leadId' => $itineraryForm->leadId])) : ?>
                         <div class="btn-wrapper text-right" style="margin-top: 10px">
                             <?= Html::a(
-                            '<i class="fa fa-edit"></i> Edit Request',
-                            ['/lead-itinerary/view-edit-form', 'id' => $itineraryForm->leadId],
-                            ['class' => 'btn btn-default']
-                        ) ?>
+                                '<i class="fa fa-edit"></i> Edit Request',
+                                ['/lead-itinerary/view-edit-form', 'id' => $itineraryForm->leadId],
+                                ['class' => 'btn btn-default']
+                            ) ?>
                         </div>
                         <?php endif; ?>
 
