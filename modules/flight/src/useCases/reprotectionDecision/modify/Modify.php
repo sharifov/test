@@ -62,7 +62,7 @@ class Modify
     {
         $originalProductQuote = $this->getProductQuote($bookingId);
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($originalProductQuote->pq_id);
+        $productQuoteChange = $this->productQuoteChangeRepository->findByProductIdAndType($originalProductQuote->pq_id, ProductQuoteChange::TYPE_RE_PROTECTION);
         if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
             throw new \DomainException('Product Quote Change status is not in "pending" or is not Schedule Change. Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"; Current Type: "' . $productQuoteChange->getTypeName() . '"', 101);
         }

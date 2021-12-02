@@ -65,7 +65,7 @@ class BoRequest
             throw new \DomainException('Not found Product Quote with bookingId: ' . $bookingId);
         }
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($productQuote->pq_id);
+        $productQuoteChange = $this->productQuoteChangeRepository->findByProductIdAndType($productQuote->pq_id, ProductQuoteChange::TYPE_RE_PROTECTION);
         if (!$productQuoteChange->isCustomerDecisionRefund()) {
             throw new \DomainException('Product Quote Change status is invalid.');
         }
