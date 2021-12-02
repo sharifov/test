@@ -17,28 +17,30 @@ use yii\helpers\Html;
     <?php if ($flightQuote) : ?>
     <div class="col-md-6">
         <h2><i class="fa fa-info-circle"></i> Product Quote Info:</h2>
-        <table class="table table-striped table-bordered">
-            <tr>
-                <th style="width: 50px">Id</th>
-                <th>Status</th>
-                <th>Service Fee, USD</th>
-                <th>Markup, USD</th>
-                <th>Agent Markup, USD</th>
-                <th>Price, USD</th>
-                <th>Client Price, <?= Html::encode($productQuote->pq_client_currency) ?></th>
-            </tr>
-            <tr>
-                <td class="text-center"><?= $productQuote->pq_id ?></td>
-                <td class="text-center"><?= \modules\product\src\entities\productQuote\ProductQuoteStatus::asFormat($productQuote->pq_status_id) ?></td>
-                <td class="text-right" title="Service fee percent: <?= $productQuote->pq_service_fee_percent ?> %">
-                    <?= number_format($productQuote->pq_service_fee_sum, 2) ?> $
-                </td>
-                <td class="text-right"><?= number_format($productQuote->pq_app_markup, 2) ?> $</td>
-                <td class="text-right"><?= number_format($productQuote->pq_agent_markup, 2) ?> $</td>
-                <td class="text-right"><?= number_format($productQuote->pq_price, 2) ?>  $</td>
-                <td class="text-right"><?= number_format($productQuote->pq_client_price, 2) ?></td>
-            </tr>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <tr>
+                    <th style="width: 50px">Id</th>
+                    <th>Status</th>
+                    <th>Service Fee, USD</th>
+                    <th>Markup, USD</th>
+                    <th>Agent Markup, USD</th>
+                    <th>Price, USD</th>
+                    <th>Client Price, <?= Html::encode($productQuote->pq_client_currency) ?></th>
+                </tr>
+                <tr>
+                    <td class="text-center"><?= $productQuote->pq_id ?></td>
+                    <td class="text-center"><?= \modules\product\src\entities\productQuote\ProductQuoteStatus::asFormat($productQuote->pq_status_id) ?></td>
+                    <td class="text-right" title="Service fee percent: <?= $productQuote->pq_service_fee_percent ?> %">
+                        $<?= number_format($productQuote->pq_service_fee_sum, 2) ?>
+                    </td>
+                    <td class="text-right">$<?= number_format($productQuote->pq_app_markup, 2) ?></td>
+                    <td class="text-right">$<?= number_format($productQuote->pq_agent_markup, 2) ?></td>
+                    <td class="text-right">$<?= number_format($productQuote->pq_price, 2) ?></td>
+                    <td class="text-right"><?= number_format($productQuote->pq_client_price, 2) ?></td>
+                </tr>
+            </table>
+        </div>
         <p>
             <small>
                 <span title="Client Currency">
@@ -53,7 +55,8 @@ use yii\helpers\Html;
 
         <h2><i class="fa fa-male"></i> Flight Quote Pax Prices:</h2>
         <?php if ($flightQuotePaxPrices = $flightQuote->flightQuotePaxPrices) : ?>
-            <table class="table table-striped table-bordered">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
                 <tr>
                     <th style="width: 50px">Nr</th>
                     <th>Pax Type</th>
@@ -76,14 +79,14 @@ use yii\helpers\Html;
                             </span>
                         </td>
                         <td class="text-center"><?php echo $flightQuotePaxPrice->qpp_cnt ?></td>
-                        <td class="text-right"><?= $flightQuotePaxPrice->qpp_fare ?> $</td>
-                        <td class="text-right"><?= $flightQuotePaxPrice->qpp_tax ?> $</td>
+                        <td class="text-right">$<?= $flightQuotePaxPrice->qpp_fare ?></td>
+                        <td class="text-right">$<?= $flightQuotePaxPrice->qpp_tax ?></td>
                         <td class="text-right"><?= $flightQuotePaxPrice->qpp_client_fare ?></td>
                         <td class="text-right"><?= $flightQuotePaxPrice->qpp_client_tax ?></td>
-                        <td class="text-right"><?php echo $flightQuotePaxPrice->qpp_system_mark_up ?> $</td>
-                        <td class="text-right"><?php echo $flightQuotePaxPrice->qpp_agent_mark_up ?> $</td>
+                        <td class="text-right">$<?php echo $flightQuotePaxPrice->qpp_system_mark_up ?></td>
+                        <td class="text-right">$<?php echo $flightQuotePaxPrice->qpp_agent_mark_up ?></td>
                         <td class="text-right" title="Fare + Tax + ProcessingFee + Agent Markup">
-                            <?= number_format($flightQuotePaxPrice->getTotalPrice(), 2) ?> $
+                            $<?= number_format($flightQuotePaxPrice->getTotalPrice(), 2) ?>
                         </td>
                         <td class="text-right" title="Client Fare + Client Tax + (ProcessingFee + Agent Markup) * Client Currency Rate">
                             <?= number_format($flightQuotePaxPrice->getClientTotalPrice(), 2) ?>
@@ -91,6 +94,7 @@ use yii\helpers\Html;
                     </tr>
                 <?php endforeach ?>
             </table>
+            </div>
         <?php else : ?>
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <strong>Flight Quote Pax Prices</strong> data is empty.
@@ -99,7 +103,8 @@ use yii\helpers\Html;
 
         <h2><i class="fa fa-cubes"></i> Product Quote Options:</h2>
         <?php if ($pqOptions = $productQuote->productQuoteOptions) : ?>
-            <table class="table table-striped table-bordered">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
                 <tr>
                     <th style="width: 50px">Nr</th>
                     <th>Name</th>
@@ -116,9 +121,9 @@ use yii\helpers\Html;
                             <span class="badge badge-primary"><?= Html::encode($pqOption->pqo_name) ?></span>
                         </td>
                         <td class="text-center"><?= Html::encode($pqOption->getStatusName()) ?></td>
-                        <td class="text-right"><?= $pqOption->pqo_price ?> $</td>
+                        <td class="text-right">$<?= $pqOption->pqo_price ?></td>
                         <td class="text-right"><?= $pqOption->pqo_client_price ?> </td>
-                        <td class="text-right"><?= $pqOption->pqo_extra_markup ?> $</td>
+                        <td class="text-right">$<?= $pqOption->pqo_extra_markup ?></td>
                         <td class="text-center" title="<?= $pqOption->pqo_request_data ?
                             \yii\helpers\VarDumper::dumpAsString(json_decode($pqOption->pqo_request_data, true)) : '' ?>">
                             <?= $pqOption->pqo_request_data ? '<i class="fa fa-info-circle" data-toggle="tooltip"></i> Data' : '' ?>
@@ -126,6 +131,7 @@ use yii\helpers\Html;
                     </tr>
                 <?php endforeach ?>
             </table>
+            </div>
         <?php else : ?>
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <strong>Product Quote Options</strong> data is empty.
