@@ -127,6 +127,13 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
                 $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
                 $productQuoteChangeRepository->save($productQuoteChange);
+
+                $case->addEventLog(
+                    CaseEventLog::RE_PROTECTION_CREATE,
+                    'New schedule change happened',
+                    ['change' => $productQuoteChange->pqc_gid],
+                    CaseEventLog::CATEGORY_INFO
+                );
             }
 
             if (!$originProductQuote || !$reProtectionCreateService::isScheduleChangeUpdatableExist($originProductQuote)) {
