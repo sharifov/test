@@ -54,7 +54,7 @@ class BoRequest
             throw new \DomainException('Quote is not applied. ID: ' . $quote->pq_id);
         }
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($quote);
+        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($quote, ProductQuoteChange::TYPE_RE_PROTECTION);
         if (!$productQuoteChange->isCustomerDecisionConfirm()) {
             throw new \DomainException('Product Quote Change customer decision status is invalid.');
         }

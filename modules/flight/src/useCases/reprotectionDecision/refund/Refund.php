@@ -71,15 +71,15 @@ class Refund
             throw new \DomainException('Not found Product Quote with bookingId: ' . $bookingId);
         }
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findByProductQuoteId($productQuote->pq_id);
+        $productQuoteChange = $this->productQuoteChangeRepository->findByProductIdAndType($productQuote->pq_id, ProductQuoteChange::TYPE_RE_PROTECTION);
         if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
             throw new \DomainException('Product Quote Change status is not in "pending" or is not Schedule Change. Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"; Current Type: "' . $productQuoteChange->getTypeName() . '"', 101);
         }
 
         try {
             [$orderRefundId, $productQuoteRefundId] = $this->transactionManager->wrap(function () use ($productQuote, $productQuoteChange, $userId) {
-                $this->inProgressProductQuoteChange($productQuoteChange);
                 $this->confirmProductQuoteChange($productQuoteChange);
+                $this->inProgressProductQuoteChange($productQuoteChange);
                 $this->refundProductQuoteChange($productQuoteChange, $userId);
                 $this->cancelReprotectionQuotesByProductQuoteChange($productQuoteChange, $userId);
                 return $this->createRefunds($productQuote, $productQuoteChange);
@@ -145,26 +145,26 @@ class Refund
 
     private function confirmProductQuoteChange(ProductQuoteChange $change): void
     {
-        $fromStatus = $change->getClientStatusName();
+        $fromStatus = $change->getSystemStatusName();
         $change->statusToComplete();
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
             'gid' => $change->pqc_gid,
             'fromStatus' => $fromStatus,
-            'toStatus' => $change->getClientStatusName(),
+            'toStatus' => $change->getSystemStatusName(),
             'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::REFUND]
         ], CaseEventLog::CATEGORY_DEBUG);
     }
 
     private function inProgressProductQuoteChange(ProductQuoteChange $change): void
     {
-        $fromStatus = $change->getClientStatusName();
+        $fromStatus = $change->getSystemStatusName();
         $change->inProgress();
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
             'gid' => $change->pqc_gid,
             'fromStatus' => $fromStatus,
-            'toStatus' => $change->getClientStatusName(),
+            'toStatus' => $change->getSystemStatusName(),
             'decided'  => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::REFUND]
         ], CaseEventLog::CATEGORY_DEBUG);
     }

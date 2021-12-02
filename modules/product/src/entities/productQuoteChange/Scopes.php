@@ -41,6 +41,11 @@ class Scopes extends ActiveQuery
         return $this->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION]);
     }
 
+    public function byType(int $typeId): self
+    {
+        return $this->andWhere(['pqc_type_id' => $typeId]);
+    }
+
     /**
      * @param null $db
      * @return ProductQuoteChange[]|array

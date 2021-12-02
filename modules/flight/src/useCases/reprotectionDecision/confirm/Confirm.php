@@ -53,7 +53,7 @@ class Confirm
                 'Current status(' . ProductQuoteStatus::getName($reprotectionQuote->pq_status_id) . ')');
         }
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote);
+        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote, ProductQuoteChange::TYPE_RE_PROTECTION);
         if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
             throw new \DomainException('Product Quote Change status is not in "pending" or is not Schedule Change. Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"; Current Type: "' . $productQuoteChange->getTypeName() . '"', 101);
         }
@@ -78,26 +78,26 @@ class Confirm
 
     private function confirmProductQuoteChange(ProductQuoteChange $change): void
     {
-        $fromStatus = $change->getClientStatusName();
+        $fromStatus = $change->getSystemStatusName();
         $change->statusToComplete();
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
             'gid' => $change->pqc_gid,
             'fromStatus' => $fromStatus,
-            'toStatus' => $change->getClientStatusName(),
+            'toStatus' => $change->getSystemStatusName(),
             'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]
         ], CaseEventLog::CATEGORY_DEBUG);
     }
 
     private function inProgressProductQuoteChange(ProductQuoteChange $change): void
     {
-        $fromStatus = $change->getClientStatusName();
+        $fromStatus = $change->getSystemStatusName();
         $change->inProgress();
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
             'gid' => $change->pqc_gid,
             'fromStatus' => $fromStatus,
-            'toStatus' => $change->getClientStatusName(),
+            'toStatus' => $change->getSystemStatusName(),
             'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]
         ], CaseEventLog::CATEGORY_DEBUG);
     }
