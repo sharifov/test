@@ -14,7 +14,7 @@ class ClientChatSocketCommands
         Notifications::pub(
             [ClientChatChannel::getPubSubKey($chat->cch_channel_id)],
             'clientChatAddQuoteButton',
-            ['data' => ['chatId' => $chat->cch_id, 'leadId' => $leadId, 'url' => Url::toRoute('/client-chat/send-quote-list')]]
+            ['data' => ['chatId' => $chat->cch_id, 'leadId' => $leadId, 'url' => '/client-chat/send-quote-list']]
         );
     }
 
@@ -32,7 +32,7 @@ class ClientChatSocketCommands
         Notifications::pub(
             [ClientChatChannel::getPubSubKey($chat->cch_channel_id)],
             'clientChatAddOfferButton',
-            ['data' => ['chatId' => $chat->cch_id, 'leadId' => $leadId, 'url' => Url::toRoute('/client-chat/send-offer-list')]]
+            ['data' => ['chatId' => $chat->cch_id, 'leadId' => $leadId, 'url' => '/client-chat/send-offer-list']]
         );
     }
 
