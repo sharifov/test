@@ -208,7 +208,7 @@ class ClientChatService
 
         $employeeSearch = new EmployeeSearch();
         $limit = $channel->getSystemUserLimit();
-        $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $limit, $channel->getSystemPastMinutes());
+        $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $limit, $channel->getSortParameters());
 
         $key = $this->getRedisDistributionLogicKey($clientChat->cch_id);
         if ($users) {

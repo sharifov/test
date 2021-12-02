@@ -64,7 +64,13 @@ class ClientChatChannelDefaultSettings
                 'sortParameters' => [
                     'pastAcceptedChatsNumber' => [
                         'pastMinutes' => 180,
-                        'sortPriority' => 0
+                        'sortPriority' => 0,
+                        'enabled' => true
+                    ],
+                    'skillLevel' => [
+                        'sortDirection' => 'ASC',
+                        'sortPriority' => 0,
+                        'enabled' => false
                     ]
                 ],
                 'autoCloseRoom' => false
@@ -98,6 +104,11 @@ class ClientChatChannelDefaultSettings
     public static function getAccessDistributionRepeatDelaySeconds(): int
     {
         return self::$settings['system']['userAccessDistribution']['repeatDelaySeconds'] ?? 0;
+    }
+
+    public static function getAccessSortParameters(): array
+    {
+        return self::$settings['system']['userAccessDistribution']['sortParameters'] ?? [];
     }
 
     public static function getAccessDistributionPastMinutes(): int

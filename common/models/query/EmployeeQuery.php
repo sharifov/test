@@ -93,6 +93,16 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         return $this->join('join', UserStatus::tableName() . ' us', $joinedField . ' = us.us_user_id and us_call_phone_status = 1 and us_is_on_call = 0');
     }
 
+    public function joinUserProfile(): self
+    {
+        return $this->join('join', UserProfile::tableName(), 'up_user_id = employees.id');
+    }
+
+    public function addOrderByUserProfileSkillLevel(int $order): self
+    {
+        return $this->addOrderBy(['up_skill' => $order]);
+    }
+
     /**
      * @param bool $leadIsBusiness
      * @param int $projectId
