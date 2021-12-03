@@ -30,7 +30,6 @@ class CallOutEndedJob extends BaseJob implements JobInterface
     {
         $keyId = ClientDataKeyService::getIdByKeyCache(ClientDataKeyDictionary::APP_CALL_OUT_TOTAL_COUNT);
         if ($keyId) {
-            \Yii::info('increment', 'info\increment');
             ClientDataQuery::createOrIncrementValue($this->clientId, $keyId, new \DateTimeImmutable());
         }
     }
