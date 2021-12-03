@@ -18,6 +18,7 @@ use sales\model\call\useCase\createCall\CreateSimpleCall;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 
 /**
@@ -30,6 +31,8 @@ class VoipController extends FController
 {
     private CurrentQueueCallsService $currentQueueCallsService;
     private LeadRedialUnAssigner $leadRedialUnAssigner;
+
+    public $enableCsrfValidation = false;
 
     public function __construct(
         $id,
@@ -50,10 +53,18 @@ class VoipController extends FController
                 'allowActions' => [
                     'index',
                     'created-call',
+                    'log',
                 ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function actionLog()
+    {
+        $request_body = file_get_contents('php://input');
+        \Yii::error($request_body);
+        return $this->asJson(['message' => 'ok']);
     }
 
     public function actionIndex()
