@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\jobs\CallOutEndedJob;
 use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
@@ -1473,6 +1474,10 @@ class Call extends \yii\db\ActiveRecord
 //                && (!$conferenceBase || ($conferenceBase && !$this->c_conference_id))
             ) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
+                if ($this->isOut() && $this->getDataCreatorType()->isClient()) {
+                    $callOutEndedJob = new CallOutEndedJob($this->c_client_id);
+                    Yii::$app->queue_job->priority(10)->push($callOutEndedJob);
+                }
             }
 //            if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
 //                if (Yii::$app->id === 'app-webapi') {
