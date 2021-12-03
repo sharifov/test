@@ -398,17 +398,15 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             }
             return $stops;
         };
-        if ($this->flightQuoteSegmentPaxBaggages) {
-            $fields['baggage'] = function () {
-                $baggages = [];
-                foreach ($this->flightQuoteSegmentPaxBaggages as $baggage) {
-                    $baggages[] = $baggage->toArray();
-                }
-                return $baggages;
-            };
-        } else {
-            $fields['baggage'] = [];
-        }
+
+        $fields['baggage'] = function () {
+            $baggages = [];
+            foreach ($this->flightQuoteSegmentPaxBaggages as $baggage) {
+                $baggages[] = $baggage->toArray();
+            }
+            return $baggages;
+        };
+
         if ($this->flightQuoteSegmentPaxBaggageCharges) {
             $fields['baggage_charges'] = function () {
                 $baggageCharges = [];
@@ -417,8 +415,6 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
                 }
                 return $baggageCharges;
             };
-        } else {
-            $fields['baggage_charges'] = [];
         }
         return $fields;
     }
