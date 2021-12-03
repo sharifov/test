@@ -355,6 +355,11 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         return ClientChatChannelDefaultSettings::getAccessDistributionRepeatDelaySeconds();
     }
 
+    public function getSortParameters(): array
+    {
+        return $this->settings['system']['userAccessDistribution']['sortParameters'] ?? ClientChatChannelDefaultSettings::getAccessSortParameters();
+    }
+
     public function getSystemPastMinutes(): int
     {
         if (isset($this->settings['system']['userAccessDistribution']['sortParameters']['pastAcceptedChatsNumber']['pastMinutes'])) {

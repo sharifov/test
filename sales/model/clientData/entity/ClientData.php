@@ -48,8 +48,7 @@ class ClientData extends \yii\db\ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['cd_created_dt', 'cd_created_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['cd_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['cd_created_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s')
             ],

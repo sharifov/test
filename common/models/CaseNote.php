@@ -65,6 +65,7 @@ class CaseNote extends \yii\db\ActiveRecord
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'cn_user_id',
                 'updatedByAttribute' => 'cn_user_id',
+                'defaultValue' => null,
             ],
         ];
     }

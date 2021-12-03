@@ -2,7 +2,7 @@
 
 namespace sales\listeners\lead;
 
-use common\components\jobs\WebEngageRequestJob;
+use common\components\jobs\WebEngageLeadRequestJob;
 use modules\webEngage\settings\WebEngageSettings;
 use modules\webEngage\src\service\webEngageEventData\lead\LeadEventDictionary;
 use sales\events\lead\LeadableEventInterface;
@@ -21,7 +21,7 @@ class LeadWebEngageListener
                 in_array($lead->status, LeadEventDictionary::STATUS_PROCESSED_LIST, false) &&
                 (new WebEngageSettings())->isEnabled()
             ) {
-                $job = new WebEngageRequestJob();
+                $job = new WebEngageLeadRequestJob();
                 $job->lead_id = $lead->id;
                 Yii::$app->queue_job->priority(100)->push($job);
             }

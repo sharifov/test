@@ -241,6 +241,7 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             'qpp_client_currency',
             'qpp_client_fare',
             'qpp_client_tax',
+            'qpp_cnt',
         ];
         $fields['paxType'] = function () {
             return FlightPax::getPaxTypeById($this->qpp_flight_pax_code_id);
@@ -304,5 +305,39 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         $model->qpp_origin_currency = $currency;
 
         return $model;
+    }
+
+    /**
+     * @return float
+     */
+    public function getTotalPrice(): float
+    {
+        return (float)$this->qpp_fare + $this->qpp_tax + $this->qpp_system_mark_up + $this->qpp_agent_mark_up;
+    }
+
+    /**
+     * @return float
+     */
+    public function getCurrencyRate(): float
+    {
+        $rate = 1.0;
+        if (
+            $this->qppFlightQuote
+            && $this->qppFlightQuote->fqProductQuote
+            && $this->qppFlightQuote->fqProductQuote->pq_client_currency_rate
+        ) {
+            $rate = (float) $this->qppFlightQuote->fqProductQuote->pq_client_currency_rate;
+        }
+        return $rate;
+    }
+
+    /**
+     * @return float
+     */
+    public function getClientTotalPrice(): float
+    {
+        return (float)$this->qpp_client_fare + $this->qpp_client_tax +
+            ($this->qpp_system_mark_up + $this->qpp_agent_mark_up)
+            * $this->qppFlightQuote->fqProductQuote->pq_client_currency_rate;
     }
 }

@@ -4,6 +4,7 @@ namespace common\components\jobs;
 
 use common\components\HybridService;
 use common\components\purifier\Purifier;
+use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\Notifications;
@@ -28,6 +29,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationQueryScopes;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
+use modules\product\src\entities\productQuoteChangeRelation\service\ProductQuoteChangeRelationService;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
@@ -92,29 +94,49 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             $originProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($flightRequest->fr_booking_id);
 
-            if ($originProductQuote && $reProtectionCreateService::isVoluntaryExist($originProductQuote)) {
+            if ($originProductQuote && $reProtectionCreateService::isChangeExist($originProductQuote)) {
                 if ($lastCase = $caseReProtectionService::getLastCaseByBookingId($flightRequest->fr_booking_id, null)) {
                     $lastCase->addEventLog(
                         CaseEventLog::RE_PROTECTION_CREATE,
-                        'ReProtection request is declined. Voluntary processing exist',
+                        'ReProtection request is declined. Change processing already exist',
                         ['booking_id' => $flightRequest->fr_booking_id],
                         CaseEventLog::CATEGORY_WARNING
                     );
                 }
-            }
-
-            if ($originProductQuote && ProductQuoteChangeQuery::existsByQuoteIdAndStatuses($originProductQuote->pq_id, ProductQuoteChangeStatus::PROCESSING_LIST)) {
-                $statusNames = implode(', ', ProductQuoteChangeStatus::getNames(ProductQuoteChangeStatus::PROCESSING_LIST));
-                $flightRequestService->error('Reason: Product Quote Change exist in status (' . $statusNames . ')');
+                $flightRequestService->error('Reason: Change processing already exist. Origin Product Quote(' .
+                    $originProductQuote->pq_gid . ')');
                 return;
             }
 
-            if (!$originProductQuote || !$originProductQuote->productQuoteLastChange) {
-                if (!$case = $caseReProtectionService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
-                    $case = $caseReProtectionService->createCase($flightRequest);
-                }
-                $caseReProtectionService->setCase($case);
+            if ($originProductQuote && $reProtectionCreateService::isNotScheduleChangeUpdatableExist($originProductQuote)) {
+                $flightRequestService->error('Reason: Product Quote Schedule Change exist. Origin Product Quote(' .
+                    $originProductQuote->pq_gid . ')');
+                return;
+            }
 
+            if (!$case = $caseReProtectionService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
+                $case = $caseReProtectionService->createCase($flightRequest);
+            }
+            $caseReProtectionService->setCase($case);
+
+            if ($originProductQuote && $updatableScheduleChanges = $reProtectionCreateService::getUpdatableScheduleChanges($originProductQuote)) {
+                foreach ($updatableScheduleChanges as $oldScheduleChange) {
+                    $oldScheduleChange->declined();
+                    $productQuoteChangeRepository->save($oldScheduleChange);
+                }
+
+                $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                $productQuoteChangeRepository->save($productQuoteChange);
+
+                $case->addEventLog(
+                    CaseEventLog::RE_PROTECTION_CREATE,
+                    'New schedule change happened',
+                    ['change' => $productQuoteChange->pqc_gid],
+                    CaseEventLog::CATEGORY_INFO
+                );
+            }
+
+            if (!$originProductQuote || !$reProtectionCreateService::isScheduleChangeUpdatableExist($originProductQuote)) {
                 if (
                     $originProductQuote &&
                     ($order = $originProductQuote->pqOrder) &&
@@ -168,6 +190,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                             $case,
                             $this->flight_request_is_automate
                         );
+                        $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                        $productQuoteChangeRepository->save($productQuoteChange);
                         $caseReProtectionService->setCaseDeadline($originProductQuote->flightQuote);
                     } catch (Throwable $throwable) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Order not created');
@@ -182,21 +206,23 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         return;
                     }
                 }
-
-                if (!$originProductQuote->productQuoteLastChange) {
-                    $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
-                    $productQuoteChangeRepository->save($productQuoteChange);
-                }
             }
 
-            if (!isset($case) && !$case = $originProductQuote->productQuoteLastChange->pqcCase ?? null) {
-                throw new DomainException('Case not found');
-            }
             if (!isset($order) && !$order = $originProductQuote->pqOrder) {
                 throw new DomainException('Order not found');
             }
 
-            $caseReProtectionService->setCase($case);
+            try {
+                $reProtectionCreateService::casesRefundProcessing($flightRequest->fr_booking_id, $case);
+            } catch (\Throwable $throwable) {
+                Yii::warning(AppHelper::throwableLog($throwable), 'ReprotectionCreateJob:CasesRefundProcessing');
+            }
+
+            try {
+                $reProtectionCreateService::casesVoluntaryChangesProcessing($flightRequest->fr_booking_id, $case);
+            } catch (\Throwable $throwable) {
+                Yii::warning(AppHelper::throwableLog($throwable), 'ReprotectionCreateJob:CasesVoluntaryChangesProcessing');
+            }
 
             try {
                 $reProtectionCreateService->originProductQuoteDecline($originProductQuote, $case);
@@ -237,18 +263,13 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 return;
             }
 
-            if (!isset($productQuoteChange) && !$productQuoteChange = $originProductQuote->productQuoteLastChange) {
-                throw new DomainException('ProductQuoteChange not found');
+            if (!isset($productQuoteChange)) {
+                $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                $productQuoteChangeRepository->save($productQuoteChange);
             }
 
             try {
-                if (!ProductQuoteChangeRelationRepository::exist($productQuoteChange->pqc_id, $reProtectionQuote->pq_id)) {
-                    $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
-                        $productQuoteChange->pqc_id,
-                        $reProtectionQuote->pq_id
-                    );
-                    (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
-                }
+                ProductQuoteChangeRelationService::getOrCreate($productQuoteChange->pqc_id, $reProtectionQuote->pq_id);
             } catch (\Throwable $throwable) {
                 Yii::error(AppHelper::throwableLog($throwable), 'ReprotectionCreateJob:ProductQuoteChangeRelation');
             }
@@ -355,7 +376,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     'productQuoteChange' => ArrayHelper::merge($productQuoteChange->toArray(), ['status' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id)]),
                 ],
                 'info\ReprotectionCreateJob:UnknownProcessException'
-            ); /* TODO:: FOR DEBUG:: must by remove  */
+            );
 
             throw new DomainException('Unknown process exception');
         } catch (Throwable $throwable) {

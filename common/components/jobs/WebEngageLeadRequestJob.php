@@ -15,7 +15,7 @@ use yii\queue\Queue;
 /**
  * @property int|null $lead_id
  */
-class WebEngageRequestJob extends BaseJob implements JobInterface
+class WebEngageLeadRequestJob extends BaseJob implements JobInterface
 {
     public $lead_id;
 
@@ -39,7 +39,7 @@ class WebEngageRequestJob extends BaseJob implements JobInterface
         } catch (Throwable $throwable) {
             \Yii::error(
                 AppHelper::throwableLog($throwable),
-                'WebEngageRequestJob:throwable'
+                'WebEngageLeadRequestJob:throwable'
             );
         }
     }

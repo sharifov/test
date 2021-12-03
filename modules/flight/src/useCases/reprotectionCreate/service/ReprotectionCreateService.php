@@ -2,8 +2,11 @@
 
 namespace modules\flight\src\useCases\reprotectionCreate\service;
 
+use common\components\purifier\Purifier;
+use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\Client;
+use common\models\Notifications;
 use DomainException;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -37,6 +40,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\caseOrder\entity\CaseOrder;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
@@ -176,8 +180,6 @@ class ReprotectionCreateService
             'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
             ['pq_gid' => $originProductQuote->pq_gid]
         );
-        $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $productQuoteChangeIsAutomate);
-        $this->productQuoteChangeRepository->save($productQuoteChange);
         return $originProductQuote;
     }
 
@@ -337,21 +339,20 @@ class ReprotectionCreateService
         }
     }
 
-    public static function isVoluntaryExist(ProductQuote $originProductQuote): bool
+    public static function isChangeExist(ProductQuote $originProductQuote): bool
     {
         return ProductQuote::find()
             ->leftJoin([
                 'change' => ProductQuoteChange::find()
                     ->select(['pqc_pq_id'])
-                    ->where(['NOT IN', 'pqc_status_id', [ProductQuoteChangeStatus::CANCELED, ProductQuoteChangeStatus::DECLINED]])
+                    ->where(['IN', 'pqc_status_id', SettingHelper::getActiveQuoteChangeStatuses()])
                     ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE])
                     ->groupBy(['pqc_pq_id'])
             ], 'change.pqc_pq_id = pq_id')
             ->leftJoin([
                 'refund' => ProductQuoteRefund::find()
                     ->select(['pqr_product_quote_id'])
-                    ->where(['NOT IN', 'pqr_status_id', [ProductQuoteRefundStatus::CANCELED, ProductQuoteRefundStatus::DECLINED]])
-                    ->andWhere(['pqr_type_id' => ProductQuoteRefund::typeVoluntary()])
+                    ->where(['IN', 'pqr_status_id', SettingHelper::getActiveQuoteRefundStatuses()])
                     ->groupBy(['pqr_product_quote_id'])
             ], 'refund.pqr_product_quote_id = pq_id')
             ->where(['pq_id' => $originProductQuote->pq_id])
@@ -361,5 +362,150 @@ class ReprotectionCreateService
                 ['IS NOT', 'refund.pqr_product_quote_id', null],
             ])
             ->exists();
+    }
+
+    public static function isNotScheduleChangeUpdatableExist(ProductQuote $originProductQuote): bool
+    {
+        return ProductQuoteChange::find()
+            ->where(['pqc_pq_id' => $originProductQuote->pq_id])
+            ->andWhere(['NOT IN', 'pqc_status_id', SettingHelper::getUpdatableInvoluntaryQuoteChange()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
+            ->exists();
+    }
+
+    public static function isScheduleChangeUpdatableExist(?ProductQuote $originProductQuote): bool
+    {
+        if (!$originProductQuote) {
+            return false;
+        }
+        return ProductQuoteChange::find()
+            ->where(['pqc_pq_id' => $originProductQuote->pq_id])
+            ->andWhere(['IN', 'pqc_status_id', SettingHelper::getUpdatableInvoluntaryQuoteChange()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
+            ->exists();
+    }
+
+    /**
+     * @param ProductQuote $originProductQuote
+     * @return ProductQuoteChange[]|null
+     */
+    public static function getUpdatableScheduleChanges(ProductQuote $originProductQuote): ?array
+    {
+        return ProductQuoteChange::find()
+            ->where(['pqc_pq_id' => $originProductQuote->pq_id])
+            ->andWhere(['IN', 'pqc_status_id', SettingHelper::getUpdatableInvoluntaryQuoteChange()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
+            ->all();
+    }
+
+    /**
+     * @param string $bookingId
+     * @param int $caseID
+     * @return Cases[]|null
+     */
+    public static function getCasesVoluntaryChanges(string $bookingId, int $caseID): array
+    {
+        return Cases::find()
+            ->select(Cases::tableName() . '.*')
+            ->innerJoin(ProductQuoteChange::tableName(), 'cs_id = pqc_case_id')
+            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pqc_pq_id')
+            ->innerJoin(FlightQuoteFlight::tableName(), 'fq_id = fqf_fq_id')
+            ->where(['fqf_booking_id' => $bookingId])
+            ->andWhere(['!=', 'cs_id', $caseID])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE])
+            ->andWhere(['NOT IN', 'pqc_status_id', SettingHelper::getActiveQuoteChangeStatuses()])
+            ->andWhere(['NOT IN', 'pqc_status_id', SettingHelper::getFinishedQuoteChangeStatuses()])
+            ->distinct()
+            ->all();
+    }
+
+    public static function casesVoluntaryChangesProcessing(string $bookingId, Cases $case): void
+    {
+        if ($casesVoluntaryChanges = self::getCasesVoluntaryChanges($bookingId, $case->cs_id)) {
+            foreach ($casesVoluntaryChanges as $caseVoluntaryChange) {
+                if (!empty($caseVoluntaryChange->cs_user_id)) {
+                    $linkToCase = Purifier::createCaseShortLink($caseVoluntaryChange);
+                    Notifications::createAndPublish(
+                        $caseVoluntaryChange->cs_user_id,
+                        'Exchange Case (' . $case->cs_id . ') update',
+                        'New Schedule Change happened: (' . $linkToCase . '). Voluntary Exchange disabled.',
+                        Notifications::TYPE_WARNING,
+                        true
+                    );
+                }
+                $caseNote = CaseNote::create(
+                    $caseVoluntaryChange->cs_id,
+                    'New Schedule Change happened: (' . $case->cs_id . '). Voluntary Exchange disabled.',
+                    null
+                );
+                $caseNote->detachBehavior('user');
+                if ($caseNote->validate()) {
+                    $caseNote->save();
+                } else {
+                    Yii::warning(
+                        [
+                            'message' => ErrorsToStringHelper::extractFromModel($caseNote),
+                            'data' => $caseNote->getAttributes(),
+                        ],
+                        'ReProtectionExchangeService:CasesVoluntaryChangesProcessing:ExchangeCaseNote'
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $bookingId
+     * @param int $caseID
+     * @return Cases[]|null
+     */
+    public static function getCasesRefund(string $bookingId, int $caseID): array
+    {
+        return Cases::find()
+            ->select(Cases::tableName() . '.*')
+            ->innerJoin(ProductQuoteRefund::tableName(), 'cs_id = pqr_case_id')
+            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pqr_product_quote_id')
+            ->innerJoin(FlightQuoteFlight::tableName(), 'fq_id = fqf_fq_id')
+            ->where(['fqf_booking_id' => $bookingId])
+            ->andWhere(['!=', 'cs_id', $caseID])
+            ->andWhere(['NOT IN', 'pqr_status_id', SettingHelper::getActiveQuoteRefundStatuses()])
+            ->andWhere(['NOT IN', 'pqr_status_id', SettingHelper::getFinishedQuoteRefundStatuses()])
+            ->distinct()
+            ->all();
+    }
+
+    public static function casesRefundProcessing(string $bookingId, Cases $case): void
+    {
+        if ($casesRefund = self::getCasesRefund($bookingId, $case->cs_id)) {
+            foreach ($casesRefund as $caseRefund) {
+                if (!empty($caseRefund->cs_user_id)) {
+                    $linkToCase = Purifier::createCaseShortLink($caseRefund);
+                    Notifications::createAndPublish(
+                        $caseRefund->cs_user_id,
+                        'Exchange Case (' . $case->cs_id . ') update',
+                        'New Schedule Change happened: (' . $linkToCase . '). Refund disabled.',
+                        Notifications::TYPE_WARNING,
+                        true
+                    );
+                }
+                $caseNote = CaseNote::create(
+                    $caseRefund->cs_id,
+                    'New Schedule Change happened: (' . $case->cs_id . '). Refund disabled.',
+                    null
+                );
+                $caseNote->detachBehavior('user');
+                if ($caseNote->validate()) {
+                    $caseNote->save();
+                } else {
+                    Yii::warning(
+                        [
+                            'message' => ErrorsToStringHelper::extractFromModel($caseNote),
+                            'data' => $caseNote->getAttributes(),
+                        ],
+                        'ReProtectionExchangeService:CasesRefundProcessing:ExchangeCaseNote'
+                    );
+                }
+            }
+        }
     }
 }

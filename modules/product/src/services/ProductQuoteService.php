@@ -9,6 +9,7 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use sales\entities\cases\CaseEventLog;
+use sales\helpers\app\AppHelper;
 use sales\interfaces\BoWebhookService;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesManageService;
@@ -84,32 +85,49 @@ class ProductQuoteService implements BoWebhookService
      */
     public function processRequest(Model $form): void
     {
-        $productQuote = $this->productQuoteRepository->findByGidFlightProductQuote($form->reprotection_quote_gid);
+        try {
+            $productQuote = $this->productQuoteRepository->findByGidFlightProductQuote($form->reprotection_quote_gid);
 
-        $flightOrigin = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $form->booking_id])->orderBy(['fqf_id' => SORT_DESC])->one();
-        $flightReprotection = $productQuote->flightQuote->flightQuoteFlight;
+            $flightOrigin = FlightQuoteFlight::find()->andWhere(['fqf_booking_id' => $form->booking_id])->orderBy(['fqf_id' => SORT_DESC])->one();
+            $flightReprotection = $productQuote->flightQuote->flightQuoteFlight;
 
-        if ($flightOrigin && $flightReprotection) {
-            $flightReprotection->fqf_booking_id = $flightOrigin->fqf_booking_id;
+            if ($flightOrigin && $flightReprotection) {
+                $flightReprotection->fqf_booking_id = $flightOrigin->fqf_booking_id;
 
-            $flightOrigin->fqf_booking_id = null;
-            $this->flightQuoteFlightRepository->save($flightOrigin);
-            $this->flightQuoteFlightRepository->save($flightReprotection);
-        }
+                $flightOrigin->fqf_booking_id = null;
+                $this->flightQuoteFlightRepository->save($flightOrigin);
+                $this->flightQuoteFlightRepository->save($flightReprotection);
+            }
 
-        if ($productQuote->isInProgress()) {
-            $productQuote->booked();
-            $this->productQuoteRepository->save($productQuote);
+            if ($productQuote->isInProgress()) {
+                $productQuote->booked();
+                $this->productQuoteRepository->save($productQuote);
 
-            $pqChange = $productQuote->relateParent->productQuoteLastChange;
-            $pqChange->pqc_status_id = ProductQuoteChangeStatus::COMPLETED;
-            $pqChange->save();
+                if (!$pqChange = $productQuote->productQuoteChangeLastRelation->pqcrPqc ?? null) {
+                    throw new \RuntimeException('productQuoteChange not found');
+                }
 
-            $case = $productQuote->relateParent->productQuoteLastChange->pqcCase;
-            $case->cs_is_automate = false;
-            $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, 'Case auto processing: disabled');
-            $this->casesManageService->solved($case, null, 'Reprotection flight quote booked');
-            $this->casesRepository->save($case);
+                $pqChange->pqc_status_id = ProductQuoteChangeStatus::COMPLETED;
+                $pqChange->save();
+
+                $case = $pqChange->pqcCase;
+                $case->cs_is_automate = false;
+                $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, 'Case auto processing: disabled');
+                $this->casesManageService->solved($case, null, 'Reprotection flight quote booked');
+
+                if ($case->isNeedAction()) {
+                    $case->offNeedAction();
+                }
+
+                $this->casesRepository->save($case);
+            }
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['data'] = $form->toArray();
+            Yii::error(
+                $message,
+                'ProductQuoteService:processRequest:Throwable'
+            );
         }
     }
 }
