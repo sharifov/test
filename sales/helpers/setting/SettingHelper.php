@@ -664,4 +664,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
     }
+
+    public static function leadRedialQCallAttemptsFromTimeValidationEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['lead_redial_qcall_attempts_from_time_validation_enabled'] ?? true);
+    }
 }

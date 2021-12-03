@@ -932,53 +932,82 @@ class Call extends \yii\db\ActiveRecord
         if ($this->c_parent_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
             $lead = $this->cLead;
 
-            if (($lqc = LeadQcall::findOne($this->c_lead_id)) && time() > strtotime($lqc->lqc_dt_from)) {
-                $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                if ($lf) {
-                    $lf->lf_out_calls = (int)$lf->lf_out_calls + 1;
-                    if (!$lf->update()) {
-                        Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
-                    }
-
-                    $attempts = 0;
-                    try {
-                        $attempts = (int)Yii::$app->params['settings']['redial_pending_to_follow_up_attempts'];
-                    } catch (\Throwable $e) {
-                        Yii::error($e, 'Not found redial_pending_to_follow_up_attempts setting');
-                    }
-
-                    if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
-                        try {
-                            $lead->followUp(null, null, 'Redial Pending max attempts reached');
-                            $leadRepository->save($lead);
-                            $qCallService->remove($lead->id);
-                            $qCallService->create(
-                                $lead->id,
-                                new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                                new FindWeightParams($lead->project_id, $lead->status),
-                                $lead->offset_gmt,
-                                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
-                            );
-                        } catch (\Throwable $e) {
-                            Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead follow up');
-                        }
-                    }
-
-                    try {
-                        $attempts = (int)Yii::$app->params['settings']['redial_max_attempts_for_dates_passed'];
-                        if (
-                            $lf->lf_out_calls > $attempts
-                            && ($departure = $lead->getDeparture())
-                            && strtotime($departure) < time()
-                        ) {
-                            $qCallService->remove($lead->id);
-                            $lead->trash($lead->employee_id, null, 'Travel Dates Passed');
-                            $leadRepository->save($lead);
-                        }
-                    } catch (\Throwable $e) {
-                        Yii::error($e, 'redial_max_attempts_for_dates_passed');
-                    }
+            $lqc = LeadQcall::findOne($this->c_lead_id);
+            if ($lqc) {
+                $timeFromValidationIsOk = true;
+                $currentTime = time();
+                if (SettingHelper::leadRedialQCallAttemptsFromTimeValidationEnabled()) {
+                    $timeFromValidationIsOk = $currentTime >= strtotime($lqc->lqc_dt_from);
                 }
+                if ($timeFromValidationIsOk) {
+                    $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                    if ($lf) {
+                        $lf->lf_out_calls = (int)$lf->lf_out_calls + 1;
+                        if (!$lf->save()) {
+                            Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
+                        }
+
+                        $attempts = 0;
+                        try {
+                            $attempts = (int)Yii::$app->params['settings']['redial_pending_to_follow_up_attempts'];
+                        } catch (\Throwable $e) {
+                            Yii::error($e, 'Not found redial_pending_to_follow_up_attempts setting');
+                        }
+
+                        if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
+                            try {
+                                $lead->followUp(null, null, 'Redial Pending max attempts reached');
+                                $leadRepository->save($lead);
+                                $qCallService->remove($lead->id);
+                                $qCallService->create(
+                                    $lead->id,
+                                    new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                                    new FindWeightParams($lead->project_id, $lead->status),
+                                    $lead->offset_gmt,
+                                    new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                                );
+                            } catch (\Throwable $e) {
+                                Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead follow up');
+                            }
+                        }
+
+                        try {
+                            $attempts = (int)Yii::$app->params['settings']['redial_max_attempts_for_dates_passed'];
+                            if (
+                                $lf->lf_out_calls > $attempts
+                                && ($departure = $lead->getDeparture())
+                                && strtotime($departure) < time()
+                            ) {
+                                $qCallService->remove($lead->id);
+                                $lead->trash($lead->employee_id, null, 'Travel Dates Passed');
+                                $leadRepository->save($lead);
+                            }
+                        } catch (\Throwable $e) {
+                            Yii::error($e, 'redial_max_attempts_for_dates_passed');
+                        }
+                    } else {
+                        Yii::error([
+                            'message' => 'Not found lead flow.',
+                            'leadId' => $this->c_lead_id,
+                            'callId' => $this->c_id,
+                        ], 'LeadRedial');
+                    }
+                } else {
+                    Yii::error([
+                        'message' => 'Detected Redial Call finished with date time from validation error.',
+                        'leadId' => $this->c_lead_id,
+                        'callId' => $this->c_id,
+                        'currentTime' => $currentTime,
+                        'lqc_dt_from' => $lqc->lqc_dt_from,
+                        'lqc_dt_from_to_time' => strtotime($lqc->lqc_dt_from),
+                    ], 'LeadRedial');
+                }
+            } elseif ($this->isRedialCall()) {
+                Yii::error([
+                    'message' => 'Detected Redial Call finished without LeadQCall record.',
+                    'leadId' => $this->c_lead_id,
+                    'callId' => $this->c_id,
+                ], 'LeadRedial');
             }
 
             if ($lead->leadQcall) {
@@ -2227,6 +2256,11 @@ class Call extends \yii\db\ActiveRecord
     public function isDirect(): bool
     {
         return $this->c_source_type_id === self::SOURCE_DIRECT_CALL;
+    }
+
+    public function isRedialCall(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_REDIAL_CALL;
     }
 
 
