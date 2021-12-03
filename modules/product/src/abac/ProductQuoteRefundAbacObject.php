@@ -33,12 +33,14 @@ class ProductQuoteRefundAbacObject extends AbacBaseModel implements AbacInterfac
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_ACCESS_DETAILS  = 'accessDetails';
     public const ACTION_UPDATE  = 'update';
+    public const ACTION_SEND_VOL_REFUND_EMAIL = 'sendVoluntaryRefundEmail';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::OBJ_PRODUCT_QUOTE_REFUND => [
             self::ACTION_ACCESS_DETAILS,
-            self::ACTION_UPDATE
+            self::ACTION_UPDATE,
+            self::ACTION_SEND_VOL_REFUND_EMAIL
         ],
     ];
 
