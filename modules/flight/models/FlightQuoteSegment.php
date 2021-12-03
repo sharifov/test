@@ -406,6 +406,8 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
                 }
                 return $baggages;
             };
+        } else {
+            $fields['baggage'] = [];
         }
         if ($this->flightQuoteSegmentPaxBaggageCharges) {
             $fields['baggage_charges'] = function () {
@@ -415,6 +417,8 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
                 }
                 return $baggageCharges;
             };
+        } else {
+            $fields['baggage_charges'] = [];
         }
         return $fields;
     }
