@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\Project;
 use common\models\search\ContactsSearch;
 use common\models\UserGroup;
+use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
@@ -80,6 +81,7 @@ use sales\model\leadRedial\queue\RedialCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\project\entity\params\Params;
 use sales\model\user\reports\stats\UserStatsReport;
+use sales\model\voip\phoneDevice\PhoneDeviceLogForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\sms\incoming\SmsIncomingForm;
@@ -98,6 +100,31 @@ class TestController extends Controller
 {
     public function actionVoip()
     {
+//        $f = new PhoneDeviceLogForm();
+//        $f->load([
+//            'level' => 4,
+//            'message' => 'Received transportClose from pstream',
+//            'timestamp' => 1638639604649,
+//            'stacktrace' => '    at Log.error (https://sales.local:444/twilio/twilio-2.0.1.js:4231:32)n    at PStream.Call._this._onTransportClose (https://sales.local:444/twilio/twilio-2.0.1.js:1127:24)n    at emitNone (https://sales.local:444/twilio/twilio-2.0.1.js:10547:13)n    at PStream.emit (https://sales.local:444/twilio/twilio-2.0.1.js:10632:7)n    at PStream._handleTransportClose (https://sales.local:444/twilio/twilio-2.0.1.js:5100:8)n    at emitNone (https://sales.local:444/twilio/twilio-2.0.1.js:10547:13)n    at WSTransport.emit (https://sales.local:444/twilio/twilio-2.0.1.js:10632:7)n    at WSTransport._closeSocket (https://sales.local:444/twilio/twilio-2.0.1.js:9342:14)',
+//        ]);
+//        $f->validate();
+//        VarDumper::dump($f->getErrors());
+//        die;
+
+        $m = <<<JSON
+{"logs":[{"level":4,"message":"{\"message\":\"TransportError (31009): No transport available to send or receive messages\",\"originalError\":{\"code\":31009,\"message\":\"No transport available to send or receive messages\",\"twilioError\":{\"message\":\"TransportError (31009): No transport available to send or receive messages\",\"causes\":[],\"code\":31009,\"description\":\"Transport error\",\"explanation\":\"No transport available to send or receive messages\",\"name\":\"TransportError\",\"solutions\":[]}},\"causes\":[],\"code\":31009,\"description\":\"Transport error\",\"explanation\":\"No transport available to send or receive messages\",\"name\":\"TransportError\",\"solutions\":[]}","timestamp":1638640598504,"stacktrace":"    at Device.<anonymous> (https://sales.local:444/web_phone/device/device.js:298:30)\n    at emitTwo (https://sales.local:444/twilio/twilio-2.0.1.js:10567:13)\n    at Device.emit (https://sales.local:444/twilio/twilio-2.0.1.js:10638:7)\n    at PStream.Device._this._onSignalingError (https://sales.local:444/twilio/twilio-2.0.1.js:2249:19)\n    at emitOne (https://sales.local:444/twilio/twilio-2.0.1.js:10562:20)\n    at PStream.emit (https://sales.local:444/twilio/twilio-2.0.1.js:10635:7)\n    at PStream._publish (https://sales.local:444/twilio/twilio-2.0.1.js:5243:10)\n    at PStream.reinvite (https://sales.local:444/twilio/twilio-2.0.1.js:5211:8)"}]}            
+JSON;
+        $m = preg_replace("/\n/", "", $m);
+//        $m = preg_replace('/\\\"/',"\"", $m);
+//        VarDumper::dump($m);die;
+
+
+//        $m = str_replace('\"', '"', $m);
+//        VarDumper::dump($m);die;
+        $a = json_decode((($m)), true, 512, JSON_THROW_ON_ERROR);
+
+        VarDumper::dump($a);
+        die;
 
 //        (new CreateRedialCall())(new RedialCall(295, '+14157693509', 1468, '+14154296676', 2, 3, 513226, 472988));
 //        die;

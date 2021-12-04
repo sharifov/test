@@ -17,6 +17,7 @@ use sales\model\call\useCase\createCall\CreateInternalCall;
 use sales\model\call\useCase\createCall\CreateSimpleCall;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\model\voip\phoneDevice\PhoneDeviceLogger;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
@@ -26,17 +27,20 @@ use yii\web\ForbiddenHttpException;
  *
  * @property CurrentQueueCallsService $currentQueueCallsService
  * @property LeadRedialUnAssigner $leadRedialUnAssigner
+ * @property PhoneDeviceLogger $phoneDeviceLogger
  */
 class VoipController extends FController
 {
+    public $enableCsrfValidation = false;
+
     private CurrentQueueCallsService $currentQueueCallsService;
     private LeadRedialUnAssigner $leadRedialUnAssigner;
-
-    public $enableCsrfValidation = false;
+    private PhoneDeviceLogger $phoneDeviceLogger;
 
     public function __construct(
         $id,
         $module,
+        PhoneDeviceLogger $phoneDeviceLogger,
         CurrentQueueCallsService $currentQueueCallsService,
         LeadRedialUnAssigner $leadRedialUnAssigner,
         $config = []
@@ -44,6 +48,7 @@ class VoipController extends FController
         parent::__construct($id, $module, $config);
         $this->currentQueueCallsService = $currentQueueCallsService;
         $this->leadRedialUnAssigner = $leadRedialUnAssigner;
+        $this->phoneDeviceLogger = $phoneDeviceLogger;
     }
 
     public function behaviors(): array
@@ -52,7 +57,7 @@ class VoipController extends FController
             'access' => [
                 'allowActions' => [
                     'index',
-                    'created-call',
+                    'create-call',
                     'log',
                 ],
             ],
@@ -62,8 +67,18 @@ class VoipController extends FController
 
     public function actionLog()
     {
-        $request_body = file_get_contents('php://input');
-        \Yii::error($request_body);
+        try {
+            $request = file_get_contents('php://input');
+            $filtered = preg_replace("/\n/", "", $request);
+            $logs = json_decode(stripslashes($filtered), true, 512, JSON_THROW_ON_ERROR);
+            $this->phoneDeviceLogger->log(Auth::id(), $logs['logs']);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'r' => VarDumper::dumpAsString($request),
+                'message' => $e->getMessage(),
+            ], 'PhoneDevice:Log');
+        }
+
         return $this->asJson(['message' => 'ok']);
     }
 
