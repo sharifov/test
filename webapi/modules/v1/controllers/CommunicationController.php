@@ -359,7 +359,7 @@ class CommunicationController extends ApiBaseController
                 $response['error_code'] = 11;
             }
 
-            $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || Call::isTrustedVerstat($postCall['StirVerstat'] ?? '');
+            $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || (empty($postCall['ForwardedFrom']) && Call::isTrustedVerstat($postCall['StirVerstat'] ?? ''));
 
             try {
                 $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
