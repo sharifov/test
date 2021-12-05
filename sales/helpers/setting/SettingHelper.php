@@ -742,4 +742,9 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['client_chat_lead_auto_take']['on_chat_accept'] ?? false);
     }
+
+    public static function phoneDeviceLogsEnabled(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['phone_device_logs_enabled'] ?? false);
+    }
 }

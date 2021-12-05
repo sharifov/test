@@ -1,5 +1,5 @@
 (function () {
-    function Init() {
+    function Init(remoteLogsEnabled) {
         if (initiated) {
             console.log('device already initiated');
             return;
@@ -13,7 +13,7 @@
             .then(function (response) {
                 // console.log("Got a Twilio Access token.");
                 PhoneWidget.addLog("Got a Twilio Access token.");
-                initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime});
+                initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime}, remoteLogsEnabled);
             })
             .catch(function (err) {
                 PhoneWidget.addLog("Get Twilio Access token error. Reload page!");
@@ -21,7 +21,7 @@
                 createNotify('Twilio Token error!', 'Could not get a token from server! Please reload page!', 'error');
             });
 
-        function initDevice(token) {
+        function initDevice(token, remoteLogsEnabled) {
             // console.log("Init Twilio Device...");
             PhoneWidget.addLog("Init Twilio Device...");
 
@@ -39,34 +39,36 @@
             // };
             // twilioLogger.setLevel(twilioLogger.getLevel());
 
-            remote.apply(
-                twilioLogger,
-                {
-                    url: '/voip/log',
-                    interval: 30000,
-                    stacktrace: {
-                        levels: ['error'],
-                        depth: 10,
-                        excess: 0
-                    },
-                    format: log => ({
-                        level: log.level.value,
-                        message: log.message,
-                        timestamp: log.timestamp,
-                        stacktrace: log.stacktrace
-                    }),
-                    timestamp: function () {
-                        let date = new Date();
-                        let day = ('0' + date.getDate()).slice(-2);
-                        let month = ('0' + (date.getMonth() + 1)).slice(-2);
-                        let year = date.getFullYear();
-                        let hours = ('0' + date.getHours()).slice(-2);
-                        let minutes = ('0' + date.getMinutes()).slice(-2);
-                        let seconds = ('0' + date.getSeconds()).slice(-2);
-                        return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+            if (remoteLogsEnabled) {
+                remote.apply(
+                    twilioLogger,
+                    {
+                        url: '/voip/log',
+                        interval: 30000,
+                        stacktrace: {
+                            levels: ['error'],
+                            depth: 10,
+                            excess: 0
+                        },
+                        format: log => ({
+                            level: log.level.value,
+                            message: log.message,
+                            timestamp: log.timestamp,
+                            stacktrace: log.stacktrace
+                        }),
+                        timestamp: function () {
+                            let date = new Date();
+                            let day = ('0' + date.getDate()).slice(-2);
+                            let month = ('0' + (date.getMonth() + 1)).slice(-2);
+                            let year = date.getFullYear();
+                            let hours = ('0' + date.getHours()).slice(-2);
+                            let minutes = ('0' + date.getMinutes()).slice(-2);
+                            let seconds = ('0' + date.getSeconds()).slice(-2);
+                            return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+                        }
                     }
-                }
-            );
+                );
+            }
 
             const device = new Twilio.Device(token.token, {
                 closeProtection: true,

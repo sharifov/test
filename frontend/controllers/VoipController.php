@@ -67,6 +67,10 @@ class VoipController extends FController
 
     public function actionLog()
     {
+        if (!SettingHelper::phoneDeviceLogsEnabled()) {
+            return $this->asJson(['message' => 'log is disabled']);
+        }
+
         $request = null;
         try {
             $request = file_get_contents('php://input');

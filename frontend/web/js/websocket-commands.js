@@ -390,7 +390,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                                 if (!PhoneWidget.isInitiated()) {
                                     PhoneWidget.init(window.phoneWidget.initParams);
                                     if (window.isTwilioDevicePage) {
-                                        window.phoneWidget.device.initialize.Init();
+                                        window.phoneWidget.device.initialize.Init(window.remoteLogsEnabled);
                                     }
                                 }
                                 PhoneWidget.updateCurrentCalls(obj.data, obj.userStatus);
