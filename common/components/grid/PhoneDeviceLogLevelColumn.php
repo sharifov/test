@@ -2,7 +2,7 @@
 
 namespace common\components\grid;
 
-use sales\model\voip\phoneDevice\PhoneDeviceLogLevel;
+use sales\model\voip\phoneDevice\log\PhoneDeviceLogLevel;
 use yii\grid\DataColumn;
 
 /**

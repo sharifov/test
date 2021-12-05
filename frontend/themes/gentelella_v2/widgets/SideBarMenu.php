@@ -70,6 +70,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'icon' => 'phone',
                 'items' => [
                     ['label' => 'Voip <span class="label-info label pull-right"></span> ', 'url' => ['/voip/index'], 'icon' => 'phone', 'visible' => Yii::$app->user->can('PhoneWidget')],
+                    ['label' => 'Phone devices<span class="label-info label pull-right"></span> ', 'url' => ['/phone-device-crud/index'], 'icon' => 'list'],
                     ['label' => 'Phone device logs<span class="label-info label pull-right"></span> ', 'url' => ['/phone-device-log/index'], 'icon' => 'phone'],
                 ]
             ];

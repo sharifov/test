@@ -1,14 +1,14 @@
 <?php
 
-namespace sales\model\voip\phoneDevice;
+namespace sales\model\voip\phoneDevice\device;
 
 /**
-* @see PhoneDeviceLog
+* @see PhoneDevice
 */
-class PhoneDeviceLogScopes extends \yii\db\ActiveQuery
+class PhoneDeviceScopes extends \yii\db\ActiveQuery
 {
     /**
-    * @return PhoneDeviceLog[]|array
+    * @return PhoneDevice[]|array
     */
     public function all($db = null)
     {
@@ -16,7 +16,7 @@ class PhoneDeviceLogScopes extends \yii\db\ActiveQuery
     }
 
     /**
-    * @return PhoneDeviceLog|array|null
+    * @return PhoneDevice|array|null
     */
     public function one($db = null)
     {

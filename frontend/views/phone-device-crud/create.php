@@ -3,13 +3,13 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\voip\phoneDevice\log\PhoneDeviceLog */
+/* @var $model sales\model\voip\phoneDevice\device\PhoneDevice */
 
-$this->title = 'Create Phone Device Log';
-$this->params['breadcrumbs'][] = ['label' => 'Phone Device Logs', 'url' => ['index']];
+$this->title = 'Create Phone Device';
+$this->params['breadcrumbs'][] = ['label' => 'Phone Devices', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="phone-device-log-create">
+<div class="phone-device-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

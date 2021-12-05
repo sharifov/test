@@ -12,6 +12,7 @@ class m211205_141009_add_permissions_phone_device_log extends Migration
     private array $routes = [
         'crud' => [
             '/phone-device-log/*',
+            '/phone-device-crud/*',
         ],
     ];
 

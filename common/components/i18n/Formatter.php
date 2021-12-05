@@ -1002,6 +1002,6 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\voip\phoneDevice\PhoneDeviceLogLevel::asFormat($value);
+        return \sales\model\voip\phoneDevice\log\PhoneDeviceLogLevel::asFormat($value);
     }
 }

@@ -17,7 +17,7 @@ use sales\model\call\useCase\createCall\CreateInternalCall;
 use sales\model\call\useCase\createCall\CreateSimpleCall;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\user\entity\userStatus\UserStatus;
-use sales\model\voip\phoneDevice\PhoneDeviceLogger;
+use sales\model\voip\phoneDevice\log\PhoneDeviceLogger;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;

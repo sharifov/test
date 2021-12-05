@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\voip\phoneDevice\PhoneDeviceLog;
+use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
 use yii\bootstrap4\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\voip\phoneDevice\PhoneDeviceLog */
+/* @var $model sales\model\voip\phoneDevice\log\PhoneDeviceLog */
 
 $this->title = $model->pdl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Phone Device Logs', 'url' => ['index']];

@@ -4,15 +4,15 @@ namespace frontend\controllers;
 
 use sales\auth\Auth;
 use Yii;
-use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
-use sales\model\voip\phoneDevice\log\PhoneDeviceLogSearch;
-use yii\filters\VerbFilter;
-use yii\helpers\ArrayHelper;
+use sales\model\voip\phoneDevice\device\PhoneDevice;
+use sales\model\voip\phoneDevice\device\PhoneDeviceSearch;
 use yii\web\NotFoundHttpException;
+use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
+use yii\helpers\ArrayHelper;
 
-class PhoneDeviceLogController extends FController
+class PhoneDeviceCrudController extends FController
 {
     public function init(): void
     {
@@ -20,9 +20,6 @@ class PhoneDeviceLogController extends FController
         $this->layoutCrud();
     }
 
-    /**
-     * @return array
-     */
     public function behaviors(): array
     {
         $behaviors = [
@@ -41,7 +38,7 @@ class PhoneDeviceLogController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new PhoneDeviceLogSearch();
+        $searchModel = new PhoneDeviceSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
@@ -67,10 +64,10 @@ class PhoneDeviceLogController extends FController
 //     */
 //    public function actionCreate()
 //    {
-//        $model = new PhoneDeviceLog();
+//        $model = new PhoneDevice();
 //
 //        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-//            return $this->redirect(['view', 'id' => $model->pdl_id]);
+//            return $this->redirect(['view', 'pd_id' => $model->pd_id]);
 //        }
 //
 //        return $this->render('create', [
@@ -78,23 +75,23 @@ class PhoneDeviceLogController extends FController
 //        ]);
 //    }
 
-//    /**
-//     * @param int $id ID
-//     * @return string|Response
-//     * @throws NotFoundHttpException
-//     */
-//    public function actionUpdate($id)
-//    {
-//        $model = $this->findModel($id);
-//
-//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-//            return $this->redirect(['view', 'id' => $model->pdl_id]);
-//        }
-//
-//        return $this->render('update', [
-//            'model' => $model,
-//        ]);
-//    }
+    /**
+     * @param int $id ID
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->pd_id]);
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
 
     /**
      * @param int $id ID
@@ -112,12 +109,12 @@ class PhoneDeviceLogController extends FController
 
     /**
      * @param int $id ID
-     * @return PhoneDeviceLog
+     * @return PhoneDevice
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): PhoneDeviceLog
+    protected function findModel($id): PhoneDevice
     {
-        if (($model = PhoneDeviceLog::findOne($id)) !== null) {
+        if (($model = PhoneDevice::findOne($id)) !== null) {
             return $model;
         }
 

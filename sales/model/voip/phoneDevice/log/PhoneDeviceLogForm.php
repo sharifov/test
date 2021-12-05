@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\voip\phoneDevice;
+namespace sales\model\voip\phoneDevice\log;
 
 use yii\base\Model;
 

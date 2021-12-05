@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\voip\phoneDevice;
+namespace sales\model\voip\phoneDevice\log;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
