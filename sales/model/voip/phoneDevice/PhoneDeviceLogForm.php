@@ -32,7 +32,7 @@ class PhoneDeviceLogForm extends Model
             ['level', 'required'],
             ['level', 'integer'],
             ['level', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
-            ['level', 'in', 'range' => [PhoneDeviceLog::LEVEL_ERROR]],
+            ['level', 'in', 'range' => array_keys(PhoneDeviceLogLevel::getList())],
 
             ['message', 'required'],
             ['message', 'string'],
