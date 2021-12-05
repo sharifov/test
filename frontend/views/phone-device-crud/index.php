@@ -1,8 +1,6 @@
 <?php
 
-use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserSelect2Column;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -38,6 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'user',
             ],
             ['attribute' => 'pd_device_identity', 'options' => ['style' => 'width:180px']],
+            ['attribute' => 'pd_connection_id', 'options' => ['style' => 'width:180px']],
             ['attribute' => 'pd_name', 'options' => ['style' => 'width:250px']],
             'pd_hash',
             [

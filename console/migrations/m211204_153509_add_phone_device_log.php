@@ -16,6 +16,7 @@ class m211204_153509_add_phone_device_log extends Migration
             'pd_id' => $this->primaryKey(),
             'pd_hash' => $this->string(255)->notNull(),
             'pd_user_id' => $this->integer()->notNull(),
+            'pd_connection_id' => $this->bigInteger(),
             'pd_name' => $this->string(255)->notNull(),
             'pd_device_identity' => $this->string(255)->notNull(),
             'pd_status_device' => $this->boolean(),
@@ -33,6 +34,15 @@ class m211204_153509_add_phone_device_log extends Migration
             '{{%employees}}',
             ['id'],
             'CASCADE',
+            'CASCADE'
+        );
+        $this->addForeignKey(
+            'FK-phone_device_connection',
+            '{{%phone_device}}',
+            ['pd_connection_id'],
+            '{{%user_connection}}',
+            ['uc_id'],
+            'SET NULL',
             'CASCADE'
         );
 

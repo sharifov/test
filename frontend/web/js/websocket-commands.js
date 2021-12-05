@@ -37,12 +37,13 @@ function pushDialogOnTop(chatID)
     }
 }
 
-window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled, isTwilioDevicePage) {
+window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled, isTwilioDevicePage, deviceHash) {
     socketSend('Call', 'GetCurrentQueueCalls', {
         'userId': userId,
         'finishedCallSid': finishedCallSid,
         'generalLinePriorityIsEnabled': generalLinePriorityIsEnabled,
-        'isTwilioDevicePage': isTwilioDevicePage
+        'isTwilioDevicePage': isTwilioDevicePage,
+        'deviceHash': deviceHash
     });
 };
 
@@ -62,7 +63,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             // console.log(e);
 
             if (typeof PhoneWidget === 'object') {
-                window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled, window.isTwilioDevicePage);
+                window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled, window.isTwilioDevicePage, window.deviceHash);
             }
         };
 
@@ -388,9 +389,10 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                                 createNotify('Phone Widget', obj.msg, 'error')
                             } else {
                                 if (!PhoneWidget.isInitiated()) {
+                                    window.phoneWidget.initParams.deviceId = obj.deviceId;
                                     PhoneWidget.init(window.phoneWidget.initParams);
                                     if (window.isTwilioDevicePage) {
-                                        window.phoneWidget.device.initialize.Init(window.remoteLogsEnabled);
+                                        window.phoneWidget.device.initialize.Init(window.remoteLogsEnabled, obj.deviceId);
                                     }
                                 }
                                 PhoneWidget.updateCurrentCalls(obj.data, obj.userStatus);

@@ -25,6 +25,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pd_name')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'pd_connection_id')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'pd_device_identity')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'pd_status_device')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => 'Select value']) ?>

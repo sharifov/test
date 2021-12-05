@@ -10,6 +10,7 @@ use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
+use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\createCall\CreateCallForm;
 use sales\model\call\useCase\createCall\CreateRedialCall;
 use sales\model\client\notifications\client\entity\NotificationType;
@@ -81,6 +82,7 @@ use sales\model\leadRedial\queue\RedialCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\project\entity\params\Params;
 use sales\model\user\reports\stats\UserStatsReport;
+use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 use sales\model\voip\phoneDevice\PhoneDeviceLogForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
@@ -100,6 +102,10 @@ class TestController extends Controller
 {
     public function actionVoip()
     {
+        VarDumper::dump($t = PhoneDeviceIdentity::getClientId(295, 'qwertyuiop'));
+        VarDumper::dump(UserCallIdentity::canParse($t));
+        VarDumper::dump(UserCallIdentity::parseUserId($t));
+        die;
 //        $f = new PhoneDeviceLogForm();
 //        $f->load([
 //            'level' => 4,

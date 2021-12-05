@@ -7,6 +7,11 @@ namespace sales\model\voip\phoneDevice\device;
 */
 class PhoneDeviceScopes extends \yii\db\ActiveQuery
 {
+    public function byHash(string $hash): self
+    {
+        return $this->andWhere(['pd_hash' => $hash]);
+    }
+
     /**
     * @return PhoneDevice[]|array
     */

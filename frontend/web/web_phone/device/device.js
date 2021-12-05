@@ -1,5 +1,5 @@
 (function () {
-    function Init(remoteLogsEnabled) {
+    function Init(remoteLogsEnabled, deviceId) {
         if (initiated) {
             console.log('device already initiated');
             return;
@@ -13,7 +13,7 @@
             .then(function (response) {
                 // console.log("Got a Twilio Access token.");
                 PhoneWidget.addLog("Got a Twilio Access token.");
-                initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime}, remoteLogsEnabled);
+                initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime}, remoteLogsEnabled, deviceId);
             })
             .catch(function (err) {
                 PhoneWidget.addLog("Get Twilio Access token error. Reload page!");
@@ -21,7 +21,7 @@
                 createNotify('Twilio Token error!', 'Could not get a token from server! Please reload page!', 'error');
             });
 
-        function initDevice(token, remoteLogsEnabled) {
+        function initDevice(token, remoteLogsEnabled, deviceId) {
             // console.log("Init Twilio Device...");
             PhoneWidget.addLog("Init Twilio Device...");
 
@@ -51,6 +51,7 @@
                             excess: 0
                         },
                         format: log => ({
+                            deviceId: deviceId,
                             level: log.level.value,
                             message: log.message,
                             timestamp: log.timestamp,
@@ -191,7 +192,7 @@
                     PhoneWidget.removeTwilioInternalIncomingConnection();
                     PhoneWidget.soundDisconnect();
                     PhoneWidget.incomingSoundOff();
-                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled, true);
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled, true, window.deviceHash);
                 });
                 call.on('error', error => {
                     createNotify('Call error', 'More info in logs panel', 'error');

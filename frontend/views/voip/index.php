@@ -9,6 +9,7 @@ use yii\web\View;
 $remoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
 
 $js = <<<JS
+window.deviceHash = 'qwertyuiop';
 window.isTwilioDevicePage = true;
 window.remoteLogsEnabled = $remoteLogsEnabled;
 JS;

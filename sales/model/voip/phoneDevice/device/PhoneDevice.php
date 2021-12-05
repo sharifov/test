@@ -3,6 +3,7 @@
 namespace sales\model\voip\phoneDevice\device;
 
 use common\models\Employee;
+use common\models\UserConnection;
 use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
 
 /**
@@ -11,6 +12,7 @@ use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
  * @property int $pd_id
  * @property string $pd_hash
  * @property int $pd_user_id
+ * @property int|null $pd_connection_id
  * @property string $pd_name
  * @property string $pd_device_identity
  * @property int|null $pd_status_device
@@ -25,6 +27,42 @@ use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
  */
 class PhoneDevice extends \yii\db\ActiveRecord
 {
+    public static function create(
+        int $userId,
+        string $hash,
+        string $name,
+        string $identity,
+        bool $statusDevice,
+        bool $statusSpeaker,
+        bool $statusMicrophone,
+        ?string $ip,
+        string $created,
+        string $updated
+    ): self {
+        $device = new self();
+        $device->pd_user_id = $userId;
+        $device->pd_hash = $hash;
+        $device->pd_name = $name;
+        $device->pd_device_identity = $identity;
+        $device->pd_status_device = $statusDevice;
+        $device->pd_status_speaker = $statusSpeaker;
+        $device->pd_status_microphone = $statusMicrophone;
+        $device->pd_ip_address = $ip;
+        $device->pd_created_dt = $created;
+        $device->pd_updated_dt = $updated;
+        return $device;
+    }
+
+    public function updateConnectionId(int $connectionId): void
+    {
+        $this->pd_connection_id = $connectionId;
+    }
+
+    public function isEqualConnection(int $connectionId): bool
+    {
+        return $this->pd_connection_id === $connectionId;
+    }
+
     public function rules(): array
     {
         return [
@@ -48,6 +86,9 @@ class PhoneDevice extends \yii\db\ActiveRecord
             ['pd_user_id', 'required'],
             ['pd_user_id', 'integer'],
             ['pd_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pd_user_id' => 'id']],
+
+            ['pd_connection_id', 'integer'],
+            ['pd_connection_id', 'exist', 'skipOnError' => true, 'targetClass' => UserConnection::class, 'targetAttribute' => ['pd_connection_id' => 'uc_id']],
         ];
     }
 
@@ -67,6 +108,7 @@ class PhoneDevice extends \yii\db\ActiveRecord
             'pd_id' => 'ID',
             'pd_hash' => 'Hash',
             'pd_user_id' => 'User',
+            'pd_connection_id' => 'Connection ID',
             'pd_name' => 'Name',
             'pd_device_identity' => 'Identity',
             'pd_status_device' => 'Status Device',

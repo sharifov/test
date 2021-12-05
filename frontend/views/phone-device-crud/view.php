@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'pd_id',
                 'pd_hash',
+                'pd_connection_id',
                 'pd_user_id:usernameWithId',
                 'pd_name',
                 'pd_device_identity',

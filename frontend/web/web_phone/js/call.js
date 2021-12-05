@@ -71,6 +71,8 @@ var PhoneWidget = function () {
 
     let isDevicePage = false;
 
+    let deviceId = null;
+
     let deviceStatus = {};
 
     let logger = new window.phoneWidget.logger.Logger();
@@ -88,6 +90,7 @@ var PhoneWidget = function () {
         callRequester.init(options);
 
         isDevicePage = options.isDevicePage;
+        deviceId = options.deviceId;
 
         audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
         deviceStatus = new window.phoneWidget.device.status.Init(isDevicePage, logger);

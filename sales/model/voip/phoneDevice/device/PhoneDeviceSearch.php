@@ -16,6 +16,8 @@ class PhoneDeviceSearch extends PhoneDevice
 
             ['pd_device_identity', 'string'],
 
+            ['pd_connection_id', 'integer'],
+
             ['pd_hash', 'string'],
 
             ['pd_id', 'integer'],
@@ -60,6 +62,7 @@ class PhoneDeviceSearch extends PhoneDevice
         $query->andFilterWhere([
             'pd_id' => $this->pd_id,
             'pd_user_id' => $this->pd_user_id,
+            'pd_connection_id' => $this->pd_connection_id,
             'pd_status_device' => $this->pd_status_device,
             'pd_status_speaker' => $this->pd_status_speaker,
             'pd_status_microphone' => $this->pd_status_microphone,
