@@ -1,6 +1,8 @@
 <?php
 
+use sales\model\voip\phoneDevice\PhoneDeviceLog;
 use yii\bootstrap4\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -15,11 +17,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="col-md-4">
+    <div class="col-md-8">
 
         <p>
-            <?= Html::a('Update', ['update', 'pdl_id' => $model->pdl_id], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Delete', ['delete', 'pdl_id' => $model->pdl_id], [
+            <?= Html::a('Delete', ['delete', 'id' => $model->pdl_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => 'Are you sure you want to delete this item?',
@@ -32,13 +33,23 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'pdl_id',
-                'pdl_user_id',
+                'pdl_user_id:userNameWithId',
                 'pdl_device_id',
-                'pdl_level',
+                'pdl_level:phoneDeviceLogLevel',
                 'pdl_message',
-                'pdl_error',
-                'pdl_timestamp_ts:datetime',
-                'pdl_created_dt',
+                [
+                    'attribute' => 'pdl_error',
+                    'value' => static function (PhoneDeviceLog $log) {
+                        if (!$log->pdl_error) {
+                            return null;
+                        }
+                        return '<pre><small>' . VarDumper::dumpAsString($log->pdl_error, 10, false) . '</small></pre>';
+                    },
+                    'format' => 'raw',
+                ],
+                'pdl_stacktrace',
+                'pdl_timestamp_dt',
+                'pdl_created_dt:byUserDatetimeWithSeconds',
             ],
         ]) ?>
 

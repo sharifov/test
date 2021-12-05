@@ -20,10 +20,10 @@ class m211204_153509_add_phone_device_log extends Migration
             'pdl_message' => $this->string(255)->notNull(),
             'pdl_error' => $this->json(),
             'pdl_stacktrace' => $this->text(),
-            'pdl_timestamp_ts' => $this->integer()->notNull(),
+            'pdl_timestamp_dt' => $this->dateTime()->notNull(),
             'pdl_created_dt' => $this->dateTime()->notNull()
         ]);
-        $this->createIndex('IDX-phone_device_log_user_ts', '{{%phone_device_log}}', ['pdl_user_id', 'pdl_timestamp_ts']);
+        $this->createIndex('IDX-phone_device_log_user_ts', '{{%phone_device_log}}', ['pdl_user_id', 'pdl_timestamp_dt']);
         $this->addForeignKey(
             'FK-phone_device_log_user',
             '{{%phone_device_log}}',

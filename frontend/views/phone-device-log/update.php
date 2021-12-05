@@ -7,7 +7,7 @@ use yii\bootstrap4\Html;
 
 $this->title = 'Update Phone Device Log: ' . $model->pdl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Phone Device Logs', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->pdl_id, 'url' => ['view', 'pdl_id' => $model->pdl_id]];
+$this->params['breadcrumbs'][] = ['label' => $model->pdl_id, 'url' => ['view', 'id' => $model->pdl_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="phone-device-log-update">

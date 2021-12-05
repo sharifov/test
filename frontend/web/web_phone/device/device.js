@@ -39,25 +39,32 @@
             // };
             // twilioLogger.setLevel(twilioLogger.getLevel());
 
-            const remoteJson = log => ({
-                level: log.level.value,
-                message: log.message,
-                timestamp: log.timestamp,
-                stacktrace: log.stacktrace
-            });
-
             remote.apply(
                 twilioLogger,
                 {
                     url: '/voip/log',
-                    interval: 1000,
+                    interval: 30000,
                     stacktrace: {
                         levels: ['error'],
                         depth: 10,
                         excess: 0
                     },
-                    format: remoteJson,
-                    timestamp: () => Date.parse(new Date().toISOString())
+                    format: log => ({
+                        level: log.level.value,
+                        message: log.message,
+                        timestamp: log.timestamp,
+                        stacktrace: log.stacktrace
+                    }),
+                    timestamp: function () {
+                        let date = new Date();
+                        let day = ('0' + date.getDate()).slice(-2);
+                        let month = ('0' + (date.getMonth() + 1)).slice(-2);
+                        let year = date.getFullYear();
+                        let hours = ('0' + date.getHours()).slice(-2);
+                        let minutes = ('0' + date.getMinutes()).slice(-2);
+                        let seconds = ('0' + date.getSeconds()).slice(-2);
+                        return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+                    }
                 }
             );
 
@@ -67,11 +74,9 @@
             });
 
             const speakerDevices = document.getElementById("speaker-devices");
-            const ringtoneDevices = document.getElementById("ringtone-devices");
             const microphoneDevices = document.getElementById("microphone-devices");
 
             speakerDevices.addEventListener("change", updateOutputDevice);
-            ringtoneDevices.addEventListener("change", updateRingtoneDevice);
 
             function updateOutputDevice() {
                 const selectedDevices = Array.from(speakerDevices.children)
@@ -79,14 +84,6 @@
                     .map((node) => node.getAttribute("data-id"));
 
                 device.audio.speakerDevices.set(selectedDevices);
-            }
-
-            function updateRingtoneDevice() {
-                const selectedDevices = Array.from(ringtoneDevices.children)
-                    .filter((node) => node.selected)
-                    .map((node) => node.getAttribute("data-id"));
-
-                device.audio.ringtoneDevices.set(selectedDevices);
             }
 
             function updateOutputDevices(selectEl, selectedDevices) {
@@ -135,7 +132,6 @@
 
             function updateAllAudioDevices() {
                 updateOutputDevices(speakerDevices, this.audio.speakerDevices.get());
-                updateOutputDevices(ringtoneDevices, this.audio.ringtoneDevices.get());
             }
 
             const updateToken = () => {
@@ -252,12 +248,6 @@
                     PhoneWidget.getDeviceStatus().speakerSelected();
                 } else {
                     PhoneWidget.getDeviceStatus().speakerUnselected();
-                }
-
-                if (device.audio.ringtoneDevices.get().size > 0) {
-                    PhoneWidget.getDeviceStatus().ringtoneSelected();
-                } else {
-                    PhoneWidget.getDeviceStatus().ringtoneUnselected();
                 }
 
                 device.audio.removeListener('deviceChange', updateInputDevice);

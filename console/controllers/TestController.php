@@ -112,10 +112,10 @@ class TestController extends Controller
 //        die;
 
         $m = <<<JSON
-{"logs":[{"level":4,"message":"{\"message\":\"TransportError (31009): No transport available to send or receive messages\",\"originalError\":{\"code\":31009,\"message\":\"No transport available to send or receive messages\",\"twilioError\":{\"message\":\"TransportError (31009): No transport available to send or receive messages\",\"causes\":[],\"code\":31009,\"description\":\"Transport error\",\"explanation\":\"No transport available to send or receive messages\",\"name\":\"TransportError\",\"solutions\":[]}},\"causes\":[],\"code\":31009,\"description\":\"Transport error\",\"explanation\":\"No transport available to send or receive messages\",\"name\":\"TransportError\",\"solutions\":[]}","timestamp":1638640598504,"stacktrace":"    at Device.<anonymous> (https://sales.local:444/web_phone/device/device.js:298:30)\n    at emitTwo (https://sales.local:444/twilio/twilio-2.0.1.js:10567:13)\n    at Device.emit (https://sales.local:444/twilio/twilio-2.0.1.js:10638:7)\n    at PStream.Device._this._onSignalingError (https://sales.local:444/twilio/twilio-2.0.1.js:2249:19)\n    at emitOne (https://sales.local:444/twilio/twilio-2.0.1.js:10562:20)\n    at PStream.emit (https://sales.local:444/twilio/twilio-2.0.1.js:10635:7)\n    at PStream._publish (https://sales.local:444/twilio/twilio-2.0.1.js:5243:10)\n    at PStream.reinvite (https://sales.local:444/twilio/twilio-2.0.1.js:5211:8)"}]}            
+{\"message\":\"ConnectionError (31005): Error sent from gateway in HANGUP\",\"causes\":[],\"code\":31005,\"description\":\"Connection error\",\"explanation\":\"A connection error occurred during the call\",\"name\":\"ConnectionError\",\"solutions\":[]}            
 JSON;
-        $m = preg_replace("/\n/", "", $m);
-//        $m = preg_replace('/\\\"/',"\"", $m);
+//        $m = preg_replace("/\n/", "", $m);
+        $m = preg_replace('/\\\"/', "\"", $m);
 //        VarDumper::dump($m);die;
 
 

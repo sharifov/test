@@ -1,5 +1,6 @@
 <?php
 
+use sales\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -14,7 +15,7 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'pdl_user_id')->textInput() ?>
+        <?= $form->field($model, 'usa_user_id')->widget(UserSelect2Widget::class) ?>
 
         <?= $form->field($model, 'pdl_device_id')->textInput() ?>
 

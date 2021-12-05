@@ -3,7 +3,6 @@
         PhoneWidgetDeviceStatus: 'PhoneWidgetDeviceStatus',
         PhoneWidgetTwilioDeviceStatus: 'PhoneWidgetTwilioDeviceStatus',
         PhoneWidgetSpeakerDeviceStatus: 'PhoneWidgetSpeakerDeviceStatus',
-        PhoneWidgetRingtoneDeviceStatus: 'PhoneWidgetRingtoneDeviceStatus',
         PhoneWidgetMicrophoneDeviceStatus: 'PhoneWidgetMicrophoneDeviceStatus'
     }
 
@@ -34,14 +33,6 @@
 
         this.speakerError = function () {
             $('.tab-device-status-speaker').html('Speaker device: <span style="color: #761c19">Error');
-        };
-
-        this.ringtoneOk = function () {
-            $('.tab-device-status-ringtone').html('Ringtone device: <span style="color: #00a35b">OK');
-        };
-
-        this.ringtoneError = function () {
-            $('.tab-device-status-ringtone').html('Ringtone device: <span style="color: #761c19">Error');
         };
 
         this.microphoneOk = function () {
@@ -78,14 +69,6 @@
             localStorage.setItem(storageNames.PhoneWidgetSpeakerDeviceStatus, 'not-ready');
         }
 
-        this.ringtoneDeviceReady = function () {
-            localStorage.setItem(storageNames.PhoneWidgetRingtoneDeviceStatus, 'ready');
-        }
-
-        this.ringtoneDeviceNotReady = function () {
-            localStorage.setItem(storageNames.PhoneWidgetRingtoneDeviceStatus, 'not-ready');
-        }
-
         this.microphoneDeviceReady = function () {
             localStorage.setItem(storageNames.PhoneWidgetMicrophoneDeviceStatus, 'ready');
         }
@@ -98,7 +81,6 @@
     function DevicePageStatus(logger) {
         this.isDeviceRegistered = false;
         this.isSpeakerSelected = false;
-        this.isRingtoneSelected = false;
         this.isMicrophoneSelected = false;
         this.switcher = new Switcher()
         this.stateRegister = new StateRegister();
@@ -110,8 +92,6 @@
             this.devices.twilioError();
             this.isSpeakerSelected = false;
             this.devices.speakerError();
-            this.isRingtoneSelected = false;
-            this.devices.ringtoneError();
             this.isMicrophoneSelected = false;
             this.devices.microphoneError();
         };
@@ -131,7 +111,7 @@
         };
 
         this.isReady = function () {
-            return this.isDeviceRegistered && this.isSpeakerSelected && this.isRingtoneSelected && this.isMicrophoneSelected;
+            return this.isDeviceRegistered && this.isSpeakerSelected && this.isMicrophoneSelected;
         };
 
         this.deviceRegister = function () {
@@ -170,24 +150,6 @@
             this.notReady();
         }
 
-        this.ringtoneSelected = function () {
-            this.stateRegister.ringtoneDeviceReady();
-            this.isRingtoneSelected = true;
-            this.logger.add('Ringtone Selected!');
-            this.devices.ringtoneOk();
-            if (this.isReady()) {
-                this.ready();
-            }
-        }
-
-        this.ringtoneUnselected = function () {
-            this.stateRegister.ringtoneDeviceNotReady();
-            this.isRingtoneSelected = false;
-            this.logger.add('Ringtone UnSelected!');
-            this.devices.ringtoneError();
-            this.notReady();
-        }
-
         this.microphoneSelected = function () {
             this.stateRegister.microphoneDeviceReady();
             this.isMicrophoneSelected = true;
@@ -208,12 +170,11 @@
 
         this.devices.twilioError();
         this.devices.speakerError();
-        this.devices.ringtoneError();
         this.devices.microphoneError();
         this.notReady();
     }
 
-    function OtherPageStatus(phoneIsReady, twilioDeviceIsReady, speakerIsReady, ringtoneIsReady, microphoneIsReady) {
+    function OtherPageStatus(phoneIsReady, twilioDeviceIsReady, speakerIsReady, microphoneIsReady) {
         this.switcher = new Switcher();
         this.phoneIsReady = phoneIsReady;
         this.devices = new Devices();
@@ -248,14 +209,6 @@
             this.devices.speakerError();
         }
 
-        this.ringtoneSelected = function () {
-            this.devices.ringtoneOk();
-        }
-
-        this.ringtoneUnselected = function () {
-            this.devices.ringtoneError();
-        }
-
         this.microphoneSelected = function () {
             this.devices.microphoneOk();
         }
@@ -280,12 +233,6 @@
             this.speakerSelected();
         } else {
             this.speakerUnselected();
-        }
-
-        if (ringtoneIsReady === true) {
-            this.ringtoneSelected();
-        } else {
-            this.ringtoneUnselected();
         }
 
         if (microphoneIsReady === true) {
@@ -325,14 +272,6 @@
                 PhoneWidget.getDeviceStatus().speakerUnselected();
                 return;
             }
-            if (event.key === storageNames.PhoneWidgetRingtoneDeviceStatus) {
-                if (event.newValue === 'ready') {
-                    PhoneWidget.getDeviceStatus().ringtoneSelected();
-                    return;
-                }
-                PhoneWidget.getDeviceStatus().ringtoneUnselected();
-                return;
-            }
             if (event.key === storageNames.PhoneWidgetMicrophoneDeviceStatus) {
                 if (event.newValue === 'ready') {
                     PhoneWidget.getDeviceStatus().microphoneSelected();
@@ -346,7 +285,6 @@
             localStorage.getItem(storageNames.PhoneWidgetDeviceStatus) === 'ready',
             localStorage.getItem(storageNames.PhoneWidgetTwilioDeviceStatus) === 'ready',
             localStorage.getItem(storageNames.PhoneWidgetSpeakerDeviceStatus) === 'ready',
-            localStorage.getItem(storageNames.PhoneWidgetRingtoneDeviceStatus) === 'ready',
             localStorage.getItem(storageNames.PhoneWidgetMicrophoneDeviceStatus) === 'ready'
         );
     }

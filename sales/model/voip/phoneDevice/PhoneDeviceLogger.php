@@ -6,9 +6,9 @@ use yii\helpers\VarDumper;
 
 class PhoneDeviceLogger
 {
-    public function log(int $userId, array $logs): void
+    public function log(int $userId, array $logs, \DateTimeImmutable $nowDt): void
     {
-        $now = date('Y-m-d H:i:s');
+        $now = $nowDt->format('Y-m-d H:i:s');
         foreach ($logs as $key => $log) {
             try {
                 $form = new PhoneDeviceLogForm();
@@ -31,10 +31,21 @@ class PhoneDeviceLogger
                     ], 'PhoneDeviceLogger');
                     continue;
                 }
-                VarDumper::dump($form->getAttributes());
-//                die;
-//                $log = PhoneDeviceLog::create($userId, $deviceId, $level, $message, $error,  $timestamp, $now);
-//                $log->save(false);
+                PhoneDeviceLog::getDb()->createCommand(
+                    "insert into " . PhoneDeviceLog::tableName() . " 
+                        (`pdl_user_id`, `pdl_device_id`, `pdl_level`, `pdl_message`, `pdl_error`, `pdl_stacktrace`, `pdl_timestamp_dt`, `pdl_created_dt`) 
+                        values (:userId, :deviceId, :level, :message, :error, :stacktrace, :timestamp, :created)",
+                    [
+                        ':userId' => $userId,
+                        ':deviceId' => $form->deviceId,
+                        ':level' => $form->level,
+                        ':message' => $form->getErrorMessage(),
+                        ':error' => $form->getErrorObject(),
+                        ':stacktrace' => $form->stacktrace,
+                        ':timestamp' => $form->timestamp,
+                        ':created' => $now
+                    ]
+                )->execute();
             } catch (\Throwable $e) {
                 \Yii::error([
                     'e' => $e->getMessage(),
@@ -44,9 +55,5 @@ class PhoneDeviceLogger
                 ], 'PhoneDeviceLogger');
             }
         }
-    }
-
-    private function validateLog($log): void
-    {
     }
 }

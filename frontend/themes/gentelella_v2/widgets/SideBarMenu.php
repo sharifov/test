@@ -63,7 +63,24 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
         $menuLItems = [];
 
-        $menuItems[] = ['label' => 'Voip', 'url' => ['/voip/index'], 'icon' => 'phone', 'visible' => Yii::$app->user->can('PhoneWidget')];
+        if (Yii::$app->user->can('/phone-device-log/index')) {
+            $menuItems[] = [
+                'label' => 'Voip',
+                'url' => 'javascript:',
+                'icon' => 'phone',
+                'items' => [
+                    ['label' => 'Voip <span class="label-info label pull-right"></span> ', 'url' => ['/voip/index'], 'icon' => 'phone', 'visible' => Yii::$app->user->can('PhoneWidget')],
+                    ['label' => 'Phone device logs<span class="label-info label pull-right"></span> ', 'url' => ['/phone-device-log/index'], 'icon' => 'phone'],
+                ]
+            ];
+        } else {
+            $menuItems[] = [
+                'label' => 'Voip',
+                'url' => ['/voip/index'],
+                'icon' => 'phone',
+                'visible' => Yii::$app->user->can('PhoneWidget')
+            ];
+        }
 
         if (Auth::can('createLead')) {
             $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];

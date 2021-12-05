@@ -2,23 +2,24 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use sales\model\voip\phoneDevice\PhoneDeviceLog;
 use sales\model\voip\phoneDevice\PhoneDeviceLogSearch;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class PhoneDeviceLogController extends Controller
+class PhoneDeviceLogController extends FController
 {
     /**
-    * @return array
-    */
+     * @return array
+     */
     public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -26,6 +27,7 @@ class PhoneDeviceLogController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -34,7 +36,7 @@ class PhoneDeviceLogController extends Controller
     public function actionIndex(): string
     {
         $searchModel = new PhoneDeviceLogSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -43,61 +45,61 @@ class PhoneDeviceLogController extends Controller
     }
 
     /**
-     * @param int $pdl_id ID
+     * @param int $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($pdl_id): string
+    public function actionView($id): string
     {
         return $this->render('view', [
-            'model' => $this->findModel($pdl_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
+//    /**
+//     * @return string|Response
+//     */
+//    public function actionCreate()
+//    {
+//        $model = new PhoneDeviceLog();
+//
+//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+//            return $this->redirect(['view', 'id' => $model->pdl_id]);
+//        }
+//
+//        return $this->render('create', [
+//            'model' => $model,
+//        ]);
+//    }
+
+//    /**
+//     * @param int $id ID
+//     * @return string|Response
+//     * @throws NotFoundHttpException
+//     */
+//    public function actionUpdate($id)
+//    {
+//        $model = $this->findModel($id);
+//
+//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+//            return $this->redirect(['view', 'id' => $model->pdl_id]);
+//        }
+//
+//        return $this->render('update', [
+//            'model' => $model,
+//        ]);
+//    }
+
     /**
-     * @return string|Response
-     */
-    public function actionCreate()
-    {
-        $model = new PhoneDeviceLog();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'pdl_id' => $model->pdl_id]);
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * @param int $pdl_id ID
-     * @return string|Response
-     * @throws NotFoundHttpException
-     */
-    public function actionUpdate($pdl_id)
-    {
-        $model = $this->findModel($pdl_id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'pdl_id' => $model->pdl_id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * @param int $pdl_id ID
+     * @param int $id ID
      * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($pdl_id): Response
+    public function actionDelete($id): Response
     {
-        $this->findModel($pdl_id)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }

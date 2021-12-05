@@ -67,16 +67,18 @@ class VoipController extends FController
 
     public function actionLog()
     {
+        $request = null;
         try {
             $request = file_get_contents('php://input');
             $filtered = preg_replace("/\n/", "", $request);
-            $logs = json_decode(stripslashes($filtered), true, 512, JSON_THROW_ON_ERROR);
-            $this->phoneDeviceLogger->log(Auth::id(), $logs['logs']);
+            $logs = json_decode($filtered, true, 512, JSON_THROW_ON_ERROR);
+            $this->phoneDeviceLogger->log(Auth::id(), $logs['logs'], new \DateTimeImmutable());
         } catch (\Throwable $e) {
             \Yii::error([
-                'r' => VarDumper::dumpAsString($request),
+                'logs' => VarDumper::dumpAsString($request),
                 'message' => $e->getMessage(),
             ], 'PhoneDevice:Log');
+            return $this->asJson(['message' => 'error']);
         }
 
         return $this->asJson(['message' => 'ok']);
