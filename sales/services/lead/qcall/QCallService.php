@@ -12,6 +12,7 @@ use common\models\ProjectWeight;
 use common\models\StatusWeight;
 use sales\model\leadRedial\queue\ClientPhones;
 use sales\model\leadRedial\job\LeadRedialAssignToUsersJob;
+use sales\model\leadRedial\queue\ClientPhones;
 use sales\repositories\lead\LeadFlowRepository;
 use sales\repositories\lead\LeadQcallRepository;
 use Yii;
@@ -109,15 +110,13 @@ class QCallService
         $lead = Lead::findOne($leadId);
         if ($lead) {
             $clientPhone = $this->clientPhones->getFirstClientPhone($lead);
-            if ($clientPhone) {
-                if (PhoneBlacklist::find()->isExists($clientPhone->phone)) {
-                    Yii::warning([
-                        'message' => 'Lead not added to Lead Redial Queue, because client phone is blocked.',
-                        'leadId' => $lead->id,
-                        'phone' => $clientPhone->phone,
-                    ], 'QCallService:create');
-                    return null;
-                }
+            if ($clientPhone && PhoneBlacklist::find()->isExists($clientPhone->phone)) {
+                Yii::warning([
+                    'message' => 'Lead not added to Lead Redial Queue, because client phone is blocked.',
+                    'leadId' => $lead->id,
+                    'phone' => $clientPhone->phone,
+                ], 'QCallService:create');
+                return null;
             }
         }
 

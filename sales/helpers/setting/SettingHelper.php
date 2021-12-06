@@ -737,4 +737,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['lead_redial_is_on_call_check_time'] ?? 20;
     }
+
+    public static function leadRedialQCallAttemptsFromTimeValidationEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['lead_redial_qcall_attempts_from_time_validation_enabled'] ?? true);
+    }
 }
