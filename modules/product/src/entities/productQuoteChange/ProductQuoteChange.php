@@ -167,6 +167,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::COMPLETED;
     }
 
+    public function statusToConfirmed(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::CONFIRMED;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -375,5 +380,10 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function getClientStatusName(): string
     {
         return $this->pqc_status_id ? ProductQuoteChangeStatus::getClientKeyStatusById($this->pqc_status_id) : '-';
+    }
+
+    public function getSystemStatusName(): string
+    {
+        return $this->pqc_status_id ? ProductQuoteChangeStatus::getName($this->pqc_status_id) : '-';
     }
 }

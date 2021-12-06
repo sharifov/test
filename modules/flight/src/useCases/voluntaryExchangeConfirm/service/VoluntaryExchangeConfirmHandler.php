@@ -112,7 +112,8 @@ class VoluntaryExchangeConfirmHandler
 
         $data['passengers'] = null;
         if ($flightQuotePaxPrices = $this->voluntaryExchangeQuote->flightQuote->flightQuotePaxPrices ?? null) {
-            foreach ($flightQuotePaxPrices as $key => $flightQuotePaxPrice) {
+            foreach ($flightQuotePaxPrices as $flightQuotePaxPrice) {
+                $key = FlightPax::getPaxTypeById($flightQuotePaxPrice->qpp_flight_pax_code_id);
                 $data['passengers'][$key]['codeAs'] = FlightPax::getPaxTypeById($flightQuotePaxPrice->qpp_flight_pax_code_id);
                 $data['passengers'][$key]['cnt'] = $flightQuotePaxPrice->qpp_cnt;
                 $data['passengers'][$key]['baseFare'] = $flightQuotePaxPrice->qpp_fare;

@@ -40,6 +40,11 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                                 <i class="fa fa-clock-o"></i> <span id="clock-expiration"><i class="fa fa-spinner fa-spin"></i></span></span>
                     <?php endif ?>
                 <?php endif ?>
+
+                <?php if ($lead->l_is_test) : ?>
+                    <span class="label status-label bg-red">TEST</span>
+                <?php endif ?>
+
             </h2>
             <div class="page-header__general">
                 <?php if (!$lead->isNewRecord) : ?>

@@ -14,6 +14,7 @@ use sales\model\call\services\QueueLongTimeNotificationJobCreator;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use yii\db\Query;
 use yii\queue\JobInterface;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /**
  * Class CallQueueLongTimeNotificationJob
@@ -98,8 +99,12 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
         if ($call->c_dep_id) {
             $department = ' ' . $call->cDep->dep_name;
         }
-        $queueTime = floor((time() - strtotime($call->c_queue_start_dt)) / 60);
-        return 'Call ID:' . $call->c_id . ' to' . $project . $department . ' from ' . $call->c_from . ' is stuck in the queue for ' . $queueTime . ' minutes.';
+
+        $queueTime = time() - strtotime($call->c_queue_start_dt);
+
+        $phoneFrom = MaskPhoneHelper::masking($call->c_from);
+
+        return 'Call ID:' . $call->c_id . ' to' . $project . $department . ' from ' . $phoneFrom . ' is stuck in the queue for ' . $queueTime . ' sec.';
     }
 
     private function getUsers(array $roles, ?int $departmentId, ?int $projectId): array

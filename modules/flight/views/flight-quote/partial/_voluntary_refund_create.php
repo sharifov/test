@@ -227,6 +227,7 @@ use yii\widgets\Pjax;
                       $content = $activeForm->field($model, 'details')->hiddenInput([
                           'name' => 'refund[auxiliaryOptions][' . $index . '][details]'
                       ])->label(false);
+                      $type = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '', $model->type . 'details'));
                     if ($model->details) {
                         $content .= Html::a(
                             '<i class="fas fa-eye"></i> details</a>',
@@ -234,12 +235,12 @@ use yii\widgets\Pjax;
                             [
                             'class' => 'btn btn-sm btn-success',
                             'data-pjax' => 0,
-                            'onclick' => '(function ( $event ) { $("#data_' . $model->type . '").toggle(); })();',
-                            ]
+                            'onclick' => '(function ( $event ) { $("#data_' . $type . '").toggle(); })();',
+                              ]
                         );
                     }
                       $content .= $model->details ?
-                          '<pre id="data_' . $model->type . '" style="display: none;">' .
+                          '<pre id="data_' . $type . '" style="display: none;">' .
                           VarDumper::dumpAsString(JsonHelper::decode($model->details), 10, true) . '</pre>' : '-';
 
                       return $content;
@@ -261,10 +262,10 @@ use yii\widgets\Pjax;
                             '<i class="fas fa-eye"></i> details</a>',
                             null,
                             [
-                                'class' => 'btn btn-sm btn-success',
-                                'data-pjax' => 0,
-                                'onclick' => '(function ( $event ) { $("#data_' . $hash . '").toggle(); })();',
-                            ]
+                              'class' => 'btn btn-sm btn-success',
+                              'data-pjax' => 0,
+                              'onclick' => '(function ( $event ) { $("#data_' . $hash . '").toggle(); })();',
+                              ]
                         );
                     }
                       $content .= $model->amountPerPax ?

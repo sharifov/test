@@ -5,6 +5,7 @@ namespace modules\product\src\entities\productQuote;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteFlight;
 use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -151,5 +152,19 @@ class ProductQuoteQuery
             ->andWhere(['pqr_type_id' => $types])
             ->byStatuses($statuses)
             ->all();
+    }
+
+    /**
+     * @param int $productQuoteChangeId
+     * @return ProductQuote[]
+     */
+    public static function getProductQuotesByChangeQuote(int $productQuoteChangeId): array
+    {
+        return ProductQuote::find()
+            ->andWhere([
+                'pq_id' => ProductQuoteChangeRelation::find()
+                    ->select(['pqcr_pq_id'])
+                    ->byChangeId($productQuoteChangeId)
+            ])->all();
     }
 }

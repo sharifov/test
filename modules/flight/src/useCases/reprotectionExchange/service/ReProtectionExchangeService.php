@@ -59,11 +59,14 @@ class ReProtectionExchangeService
 
         $case->addEventLog(CaseEventLog::RE_PROTECTION_EXCHANGE, 'Exchange request started processing');
 
-        if (!$productQuoteChange->isPending()) {
+        if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
             $message = 'ProductQuoteChange not in status ' .
-                ProductQuoteChangeStatus::getName(ProductQuoteChangeStatus::PENDING);
+                ProductQuoteChangeStatus::getName(ProductQuoteChangeStatus::PENDING) . ' or type is not ' . ProductQuoteChange::TYPE_LIST[ProductQuoteChange::TYPE_RE_PROTECTION];
 
-            $case->addEventLog(CaseEventLog::RE_PROTECTION_EXCHANGE, $message);
+            $case->addEventLog(CaseEventLog::RE_PROTECTION_EXCHANGE, $message, [
+                'status' => $productQuoteChange->getSystemStatusName(),
+                'type' => $productQuoteChange->getTypeName()
+            ]);
             throw new \DomainException($message, 101);
         }
 

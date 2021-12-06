@@ -703,6 +703,11 @@ class SettingHelper
         return self::prePareStatusIds(Yii::$app->params['settings']['exchange_quote_confirm_status_list']);
     }
 
+    public static function getUpdatableInvoluntaryQuoteChange(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['updatable_involuntary_quote_change']);
+    }
+
     public static function getVoluntaryExchangeBoEndpoint(): ?string
     {
         return Yii::$app->params['settings']['voluntary_exchange_bo_endpoint'] ?? null;
@@ -736,5 +741,25 @@ class SettingHelper
     public static function isClientChatLeadAutoTakeOnChatAccept(): bool
     {
         return (bool)(\Yii::$app->params['settings']['client_chat_lead_auto_take']['on_chat_accept'] ?? false);
+    }
+
+    public static function leadRedialQCallAttemptsFromTimeValidationEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['lead_redial_qcall_attempts_from_time_validation_enabled'] ?? true);
+    }
+
+    public static function getDbCryptBlockEncryptionMode(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_block_encryption_mode'] ?? null;
+    }
+
+    public static function getDbCryptKeyStr(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_key_str'] ?? null;
+    }
+
+    public static function getDbCryptInitVector(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_init_vector'] ?? null;
     }
 }

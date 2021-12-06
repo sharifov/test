@@ -4,39 +4,21 @@ namespace modules\flight\src\useCases\voluntaryExchange\service;
 
 use common\components\hybrid\HybridWhData;
 use common\components\purifier\Purifier;
-use common\models\CaseSale;
-use common\models\Client;
 use common\models\Notifications;
 use common\models\Project;
-use DomainException;
-use modules\flight\models\Flight;
-use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
-use modules\order\src\entities\order\Order;
-use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
-use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
-use sales\forms\lead\EmailCreateForm;
-use sales\forms\lead\PhoneCreateForm;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\setting\SettingHelper;
 use sales\interfaces\BoWebhookService;
-use sales\services\client\ClientCreateForm;
-use Throwable;
 use webapi\src\forms\boWebhook\FlightVoluntaryExchangeUpdateForm;
-use Yii;
 use yii\base\Model;
 use yii\db\Transaction;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class VoluntaryExchangeBoHandler

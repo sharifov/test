@@ -29,6 +29,6 @@ class QueueLongTimeNotificationParams
 
     public function getDelay(): int
     {
-        return $this->waitTime * 60;
+        return $this->waitTime;
     }
 }

@@ -614,8 +614,6 @@ class FlightQuoteManageService implements ProductQuoteService
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
             $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
-            $this->calcProductQuotePrice($productQuote, $flightQuote);
-
             $this->createFlightTrip($flightQuote, $quote);
 
             if ($originProductQuote && $originProductQuote->isFlight()) {
@@ -643,6 +641,8 @@ class FlightQuoteManageService implements ProductQuoteService
 
                 $this->cloneFlightQuoteBaggage($originProductQuote->flightQuote, $flightQuote);
             }
+
+            $this->calcProductQuotePrice($productQuote, $flightQuote);
 
             $flightQuoteFlight = $this->createFlightQuoteFlight($flightQuote, $bookingId);
 
