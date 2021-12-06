@@ -12,7 +12,6 @@ use common\models\ProjectWeight;
 use common\models\StatusWeight;
 use sales\model\leadRedial\queue\ClientPhones;
 use sales\model\leadRedial\job\LeadRedialAssignToUsersJob;
-use sales\model\leadRedial\queue\ClientPhones;
 use sales\repositories\lead\LeadFlowRepository;
 use sales\repositories\lead\LeadQcallRepository;
 use Yii;
