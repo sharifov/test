@@ -3,6 +3,7 @@
 namespace sales\model\emailReviewQueue\entity;
 
 use common\models\Department;
+use common\models\Email;
 use common\models\Employee;
 use common\models\Project;
 use yii\base\Model;
@@ -22,6 +23,12 @@ class EmailReviewQueueSearch extends EmailReviewQueue
         return [
             [['erq_id', 'erq_email_id', 'erq_project_id', 'erq_department_id', 'erq_owner_id', 'erq_status_id', 'erq_user_reviewer_id'], 'integer'],
             [['erq_created_dt', 'erq_updated_dt'], 'safe'],
+            [['erq_status_id'], 'in', 'range' => array_keys(EmailReviewQueueStatus::getList())],
+            [['erq_department_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['erq_department_id' => 'dep_id']],
+            [['erq_email_id'], 'exist', 'skipOnError' => true, 'targetClass' => Email::class, 'targetAttribute' => ['erq_email_id' => 'e_id']],
+            [['erq_owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['erq_owner_id' => 'id']],
+            [['erq_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['erq_project_id' => 'id']],
+            [['erq_user_reviewer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['erq_user_reviewer_id' => 'id']],
         ];
     }
 
