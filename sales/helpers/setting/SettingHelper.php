@@ -738,7 +738,6 @@ class SettingHelper
         return Yii::$app->params['settings']['lead_redial_is_on_call_check_time'] ?? 20;
     }
 
-
     public static function isClientChatLeadAutoTakeOnChatAccept(): bool
     {
         return (bool)(\Yii::$app->params['settings']['client_chat_lead_auto_take']['on_chat_accept'] ?? false);
@@ -747,5 +746,20 @@ class SettingHelper
     public static function leadRedialQCallAttemptsFromTimeValidationEnabled(): bool
     {
         return (bool) (Yii::$app->params['settings']['lead_redial_qcall_attempts_from_time_validation_enabled'] ?? true);
+	}
+        
+    public static function getDbCryptBlockEncryptionMode(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_block_encryption_mode'] ?? null;
+    }
+
+    public static function getDbCryptKeyStr(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_key_str'] ?? null;
+    }
+
+    public static function getDbCryptInitVector(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_init_vector'] ?? null;
     }
 }
