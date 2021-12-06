@@ -177,7 +177,7 @@ use yii\widgets\Pjax;
                         'attribute' => 'details',
                         'value' => static function (AuxiliaryOptionForm $model) {
                             $content = '';
-                            $type = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '', $model->type));
+                            $type = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '', $model->type . 'details'));
                             if ($model->details) {
                                 $content = Html::a(
                                     '<i class="fas fa-eye"></i> details</a>',
@@ -204,7 +204,7 @@ use yii\widgets\Pjax;
                         'attribute' => 'amountPerPax',
                         'value' => static function (AuxiliaryOptionForm $model) {
                             $content = '';
-                            $type = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '', $model->type));
+                            $type = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '', $model->type . 'amountPerPax'));
                             if ($model->amountPerPax) {
                                 $content = Html::a(
                                     '<i class="fas fa-eye"></i> details</a>',
