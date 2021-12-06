@@ -742,4 +742,19 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['client_chat_lead_auto_take']['on_chat_accept'] ?? false);
     }
+
+    public static function getDbCryptBlockEncryptionMode(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_block_encryption_mode'] ?? null;
+    }
+
+    public static function getDbCryptKeyStr(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_key_str'] ?? null;
+    }
+
+    public static function getDbCryptInitVector(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_init_vector'] ?? null;
+    }
 }
