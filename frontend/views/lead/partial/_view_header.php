@@ -41,7 +41,7 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                     <?php endif ?>
                 <?php endif ?>
 
-                <?php if (!$lead->l_is_test) : ?>
+                <?php if ($lead->l_is_test) : ?>
                     <span class="label status-label bg-red">TEST</span>
                 <?php endif ?>
 
