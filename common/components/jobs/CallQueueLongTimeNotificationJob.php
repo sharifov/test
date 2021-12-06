@@ -99,7 +99,7 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
         if ($call->c_dep_id) {
             $department = ' ' . $call->cDep->dep_name;
         }
-        
+
         $queueTime = time() - strtotime($call->c_queue_start_dt);
 
         $phoneFrom = MaskPhoneHelper::masking($call->c_from);
