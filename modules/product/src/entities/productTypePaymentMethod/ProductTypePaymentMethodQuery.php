@@ -32,7 +32,7 @@ class ProductTypePaymentMethodQuery
             return $paymentMethod->ptpm_payment_fee_percent;
         }
 
-        \Yii::warning('Not Found default percent fee; Product Id . ' . $productTypeId, 'ProductTypePaymentMethodQuery:getDefaultPercentFeeByProductType');
+//        \Yii::warning('Not Found default percent fee; Product Id . ' . $productTypeId, 'ProductTypePaymentMethodQuery:getDefaultPercentFeeByProductType');
 
         return null;
     }

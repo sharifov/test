@@ -463,13 +463,13 @@ class CommunicationController extends ApiBaseController
                                 );
                                 $logExecutionTime->end();
 
-                                Yii::info([
-                                    'callId' => $callModel->c_id,
-                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                    'type' => $callLogFilterGuard->getTypeName(),
-                                    'phone' => $callModel->c_from,
-                                    'result' => $result,
-                                ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
+//                                Yii::info([
+//                                    'callId' => $callModel->c_id,
+//                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
+//                                    'type' => $callLogFilterGuard->getTypeName(),
+//                                    'phone' => $callModel->c_from,
+//                                    'result' => $result,
+//                                ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
 
                                 $redialStatus = $result['data']['result']['status'] ?? null;
                                 if ($redialStatus) {

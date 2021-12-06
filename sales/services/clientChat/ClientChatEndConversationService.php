@@ -43,13 +43,13 @@ class ClientChatEndConversationService
             throw new \RuntimeException($errorMessage);
         }
 
-        $info = 'Id : (' . $clientChat->cch_id .
-                ') Rid : (' . $clientChat->cch_rid .
-                ') Status: (' . $clientChat->getStatusName() .
-                ') shallowCloseParam: (' . (string) $shallowCloseParam . ')';
-        \Yii::info(
-            'Chat Bot request successfully processed. ' . PHP_EOL . $info,
-            'info\ClientChatEndConversationService:successfully'
-        );
+//        $info = 'Id : (' . $clientChat->cch_id .
+//                ') Rid : (' . $clientChat->cch_rid .
+//                ') Status: (' . $clientChat->getStatusName() .
+//                ') shallowCloseParam: (' . (string) $shallowCloseParam . ')';
+//        \Yii::info(
+//            'Chat Bot request successfully processed. ' . PHP_EOL . $info,
+//            'info\ClientChatEndConversationService:successfully'
+//        );
     }
 }
