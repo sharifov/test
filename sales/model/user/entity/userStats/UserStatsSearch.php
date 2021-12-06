@@ -6,6 +6,7 @@ use common\components\validators\IsArrayValidator;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
+use common\models\ProfitSplit;
 use common\models\UserOnline;
 use common\models\UserParams;
 use DateTime;
@@ -283,20 +284,26 @@ class UserStatsSearch extends Model
 
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT => (new Query())
-                    ->select(['COUNT(id)'])
+                    ->select(['COUNT(' . Lead::tableName() . '.id)'])
                     ->from(Lead::tableName())
-                    ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+                    ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
+                    ->where([ProfitSplit::tableName() . '.ps_user_id' => Employee::tableName() . '.id'])
+                    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
+                        ':startDt' => $from, ':endDt' => $to,
+                    ])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT => (new Query())
-                    ->select(['COUNT(id)'])
+                    ->select(['COUNT(' . Lead::tableName() . '.id)'])
                     ->from(Lead::tableName())
-                    ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
-                    ->where(['status' => Lead::STATUS_SOLD])
-                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+                    ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
+                    ->where([ProfitSplit::tableName() . '.ps_user_id' => Employee::tableName() . '.id'])
+                    ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_SOLD])
+                    ->andWhere(Lead::tableName() . '.l_status_dt BETWEEN :startDt AND :endDt', [
+                        ':startDt' => $from, ':endDt' => $to,
+                    ])
             ]);
         }
 
