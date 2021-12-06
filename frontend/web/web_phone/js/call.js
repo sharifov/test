@@ -71,8 +71,6 @@ var PhoneWidget = function () {
 
     let isDevicePage = false;
 
-    let deviceId = null;
-
     let deviceStatus = {};
 
     let logger = new window.phoneWidget.logger.Logger();
@@ -80,6 +78,8 @@ var PhoneWidget = function () {
     let twilioInternalIncomingConnection = null;
 
     let initiated = false;
+    
+    let deviceHashKey = null;
 
     function init(options)
     {
@@ -90,7 +90,7 @@ var PhoneWidget = function () {
         callRequester.init(options);
 
         isDevicePage = options.isDevicePage;
-        deviceId = options.deviceId;
+        deviceHashKey = options.deviceHashKey;
 
         audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
         deviceStatus = new window.phoneWidget.device.status.Init(isDevicePage, logger);
@@ -751,10 +751,15 @@ var PhoneWidget = function () {
             return false;
         }
 
-        callRequester.returnHoldCall(call);
+        callRequester.returnHoldCall(call, getDeviceHash());
     }
 
     function checkDevice(title) {
+        let deviceHash = getDeviceHash();
+        if (!deviceHash) {
+            createNotify(title, 'Undefined device. Possibly Voip page is closed. Please open Voip page and refresh current page!', 'error');
+            return false;
+        }
         if (deviceStatus.isReady()) {
             return true;
         }
@@ -778,7 +783,7 @@ var PhoneWidget = function () {
             return false;
         }
 
-        callRequester.accept(call);
+        callRequester.accept(call, getDeviceHash());
     }
 
     function acceptWarmTransfer(callSid)
@@ -797,7 +802,7 @@ var PhoneWidget = function () {
             return false;
         }
 
-        callRequester.acceptWarmTransfer(call);
+        callRequester.acceptWarmTransfer(call, getDeviceHash());
     }
 
     function acceptPriorityCall()
@@ -810,7 +815,7 @@ var PhoneWidget = function () {
             return false;
         }
 
-        callRequester.acceptPriorityCall(window.phoneWidget.notifier.keys.priorityCall);
+        callRequester.acceptPriorityCall(window.phoneWidget.notifier.keys.priorityCall, getDeviceHash());
     }
 
     function changeStatus(status) {
@@ -1655,7 +1660,7 @@ var PhoneWidget = function () {
     }
 
     function getActiveCall() {
-        let activeCall = window.localStorage.getItem('activeCall');
+        let activeCall = localStorage.getItem('activeCall');
         if (activeCall) {
             return JSON.parse(activeCall);
         }
@@ -1663,7 +1668,7 @@ var PhoneWidget = function () {
     }
 
     function setActiveCall(call) {
-        window.localStorage.setItem('activeCall', JSON.stringify({
+        localStorage.setItem('activeCall', JSON.stringify({
             'CallSid': call.parameters.CallSid,
             'To': call.parameters.To
         }));
@@ -1718,15 +1723,15 @@ var PhoneWidget = function () {
     }
 
     function joinListen(call_sid) {
-        callRequester.joinConference(conferenceSources.listen.name, conferenceSources.listen.id, call_sid);
+        callRequester.joinConference(conferenceSources.listen.name, conferenceSources.listen.id, call_sid, getDeviceHash());
     }
 
     function joinCoach(call_sid) {
-        callRequester.joinConference(conferenceSources.coach.name, conferenceSources.coach.id, call_sid);
+        callRequester.joinConference(conferenceSources.coach.name, conferenceSources.coach.id, call_sid, getDeviceHash());
     }
 
     function joinBarge(call_sid) {
-        callRequester.joinConference(conferenceSources.barge.name, conferenceSources.barge.id, call_sid);
+        callRequester.joinConference(conferenceSources.barge.name, conferenceSources.barge.id, call_sid, getDeviceHash());
     }
 
     function freeDialButton() {
@@ -1755,7 +1760,8 @@ var PhoneWidget = function () {
             'caseId': value.attr('data-case-id'),
             'fromCase': value.attr('data-from-case'),
             'fromLead': value.attr('data-from-lead'),
-            'fromContacts': value.attr('data-from-contacts')
+            'fromContacts': value.attr('data-from-contacts'),
+            'deviceHash': getDeviceHash()
         };
 
         reserveDialButton();
@@ -1991,6 +1997,15 @@ var PhoneWidget = function () {
     function isInitiated() {
         return initiated === true;
     }
+    
+    function getDeviceHash() {
+        return localStorage.getItem(deviceHashKey);
+    }
+
+    function removeDeviceHash() {
+        console.log(deviceHashKey);
+        return window.localStorage.removeItem(deviceHashKey);
+    }
 
     return {
         init: init,
@@ -2033,7 +2048,8 @@ var PhoneWidget = function () {
         clearLog: clearLog,
         setTwilioInternalIncomingConnection: setTwilioInternalIncomingConnection,
         removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection,
-        isInitiated: isInitiated
+        isInitiated: isInitiated,
+        removeDeviceHash: removeDeviceHash
     };
 }();
 

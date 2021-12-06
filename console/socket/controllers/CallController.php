@@ -3,7 +3,7 @@
 namespace console\socket\controllers;
 
 use common\models\UserCallStatus;
-use common\models\UserConnection;
+use frontend\widgets\newWebPhone\DeviceHash;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\voip\phoneDevice\device\PhoneDevice;
 use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
@@ -42,66 +42,53 @@ class CallController
         }
         $userId = (int)$params['userId'];
 
-        $deviceHash = (string)$params['deviceHash'];
-        if (!$deviceHash) {
-            return [
-                'errors' => [
-                    'Not found device hash'
-                ]
-            ];
-        }
-        // todo validate hash (length...)
-
+        $now = date('Y-m-d H:i:s');
         $deviceId = null;
-        $device = PhoneDevice::find()->byHash($deviceHash)->one();
-        if ($device) {
-            if ($device->pd_user_id !== $userId) {
-                \Yii::error([
-                    'message' => 'Found different users with equal device hash',
-                    'existUserId' => $device->pd_user_id,
-                    'requestedUserId' => $userId,
-                    'hash' => $deviceHash,
-                ], 'PhoneDevice:hash');
+        $deviceHash = (string)$params['deviceHash']; // only from device page
+        // todo validate hash, length, etc...
+        if ($deviceHash) {
+            if (!DeviceHash::isValid($deviceHash)) {
                 return [
-                    'errors' => [
-                        'Device hash is invalid. Contact to administrator.'
-                    ]
+                    'cmd' => 'updateCurrentCalls',
+                    'twilioDeviceError' => true,
+                    'msg' => 'Device hash is invalid. Please refresh page!',
+                    'hashIsInvalid' => true,
                 ];
             }
-            $deviceId = $device->pd_id;
-        } else {
-            try {
-                $now = date('Y-m-d H:i:s');
-                $device = PhoneDevice::create(
-                    $userId,
-                    $deviceHash,
-                    PhoneDeviceNameGenerator::generate(),
-                    PhoneDeviceIdentity::getId($userId, $deviceHash),
-                    false,
-                    false,
-                    false,
-                    null,
-                    $now,
-                    $now
-                );
-                $device->save(false);
+            $device = PhoneDevice::find()->byHash($deviceHash)->byUserId($userId)->one();
+            if ($device) {
                 $deviceId = $device->pd_id;
-            } catch (\Throwable $e) {
-                \Yii::error([
-                    'message' => $e->getMessage(),
-                    'userId' => $userId,
-                ], 'PhoneDevice:create');
-                return [
-                    'errors' => [
-                        'Device created error. Refresh page.'
-                    ]
-                ];
+            } else {
+                try {
+                    $device = PhoneDevice::create(
+                        $userId,
+                        $deviceHash,
+                        PhoneDeviceNameGenerator::generate(),
+                        PhoneDeviceIdentity::getClientId($userId, $deviceHash),
+                        false,
+                        false,
+                        false,
+                        null,
+                        $now,
+                        $now
+                    );
+                    $device->save(false);
+                    $deviceId = $device->pd_id;
+                } catch (\Throwable $e) {
+                    \Yii::error([
+                        'message' => $e->getMessage(),
+                        'userId' => $userId,
+                    ], 'PhoneDevice:create');
+                    return [
+                        'errors' => [
+                            'Device created error. Refresh page.'
+                        ]
+                    ];
+                }
             }
-        }
 
-        if (isset($params['isTwilioDevicePage']) && (bool)$params['isTwilioDevicePage']) {
             if (!$device->pd_connection_id) {
-                $device->updateConnectionId($connectionIdentity);
+                $device->updateConnectionId($connectionIdentity, $now);
                 $device->save(false);
             }
             if (!$device->isEqualConnection($connectionIdentity)) {

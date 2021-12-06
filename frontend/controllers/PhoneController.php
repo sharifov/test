@@ -38,6 +38,8 @@ use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\model\voip\phoneDevice\device\PhoneDevice;
+use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 use sales\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
@@ -45,6 +47,7 @@ use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -117,7 +120,15 @@ class PhoneController extends FController
     public function actionGetToken()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $username = UserCallIdentity::getId(Auth::id());
+        $deviceId = (int)Yii::$app->request->get('deviceId');
+        $device = PhoneDevice::find()->select(['pd_user_id', 'pd_hash'])->andWhere(['pd_id' => $deviceId])->asArray()->one();
+        if (!$device) {
+            throw new NotFoundHttpException('Not found device with Id: ' . $deviceId);
+        }
+        if ((int)$device['pd_user_id'] !== Auth::id()) {
+            throw new NotFoundHttpException('Not found device Id (' . $deviceId . ') relation with user.');
+        }
+        $username = PhoneDeviceIdentity::getId(Auth::id(), $device['pd_hash']);
         //VarDumper::dump($username, 10, true); exit;
         $data = Yii::$app->communication->getJwtTokenCache($username);
         return $data;

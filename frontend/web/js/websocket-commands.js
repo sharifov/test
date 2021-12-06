@@ -37,12 +37,11 @@ function pushDialogOnTop(chatID)
     }
 }
 
-window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled, isTwilioDevicePage, deviceHash) {
+window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled, deviceHash) {
     socketSend('Call', 'GetCurrentQueueCalls', {
         'userId': userId,
         'finishedCallSid': finishedCallSid,
         'generalLinePriorityIsEnabled': generalLinePriorityIsEnabled,
-        'isTwilioDevicePage': isTwilioDevicePage,
         'deviceHash': deviceHash
     });
 };
@@ -63,7 +62,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             // console.log(e);
 
             if (typeof PhoneWidget === 'object') {
-                window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled, window.isTwilioDevicePage, window.deviceHash);
+                window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled, window.deviceHash);
             }
         };
 
@@ -384,16 +383,18 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'updateCurrentCalls') {
                         if (typeof PhoneWidget === "object") {
+                            if (!PhoneWidget.isInitiated()) {
+                                PhoneWidget.init(window.phoneWidget.initParams);
+                            }
                             if (obj.twilioDeviceError) {
+                                if (obj.hashIsInvalid) {
+                                    PhoneWidget.removeDeviceHash();
+                                }
                                 PhoneWidget.addLog(obj.msg);
                                 createNotify('Phone Widget', obj.msg, 'error')
                             } else {
-                                if (!PhoneWidget.isInitiated()) {
-                                    window.phoneWidget.initParams.deviceId = obj.deviceId;
-                                    PhoneWidget.init(window.phoneWidget.initParams);
-                                    if (window.isTwilioDevicePage) {
-                                        window.phoneWidget.device.initialize.Init(window.remoteLogsEnabled, obj.deviceId);
-                                    }
+                                if (window.isTwilioDevicePage && obj.deviceId) {
+                                    window.phoneWidget.device.initialize.Init(window.remoteLogsEnabled, obj.deviceId);
                                 }
                                 PhoneWidget.updateCurrentCalls(obj.data, obj.userStatus);
                             }

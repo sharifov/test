@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Call;
+use frontend\widgets\newWebPhone\DeviceHash;
 use sales\auth\Auth;
 
 /** @var View $this */
@@ -261,6 +262,8 @@ $conferenceSources = json_encode([
 $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
+$deviceHashKey = DeviceHash::getHashKey(Auth::id());
+
 $js = <<<JS
 window.phoneWidget.initParams = {
     'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',
@@ -312,7 +315,8 @@ window.phoneWidget.initParams = {
     'ajaxCheckUserForCallUrl': '$ajaxCheckUserForCallUrl',
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
-    'isDevicePage': window.isTwilioDevicePage
+    'isDevicePage': window.isTwilioDevicePage,
+    'deviceHashKey': '$deviceHashKey'
 };
 JS;
 $this->registerJs($js);

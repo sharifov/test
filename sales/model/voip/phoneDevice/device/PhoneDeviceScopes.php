@@ -12,6 +12,11 @@ class PhoneDeviceScopes extends \yii\db\ActiveQuery
         return $this->andWhere(['pd_hash' => $hash]);
     }
 
+    public function byUserId(int $userId): self
+    {
+        return $this->andWhere(['pd_user_id' => $userId]);
+    }
+
     /**
     * @return PhoneDevice[]|array
     */

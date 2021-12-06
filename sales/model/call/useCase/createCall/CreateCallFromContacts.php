@@ -48,7 +48,7 @@ class CreateCallFromContacts
 
             $result = \Yii::$app->communication->createCall(
                 new \sales\model\call\useCase\conference\create\CreateCallForm([
-                    'user_identity' => UserCallIdentity::getClientId($form->getCreatedUserId()),
+                    'user_identity' => $form->getDeviceIdentity(),
                     'user_id' => $form->getCreatedUserId(),
                     'to_number' => $form->to,
                     'from_number' => $form->from,

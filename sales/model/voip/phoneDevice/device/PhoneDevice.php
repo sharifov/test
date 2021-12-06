@@ -53,9 +53,10 @@ class PhoneDevice extends \yii\db\ActiveRecord
         return $device;
     }
 
-    public function updateConnectionId(int $connectionId): void
+    public function updateConnectionId(int $connectionId, string $updated): void
     {
         $this->pd_connection_id = $connectionId;
+        $this->pd_updated_dt = $updated;
     }
 
     public function isEqualConnection(int $connectionId): bool

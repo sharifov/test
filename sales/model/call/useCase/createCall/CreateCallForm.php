@@ -11,6 +11,7 @@ use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\voip\phoneDevice\device\PhoneDevice;
 use yii\base\Model;
 
 /**
@@ -28,11 +29,14 @@ use yii\base\Model;
  * @property $fromCase
  * @property $fromLead
  * @property $fromContacts
+ * @property $deviceHash
+ * @property $deviceIdentity
  */
 class CreateCallForm extends Model
 {
     private $createdUserId;
     private $phoneListId;
+    private $deviceIdentity;
 
     public $toUserId;
     public $from;
@@ -44,6 +48,7 @@ class CreateCallForm extends Model
     public $fromCase;
     public $fromLead;
     public $fromContacts;
+    public $deviceHash;
 
     public function __construct(int $createdUserId, $config = [])
     {
@@ -120,6 +125,21 @@ class CreateCallForm extends Model
             ['caseId', 'integer'],
             ['caseId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             ['caseId', 'exist', 'targetClass' => Cases::class, 'targetAttribute' => ['caseId' => 'cs_id'], 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['deviceHash', 'required'],
+            ['deviceHash', 'string'],
+            ['deviceHash', function ($attribute) {
+                $device = PhoneDevice::find()->select(['pd_user_id', 'pd_device_identity'])->byHash($attribute)->asArray()->one();
+                if (!$device) {
+                    $this->addError($attribute, 'Not found device.');
+                    return;
+                }
+                if ((int)$device['pd_user_id'] !== $this->getCreatedUserId()) {
+                    $this->addError($attribute, 'Device is invalid. Error relation with user.');
+                    return;
+                }
+                $this->deviceIdentity = $device['pd_device_identity'];
+            }, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 
@@ -161,5 +181,10 @@ class CreateCallForm extends Model
     public function getCreatedUserId(): int
     {
         return $this->createdUserId;
+    }
+
+    public function getDeviceIdentity(): string
+    {
+        return $this->deviceIdentity;
     }
 }

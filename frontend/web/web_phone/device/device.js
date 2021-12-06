@@ -1,15 +1,19 @@
 (function () {
     function Init(remoteLogsEnabled, deviceId) {
         if (initiated) {
+            if (initDeviceId !== deviceId) {
+                createNotify('Phone Device', 'Device Id was changed. Please refresh page!', 'error');
+            }
             console.log('device already initiated');
             return;
         }
 
         initiated = true;
+        initDeviceId = deviceId;
 
         // console.log("Requesting Twilio Access Token...");
         PhoneWidget.addLog("Requesting Twilio Access Token...");
-        $.getJSON('/phone/get-token')
+        $.getJSON('/phone/get-token?deviceId=' + deviceId)
             .then(function (response) {
                 // console.log("Got a Twilio Access token.");
                 PhoneWidget.addLog("Got a Twilio Access token.");
@@ -139,7 +143,7 @@
 
             const updateToken = () => {
                 PhoneWidget.addLog("Update Twilio Access Token...");
-                $.getJSON('/phone/get-token')
+                $.getJSON('/phone/get-token?deviceId=' + deviceId)
                     .then(function (response) {
                         //console.log("Got a Twilio Access token.");
                         PhoneWidget.addLog("Got a Twilio Access token.");
@@ -192,7 +196,7 @@
                     PhoneWidget.removeTwilioInternalIncomingConnection();
                     PhoneWidget.soundDisconnect();
                     PhoneWidget.incomingSoundOff();
-                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled, true, window.deviceHash);
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled, null);
                 });
                 call.on('error', error => {
                     createNotify('Call error', 'More info in logs panel', 'error');
@@ -311,6 +315,7 @@
     }
 
     let initiated = false;
+    let initDeviceId = null;
 
     window.phoneWidget.device.initialize = {
         Init: Init

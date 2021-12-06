@@ -76,7 +76,7 @@
                 })
         };
 
-        this.accept = function (call) {
+        this.accept = function (call, deviceHash) {
             window.phoneWidget.notifier.off(call.data.callSid);
             PhoneWidget.audio.incoming.off(call.data.callSid);
             $.ajax({
@@ -85,7 +85,8 @@
                 dataType: 'json',
                 data: {
                     act: 'accept',
-                    call_sid: call.data.callSid
+                    call_sid: call.data.callSid,
+                    deviceHash: deviceHash
                 }
             })
                 .done(function (data) {
@@ -105,7 +106,7 @@
                 })
         };
 
-        this.acceptWarmTransfer = function (call) {
+        this.acceptWarmTransfer = function (call, deviceHash) {
             window.phoneWidget.notifier.off(call.data.callSid);
             PhoneWidget.audio.incoming.off(call.data.callSid);
             $.ajax({
@@ -113,7 +114,8 @@
                 url: this.settings.acceptWarmTransferCallUrl,
                 dataType: 'json',
                 data: {
-                    call_sid: call.data.callSid
+                    call_sid: call.data.callSid,
+                    deviceHash: deviceHash
                 }
             })
                 .done(function (data) {
@@ -175,7 +177,7 @@
                 })
         };
 
-        this.returnHoldCall = function (call) {
+        this.returnHoldCall = function (call, deviceHash) {
             window.phoneWidget.notifier.off(call.data.callSid);
             PhoneWidget.audio.incoming.off(call.data.callSid);
             $.ajax({
@@ -183,7 +185,8 @@
                 url: this.settings.returnHoldCallUrl,
                 dataType: 'json',
                 data: {
-                    call_sid: call.data.callSid
+                    call_sid: call.data.callSid,
+                    deviceHash: deviceHash
                 }
             })
                 .done(function (data) {
@@ -445,7 +448,7 @@
                 })
         };
 
-        this.acceptPriorityCall = function (key) {
+        this.acceptPriorityCall = function (key, deviceHash) {
             PhoneWidget.queues.priority.accept();
             window.phoneWidget.notifier.off(key);
             PhoneWidget.audio.incoming.off(key);
@@ -455,6 +458,7 @@
                 dataType: 'json',
                 data: {
                     act: 'accept',
+                    deviceHash: deviceHash
                 }
             })
                 .done(function (data) {
@@ -551,10 +555,11 @@
             });
         };
 
-        this.joinConference = function (source_type, source_type_id, call_sid) {
+        this.joinConference = function (source_type, source_type_id, call_sid, deviceHash) {
             let data = {
                 'call_sid': call_sid,
-                'source_type_id': source_type_id
+                'source_type_id': source_type_id,
+                'deviceHash': deviceHash
             };
             data[this.settings.csrf_param] = this.settings.csrf_token;
             $.ajax({
@@ -606,11 +611,13 @@
             }, 'json');
         };
 
-        this.createInternalCall = function (toUserId) {
+        // deprecated
+        this.createInternalCall = function (toUserId, deviceHash) {
             $.ajax({
                 type: 'post',
                 data: {
-                    'user_id': toUserId
+                    'user_id': toUserId,
+                    'deviceHash': deviceHash
                 },
                 url: this.settings.createInternalCallUrl
             })

@@ -8,6 +8,6 @@ class PhoneDeviceNameGenerator
 {
     public static function generate(): string
     {
-        return UuidHelper::uuid();
+        return 'Device name #' . substr(str_replace('-', '', UuidHelper::uuid()), 0, 10);
     }
 }
