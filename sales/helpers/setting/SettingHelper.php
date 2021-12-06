@@ -746,8 +746,8 @@ class SettingHelper
     public static function leadRedialQCallAttemptsFromTimeValidationEnabled(): bool
     {
         return (bool) (Yii::$app->params['settings']['lead_redial_qcall_attempts_from_time_validation_enabled'] ?? true);
-	}
-        
+    }
+
     public static function getDbCryptBlockEncryptionMode(): ?string
     {
         return \Yii::$app->params['settings']['db_crypt_block_encryption_mode'] ?? null;
