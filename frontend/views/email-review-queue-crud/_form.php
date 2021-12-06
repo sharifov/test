@@ -2,6 +2,7 @@
 
 use common\models\Department;
 use common\models\Project;
+use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use sales\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -29,7 +30,7 @@ use yii\widgets\ActiveForm;
             ] : [],
         ]) ?>
 
-        <?= $form->field($model, 'erq_status_id')->textInput() ?>
+        <?= $form->field($model, 'erq_status_id')->dropDownList(EmailReviewQueueStatus::getList(), ['prompt' => '--']) ?>
 
         <?= $form->field($model, 'erq_user_reviewer_id')->widget(UserSelect2Widget::class, [
             'data' => $model->erq_user_reviewer_id ? [

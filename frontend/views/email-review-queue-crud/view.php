@@ -1,6 +1,7 @@
 <?php
 
 use sales\model\emailReviewQueue\entity\EmailReviewQueue;
+use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -41,7 +42,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'erq_project_id:projectName',
             'erq_department_id:department',
             'erq_owner_id:userName',
-            'erq_status_id',
+            [
+                'attribute' => 'erq_status_id',
+                'value' => static function (EmailReviewQueue $model) {
+                    return EmailReviewQueueStatus::asFormat($model->erq_status_id);
+                },
+                'format' => 'raw',
+            ],
             'erq_user_reviewer_id:userName',
             'erq_created_dt:byUserDateTime',
             'erq_updated_dt:byUserDateTime',
