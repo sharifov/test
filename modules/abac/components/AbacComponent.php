@@ -141,9 +141,13 @@ class AbacComponent extends Component
             $subject = new \stdClass();
         }
         try {
-            if (!$user) {
+            if (!$user && (Yii::$app instanceof \yii\web\Application) && Yii::$app->id === 'app-frontend') {
                 $user = Auth::user();
             }
+            if (!$user) {
+                return false;
+            }
+
             $subject->env = $this->getEnv($user);
             //$sub->data = $subject;
 
@@ -151,7 +155,7 @@ class AbacComponent extends Component
                 return true;
             }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'AbacComponent::can');
+            Yii::error(AppHelper::throwableLog($throwable, true), 'AbacComponent::can');
             //VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
             return null;
         }
