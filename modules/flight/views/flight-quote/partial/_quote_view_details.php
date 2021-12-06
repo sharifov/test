@@ -15,7 +15,7 @@ use yii\helpers\Html;
 
 <div class="row">
     <?php if ($flightQuote) : ?>
-    <div class="col-md-6">
+    <div class="col-md-12">
         <h2><i class="fa fa-info-circle"></i> Product Quote Info:</h2>
         <div class="table-responsive">
             <table class="table table-striped table-bordered">
@@ -138,7 +138,7 @@ use yii\helpers\Html;
             </div>
         <?php endif ?>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-12">
         <h2><i class="fa fa-plane"></i> Flight Trips:</h2>
         <?php foreach ($flightQuote->flightQuoteTrips as $tripKey => $trip) :?>
                 <?php $segments = $trip->flightQuoteSegments;?>
