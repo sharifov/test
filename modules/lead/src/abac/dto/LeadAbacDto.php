@@ -40,7 +40,6 @@ class LeadAbacDto extends \stdClass
     /**
      * @param Lead|null $lead
      * @param int $userId
-     * @throws \Exception
      */
     public function __construct(?Lead $lead, int $userId)
     {

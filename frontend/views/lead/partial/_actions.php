@@ -18,6 +18,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
 use yii\bootstrap4\Modal;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 
 $leadModel = $leadForm->getLead();
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadModel->id]);
@@ -26,7 +28,7 @@ $userId = Yii::$app->user->id;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-
+$leadAbacDto = new LeadAbacDto($leadModel, $userId);
 ?>
 <?php
 
@@ -111,13 +113,13 @@ $user = Yii::$app->user->identity;
             $buttonsSubAction[] = $buttonSnooze;
         }
         $buttonsSubAction[] = $buttonTrash;
-        if ($leadModel->isSold()) {
+        /*if ($leadModel->isSold()) {
             if ($user->isAdmin()) {
                 $buttonsSubAction[] = $buttonClone;
             }
         } else {
             $buttonsSubAction[] = $buttonClone;
-        }
+        }*/
     }
     if ($leadModel->isSnooze()) {
         $buttonsSubAction[] = $buttonOnWake;
@@ -129,7 +131,7 @@ $user = Yii::$app->user->identity;
             $buttonsSubAction[] = $buttonTake;
         }
     }
-    if ($viwModeSuperAdminCondition) {
+    /*if ($viwModeSuperAdminCondition) {
         if ($leadModel->isSold()) {
             if ($user->isAdmin()) {
                 $buttonsSubAction[] = $buttonClone;
@@ -147,8 +149,12 @@ $user = Yii::$app->user->identity;
         } else {
             $buttonsSubAction[] = $buttonClone;
         }
-    }
+    }*/
 
+    /** @abac $leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE, Btn clone lead */
+    if (Auth::can('leadSection', ['lead' => $leadModel]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE)) {
+        $buttonsSubAction[] = $buttonClone;
+    }
 
     $project = $leadModel->project;
     $projectStyles = '';
@@ -835,7 +841,9 @@ $js = <<<JS
         $('#modal-sm-label').html('Clone Lead');
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            modal.modal('show');
+            if (xhr.status != 403) {
+                modal.modal('show');
+            }            
         });
     });
     

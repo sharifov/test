@@ -2592,8 +2592,14 @@ class LeadController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        if ($lead->isSold() && !$user->isAdmin()) {
+        /*if ($lead->isSold() && !$user->isAdmin()) {
             throw new ForbiddenHttpException('Access denied! Lead is sold.');
+        }*/
+
+        $leadAbacDto = new LeadAbacDto($lead, $user->id);
+        /** @abac $leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE, Act clone lead */
+        if (!(Auth::can('leadSection', ['lead' => $lead]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE))) {
+            throw new ForbiddenHttpException('Access denied');
         }
 
         $form = new CloneReasonForm($lead);
