@@ -137,6 +137,11 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 $originalQuote = $this->productQuoteRepository->find($form->originProductQuoteId);
                 $productQuoteRefund = $this->productQuoteRefundRepository->find($form->productQuoteRefundId);
 
+                /** @abac $pqrAbacDto, ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_ACCESS_DETAILS, Product quote refund send email */
+                if (!Yii::$app->abac->can(new ProductQuoteRefundAbacDto($productQuoteRefund), ProductQuoteRefundAbacObject::OBJ_PRODUCT_QUOTE_REFUND, ProductQuoteRefundAbacObject::ACTION_SEND_VOL_REFUND_EMAIL)) {
+                    throw new ForbiddenHttpException('Access denied');
+                }
+
                 $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
                 $emailData['original_quote'] = $originalQuote->serialize();
                 $emailData['refund'] = $productQuoteRefund->serialize();

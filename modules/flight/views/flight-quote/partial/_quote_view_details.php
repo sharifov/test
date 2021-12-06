@@ -178,7 +178,11 @@ use yii\helpers\Html;
                                         </span>
                                     </div>
                                 <?php endif;?>
-                                <div class="trip-detailed__segment segment" style="background-color: <?=$segment->getTicketColor()?>">
+                                <div
+                                    class="trip-detailed__segment segment"
+                                    style="background-color: <?=$segment->getTicketColor()?>"
+                                    data-id="<?php echo $segment->fqs_id?>"
+                                    data-iata="<?php echo $segment->fqs_departure_airport_iata . ':' . $segment->fqs_arrival_airport_iata ?>">
                                     <div class="segment__wrapper">
                                         <div class="segment__options">
                                             <?= Html::img($segment->getAirlineLogoImg(), ['alt' => $segment->fqs_marketing_airline, 'class' => 'segment__airline-logo']) ?>

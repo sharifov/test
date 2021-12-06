@@ -1264,10 +1264,6 @@ class FlightQuoteController extends FController
             $tripType = (int) Yii::$app->request->post('tripType', 0);
             $changeId = Yii::$app->request->get('change_id');
 
-            if (($productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId])) && $productQuoteChange->isTypeVoluntary()) {
-                $withBaggageForm = false;
-            }
-
             try {
                 if (!$dump = Yii::$app->request->post('reservationDump')) {
                     throw new \RuntimeException('Param dump is required');

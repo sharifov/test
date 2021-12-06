@@ -398,15 +398,15 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             }
             return $stops;
         };
-        if ($this->flightQuoteSegmentPaxBaggages) {
-            $fields['baggage'] = function () {
-                $baggages = [];
-                foreach ($this->flightQuoteSegmentPaxBaggages as $baggage) {
-                    $baggages[] = $baggage->toArray();
-                }
-                return $baggages;
-            };
-        }
+
+        $fields['baggage'] = function () {
+            $baggages = [];
+            foreach ($this->flightQuoteSegmentPaxBaggages as $baggage) {
+                $baggages[] = $baggage->toArray();
+            }
+            return $baggages;
+        };
+
         if ($this->flightQuoteSegmentPaxBaggageCharges) {
             $fields['baggage_charges'] = function () {
                 $baggageCharges = [];

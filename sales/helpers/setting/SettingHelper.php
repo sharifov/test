@@ -747,4 +747,24 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['phone_device_logs_enabled'] ?? false);
     }
+
+    public static function leadRedialQCallAttemptsFromTimeValidationEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['lead_redial_qcall_attempts_from_time_validation_enabled'] ?? true);
+    }
+
+    public static function getDbCryptBlockEncryptionMode(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_block_encryption_mode'] ?? null;
+    }
+
+    public static function getDbCryptKeyStr(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_key_str'] ?? null;
+    }
+
+    public static function getDbCryptInitVector(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_init_vector'] ?? null;
+    }
 }

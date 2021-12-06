@@ -364,7 +364,7 @@ class CommunicationController extends ApiBaseController
                 $response['error_code'] = 11;
             }
 
-            $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || Call::isTrustedVerstat($postCall['StirVerstat'] ?? '');
+            $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || (empty($postCall['ForwardedFrom']) && Call::isTrustedVerstat($postCall['StirVerstat'] ?? ''));
 
             try {
                 $this->callService->guardFromInternalCall($postCall);
@@ -463,13 +463,13 @@ class CommunicationController extends ApiBaseController
                                 );
                                 $logExecutionTime->end();
 
-                                Yii::info([
-                                    'callId' => $callModel->c_id,
-                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
-                                    'type' => $callLogFilterGuard->getTypeName(),
-                                    'phone' => $callModel->c_from,
-                                    'result' => $result,
-                                ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
+//                                Yii::info([
+//                                    'callId' => $callModel->c_id,
+//                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
+//                                    'type' => $callLogFilterGuard->getTypeName(),
+//                                    'phone' => $callModel->c_from,
+//                                    'result' => $result,
+//                                ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
 
                                 $redialStatus = $result['data']['result']['status'] ?? null;
                                 if ($redialStatus) {

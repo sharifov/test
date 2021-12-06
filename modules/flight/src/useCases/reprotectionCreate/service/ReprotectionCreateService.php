@@ -482,7 +482,7 @@ class ReprotectionCreateService
                     $linkToCase = Purifier::createCaseShortLink($caseRefund);
                     Notifications::createAndPublish(
                         $caseRefund->cs_user_id,
-                        'Exchange Case (' . $case->cs_id . ') update',
+                        'Refund Case (' . $case->cs_id . ') update',
                         'New Schedule Change happened: (' . $linkToCase . '). Refund disabled.',
                         Notifications::TYPE_WARNING,
                         true
