@@ -1736,7 +1736,8 @@ class FlightController extends BaseController
                                         "departureLocation": "Paris",
                                         "arrivalLocation": "Los Angeles",
                                         "stop": 0,
-                                        "stops": []
+                                        "stops": [],
+                                        "baggage": []
                                     },
                                     {
                                         "uid": "fqs6116010cebd9a",
@@ -1760,7 +1761,8 @@ class FlightController extends BaseController
                                         "departureLocation": "Los Angeles",
                                         "arrivalLocation": "Sacramento",
                                         "stop": 0,
-                                        "stops": []
+                                        "stops": [],
+                                        "baggage": []
                                     }
                                 ]
                             },
@@ -1815,7 +1817,8 @@ class FlightController extends BaseController
                                         "departureLocation": "Seattle",
                                         "arrivalLocation": "Minneapolis",
                                         "stop": 0,
-                                        "stops": []
+                                        "stops": [],
+                                        "baggage": []
                                     },
                                     {
                                         "uid": "fqs6116010ceccdb",
@@ -1839,7 +1842,8 @@ class FlightController extends BaseController
                                         "departureLocation": "Minneapolis",
                                         "arrivalLocation": "Paris",
                                         "stop": 0,
-                                        "stops": []
+                                        "stops": [],
+                                        "baggage": []
                                     },
                                     {
                                         "uid": "fqs6116010ced118",
@@ -1873,7 +1877,8 @@ class FlightController extends BaseController
                                                 "departureDateTime": "2021-09-11 15:20",
                                                 "arrivalDateTime": "2021-09-11 13:55"
                                             }
-                                        ]
+                                        ],
+                                        "baggage": []
                                     }
                                 ]
                             }
