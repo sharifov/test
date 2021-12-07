@@ -256,7 +256,8 @@ class FlightQuoteSearchForm extends Model
                 $item['showed'] = true;
                 if (!empty($leadFlight)) {
                     foreach ($leadFlight as $tripKey => $queryTrip) {
-                        if (!empty($item['trips']) && isset($this->airportExactMatch[$tripKey])
+                        if (
+                            !empty($item['trips']) && isset($this->airportExactMatch[$tripKey])
                             && $this->airportExactMatch[$tripKey]
                             && !empty($item['trips'][$tripKey]['segments'])
                             && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
