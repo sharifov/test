@@ -57,9 +57,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::class,
                 'template' => '{view} {update} {delete}',
                 'visibleButtons' => [
-                    'update' => static function (LeadDataKey $model) {
-                        return !$model->ldk_is_system;
-                    },
                     'delete' => static function (LeadDataKey $model) {
                         return !$model->ldk_is_system;
                     },
