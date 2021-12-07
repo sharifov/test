@@ -207,20 +207,31 @@ class FlightQuoteSearchForm extends Model
         }
 
         if (!empty($this->departureStartTimeList) && !empty($this->departureEndTimeList)) {
-            $quotes['results'] = array_filter($quotes['results'], function ($item) {
-                foreach ($item['time'] as $tripKey => $time) {
-                    if ($time['departure'] && $this->departureStartTimeList[$tripKey] != '' && $this->departureEndTimeList[$tripKey] != '') {
-                        $departureDate = new \DateTime($time['departure']);
-                        $departureMinutesOfDay = (int)$departureDate->format('i') + (int)$departureDate->format('H') * 60;
-                        $departureStartMinutesOfDay = substr($this->departureStartTimeList[$tripKey], 0, 2) * 60 + substr($this->departureStartTimeList[$tripKey], 3, 2);
-                        $departureEndMinutesOfDay = substr($this->departureEndTimeList[$tripKey], 0, 2) * 60 + substr($this->departureEndTimeList[$tripKey], 3, 2);
-                        if ($departureMinutesOfDay < $departureStartMinutesOfDay || $departureMinutesOfDay > $departureEndMinutesOfDay) {
-                            return false;
+            $validationOk = false;
+            foreach ($this->departureStartTimeList as $tripKey => $time) {
+                if ($this->departureStartTimeList[$tripKey] != '' && $this->departureEndTimeList[$tripKey] != '' && substr($this->departureStartTimeList[$tripKey], 0, 2) * 60 + substr($this->departureStartTimeList[$tripKey], 3, 2) > substr($this->departureEndTimeList[$tripKey], 0, 2) * 60 + substr($this->departureEndTimeList[$tripKey], 3, 2)) {
+                    $this->addError("departureStartTimeList", 'check time range!');
+                    $this->addError("departureEndTimeList", 'check time range!');
+                } else {
+                    $validationOk = true;
+                }
+            }
+            if ($validationOk) {
+                $quotes['results'] = array_filter($quotes['results'], function ($item) {
+                    foreach ($item['time'] as $tripKey => $time) {
+                        if ($time['departure'] && $this->departureStartTimeList[$tripKey] != '' && $this->departureEndTimeList[$tripKey] != '') {
+                            $departureDate = new \DateTime($time['departure']);
+                            $departureMinutesOfDay = (int)$departureDate->format('i') + (int)$departureDate->format('H') * 60;
+                            $departureStartMinutesOfDay = substr($this->departureStartTimeList[$tripKey], 0, 2) * 60 + substr($this->departureStartTimeList[$tripKey], 3, 2);
+                            $departureEndMinutesOfDay = substr($this->departureEndTimeList[$tripKey], 0, 2) * 60 + substr($this->departureEndTimeList[$tripKey], 3, 2);
+                            if ($departureMinutesOfDay < $departureStartMinutesOfDay || $departureMinutesOfDay > $departureEndMinutesOfDay) {
+                                return false;
+                            }
                         }
                     }
-                }
-                return true;
-            }, ARRAY_FILTER_USE_BOTH);
+                    return true;
+                }, ARRAY_FILTER_USE_BOTH);
+            }
         }
 
         if (!empty($this->arrivalStartTimeList) && !empty($this->arrivalEndTimeList)) {
