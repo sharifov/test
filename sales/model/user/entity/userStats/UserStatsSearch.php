@@ -343,7 +343,7 @@ class UserStatsSearch extends Model
             Employee::tableName() . '.id' => $this->id,
         ]);
 
-        //$query->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($this->currentUser->getId())]);
+        $query->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($this->currentUser->getId())]);
 
         return $dataProvider;
     }
