@@ -17,6 +17,7 @@ use sales\services\parsingDump\lib\worldSpan\Reservation;
 use sales\services\parsingDump\lib\worldSpan\WorldSpan;
 use sales\services\parsingDump\ReservationService;
 use sales\services\phone\checkPhone\CheckPhoneNeutrinoService;
+use sales\services\system\DbViewCryptDictionary;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -254,6 +255,22 @@ class ToolsController extends FController
         return $this->render('db-info', [
             'tables' => $tables,
             'schema' => $schema,
+        ]);
+    }
+
+    public function actionDbView(): string
+    {
+        $db = Yii::$app->getDb();
+        $schema = $db->createCommand('select database()')->queryScalar();
+        $tables = $db->createCommand('SELECT * FROM information_schema.tables WHERE table_schema = :schema AND table_type = :type', [
+            ':schema' => $schema,
+            ':type' => 'VIEW',
+        ])->queryAll();
+
+        return $this->render('db-view', [
+            'tables' => $tables,
+            'schema' => $schema,
+            'viewCreateData' => DbViewCryptDictionary::getSources(),
         ]);
     }
 

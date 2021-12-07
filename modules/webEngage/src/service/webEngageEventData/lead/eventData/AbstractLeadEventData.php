@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\webEngage\src\service\webEngageEventData\lead;
+namespace modules\webEngage\src\service\webEngageEventData\lead\eventData;
 
 use common\models\Lead;
 

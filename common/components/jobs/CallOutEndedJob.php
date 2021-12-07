@@ -3,9 +3,11 @@
 namespace common\components\jobs;
 
 use common\models\Call;
+use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\WebEngageRequestService;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientData\entity\ClientData;
 use sales\model\clientData\entity\ClientDataQuery;
 use sales\model\clientDataKey\entity\ClientDataKeyDictionary;
@@ -53,18 +55,26 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                         'eventName' => WebEngageDictionary::EVENT_CALL_FIRST_CALL_NOT_PICKED,
                         'eventTime' => date('Y-m-d\TH:i:sO')
                     ];
+                    $webEngageEventForm = new WebEngageEventForm();
+                    if (!$webEngageEventForm->load($data)) {
+                        throw new \RuntimeException('WebEngageEventForm not loaded');
+                    }
                     $webEngageRequestService = new WebEngageRequestService();
-                    $webEngageRequestService->addEvent($data);
+                    $webEngageRequestService->addEvent($webEngageEventForm);
                 }
 
-                if ($call->c_call_duration > 2 && $call->isStatusCompleted()) {
+                if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
                     $data = [
                         'anonymousId' => (string) $this->clientId,
                         'eventName' => WebEngageDictionary::EVENT_CALL_USER_PICKED_CALL,
                         'eventTime' => date('Y-m-d\TH:i:sO')
                     ];
+                    $webEngageEventForm = new WebEngageEventForm();
+                    if (!$webEngageEventForm->load($data)) {
+                        throw new \RuntimeException('WebEngageEventForm not loaded');
+                    }
                     $webEngageRequestService = new WebEngageRequestService();
-                    $webEngageRequestService->addEvent($data);
+                    $webEngageRequestService->addEvent($webEngageEventForm);
                 }
             } catch (\Throwable $e) {
                 \Yii::error(AppHelper::throwableLog($e, true), 'error:CallOutEndedJob:Throwable');

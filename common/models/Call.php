@@ -1503,7 +1503,7 @@ class Call extends \yii\db\ActiveRecord
 //                && (!$conferenceBase || ($conferenceBase && !$this->c_conference_id))
             ) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
-                if ($this->isOut() && $this->getDataCreatorType()->isClient()) {
+                if ($this->c_client_id && $this->isOut() && $this->getDataCreatorType()->isClient()) {
                     $callOutEndedJob = new CallOutEndedJob($this->c_client_id, $this->c_id);
                     Yii::$app->queue_job->priority(10)->push($callOutEndedJob);
                 }

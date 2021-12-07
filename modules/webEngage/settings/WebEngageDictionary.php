@@ -13,9 +13,10 @@ class WebEngageDictionary
     public const EVENT_LEAD_CREATED = 'LeadCreated';
     public const EVENT_LEAD_BOOKED = 'LeadBooked';
     public const EVENT_LEAD_SOLD = 'LeadSold';
-    public const EVENT_LEAD_TRASHED = 'LeadTrashed ';
+    public const EVENT_LEAD_TRASHED = 'LeadTrashed';
     public const EVENT_CALL_FIRST_CALL_NOT_PICKED = 'FirstCallNotPicked';
     public const EVENT_CALL_USER_PICKED_CALL = 'UserPickedCall';
+    public const EVENT_LEAD_EMAIL_REPLIED = 'LeadEmailReplied';
 
     public const EVENT_LIST = [
         self::EVENT_LEAD_CREATED => self::EVENT_LEAD_CREATED,
@@ -24,5 +25,6 @@ class WebEngageDictionary
         self::EVENT_LEAD_TRASHED => self::EVENT_LEAD_TRASHED,
         self::EVENT_CALL_FIRST_CALL_NOT_PICKED => self::EVENT_CALL_FIRST_CALL_NOT_PICKED,
         self::EVENT_CALL_USER_PICKED_CALL => self::EVENT_CALL_USER_PICKED_CALL,
+        self::EVENT_LEAD_EMAIL_REPLIED => self::EVENT_LEAD_EMAIL_REPLIED,
     ];
 }

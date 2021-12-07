@@ -825,6 +825,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Check Exclude IP'), 'url' => ['/tools/check-exclude-ip']],
                         ['label' => Yii::t('menu', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
                         ['label' => Yii::t('menu', 'DB Info'), 'url' => ['/tools/db-info']],
+                        ['label' => Yii::t('menu', 'DB View'), 'url' => ['/tools/db-view'], 'icon' => 'database'],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
                     ]

@@ -3,6 +3,7 @@
 namespace modules\webEngage\form;
 
 use common\components\validators\IsArrayValidator;
+use modules\webEngage\settings\WebEngageDictionary;
 use sales\traits\FormNameModelTrait;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
@@ -25,6 +26,7 @@ class WebEngageEventForm extends Model
         return [
              [['eventName'], 'required'],
              [['eventName'], 'string', 'max' => 100],
+             [['eventName'], 'in', 'range' => array_keys(WebEngageDictionary::EVENT_LIST)],
 
              ['userId', 'required', 'when' => function ($model) {
                  return empty($model->anonymousId);
@@ -48,5 +50,10 @@ class WebEngageEventForm extends Model
         if (!ArrayHelper::isAssociative($this->eventData)) {
             $this->addError($attribute, 'EventData attributes must be associative array');
         }
+    }
+
+    public function formName(): string
+    {
+        return '';
     }
 }

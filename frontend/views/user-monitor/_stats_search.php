@@ -45,7 +45,7 @@ use yii\widgets\ActiveForm;
                                 'startAttribute' => 'startTime',
                                 'endAttribute' => 'endTime',
                             ])->label('User Monitor Start/End Date');
-                            ?>
+?>
                         </div>
                     </div>
                 </div>

@@ -33,7 +33,7 @@ use yii\widgets\ActiveForm;
                                 ]
                             ]
                         ])->label('Chat Created Date / Message Send Date');
-                    ?>
+?>
                 </div>
             </div>
         </div>
