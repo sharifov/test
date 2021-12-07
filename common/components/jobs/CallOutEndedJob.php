@@ -63,7 +63,7 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                     $webEngageRequestService->addEvent($webEngageEventForm);
                 }
 
-                if ($call->c_call_duration > SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
+                if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
                     $data = [
                         'anonymousId' => (string) $this->clientId,
                         'eventName' => WebEngageDictionary::EVENT_CALL_USER_PICKED_CALL,
