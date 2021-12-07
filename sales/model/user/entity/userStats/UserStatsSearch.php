@@ -137,8 +137,8 @@ class UserStatsSearch extends Model
             ],
         ]);
 
-        $to = date("Y-m-d 23:59:59");
-        $from = date("Y-m-01 00:00:00");
+        $to = date("Y-m-d");
+        $from = date("Y-m-01");
 
         $this->load($params);
 
@@ -288,9 +288,7 @@ class UserStatsSearch extends Model
                     ->from(Lead::tableName())
                     ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
                     ->where(ProfitSplit::tableName() . '.ps_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $from, ':endDt' => $to,
-                    ])
+                    ->andWhere(['BETWEEN', 'DATE(created)', $from, $to])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT)) {
@@ -301,9 +299,7 @@ class UserStatsSearch extends Model
                     ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
                     ->where(ProfitSplit::tableName() . '.ps_user_id = ' . Employee::tableName() . '.id')
                     ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_SOLD])
-                    ->andWhere(Lead::tableName() . '.l_status_dt BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $from, ':endDt' => $to,
-                    ])
+                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
             ]);
         }
 
