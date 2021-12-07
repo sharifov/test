@@ -281,14 +281,7 @@ class UserStatsSearch extends Model
                     ->where(['status' => Lead::STATUS_SOLD])
                     ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
             ]);
-//vred((new Query())
-//    ->select(['COUNT(' . Lead::tableName() . '.id)'])
-//    ->from(Lead::tableName())
-//    ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
-//    ->where([ProfitSplit::tableName() . '.ps_user_id' => Employee::tableName() . '.id'])
-//    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
-//        ':startDt' => $from, ':endDt' => $to,
-//    ])->all());
+
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT => (new Query())
                     ->select(['COUNT(' . Lead::tableName() . '.id)'])
