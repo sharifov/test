@@ -116,4 +116,10 @@ class DbViewCryptService
             FROM
                 {$this->viewName}; ";
     }
+
+    public static function viewCheck(string $viewName, array $tables): bool
+    {
+        $tableName = str_replace(DbViewCryptDictionary::VIEW_POST_FIX, '', $viewName);
+        return array_key_exists($tableName, $tables);
+    }
 }
