@@ -15,19 +15,20 @@ use yii\helpers\ArrayHelper;
  * @property array $stops
  * @property int $price
  * @property array $airlines
+ * @property array $tripMaxDurationHours
+ * @property array $tripMaxDurationMinutes
  * @property bool $baggage
  * @property bool $airportChange
+ * @property array $airportExactMatch
+ * @property array $excludeConnectionAirports
  * @property string $sortBy
- * @property string $topCriteria
+ * @property array $topCriteria
  * @property mixed $rank
- * @property string $departure
  * @property string $departureStartTimeList
  * @property string $departureEndTimeList
- * @property int $arrivalMin
- * @property int $arrivalMax
  * @property string $arrivalStartTimeList
  * @property string $arrivalEndTimeList
- * @property string $filterIsShown
+ * @property int $filterIsShown
  */
 class FlightQuoteSearchForm extends Model
 {
