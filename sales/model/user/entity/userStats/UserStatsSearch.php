@@ -13,6 +13,7 @@ use DateTime;
 use sales\access\EmployeeGroupAccess;
 use sales\behaviors\userModelSetting\UserModelSettingSearchBehavior;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\user\entity\ShiftTime;
 use sales\model\userModelSetting\service\UserModelSettingDictionary;
 use sales\traits\UserModelSettingTrait;
@@ -323,11 +324,10 @@ class UserStatsSearch extends Model
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT => (new Query())
-                    ->select(['COUNT(id)'])
-                    ->from(Lead::tableName())
-                    ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
-                    ->where(['status' => Lead::STATUS_SOLD])
-                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $this->startDt, $this->endDt])
+                    ->select(['COUNT(' . LeadUserConversion::tableName() . '.luc_lead_id)'])
+                    ->from(LeadUserConversion::tableName())
+                    ->where('luc_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(['BETWEEN', 'luc_created_dt', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_PHONE)) {
