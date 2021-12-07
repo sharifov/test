@@ -137,8 +137,8 @@ class UserStatsSearch extends Model
             ],
         ]);
 
-        $to = date("Y-m-d");
-        $from = date("Y-m-01");
+        $to = date("Y-m-d 23:59:59");
+        $from = date("Y-m-01 00:00:00");
 
         $this->load($params);
 
