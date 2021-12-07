@@ -17,10 +17,7 @@ class LeadWebEngageListener
     {
         try {
             $lead = $event->getLead();
-            if (
-                in_array($lead->status, LeadEventDictionary::STATUS_PROCESSED_LIST, false) &&
-                (new WebEngageSettings())->isEnabled()
-            ) {
+            if ((new WebEngageSettings())->isEnabled()) {
                 $job = new WebEngageLeadRequestJob();
                 $job->lead_id = $lead->id;
                 Yii::$app->queue_job->priority(100)->push($job);

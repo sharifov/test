@@ -109,6 +109,7 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
+use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\src\service\webEngageEventData\lead\LeadEventDataService;
 use modules\webEngage\src\service\WebEngageRequestService;
 use Mpdf\Tag\P;
@@ -2212,7 +2213,11 @@ class TestController extends FController
                 ]
             ];
 
-            $x = $webEngageRequestService->addEvent($data);
+            $webEngageEventForm = new WebEngageEventForm();
+            if (!$webEngageEventForm->load($data)) {
+                throw new \RuntimeException('WebEngageEventForm not loaded');
+            }
+            $x = $webEngageRequestService->addEvent($webEngageEventForm);
 
             \yii\helpers\VarDumper::dump($x, 20, true);
             exit();
