@@ -17,22 +17,19 @@ use yii\helpers\VarDumper;
  * @property array $stops
  * @property int $price
  * @property array $airlines
- * @property string $tripDuration
  * @property bool $baggage
  * @property bool $airportChange
  * @property string $sortBy
  * @property string $topCriteria
  * @property mixed $rank
  * @property string $departure
- * @property int $departureMin
- * @property int $departureMax
- * @property string $departureStart
- * @property string $departureEnd
- * @property string $arrival
+ * @property string $departureStartTimeList
+ * @property string $departureEndTimeList
  * @property int $arrivalMin
  * @property int $arrivalMax
- * @property string $arrivalStart
- * @property string $arrivalEnd
+ * @property string $arrivalStartTimeList
+ * @property string $arrivalEndTimeList
+ * @property string $filterIsShown
  */
 class FlightQuoteSearchForm extends Model
 {
@@ -44,11 +41,17 @@ class FlightQuoteSearchForm extends Model
 
     public $airlines;
 
-    public $tripDuration;
+    public $tripMaxDurationHours;
+
+    public $tripMaxDurationMinutes;
 
     public $baggage;
 
     public $airportChange;
+
+    public $airportExactMatch;
+
+    public $excludeConnectionAirports;
 
     public $sortBy;
 
@@ -56,25 +59,15 @@ class FlightQuoteSearchForm extends Model
 
     public $rank = '0-10';
 
-    public string $departure = '';
+    public $departureStartTimeList;
 
-    public int $departureMin = 0;
+    public $departureEndTimeList;
 
-    public int $departureMax = 1440;
+    public $arrivalStartTimeList;
 
-    public string $departureStart = '';
+    public $arrivalEndTimeList;
 
-    public string $departureEnd = '';
-
-    public string $arrival = '';
-
-    public int $arrivalMin = 0;
-
-    public int $arrivalMax = 1440;
-
-    public string $arrivalStart = '';
-
-    public string $arrivalEnd = '';
+    public $filterIsShown = 0;
 
     /**
      * @return array
@@ -84,8 +77,10 @@ class FlightQuoteSearchForm extends Model
         return [
             [
                 [
-                    'fareType', 'airlines', 'tripDuration', 'stops', 'baggage', 'airportChange', 'sortBy',
-                    'topCriteria', 'rank', 'departure', 'arrival'
+                    'fareType', 'airlines', 'tripMaxDurationHours', 'tripMaxDurationMinutes', 'stops',
+                    'baggage', 'airportChange', 'airportExactMatch', 'excludeConnectionAirports', 'sortBy',
+                    'topCriteria', 'rank', 'departureStartTimeList','departureEndTimeList', 'arrivalStartTimeList',
+                    'arrivalEndTimeList', 'filterIsShown'
                 ], 'safe'],
             ['price', 'filter', 'filter' => 'intval'],
         ];
@@ -126,7 +121,7 @@ class FlightQuoteSearchForm extends Model
      * @return array
      * @throws \Exception
      */
-    public function applyFilters(array $quotes): array
+    public function applyFilters(array $quotes, $leadFlight = null): array
     {
         if ($this->getSortBy()) {
             ArrayHelper::multisort($quotes['results'], $this->getSortBy(), $this->getSortType());
@@ -140,6 +135,24 @@ class FlightQuoteSearchForm extends Model
             $quotes['results'] = AppHelper::filterByArray($quotes['results'], 'validatingCarrier', $this->airlines);
         }
 
+        if (!empty($this->excludeConnectionAirports)) {
+            $quotes['results'] = array_filter($quotes['results'], function ($item) {
+                $item['showed'] = true;
+                if (!empty($item['trips'])) {
+                    foreach ($item['trips'] as $trip) {
+                        if (!empty($trip['segments'])) {
+                            foreach ($trip['segments'] as $segment) {
+                                if (in_array($segment['departureAirportCode'], $this->excludeConnectionAirports) || in_array($segment['arrivalAirportCode'], $this->excludeConnectionAirports)) {
+                                    $item['showed'] = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                return $item['showed'];
+            }, ARRAY_FILTER_USE_BOTH);
+        }
+
         if (!empty($this->price)) {
             $quotes['results'] = AppHelper::filterByRange($quotes['results'], 'price', null, $this->price);
         }
@@ -147,9 +160,11 @@ class FlightQuoteSearchForm extends Model
         if (!$this->stops !== null && $this->stops != '') {
             $quotes['results'] = array_filter($quotes['results'], function ($item) {
                 $cnt = 0;
-                foreach ($item['stops'] as $stop) {
-                    if ($stop <= $this->stops) {
-                        $cnt++;
+                if (!empty($item['stops'])) {
+                    foreach ($item['stops'] as $stop) {
+                        if ($stop <= $this->stops) {
+                            $cnt++;
+                        }
                     }
                 }
 
@@ -165,21 +180,22 @@ class FlightQuoteSearchForm extends Model
             $quotes['results'] = AppHelper::filterByRange($quotes['results'], 'bagFilter', (int)$this->baggage);
         }
 
-        if ($this->tripDuration) {
+        if (!empty($this->tripMaxDurationHours) && !empty($this->tripMaxDurationMinutes)) {
             $quotes['results'] = array_filter($quotes['results'], function ($item) {
-                $cnt = 0;
-                foreach ($item['duration'] as $duration) {
-                    if ($duration <= $this->tripDuration) {
-                        $cnt++;
+                $item['showed'] = true;
+                if (!empty($item['trips'])) {
+                    foreach ($item['trips'] as $tripKey => $trip) {
+                        if (!empty($this->tripMaxDurationHours[$tripKey]) && !empty($this->tripMaxDurationMinutes[$tripKey]) && $trip['duration'] > $this->tripMaxDurationHours[$tripKey] * 60 + $this->tripMaxDurationMinutes[$tripKey]) {
+                            $item['showed'] = false;
+                        }
                     }
                 }
-
-                return count($item['duration']) === $cnt;
+                return $item['showed'];
             }, ARRAY_FILTER_USE_BOTH);
         }
 
         if ($this->topCriteria) {
-            $quotes['results'] = AppHelper::filterBySearchInValue($quotes['results'], 'topCriteria', $this->topCriteria);
+            $quotes['results'] = AppHelper::filterByArrayContainValues($quotes['results'], 'topCriteria', $this->topCriteria);
         }
 
         if ($this->rank) {
@@ -190,44 +206,59 @@ class FlightQuoteSearchForm extends Model
             });
         }
 
-        $departure = explode('-', $this->departure);
-        $this->departureStart = (int)trim($departure[0] ?? $this->departureMin);
-        $this->departureEnd = (int)trim($departure[1] ?? $this->departureMax);
-        if ($this->departure) {
+        if (!empty($this->departureStartTimeList) && !empty($this->departureEndTimeList)) {
             $quotes['results'] = array_filter($quotes['results'], function ($item) {
-                foreach ($item['time'] as $time) {
-                    if ($time['departure']) {
+                foreach ($item['time'] as $tripKey => $time) {
+                    if ($time['departure'] && $this->departureStartTimeList[$tripKey] != '' && $this->departureEndTimeList[$tripKey] != '') {
                         $departureDate = new \DateTime($time['departure']);
                         $departureMinutesOfDay = (int)$departureDate->format('i') + (int)$departureDate->format('H') * 60;
-
-                        if ($departureMinutesOfDay >= $this->departureStart && $departureMinutesOfDay <= $this->departureEnd) {
-                            return true;
+                        $departureStartMinutesOfDay = substr($this->departureStartTimeList[$tripKey], 0, 2) * 60 + substr($this->departureStartTimeList[$tripKey], 3, 2);
+                        $departureEndMinutesOfDay = substr($this->departureEndTimeList[$tripKey], 0, 2) * 60 + substr($this->departureEndTimeList[$tripKey], 3, 2);
+                        if ($departureMinutesOfDay < $departureStartMinutesOfDay || $departureMinutesOfDay > $departureEndMinutesOfDay) {
+                            return false;
                         }
                     }
                 }
-                return false;
+                return true;
             }, ARRAY_FILTER_USE_BOTH);
         }
 
-        $arrival = explode('-', $this->arrival);
-        $this->arrivalStart = (int)trim($arrival[0] ?? $this->arrivalMin);
-        $this->arrivalEnd = (int)trim($arrival[1] ?? $this->arrivalMax);
-        if ($this->arrival) {
+        if (!empty($this->arrivalStartTimeList) && !empty($this->arrivalEndTimeList)) {
             $quotes['results'] = array_filter($quotes['results'], function ($item) {
-                foreach ($item['time'] as $time) {
-                    if ($time['arrival']) {
+                foreach ($item['time'] as $tripKey => $time) {
+                    if ($time['arrival'] && $this->arrivalStartTimeList[$tripKey] != '' && $this->arrivalEndTimeList[$tripKey] != '') {
                         $arrivalDate = new \DateTime($time['arrival']);
                         $arrivalMinutesOfDay = (int)$arrivalDate->format('i') + (int)$arrivalDate->format('H') * 60;
-
-                        if ($arrivalMinutesOfDay >= $this->arrivalStart && $arrivalMinutesOfDay <= $this->arrivalEnd) {
-                            return true;
+                        $arrivalStartMinutesOfDay = substr($this->arrivalStartTimeList[$tripKey], 0, 2) * 60 + substr($this->arrivalStartTimeList[$tripKey], 3, 2);
+                        $arrivalEndMinutesOfDay = substr($this->arrivalEndTimeList[$tripKey], 0, 2) * 60 + substr($this->arrivalEndTimeList[$tripKey], 3, 2);
+                        if ($arrivalMinutesOfDay < $arrivalStartMinutesOfDay || $arrivalMinutesOfDay > $arrivalEndMinutesOfDay) {
+                            return false;
                         }
                     }
                 }
-                return false;
+                return true;
             }, ARRAY_FILTER_USE_BOTH);
         }
 
+        if (!empty($this->airportExactMatch)) {
+            $quotes['results'] = array_filter($quotes['results'], function ($item) use (&$leadFlight) {
+                $item['showed'] = true;
+                if (!empty($leadFlight)) {
+                    foreach ($leadFlight as $tripKey => $queryTrip) {
+                        if (
+                            !empty($item['trips']) && isset($this->airportExactMatch[$tripKey])
+                            && $this->airportExactMatch[$tripKey]
+                            && !empty($item['trips'][$tripKey]['segments'])
+                            && ($item['trips'][$tripKey]['segments'][0]['departureAirportCode'] != $queryTrip->origin
+                                || $item['trips'][$tripKey]['segments'][count($item['trips'][$tripKey]['segments']) - 1]['arrivalAirportCode'] != $queryTrip->destination)
+                        ) {
+                            $item['showed'] = false;
+                        }
+                    }
+                }
+                return $item['showed'];
+            }, ARRAY_FILTER_USE_BOTH);
+        }
 
         return $quotes;
     }

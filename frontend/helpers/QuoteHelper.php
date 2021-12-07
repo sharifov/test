@@ -3,6 +3,8 @@
 namespace frontend\helpers;
 
 use common\models\Quote;
+use common\models\Airports;
+use common\models\Lead;
 use yii\helpers\VarDumper;
 
 /**
@@ -179,10 +181,10 @@ class QuoteHelper
     {
         self::getQuotePriceRange($quotes);
 
+        $connectionAirports = [];
         foreach ($quotes['results'] as $key => $quote) {
             $quotes['results'][$key]['price'] = self::getQuotePrice($quote);
             $quotes['results'][$key]['originRate'] = self::getOriginRate($quote);
-
             $preSegment = null;
             $baggagePerSegment = [];
             $freeBaggage = false;
@@ -192,13 +194,14 @@ class QuoteHelper
             $stops = [];
             $totalDuration = [];
             $bagFilter = '';
-
+            $cnt = 0;
             foreach ($quote['trips'] as $trip) {
                 if (isset($trip['duration'])) {
                     $totalDuration[] = $trip['duration'];
                     $quotes['totalDuration'][] = $trip['duration'];
-//                  $totalDurationSum += $trip['duration'];
+                    $quotes['tripsDurations'][$cnt][] = $trip['duration'];
                 }
+                $cnt++;
                 $stopCnt = count($trip['segments']) - 1;
 
                 foreach ($trip['segments'] as $segment) {
@@ -209,6 +212,14 @@ class QuoteHelper
 
                     if ($preSegment !== null && $segment['departureAirportCode'] != $preSegment['arrivalAirportCode']) {
                         $airportChange = true;
+                    }
+                    if ($segment['departureAirportCode'] || $segment['arrivalAirportCode']) {
+                        if (!in_array($segment['departureAirportCode'], $connectionAirports)) {
+                            $connectionAirports[$segment['departureAirportCode']] = Airports::findByIata($segment['departureAirportCode'])->cityName . ' ' . $segment['departureAirportCode'];
+                        }
+                        if (!in_array($segment['arrivalAirportCode'], $connectionAirports)) {
+                            $connectionAirports[$segment['arrivalAirportCode']] = Airports::findByIata($segment['arrivalAirportCode'])->cityName . ' ' . $segment['arrivalAirportCode'];
+                        }
                     }
 
                     if (isset($segment['baggage']) && $freeBaggage === false) {
@@ -244,6 +255,21 @@ class QuoteHelper
             $quotes['results'][$key]['totalDuration'] = array_sum($totalDuration);
             $quotes['results'][$key]['topCriteria'] = self::getQuoteTopCriteria($quote);
             $quotes['results'][$key]['rank'] = self::getQuoteRank($quote);
+        }
+
+        sort($connectionAirports);
+        $quotes['connectionAirports'] = $connectionAirports;
+        $quotes['tripsMinDurationsInMinutes'] = $quotes['tripsMaxDurationsInMinutes'] = $quotes['tripMaxDurationRoundHours'] = $quotes['tripMaxDurationRoundMinutes'] = [];
+        if (!empty($quotes['tripsDurations'])) {
+            foreach ($quotes['tripsDurations'] as $key => $tripDurations) {
+                $quotes['tripsMinDurationsInMinutes'][$key] = min($tripDurations) > 0 ? min($tripDurations) : 0;
+                $quotes['tripsMaxDurationsInMinutes'][$key] = max($tripDurations) > 0 ? max($tripDurations) : 0;
+                $quotes['tripMaxDurationRoundHours'][$key] = floor($quotes['tripsMaxDurationsInMinutes'][$key] / 60);
+                if ($quotes['tripsMaxDurationsInMinutes'][$key] % 60 > 50) {
+                    $quotes['tripMaxDurationRoundHours'][$key]++;
+                }
+                $quotes['tripMaxDurationRoundMinutes'][$key] = ceil($quotes['tripsMaxDurationsInMinutes'][$key] / 10) * 10 % 60;
+            }
         }
 
         return self::sortByTopCriteria($quotes);

@@ -59,7 +59,7 @@ use yii\widgets\ActiveForm;
         ]
     ])->label(false);
 
-    ?>
+?>
 
     <?= Html::hiddenInput('orderId', $order->or_id) ?>
 

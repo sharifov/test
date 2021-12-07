@@ -45,27 +45,7 @@ if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
         $('.modal-backdrop.show').last().css('z-index', '1051');
     });
 
-// init listeners
-        
-
-    // $(document).on('change', '#sort_search', function(e) {
-    //     var self = $(this).find('option:selected')[0];
-    //     $('.search-results__wrapper').html(
-    //         $('.search-result__quote').toArray().sort(function(a,b){
-    //             var a = +a.getAttribute('data-'+self.getAttribute('data-field'));
-    //             var b = +b.getAttribute('data-'+self.getAttribute('data-field'));
-    //             if(self.getAttribute('data-sort') === 'asc'){
-    //                 return a - b;
-    //             }
-    //             return b - a;
-    //         })
-    //     )
-    // });
-
-    // var searchResult = new SearchResult();    
-    // searchResult.init();
-
-JS;
+    JS;
     $this->registerJs($js);
 
     $flightQuotes = [];
@@ -81,14 +61,21 @@ JS;
         pjaxOffFormSubmit('#pjax-search-quote-filter');
     </script>
     <?php Pjax::begin(['timeout' => 20000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false, 'id' => 'pjax-search-quote-filter']); ?>
+
     <?= $this->render('_quote_filters', [
     'minPrice' => $quotes['minPrice'],
     'maxPrice' => $quotes['maxPrice'],
     'airlines' => $airlines,
+    'connectionAirports' => $quotes['connectionAirports'],
+    'lead' => $lead,
     'searchFrom' => $searchForm,
+    'tripMaxDurationRoundHours' => $quotes['tripMaxDurationRoundHours'],
+    'tripMaxDurationRoundMinutes' => $quotes['tripMaxDurationRoundMinutes'],
+    'tripsMinDurationsInMinutes' => $quotes['tripsMinDurationsInMinutes'],
+    'tripsMaxDurationsInMinutes' => $quotes['tripsMaxDurationsInMinutes'],
     'minTotalDuration' => min($quotes['totalDuration']),
     'maxTotalDuration' => max($quotes['totalDuration'])
-]) ?>
+    ]) ?>
 
     <div class="search-results__wrapper">
         <?php $n = 0;
@@ -105,7 +92,7 @@ JS;
         <?php endif; ?>
         <?= ListView::widget([
             'dataProvider' => $dataProvider,
-            'emptyText' => '<div class="text-center">Not found quotes</div><br>',
+            'emptyText' => '<div class="text-center">Quotes not found!</div><br>',
             'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes, $keyCache, $lead) {
                 return $this->render(
                     '_quote_search_item',
@@ -138,16 +125,16 @@ JS;
     $('[data-toggle="tooltip"]').tooltip({html:true});
     
     $("#pjax-search-quote-filter").on("pjax:beforeSend", function() {
-        $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-filter').addClass('fa-spin fa-spinner disabled').prop('disabled', true);
+        $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-check').addClass('fa-spin fa-spinner disabled').prop('disabled', true);
         $('.search-results__wrapper').addClass('loading');
     });
 
     $("#pjax-search-quote-filter").on("pjax:complete", function() {
-        $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-spin fa-spinner disabled').addClass('fa-filter').removeAttr('disabled');
+        $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-spin fa-spinner disabled').addClass('fa-check').removeAttr('disabled');
         $('.search-results__wrapper').removeClass('loading');
     });
     
-JS;
+    JS;
     $this->registerJs($js);
     ?>
     <?php Pjax::end(); ?>
@@ -171,11 +158,25 @@ JS;
         <?php if ($canDisplayQuoteSearchParams && isset($searchServiceQuoteDto)) : ?>
             <div class="d-flex justify-content-between align-items-center"><span data-toggle="collapse" href="#collapseSearchParams" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Search Query Params</span></div>
             <div id="collapseSearchParams" class="collapse">
-              <div class="card-body card">
-                <h4>Search Query Params</h4>
-                <pre><?= Html::encode(VarDumper::dumpAsString($searchServiceQuoteDto->getAsArray())) ?></pre>
-              </div>
+                <div class="card-body card">
+                    <h4>Search Query Params</h4>
+                    <pre><?= Html::encode(VarDumper::dumpAsString($searchServiceQuoteDto->getAsArray())) ?></pre>
+                </div>
             </div>
         <?php endif; ?>
     </div>
 <?php endif;?>
+
+<?php
+$js = <<<JS
+    $(document).on('click', '#quote-search-filter-show-hide', function(e) {
+        if ($('#filterIsShown').val() == '1') {
+            $('#filterIsShown').val('0');
+        } else {
+            $('#filterIsShown').val('1');
+        }
+    });
+
+JS;
+$this->registerJs($js);
+?>
