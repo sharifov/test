@@ -141,11 +141,11 @@ class AbacComponent extends Component
             $subject = new \stdClass();
         }
         try {
-            if (!$user && (Yii::$app instanceof \yii\web\Application) && Yii::$app->id === 'app-frontend') {
-                $user = Auth::user();
-            }
+//            if (!$user && (Yii::$app instanceof \yii\web\Application) && Yii::$app->id === 'app-frontend') {
+//                $user = Auth::user();
+//            }
             if (!$user) {
-                return false;
+                $user = Auth::user();
             }
 
             $subject->env = $this->getEnv($user);
