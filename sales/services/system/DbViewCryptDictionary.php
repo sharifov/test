@@ -138,6 +138,8 @@ class DbViewCryptDictionary
             'coupon' => [
                 'c_code',
             ],
+            'phone_blacklist_log' => ['pbll_phone'],
+            'hotel_quote_room_pax' => ['hqrp_first_name', 'hqrp_last_name'],
         ];
     }
 }
