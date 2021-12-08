@@ -123,23 +123,19 @@ class WebEngageRequestService
     }
 
     /**
-     * @param array $data
+     * @param WebEngageEventForm $webEngageEventForm
      * @return array|null
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      * @throws \yii\httpclient\Exception
      */
-    public function addEvent(array $data): ?array
+    public function addEvent(WebEngageEventForm $webEngageEventForm): ?array
     {
-        $webEngageEventForm = new WebEngageEventForm();
-        $webEngageEventForm->setFormName('');
-
-        if (!$webEngageEventForm->load($data)) {
-            throw new \RuntimeException('WebEngageEventForm not loaded');
-        }
         if (!$webEngageEventForm->validate()) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($webEngageEventForm));
         }
+
+        $data = $webEngageEventForm->toArray();
 
         if ($this->settings->isTest()) {
             $data['eventData']['isTest'] = true;

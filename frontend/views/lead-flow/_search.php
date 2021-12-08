@@ -79,7 +79,7 @@ if ($user->isAdmin()) {
                             ]
                         ]
                     ])->label('Created From / To');
-                    ?>
+?>
                 </div>
             </div>
         </div>

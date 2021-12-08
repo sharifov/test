@@ -25,6 +25,8 @@ class DbViewCryptDictionary
                 'e_attach',
                 'e_email_from_name',
                 'e_email_to_name',
+                'e_message_id',
+                'e_ref_message_id',
             ],
             'leads' => [
                 'l_client_first_name',
@@ -137,6 +139,15 @@ class DbViewCryptDictionary
             ],
             'coupon' => [
                 'c_code',
+            ],
+            'phone_blacklist_log' => ['pbll_phone'],
+            'hotel_quote_room_pax' => ['hqrp_first_name', 'hqrp_last_name'],
+            'order_contact' => [
+                'oc_first_name',
+                'oc_last_name',
+                'oc_middle_name',
+                'oc_email',
+                'oc_phone_number',
             ],
         ];
     }

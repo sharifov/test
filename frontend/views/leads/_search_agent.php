@@ -219,7 +219,7 @@ use yii\widgets\ActiveForm;
                             ]
                         ]
                     ])->label('Depart From / To');
-                    ?>
+?>
                 </div>
             </div>
 

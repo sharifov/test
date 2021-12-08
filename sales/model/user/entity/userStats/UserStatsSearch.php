@@ -6,13 +6,17 @@ use common\components\validators\IsArrayValidator;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
+use common\models\ProfitSplit;
+use common\models\UserCallStatus;
 use common\models\UserOnline;
 use common\models\UserParams;
 use DateTime;
 use sales\access\EmployeeGroupAccess;
 use sales\behaviors\userModelSetting\UserModelSettingSearchBehavior;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\user\entity\ShiftTime;
+use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userModelSetting\service\UserModelSettingDictionary;
 use sales\traits\UserModelSettingTrait;
 use yii\base\Model;
@@ -136,8 +140,8 @@ class UserStatsSearch extends Model
             ],
         ]);
 
-        $to = date("Y-m-d");
-        $from = date("Y-m-01");
+        $to = date("Y-m-d 23:59:59");
+        $from = date("Y-m-01 00:00:00");
 
         $this->load($params);
 
@@ -283,20 +287,27 @@ class UserStatsSearch extends Model
 
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT => (new Query())
-                    ->select(['COUNT(id)'])
+                    ->select(['COUNT(' . Lead::tableName() . '.id)'])
                     ->from(Lead::tableName())
-                    ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+                    ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
+                    ->where(ProfitSplit::tableName() . '.ps_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
+                        ':startDt' => $from, ':endDt' => $to,
+                    ])
             ]);
         }
+
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT => (new Query())
-                    ->select(['COUNT(id)'])
+                    ->select(['COUNT(' . Lead::tableName() . '.id)'])
                     ->from(Lead::tableName())
-                    ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
-                    ->where(['status' => Lead::STATUS_SOLD])
-                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+                    ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
+                    ->where(ProfitSplit::tableName() . '.ps_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_SOLD])
+                    ->andWhere(Lead::tableName() . '.l_status_dt BETWEEN :startDt AND :endDt', [
+                        ':startDt' => $from, ':endDt' => $to,
+                    ])
             ]);
         }
 
@@ -315,20 +326,23 @@ class UserStatsSearch extends Model
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT => (new Query())
-                    ->select(['COUNT(id)'])
-                    ->from(Lead::tableName())
-                    ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
-                    ->where(['status' => Lead::STATUS_SOLD])
-                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $this->startDt, $this->endDt])
+                    ->select(['COUNT(' . LeadUserConversion::tableName() . '.luc_lead_id)'])
+                    ->from(LeadUserConversion::tableName())
+                    ->where('luc_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(['BETWEEN', 'luc_created_dt', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_PHONE)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_CLIENT_PHONE => (new Query())
-                    ->select(['us_call_phone_status'])
-                    ->from(Employee::tableName())
-                    ->leftJoin('user_status', 'us_user_id = id')
-                    ->where(['id' =>  Employee::tableName() . '.id'])
+                    ->select(new Expression('
+                        CASE
+                            WHEN us_call_phone_status = 1 AND us_is_on_call = 0 THEN 1
+                            ELSE 0
+                        END
+                    '))
+                    ->from(UserStatus::tableName())
+                    ->where('us_user_id = ' . Employee::tableName() . '.id')
             ]);
         }
 

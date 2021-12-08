@@ -179,8 +179,8 @@ $keyId = md5($result['key']);
                 <div class="quote__segment">
                     <div class="quote__info">
                         <?php if (count($marketingAirlines) === 1) :?>
-                            <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
-                            <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                            <?php if ($marketingAirlines[0]) : ?>
+                                <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
                                 <span class="quote__vc-logo">
                                     <img src="<?php echo $airlineLogo ?>" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
                                 </span>

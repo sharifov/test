@@ -3,6 +3,7 @@
 namespace modules\webEngage\src\service\webEngageEventData\lead;
 
 use common\models\Lead;
+use modules\webEngage\settings\WebEngageDictionary;
 
 /**
  * Class LeadEventDictionary
@@ -10,16 +11,11 @@ use common\models\Lead;
  */
 class LeadEventDictionary
 {
-    public const EVENT_NAME_LEAD_CREATED = 'LeadCreated';
-    public const EVENT_NAME_LEAD_BOOKED = 'LeadBooked';
-    public const EVENT_NAME_LEAD_SOLD = 'LeadSold';
-    public const EVENT_NAME_LEAD_TRASHED = 'LeadTrashed';
-
     public const EVENT_NAME_STATUS_MAP = [
-        Lead::STATUS_PENDING => self::EVENT_NAME_LEAD_CREATED,
-        Lead::STATUS_BOOKED => self::EVENT_NAME_LEAD_BOOKED,
-        Lead::STATUS_SOLD => self::EVENT_NAME_LEAD_SOLD,
-        Lead::STATUS_TRASH => self::EVENT_NAME_LEAD_TRASHED,
+        Lead::STATUS_PENDING => WebEngageDictionary::EVENT_LEAD_CREATED,
+        Lead::STATUS_BOOKED => WebEngageDictionary::EVENT_LEAD_BOOKED,
+        Lead::STATUS_SOLD => WebEngageDictionary::EVENT_LEAD_SOLD,
+        Lead::STATUS_TRASH => WebEngageDictionary::EVENT_LEAD_TRASHED,
     ];
 
     public const STATUS_PROCESSED_LIST = [

@@ -3,9 +3,12 @@
 namespace common\components\jobs;
 
 use common\models\Call;
+use common\models\Client;
+use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\WebEngageRequestService;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientData\entity\ClientData;
 use sales\model\clientData\entity\ClientDataQuery;
 use sales\model\clientDataKey\entity\ClientDataKeyDictionary;
@@ -48,23 +51,37 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                 $clientData = ClientData::findOne(['cd_key_id' => $keyId, 'cd_client_id' => $this->clientId]);
 
                 if ($clientData && $clientData->cd_field_value <= 1 && $call->isStatusNoAnswer()) {
+                    if (!$client = Client::findOne($this->clientId)) {
+                        throw new \RuntimeException('Client not found by ID(' . $this->clientId . ')');
+                    }
                     $data = [
-                        'anonymousId' => (string) $this->clientId,
+                        'userId' => $client->uuid,
                         'eventName' => WebEngageDictionary::EVENT_CALL_FIRST_CALL_NOT_PICKED,
                         'eventTime' => date('Y-m-d\TH:i:sO')
                     ];
+                    $webEngageEventForm = new WebEngageEventForm();
+                    if (!$webEngageEventForm->load($data)) {
+                        throw new \RuntimeException('WebEngageEventForm not loaded');
+                    }
                     $webEngageRequestService = new WebEngageRequestService();
-                    $webEngageRequestService->addEvent($data);
+                    $webEngageRequestService->addEvent($webEngageEventForm);
                 }
 
-                if ($call->c_call_duration > 2 && $call->isStatusCompleted()) {
+                if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
+                    if (!$client = Client::findOne($this->clientId)) {
+                        throw new \RuntimeException('Client not found by ID(' . $this->clientId . ')');
+                    }
                     $data = [
-                        'anonymousId' => (string) $this->clientId,
+                        'userId' => $client->uuid,
                         'eventName' => WebEngageDictionary::EVENT_CALL_USER_PICKED_CALL,
                         'eventTime' => date('Y-m-d\TH:i:sO')
                     ];
+                    $webEngageEventForm = new WebEngageEventForm();
+                    if (!$webEngageEventForm->load($data)) {
+                        throw new \RuntimeException('WebEngageEventForm not loaded');
+                    }
                     $webEngageRequestService = new WebEngageRequestService();
-                    $webEngageRequestService->addEvent($data);
+                    $webEngageRequestService->addEvent($webEngageEventForm);
                 }
             } catch (\Throwable $e) {
                 \Yii::error(AppHelper::throwableLog($e, true), 'error:CallOutEndedJob:Throwable');

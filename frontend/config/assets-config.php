@@ -20,7 +20,6 @@ use frontend\assets\overridden\KartikEditableAsset;
 use frontend\assets\overridden\KartikEditablePjaxAsset;
 use frontend\assets\overridden\KartikExportMenuAsset;
 use frontend\assets\overridden\KartikGridExportAsset;
-use frontend\assets\overridden\KartikGridFloatHeadAsset;
 use frontend\assets\overridden\KartikGridResizeColumnsAsset;
 use frontend\assets\overridden\KartikGridToggleDataAsset;
 use frontend\assets\overridden\KartikGridViewAsset;
@@ -167,7 +166,6 @@ return [
         \kartik\daterange\MomentAsset::class,
         MultiSelectAsset::class,
         DateTimePickerAsset::class,
-        KartikGridFloatHeadAsset::class,
         TimePickerAsset::class,
         LanguagePluginAsset::class,
         LanguageAsset::class,
@@ -637,16 +635,6 @@ return [
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
         ],
-        'KartikGridFloatHeadAsset' => [
-            'class' => KartikGridFloatHeadAsset::class,
-            'basePath' => '@webroot/all_shared/build',
-            'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-gridfloathead.min.js',
-            'css' => 'kartik-gridfloathead.min.css',
-            'depends' => [ KartikGridFloatHeadAsset::class ],
-            'bsPluginEnabled' => false,
-            'bsDependencyEnabled' => false
-        ],
         'TimePickerAsset' => [
             'class' => TimePickerAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -858,11 +846,6 @@ return [
                 'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             KartikActiveFormAsset::class => [
-                'bsPluginEnabled' => false,
-                'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
-            ],
-            KartikGridFloatHeadAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
                 'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]

@@ -767,4 +767,9 @@ class SettingHelper
     {
         return \Yii::$app->params['settings']['db_crypt_init_vector'] ?? null;
     }
+
+    public static function getUserPrickedCallDuration(): int
+    {
+        return (int)(\Yii::$app->params['settings']['user_picked_call_duration'] ?? 30);
+    }
 }

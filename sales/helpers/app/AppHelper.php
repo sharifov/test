@@ -147,6 +147,35 @@ class AppHelper
         return $newArray;
     }
 
+/**
+ * @param array $array
+ * @param string $index (array key)
+ * @param array $arrayVal (array of filter values)
+ * @return array
+*/
+    public static function filterByArrayContainValues(array $array, string $index, array $arrayVal = []): array
+    {
+        $newArray = [];
+        if ($array) {
+            foreach (array_keys($array) as $key) {
+                if ($arrayVal) {
+                    $match = false;
+                    foreach ($arrayVal as $needle) {
+                        if (stripos($array[$key][$index], $needle) !== false) {
+                            $match = true;
+                        }
+                        if ($match) {
+                            $newArray[$key] = $array[$key];
+                        }
+                    }
+                } else {
+                    $newArray[$key] = $array[$key];
+                }
+            }
+        }
+        return $newArray;
+    }
+
     /**
      * @param array $array
      * @param string $index

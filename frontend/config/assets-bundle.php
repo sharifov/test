@@ -10,7 +10,6 @@ use frontend\assets\overridden\KartikEditableAsset;
 use frontend\assets\overridden\KartikEditablePjaxAsset;
 use frontend\assets\overridden\KartikExportMenuAsset;
 use frontend\assets\overridden\KartikGridExportAsset;
-use frontend\assets\overridden\KartikGridFloatHeadAsset;
 use frontend\assets\overridden\KartikGridResizeColumnsAsset;
 use frontend\assets\overridden\KartikGridToggleDataAsset;
 use frontend\assets\overridden\KartikGridViewAsset;
@@ -24,7 +23,6 @@ use kartik\export\ExportMenuAsset;
 use kartik\form\ActiveFormAsset;
 use kartik\grid\CheckboxColumnAsset;
 use kartik\grid\GridExportAsset;
-use kartik\grid\GridFloatHeadAsset;
 use kartik\grid\GridResizeColumnsAsset;
 use kartik\grid\GridToggleDataAsset;
 use kartik\grid\GridViewAsset;
@@ -151,14 +149,6 @@ return array_merge($assetsProd, [
         'js' => [],
         'depends' => [
             KartikGridToggleDataAsset::class,
-        ]
-    ],
-    GridFloatHeadAsset::class => [
-        'class' => KartikGridFloatHeadAsset::class,
-        'css' => [],
-        'js' => [],
-        'depends' => [
-            KartikGridFloatHeadAsset::class,
         ]
     ],
     JqueryAsset::class => [
