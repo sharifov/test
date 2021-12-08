@@ -8,6 +8,7 @@ use sales\entities\cases\CaseEventLog;
 use sales\forms\emailReviewQueue\EmailReviewQueueForm;
 use sales\model\emailReviewQueue\entity\EmailReviewQueue;
 use sales\model\emailReviewQueue\entity\EmailReviewQueueSearch;
+use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -25,7 +26,9 @@ class EmailReviewQueueController extends FController
                     'index',
                     'review',
                     'send',
-                    'reject'
+                    'reject',
+                    'pending',
+                    'completed'
                 ],
             ]
         ];
@@ -38,6 +41,30 @@ class EmailReviewQueueController extends FController
         $dataProvider = $search->reviewQueue($this->request->queryParams, Auth::user());
 
         return $this->render('index', [
+            'searchModel' => $search,
+            'dataProvider' => $dataProvider
+        ]);
+    }
+
+    public function actionPending(): string
+    {
+        $search = new EmailReviewQueueSearch();
+        $search->setPendingScenario();
+        $dataProvider = $search->reviewQueueByStatuses($this->request->queryParams, Auth::user(), array_keys(EmailReviewQueueStatus::getPendingList()));
+
+        return $this->render('pending', [
+            'searchModel' => $search,
+            'dataProvider' => $dataProvider
+        ]);
+    }
+
+    public function actionCompleted(): string
+    {
+        $search = new EmailReviewQueueSearch();
+        $search->setCompletedScenario();
+        $dataProvider = $search->reviewQueueByStatuses($this->request->queryParams, Auth::user(), array_keys(EmailReviewQueueStatus::getCompletedList()));
+
+        return $this->render('completed', [
             'searchModel' => $search,
             'dataProvider' => $dataProvider
         ]);

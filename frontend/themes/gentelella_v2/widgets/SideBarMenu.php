@@ -201,7 +201,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'envelope',
             'items' => [
                 ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
-                ['label' => 'Email Review Queue', 'url' => ['/email-review-queue/index'], 'icon' => 'list'],
+                ['label' => 'Review Queue All', 'url' => ['/email-review-queue/index'], 'icon' => 'list'],
+                ['label' => 'Review Queue Pending', 'url' => ['/email-review-queue/pending'], 'icon' => 'list'],
+                ['label' => 'Review Queue Completed', 'url' => ['/email-review-queue/completed'], 'icon' => 'list'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
                 ['label' => 'Email Review Queue Crud', 'url' => ['/email-review-queue-crud/index'], 'icon' => 'list'],
             ]
