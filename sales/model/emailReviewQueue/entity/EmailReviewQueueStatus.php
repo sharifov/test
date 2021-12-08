@@ -6,10 +6,10 @@ use yii\bootstrap4\Html;
 
 class EmailReviewQueueStatus
 {
-    private const PENDING = 1;
-    private const IN_PROGRESS = 2;
-    private const REVIEWED = 3;
-    private const REJECTED = 4;
+    public const PENDING = 1;
+    public const IN_PROGRESS = 2;
+    public const REVIEWED = 3;
+    public const REJECTED = 4;
 
     private const LIST = [
         self::PENDING => 'Pending',

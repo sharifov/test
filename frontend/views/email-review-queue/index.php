@@ -8,6 +8,7 @@ use common\components\grid\DateTimeColumn;
 use common\components\grid\department\DepartmentColumn;
 use common\components\grid\UserSelect2Column;
 use common\models\Department;
+use frontend\themes\gentelella_v2\widgets\FlashAlert;
 use sales\model\emailReviewQueue\entity\EmailReviewQueue;
 use sales\model\emailReviewQueue\entity\EmailReviewQueueSearch;
 use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
@@ -24,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
   <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php Pjax::begin(); ?>
+  <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

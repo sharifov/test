@@ -150,4 +150,14 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
     {
         return new Scopes(get_called_class());
     }
+
+    public function statusToReviewed(): void
+    {
+        $this->erq_status_id = EmailReviewQueueStatus::REVIEWED;
+    }
+
+    public function statusToReject(): void
+    {
+        $this->erq_status_id = EmailReviewQueueStatus::REJECTED;
+    }
 }
