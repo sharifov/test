@@ -199,6 +199,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $lead_id = $this->emailService->detectLeadId($email);
                         $case_id = $this->emailService->detectCaseId($email);
 
+                        \Yii::info(
+                            $email->toArray(),
+                            'info\Debug:ReceiveEmailsJob:email'
+                        );
+                        /* TODO: FOR DEBUG:: must by remove */
+
                         $users = $email->getUsersIdByEmail();
 
                         $user_id = 0;
