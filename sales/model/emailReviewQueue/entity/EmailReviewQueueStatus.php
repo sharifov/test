@@ -14,7 +14,7 @@ class EmailReviewQueueStatus
     private const LIST = [
         self::PENDING => 'Pending',
         self::IN_PROGRESS => 'In Progress',
-        self::REVIEWED => 'Reviewed',
+        self::REVIEWED => 'Success',
         self::REJECTED => 'Rejected'
     ];
 

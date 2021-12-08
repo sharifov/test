@@ -81,12 +81,12 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
     {
         return [
             'erq_id' => 'ID',
-            'erq_email_id' => 'Email ID',
-            'erq_project_id' => 'Project ID',
-            'erq_department_id' => 'Department ID',
-            'erq_owner_id' => 'Owner ID',
-            'erq_status_id' => 'Status ID',
-            'erq_user_reviewer_id' => 'User Reviewer ID',
+            'erq_email_id' => 'Email',
+            'erq_project_id' => 'Project',
+            'erq_department_id' => 'Department',
+            'erq_owner_id' => 'Owner',
+            'erq_status_id' => 'Status',
+            'erq_user_reviewer_id' => 'User Reviewer',
             'erq_created_dt' => 'Created Dt',
             'erq_updated_dt' => 'Updated Dt',
         ];

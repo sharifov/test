@@ -33,11 +33,61 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             [
+                'attribute' => 'erq_id',
+                'options' => [
+                    'width' => '30px'
+                ]
+            ],
+            [
                 'attribute' => 'erq_email_id',
                 'value' => static function (EmailReviewQueue $model) {
                     return Html::a('<i class="fa fa-link"></i> ' . $model->erq_email_id, ['/email/view', 'id' => $model->erq_email_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
+                'format' => 'raw',
+                'options' => [
+                    'width' => '110px'
+                ]
+            ],
+            [
+                'label' => 'Email Subject',
+                'value' => static function (EmailReviewQueue $model) {
+                    return $model->erqEmail->e_email_subject;
+                }
+            ],
+            [
+                'label' => 'Email Template Name',
+                'value' => static function (EmailReviewQueue $model) {
+                    return $model->erqEmail->eTemplateType->etp_name ?? '--';
+                }
+            ],
+            [
+                'label' => 'Email Lead',
+                'value' => static function (EmailReviewQueue $model) {
+                    return $model->erqEmail->eLead;
+                },
+                'format' => 'lead',
+            ],
+            [
+                'label' => 'Email Case',
+                'value' => static function (EmailReviewQueue $model) {
+                    return $model->erqEmail->eCase;
+                },
+                'format' => 'case',
+            ],
+            [
+                'label' => 'Email Status',
+                'value' => static function (EmailReviewQueue $model) {
+                    return $model->erqEmail->statusName;
+                },
                 'format' => 'raw'
+            ],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'erq_owner_id',
+                'relation' => 'erqOwner',
+                'format' => 'username',
+                'placeholder' => 'Select User',
+                'label' => 'Email Creator'
             ],
             [
                 'attribute' => 'erq_project_id',
@@ -47,32 +97,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Project::getList(),
                 'format' => 'raw',
             ],
-            ['class' => DateTimeColumn::class, 'attribute' => 'erq_created_dt'],
-            ['class' => DateTimeColumn::class, 'attribute' => 'erq_updated_dt'],
             [
                 'class' => DepartmentColumn::class,
                 'attribute' => 'erq_department_id',
                 'relation' => 'erqDepartment',
                 'filter' => Department::getList(),
-            ],
-            [
-                'label' => 'Subject',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->erqEmail->e_email_subject;
-                }
-            ],
-            [
-                'label' => 'Template Name',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->erqEmail->eTemplateType->etp_name ?? '--';
-                }
-            ],
-            [
-                'class' => UserSelect2Column::class,
-                'attribute' => 'erq_owner_id',
-                'relation' => 'erqOwner',
-                'format' => 'username',
-                'placeholder' => 'Select User'
             ],
             [
                 'attribute' => 'erq_status_id',
@@ -89,7 +118,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'username',
                 'placeholder' => 'Select User'
             ],
-
+            ['class' => DateTimeColumn::class, 'attribute' => 'erq_created_dt'],
+            ['class' => DateTimeColumn::class, 'attribute' => 'erq_updated_dt'],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{review}',
