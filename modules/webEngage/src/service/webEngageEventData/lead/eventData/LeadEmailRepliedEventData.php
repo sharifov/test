@@ -10,22 +10,12 @@ use modules\webEngage\settings\WebEngageDictionary;
  */
 class LeadEmailRepliedEventData extends AbstractLeadEventData
 {
-    public function getData(): array
-    {
-        return [
-            'anonymousId' => (string) $this->lead->client_id,
-            'eventName' => WebEngageDictionary::EVENT_LEAD_EMAIL_REPLIED,
-            'eventTime' => date('Y-m-d\TH:i:sO'),
-            'eventData' => $this->getEventData(),
-        ];
-    }
-
     public function getEventData(): array
     {
-        $result['lead_id'] = $this->lead->id;
+        $result['lead_id'] = $this->getLead()->id;
         $result['datetime'] = date('Y-m-d H:i:s');
-        $result['project_key'] = $this->lead->project->project_key ?? null;
-        $result['department_key'] = $this->lead->lDep->dep_key ?? null;
+        $result['project_key'] = $this->getLead()->project->project_key ?? null;
+        $result['department_key'] = $this->getLead()->lDep->dep_key ?? null;
 
         return $result;
     }

@@ -45,4 +45,14 @@ abstract class AbstractLeadEventData
 
         return $result;
     }
+
+    public function getLead(): Lead
+    {
+        return $this->lead;
+    }
+
+    public function getLeadService(): LeadEventDataService
+    {
+        return $this->leadService;
+    }
 }
