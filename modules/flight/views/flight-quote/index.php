@@ -5,6 +5,8 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+use yii\helpers\Url;
+use yii\bootstrap4\Modal;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightQuoteSearch */
@@ -64,7 +66,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'fq_created_expert_name',
             'fq_reservation_dump:ntext',
             'fq_pricing_info:ntext',
-            'fq_origin_search_data',
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'header' => 'OSD',
+                'headerOptions' => ['title' => 'Origin Search Data'],
+                'template' => '{popupview}',
+                'buttons' => [
+                    'popupview' => function ($url, $model) {
+                        $url = Url::to(['flight-quote/show-osd' , 'id' => $model->fq_id]);
+                        return Html::a('<span class="fas fa-eye white"></span>', $url, ['class' => 'btn btn-info show-osd', 'id' => 'viewButton', 'title' => 'Original Search Data', 'data-pjax' => 0]);
+                    },
+                ],
+            ],
+            //'fq_origin_search_data',
             //'fq_last_ticket_date',
             [
                 'attribute' => 'fq_last_ticket_date',
@@ -98,3 +112,29 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
+
+<?php
+Modal::begin([
+    'title' => '<h4>Original Search Data</h4>',
+    'id' => 'view',
+    'size' => 'modal-lg',
+]);
+
+echo "<pre><div id='viewContent'></div></pre>";
+
+Modal::end();
+?>
+
+<?php
+$jsCode = <<<JS
+    
+    $(document).on('click', '.show-osd', function(){        
+        $('#view').modal('show')
+            .find('#viewContent')
+            .load($(this).attr('href'));
+        return false;
+    });
+
+JS;
+$this->registerJs($jsCode, \yii\web\View::POS_READY);
+?>
