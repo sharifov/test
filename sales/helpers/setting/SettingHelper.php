@@ -742,4 +742,9 @@ class SettingHelper
     {
         return (bool) (Yii::$app->params['settings']['lead_redial_qcall_attempts_from_time_validation_enabled'] ?? true);
     }
+
+    public static function leadRedialEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['lead_redial_enabled'] ?? false);
+    }
 }

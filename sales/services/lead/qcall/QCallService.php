@@ -10,6 +10,7 @@ use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\Lead;
 use common\models\ProjectWeight;
 use common\models\StatusWeight;
+use sales\helpers\setting\SettingHelper;
 use sales\model\leadRedial\queue\ClientPhones;
 use sales\model\leadRedial\job\LeadRedialAssignToUsersJob;
 use sales\repositories\lead\LeadFlowRepository;
@@ -135,7 +136,9 @@ class QCallService
 
         $this->leadQcallRepository->save($qCall);
 
-        \Yii::$app->queue_lead_redial->priority(1)->push(new LeadRedialAssignToUsersJob($qCall->lqc_lead_id));
+        if (SettingHelper::leadRedialEnabled()) {
+            \Yii::$app->queue_lead_redial->priority(1)->push(new LeadRedialAssignToUsersJob($qCall->lqc_lead_id));
+        }
 
         return $qCall->lqc_lead_id;
     }
