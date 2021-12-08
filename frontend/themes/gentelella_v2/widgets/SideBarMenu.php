@@ -272,6 +272,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
                 ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                ['label' => 'Email Review Queue', 'url' => ['/email-review-queue/index'], 'icon' => 'list'],
+                ['label' => 'Email Review Queue Crud', 'url' => ['/email-review-queue-crud/index'], 'icon' => 'list'],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'bell-o'],
 
                 [

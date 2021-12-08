@@ -38,6 +38,7 @@ class CaseEventLog extends ActiveRecord
     public const VOLUNTARY_REFUND_CONFIRM    = 13;
     public const VOLUNTARY_REFUND_EMAIL_SEND    = 14;
     public const VOLUNTARY_REFUND_WH_SEND_OTA    = 15;
+    public const EMAIL_REVIEWED    = 16;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',
@@ -55,6 +56,7 @@ class CaseEventLog extends ActiveRecord
         self::VOLUNTARY_REFUND_CONFIRM => 'Voluntary Refund Confirm',
         self::VOLUNTARY_REFUND_EMAIL_SEND => 'Voluntary Refund Send Email to client',
         self::VOLUNTARY_REFUND_WH_SEND_OTA => 'Voluntary Refund Send WH to OTA',
+        self::EMAIL_REVIEWED => 'Email Reviewed',
     ];
 
     public const CATEGORY_ERROR = 1;
