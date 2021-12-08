@@ -25,6 +25,8 @@ class DbViewCryptDictionary
                 'e_attach',
                 'e_email_from_name',
                 'e_email_to_name',
+                'e_message_id',
+                'e_ref_message_id',
             ],
             'leads' => [
                 'l_client_first_name',
