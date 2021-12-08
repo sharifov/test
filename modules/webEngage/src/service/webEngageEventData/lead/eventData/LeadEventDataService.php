@@ -21,11 +21,11 @@ use common\models\QuoteSegment;
  */
 class LeadEventDataService
 {
-    public ?string $origin = null;
-    public ?string $destination = null;
-    public ?string $departureDate = null;
-    public ?string $returnDate = null;
-    public ?string $route = null;
+    private ?string $origin = null;
+    private ?string $destination = null;
+    private ?string $departureDate = null;
+    private ?string $returnDate = null;
+    private ?string $route = null;
 
     private Lead $lead;
     private ?LeadFlightSegment $firstSegment = null;
@@ -39,16 +39,6 @@ class LeadEventDataService
         $this->lead = $lead;
         $this->prepareSegments()
             ->prepareEventData();
-    }
-
-    private function prepareEventData(): LeadEventDataService
-    {
-        $this->origin = $this->firstSegment->origin ?? null;
-        $this->destination = $this->lastSegment->destination ?? null;
-        $this->departureDate = $this->firstSegment->departure ?? null;
-        $this->returnDate = null; /* TODO::  */
-
-        return $this;
     }
 
     private function prepareSegments(): LeadEventDataService
@@ -74,5 +64,40 @@ class LeadEventDataService
             reset($leadFlightSegments);
         }
         return $this;
+    }
+
+    private function prepareEventData(): LeadEventDataService
+    {
+        $this->origin = $this->firstSegment->origin ?? null;
+        $this->destination = $this->firstSegment->destination ?? null;
+        $this->departureDate = $this->firstSegment->departure ?? null;
+        $this->returnDate = null; /* TODO::  */
+
+        return $this;
+    }
+
+    public function getRoute(): ?string
+    {
+        return $this->route;
+    }
+
+    public function getReturnDate(): ?string
+    {
+        return $this->returnDate;
+    }
+
+    public function getOrigin(): ?string
+    {
+        return $this->origin;
+    }
+
+    public function getDestination(): ?string
+    {
+        return $this->destination;
+    }
+
+    public function getDepartureDate(): ?string
+    {
+        return $this->departureDate;
     }
 }
