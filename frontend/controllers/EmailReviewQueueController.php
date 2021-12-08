@@ -26,7 +26,6 @@ class EmailReviewQueueController extends FController
         $behaviors = [
             'access' => [
                 'allowActions' => [
-                    'index',
                     'review',
                     'send',
                     'reject',
@@ -113,12 +112,13 @@ class EmailReviewQueueController extends FController
 
                     if (empty($mailResponse['error'])) {
                         $emailQueue->statusToReviewed();
+                        $emailQueue->erq_user_reviewer_id = Auth::id();
                         $emailQueue->save();
 
                         if ($case = $email->eCase) {
                             $case->addEventLog(CaseEventLog::EMAIL_REVIEWED, ($email->eTemplateType->etp_name ?? '') . ' email sent. By: ' . $email->e_email_from_name, [], CaseEventLog::CATEGORY_INFO);
                         }
-                        \Yii::$app->session->setFlash('success', 'Email was sent to ' . $email->e_email_to);
+                        \Yii::$app->session->setFlash('success', 'Email(' . $email->e_id . ') was sent to ' . $email->e_email_to);
                         return $this->redirect('/email-review-queue/index');
                     }
                     $form->addError('general', 'Error: Email Message has not been sent to ' .  $email->e_email_to . '; Reason: ' . $email->e_error_message);
@@ -141,6 +141,7 @@ class EmailReviewQueueController extends FController
         if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
             $emailReviewQueue = $this->findModel($form->emailQueueId);
             $emailReviewQueue->statusToReject();
+            $emailReviewQueue->erq_user_reviewer_id = Auth::id();
             if ($emailReviewQueue->save()) {
                 $email = $emailReviewQueue->erqEmail;
                 $message = 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')';
@@ -154,7 +155,7 @@ class EmailReviewQueueController extends FController
                     $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                     Notifications::publish('getNewNotification', ['user_id' => $emailReviewQueue->erq_owner_id], $dataNotification);
                 }
-                \Yii::$app->session->setFlash('warning', 'Email was rejected');
+                \Yii::$app->session->setFlash('warning', 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected');
                 return $this->redirect('/email-review-queue/index');
             }
         }

@@ -12,15 +12,13 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 ?>
-
+<div class="btn-wrapper text-left">
+    <?= Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-lg btn-danger btn-submit', 'id' => 'reject-email-review-queue', 'data-url' => Url::to(['/email-review-queue/reject'])]) ?>
+    <?= Html::button('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-success btn-submit', 'id' => 'send-email-review-queue', 'data-url' => Url::to(['/email-review-queue/send'])]) ?>
+</div>
 <div class="x_panel">
     <div class="x_title" >
         <h2><i class="fa fa-sticky-note-o"></i> Review Email Form</h2>
-        <ul class="nav navbar-right panel_toolbox">
-            <li>
-                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-            </li>
-        </ul>
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="margin-top: -10px;">
@@ -90,10 +88,6 @@ use yii\widgets\Pjax;
                     </div>
                 </div>
 
-                <div class="btn-wrapper text-right">
-                    <?= Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-lg btn-danger btn-submit', 'id' => 'reject-email-review-queue', 'data-url' => Url::to(['/email-review-queue/reject'])]) ?>
-                    <?= Html::button('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-success btn-submit', 'id' => 'send-email-review-queue', 'data-url' => Url::to(['/email-review-queue/send'])]) ?>
-                </div>
                 <?php ActiveForm::end(); ?>
                 <?php Pjax::end()?>
             </div>
