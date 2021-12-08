@@ -50,6 +50,7 @@ class EmailReviewQueueController extends FController
         $email = $model->erqEmail;
         $previewForm = new EmailReviewQueueForm($email, $model->erq_id);
         $model->erq_user_reviewer_id = Auth::id();
+        $model->statusToInProgress();
         $model->save();
         return $this->render('review', [
             'model' => $model,

@@ -160,4 +160,9 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
     {
         $this->erq_status_id = EmailReviewQueueStatus::REJECTED;
     }
+
+    public function statusToInProgress(): void
+    {
+        $this->erq_status_id = EmailReviewQueueStatus::IN_PROGRESS;
+    }
 }
