@@ -200,12 +200,6 @@ class GmailService
             $email->e_ref_message_id = $gmail->getReferences();
             $email->e_message_id = $gmail->getMessageId();
 
-            \Yii::info(
-                $email->toArray(),
-                'info\Debug:GmailService:email'
-            );
-            /* TODO: FOR DEBUG:: must by remove */
-
             $lead_id = $this->emailService->detectLeadId($email);
             $case_id = $this->emailService->detectCaseId($email);
 
