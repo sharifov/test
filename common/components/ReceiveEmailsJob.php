@@ -271,7 +271,18 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             }
                         }
 
+                        \Yii::info(
+                            [$email->e_lead_id, $lead_id],
+                            'info\Debug:ReceiveEmailsJob:lead_id:detected:step1'
+                        );
+                        /* TODO: FOR DEBUG:: must by remove */
+
                         if ($lead_id && $lead = Lead::findOne($lead_id)) {
+                            \Yii::info(
+                                $lead_id,
+                                'info\Debug:ReceiveEmailsJob:lead_id:detected:step2'
+                            );
+                            /* TODO: FOR DEBUG:: must by remove */
                             try {
                                 if (!LeadDataCreateService::isExist($lead->id, LeadDataDictionary::KEY_WE_EMAIL_REPLIED)) {
                                     (new LeadDataCreateService())->createWeEmailReplied($lead);
