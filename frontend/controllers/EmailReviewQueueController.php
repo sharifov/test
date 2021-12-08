@@ -2,7 +2,10 @@
 
 namespace frontend\controllers;
 
+use common\components\purifier\Purifier;
 use common\models\Email;
+use common\models\Notifications;
+use frontend\widgets\notification\NotificationMessage;
 use sales\auth\Auth;
 use sales\entities\cases\CaseEventLog;
 use sales\forms\emailReviewQueue\EmailReviewQueueForm;
@@ -139,6 +142,18 @@ class EmailReviewQueueController extends FController
             $emailReviewQueue = $this->findModel($form->emailQueueId);
             $emailReviewQueue->statusToReject();
             if ($emailReviewQueue->save()) {
+                $email = $emailReviewQueue->erqEmail;
+                $message = 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')';
+                if ($email->e_lead_id && ($lead = $email->eLead)) {
+                    $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($lead) . ')';
+                }
+                if ($email->e_case_id && ($case = $email->eCase)) {
+                    $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($case) . ')';
+                }
+                if ($ntf = Notifications::create($emailReviewQueue->erq_owner_id, 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')', $message, Notifications::TYPE_WARNING, true)) {
+                    $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::publish('getNewNotification', ['user_id' => $emailReviewQueue->erq_owner_id], $dataNotification);
+                }
                 \Yii::$app->session->setFlash('warning', 'Email was rejected');
                 return $this->redirect('/email-review-queue/index');
             }

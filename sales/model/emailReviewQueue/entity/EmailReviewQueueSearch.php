@@ -80,8 +80,8 @@ class EmailReviewQueueSearch extends EmailReviewQueue
             'erq_owner_id' => $this->erq_owner_id,
             'erq_status_id' => $this->erq_status_id,
             'erq_user_reviewer_id' => $this->erq_user_reviewer_id,
-            'erq_created_dt' => $this->erq_created_dt,
-            'erq_updated_dt' => $this->erq_updated_dt,
+            'date(erq_created_dt)' => $this->erq_created_dt,
+            'date(erq_updated_dt)' => $this->erq_updated_dt,
         ]);
 
         return $dataProvider;

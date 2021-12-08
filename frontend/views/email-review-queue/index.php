@@ -48,6 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             ['class' => DateTimeColumn::class, 'attribute' => 'erq_created_dt'],
+            ['class' => DateTimeColumn::class, 'attribute' => 'erq_updated_dt'],
             [
                 'class' => DepartmentColumn::class,
                 'attribute' => 'erq_department_id',
