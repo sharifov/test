@@ -142,6 +142,13 @@ class DbViewCryptDictionary
             ],
             'phone_blacklist_log' => ['pbll_phone'],
             'hotel_quote_room_pax' => ['hqrp_first_name', 'hqrp_last_name'],
+            'order_contact' => [
+                'oc_first_name',
+                'oc_last_name',
+                'oc_middle_name',
+                'oc_email',
+                'oc_phone_number',
+            ],
         ];
     }
 }
