@@ -178,6 +178,12 @@ class DownloadEmails
                         $lead_id = $this->emailService->detectLeadId($email);
                         $case_id = $this->emailService->detectCaseId($email);
 
+                        \Yii::info(
+                            $email->toArray(),
+                            'info\Debug:DownloadEmails:email'
+                        );
+                        /* TODO: FOR DEBUG:: must by remove */
+
                         $users = $email->getUsersIdByEmail();
 
                         $user_id = 0;

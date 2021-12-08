@@ -156,6 +156,12 @@ class CommunicationController extends Controller
                 $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
                 $email->e_message_id = $mail['ei_message_id'];
 
+                \Yii::info(
+                    $email->toArray(),
+                    'info\Debug:CommunicationController:email'
+                );
+                /* TODO: FOR DEBUG:: must by remove */
+
                 if (!$email->save()) {
                     Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newMessagesReceived:Email:save');
                 }
