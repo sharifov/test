@@ -257,7 +257,7 @@ class QuoteHelper
             $quotes['results'][$key]['rank'] = self::getQuoteRank($quote);
         }
 
-        sort($connectionAirports);
+        asort($connectionAirports);
         $quotes['connectionAirports'] = $connectionAirports;
         $quotes['tripsMinDurationsInMinutes'] = $quotes['tripsMaxDurationsInMinutes'] = $quotes['tripMaxDurationRoundHours'] = $quotes['tripMaxDurationRoundMinutes'] = [];
         if (!empty($quotes['tripsDurations'])) {
