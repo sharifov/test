@@ -43,16 +43,16 @@ use yii\widgets\Pjax;
                 <div class="row">
                     <div class="col-sm-6 form-group">
 
-                        <?= $form->field($previewForm, 'emailFrom')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                        <?= $form->field($previewForm, 'emailFromName')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                        <?= $form->field($previewForm, 'emailFrom')->textInput(['class' => 'form-control', 'maxlength' => true, ]) ?>
+                        <?= $form->field($previewForm, 'emailFromName')->textInput(['class' => 'form-control', 'maxlength' => true, ]) ?>
 
 
                         <?= $form->field($previewForm, 'emailId')->hiddenInput()->label(false); ?>
                         <?= $form->field($previewForm, 'emailQueueId')->hiddenInput()->label(false); ?>
                     </div>
                     <div class="col-sm-6 form-group">
-                        <?= $form->field($previewForm, 'emailTo')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                        <?= $form->field($previewForm, 'emailToName')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                        <?= $form->field($previewForm, 'emailTo')->textInput(['class' => 'form-control', 'maxlength' => true, ]) ?>
+                        <?= $form->field($previewForm, 'emailToName')->textInput(['class' => 'form-control', 'maxlength' => true, ]) ?>
                     </div>
                 </div>
                 <div class="row">
