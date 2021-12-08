@@ -230,6 +230,7 @@ class FlightQuoteController extends FController
                     'create-re-protection-quote',
                     'ajax-save-re-protection',
                     'segment-baggage-validate',
+                    'show-osd'
                 ]
             ]
         ];
@@ -262,6 +263,15 @@ class FlightQuoteController extends FController
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
+    }
+
+    public function actionShowOsd()
+    {
+        $id = Yii::$app->request->get('id');
+
+        $data = FlightQuote::find()->select(['fq_origin_search_data'])->where(['fq_id' => $id])->asArray()->one();
+
+        return json_decode($data['fq_origin_search_data'] ?? '');
     }
 
     /**
