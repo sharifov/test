@@ -199,9 +199,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_PHONE)) {
         $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_CLIENT_PHONE);
-        $rowField['value'] = function ($model) {
+        $rowField['value'] = static function ($model) {
             $clientPhone = $model[UserModelSettingDictionary::FIELD_CLIENT_PHONE];
-            return Html::encode($clientPhone ? 'ready' : 'busy');
+            return Html::encode((bool) $clientPhone ? 'ready' : 'busy');
         };
         $columns[] = $rowField;
     }

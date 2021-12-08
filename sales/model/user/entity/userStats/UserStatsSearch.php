@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
+use common\models\UserCallStatus;
 use common\models\UserOnline;
 use common\models\UserParams;
 use DateTime;
@@ -15,6 +16,7 @@ use sales\behaviors\userModelSetting\UserModelSettingSearchBehavior;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\user\entity\ShiftTime;
+use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userModelSetting\service\UserModelSettingDictionary;
 use sales\traits\UserModelSettingTrait;
 use yii\base\Model;
@@ -333,10 +335,14 @@ class UserStatsSearch extends Model
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_PHONE)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_CLIENT_PHONE => (new Query())
-                    ->select(['us_call_phone_status'])
-                    ->from(Employee::tableName())
-                    ->leftJoin('user_status', 'us_user_id = id')
-                    ->where(['id' =>  Employee::tableName() . '.id'])
+                    ->select(new Expression('
+                        CASE
+                            WHEN us_call_phone_status = 1 AND us_is_on_call = 0 THEN 1
+                            ELSE 0
+                        END
+                    '))
+                    ->from(UserStatus::tableName())
+                    ->where('us_user_id = ' . Employee::tableName() . '.id')
             ]);
         }
 
