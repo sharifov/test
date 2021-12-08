@@ -62,7 +62,6 @@ use sales\listeners\lead\LeadSoldSplitListener;
 use sales\listeners\lead\LeadTaskEventListener;
 use sales\listeners\lead\LeadTrashEventLogListener;
 use sales\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
-use sales\listeners\lead\leadWebEngage\LeadCreatedWebEngageListener;
 use sales\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
 use sales\listeners\lead\leadWebEngage\LeadTrashedWebEngageListener;
 
@@ -77,7 +76,6 @@ return [
     LeadCreatedByApiEvent::class => [
         LeadCreatedByApiLogEventListener::class,
         LeadQcallAddListener::class,
-        //LeadCreatedWebEngageListener::class,
     ],
     LeadCreatedByApiBOEvent::class => [
         LeadCreatedByApiBOLogEventListener::class,

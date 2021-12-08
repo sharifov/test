@@ -96,4 +96,21 @@ class WebEngageSettings
         }
         return $this->trackingEventsHost = $trackingEventsHost;
     }
+
+    public function leadCreated(): array
+    {
+        if ((!$leadCreated = $this->settings['LeadCreated'] ?? null) || empty($leadCreated)) {
+            throw new \RuntimeException('WebEngageSettings "LeadCreated" is empty');
+        }
+        if (!is_array($leadCreated)) {
+            throw new \RuntimeException('WebEngageSettings "LeadCreated" is not array');
+        }
+        return $leadCreated;
+    }
+
+    public function leadCreatedApiUsernames(): ?string
+    {
+        $leadCreated = $this->leadCreated();
+        return $leadCreated['apiUsernames'] ?? null;
+    }
 }

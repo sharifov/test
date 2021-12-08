@@ -29,7 +29,7 @@ class LeadEventService
     public function getData(): array
     {
         return [
-            'anonymousId' => (string) $this->lead->client_id,
+            'userId' => $this->lead->client->uuid,
             'eventName' => $this->eventName,
             'eventTime' => date('Y-m-d\TH:i:sO'),
             'eventData' => (new LeadEventDataFactory($this->lead, $this->eventName))->create()->getEventData(),

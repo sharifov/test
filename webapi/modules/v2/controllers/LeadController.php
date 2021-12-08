@@ -2,8 +2,12 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\components\jobs\WebEngageLeadRequestJob;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use modules\webEngage\settings\WebEngageDictionary;
+use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
+use sales\helpers\app\AppHelper;
 use sales\model\lead\LeadCodeException;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
 use sales\model\lead\useCases\lead\api\create\LeadCreateValue;
@@ -319,6 +323,15 @@ class LeadController extends BaseController
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
+        }
+
+        try {
+            if (LeadCreatedEventData::checkByApiUser($this->auth)) {
+                $job = new WebEngageLeadRequestJob($lead->id, WebEngageDictionary::EVENT_LEAD_CREATED);
+                Yii::$app->queue_job->priority(100)->push($job);
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'LeadController:v2:WebEngageLeadRequest');
         }
 
         return new SuccessResponse(
