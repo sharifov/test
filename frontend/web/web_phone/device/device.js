@@ -11,6 +11,8 @@
         initiated = true;
         initDeviceId = deviceId;
 
+        localStorage.setItem(window.phoneDeviceIdStorageKey, initDeviceId);
+
         // console.log("Requesting Twilio Access Token...");
         PhoneWidget.addLog("Requesting Twilio Access Token...");
         $.getJSON('/phone/get-token?deviceId=' + deviceId)
@@ -196,7 +198,7 @@
                     PhoneWidget.removeTwilioInternalIncomingConnection();
                     PhoneWidget.soundDisconnect();
                     PhoneWidget.incomingSoundOff();
-                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled, null);
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled, null, false);
                 });
                 call.on('error', error => {
                     createNotify('Call error', 'More info in logs panel', 'error');

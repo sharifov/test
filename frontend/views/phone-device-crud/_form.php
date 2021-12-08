@@ -15,8 +15,6 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'pd_hash')->textInput(['maxlength' => true]) ?>
-
         <?= $form->field($model, 'pd_user_id')->widget(UserSelect2Widget::class, [
             'data' => $model->pd_user_id ? [
                 $model->pd_user_id => $model->user->username

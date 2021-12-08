@@ -79,7 +79,7 @@ var PhoneWidget = function () {
 
     let initiated = false;
     
-    let deviceHashKey = null;
+    let deviceIdStorageKey = null;
 
     function init(options)
     {
@@ -90,7 +90,7 @@ var PhoneWidget = function () {
         callRequester.init(options);
 
         isDevicePage = options.isDevicePage;
-        deviceHashKey = options.deviceHashKey;
+        deviceIdStorageKey = options.deviceIdStorageKey;
 
         audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
         deviceStatus = new window.phoneWidget.device.status.Init(isDevicePage, logger);
@@ -751,13 +751,13 @@ var PhoneWidget = function () {
             return false;
         }
 
-        callRequester.returnHoldCall(call, getDeviceHash());
+        callRequester.returnHoldCall(call, getDeviceId());
     }
 
     function checkDevice(title) {
-        let deviceHash = getDeviceHash();
-        if (!deviceHash) {
-            createNotify(title, 'Undefined device. Possibly Voip page is closed. Please open Voip page and refresh current page!', 'error');
+        let deviceId = getDeviceId();
+        if (!deviceId) {
+            createNotify(title, 'Not found Device ID. Possibly Voip page is closed. Please open Voip page and refresh current page!', 'error');
             return false;
         }
         if (deviceStatus.isReady()) {
@@ -783,7 +783,7 @@ var PhoneWidget = function () {
             return false;
         }
 
-        callRequester.accept(call, getDeviceHash());
+        callRequester.accept(call, getDeviceId());
     }
 
     function acceptWarmTransfer(callSid)
@@ -802,7 +802,7 @@ var PhoneWidget = function () {
             return false;
         }
 
-        callRequester.acceptWarmTransfer(call, getDeviceHash());
+        callRequester.acceptWarmTransfer(call, getDeviceId());
     }
 
     function acceptPriorityCall()
@@ -815,7 +815,7 @@ var PhoneWidget = function () {
             return false;
         }
 
-        callRequester.acceptPriorityCall(window.phoneWidget.notifier.keys.priorityCall, getDeviceHash());
+        callRequester.acceptPriorityCall(window.phoneWidget.notifier.keys.priorityCall, getDeviceId());
     }
 
     function changeStatus(status) {
@@ -1723,15 +1723,15 @@ var PhoneWidget = function () {
     }
 
     function joinListen(call_sid) {
-        callRequester.joinConference(conferenceSources.listen.name, conferenceSources.listen.id, call_sid, getDeviceHash());
+        callRequester.joinConference(conferenceSources.listen.name, conferenceSources.listen.id, call_sid, getDeviceId());
     }
 
     function joinCoach(call_sid) {
-        callRequester.joinConference(conferenceSources.coach.name, conferenceSources.coach.id, call_sid, getDeviceHash());
+        callRequester.joinConference(conferenceSources.coach.name, conferenceSources.coach.id, call_sid, getDeviceId());
     }
 
     function joinBarge(call_sid) {
-        callRequester.joinConference(conferenceSources.barge.name, conferenceSources.barge.id, call_sid, getDeviceHash());
+        callRequester.joinConference(conferenceSources.barge.name, conferenceSources.barge.id, call_sid, getDeviceId());
     }
 
     function freeDialButton() {
@@ -1761,7 +1761,7 @@ var PhoneWidget = function () {
             'fromCase': value.attr('data-from-case'),
             'fromLead': value.attr('data-from-lead'),
             'fromContacts': value.attr('data-from-contacts'),
-            'deviceHash': getDeviceHash()
+            'deviceId': getDeviceId()
         };
 
         reserveDialButton();
@@ -1998,13 +1998,12 @@ var PhoneWidget = function () {
         return initiated === true;
     }
     
-    function getDeviceHash() {
-        return localStorage.getItem(deviceHashKey);
+    function getDeviceId() {
+        return localStorage.getItem(deviceIdStorageKey);
     }
 
-    function removeDeviceHash() {
-        console.log(deviceHashKey);
-        return window.localStorage.removeItem(deviceHashKey);
+    function removeDeviceId() {
+        return window.localStorage.removeItem(deviceIdStorageKey);
     }
 
     return {
@@ -2049,7 +2048,7 @@ var PhoneWidget = function () {
         setTwilioInternalIncomingConnection: setTwilioInternalIncomingConnection,
         removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection,
         isInitiated: isInitiated,
-        removeDeviceHash: removeDeviceHash
+        removeDeviceId: removeDeviceId
     };
 }();
 

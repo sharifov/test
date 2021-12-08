@@ -37,12 +37,13 @@ function pushDialogOnTop(chatID)
     }
 }
 
-window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled, deviceHash) {
+window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled, deviceId, validateDeviceId) {
     socketSend('Call', 'GetCurrentQueueCalls', {
         'userId': userId,
         'finishedCallSid': finishedCallSid,
         'generalLinePriorityIsEnabled': generalLinePriorityIsEnabled,
-        'deviceHash': deviceHash
+        'deviceId': deviceId,
+        'validateDeviceId': validateDeviceId
     });
 };
 
@@ -62,7 +63,11 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             // console.log(e);
 
             if (typeof PhoneWidget === 'object') {
-                window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled, window.deviceHash);
+                if (window.isTwilioDevicePage) {
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled, localStorage.getItem(window.phoneDeviceIdStorageKey), true);
+                } else {
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled, null, false);
+                }
             }
         };
 
@@ -386,9 +391,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                             if (!PhoneWidget.isInitiated()) {
                                 PhoneWidget.init(window.phoneWidget.initParams);
                             }
-                            if (obj.twilioDeviceError) {
-                                if (obj.hashIsInvalid) {
-                                    PhoneWidget.removeDeviceHash();
+                            if (obj.error) {
+                                if (obj.deviceIsInvalid) {
+                                    PhoneWidget.removeDeviceId();
                                 }
                                 PhoneWidget.addLog(obj.msg);
                                 createNotify('Phone Widget', obj.msg, 'error')

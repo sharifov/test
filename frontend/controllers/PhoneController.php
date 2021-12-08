@@ -120,17 +120,16 @@ class PhoneController extends FController
     public function actionGetToken()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $userId = Auth::id();
         $deviceId = (int)Yii::$app->request->get('deviceId');
-        $device = PhoneDevice::find()->select(['pd_user_id', 'pd_hash'])->andWhere(['pd_id' => $deviceId])->asArray()->one();
+        $device = PhoneDevice::find()->byId($deviceId)->one();
         if (!$device) {
             throw new NotFoundHttpException('Not found device with Id: ' . $deviceId);
         }
-        if ((int)$device['pd_user_id'] !== Auth::id()) {
+        if (!$device->isEqualUser($userId)) {
             throw new NotFoundHttpException('Not found device Id (' . $deviceId . ') relation with user.');
         }
-        $username = PhoneDeviceIdentity::getId(Auth::id(), $device['pd_hash']);
-        //VarDumper::dump($username, 10, true); exit;
-        $data = Yii::$app->communication->getJwtTokenCache($username);
+        $data = Yii::$app->communication->getJwtTokenCache($device->pd_device_identity);
         return $data;
     }
 
@@ -1459,6 +1458,17 @@ class PhoneController extends FController
 
     public function actionAjaxJoinToConference(): Response
     {
+        $deviceId = (int)\Yii::$app->request->post('deviceId');
+
+        try {
+            $deviceIdentity = (new PhoneDeviceIdentity())->get($deviceId, Auth::id());
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
         try {
             $isOnCall = UserStatus::findOne(['us_user_id' => Auth::id(), 'us_is_on_call' => true]);
             if ($isOnCall) {
@@ -1490,7 +1500,7 @@ class PhoneController extends FController
                 $call->c_conference_sid,
                 $call->c_project_id,
                 $call->c_from, //$from
-                UserCallIdentity::getClientId(Auth::id()),
+                $deviceIdentity,
                 $source_type_id,
                 Auth::id(),
                 $conference->isRecordingDisabled(),

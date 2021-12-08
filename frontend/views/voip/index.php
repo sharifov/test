@@ -1,6 +1,6 @@
 <?php
 
-use frontend\widgets\newWebPhone\DeviceHash;
+use frontend\widgets\newWebPhone\DeviceStorageKey;
 use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
 use yii\web\View;
@@ -10,16 +10,11 @@ use yii\web\View;
 \frontend\widgets\newWebPhone\TwilioAsset::register($this);
 $remoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
 
-$deviceHash = DeviceHash::generate();
-$deviceHashKey = DeviceHash::getHashKey(Auth::id());
+$deviceIdStorageKey = DeviceStorageKey::getDeviceIdStorageKey(Auth::id());
 
 $js = <<<JS
 window.isTwilioDevicePage = true;
+window.phoneDeviceIdStorageKey = '$deviceIdStorageKey';
 window.remoteLogsEnabled = $remoteLogsEnabled;
-window.deviceHash = localStorage.getItem('$deviceHashKey');
-if (!window.deviceHash) {
-    window.deviceHash = '$deviceHash';
-    localStorage.setItem('$deviceHashKey', window.deviceHash);
-}
 JS;
 $this->registerJs($js, View::POS_READY);

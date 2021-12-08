@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Call;
-use frontend\widgets\newWebPhone\DeviceHash;
+use frontend\widgets\newWebPhone\DeviceStorageKey;
 use sales\auth\Auth;
 
 /** @var View $this */
@@ -262,7 +262,7 @@ $conferenceSources = json_encode([
 $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
-$deviceHashKey = DeviceHash::getHashKey(Auth::id());
+$deviceIdStorageKey = DeviceStorageKey::getDeviceIdStorageKey(Auth::id());
 
 $js = <<<JS
 window.phoneWidget.initParams = {
@@ -316,7 +316,7 @@ window.phoneWidget.initParams = {
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
     'isDevicePage': window.isTwilioDevicePage,
-    'deviceHashKey': '$deviceHashKey'
+    'deviceIdStorageKey': '$deviceIdStorageKey'
 };
 JS;
 $this->registerJs($js);

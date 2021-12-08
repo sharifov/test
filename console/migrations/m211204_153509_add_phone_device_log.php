@@ -14,7 +14,6 @@ class m211204_153509_add_phone_device_log extends Migration
     {
         $this->createTable('{{%phone_device}}', [
             'pd_id' => $this->primaryKey(),
-            'pd_hash' => $this->string(255)->notNull(),
             'pd_user_id' => $this->integer()->notNull(),
             'pd_connection_id' => $this->bigInteger(),
             'pd_name' => $this->string(255)->notNull(),

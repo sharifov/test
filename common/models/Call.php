@@ -1553,9 +1553,10 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @param Call $call
      * @param int $user_id
+     * @param string $deviceIdentity
      * @return bool
      */
-    public static function applyCallToAgent(Call $call, int $user_id): bool
+    public static function applyCallToAgent(Call $call, int $user_id, string $deviceIdentity): bool
     {
         try {
             if ($call) {
@@ -1670,7 +1671,7 @@ class Call extends \yii\db\ActiveRecord
                 $res = \Yii::$app->communication->acceptConferenceCall(
                     $call->c_id,
                     $call->c_call_sid,
-                    UserCallIdentity::getClientId($user_id),
+                    $deviceIdentity,
                     $call->c_from,
                     $user_id,
                     $call->isRecordingDisable(),
@@ -1715,9 +1716,10 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @param Call $call
      * @param int $user_id
+     * @param string $deviceIdentity
      * @return bool
      */
-    public static function applyWarmTransferCallToAgent(Call $call, int $user_id): bool
+    public static function applyWarmTransferCallToAgent(Call $call, int $user_id, string $deviceIdentity): bool
     {
         try {
             if (!$call->isStatusDelay() && !$call->isStatusInProgress() && !$call->isHold()) {
@@ -1799,7 +1801,7 @@ class Call extends \yii\db\ActiveRecord
             $res = \Yii::$app->communication->acceptWarmTransferCall(
                 $call->c_id,
                 $call->c_call_sid,
-                UserCallIdentity::getClientId($user_id),
+                $deviceIdentity,
                 $call->c_from,
                 $user_id,
                 $call->isRecordingDisable(),

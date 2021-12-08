@@ -18,8 +18,6 @@ class PhoneDeviceSearch extends PhoneDevice
 
             ['pd_connection_id', 'integer'],
 
-            ['pd_hash', 'string'],
-
             ['pd_id', 'integer'],
 
             ['pd_ip_address', 'string'],
@@ -68,8 +66,7 @@ class PhoneDeviceSearch extends PhoneDevice
             'pd_status_microphone' => $this->pd_status_microphone,
         ]);
 
-        $query->andFilterWhere(['like', 'pd_hash', $this->pd_hash])
-            ->andFilterWhere(['like', 'pd_name', $this->pd_name])
+        $query->andFilterWhere(['like', 'pd_name', $this->pd_name])
             ->andFilterWhere(['like', 'pd_device_identity', $this->pd_device_identity])
             ->andFilterWhere(['like', 'pd_ip_address', $this->pd_ip_address]);
 

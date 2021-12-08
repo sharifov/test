@@ -10,7 +10,6 @@ use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
  * This is the model class for table "{{%phone_device}}".
  *
  * @property int $pd_id
- * @property string $pd_hash
  * @property int $pd_user_id
  * @property int|null $pd_connection_id
  * @property string $pd_name
@@ -29,7 +28,6 @@ class PhoneDevice extends \yii\db\ActiveRecord
 {
     public static function create(
         int $userId,
-        string $hash,
         string $name,
         string $identity,
         bool $statusDevice,
@@ -41,7 +39,6 @@ class PhoneDevice extends \yii\db\ActiveRecord
     ): self {
         $device = new self();
         $device->pd_user_id = $userId;
-        $device->pd_hash = $hash;
         $device->pd_name = $name;
         $device->pd_device_identity = $identity;
         $device->pd_status_device = $statusDevice;
@@ -64,14 +61,26 @@ class PhoneDevice extends \yii\db\ActiveRecord
         return $this->pd_connection_id === $connectionId;
     }
 
+    public function isEqualUser(int $userId): bool
+    {
+        return $this->pd_user_id === $userId;
+    }
+
+    public function getClientDeviceIdentity(): string
+    {
+        return 'client:' . $this->pd_device_identity;
+    }
+
+    public function connectionReady(): bool
+    {
+        return $this->pd_connection_id !== null;
+    }
+
     public function rules(): array
     {
         return [
             ['pd_device_identity', 'required'],
             ['pd_device_identity', 'string', 'max' => 255],
-
-            ['pd_hash', 'required'],
-            ['pd_hash', 'string', 'max' => 255],
 
             ['pd_ip_address', 'string', 'max' => 45],
 
@@ -107,7 +116,6 @@ class PhoneDevice extends \yii\db\ActiveRecord
     {
         return [
             'pd_id' => 'ID',
-            'pd_hash' => 'Hash',
             'pd_user_id' => 'User',
             'pd_connection_id' => 'Connection ID',
             'pd_name' => 'Name',

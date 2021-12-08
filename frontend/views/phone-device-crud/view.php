@@ -32,7 +32,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'pd_id',
-                'pd_hash',
                 'pd_connection_id',
                 'pd_user_id:usernameWithId',
                 'pd_name',

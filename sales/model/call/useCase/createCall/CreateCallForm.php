@@ -12,6 +12,7 @@ use sales\entities\cases\Cases;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\voip\phoneDevice\device\PhoneDevice;
+use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 use yii\base\Model;
 
 /**
@@ -29,7 +30,7 @@ use yii\base\Model;
  * @property $fromCase
  * @property $fromLead
  * @property $fromContacts
- * @property $deviceHash
+ * @property $deviceId
  * @property $deviceIdentity
  */
 class CreateCallForm extends Model
@@ -48,7 +49,7 @@ class CreateCallForm extends Model
     public $fromCase;
     public $fromLead;
     public $fromContacts;
-    public $deviceHash;
+    public $deviceId;
 
     public function __construct(int $createdUserId, $config = [])
     {
@@ -126,20 +127,21 @@ class CreateCallForm extends Model
             ['caseId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             ['caseId', 'exist', 'targetClass' => Cases::class, 'targetAttribute' => ['caseId' => 'cs_id'], 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['deviceHash', 'required'],
-            ['deviceHash', 'string'],
-            ['deviceHash', function ($attribute) {
-                $device = PhoneDevice::find()->select(['pd_user_id', 'pd_device_identity'])->byHash($attribute)->asArray()->one();
-                if (!$device) {
-                    $this->addError($attribute, 'Not found device.');
-                    return;
-                }
-                if ((int)$device['pd_user_id'] !== $this->getCreatedUserId()) {
-                    $this->addError($attribute, 'Device is invalid. Error relation with user.');
-                    return;
-                }
-                $this->deviceIdentity = $device['pd_device_identity'];
-            }, 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['deviceId', 'required'],
+            ['deviceId', 'integer'],
+            [
+                'deviceId',
+                function ($attribute) {
+                    $deviceIdentity = new PhoneDeviceIdentity();
+                    try {
+                        $this->deviceIdentity = $deviceIdentity->get($this->{$attribute}, $this->getCreatedUserId());
+                    } catch (\Throwable $e) {
+                        $this->addError($attribute, $e->getMessage());
+                    }
+                },
+                'skipOnEmpty' => true,
+                'skipOnError' => true
+            ],
         ];
     }
 
@@ -183,7 +185,7 @@ class CreateCallForm extends Model
         return $this->createdUserId;
     }
 
-    public function getDeviceIdentity(): string
+    public function getClientDeviceIdentity(): string
     {
         return $this->deviceIdentity;
     }

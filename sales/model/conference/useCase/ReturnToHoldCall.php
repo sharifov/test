@@ -26,7 +26,7 @@ class ReturnToHoldCall
         $this->communication = \Yii::$app->communication;
     }
 
-    public function return(Call $call, int $userId): bool
+    public function return(Call $call, int $userId, string $deviceIdentity): bool
     {
         if (!$call->isOwner($userId)) {
             $this->log([
@@ -81,7 +81,7 @@ class ReturnToHoldCall
                 $parentCallSid,
                 $conference->cf_friendly_name,
                 $conference->cf_sid,
-                UserCallIdentity::getClientId($userId),
+                $deviceIdentity,
                 $userId,
                 $conference->isRecordingDisabled(),
                 $call->getDataPhoneListId(),

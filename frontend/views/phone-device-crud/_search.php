@@ -20,8 +20,6 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'pd_id') ?>
 
-    <?= $form->field($model, 'pd_hash') ?>
-
     <?= $form->field($model, 'pd_user_id') ?>
 
     <?= $form->field($model, 'pd_name') ?>
