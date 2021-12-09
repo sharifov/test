@@ -766,5 +766,10 @@ class SettingHelper
     public static function getUserPrickedCallDuration(): int
     {
         return (int)(\Yii::$app->params['settings']['user_picked_call_duration'] ?? 30);
+	}
+	
+    public static function leadRedialEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['lead_redial_enabled'] ?? false);
     }
 }
