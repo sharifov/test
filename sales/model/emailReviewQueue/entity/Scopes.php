@@ -31,4 +31,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function filterByStatuses(array $statuses): self
+    {
+        return $this->andFilterWhere(['erq_status_id' => $statuses]);
+    }
 }
