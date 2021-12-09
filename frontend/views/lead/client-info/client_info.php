@@ -42,7 +42,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                 <?php /** @abac $leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to Menu in Client Info block on lead */ ?>
                 <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
                     <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS, Access to button client details on lead */ ?>
-                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS)) : ?>
+                    <?php //if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS)) : ?>
                         <li>
                             <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#', [
                                 'id' => 'btn-client-info-details',
@@ -51,7 +51,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                                 'title' => 'Client Info',
                             ])?>
                         </li>
-                    <?php endif; ?>
+                    <?php //endif; ?>
 
                     <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS, Access to button client add phone on lead*/ ?>
                     <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS)) : ?>
