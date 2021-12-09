@@ -406,6 +406,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
+
+            if (!empty($filter['email_list'])) {
+                foreach ($filter['email_list'] as $key => $email) {
+                    $filter['email_list'][$key] = MaskEmailHelper::masking($email);
+                }
+            }
             \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
         }
 
