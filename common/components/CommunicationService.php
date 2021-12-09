@@ -19,6 +19,7 @@ use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -406,6 +407,14 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
+
+            if (!empty($filter['email_list'])) {
+                $email_list = Json::decode($filter['email_list'])['list'];
+                foreach ($email_list as $key => $email) {
+                    $email_list[$key] = MaskEmailHelper::masking($email);
+                }
+                $filter['email_list'] = Json::encode(['list' => $email_list]);
+            }
             \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
         }
 
