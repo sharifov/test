@@ -4632,32 +4632,15 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
-        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
-            $query = CallLogLead::find()
-                ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
-                ->where(['cll_lead_id' => $this->id]);
-
-            if ($type_id !== 0) {
-                $query->andWhere(['cl_type_id' => $type_id]);
-            }
-            return (int) $query->count();
-        }
-
-        $query = Call::find();
-        $query->where(['c_lead_id' => $this->id]);
+        $query = CallLogLead::find()
+            ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
+            ->where(['cll_lead_id' => $this->id]);
 
         if ($type_id !== 0) {
-            $query->andWhere(['c_call_type_id' => $type_id]);
+            $query->andWhere(['cl_type_id' => $type_id]);
         }
-
-        if ($onlyParent) {
-            $query->andWhere(['c_parent_id' => null]);
-        }
-        $count = $query->count();
-
-        return (int) $count;
+        return (int) $query->count();
     }
-
 
     /**
      * @param int $type_id

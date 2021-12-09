@@ -6,11 +6,9 @@
  * @var $previewEmailForm LeadPreviewEmailForm
  * @var $previewSmsForm LeadPreviewSmsForm
  * @var $quotesProvider ActiveDataProvider
- * @var $dataProviderCommunication ActiveDataProvider
  * @var $dataProviderCommunicationLog ActiveDataProvider
  * @var $dataProviderCallExpert ActiveDataProvider
  * @var $dataProviderNotes ActiveDataProvider
- * @var $enableCommunication boolean
  * @var $modelLeadCallExpert LeadCallExpert
  * @var $modelNote Note
  * @var $modelLeadChecklist LeadChecklist
@@ -184,7 +182,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'modelNote'  => $modelNote,
                 ]) ?>
             <?php endif;?>
-            
+
             <?php if (Yii::$app->user->can('lead-view/communication-block/view', ['lead' => $lead])) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
@@ -192,9 +190,8 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'previewSmsForm' => $previewSmsForm,
                     'comForm'       => $comForm,
                     'leadId'        => $lead->id,
-                    'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_lead'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
+                    'dataProvider'  => $dataProviderCommunicationLog,
                     'isAdmin'       => $is_admin,
-                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead'],
                     'lead' => $lead,
                     'fromPhoneNumbers' => $fromPhoneNumbers,
                     'unsubscribe' => $unsubscribe,

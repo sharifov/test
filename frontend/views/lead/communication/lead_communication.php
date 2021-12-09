@@ -8,7 +8,6 @@
  * @var $previewEmailForm LeadPreviewEmailForm
  * @var $previewSmsForm LeadPreviewSmsForm
  * @var $isAdmin bool
- * @var $isCommunicationLogEnabled bool
  * @var $lead Lead
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
@@ -37,9 +36,7 @@ use yii\helpers\VarDumper;
 
 $c_type_id = $comForm->c_type_id;
 
-$pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
-$pjaxContainerIdForm = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log-form' : 'pjax-lead-communication-form';
-$listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
+$pjaxContainerId = 'pjax-lead-communication-log';
 $unsubscribedEmails = @json_encode($unsubscribedEmails);
 $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES);
 $emailTemplateTypes = @json_encode($emailTemplateTypes);
@@ -87,8 +84,8 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
                         ],
                         'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
                         'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
-                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView, $disableMasking) {
-                            return $this->render($listItemView, [
+                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $disableMasking) {
+                            return $this->render('_list_item_log', [
                                     'model' => $model,
                                     'dataProvider' => $dataProvider,
                                     'disableMasking' => $disableMasking
@@ -114,7 +111,7 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
                     </div>
 
-                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm , 'timeout' => 5000]) ?>
+                    <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication-log-form' , 'timeout' => 5000]) ?>
 
                     <?php if (!Yii::$app->user->identity->canRole('qa')) : ?>
                         <?php if ($unsubscribe) : ?>

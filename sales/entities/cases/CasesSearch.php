@@ -1024,29 +1024,16 @@ class CasesSearch extends Cases
         }
 
         if (!empty($this->callsQtyFrom) || !empty($this->callsQtyTo)) {
-            if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
-                $query->leftJoin([
-                    'calls' => CallLogCase::find()
-                        ->select([
-                            'clc_case_id AS c_case_id',
-                            new Expression('COUNT(clc_case_id) AS cnt')
-                        ])
-                        ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_case.clc_cl_id')
-                        ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
-                        ->groupBy(['clc_case_id'])
-                ], 'cases.cs_id = calls.c_case_id');
-            } else {
-                $query->leftJoin([
-                    'calls' => Call::find()
-                        ->select([
-                            'c_case_id',
-                            new Expression('COUNT(c_case_id) AS cnt')
-                        ])
-                        ->where(['c_parent_id' => null])
-                        ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
-                        ->groupBy(['c_case_id'])
-                ], 'cases.cs_id = calls.c_case_id');
-            }
+            $query->leftJoin([
+                'calls' => CallLogCase::find()
+                    ->select([
+                        'clc_case_id AS c_case_id',
+                        new Expression('COUNT(clc_case_id) AS cnt')
+                    ])
+                    ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_case.clc_cl_id')
+                    ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                    ->groupBy(['clc_case_id'])
+            ], 'cases.cs_id = calls.c_case_id');
 
             if (!empty($this->callsQtyFrom)) {
                 if ((int) $this->callsQtyFrom === 0) {

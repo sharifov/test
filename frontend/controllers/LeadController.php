@@ -1072,21 +1072,6 @@ class LeadController extends FController
             ->from('{{%client_chat_lead}}')
             ->where(['ccl_lead_id' => $lead->id]);
 
-
-//        $query3 = (new \yii\db\Query())
-//            ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
-//            ->from('call')
-//            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
-
-        $queryCall = (new \yii\db\Query())
-            ->select(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
-            ->addSelect(['type' => new Expression('"voice"')])
-            ->addSelect(['lead_id' => 'c_lead_id', 'created_dt' => 'MAX(c_created_dt)'])
-            ->from('call')
-            ->where(['c_lead_id' => $lead->id])
-//            ->addGroupBy(['id', 'c_lead_id', 'c_created_dt']);
-            ->addGroupBy(['id']);
-
         $queryCallLog = (new Query())
             ->select(['id' => new Expression('cl_group_id')])
             ->addSelect(['type' => new Expression('"voice"')])
@@ -1098,27 +1083,11 @@ class LeadController extends FController
             ->orderBy(['created_dt' => SORT_ASC])
             ->groupBy(['id', 'type', 'lead_id']);
 
-        $queryUnion = $queryEmail->union($querySms)->union($queryChats);
-        $queryUnionLog = clone $queryUnion;
+        $queryUnionLog = $queryEmail->union($querySms)->union($queryChats);
 
         $unionQueryLog = (new Query())
             ->from(['union_table' => $queryUnionLog->union($queryCallLog)])
             ->orderBy(['created_dt' => SORT_ASC]);
-
-        $unionQuery = (new \yii\db\Query())
-            ->from(['union_table' => $queryUnion->union($queryCall)])
-            ->orderBy(['created_dt' => SORT_ASC]);
-
-//        echo '<pre>';print_r($unionQueryLog->createCommand()->rawSql);die;
-        //echo $query3->createCommand()->getRawSql(); exit;
-
-        $dataProviderCommunication = new ActiveDataProvider([
-            'query' => $unionQuery,
-            'pagination' => [
-                'pageSize' => 10,
-                //'page' => 0
-            ],
-        ]);
 
         $dataProviderCommunicationLog = new ActiveDataProvider([
             'query' => $unionQueryLog,
@@ -1127,46 +1096,13 @@ class LeadController extends FController
             ]
         ]);
 
-
         if (!Yii::$app->request->isAjax || !Yii::$app->request->get('page')) {
-            $pageCount = ceil($dataProviderCommunication->totalCount / $dataProviderCommunication->pagination->pageSize) - 1;
-            if ($pageCount < 0) {
-                $pageCount = 0;
-            }
-            $dataProviderCommunication->pagination->page = $pageCount;
-
             $pageCountLog = ceil($dataProviderCommunicationLog->totalCount / $dataProviderCommunicationLog->pagination->pageSize) - 1;
             if ($pageCountLog < 0) {
                 $pageCountLog = 0;
             }
             $dataProviderCommunicationLog->pagination->page = $pageCountLog;
         }
-        //      $query = (new Query())->select(['cl.*'])->from('call_log_lead')->leftJoin('call_log cl', 'cl.cl_id = cll_cl_id')->where(['cll_lead_id' => $lead->id])->all();
-
-//        $enableCommunication = false;
-//
-//        if (!$leadForm->getLead()->isNewRecord) {
-//
-//            //$leadForm->mode === $leadForm::VIEW_MODE
-//
-//            if ($is_admin || $isQA) {
-//                $enableCommunication = true;
-//            } elseif ($is_supervision) {
-//                if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
-//                    $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
-//                }
-//                if (!$leadForm->getLead()->hasOwner()) {
-//                    $enableCommunication = true;
-//                }
-//            } elseif ($is_agent) {
-//                if ($leadForm->getLead()->employee_id == Yii::$app->user->id) {
-//                    $enableCommunication = true;
-//                }
-//            }
-//
-//        }
-
-        //$dataProviderCommunication
 
         $modelLeadCallExpert = new LeadCallExpert();
 
@@ -1180,10 +1116,7 @@ class LeadController extends FController
 
                 if ($modelLeadCallExpert->save()) {
                     $modelLeadCallExpert->lce_request_text = '';
-                    //Yii::info(VarDumper::dumpAsString($modelLeadCallExpert->attributes), 'info\LeadController:view:LeadCallExpert');
                 }
-                //$modelLeadCallExpert =
-                //return $this->redirect(['view', 'id' => $model->lce_id]);
             }
         }
 
@@ -1213,8 +1146,6 @@ class LeadController extends FController
             } else {
                 Yii::error('Lead id: ' . $lead->id . ', ' . VarDumper::dumpAsString($modelLeadCallExpert->errors), 'Lead:view:LeadChecklist:save');
             }
-
-            //return $this->redirect(['view', 'id' => $model->lce_id]);
         }
 
         $searchModelLeadChecklist = new LeadChecklistSearch();
@@ -1244,10 +1175,6 @@ class LeadController extends FController
             ],
         ]);
 
-        //VarDumper::dump(enableCommunication); exit;
-
-        //$dataProviderCommunication = $lead->getQuotesProvider([]);
-
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
@@ -1268,9 +1195,7 @@ class LeadController extends FController
             'previewSmsForm' => $previewSmsForm,
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
-            'dataProviderCommunication' => $dataProviderCommunication,
             'dataProviderCommunicationLog' => $dataProviderCommunicationLog,
-//            'enableCommunication' => $enableCommunication,
             'dataProviderCallExpert' => $dataProviderCallExpert,
             'modelLeadCallExpert' => $modelLeadCallExpert,
             'dataProviderChecklist' => $dataProviderChecklist,
