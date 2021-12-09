@@ -5,6 +5,7 @@
  * @var Email $email
  * @var \sales\forms\emailReviewQueue\EmailReviewQueueForm $previewForm
  * @var $this yii\web\View
+ * @var $displayActionBtns bool
  */
 
 use common\models\Email;
@@ -30,7 +31,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="row">
   <div class="col-md-7">
     <?= $this->render('partial/_preview_email', [
-        'previewForm' => $previewForm
+        'previewForm' => $previewForm,
+        'displayActionBtns' => $displayActionBtns
     ]) ?>
   </div>
   <div class="col-md-5">

@@ -165,4 +165,24 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
     {
         $this->erq_status_id = EmailReviewQueueStatus::IN_PROGRESS;
     }
+
+    public function isInProgress(): bool
+    {
+        return $this->erq_status_id === EmailReviewQueueStatus::IN_PROGRESS;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->erq_status_id === EmailReviewQueueStatus::PENDING;
+    }
+
+    public function canTake(int $userId): bool
+    {
+        return $this->isInProgress() && $this->erq_user_reviewer_id !== $userId;
+    }
+
+    public function canReview(int $userId): bool
+    {
+        return $this->isInProgress() && $this->erq_user_reviewer_id === $userId;
+    }
 }

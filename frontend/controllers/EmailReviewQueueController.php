@@ -76,15 +76,31 @@ class EmailReviewQueueController extends FController
     {
         $model = $this->findModel($id);
 
+        $isReview = (bool)\Yii::$app->request->get('review', false);
+        $isTake = (bool)\Yii::$app->request->get('take', false);
+
         $email = $model->erqEmail;
         $previewForm = new EmailReviewQueueForm($email, $model->erq_id);
-        $model->erq_user_reviewer_id = Auth::id();
-        $model->statusToInProgress();
-        $model->save();
+        $displayActionBtns = false;
+        if ($isReview && $model->isPending()) {
+            $model->erq_user_reviewer_id = Auth::id();
+            $model->statusToInProgress();
+            $model->save();
+            $displayActionBtns = true;
+        } elseif ($isTake && $model->canTake(Auth::id())) {
+            $model->erq_user_reviewer_id = Auth::id();
+            $model->save();
+            $displayActionBtns = true;
+        }
+
+        if ($model->canReview(Auth::id())) {
+            $displayActionBtns = true;
+        }
         return $this->render('review', [
             'model' => $model,
             'email' => $email,
-            'previewForm' => $previewForm
+            'previewForm' => $previewForm,
+            'displayActionBtns' => $displayActionBtns
         ]);
     }
 
@@ -126,7 +142,8 @@ class EmailReviewQueueController extends FController
             }
         }
         return $this->render('partial/_preview_email', [
-            'previewForm' => $form
+            'previewForm' => $form,
+            'displayActionBtns' => true
         ]);
     }
 
@@ -160,7 +177,8 @@ class EmailReviewQueueController extends FController
             }
         }
         return $this->render('partial/_preview_email', [
-            'previewForm' => $form
+            'previewForm' => $form,
+            'displayActionBtns' => true
         ]);
     }
 

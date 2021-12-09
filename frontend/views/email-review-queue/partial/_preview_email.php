@@ -3,6 +3,7 @@
 /**
  * @var \sales\forms\emailReviewQueue\EmailReviewQueueForm $previewForm
  * @var $this yii\web\View
+ * @var $displayActionBtns bool
  */
 
 use dosamigos\ckeditor\CKEditor;
@@ -12,10 +13,12 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 ?>
+<?php if ($displayActionBtns) : ?>
 <div class="btn-wrapper text-left">
     <?= Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-lg btn-danger btn-submit', 'id' => 'reject-email-review-queue', 'data-url' => Url::to(['/email-review-queue/reject'])]) ?>
     <?= Html::button('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-success btn-submit', 'id' => 'send-email-review-queue', 'data-url' => Url::to(['/email-review-queue/send'])]) ?>
 </div>
+<?php endif; ?>
 <div class="x_panel">
     <div class="x_title" >
         <h2><i class="fa fa-sticky-note-o"></i> Review Email Form</h2>

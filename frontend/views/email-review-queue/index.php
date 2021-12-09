@@ -1,5 +1,6 @@
 <?php
 
+use yii\grid\ActionColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel EmailReviewQueueSearch */
 /* @var $dataProvider ActiveDataProvider */
@@ -9,6 +10,7 @@ use common\components\grid\department\DepartmentColumn;
 use common\components\grid\UserSelect2Column;
 use common\models\Department;
 use frontend\themes\gentelella_v2\widgets\FlashAlert;
+use sales\auth\Auth;
 use sales\model\emailReviewQueue\entity\EmailReviewQueue;
 use sales\model\emailReviewQueue\entity\EmailReviewQueueSearch;
 use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
@@ -121,15 +123,38 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => DateTimeColumn::class, 'attribute' => 'erq_created_dt'],
             ['class' => DateTimeColumn::class, 'attribute' => 'erq_updated_dt'],
             [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{review}',
+                'class' => ActionColumn::class,
+                'template' => '{review} {view} {take}',
                 'buttons' => [
                     'review' => static function ($url, EmailReviewQueue $model) {
-                        return Html::a('<i class="fa fa-eye"></i> Review', ['/email-review-queue/review', 'id' => $model->erq_id], [
+                        return Html::a('<i class="fa fa-eye"></i> Review', ['/email-review-queue/review', 'id' => $model->erq_id, 'review' => true], [
                             'class' => 'btn btn-info btn-xs',
                             'data-pjax' => 0,
                         ]);
-                    }
+                    },
+                    'take' => static function ($url, EmailReviewQueue $model) {
+                        return Html::a('Take', ['/email-review-queue/review', 'id' => $model->erq_id], [
+                            'class' => 'btn btn-primary btn-xs',
+                            'data-pjax' => 0,
+                        ]);
+                    },
+                    'view' => static function ($url, EmailReviewQueue $model) {
+                        return Html::a('View', ['/email-review-queue/review', 'id' => $model->erq_id, 'view' => true], [
+                            'class' => 'btn btn-warning btn-xs',
+                            'data-pjax' => 0,
+                        ]);
+                    },
+                ],
+                'visibleButtons' => [
+                    'review' => static function (EmailReviewQueue $model, $key, $index) {
+                        return $model->isPending();
+                    },
+                    'take' => static function (EmailReviewQueue $model, $key, $index) {
+                        return $model->canTake(Auth::id());
+                    },
+                    'view' => static function (EmailReviewQueue $model, $key, $index) {
+                        return true;
+                    },
                 ]
             ],
         ],
