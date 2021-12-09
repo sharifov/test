@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'erq_id',
                 'options' => [
-                    'width' => '30px'
+                    'width' => '80px'
                 ]
             ],
             [
@@ -49,6 +49,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => [
                     'width' => '110px'
                 ]
+            ],
+            [
+                'attribute' => 'erq_project_id',
+                'value' => static function (EmailReviewQueue $model) {
+                    return Yii::$app->formatter->asProjectName($model->erqProject);
+                },
+                'filter' => \common\models\Project::getList(),
+                'format' => 'raw',
+            ],
+            [
+                'class' => DepartmentColumn::class,
+                'attribute' => 'erq_department_id',
+                'relation' => 'erqDepartment',
+                'filter' => Department::getList(),
+                'format' => 'departmentName'
             ],
             [
                 'label' => 'Email Subject',
@@ -92,26 +107,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Email Creator'
             ],
             [
-                'attribute' => 'erq_project_id',
-                'value' => static function (EmailReviewQueue $model) {
-                    return Yii::$app->formatter->asProjectName($model->erqProject);
-                },
-                'filter' => \common\models\Project::getList(),
-                'format' => 'raw',
-            ],
-            [
-                'class' => DepartmentColumn::class,
-                'attribute' => 'erq_department_id',
-                'relation' => 'erqDepartment',
-                'filter' => Department::getList(),
-            ],
-            [
                 'attribute' => 'erq_status_id',
                 'value' => static function (EmailReviewQueue $model) {
                     return EmailReviewQueueStatus::asFormat($model->erq_status_id);
                 },
                 'format' => 'raw',
-                'filter' => EmailReviewQueueStatus::getCompletedList()
+                'filter' => EmailReviewQueueStatus::getCompletedList(),
+                'label' => 'Review Status'
             ],
             [
                 'class' => UserSelect2Column::class,
