@@ -127,13 +127,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{review} {view} {take}',
                 'buttons' => [
                     'review' => static function ($url, EmailReviewQueue $model) {
-                        return Html::a('<i class="fa fa-eye"></i> Review', ['/email-review-queue/review', 'id' => $model->erq_id, 'review' => true], [
+                        return Html::a('Review', ['/email-review-queue/review', 'id' => $model->erq_id, 'review' => true], [
                             'class' => 'btn btn-info btn-xs',
                             'data-pjax' => 0,
                         ]);
                     },
                     'take' => static function ($url, EmailReviewQueue $model) {
-                        return Html::a('Take', ['/email-review-queue/review', 'id' => $model->erq_id], [
+                        return Html::a('Take', ['/email-review-queue/review', 'id' => $model->erq_id, 'take' => true], [
                             'class' => 'btn btn-primary btn-xs',
                             'data-pjax' => 0,
                         ]);
