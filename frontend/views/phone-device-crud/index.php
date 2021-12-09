@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['attribute' => 'pd_device_identity', 'options' => ['style' => 'width:180px']],
             ['attribute' => 'pd_connection_id', 'options' => ['style' => 'width:180px']],
             ['attribute' => 'pd_name', 'options' => ['style' => 'width:250px']],
+            ['attribute' => 'pd_user_agent', 'options' => ['style' => 'width:450px']],
             [
                 'class' => \common\components\grid\BooleanColumn::class,
                 'attribute' => 'pd_status_device',

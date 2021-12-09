@@ -35,6 +35,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pd_ip_address')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'pd_user_agent')->textInput(['maxlength' => true]) ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

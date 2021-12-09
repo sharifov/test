@@ -22,6 +22,8 @@ class PhoneDeviceSearch extends PhoneDevice
 
             ['pd_ip_address', 'string'],
 
+            ['pd_user_agent', 'string'],
+
             ['pd_name', 'string'],
 
             ['pd_status_device', 'boolean'],
@@ -68,7 +70,8 @@ class PhoneDeviceSearch extends PhoneDevice
 
         $query->andFilterWhere(['like', 'pd_name', $this->pd_name])
             ->andFilterWhere(['like', 'pd_device_identity', $this->pd_device_identity])
-            ->andFilterWhere(['like', 'pd_ip_address', $this->pd_ip_address]);
+            ->andFilterWhere(['like', 'pd_ip_address', $this->pd_ip_address])
+            ->andFilterWhere(['like', 'pd_user_agent', $this->pd_user_agent]);
 
         return $dataProvider;
     }

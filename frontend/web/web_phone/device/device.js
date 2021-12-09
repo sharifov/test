@@ -1,25 +1,22 @@
 (function () {
     function Init(remoteLogsEnabled, deviceId) {
+        initDeviceId = deviceId;
+        localStorage.setItem(window.phoneDeviceIdStorageKey, initDeviceId);
+
         if (initiated) {
-            if (initDeviceId !== deviceId) {
-                createNotify('Phone Device', 'Device Id was changed. Please refresh page!', 'error');
-            }
             console.log('device already initiated');
             return;
         }
 
         initiated = true;
-        initDeviceId = deviceId;
-
-        localStorage.setItem(window.phoneDeviceIdStorageKey, initDeviceId);
 
         // console.log("Requesting Twilio Access Token...");
         PhoneWidget.addLog("Requesting Twilio Access Token...");
-        $.getJSON('/phone/get-token?deviceId=' + deviceId)
+        $.getJSON('/phone/get-token?deviceId=' + initDeviceId)
             .then(function (response) {
                 // console.log("Got a Twilio Access token.");
                 PhoneWidget.addLog("Got a Twilio Access token.");
-                initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime}, remoteLogsEnabled, deviceId);
+                initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime}, remoteLogsEnabled);
             })
             .catch(function (err) {
                 PhoneWidget.addLog("Get Twilio Access token error. Reload page!");
@@ -27,7 +24,7 @@
                 createNotify('Twilio Token error!', 'Could not get a token from server! Please reload page!', 'error');
             });
 
-        function initDevice(token, remoteLogsEnabled, deviceId) {
+        function initDevice(token, remoteLogsEnabled) {
             // console.log("Init Twilio Device...");
             PhoneWidget.addLog("Init Twilio Device...");
 
@@ -57,7 +54,7 @@
                             excess: 0
                         },
                         format: log => ({
-                            deviceId: deviceId,
+                            deviceId: initDeviceId,
                             level: log.level.value,
                             message: log.message,
                             timestamp: log.timestamp,
@@ -145,7 +142,7 @@
 
             const updateToken = () => {
                 PhoneWidget.addLog("Update Twilio Access Token...");
-                $.getJSON('/phone/get-token?deviceId=' + deviceId)
+                $.getJSON('/phone/get-token?deviceId=' + initDeviceId)
                     .then(function (response) {
                         //console.log("Got a Twilio Access token.");
                         PhoneWidget.addLog("Got a Twilio Access token.");
@@ -198,7 +195,7 @@
                     PhoneWidget.removeTwilioInternalIncomingConnection();
                     PhoneWidget.soundDisconnect();
                     PhoneWidget.incomingSoundOff();
-                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled, null, false);
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls(call.parameters.CallSid, window.userId, window.generalLinePriorityIsEnabled);
                 });
                 call.on('error', error => {
                     createNotify('Call error', 'More info in logs panel', 'error');

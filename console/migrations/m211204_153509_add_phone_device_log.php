@@ -22,6 +22,7 @@ class m211204_153509_add_phone_device_log extends Migration
             'pd_status_speaker' => $this->boolean(),
             'pd_status_microphone' => $this->boolean(),
             'pd_ip_address' => $this->string(45),
+            'pd_user_agent' => $this->string(500),
             'pd_created_dt' => $this->dateTime()->notNull(),
             'pd_updated_dt' => $this->dateTime()->notNull(),
         ]);

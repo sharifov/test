@@ -18,6 +18,7 @@ use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
  * @property int|null $pd_status_speaker
  * @property int|null $pd_status_microphone
  * @property string|null $pd_ip_address
+ * @property string|null $pd_user_agent
  * @property string $pd_created_dt
  * @property string $pd_updated_dt
  *
@@ -34,6 +35,7 @@ class PhoneDevice extends \yii\db\ActiveRecord
         bool $statusSpeaker,
         bool $statusMicrophone,
         ?string $ip,
+        ?string $userAgent,
         string $created,
         string $updated
     ): self {
@@ -45,6 +47,7 @@ class PhoneDevice extends \yii\db\ActiveRecord
         $device->pd_status_speaker = $statusSpeaker;
         $device->pd_status_microphone = $statusMicrophone;
         $device->pd_ip_address = $ip;
+        $device->pd_user_agent = $userAgent;
         $device->pd_created_dt = $created;
         $device->pd_updated_dt = $updated;
         return $device;
@@ -83,6 +86,8 @@ class PhoneDevice extends \yii\db\ActiveRecord
             ['pd_device_identity', 'string', 'max' => 255],
 
             ['pd_ip_address', 'string', 'max' => 45],
+
+            ['pd_user_agent', 'string', 'max' => 500],
 
             ['pd_name', 'required'],
             ['pd_name', 'string', 'max' => 255],
@@ -124,6 +129,7 @@ class PhoneDevice extends \yii\db\ActiveRecord
             'pd_status_speaker' => 'Status Speaker',
             'pd_status_microphone' => 'Status Microphone',
             'pd_ip_address' => 'Ip Address',
+            'pd_user_agent' => 'User agent',
             'pd_created_dt' => 'Created',
             'pd_updated_dt' => 'Updated',
         ];
