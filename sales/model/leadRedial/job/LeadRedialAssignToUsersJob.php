@@ -78,7 +78,10 @@ class LeadRedialAssignToUsersJob extends BaseJob implements JobInterface
             }
 
             if ($isAssigned) {
-                Yii::$app->queue_lead_redial->delay(SettingHelper::getRedialUserAccessExpiredSecondsLimit())->push(new LeadRedialExpiredAccessJob($lead->id));
+                $job = new LeadRedialExpiredAccessJob($lead->id);
+                $delay = SettingHelper::getRedialUserAccessExpiredSecondsLimit();
+                $job->delayJob = $delay;
+                Yii::$app->queue_lead_redial->delay($delay)->push($job);
             }
         } catch (\Throwable $e) {
             Yii::error(

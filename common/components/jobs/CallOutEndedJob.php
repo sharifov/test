@@ -6,6 +6,9 @@ use common\models\Call;
 use common\models\Client;
 use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\settings\WebEngageDictionary;
+use modules\webEngage\src\service\webEngageEventData\call\CallEventService;
+use modules\webEngage\src\service\webEngageEventData\call\eventData\FirstCallNotPickedEventData;
+use modules\webEngage\src\service\webEngageEventData\call\eventData\UserPickedCallEventData;
 use modules\webEngage\src\service\WebEngageRequestService;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
@@ -57,8 +60,13 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                     $data = [
                         'userId' => $client->uuid,
                         'eventName' => WebEngageDictionary::EVENT_CALL_FIRST_CALL_NOT_PICKED,
-                        'eventTime' => date('Y-m-d\TH:i:sO')
+                        'eventTime' => date('Y-m-d\TH:i:sO'),
                     ];
+
+                    if ($lead = CallEventService::getLead($this->callId, $this->clientId)) {
+                        $data['eventData'] = (new FirstCallNotPickedEventData($lead))->getEventData();
+                    }
+
                     $webEngageEventForm = new WebEngageEventForm();
                     if (!$webEngageEventForm->load($data)) {
                         throw new \RuntimeException('WebEngageEventForm not loaded');
@@ -76,6 +84,11 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                         'eventName' => WebEngageDictionary::EVENT_CALL_USER_PICKED_CALL,
                         'eventTime' => date('Y-m-d\TH:i:sO')
                     ];
+
+                    if ($lead = CallEventService::getLead($this->callId, $this->clientId)) {
+                        $data['eventData'] = (new UserPickedCallEventData($lead))->getEventData();
+                    }
+
                     $webEngageEventForm = new WebEngageEventForm();
                     if (!$webEngageEventForm->load($data)) {
                         throw new \RuntimeException('WebEngageEventForm not loaded');

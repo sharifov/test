@@ -132,7 +132,7 @@ class WebEngageRequestService
     public function addEvent(WebEngageEventForm $webEngageEventForm): ?array
     {
         if (!$webEngageEventForm->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($webEngageEventForm));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($webEngageEventForm, ' '));
         }
 
         $data = $webEngageEventForm->toArray();

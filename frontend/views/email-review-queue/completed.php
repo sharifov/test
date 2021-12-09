@@ -1,6 +1,5 @@
 <?php
 
-use yii\grid\ActionColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel EmailReviewQueueSearch */
 /* @var $dataProvider ActiveDataProvider */
@@ -15,6 +14,7 @@ use sales\model\emailReviewQueue\entity\EmailReviewQueue;
 use sales\model\emailReviewQueue\entity\EmailReviewQueueSearch;
 use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use yii\data\ActiveDataProvider;
+use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -25,9 +25,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="email-review-queue-index">
 
-  <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?></h1>
 
-  <?php Pjax::begin(); ?>
+    <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -111,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return EmailReviewQueueStatus::asFormat($model->erq_status_id);
                 },
                 'format' => 'raw',
-                'filter' => EmailReviewQueueStatus::getList()
+                'filter' => EmailReviewQueueStatus::getCompletedList()
             ],
             [
                 'class' => UserSelect2Column::class,

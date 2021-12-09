@@ -1075,7 +1075,7 @@ class CallController extends FController
 
             if (!$isReserved) {
                 $autoRedialIsEnabled = (bool)UserProfile::find()->select(['up_auto_redial'])->andWhere(['up_user_id' => Auth::id()])->scalar();
-                if ($autoRedialIsEnabled && Yii::createObject(LeadRedialAccessChecker::class)->exist($userId)) {
+                if (SettingHelper::leadRedialEnabled() && $autoRedialIsEnabled && Yii::createObject(LeadRedialAccessChecker::class)->exist($userId)) {
                     $leadRedialQueue = Yii::createObject(\sales\model\leadRedial\queue\LeadRedialQueue::class);
                     $redialCall = $leadRedialQueue->getCall(Auth::user());
                     if ($redialCall) {
@@ -1083,7 +1083,10 @@ class CallController extends FController
                         if ($prepare->prepare()) {
                             UserStatus::isOnCallOn($userId);
                             Yii::createObject(LeadRedialUnAssigner::class)->acceptRedialCall($userId, $redialCall->leadId);
-                            \Yii::$app->queue_job->delay(SettingHelper::getRedialCheckIsOnCallTime())->push(new CheckUserIsOnRedialCallJob($userId, $redialCall->leadId, date('Y-m-d H:i:s')));
+                            $job = new CheckUserIsOnRedialCallJob($userId, $redialCall->leadId, date('Y-m-d H:i:s'));
+                            $delay = SettingHelper::getRedialCheckIsOnCallTime();
+                            $job->delayJob = $delay;
+                            \Yii::$app->queue_job->delay($delay)->push($job);
                             $response['isRedialCall'] = true;
                             try {
                                 $result = (new CreateRedialCall())($redialCall);

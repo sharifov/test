@@ -216,6 +216,20 @@ class SideBarMenu extends \yii\bootstrap\Widget
         ];
 
         $menuItems[] = [
+            'label' => 'Email <span class="label-info label pull-right"></span> ',
+            'url' => 'javascript:',
+            'icon' => 'envelope',
+            'items' => [
+                ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                ['label' => 'Review Queue All', 'url' => ['/email-review-queue/index'], 'icon' => 'list'],
+                ['label' => 'Review Queue Pending', 'url' => ['/email-review-queue/pending'], 'icon' => 'list'],
+                ['label' => 'Review Queue Completed', 'url' => ['/email-review-queue/completed'], 'icon' => 'list'],
+                ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
+                ['label' => 'Email Review Queue Crud', 'url' => ['/email-review-queue-crud/index'], 'icon' => 'list'],
+            ]
+        ];
+
+        $menuItems[] = [
             'label' => 'Client Chat' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
             'url' => 'javascript:',
             'icon' => 'comments',
@@ -291,9 +305,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
-                ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
-                ['label' => 'Email Review Queue', 'url' => ['/email-review-queue/index'], 'icon' => 'list'],
-                ['label' => 'Email Review Queue Crud', 'url' => ['/email-review-queue-crud/index'], 'icon' => 'list'],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'bell-o'],
 
                 [
@@ -551,7 +562,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
                 ['label' => 'Phone BlockList', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
                 ['label' => 'Phone BlockList Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
-                ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airlines', 'url' => ['/airline-crud/index'], 'icon' => 'space-shuttle'],

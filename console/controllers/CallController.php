@@ -353,6 +353,13 @@ class CallController extends Controller
 
     public function actionRedialCall()
     {
+        if (!SettingHelper::leadRedialEnabled()) {
+            echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+            echo 'Lead redial logic disabled' . PHP_EOL;
+            echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+            return;
+        }
+
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
         $processed = 0;

@@ -14,7 +14,7 @@ class EmailReviewQueueStatus
     private const LIST = [
         self::PENDING => 'Pending',
         self::IN_PROGRESS => 'In Progress',
-        self::REVIEWED => 'Reviewed',
+        self::REVIEWED => 'Success',
         self::REJECTED => 'Rejected'
     ];
 
@@ -23,6 +23,16 @@ class EmailReviewQueueStatus
         self::IN_PROGRESS => 'info',
         self::REVIEWED => 'success',
         self::REJECTED => 'danger'
+    ];
+
+    private const PENDING_LIST = [
+        self::PENDING => self::LIST[self::PENDING],
+        self::IN_PROGRESS => self::LIST[self::IN_PROGRESS]
+    ];
+
+    private const COMPLETED_LIST = [
+        self::REJECTED => self::LIST[self::REJECTED],
+        self::REVIEWED => self::LIST[self::REVIEWED]
     ];
 
     public static function getList(): array
@@ -47,5 +57,15 @@ class EmailReviewQueueStatus
             self::getName($value),
             ['class' => 'badge badge-' . self::getCssClass($value)]
         );
+    }
+
+    public static function getPendingList(): array
+    {
+        return self::PENDING_LIST;
+    }
+
+    public static function getCompletedList(): array
+    {
+        return self::COMPLETED_LIST;
     }
 }

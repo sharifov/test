@@ -4,6 +4,7 @@ namespace sales\model\leadRedial\assign;
 
 use common\models\Notifications;
 use common\models\UserCallStatus;
+use sales\helpers\setting\SettingHelper;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\leadRedial\entity\CallRedialUserAccessWithCallStatus;
@@ -31,7 +32,9 @@ class LeadRedialUnAssigner
         foreach ($accesses as $access) {
             $this->unAssign($access);
             if (!$access->isEqual($leadId)) {
-                \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id));
+                if (SettingHelper::leadRedialEnabled()) {
+                    \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id));
+                }
             }
         }
     }
@@ -41,7 +44,9 @@ class LeadRedialUnAssigner
         $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
             $this->unAssign($access);
-            \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id));
+            if (SettingHelper::leadRedialEnabled()) {
+                \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id));
+            }
         }
     }
 
@@ -50,7 +55,9 @@ class LeadRedialUnAssigner
         $accesses = CallRedialUserAccess::find()->byUserId($userId)->all();
         foreach ($accesses as $access) {
             $this->unAssign($access);
-            \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id));
+            if (SettingHelper::leadRedialEnabled()) {
+                \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($access->crua_lead_id));
+            }
         }
     }
 
@@ -85,7 +92,9 @@ class LeadRedialUnAssigner
             }
         }
 
-        \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($leadId));
+        if (SettingHelper::leadRedialEnabled()) {
+            \Yii::$app->queue_lead_redial->priority(2)->push(new LeadRedialAssignToUsersJob($leadId));
+        }
     }
 
     private function missedCallNotification(int $userId): void
