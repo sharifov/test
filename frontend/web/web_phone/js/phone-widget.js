@@ -977,6 +977,7 @@ function handleWidgetIcon() {
     function createInitialIcon(type,status) {
         initialNode = '<div class="widget-icon-inner" data-wi-type="'+ type +'" data-wi-status="'+ status +'">'+
             '<div class="standby-phone">'+
+            '<i class="fa fa-exclamation-triangle phone-widget-icon__warning"></i>' +
             '<i class="fa fa-phone-volume icon-phone-answer"></i>' +
             '<div class="phone-widget-icon__state">'+
             '<span class="phone-widget-icon__ongoing"></span>'+

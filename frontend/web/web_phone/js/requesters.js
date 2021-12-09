@@ -241,7 +241,7 @@
                         call.unSetHangupRequestState();
                     }
                     if (typeof data.result !== 'undefined' && typeof data.result.status !== 'undefined' && data.result.status === 'completed') {
-                        PhoneWidget.completeCall(callSid);
+                        PhoneWidget.completeCall(call.data.callSid);
                     }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {

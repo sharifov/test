@@ -22,6 +22,7 @@ use yii\web\View;
         <label for="number-status3" id="pw_status_name"><?= ($userCallStatus && $userCallStatus->isReady() ? 'ON' : 'OFF') ?></label>
         <div class="status-confirmation"></div>
       </div>
+        <i class="fa fa-exclamation-triangle phone-widget-heading__warning" data-toggle="popover"  data-content="Note: Missing connection" data-placement="bottom"></i>
         <ul class="call-filter">
             <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-active" title="Active Calls" data-call-filter="active">0</a></li>
             <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-direct" title="Direct Line" data-call-filter="direct">0</a></li>
@@ -475,8 +476,6 @@ use yii\web\View;
                 <div id="output-selection">
                     <label>Microphone Devices</label>
                     <select id="microphone-devices" class="ringtone-devices form-control" multiple></select>
-                    <label>Ringtone Devices</label>
-                    <select id="ringtone-devices" class="ringtone-devices form-control" multiple></select>
                     <label>Speaker Devices</label>
                     <select id="speaker-devices" class="speaker-devices form-control" multiple></select><br/>
                 </div>
@@ -484,7 +483,6 @@ use yii\web\View;
             <li class="tabs__item" id="tab-device-status">
                 <span class="tab-device-status-twilio"></span><br>
                 <span class="tab-device-status-speaker"></span><br>
-                <span class="tab-device-status-ringtone"></span><br>
                 <span class="tab-device-status-microphone"></span><br>
             </li>
             <li class="tabs__item" id="tab-logs">
