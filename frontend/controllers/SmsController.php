@@ -91,8 +91,8 @@ class SmsController extends FController
         //$params['SmsSearch']['phone'] = Yii::$app->request->get('sms_phone');
         $params['SmsSearch']['s_is_deleted'] = 0;
 
-        $dataProvider = $searchModel->searchSms($params);
         $phoneList = Employee::getPhoneList(Yii::$app->user->id);
+        $dataProvider = $searchModel->searchSms($params, $phoneList);
 
         //VarDumper::dump($phoneList, 10, true);
 

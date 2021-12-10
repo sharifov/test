@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use sales\helpers\phone\MaskPhoneHelper;
+use common\models\Sms;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SmsSearch */
@@ -80,7 +81,7 @@ $user = Yii::$app->user->identity;
                 $nr = 1;
                 foreach ($phoneList as $phone) :?>
                     <tr>
-                        <td width="100px"><?=($nr++)?></td>
+                        <td style="width:100px"><?=($nr++)?></td>
                         <td><?=Html::encode($phone)?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -103,8 +104,8 @@ $user = Yii::$app->user->identity;
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-comments"></i></div>
                 <div class="count">
-                    <?=\common\models\Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
-                        ->andWhere(['s_is_new' => true, 's_is_deleted' => false])->count()?>
+                    <?= Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
+                        ->andWhere(['s_is_new' => true, 's_is_deleted' => false])->cache(30 * 60)->count()?>
                 </div>
                 <h3>New SMS (unread)</h3>
                 <p>Total new (unread) SMS messages</p>
@@ -115,8 +116,8 @@ $user = Yii::$app->user->identity;
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-comments-o"></i></div>
                 <div class="count">
-                    <?=\common\models\Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
-                        ->andWhere(['s_type_id' => \common\models\Sms::TYPE_INBOX, 'DATE(s_created_dt)' => new \yii\db\Expression('DATE(NOW())'), 's_is_deleted' => false])->count()?>
+                    <?= Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
+                        ->andWhere(['s_type_id' => Sms::TYPE_INBOX, 'DATE(s_created_dt)' => new \yii\db\Expression('DATE(NOW())'), 's_is_deleted' => false])->cache(30 * 60)->count()?>
                 </div>
                 <h3>Today Inbox</h3>
                 <p>Today inbox count of SMS messages</p>
@@ -127,27 +128,25 @@ $user = Yii::$app->user->identity;
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-comments"></i></div>
                 <div class="count">
-                    <?=\common\models\Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
-                        ->andWhere(['s_type_id' => \common\models\Sms::TYPE_OUTBOX, 'DATE(s_created_dt)' => new \yii\db\Expression('DATE(NOW())'), 's_is_deleted' => false])->count()?>
+                    <?= Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
+                        ->andWhere(['s_type_id' => Sms::TYPE_OUTBOX, 'DATE(s_created_dt)' => new \yii\db\Expression('DATE(NOW())'), 's_is_deleted' => false])->cache(30 * 60)->count()?>
                 </div>
                 <h3>Today Outbox</h3>
                 <p>Today outbox count of SMS messages</p>
             </div>
         </div>
 
-
-
-        <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
+<!--        <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-trash"></i></div>
                 <div class="count">
-                    <?=\common\models\Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
-                        ->andWhere(['s_type_id' => \common\models\Sms::FILTER_TYPE_TRASH, 's_is_deleted' => false])->count()?>
+                    <?php /*echo Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
+                        ->andWhere(['s_type_id' => Sms::FILTER_TYPE_TRASH, 's_is_deleted' => false])->cache(30 * 60)->count()*/?>
                 </div>
                 <h3>Trash</h3>
                 <p>Trash count of SMS messages</p>
             </div>
-        </div>
+        </div>-->
 
         <?php /*
             <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">

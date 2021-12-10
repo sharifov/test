@@ -159,9 +159,21 @@ class SmsSearch extends Sms
      *
      * @return ActiveDataProvider
      */
-    public function searchSms($params)
+    public function searchSms($params, $phoneList)
     {
-        $query = Sms::find();
+        $query = Sms::find()->select([
+            's_id',
+            's_is_new',
+            's_type_id',
+            's_lead_id',
+            's_project_id',
+            's_phone_from',
+            's_phone_to',
+            's_sms_text',
+            's_status_id',
+            's_created_user_id',
+            's_created_dt',
+        ]);
 
         // add conditions that should always apply here
 
@@ -215,12 +227,12 @@ class SmsSearch extends Sms
 //            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
 //                ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]]);
 
-            $subQuery = UserProjectParams::find()->select(['pl_phone_number'])->distinct()->byUserId($params['SmsSearch']['user_id'])->innerJoinWith('phoneList', false);
+            //$subQuery = UserProjectParams::find()->select(['pl_phone_number'])->distinct()->byUserId($params['SmsSearch']['user_id'])->innerJoinWith('phoneList', false);
 
             //$subQuery2 = UserProjectParams::find()->select(['DISTINCT(upp_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
             //    ->andWhere(['and', ['<>', 'upp_phone_number', ''], ['IS NOT', 'upp_phone_number', null]]);
 
-            $query->andWhere(['or', ['IN', 's_phone_from', $subQuery], ['and', ['IN', 's_phone_to', $subQuery], ['s_type_id' => Sms::TYPE_INBOX]]]);
+            $query->andWhere(['or', ['IN', 's_phone_from', $phoneList], ['and', ['IN', 's_phone_to', $phoneList], ['s_type_id' => Sms::TYPE_INBOX]]]);
             //$query->orWhere(['or', ['IN', 's_phone_from', $subQuery2], ['and', ['IN', 's_phone_to', $subQuery2], ['s_type_id' => Sms::TYPE_INBOX]]]);
         }
 
