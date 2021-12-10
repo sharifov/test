@@ -116,6 +116,10 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if (!$case = $caseReProtectionService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
                 $case = $caseReProtectionService->createCase($flightRequest);
+
+                if ($clientId = $originProductQuote->productQuoteLastChange->pqcCase->cs_client_id ?? null) {
+                    $caseReProtectionService->additionalFillingCase($clientId, $flightRequest->fr_project_id);
+                }
             }
             $caseReProtectionService->setCase($case);
 
