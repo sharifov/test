@@ -83,16 +83,26 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
 
 
-        $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/failed-bookings'], 'icon' => 'recycle'];
-        $menuLItems[] = ['label' => 'Alternative <span id="badges-alternative" data-type="alternative" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/alternative'], 'icon' => 'recycle'];
-        $menuLItems[] = ['label' => 'Bonus <span id="badges-bonus" data-type="bonus" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/bonus'], 'icon' => 'recycle'];
-        $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
-        $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
-        $menuLItems[] = ['label' => 'Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
-        $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
-        $menuLItems[] = ['label' => 'Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
-        $menuLItems[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
-        $menuLItems[] = ['label' => 'Import Leads', 'url' => ['/lead/import'], 'icon' => 'upload'];
+        $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ',
+            'url' => ['/queue/failed-bookings'], 'icon' => 'recycle', 'title' => 'Failed Bookings Leads queue'];
+        $menuLItems[] = ['label' => 'Alternative <span id="badges-alternative" data-type="alternative" class="label-warning label pull-right bginfo"></span> ',
+            'url' => ['/queue/alternative'], 'icon' => 'recycle', 'title' => 'Alternative Leads queue'];
+        $menuLItems[] = ['label' => 'Bonus <span id="badges-bonus" data-type="bonus" class="label-success label pull-right bginfo"></span> ',
+            'url' => ['/queue/bonus'], 'icon' => 'recycle', 'title' => 'Bonus Leads queue'];
+        $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ',
+            'url' => ['/queue/follow-up'], 'icon' => 'recycle', 'title' => 'Follow Up Leads queue'];
+        $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ',
+            'url' => ['/queue/processing'], 'icon' => 'spinner', 'title' => 'Processing Leads queue'];
+        $menuLItems[] = ['label' => 'Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>',
+            'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning', 'title' => 'Booked Leads queue'];
+        $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ',
+            'url' => ['/queue/sold'], 'icon' => 'flag text-success', 'title' => 'Sold Leads queue'];
+        $menuLItems[] = ['label' => 'Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>',
+            'url' => ['/queue/duplicate'], 'icon' => 'list text-danger', 'title' => 'Duplicate Leads queue'];
+        $menuLItems[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>',
+            'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger', 'title' => 'Trash Leads queue'];
+        $menuLItems[] = ['label' => 'Import Leads',
+            'url' => ['/lead/import'], 'icon' => 'upload', 'title' => 'Import Leads'];
 
 
         if ($isAdmin) {
@@ -110,20 +120,34 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuCases[] = ['label' => 'Create new Case', 'url' => ['/cases/create'], 'icon' => 'plus'];
         $menuCases[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
 
-        $menuCases[] = ['label' => 'Case Need Action <span id="cases-q-need-action" data-type="need-action" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/need-action'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case Unidentified <span id="cases-q-unidentified" data-type="unidentified" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/unidentified'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case First Priority <span id="cases-q-first-priority" data-type="first-priority" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/first-priority'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case Second Priority <span id="cases-q-second-priority" data-type="second-priority" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/second-priority'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case Pass Departure <span id="cases-q-pass-departure" data-type="pass-departure" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pass-departure'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
-        $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-follow-up" data-type="follow-up" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/follow-up'], 'icon' => 'recycle'];
-        $menuCases[] = ['label' => 'Case Awaiting <span id="cases-q-awaiting" data-type="awaiting" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/awaiting'], 'icon' => 'hourglass text-success'];
-        $menuCases[] = ['label' => 'Case Auto Processing <span id="cases-q-auto-processing" data-type="auto-processing" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/auto-processing'], 'icon' => 'spinner text-success'];
-        $menuCases[] = ['label' => 'Case Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
-        $menuCases[] = ['label' => 'Case Error <span id="cases-q-error" data-type="error" class="label-danger label pull-right cases-q-info"></span>', 'url' => ['/cases-q/error'], 'icon' => 'times text-danger'];
-        $menuCases[] = ['label' => 'Case Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
+        $menuCases[] = ['label' => 'Need Action <span id="cases-q-need-action" data-type="need-action" class="label-warning label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/need-action'], 'icon' => 'list', 'title' => 'Case Need Action queue'];
+        $menuCases[] = ['label' => 'Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/pending'], 'icon' => 'list', 'title' => 'Case Pending queue'];
+        $menuCases[] = ['label' => 'Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info', 'title' => 'Case Inbox queue'];
+        $menuCases[] = ['label' => 'Unidentified <span id="cases-q-unidentified" data-type="unidentified" class="label-warning label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/unidentified'], 'icon' => 'list', 'title' => 'Case Unidentified queue'];
+        $menuCases[] = ['label' => 'First Priority <span id="cases-q-first-priority" data-type="first-priority" class="label-warning label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/first-priority'], 'icon' => 'list', 'title' => 'Case First Priority queue'];
+        $menuCases[] = ['label' => 'Second Priority <span id="cases-q-second-priority" data-type="second-priority" class="label-warning label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/second-priority'], 'icon' => 'list', 'title' => 'Case Second Priority queue'];
+        $menuCases[] = ['label' => 'Pass Departure <span id="cases-q-pass-departure" data-type="pass-departure" class="label-warning label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/pass-departure'], 'icon' => 'list', 'title' => 'Case Pass Departure queue'];
+        $menuCases[] = ['label' => 'Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/processing'], 'icon' => 'spinner', 'title' => 'Case Processing queue'];
+        $menuCases[] = ['label' => 'Follow Up <span id="cases-q-follow-up" data-type="follow-up" class="label-success label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/follow-up'], 'icon' => 'recycle', 'title' => 'Case Follow Up queue'];
+        $menuCases[] = ['label' => 'Awaiting <span id="cases-q-awaiting" data-type="awaiting" class="label-success label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/awaiting'], 'icon' => 'hourglass', 'title' => 'Case Awaiting queue'];
+        $menuCases[] = ['label' => 'Auto Processing <span id="cases-q-auto-processing" data-type="auto-processing" class="label-success label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/auto-processing'], 'icon' => 'spinner text-success', 'title' => 'Case Auto Processing queue'];
+        $menuCases[] = ['label' => 'Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ',
+            'url' => ['/cases-q/solved'], 'icon' => 'flag', 'title' => 'Case Solved queue'];
+        $menuCases[] = ['label' => 'Error <span id="cases-q-error" data-type="error" class="label-danger label pull-right cases-q-info"></span>',
+            'url' => ['/cases-q/error'], 'icon' => 'times text-danger', 'title' => 'Case Error queue'];
+        $menuCases[] = ['label' => 'Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>',
+            'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger', 'title' => 'Case Trash queue'];
 
         if ($isAdmin) {
             $menuItems[] = [
@@ -232,14 +256,14 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'phone',
                     'items' => [
-                        ['label' => 'Log', 'url' => ['/call-log/index']],
-                        ['label' => 'User access', 'url' => ['/call-log-user-access/index']],
-                        ['label' => 'Cases', 'url' => ['/call-log-case/index']],
-                        ['label' => 'Leads', 'url' => ['/call-log-lead/index']],
-                        ['label' => 'Queue', 'url' => ['/call-log-queue/index']],
-                        ['label' => 'Record', 'url' => ['/call-log-record/index']],
-                        ['label' => 'Twilio Recording Log', 'url' => ['/call-recording-log-crud/index']],
-                        ['label' => 'Call Log Filter Guard', 'url' => ['/call-log-filter-guard-crud/index']],
+                        ['label' => 'Call Log', 'url' => ['/call-log/index'], 'title' => 'Call Logs'],
+                        ['label' => 'User access', 'url' => ['/call-log-user-access/index'], 'title' => 'Call Logs User access'],
+                        ['label' => 'Cases', 'url' => ['/call-log-case/index'], 'title' => 'Call Logs Cases'],
+                        ['label' => 'Leads', 'url' => ['/call-log-lead/index'], 'title' => 'Call Logs Leads'],
+                        ['label' => 'Queue', 'url' => ['/call-log-queue/index'], 'title' => 'Call Logs Queue'],
+                        ['label' => 'Record', 'url' => ['/call-log-record/index'], 'title' => 'Call Logs Record'],
+                        ['label' => 'Twilio Recording Log', 'url' => ['/call-recording-log-crud/index'], 'title' => 'Call Logs Twilio Recording'],
+                        ['label' => 'Filter Guard', 'url' => ['/call-log-filter-guard-crud/index'], 'title' => 'Call Logs Filter Guard'],
                     ],
                 ],
                 [
@@ -901,7 +925,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 continue;
             }
 
-            if (stripos(strip_tags($item['label']), $text) === false) {
+            $searchValue = $item['label'];
+            if (!empty($item['title'])) {
+                $searchValue .= ' ' . $item['title'];
+            }
+
+            if (stripos(strip_tags($searchValue), $text) === false) {
                 $item['visible'] = false;
             }
 
