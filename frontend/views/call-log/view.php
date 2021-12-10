@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\helpers\phone\MaskPhoneHelper;
+use sales\model\call\abac\CallAbacObject;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\callLog\entity\callLog\CallLog */
@@ -13,6 +14,7 @@ use sales\helpers\phone\MaskPhoneHelper;
 $this->title = $model->cl_id;
 $this->params['breadcrumbs'][] = ['label' => $breadcrumbsPreviousLabel, 'url' => [$breadcrumbsPreviousPage]];
 $this->params['breadcrumbs'][] = $this->title;
+
 \yii\web\YiiAsset::register($this);
 ?>
 <div class="call-log-view">
@@ -20,14 +22,21 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->cl_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->cl_id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+        <?php /** @abac $callLogAbacDto, CallLogAbacObject::OBJ_CALL_LOG, CallLogAbacObject::ACTION_UPDATE, Call log act update */ ?>
+        <?php if (Yii::$app->abac->can(null, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_UPDATE)) : ?>
+            <?= Html::a('Update', ['update', 'id' => $model->cl_id], ['class' => 'btn btn-primary']) ?>
+        <?php endif; ?>
+
+        <?php /** @abac $callLogAbacDto, CallLogAbacObject::OBJ_CALL_LOG, CallLogAbacObject::ACTION_DELETE, Call log act delete */ ?>
+        <?php if (Yii::$app->abac->can(null, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_DELETE)) : ?>
+            <?= Html::a('Delete', ['delete', 'id' => $model->cl_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+        <?php endif; ?>
     </p>
 
     <div class="row">
