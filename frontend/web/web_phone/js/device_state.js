@@ -96,44 +96,44 @@
 
     function DummyLogger() {
         this.add = function () {}
+        this.success = function () {}
+        this.error = function () {}
     }
 
-    function State(userId, stateRegister, logger, twilioIsReady, speakerIsReady, microphoneIsReady) {
+    function State(userId, register, logger, twilioIsReady, speakerIsReady, microphoneIsReady) {
         this.userId = userId;
         this.isTwilioRegistered = false;
         this.isSpeakerSelected = false;
         this.isMicrophoneSelected = false;
-        this.stateRegister = stateRegister;
+        this.register = register;
         this.logger = logger;
         this.switcher = new Switcher()
         this.panel = new Panel();
+        this.statusReady = true;
 
         this.reset = function () {
-            this.isTwilioRegistered = false;
-            this.panel.twilioError();
-            this.stateRegister.twilioNotReady();
-
-            this.isSpeakerSelected = false;
-            this.panel.speakerError();
-            this.stateRegister.speakerNotReady();
-
-            this.isMicrophoneSelected = false;
-            this.panel.microphoneError();
-            this.stateRegister.microphoneNotReady();
-
             this.switcher.notReady('Reset devices');
+            this.logger.error('Reset devices!');
+
+            this.twilioUnregister();
+            this.speakerUnselected();
+            this.microphoneUnselected();
         };
 
         this.ready = function () {
+            this.statusReady = true;
             this.switcher.ready();
-            this.logger.add('Phone Widget Ready!', '#4e9e22');
-            console.log('Phone Widget Ready!');
+            this.logger.success('Phone Device Ready!');
+            console.log('Phone Device Ready!');
         };
 
         this.notReady = function (reason) {
             this.switcher.notReady(reason);
-            this.logger.add('Phone Widget Not Ready!', '#f41b1b');
-            console.log('Phone Widget Not Ready!');
+            if (this.statusReady === true) {
+                this.logger.error('Phone Device Not Ready!');
+                console.log('Phone Device Not Ready!');
+            }
+            this.statusReady = false;
         };
 
         this.isReady = function () {
@@ -142,9 +142,9 @@
 
         this.twilioRegister = function () {
             this.isTwilioRegistered = true;
-            this.stateRegister.twilioReady();
+            this.register.twilioReady();
             this.panel.twilioOk();
-            this.logger.add('Twilio Device Registered!');
+            this.logger.success('Twilio Device Registered!');
             if (this.isReady()) {
                 this.ready();
             }
@@ -152,17 +152,17 @@
 
         this.twilioUnregister = function () {
             this.isTwilioRegistered = false;
-            this.stateRegister.twilioNotReady();
+            this.register.twilioNotReady();
             this.panel.twilioError();
-            this.logger.add('Twilio Device UnRegistered!');
+            this.logger.error('Twilio Device UnRegistered!');
             this.notReady('Twilio Device: unregistered');
         }
 
         this.speakerSelected = function () {
             this.isSpeakerSelected = true;
-            this.stateRegister.speakerReady()
+            this.register.speakerReady()
             this.panel.speakerOk();
-            this.logger.add('Speaker Selected!');
+            this.logger.success('Speaker Selected!');
             if (this.isReady()) {
                 this.ready();
             }
@@ -170,17 +170,17 @@
 
         this.speakerUnselected = function () {
             this.isSpeakerSelected = false;
-            this.stateRegister.speakerNotReady()
+            this.register.speakerNotReady()
             this.panel.speakerError();
-            this.logger.add('Speaker UnSelected!');
+            this.logger.error('Speaker UnSelected!');
             this.notReady('Speaker: unselected');
         }
 
         this.microphoneSelected = function () {
             this.isMicrophoneSelected = true;
-            this.stateRegister.microphoneReady();
+            this.register.microphoneReady();
             this.panel.microphoneOk();
-            this.logger.add('Microphone Selected!');
+            this.logger.success('Microphone Selected!');
             if (this.isReady()) {
                 this.ready();
             }
@@ -188,9 +188,9 @@
 
         this.microphoneUnselected = function () {
             this.isMicrophoneSelected = false;
-            this.stateRegister.microphoneNotReady();
+            this.register.microphoneNotReady();
             this.panel.microphoneError();
-            this.logger.add('Microphone UnSelected!');
+            this.logger.error('Microphone UnSelected!');
             this.notReady('Microphone unselected');
         }
 

@@ -10,11 +10,9 @@
 
         initiated = true;
 
-        // console.log("Requesting Twilio Access Token...");
         PhoneWidget.addLog("Requesting Twilio Access Token...");
         $.getJSON('/phone/get-token?deviceId=' + initDeviceId)
             .then(function (response) {
-                // console.log("Got a Twilio Access token.");
                 PhoneWidget.addLog("Got a Twilio Access token.");
                 initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime}, remoteLogsEnabled);
             })
@@ -25,7 +23,6 @@
             });
 
         function initDevice(token, remoteLogsEnabled) {
-            // console.log("Init Twilio Device...");
             PhoneWidget.addLog("Init Twilio Device...");
 
            const twilioLogger = Twilio.Logger;
@@ -159,7 +156,6 @@
            setTimeout(async () => updateToken(), token.refreshTime * 1000);
 
             device.on('registering', () => {
-                //console.log("Twilio.Device Registering...");
                 PhoneWidget.addLog("Twilio.Device Registering...");
             });
 
@@ -168,7 +164,6 @@
 
                 call.on('accept', call => {
                     PhoneWidget.removeTwilioInternalIncomingConnection();
-                    //console.log('The incoming call was accepted.');
                     PhoneWidget.freeDialButton();
                     PhoneWidget.setActiveCall(call);
                     PhoneWidget.incomingSoundOff();
@@ -179,7 +174,6 @@
                     PhoneWidget.soundConnect();
                 });
                 call.on('cancel', () => {
-                    //console.log('The call has been canceled.');
                     PhoneWidget.freeDialButton();
                     PhoneWidget.removeTwilioInternalIncomingConnection();
                     PhoneWidget.incomingSoundOff();
@@ -190,7 +184,6 @@
                     } catch (error) {
                         console.log(error);
                     }
-                    //console.log('The call has been disconnected.');
                     PhoneWidget.freeDialButton();
                     PhoneWidget.removeTwilioInternalIncomingConnection();
                     PhoneWidget.soundDisconnect();
@@ -236,7 +229,6 @@
                     device.audio.setInputDevice(microphoneDevices.value)
                         .then(() => {
                             call.accept();
-                            //console.log("Accepted incoming call.");
                         })
                         .catch(error => {
                             console.log(error);
@@ -246,8 +238,6 @@
             };
 
             device.on("registered", () => {
-                //console.log("Twilio.Device Ready!");
-
                 PhoneWidget.getDeviceState().twilioRegister();
 
                 if (device.audio.speakerDevices.get().size > 0) {
@@ -289,7 +279,6 @@
                     updateToken();
                     return;
                 }
-               // console.log('An error has occurred: ', twilioError);
 
                 twilioLogger.error('%j', twilioError);
                 PhoneWidget.freeDialButton();

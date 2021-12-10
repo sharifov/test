@@ -2,6 +2,14 @@
     function Logger() {
         this.block = $('.logs-block');
 
+        this.success = function (message) {
+            this.add(message, '#4e9e22');
+        };
+
+        this.error = function (message) {
+            this.add(message, '#f41b1b');
+        };
+
         this.add = function (message, color) {
             if (window.isTwilioDevicePage) {
                 localStorage.setItem(
