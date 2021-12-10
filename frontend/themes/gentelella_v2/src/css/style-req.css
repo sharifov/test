@@ -2890,17 +2890,13 @@ input[disabled] + .radio-tab__text {
   vertical-align: middle;
 }
 
-.custom-checkbox {
-  padding-top: 3px;
-}
-
 .custom-radio input[type="radio"],
 .custom-checkbox input[type="checkbox"] {
   display: none;
 }
 
-.custom-radio input[type="radio"] + label
-/*, .custom-checkbox input[type="checkbox"] + label*/
+.custom-radio input[type="radio"] + label,
+.custom-checkbox input[type="checkbox"] + label
 {
   background-color: #fff;
   border-radius: 50%;
@@ -2931,7 +2927,7 @@ input[disabled] + .radio-tab__text {
   position: relative;
 }
 
-/*
+
 .custom-checkbox input[type="checkbox"]:checked + label:after {
   content: '';
   background-color: #60afd7;
@@ -2957,7 +2953,6 @@ input[disabled] + .radio-tab__text {
   transform: rotate(45deg);
   width: 3px;
 }
-*/
 
 .success, .text-success {
   color: #4ea784;
