@@ -108,8 +108,8 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 return;
             }
 
-            if ($originProductQuote && $reProtectionCreateService::isNotScheduleChangeUpdatableExist($originProductQuote)) {
-                $flightRequestService->error('Reason: Product Quote Schedule Change exist. Origin Product Quote(' .
+            if ($originProductQuote && $reProtectionCreateService::isScheduleChangeActiveExist($originProductQuote)) {
+                $flightRequestService->error('Reason: Product Quote Schedule Change Active exist. Origin Product Quote(' .
                     $originProductQuote->pq_gid . ')');
                 return;
             }
