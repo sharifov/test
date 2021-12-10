@@ -716,6 +716,9 @@ class QuoteController extends ApiBaseController
                 if (!$model->hasErrors()) {
                     if (!empty($leadAttributes)) {
                         $model->lead->attributes = $leadAttributes;
+                        if (!$model->lead->hybrid_uid) {
+                            $model->lead->hybrid_uid = $leadAttributes['additional_information'][0]['bookingId'] ?? null;
+                        }
                         if (!$model->lead->save()) {
                             $response['errors'][] = $model->lead->getErrors();
                         }
