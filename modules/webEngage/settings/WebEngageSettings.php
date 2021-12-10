@@ -99,18 +99,29 @@ class WebEngageSettings
 
     public function leadCreated(): array
     {
-        if ((!$leadCreated = $this->settings['LeadCreated'] ?? null) || empty($leadCreated)) {
-            throw new \RuntimeException('WebEngageSettings "LeadCreated" is empty');
-        }
-        if (!is_array($leadCreated)) {
-            throw new \RuntimeException('WebEngageSettings "LeadCreated" is not array');
-        }
-        return $leadCreated;
+        return $this->getByEventName(WebEngageDictionary::EVENT_LEAD_CREATED);
     }
 
     public function leadCreatedApiUsernames(): ?string
     {
         $leadCreated = $this->leadCreated();
         return $leadCreated['apiUsernames'] ?? null;
+    }
+
+    public function getByEventName(string $eventName): array
+    {
+        if ((!$setting = $this->settings[$eventName] ?? null) || empty($setting)) {
+            throw new \RuntimeException('WebEngageSettings "' . $eventName . '" is empty');
+        }
+        if (!is_array($setting)) {
+            throw new \RuntimeException('WebEngageSettings "' . $eventName . '" is not array');
+        }
+        return $setting;
+    }
+
+    public function isSendUserCreateRequest(string $eventName): bool
+    {
+        $settings = $this->getByEventName($eventName);
+        return (bool) ($settings['isSendUserCreateRequest'] ?? false);
     }
 }

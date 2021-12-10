@@ -86,4 +86,13 @@ class ClientData extends \yii\db\ActiveRecord
     {
         return 'client_data';
     }
+
+    public static function create(int $clientId, int $keyId, string $value): ClientData
+    {
+        $model = new self();
+        $model->cd_client_id = $clientId;
+        $model->cd_key_id = $keyId;
+        $model->cd_field_value = $value;
+        return $model;
+    }
 }

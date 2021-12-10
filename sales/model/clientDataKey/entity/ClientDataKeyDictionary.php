@@ -13,8 +13,10 @@ class ClientDataKeyDictionary
     public const CACHE_DURATION = 60 * 2;
 
     public const APP_CALL_OUT_TOTAL_COUNT = 'app_call_out_total_count';
+    public const IS_SEND_TO_WEB_ENGAGE = 'is_sending_to_web_engage';
 
     public const KEY_LIST = [
         self::APP_CALL_OUT_TOTAL_COUNT => self::APP_CALL_OUT_TOTAL_COUNT,
+        self::IS_SEND_TO_WEB_ENGAGE => self::IS_SEND_TO_WEB_ENGAGE,
     ];
 }
