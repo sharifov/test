@@ -137,18 +137,6 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
 
             if (!$originProductQuote || !$reProtectionCreateService::isScheduleChangeUpdatableExist($originProductQuote)) {
-                if (
-                    $originProductQuote &&
-                    ($order = $originProductQuote->pqOrder) &&
-                    !CaseOrder::find()->where(['co_order_id' => $order->or_id, 'co_case_id' => $case->cs_id])->exists()
-                ) {
-                    $caseOrder = CaseOrder::create($case->cs_id, $order->or_id);
-                    $caseOrder->detachBehavior('user');
-                    if (!$caseOrder->save()) {
-                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($caseOrder));
-                    }
-                }
-
                 try {
                     $saleData = $boRequestReProtectionService->getSaleData($flightRequest->fr_booking_id, $case);
 
@@ -210,6 +198,14 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if (!isset($order) && !$order = $originProductQuote->pqOrder) {
                 throw new DomainException('Order not found');
+            }
+
+            if (!CaseOrder::find()->where(['co_order_id' => $order->or_id, 'co_case_id' => $case->cs_id])->exists()) {
+                $caseOrder = CaseOrder::create($case->cs_id, $order->or_id);
+                $caseOrder->detachBehavior('user');
+                if (!$caseOrder->save()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($caseOrder));
+                }
             }
 
             try {
