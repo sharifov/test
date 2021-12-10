@@ -365,6 +365,15 @@ class CommunicationController extends ApiBaseController
             }
 
             $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || (empty($postCall['ForwardedFrom']) && Call::isTrustedVerstat($postCall['StirVerstat'] ?? ''));
+            if (!$isTrustStirCall && !empty($postCall['ForwardedFrom'])) {
+                $isInternal = PhoneList::find()->andWhere([
+                    'pl_phone_number' => $postCall['ForwardedFrom'],
+                    'pl_enabled' => true
+                ])->exists();
+                if ($isInternal) {
+                    $isTrustStirCall = true;
+                }
+            }
 
             try {
                 $this->callService->guardFromInternalCall($postCall);
