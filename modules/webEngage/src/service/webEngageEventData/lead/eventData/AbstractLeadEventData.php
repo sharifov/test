@@ -47,6 +47,7 @@ abstract class AbstractLeadEventData
         $result['infant'] = $this->lead->infants;
         $result['price'] = null;
         $result['isTest'] = $this->settings->isTest();
+        $result['sourceCID'] = $this->lead->source->cid;
 
         return $result;
     }

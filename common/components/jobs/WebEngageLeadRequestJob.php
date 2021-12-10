@@ -56,7 +56,11 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
             if (!$lead = Lead::findOne($this->leadId)) {
                 throw new \RuntimeException('Lead not found by ID (' . $this->leadId . ')');
             }
-            $webEngageRequestService = new WebEngageRequestService();
+            $leadEventService = new LeadEventService($lead, $this->eventName);
+            if (!$leadEventService->isSourceCIDChecked()) {
+                throw new \RuntimeException('SourceCIDChecked is failed. CID(' . $lead->source->cid ?? null . ')');
+            }
+
             $webEngageUserService = new WebEngageUserService($this->eventName, $lead->client ?? null);
 
             if ($webEngageUserService->isSendUserCreateRequest()) {
@@ -65,9 +69,10 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
                     throw new \RuntimeException('WebEngageUserForm not loaded');
                 }
                 if (!$webEngageUserForm->validate()) {
-                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($webEngageUserForm, ' '));
+                    throw new \RuntimeException('WebEngageUserForm : ' .
+                        ErrorsToStringHelper::extractFromModel($webEngageUserForm, ' '));
                 }
-                $webEngageRequestService->addUser($webEngageUserForm);
+                (new WebEngageRequestService())->addUser($webEngageUserForm);
                 ClientDataService::setValue(
                     $lead->client->id,
                     ClientDataKeyDictionary::IS_SEND_TO_WEB_ENGAGE,
@@ -76,16 +81,17 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
             }
 
             if (empty($this->data)) {
-                $this->data = (new LeadEventService($lead, $this->eventName))->getData();
+                $this->data = $leadEventService->getData();
             }
             $webEngageEventForm = new WebEngageEventForm();
             if (!$webEngageEventForm->load($this->data)) {
                 throw new \RuntimeException('WebEngageEventForm not loaded');
             }
             if (!$webEngageEventForm->validate()) {
-                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($webEngageEventForm, ' '));
+                throw new \RuntimeException('WebEngageEventForm : ' .
+                    ErrorsToStringHelper::extractFromModel($webEngageEventForm, ' '));
             }
-            $webEngageRequestService->addEvent($webEngageEventForm);
+            (new WebEngageRequestService())->addEvent($webEngageEventForm);
         } catch (Throwable $throwable) {
             \Yii::error(
                 AppHelper::throwableLog($throwable),

@@ -16,6 +16,7 @@ use Yii;
  * @property string $licenseCode
  * @property string $apiKey
  * @property string $trackingEventsHost
+ * @property array $sourceCIds
  */
 class WebEngageSettings
 {
@@ -26,6 +27,7 @@ class WebEngageSettings
     private string $licenseCode;
     private string $apiKey;
     private string $trackingEventsHost;
+    private array $sourceCIds;
 
     public function __construct()
     {
@@ -123,5 +125,19 @@ class WebEngageSettings
     {
         $settings = $this->getByEventName($eventName);
         return (bool) ($settings['isSendUserCreateRequest'] ?? false);
+    }
+
+    public function sourceCIds(): array
+    {
+        if ($this->sourceCIds ?? null) {
+            return $this->sourceCIds;
+        }
+        if (!array_key_exists('sourceCIds', $this->settings)) {
+            throw new \RuntimeException('WebEngageSettings "sourceCIds" not found');
+        }
+        if (!is_array($this->settings['sourceCIds'])) {
+            throw new \RuntimeException('WebEngageSettings "sourceCIds" is not array');
+        }
+        return $this->sourceCIds = $this->settings['sourceCIds'];
     }
 }
