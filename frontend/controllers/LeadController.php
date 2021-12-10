@@ -26,6 +26,8 @@ use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
+use modules\email\src\abac\dto\EmailPreviewDto;
+use modules\email\src\abac\EmailAbacObject;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\lead\src\abac\dto\LeadAbacDto;
@@ -489,44 +491,63 @@ class LeadController extends FController
                 if ($mail->save()) {
                     $mail->e_message_id = $mail->generateMessageId();
                     $mail->update();
-                    $previewEmailForm->is_send = true;
-                    $mailResponse = $mail->sendMail($attachments);
 
-                    if (isset($mailResponse['error']) && $mailResponse['error']) {
-                        //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
-                        Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'LeadController:view:Email:sendMail');
-                    } else {
-                        //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                    $abacDto = new EmailPreviewDto(
+                        $previewEmailForm->e_email_tpl_id,
+                        $previewEmailForm->isMessageEdited(),
+                        $previewEmailForm->isSubjectEdited(),
+                        $lead,
+                        null
+                    );
 
-                        if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
-                            if (is_array($offerList)) {
-                                $service = Yii::createObject(OfferSendLogService::class);
-                                foreach ($offerList as $offerId) {
-                                    $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
+                    $canSend = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND);
+                    $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
+                    if ($canSend && $canSendWithoutReview) {
+                        $previewEmailForm->is_send = true;
+                        $mailResponse = $mail->sendMail($attachments);
+
+                        if (isset($mailResponse['error']) && $mailResponse['error']) {
+                            //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                            Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
+                            Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'LeadController:view:Email:sendMail');
+                        } else {
+                            //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+
+                            if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
+                                if (is_array($offerList)) {
+                                    $service = Yii::createObject(OfferSendLogService::class);
+                                    foreach ($offerList as $offerId) {
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
+                                    }
                                 }
                             }
-                        }
 
 
-                        if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
-                            if (is_array($quoteList)) {
-                                foreach ($quoteList as $quoteId) {
-                                    $quoteId = (int)$quoteId;
-                                    $quote = Quote::findOne($quoteId);
-                                    if ($quote) {
-                                        $quote->setStatusSend();
-                                        if (!$this->quoteRepository->save($quote)) {
-                                            Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
+                            if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
+                                if (is_array($quoteList)) {
+                                    foreach ($quoteList as $quoteId) {
+                                        $quoteId = (int)$quoteId;
+                                        $quote = Quote::findOne($quoteId);
+                                        if ($quote) {
+                                            $quote->setStatusSend();
+                                            if (!$this->quoteRepository->save($quote)) {
+                                                Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
+                            Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
+                        }
+                        $this->refresh('#communication-form');
+                    } elseif ($canSend) {
+                        $mail->statusToReview();
+                        $mail->update();
+                        Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
+                    } else {
+                        $previewEmailForm->addError('general', 'Access denied');
                     }
-                    $this->refresh('#communication-form');
                 } else {
                     $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
                     Yii::error(VarDumper::dumpAsString($mail->errors), 'LeadController:view:Email:save');
@@ -733,6 +754,7 @@ class LeadController extends FController
                                 Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
                                 $previewEmailForm->keyCache = $keyCache;
                                 $previewEmailForm->e_email_message = $emailBodyHtml;
+                                $previewEmailForm->e_email_message_origin = $emailBodyHtml;
 
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];

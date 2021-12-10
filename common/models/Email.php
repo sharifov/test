@@ -95,6 +95,7 @@ class Email extends \yii\db\ActiveRecord
     public const STATUS_CANCEL  = 4;
     public const STATUS_DONE    = 5;
     public const STATUS_ERROR   = 6;
+    public const STATUS_REVIEW  = 7;
 
     public const STATUS_LIST = [
         self::STATUS_NEW        => 'New',
@@ -103,6 +104,7 @@ class Email extends \yii\db\ActiveRecord
         self::STATUS_CANCEL     => 'Cancel',
         self::STATUS_DONE       => 'Done',
         self::STATUS_ERROR      => 'Error',
+        self::STATUS_REVIEW     => 'Review'
     ];
 
     public const PRIORITY_LOW       = 1;
@@ -847,5 +849,25 @@ class Email extends \yii\db\ActiveRecord
     public function hasCreatedUser(): bool
     {
         return $this->e_created_user_id ? true : false;
+    }
+
+    public function statusToReview(): void
+    {
+        $this->e_status_id = self::STATUS_REVIEW;
+    }
+
+    public function statusIsReview(): bool
+    {
+        return $this->e_status_id === self::STATUS_REVIEW;
+    }
+
+    public function statusIsErrorGroup(): bool
+    {
+        return $this->e_status_id === self::STATUS_ERROR || $this->e_status_id === self::STATUS_CANCEL;
+    }
+
+    public function statusIsDone(): bool
+    {
+        return $this->e_status_id === self::STATUS_DONE;
     }
 }

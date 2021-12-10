@@ -2,6 +2,9 @@
 
 namespace modules\email\src\abac;
 
+use common\models\Department;
+use common\models\EmailTemplateType;
+use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 
@@ -17,16 +20,41 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_ALL     = self::NS . 'act/*';
     public const ACT_VIEW  = self::NS . 'act/view';
 
+    public const OBJ_PREVIEW_EMAIL = self::NS . 'obj/preview-email';
+
     public const OBJECT_LIST = [
         self::ACT_VIEW => self::ACT_VIEW,
+        self::OBJ_PREVIEW_EMAIL => self::OBJ_PREVIEW_EMAIL
     ];
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_ACCESS  = 'access';
+    public const ACTION_SEND = 'send';
+    public const ACTION_SEND_WITHOUT_REVIEW = 'sendWithoutReview';
+    public const ACTION_EDIT_MESSAGE = 'editMessage';
+    public const ACTION_EDIT_SUBJECT = 'editSubject';
+    public const ACTION_EDIT_FROM = 'editFrom';
+    public const ACTION_EDIT_TO = 'editTo';
+    public const ACTION_EDIT_EMAIL_FROM_NAME = 'editEmailFromName';
+    public const ACTION_EDIT_EMAIL_TO_NAME = 'editEmailToName';
+    public const ACTION_ATTACH_FILES = 'attachFiles';
+    public const ACTION_SHOW_EMAIL_DATA = 'showEmailData';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ACT_VIEW  => [self::ACTION_ACCESS],
+        self::OBJ_PREVIEW_EMAIL => [
+            self::ACTION_SEND,
+            self::ACTION_SEND_WITHOUT_REVIEW,
+            self::ACTION_EDIT_MESSAGE,
+            self::ACTION_EDIT_SUBJECT,
+            self::ACTION_EDIT_FROM,
+            self::ACTION_EDIT_TO,
+            self::ACTION_EDIT_EMAIL_FROM_NAME,
+            self::ACTION_EDIT_EMAIL_TO_NAME,
+            self::ACTION_ATTACH_FILES,
+            self::ACTION_SHOW_EMAIL_DATA,
+        ]
     ];
 
     protected const ATTR_IS_EMAIL_OWNER = [
@@ -101,6 +129,62 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_TEMPLATE_KEY = [
+        'optgroup' => 'EMAIL PREVIEW',
+        'id' => self::NS . 'template_id',
+        'field' => 'template_id',
+        'label' => 'Template',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'icon' => 'fa fa-list',
+    ];
+
+    protected const ATTR_IS_MESSAGE_EDITED = [
+        'optgroup' => 'EMAIL PREVIEW',
+        'id' => self::NS . 'is_message_edited',
+        'field' => 'is_message_edited',
+        'label' => 'Is Message Edited',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'Yes', 'false' => 'No'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_IS_SUBJECT_EDITED = [
+        'optgroup' => 'EMAIL PREVIEW',
+        'id' => self::NS . 'is_subject_edited',
+        'field' => 'is_subject_edited',
+        'label' => 'Is Subject Edited',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'Yes', 'false' => 'No'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_PROJECT_ID = [
+        'optgroup' => 'EMAIL PREVIEW',
+        'id' => self::NS . 'project_id',
+        'field' => 'project_id',
+        'label' => 'Project',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'icon' => 'fa fa-list',
+    ];
+
+    protected const ATTR_DEPARTMENT_ID = [
+        'optgroup' => 'EMAIL PREVIEW',
+        'id' => self::NS . 'department_id',
+        'field' => 'department_id',
+        'label' => 'Department',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'icon' => 'fa fa-list',
+    ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
@@ -111,6 +195,10 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_LEAD_OWNER,
             self::ATTR_IS_ADDRESS_OWNER,
             self::ATTR_IS_COMMON_GROUP
+        ],
+        self::OBJ_PREVIEW_EMAIL => [
+            self::ATTR_IS_MESSAGE_EDITED,
+            self::ATTR_IS_SUBJECT_EDITED
         ]
     ];
 
@@ -136,10 +224,19 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
+        $templateKey = self::ATTR_TEMPLATE_KEY;
+        $templateKey['values'] = EmailTemplateType::getList(false, null);
 
-        //$attributeList = self::OBJECT_ATTRIBUTE_LIST;
-       // $attributeList[self::ACT_VIEW][] = self::OBJECT_ATTRIBUTE_LIST;
+        $project = self::ATTR_PROJECT_ID;
+        $project['values'] = Project::getList();
 
-        return self::OBJECT_ATTRIBUTE_LIST;
+        $department = self::ATTR_DEPARTMENT_ID;
+        $department['values'] = Department::getList();
+
+        $attributeList = self::OBJECT_ATTRIBUTE_LIST;
+        $attributeList[self::OBJ_PREVIEW_EMAIL][] = $templateKey;
+        $attributeList[self::OBJ_PREVIEW_EMAIL][] = $project;
+        $attributeList[self::OBJ_PREVIEW_EMAIL][] = $department;
+        return $attributeList;
     }
 }

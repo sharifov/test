@@ -41,4 +41,49 @@ class EmailHelper
 
         return FileStorageEmailSentListWidget::create($files['files']);
     }
+
+    public static function getIconForCommunicationBlock(Email $mail): string
+    {
+        if ($mail->statusIsDone()) {
+            $statusTitle = 'DONE - ' . ($mail->e_status_done_dt ? Yii::$app->formatter->asDatetime(strtotime($mail->e_status_done_dt)) : Yii::$app->formatter->asDatetime(strtotime($mail->e_updated_dt)));
+            return Html::tag('i', null, [
+                'class' => 'chat__status chat__status--success fa fa-circle',
+                'data-toggle' => 'tooltip',
+                'title' => $statusTitle,
+                'data-placement' => 'right',
+                'data-original-title' => $statusTitle
+            ]);
+        }
+
+        if ($mail->statusIsErrorGroup()) {
+            $statusTitle = 'Email on review';
+            return Html::tag('i', null, [
+                'class' => 'chat__status chat__status--error fa fa-circle',
+                'data-toggle' => 'tooltip',
+                'title' => $statusTitle,
+                'data-placement' => 'right',
+                'data-original-title' => $statusTitle
+            ]);
+        }
+
+        if ($mail->statusIsReview()) {
+            $statusTitle = 'ERROR - ' . $mail->e_error_message;
+            return Html::tag('i', null, [
+                'class' => 'chat__status warning fas fa-exclamation-triangle',
+                'data-toggle' => 'tooltip',
+                'title' => $statusTitle,
+                'data-placement' => 'right',
+                'data-original-title' => $statusTitle
+            ]);
+        }
+
+        $statusTitle = 'SENT - ComID: ' . $mail->e_communication_id;
+        return Html::tag('i', null, [
+            'class' => 'chat__status chat__status--sent fa fa-circle',
+            'data-toggle' => 'tooltip',
+            'title' => $statusTitle,
+            'data-placement' => 'right',
+            'data-original-title' => $statusTitle
+        ]);
+    }
 }

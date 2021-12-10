@@ -80,6 +80,9 @@ class AbacComponent extends Component
             $adp
             //Yii::getAlias("@common/config/casbin/policy_list.csv")
         );
+        $this->enforser->addFunction('ownRegEx', static function ($arg) {
+            return '^' . $arg . '$';
+        });
     }
 
     /**
