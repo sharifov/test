@@ -247,6 +247,7 @@ div#call-controls input {
   left: 88px;
   width: 30px;
   height: 30px;
+  display: none;
 }
 
 .phone-widget-heading__warning:before
@@ -319,30 +320,4 @@ div#call-controls input {
 {
   top: 8px;
   right: 10px;
-}
-.phone-widget-heading__warning
-{
-  position: absolute;
-  left: 88px;
-  width: 30px;
-  height: 30px;
-}
-
-.phone-widget-heading__warning:before
-{
-  font-size: 26px;
-  color: rgba(0,0,0,0.15);
-  position: absolute;
-  top: 0 -2px;
-  left: 0;
-}
-
-.phone-widget-heading__warning:after
-{
-  content: "\f071";
-  position: absolute;
-  color: #FFE81B;
-  font-size: 22px;
-  top: 0;
-  left: 2px;
 }

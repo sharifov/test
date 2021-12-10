@@ -196,6 +196,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 </div>
 
 <?php
+$userId = Auth::id();
 $ajaxCallRedirectGetAgents = Url::to(['/phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['/call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
@@ -240,7 +241,7 @@ $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 $btnHoldShow = Auth::can('PhoneWidget_OnHold') ? 'true' : 'false';
 $btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
 $canRecordingDisabled = Auth::can('PhoneWidget_CallRecordingDisabled') ? 'true' : 'false';
-$canAddBlockList = PhoneBlackListGuard::canAdd(Auth::id()) ? 'true' : 'false';
+$canAddBlockList = PhoneBlackListGuard::canAdd($userId) ? 'true' : 'false';
 
 $redialSourceType = Call::SOURCE_REDIAL_CALL;
 
@@ -262,7 +263,7 @@ $conferenceSources = json_encode([
 $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
-$deviceIdStorageKey = DeviceStorageKey::getDeviceIdStorageKey(Auth::id());
+$deviceIdStorageKey = DeviceStorageKey::getDeviceIdStorageKey($userId);
 
 $js = <<<JS
 window.phoneWidget.initParams = {
@@ -316,7 +317,8 @@ window.phoneWidget.initParams = {
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
     'isDevicePage': window.isTwilioDevicePage,
-    'deviceIdStorageKey': '$deviceIdStorageKey'
+    'deviceIdStorageKey': '$deviceIdStorageKey',
+    'userId': $userId
 };
 JS;
 $this->registerJs($js);

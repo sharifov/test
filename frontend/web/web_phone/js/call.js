@@ -71,7 +71,7 @@ var PhoneWidget = function () {
 
     let isDevicePage = false;
 
-    let deviceStatus = {};
+    let deviceState = {};
 
     let logger = new window.phoneWidget.logger.Logger();
 
@@ -93,7 +93,7 @@ var PhoneWidget = function () {
         deviceIdStorageKey = options.deviceIdStorageKey;
 
         audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
-        deviceStatus = new window.phoneWidget.device.status.Init(isDevicePage, logger);
+        deviceState = new window.phoneWidget.device.state.Init(options.userId, isDevicePage, logger);
 
         Object.assign(settings, options);
 
@@ -149,8 +149,8 @@ var PhoneWidget = function () {
         return logger.clear();
     }
 
-    function getDeviceStatus() {
-        return deviceStatus;
+    function getDeviceState() {
+        return deviceState;
     }
 
     function getLeadViewPageShortUrl() {
@@ -760,7 +760,7 @@ var PhoneWidget = function () {
             createNotify(title, 'Not found Device ID. Possibly Voip page is closed. Please open Voip page and refresh current page!', 'error');
             return false;
         }
-        if (deviceStatus.isReady()) {
+        if (deviceState.isReady()) {
             return true;
         }
         createNotify(title, 'Please try again after some seconds. Device is not ready.', 'warning');
@@ -2042,7 +2042,7 @@ var PhoneWidget = function () {
         soundDisconnect: soundDisconnect,
         soundConnect: soundConnect,
         resetDialNumberData: resetDialNumberData,
-        getDeviceStatus: getDeviceStatus,
+        getDeviceState: getDeviceState,
         addLog: addLog,
         clearLog: clearLog,
         setTwilioInternalIncomingConnection: setTwilioInternalIncomingConnection,

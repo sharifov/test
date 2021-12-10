@@ -6,6 +6,6 @@ class DeviceStorageKey
 {
     public static function getDeviceIdStorageKey(int $userId): string
     {
-        return 'phoneDeviceId' . $userId;
+        return 'PhoneDeviceId' . $userId;
     }
 }

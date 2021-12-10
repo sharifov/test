@@ -117,7 +117,7 @@
                 if (device.audio.availableInputDevices.size < 1) {
                     createNotify('Phone widget', 'Microphone device not found.', 'error')
                     PhoneWidget.addLog('Not found Microphone device');
-                    PhoneWidget.getDeviceStatus().microphoneUnselected();
+                    PhoneWidget.getDeviceState().microphoneUnselected();
                     return;
                 }
 
@@ -133,7 +133,7 @@
                     }
                     microphoneDevices.appendChild(option);
                 });
-                PhoneWidget.getDeviceStatus().microphoneSelected();
+                PhoneWidget.getDeviceState().microphoneSelected();
             }
 
             function updateAllAudioDevices() {
@@ -248,12 +248,12 @@
             device.on("registered", () => {
                 //console.log("Twilio.Device Ready!");
 
-                PhoneWidget.getDeviceStatus().deviceRegister();
+                PhoneWidget.getDeviceState().twilioRegister();
 
                 if (device.audio.speakerDevices.get().size > 0) {
-                    PhoneWidget.getDeviceStatus().speakerSelected();
+                    PhoneWidget.getDeviceState().speakerSelected();
                 } else {
-                    PhoneWidget.getDeviceStatus().speakerUnselected();
+                    PhoneWidget.getDeviceState().speakerUnselected();
                 }
 
                 device.audio.removeListener('deviceChange', updateInputDevice);
@@ -266,7 +266,7 @@
                         console.log(error);
                         error.comment = 'Microphone error';
                         PhoneWidget.addLog(error);
-                        PhoneWidget.getDeviceStatus().microphoneUnselected();
+                        PhoneWidget.getDeviceState().microphoneUnselected();
                     });
 
                 device.removeListener("incoming", incomingCallHandler);
@@ -275,9 +275,9 @@
 
             device.on('unregistered', function () {
                 //console.log("Twilio.Device unregistered!");
-                PhoneWidget.getDeviceStatus().reset();
+                PhoneWidget.getDeviceState().reset();
                 PhoneWidget.incomingSoundOff();
-                PhoneWidget.getDeviceStatus().deviceUnregister();
+                PhoneWidget.getDeviceState().twilioUnregister();
             });
 
             device.on('error', (twilioError, call) => {
