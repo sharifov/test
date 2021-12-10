@@ -141,6 +141,14 @@ var PhoneWidget = function () {
         $(document).find('.phone-widget__additional-bar #tab-logs').show();
     }
 
+    function addLogSuccess(message) {
+        return logger.success(message);
+    }
+
+    function addLogError(message) {
+        return logger.error(message);
+    }
+
     function addLog(message, color) {
         return logger.add(message, color);
     }
@@ -2048,7 +2056,9 @@ var PhoneWidget = function () {
         setTwilioInternalIncomingConnection: setTwilioInternalIncomingConnection,
         removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection,
         isInitiated: isInitiated,
-        removeDeviceId: removeDeviceId
+        removeDeviceId: removeDeviceId,
+        addLogError: addLogError,
+        addLogSuccess: addLogSuccess
     };
 }();
 

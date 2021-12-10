@@ -4,22 +4,23 @@
         localStorage.setItem(window.phoneDeviceIdStorageKey, initDeviceId);
 
         if (initiated) {
-            console.log('device already initiated');
+            PhoneWidget.addLogError('device already initiated');
             return;
         }
 
         initiated = true;
 
+        const twilioTokenUrl = '/phone/get-token?deviceId=' + initDeviceId;
+
         PhoneWidget.addLog("Requesting Twilio Access Token...");
-        $.getJSON('/phone/get-token?deviceId=' + initDeviceId)
+        $.getJSON(twilioTokenUrl)
             .then(function (response) {
                 PhoneWidget.addLog("Got a Twilio Access token.");
                 initDevice({"token": response.data.token, "refreshTime": response.data.refreshTime}, remoteLogsEnabled);
             })
-            .catch(function (err) {
-                PhoneWidget.addLog("Get Twilio Access token error. Reload page!");
-                console.log(err);
-                createNotify('Twilio Token error!', 'Could not get a token from server! Please reload page!', 'error');
+            .catch(function (error) {
+                PhoneWidget.addLogError("Get Twilio Access token error. Reload page!");
+                console.error(error);
             });
 
         function initDevice(token, remoteLogsEnabled) {
@@ -112,8 +113,11 @@
                 microphoneDevices.innerHTML = '';
 
                 if (device.audio.availableInputDevices.size < 1) {
-                    createNotify('Phone widget', 'Microphone device not found.', 'error')
-                    PhoneWidget.addLog('Not found Microphone device');
+                    twilioLogger.error(createError({
+                        name: 'Update input device',
+                        message: 'Not found Microphone device'
+                    }));
+                    PhoneWidget.addLogError('Not found Microphone device');
                     PhoneWidget.getDeviceState().microphoneUnselected();
                     return;
                 }
@@ -139,24 +143,26 @@
 
             const updateToken = () => {
                 PhoneWidget.addLog("Update Twilio Access Token...");
-                $.getJSON('/phone/get-token?deviceId=' + initDeviceId)
+                $.getJSON(twilioTokenUrl)
                     .then(function (response) {
-                        //console.log("Got a Twilio Access token.");
-                        PhoneWidget.addLog("Got a Twilio Access token.");
+                        PhoneWidget.addLogSuccess("Got a Twilio Access token.");
                         device.updateToken(response.data.token);
                         setTimeout(async () => updateToken(), response.data.refreshTime * 1000);
                     })
-                    .catch(function (err) {
-                        PhoneWidget.addLog("Get Twilio Access token error. Reload page!", '#f41b1b');
-                        console.log(err);
-                        createNotify('Twilio Token error!', 'Could not get a token from server! Please reload page!', 'error');
+                    .catch(function (error) {
+                        PhoneWidget.addLogError("Get Twilio Access token error. Reload page!");
+                        error.url = twilioTokenUrl;
+                        if (!error.message) {
+                            error.message = error.responseText || 'Twilio token update';
+                        }
+                        twilioLogger.error('%j', error);
                     });
             };
 
            setTimeout(async () => updateToken(), token.refreshTime * 1000);
 
             device.on('registering', () => {
-                PhoneWidget.addLog("Twilio.Device Registering...");
+                PhoneWidget.addLogSuccess("Twilio.Device Registering.");
             });
 
             const incomingCallHandler = (call) => {
@@ -167,11 +173,10 @@
                     PhoneWidget.freeDialButton();
                     PhoneWidget.setActiveCall(call);
                     PhoneWidget.incomingSoundOff();
-
+                    PhoneWidget.soundConnect();
                     call.on("volume", function (inputVolume, outputVolume) {
                         PhoneWidget.volumeIndicatorsChange(inputVolume, outputVolume)
                     });
-                    PhoneWidget.soundConnect();
                 });
                 call.on('cancel', () => {
                     PhoneWidget.freeDialButton();
@@ -192,7 +197,6 @@
                 });
                 call.on('error', error => {
                     createNotify('Call error', 'More info in logs panel', 'error');
-                    // console.log('An error has occurred: ', error);
                     twilioLogger.error('%j', error);
                     PhoneWidget.addLog(error);
                 });
@@ -231,7 +235,9 @@
                             call.accept();
                         })
                         .catch(error => {
-                            console.log(error);
+                            let err = createError(error, 'Microphone error');
+                            twilioLogger.error('%j', err);
+                            PhoneWidget.addLog(error);
                             createNotify('Accept incoming connection', error.message, 'error')
                         });
                 }
@@ -253,38 +259,32 @@
                         updateInputDevice();
                         stream.getTracks().forEach(track => track.stop());
                     }).catch(error => {
-                        console.log(error);
-                        error.comment = 'Microphone error';
+                        let err = createError(error, 'Microphone error');
+                        twilioLogger.error('%j', err);
                         PhoneWidget.addLog(error);
                         PhoneWidget.getDeviceState().microphoneUnselected();
                     });
-
                 device.removeListener("incoming", incomingCallHandler);
                 device.addListener("incoming", incomingCallHandler);
             });
 
             device.on('unregistered', function () {
-                //console.log("Twilio.Device unregistered!");
                 PhoneWidget.getDeviceState().reset();
                 PhoneWidget.incomingSoundOff();
-                PhoneWidget.getDeviceState().twilioUnregister();
             });
 
-            device.on('error', (twilioError, call) => {
-                if (twilioError.code === 20104) {
-                    //console.log('Twilio JWT Token Expired');
-                    PhoneWidget.addLog('Twilio JWT Token Expired', '#f41b1b');
-                    //console.log("Requesting New Twilio Access Token...");
-                    PhoneWidget.addLog("Requesting New Twilio Access Token...");
+            device.on('error', (error, call) => {
+                if (error.code === 20104) {
+                    twilioLogger.error('%j', error);
+                    PhoneWidget.addLogError('Twilio JWT Token Expired');
                     updateToken();
                     return;
                 }
 
-                twilioLogger.error('%j', twilioError);
+                twilioLogger.error('%j', error);
+                PhoneWidget.addLog(error);
                 PhoneWidget.freeDialButton();
-                PhoneWidget.addLog(twilioError);
                 PhoneWidget.incomingSoundOff();
-                createNotify(twilioError.description, twilioError.explanation, 'error');
             });
 
            device.audio.on("deviceChange", updateAllAudioDevices.bind(device));
@@ -300,6 +300,18 @@
 
             device.register();
         }
+
+        const createError = (error, defaultMessage) => ({
+            name: error.name || defaultMessage,
+            code: error.code,
+            message: error.message || defaultMessage,
+            description: error.description || defaultMessage,
+            comment: error.comment || defaultMessage,
+            explanation: error.explanation || defaultMessage,
+            causes: error.causes,
+            solutions: error.solutions,
+            originalError: error.originalError
+        });
     }
 
     let initiated = false;

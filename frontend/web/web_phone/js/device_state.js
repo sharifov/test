@@ -94,12 +94,6 @@
         this.microphoneNotReady = function () {}
     }
 
-    function DummyLogger() {
-        this.add = function () {}
-        this.success = function () {}
-        this.error = function () {}
-    }
-
     function State(userId, register, logger, twilioIsReady, speakerIsReady, microphoneIsReady) {
         this.userId = userId;
         this.isTwilioRegistered = false;
@@ -249,7 +243,7 @@
         return new State(
             userId,
             new DummyRegister(userId),
-            new DummyLogger(),
+            new window.phoneWidget.logger.DummyLogger(),
             localStorage.getItem(getStorageNameTwilioStatus(userId)) === 'ready',
             localStorage.getItem(getStorageNameSpeakerStatus(userId)) === 'ready',
             localStorage.getItem(getStorageNameMicrophoneStatus(userId)) === 'ready'

@@ -59,6 +59,9 @@
             if (error.comment) {
                 msg += '<p>comment: ' + error.comment + '</p>';
             }
+            if (error.explanation) {
+                msg += '<p>explanation: ' + error.explanation + '</p>';
+            }
             if (error.causes) {
                 msg += '<p style="color: #761c19; font-weight: bold">causes: </p>';
                 error.causes.forEach(function (cause, key) {
@@ -84,6 +87,14 @@
         }
     }
 
+    function DummyLogger() {
+        this.success = function (message) {};
+        this.error = function (message) {};
+        this.add = function (message, color) {};
+        this.clear = function () {};
+        this.addError = function (error) {};
+    }
+
     window.addEventListener('storage', function (event) {
         if (event.key === 'PhoneWidgetLog') {
             let value = JSON.parse(event.newValue);
@@ -92,6 +103,7 @@
     });
 
     window.phoneWidget.logger = {
-        Logger: Logger
+        Logger: Logger,
+        DummyLogger: DummyLogger
     }
 })();
