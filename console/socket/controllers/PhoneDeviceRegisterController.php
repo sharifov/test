@@ -9,15 +9,15 @@ use sales\model\voip\phoneDevice\device\PhoneDeviceNameGenerator;
 use sales\model\voip\phoneDevice\device\RandomStringGenerator;
 
 /**
- * Class PhoneDeviceController
+ * Class PhoneDeviceRegisterController
  */
-class PhoneDeviceController
+class PhoneDeviceRegisterController
 {
     public function actionRegister($connectionIdentity, $params): array
     {
         if (!$connectionIdentity) {
             return [
-                'cmd' => 'phoneDeviceRegister',
+                'cmd' => 'PhoneDeviceRegister',
                 'error' => true,
                 'msg' => 'Connection Identity is empty. Refresh page.',
             ];
@@ -25,9 +25,9 @@ class PhoneDeviceController
 
         if (!isset($params['userId'])) {
             return [
-                'cmd' => 'phoneDeviceRegister',
+                'cmd' => 'PhoneDeviceRegister',
                 'error' => true,
-                'msg' => 'Not found user Id',
+                'msg' => 'Not found User Id',
             ];
         }
         $userId = (int)$params['userId'];
@@ -39,7 +39,7 @@ class PhoneDeviceController
             $device = PhoneDevice::find()->byId($requestedDeviceId)->one();
             if (!$device) {
                 return [
-                    'cmd' => 'phoneDeviceRegister',
+                    'cmd' => 'PhoneDeviceRegister',
                     'error' => true,
                     'deviceIsInvalid' => true,
                     'msg' => 'Device not found. Please refresh page!',
@@ -47,7 +47,7 @@ class PhoneDeviceController
             }
             if (!$device->isEqualUser($userId)) {
                 return [
-                    'cmd' => 'phoneDeviceRegister',
+                    'cmd' => 'PhoneDeviceRegister',
                     'error' => true,
                     'deviceIsInvalid' => true,
                     'msg' => 'User is not owner of device. Please refresh page!',
@@ -58,7 +58,7 @@ class PhoneDeviceController
                 $userConnection = UserConnection::find()->select(['uc_ip', 'uc_user_agent'])->byId($connectionIdentity)->asArray()->one();
                 if (!$userConnection) {
                     return [
-                        'cmd' => 'phoneDeviceRegister',
+                        'cmd' => 'PhoneDeviceRegister',
                         'error' => true,
                         'deviceIsInvalid' => true,
                         'msg' => 'User connection is invalid. Please refresh page!',
@@ -85,7 +85,7 @@ class PhoneDeviceController
                     'userId' => $userId,
                 ], 'PhoneDevice:create');
                 return [
-                    'cmd' => 'phoneDeviceRegister',
+                    'cmd' => 'PhoneDeviceRegister',
                     'error' => true,
                     'deviceIsInvalid' => true,
                     'msg' => 'Device created error. Please refresh page!',
@@ -100,14 +100,14 @@ class PhoneDeviceController
 
         if (!$device->isEqualConnection($connectionIdentity)) {
             return [
-                'cmd' => 'phoneDeviceRegister',
+                'cmd' => 'PhoneDeviceRegister',
                 'error' => true,
                 'msg' => 'Voip page is already opened. Please close this page!',
             ];
         }
 
         return [
-            'cmd' => 'phoneDeviceRegister',
+            'cmd' => 'PhoneDeviceRegister',
             'userId' => $userId,
             'deviceId' => $device->pd_id,
         ];

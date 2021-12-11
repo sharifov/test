@@ -13,7 +13,7 @@ class PhoneDeviceIdentity
         if (!$device->isEqualUser($userId)) {
             throw new \DomainException('Device (' . $deviceId . ') is invalid. Error relation with user(' . $userId . ').');
         }
-        if (!$device->connectionReady()) {
+        if (!$device->isReady()) {
             throw new \DomainException('Device is not ready. Please refresh Voip page.');
         }
         return $device->getClientDeviceIdentity();

@@ -74,9 +74,60 @@ class PhoneDevice extends \yii\db\ActiveRecord
         return 'client:' . $this->pd_device_identity;
     }
 
-    public function connectionReady(): bool
+    public function isReady(): bool
     {
-        return $this->pd_connection_id !== null;
+        return $this->pd_connection_id !== null && $this->deviceIsReady() && $this->speakerIsReady() && $this->microphoneIsReady();
+    }
+
+    public function deviceIsReady(): bool
+    {
+        return $this->pd_status_device ? true : false;
+    }
+
+    public function deviceReady(string $updated): void
+    {
+        $this->pd_status_device = true;
+        $this->pd_updated_dt = $updated;
+    }
+
+    public function deviceNotReady(string $updated): void
+    {
+        $this->pd_status_device = false;
+        $this->pd_updated_dt = $updated;
+    }
+
+    public function speakerIsReady(): bool
+    {
+        return $this->pd_status_speaker ? true : false;
+    }
+
+    public function speakerReady(string $updated): void
+    {
+        $this->pd_status_speaker = true;
+        $this->pd_updated_dt = $updated;
+    }
+
+    public function speakerNotReady(string $updated): void
+    {
+        $this->pd_status_speaker = false;
+        $this->pd_updated_dt = $updated;
+    }
+
+    public function microphoneIsReady(): bool
+    {
+        return $this->pd_status_microphone ? true : false;
+    }
+
+    public function microphoneReady(string $updated): void
+    {
+        $this->pd_status_microphone = true;
+        $this->pd_updated_dt = $updated;
+    }
+
+    public function microphoneNotReady(string $updated): void
+    {
+        $this->pd_status_microphone = false;
+        $this->pd_updated_dt = $updated;
     }
 
     public function rules(): array

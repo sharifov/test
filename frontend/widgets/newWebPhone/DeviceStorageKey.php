@@ -4,7 +4,7 @@ namespace frontend\widgets\newWebPhone;
 
 class DeviceStorageKey
 {
-    public static function getDeviceIdStorageKey(int $userId): string
+    public static function getPhoneDeviceIdStorageKey(int $userId): string
     {
         return 'PhoneDeviceId' . $userId;
     }

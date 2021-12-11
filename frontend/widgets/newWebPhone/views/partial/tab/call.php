@@ -263,7 +263,7 @@ $conferenceSources = json_encode([
 $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
-$deviceIdStorageKey = DeviceStorageKey::getDeviceIdStorageKey($userId);
+$phoneDeviceIdStorageKey = DeviceStorageKey::getPhoneDeviceIdStorageKey($userId);
 
 $js = <<<JS
 window.phoneWidget.initParams = {
@@ -317,7 +317,7 @@ window.phoneWidget.initParams = {
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
     'isDevicePage': window.isTwilioDevicePage,
-    'deviceIdStorageKey': '$deviceIdStorageKey',
+    'phoneDeviceIdStorageKey': '$phoneDeviceIdStorageKey',
     'userId': $userId
 };
 JS;

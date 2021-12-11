@@ -78,8 +78,6 @@ var PhoneWidget = function () {
     let twilioInternalIncomingConnection = null;
 
     let initiated = false;
-    
-    let deviceIdStorageKey = null;
 
     function init(options)
     {
@@ -90,10 +88,9 @@ var PhoneWidget = function () {
         callRequester.init(options);
 
         isDevicePage = options.isDevicePage;
-        deviceIdStorageKey = options.deviceIdStorageKey;
 
         audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
-        deviceState = new window.phoneWidget.device.state.Init(options.userId, isDevicePage, logger);
+        deviceState = new window.phoneWidget.device.state.Init(options.userId, isDevicePage, options.phoneDeviceIdStorageKey, logger);
 
         Object.assign(settings, options);
 
@@ -159,6 +156,10 @@ var PhoneWidget = function () {
 
     function getDeviceState() {
         return deviceState;
+    }
+
+    function getDeviceId() {
+        return getDeviceState().getDeviceId();
     }
 
     function getLeadViewPageShortUrl() {
@@ -2005,14 +2006,6 @@ var PhoneWidget = function () {
     function isInitiated() {
         return initiated === true;
     }
-    
-    function getDeviceId() {
-        return localStorage.getItem(deviceIdStorageKey);
-    }
-
-    function removeDeviceId() {
-        return window.localStorage.removeItem(deviceIdStorageKey);
-    }
 
     return {
         init: init,
@@ -2056,7 +2049,6 @@ var PhoneWidget = function () {
         setTwilioInternalIncomingConnection: setTwilioInternalIncomingConnection,
         removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection,
         isInitiated: isInitiated,
-        removeDeviceId: removeDeviceId,
         addLogError: addLogError,
         addLogSuccess: addLogSuccess
     };

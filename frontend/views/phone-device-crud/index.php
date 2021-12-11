@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use sales\model\voip\phoneDevice\device\PhoneDevice;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -28,6 +29,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => static function (PhoneDevice $model) {
+            if (!$model->isReady()) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             ['attribute' => 'pd_id', 'options' => ['style' => 'width:80px']],
             [

@@ -57,35 +57,76 @@
         };
     }
 
-    function Register(userId) {
-        this.userId = userId;
+    function Register(initUserId, initLogger) {
+        const userId = initUserId;
+        const logger = initLogger;
+
+        function Queue() {
+            this.actions = [];
+            this.enqueue = function (action) {
+                this.actions.push(action);
+            };
+            this.dequeue = function () {
+                if (this.actions.length > 0) {
+                    return this.actions.shift();
+                }
+                return null;
+            };
+        }
+
+        const queue = new Queue();
+
+        setInterval(() => {
+            let action = queue.dequeue();
+            if (action === null) {
+                return;
+            }
+            let deviceId = PhoneWidget.getDeviceState().getDeviceId();
+            if (deviceId === null) {
+                logger.add({
+                    name: 'Change device status. Action: ' + action,
+                    message: 'Device ID must be set!'
+                });
+                return;
+            }
+            socketSend('PhoneDeviceReady', action, {
+                'userId': userId,
+                'deviceId': deviceId
+            });
+        }, 200);
 
         this.twilioReady = function () {
-            localStorage.setItem(getStorageNameTwilioStatus(this.userId), 'ready');
+            localStorage.setItem(getStorageNameTwilioStatus(userId), 'ready');
+            queue.enqueue('TwilioReady');
         }
 
         this.twilioNotReady = function () {
-            localStorage.setItem(getStorageNameTwilioStatus(this.userId), 'not-ready');
+            localStorage.setItem(getStorageNameTwilioStatus(userId), 'not-ready');
+            queue.enqueue('TwilioNotReady');
         }
 
         this.speakerReady = function () {
-            localStorage.setItem(getStorageNameSpeakerStatus(this.userId), 'ready');
+            localStorage.setItem(getStorageNameSpeakerStatus(userId), 'ready');
+            queue.enqueue('SpeakerReady');
         }
 
         this.speakerNotReady = function () {
-            localStorage.setItem(getStorageNameSpeakerStatus(this.userId), 'not-ready');
+            localStorage.setItem(getStorageNameSpeakerStatus(userId), 'not-ready');
+            queue.enqueue('SpeakerNotReady');
         }
 
         this.microphoneReady = function () {
-            localStorage.setItem(getStorageNameMicrophoneStatus(this.userId), 'ready');
+            localStorage.setItem(getStorageNameMicrophoneStatus(userId), 'ready');
+            queue.enqueue('MicrophoneReady');
         }
 
         this.microphoneNotReady = function () {
-            localStorage.setItem(getStorageNameMicrophoneStatus(this.userId), 'not-ready');
+            localStorage.setItem(getStorageNameMicrophoneStatus(userId), 'not-ready');
+            queue.enqueue('MicrophoneNotReady');
         }
     }
 
-    function DummyRegister(userId) {
+    function DummyRegister() {
         this.twilioReady = function () {}
         this.twilioNotReady = function () {}
         this.speakerReady = function () {}
@@ -94,7 +135,7 @@
         this.microphoneNotReady = function () {}
     }
 
-    function State(userId, register, logger, twilioIsReady, speakerIsReady, microphoneIsReady) {
+    function State(userId, register, phoneDeviceIdStorageKey, twilioIsReady, speakerIsReady, microphoneIsReady, logger) {
         this.userId = userId;
         this.isTwilioRegistered = false;
         this.isSpeakerSelected = false;
@@ -104,10 +145,11 @@
         this.switcher = new Switcher()
         this.panel = new Panel();
         this.statusReady = true;
+        this.phoneDeviceIdStorageKey = phoneDeviceIdStorageKey;
 
-        this.reset = function () {
-            this.switcher.notReady('Reset devices');
-            this.logger.error('Reset devices!');
+        this.reset = function (reason) {
+            this.switcher.notReady('Reset devices. ' + reason);
+            this.logger.error('Reset devices! ' + reason);
 
             this.twilioUnregister();
             this.speakerUnselected();
@@ -124,8 +166,8 @@
         this.notReady = function (reason) {
             this.switcher.notReady(reason);
             if (this.statusReady === true) {
-                this.logger.error('Phone Device Not Ready!');
-                console.log('Phone Device Not Ready!');
+                this.logger.error('Phone Device Not Ready! ' + reason);
+                console.log('Phone Device Not Ready! ' + reason);
             }
             this.statusReady = false;
         };
@@ -138,7 +180,7 @@
             this.isTwilioRegistered = true;
             this.register.twilioReady();
             this.panel.twilioOk();
-            this.logger.success('Twilio Device Registered!');
+            this.logger.success('Twilio Device registered!');
             if (this.isReady()) {
                 this.ready();
             }
@@ -148,7 +190,7 @@
             this.isTwilioRegistered = false;
             this.register.twilioNotReady();
             this.panel.twilioError();
-            this.logger.error('Twilio Device UnRegistered!');
+            this.logger.error('Twilio Device unregistered!');
             this.notReady('Twilio Device: unregistered');
         }
 
@@ -188,7 +230,21 @@
             this.notReady('Microphone unselected');
         }
 
-        this.notReady('Load devices');
+        this.setDeviceId = function (deviceId) {
+            localStorage.setItem(this.phoneDeviceIdStorageKey, deviceId);
+            this.logger.success('Device ID was installed.');
+        };
+
+        this.getDeviceId = function () {
+            return localStorage.getItem(this.phoneDeviceIdStorageKey) || null;
+        };
+
+        this.removeDeviceId = function () {
+            localStorage.removeItem(this.phoneDeviceIdStorageKey);
+            this.logger.error('Device ID was removed.');
+        };
+
+        this.notReady('Init devices');
 
         if (microphoneIsReady === true) {
             this.microphoneSelected();
@@ -209,9 +265,17 @@
         }
     }
 
-    function Init(userId, isDevicePage, logger) {
+    function Init(userId, isDevicePage, phoneDeviceIdStorageKey, logger) {
         if (isDevicePage) {
-            return new State(userId, new Register(userId), logger, false, false, false);
+            return new State(
+                userId,
+                new Register(userId, logger),
+                phoneDeviceIdStorageKey,
+                false,
+                false,
+                false,
+                logger
+            );
         }
 
         window.addEventListener('storage', function (event) {
@@ -237,16 +301,17 @@
                     return;
                 }
                 PhoneWidget.getDeviceState().microphoneUnselected();
-                return;
             }
         });
+
         return new State(
             userId,
-            new DummyRegister(userId),
-            new window.phoneWidget.logger.DummyLogger(),
+            new DummyRegister(),
+            phoneDeviceIdStorageKey,
             localStorage.getItem(getStorageNameTwilioStatus(userId)) === 'ready',
             localStorage.getItem(getStorageNameSpeakerStatus(userId)) === 'ready',
-            localStorage.getItem(getStorageNameMicrophoneStatus(userId)) === 'ready'
+            localStorage.getItem(getStorageNameMicrophoneStatus(userId)) === 'ready',
+            new window.phoneWidget.logger.DummyLogger()
         );
     }
 
