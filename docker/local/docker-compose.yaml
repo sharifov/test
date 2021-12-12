@@ -21,8 +21,6 @@ services:
       args:
         REDIS_VERSION: ${REDIS_VERSION}
     restart: always
-    networks:
-      - default
     ports:
       - ${REDIS_HOST_PORT}:6379
 
@@ -42,8 +40,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     restart: always
-    networks:
-      - default
 
   psql:
     build:
@@ -61,8 +57,6 @@ services:
     ports:
       - ${POSTGRES_HOST_PORT}:5432
     restart: always
-    networks:
-      - default
 
   centrifugo:
     image: centrifugo/centrifugo:${CENTRIFUGO_VERSION}
@@ -89,12 +83,10 @@ services:
     restart: always
     ports:
       - ${BEANSTALKD_PORT}
-    networks:
-      - default
 
-  web:
+  frontend:
     build:
-      context: ./web
+      context: ./frontend
       args:
         PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     volumes:
@@ -110,9 +102,25 @@ services:
     restart: always
     environment:
       PHP_IDE_CONFIG: "serverName=SalesWebServer"
-    networks:
-      - default
-      - sales-communication
+
+  api:
+    build:
+      context: ./api
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+     - php-fpm
+     - mysql
+     - psql
+     - redis
+     - beanstalkd
+     - centrifugo
+     - queue
+    restart: always
+    environment:
+      PHP_IDE_CONFIG: "serverName=SalesWebServer"
 
   nginx:
     build:
@@ -126,10 +134,11 @@ services:
       - ./../../../fileStorage:${APP_ROOT}/fileStorage
       - ./../../:${APP_ROOT}/www
     ports:
-      - ${HOST_PORT}:443 #frontend
-      - ${HOST_API_PORT}:80 #api
+      - ${HOST_PORT}:${HOST_PORT} #frontend
+      - ${HOST_API_PORT}:${HOST_API_PORT} #api
     depends_on:
-      - web
+      - frontend
+      - api
     restart: always
     environment:
       - NGINX_ENVSUBST_TEMPLATE_DIR=${NGINX_TEMPLATE_PATH}
@@ -137,15 +146,11 @@ services:
       - HOST=${HOST}
       - HOST_PORT=${HOST_PORT}
       - HOST_API=${HOST_API}
+      - HOST_API_PORT=${HOST_API_PORT}
       - SSL_CRT_PATH=${SSL_CRT_PATH}
       - SSL_KEY_PATH=${SSL_KEY_PATH}
       - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
       - WEB_SOCKET_SERVER_PORT=${WEB_SOCKET_SERVER_PORT}
-    networks:
-      default:
-      sales-communication:
-        aliases:
-          - ${HOST_API}
 
   ws:
     build:
@@ -162,8 +167,6 @@ services:
       - beanstalkd
     restart: always
     command: ./yii websocket-server/start
-    networks:
-      - default
 
   queue:
     build:
@@ -180,9 +183,6 @@ services:
       - beanstalkd
       - centrifugo
       - redis
-    networks:
-      - default
-      - sales-communication
     restart: always
 
   console:
@@ -199,12 +199,4 @@ services:
       - psql
       - beanstalkd
       - redis
-    networks:
-      - default
-      - sales-communication
     restart: always
-
-networks:
-  default:
-  sales-communication:
-    name: sales-communication

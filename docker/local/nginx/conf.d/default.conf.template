@@ -15,7 +15,8 @@ server {
 	fastcgi_buffers 16 16k;
 	fastcgi_buffer_size 32k;
 
-    listen 443 ssl;
+    listen ${HOST_PORT} ssl;
+
     server_name ${HOST}:${HOST_PORT};
 
     ssl_certificate ${SSL_CRT_PATH};
@@ -101,7 +102,7 @@ server {
 
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_pass web:9000;
+        fastcgi_pass frontend:9000;
         try_files $uri =404;
 
         rewrite (?!^/((frontend|backend)/web|admin))^ /frontend/web$uri break;
@@ -128,7 +129,7 @@ server {
     charset utf-8;
     client_max_body_size 128M;
 
-    listen 80;
+    listen ${HOST_API_PORT};
 
     server_name ${HOST_API};
 
@@ -157,7 +158,7 @@ server {
     location ~ \.php$ {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_pass web:9000;
+        fastcgi_pass api:9000;
         try_files $uri =404;
     }
 
