@@ -71,7 +71,10 @@ class LeadEventDataService
         $this->origin = $this->firstSegment->origin ?? null;
         $this->destination = $this->firstSegment->destination ?? null;
         $this->departureDate = $this->firstSegment->departure ?? null;
-        $this->returnDate = null; /* TODO::  */
+        $this->returnDate = null;
+        if ($this->lead->trip_type === Lead::TRIP_TYPE_ROUND_TRIP) {
+            $this->returnDate = $this->lastSegment->departure ?? null;
+        }
 
         return $this;
     }

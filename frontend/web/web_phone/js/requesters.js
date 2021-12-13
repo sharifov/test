@@ -28,7 +28,7 @@
             'csrf_token': '',
             'ajaxGetPhoneListIdUrl': '',
             'createInternalCallUrl': '',
-            'createCallUrl': '',
+            'createCallUrl': ''
         };
 
         this.init = function (settings) {
@@ -677,6 +677,29 @@
                 .fail(function () {
                     createNotify('Create Call', 'Server error', 'error');
                     PhoneWidget.freeDialButton();
+                })
+        };
+
+        this.reconnect = function (call) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': call.data.callSid
+                },
+                url: this.settings.reconnectUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        call.unSetReconnectRequestState();
+                        createNotify('Reconnect', data.message, 'error');
+                        return;
+                    }
+                    PhoneWidgetCall.openHoldCallPanel();
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Reconnect', message, 'error');
+                    call.unSetReconnectRequestState();
                 })
         };
     }
