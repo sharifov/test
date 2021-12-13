@@ -492,26 +492,30 @@ class FlightQuoteController extends FController
         }
 
         if (!$lead) {
-            $case = $this->casesRepository->find($caseId);
-            $order = $this->orderRepository->find($orderId);
-            if (!$productQuote->relateParent) {
-                $productQuoteAbacDto = new ProductQuoteAbacDto($productQuote);
-                $productQuoteAbacDto->mapCaseAttributes($case);
-                $productQuoteAbacDto->mapOrderAttributes($order);
-                /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
-                if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
-                    throw new ForbiddenHttpException('Access denied');
-                }
-            } else {
-                $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
-                $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($productQuote);
-                $relatedProductQuoteAbacDto->mapOrderAttributes($order);
-                $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
-                $relatedProductQuoteAbacDto->mapCaseAttributes($case);
+            if ($caseId && $orderId) {
+                $case = $this->casesRepository->find($caseId);
+                $order = $this->orderRepository->find($orderId);
+                if (!$productQuote->relateParent) {
+                    $productQuoteAbacDto = new ProductQuoteAbacDto($productQuote);
+                    $productQuoteAbacDto->mapCaseAttributes($case);
+                    $productQuoteAbacDto->mapOrderAttributes($order);
+                    /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, CasesAbacObject::ACTION_ACCESS_DETAILS, Product quote view details */
+                    if (!Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
+                        throw new ForbiddenHttpException('Access denied');
+                    }
+                } else {
+                    if ($pqcId) {
+                        $productQuoteChange = $this->productQuoteChangeRepository->find($pqcId);
+                        $relatedProductQuoteAbacDto = new RelatedProductQuoteAbacDto($productQuote);
+                        $relatedProductQuoteAbacDto->mapOrderAttributes($order);
+                        $relatedProductQuoteAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
+                        $relatedProductQuoteAbacDto->mapCaseAttributes($case);
 
-                /** @abac $relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS, ReProtection Quote View Details */
-                if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
-                    throw new ForbiddenHttpException('Access denied');
+                        /** @abac $relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS, ReProtection Quote View Details */
+                        if (!Yii::$app->abac->can($relatedProductQuoteAbacDto, RelatedProductQuoteAbacObject::OBJ_RELATED_PRODUCT_QUOTE, RelatedProductQuoteAbacObject::ACTION_ACCESS_DETAILS)) {
+                            throw new ForbiddenHttpException('Access denied');
+                        }
+                    }
                 }
             }
         }
