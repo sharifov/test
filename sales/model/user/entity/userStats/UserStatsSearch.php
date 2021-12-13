@@ -278,7 +278,7 @@ class UserStatsSearch extends Model
         ) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_SPLIT_SHARE => (new Query())
-                    ->select(['AVG(ROUND((ps_percent / 100), 2))'])
+                    ->select(['SUM(ROUND((ps_percent / 100), 2))'])
                     ->from(Lead::tableName())
                     ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
                     ->where(['status' => Lead::STATUS_SOLD])
@@ -287,11 +287,10 @@ class UserStatsSearch extends Model
 
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT => (new Query())
-                    ->select(['COUNT(' . Lead::tableName() . '.id)'])
-                    ->from(Lead::tableName())
-                    ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
-                    ->where(ProfitSplit::tableName() . '.ps_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
+                    ->select(['COUNT(luc_lead_id)'])
+                    ->from(LeadUserConversion::tableName())
+                    ->where('luc_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere('luc_created_dt BETWEEN :startDt AND :endDt', [
                         ':startDt' => $from, ':endDt' => $to,
                     ])
             ]);

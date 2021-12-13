@@ -962,11 +962,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function disconnectFromConferenceCall(string $conferenceSid, string $keeperSid): array
+    public function disconnectFromConferenceCall(string $conferenceSid, string $keeperSid, ?string $announce): array
     {
         $data = [
             'conferenceSid' => $conferenceSid,
             'keeperSid' => $keeperSid,
+            'announce' => $announce
         ];
 
         $response = $this->sendRequest('twilio-conference/disconnect-from-conference-call', $data);
