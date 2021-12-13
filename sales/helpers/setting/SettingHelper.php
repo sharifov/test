@@ -708,6 +708,11 @@ class SettingHelper
         return self::prePareStatusIds(Yii::$app->params['settings']['updatable_involuntary_quote_change']);
     }
 
+    public static function getInvoluntaryChangeActiveStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['involuntary_change_active_statuses']);
+    }
+
     public static function getVoluntaryExchangeBoEndpoint(): ?string
     {
         return Yii::$app->params['settings']['voluntary_exchange_bo_endpoint'] ?? null;
@@ -771,5 +776,10 @@ class SettingHelper
     public static function leadRedialEnabled(): bool
     {
         return (bool) (Yii::$app->params['settings']['lead_redial_enabled'] ?? false);
+    }
+
+    public static function getCallReconnectAnnounceMessage(): string
+    {
+        return (string) (Yii::$app->params['settings']['call_reconnect_announce'] ?? 'Connection Error. Reconnecting. Please hold');
     }
 }

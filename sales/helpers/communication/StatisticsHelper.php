@@ -102,25 +102,14 @@ class StatisticsHelper
      */
     protected function getLeadCallCount(bool $onlyParent = true): int
     {
-        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
-            $query = CallLogLead::find()
-                ->innerJoin(
-                    CallLog::tableName(),
-                    CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id'
-                )
-                ->where(['cll_lead_id' => $this->id])
-                ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
-                ->cache($this->cacheDuration);
-            return (int) $query->count();
-        }
-
-        $query = Call::find()
-            ->where(['c_lead_id' => $this->id])
-            ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
+        $query = CallLogLead::find()
+            ->innerJoin(
+                CallLog::tableName(),
+                CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id'
+            )
+            ->where(['cll_lead_id' => $this->id])
+            ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
             ->cache($this->cacheDuration);
-        if ($onlyParent) {
-            $query->andWhere(['c_parent_id' => null]);
-        }
         return (int) $query->count();
     }
 
@@ -130,25 +119,14 @@ class StatisticsHelper
     */
     protected function getCaseCallCount(bool $onlyParent = true): int
     {
-        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
-            $query = CallLogCase::find()
-                ->innerJoin(
-                    CallLog::tableName(),
-                    CallLog::tableName() . '.cl_id = ' . CallLogCase::tableName() . '.clc_cl_id'
-                )
-                ->where(['clc_case_id' => $this->id])
-                ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
-                ->cache($this->cacheDuration);
-            return (int) $query->count();
-        }
-
-        $query = Call::find()
-            ->where(['c_case_id' => $this->id])
-            ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
+        $query = CallLogCase::find()
+            ->innerJoin(
+                CallLog::tableName(),
+                CallLog::tableName() . '.cl_id = ' . CallLogCase::tableName() . '.clc_cl_id'
+            )
+            ->where(['clc_case_id' => $this->id])
+            ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
             ->cache($this->cacheDuration);
-        if ($onlyParent) {
-            $query->andWhere(['c_parent_id' => null]);
-        }
         return (int) $query->count();
     }
 

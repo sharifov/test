@@ -55,7 +55,7 @@ var PhoneWidgetCall = function () {
 
         setCountMissedCalls(options.countMissedCalls);
 
-        panes.active.setup(options.btnHoldShow, options.btnTransferShow, options.canRecordingDisabled, options.canAddBlockList);
+        panes.active.setup(options.btnHoldShow, options.btnTransferShow, options.canRecordingDisabled, options.canAddBlockList, options.btnReconnectShow);
 
         muteBtnClickEvent();
         transferCallBtnClickEvent();
@@ -76,6 +76,7 @@ var PhoneWidgetCall = function () {
         recordingClickEvent();
         addPhoneBlacklistEvent();
         createLeadEvent();
+        reconnectClickEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -1083,6 +1084,28 @@ var PhoneWidgetCall = function () {
         });
     }
 
+    function reconnectClickEvent() {
+        $(document).on('click', '#wg-reconnect-call', function(e) {
+            if ($(this).attr('data-active') !== 'true') {
+                return false;
+            }
+
+            let callSid = $(this).attr('data-call-sid');
+            if (!callSid) {
+                createNotify('Error', 'Not found Call SID', 'error');
+                return false;
+            }
+
+            let call = queues.active.one(callSid);
+            if (call === null) {
+                createNotify('Error', 'Not found Call on Active Queue', 'error');
+                return false;
+            }
+
+            sendReconnectRequest(call.data.callSid);
+        });
+    }
+
     function recordingClickEvent() {
         $(document).on('click', '#wg-call-record', function(e) {
             if (!conferenceBase) {
@@ -1194,6 +1217,20 @@ var PhoneWidgetCall = function () {
         }
 
         callRequester.unHold(call);
+    }
+
+    function sendReconnectRequest(callSid) {
+        let call = queues.active.one(callSid);
+        if (call === null) {
+            createNotify('Error', 'Not found Call on Active Queue', 'error');
+            return false;
+        }
+
+        if (!call.setReconnectRequestState()) {
+            return false;
+        }
+
+        callRequester.reconnect(call);
     }
 
     function sendRecordingEnableRequest(callSid) {
@@ -1440,11 +1477,7 @@ var PhoneWidgetCall = function () {
         audio.incoming.refresh();
 
         if (holdExist && !activeExist && !outgoingExist && !incomingExist) {
-            openWidget();
-            panes.queue.openAllCalls();
-            window.phoneWidget.notifier.refresh();
-            audio.incoming.refresh();
-            iconUpdate();
+            openHoldCallPanel();
             return;
         }
 
@@ -1453,6 +1486,14 @@ var PhoneWidgetCall = function () {
         }
 
         refreshPanes();
+    }
+
+    function openHoldCallPanel() {
+        openWidget();
+        panes.queue.openAllCalls();
+        window.phoneWidget.notifier.refresh();
+        audio.incoming.refresh();
+        iconUpdate();
     }
 
     function resetQueues() {
@@ -1546,7 +1587,8 @@ var PhoneWidgetCall = function () {
         audio: audio,
         showCallingPanel: showCallingPanel,
         openCallTab: openCallTab,
-        hidePhoneNotifications: hidePhoneNotifications
+        hidePhoneNotifications: hidePhoneNotifications,
+        openHoldCallPanel: openHoldCallPanel
     };
 }();
 
