@@ -364,6 +364,15 @@ class ReprotectionCreateService
             ->exists();
     }
 
+    public static function isScheduleChangeActiveExist(ProductQuote $originProductQuote): bool
+    {
+        return ProductQuoteChange::find()
+            ->where(['pqc_pq_id' => $originProductQuote->pq_id])
+            ->andWhere(['IN', 'pqc_status_id', SettingHelper::getInvoluntaryChangeActiveStatuses()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
+            ->exists();
+    }
+
     public static function isNotScheduleChangeUpdatableExist(ProductQuote $originProductQuote): bool
     {
         return ProductQuoteChange::find()

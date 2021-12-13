@@ -644,6 +644,13 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
                 device.on('offline', function (device) {
                     console.log('Phone device: status Offline');
+
+                    let call = PhoneWidgetCall.queues.active.one(window.connectCallSid);
+                    if (call !== null) {
+                        createNotify('Phone Device', 'Phone device went offline. Try reconnect', 'error');
+                        call.connectionError();
+                    }
+
                     // createNotify('Status Offline', 'Phone device: status Offline', 'error');
                     incomingSoundOff();
                 });

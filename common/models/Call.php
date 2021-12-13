@@ -1467,20 +1467,20 @@ class Call extends \yii\db\ActiveRecord
             NativeEventDispatcher::trigger(CallEvents::class, CallEvents::CHANGE_STATUS);
         }
 
-        if (($this->c_lead_id || $this->c_case_id) && !$this->isJoin()) {
-            //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
-
-            $socketParams = [];
-            if ($this->c_lead_id) {
-                $socketParams['lead_id'] = $this->c_lead_id;
-            }
-
-            if ($this->c_case_id) {
-                $socketParams['case_id'] = $this->c_case_id;
-            }
-
-            Notifications::publish('updateCommunication', $socketParams, ['lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
-        }
+//        if (($this->c_lead_id || $this->c_case_id) && !$this->isJoin()) {
+//            //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
+//
+//            $socketParams = [];
+//            if ($this->c_lead_id) {
+//                $socketParams['lead_id'] = $this->c_lead_id;
+//            }
+//
+//            if ($this->c_case_id) {
+//                $socketParams['case_id'] = $this->c_case_id;
+//            }
+//
+//            Notifications::publish('updateCommunication', $socketParams, ['lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
+//        }
 
 //        if ($userListSocketNotification) {
 //            foreach ($userListSocketNotification as $userId) {

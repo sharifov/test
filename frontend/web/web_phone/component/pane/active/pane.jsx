@@ -28,6 +28,10 @@ class ActivePane extends React.Component {
 
     render() {
         let call = this.state.call;
+        let controls = this.props.controls;
+        if (call.data.connectionError) {
+            controls.reconnect.active = true;
+        }
         return (
             <React.Fragment>
                 <CallInfo project={call.data.project} source={call.data.source}/>
@@ -38,7 +42,7 @@ class ActivePane extends React.Component {
                     <RecordIndicator call={call} canRecordingDisabled={this.props.controls.canRecordingDisabled}/>
                     <AddInBlacklist call={call} canAddBlackList={this.props.controls.canAddBlackList}/>
                 </div>
-                <ActivePaneControls call={call} controls={this.props.controls}/>
+                <ActivePaneControls call={call} controls={controls}/>
             </React.Fragment>
         );
     }
