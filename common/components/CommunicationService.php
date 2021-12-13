@@ -11,6 +11,7 @@ namespace common\components;
 
 use common\models\Call;
 use common\models\Project;
+use sales\helpers\email\MaskEmailHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\useCase\conference\create\CreateCallForm;
@@ -409,13 +410,23 @@ class CommunicationService extends Component implements CommunicationServiceInte
             $out['error'] = $response->content;
 
             if (!empty($filter['email_list'])) {
-                $email_list = Json::decode($filter['email_list'])['list'];
-                foreach ($email_list as $key => $email) {
-                    $email_list[$key] = MaskEmailHelper::masking($email);
+                $email_list = [];
+                if (is_object(json_decode($filter['email_list']))) {
+                    $email_list_raw = Json::decode($filter['email_list']);
+                    if (!empty($email_list_raw['list'])) {
+                        foreach ($email_list_raw['list'] as $key => $email) {
+                            $email_list[$key] = MaskEmailHelper::maskingPartial($email);
+                        }
+                    }
                 }
-                $filter['email_list'] = Json::encode(['list' => $email_list]);
+                if (!empty($email_list)) {
+                    $filter['email_list'] = Json::encode(['list' => $email_list]);
+                }
             }
-            \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
+            \Yii::error([
+                'message' => VarDumper::dumpAsString($out['error'], 10),
+                'filter' => VarDumper::dumpAsString($filter, 10),
+            ], 'Component:CommunicationService::mailGetMessages');
         }
 
         return $out;
@@ -1094,8 +1105,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
                 if ($isError) {
                     $out['error'] = true;
                     $out['message'] = (string)($data['message'] ?? 'Undefined error message');
-                    if (
-                        !
+                    if (!
                         (
                             (!empty($data['code']) && $data['code'] === 21220 && $out['message'] === 'Call status is Completed')
                             || (!empty($data['code']) && $data['code'] === 20404 && $out['message'] === 'Send digit error. Conference not found')
@@ -1331,8 +1341,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         if ($locale) {
             $data['locale'] = $locale;
-        } elseif (
-            !$locale &&
+        } elseif (!$locale &&
             ($project = Project::findOne(['project_key' => ArrayHelper::getValue($contentData, 'project_key')])) &&
             $defaultMarketCountry = ProjectLocale::getDefaultMarketCountryByProject($project->id)
         ) {
