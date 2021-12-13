@@ -96,7 +96,7 @@ class MultipleUpdateService
                 $this->leadStateService->pending($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
                 if ($form->authUserIsSupervisor()) {
-                    $this->leadUserConversionService->add(
+                    $this->leadUserConversionService->addAutomate(
                         $lead->id,
                         $newOwner->id,
                         LeadUserConversionDictionary::DESCRIPTION_ASSIGN,
@@ -186,7 +186,7 @@ class MultipleUpdateService
                 $this->leadStateService->processing($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->movedStateMessage($lead, 'Processing', $oldOwnerId, $newOwner->id, $newOwner->userName));
                 if ($form->authUserIsSupervisor()) {
-                    $this->leadUserConversionService->add(
+                    $this->leadUserConversionService->addAutomate(
                         $lead->id,
                         $newOwner->id,
                         LeadUserConversionDictionary::DESCRIPTION_ASSIGN,

@@ -491,7 +491,7 @@ class ClientChatFlightQuoteController extends FController
         $lead = $leadManageService->createByClientChat((new CreateLeadByChatDTO($form, $chat, $userId))->leadInProgressDataPrepare());
 
         $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-        $leadUserConversionService->add(
+        $leadUserConversionService->addAutomate(
             $lead->id,
             $userId,
             LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL,

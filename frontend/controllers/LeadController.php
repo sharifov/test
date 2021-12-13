@@ -1344,7 +1344,7 @@ class LeadController extends FController
 
                         if ($oldStatus === Lead::STATUS_PENDING) {
                             $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                            $leadUserConversionService->add(
+                            $leadUserConversionService->addAutomate(
                                 $lead->id,
                                 $user->getId(),
                                 LeadUserConversionDictionary::DESCRIPTION_TAKE,
@@ -1406,7 +1406,7 @@ class LeadController extends FController
 
             if ($oldStatus === Lead::STATUS_PENDING) {
                 $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                $leadUserConversionService->add(
+                $leadUserConversionService->addAutomate(
                     $lead->id,
                     $user->getId(),
                     LeadUserConversionDictionary::DESCRIPTION_TAKE,
@@ -2138,7 +2138,7 @@ class LeadController extends FController
                 }
 
                 $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                $leadUserConversionService->add(
+                $leadUserConversionService->addAutomate(
                     $lead->id,
                     Yii::$app->user->id,
                     LeadUserConversionDictionary::DESCRIPTION_MANUAL,
@@ -2177,7 +2177,7 @@ class LeadController extends FController
                     $lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
 
                     $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                    $leadUserConversionService->add(
+                    $leadUserConversionService->addAutomate(
                         $lead->id,
                         Yii::$app->user->id,
                         LeadUserConversionDictionary::DESCRIPTION_MANUAL,
@@ -2233,7 +2233,7 @@ class LeadController extends FController
                 $lead = $leadManageService->createByClientChat((new CreateLeadByChatDTO($form, $chat, $userId))->leadInProgressDataPrepare());
 
                 $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                $leadUserConversionService->add(
+                $leadUserConversionService->addAutomate(
                     $lead->id,
                     $userId,
                     LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL,
@@ -2540,7 +2540,7 @@ class LeadController extends FController
 
                 if ((int) $lead->employee_id !== $user->getId()) {
                     $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                    $leadUserConversionService->add(
+                    $leadUserConversionService->addAutomate(
                         $clone->id,
                         $user->getId(),
                         LeadUserConversionDictionary::DESCRIPTION_CLONE,
