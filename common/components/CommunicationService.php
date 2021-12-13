@@ -1105,7 +1105,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
                 if ($isError) {
                     $out['error'] = true;
                     $out['message'] = (string)($data['message'] ?? 'Undefined error message');
-                    if (!
+                    if (
+                        !
                         (
                             (!empty($data['code']) && $data['code'] === 21220 && $out['message'] === 'Call status is Completed')
                             || (!empty($data['code']) && $data['code'] === 20404 && $out['message'] === 'Send digit error. Conference not found')
@@ -1341,7 +1342,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         if ($locale) {
             $data['locale'] = $locale;
-        } elseif (!$locale &&
+        } elseif (
+            !$locale &&
             ($project = Project::findOne(['project_key' => ArrayHelper::getValue($contentData, 'project_key')])) &&
             $defaultMarketCountry = ProjectLocale::getDefaultMarketCountryByProject($project->id)
         ) {
