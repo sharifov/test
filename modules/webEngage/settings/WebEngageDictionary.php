@@ -8,7 +8,12 @@ namespace modules\webEngage\settings;
 class WebEngageDictionary
 {
     public const ENDPOINT_EVENTS = 'events';
-    public const ENDPOINT_EVENT_LIST = ['events'];
+    public const ENDPOINT_USERS = 'users';
+
+    public const ENDPOINT_LIST = [
+        self::ENDPOINT_EVENTS => self::ENDPOINT_EVENTS,
+        self::ENDPOINT_USERS => self::ENDPOINT_USERS,
+    ];
 
     public const EVENT_LEAD_CREATED = 'LeadCreated';
     public const EVENT_LEAD_BOOKED = 'LeadBooked';

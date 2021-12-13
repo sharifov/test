@@ -5,6 +5,7 @@ namespace modules\webEngage\src\service;
 use common\components\EmailService;
 use common\components\Metrics;
 use modules\webEngage\form\WebEngageEventForm;
+use modules\webEngage\form\WebEngageUserForm;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\settings\WebEngageSettings;
 use sales\helpers\app\AppHelper;
@@ -131,16 +132,24 @@ class WebEngageRequestService
      */
     public function addEvent(WebEngageEventForm $webEngageEventForm): ?array
     {
-        if (!$webEngageEventForm->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($webEngageEventForm, ' '));
-        }
-
         $data = $webEngageEventForm->toArray();
-
-        if ($this->settings->isTest()) {
-            $data['eventData']['isTest'] = true;
-        }
         $response = $this->sendRequest($data, WebEngageDictionary::ENDPOINT_EVENTS);
+
+        return ($response !== null) ? $response->getData() : null;
+    }
+
+    /**
+     * @param WebEngageUserForm $webEngageUserForm
+     * @return array|null
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     * @throws \yii\httpclient\Exception
+     */
+    public function addUser(WebEngageUserForm $webEngageUserForm): ?array
+    {
+        $data = $webEngageUserForm->toArray();
+        $response = $this->sendRequest($data, WebEngageDictionary::ENDPOINT_USERS);
+
         return ($response !== null) ? $response->getData() : null;
     }
 
