@@ -848,7 +848,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bug text-warning'],
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
-                ['label' => 'Action Logs', 'url' => ['/log/action'], 'icon' => 'bars'],
 
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
