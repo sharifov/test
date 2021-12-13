@@ -95,14 +95,6 @@ class MultipleUpdateService
             try {
                 $this->leadStateService->pending($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                if ($form->authUserIsSupervisor()) {
-                    $this->leadUserConversionService->addAutomate(
-                        $lead->id,
-                        $newOwner->id,
-                        LeadUserConversionDictionary::DESCRIPTION_ASSIGN,
-                        $creatorId
-                    );
-                }
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
             }
@@ -183,9 +175,11 @@ class MultipleUpdateService
             }
         } elseif ($form->isProcessing()) {
             try {
+                $ownerChanged = $oldOwnerId !== $newOwner->id;
+                $oldStatusIsPending = $lead->isPending();
                 $this->leadStateService->processing($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->movedStateMessage($lead, 'Processing', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                if ($form->authUserIsSupervisor()) {
+                if ($ownerChanged && $oldStatusIsPending) {
                     $this->leadUserConversionService->addAutomate(
                         $lead->id,
                         $newOwner->id,
