@@ -20,11 +20,14 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_ALL     = self::NS . 'act/*';
     public const ACT_VIEW  = self::NS . 'act/view';
 
+    /** UI PERMISSION */
     public const OBJ_PREVIEW_EMAIL = self::NS . 'obj/preview-email';
+    public const OBJ_REVIEW_EMAIL = self::NS . 'obj/review-email';
 
     public const OBJECT_LIST = [
         self::ACT_VIEW => self::ACT_VIEW,
-        self::OBJ_PREVIEW_EMAIL => self::OBJ_PREVIEW_EMAIL
+        self::OBJ_PREVIEW_EMAIL => self::OBJ_PREVIEW_EMAIL,
+        self::OBJ_REVIEW_EMAIL => self::OBJ_REVIEW_EMAIL
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -40,6 +43,10 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_ATTACH_FILES = 'attachFiles';
     public const ACTION_SHOW_EMAIL_DATA = 'showEmailData';
 
+    public const ACTION_MANAGE_REVIEW_FORM = 'manageReviewForm';
+    public const ACTION_VIEW_REVIEW_DATA = 'viewReviewData';
+    public const ACTION_VIEW_REVIEW_EMAIL_DATA = 'viewReviewEmailData';
+
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ACT_VIEW  => [self::ACTION_ACCESS],
@@ -54,6 +61,11 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_EDIT_EMAIL_TO_NAME,
             self::ACTION_ATTACH_FILES,
             self::ACTION_SHOW_EMAIL_DATA,
+        ],
+        self::OBJ_REVIEW_EMAIL => [
+            self::ACTION_MANAGE_REVIEW_FORM,
+            self::ACTION_VIEW_REVIEW_DATA,
+            self::ACTION_VIEW_REVIEW_EMAIL_DATA,
         ]
     ];
 
@@ -199,6 +211,14 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_PREVIEW_EMAIL => [
             self::ATTR_IS_MESSAGE_EDITED,
             self::ATTR_IS_SUBJECT_EDITED
+        ],
+        self::OBJ_REVIEW_EMAIL => [
+            self::ATTR_IS_EMAIL_OWNER,
+            self::ATTR_HAS_CREATOR,
+            self::ATTR_IS_CASE_OWNER,
+            self::ATTR_IS_LEAD_OWNER,
+            self::ATTR_IS_ADDRESS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
         ]
     ];
 
