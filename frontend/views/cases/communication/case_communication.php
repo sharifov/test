@@ -21,6 +21,8 @@ use common\models\DepartmentPhoneProject;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use modules\email\src\abac\dto\EmailPreviewDto;
+use modules\email\src\abac\EmailAbacObject;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
 use sales\entities\cases\Cases;
@@ -42,6 +44,25 @@ $pjaxContainerIdForm = $isCommunicationLogEnabled ? 'pjax-case-communication-log
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
 $unsubscribedEmails =  @json_encode($unsubscribedEmails);
 $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id, $model->cs_project_id);
+
+$abacDto = new EmailPreviewDto($previewEmailForm->e_email_tpl_id, null, null, null, $model);
+
+/** @abac $abacDto, EmailAbacObject::ACT_VIEOBJ_PREVIEW_EMAILmailAbacObject::ACTION_EDIT_FROM, Restrict access to edit input email_from in lead communication block */
+$emailFromReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_FROM);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_TO, Restrict access to edit input email_to in lead communication block*/
+$emailToReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_TO);
+/** @abac $abacDto, EmailAbacObject::ACT_VIOBJ_PREVIEW_EMAILEmailAbacObject::ACTION_EDIT_EMAIL_FROM_NAME, Restrict access to edit input email_from_name in lead communication block*/
+$emailFromNameReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_EMAIL_FROM_NAME);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_EMAIL_TO_NAME, Restrict access to edit input email_to_name in lead communication block*/
+$emailToNameReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_EMAIL_TO_NAME);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_SUBJECT, Restrict access to edit input email_subject in lead communication block*/
+$emailSubjectReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_SUBJECT);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_MESSAGE, Restrict access to edit input email_message in lead communication block*/
+$emailMessageReadonly = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_MESSAGE);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block*/
+$canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
+/** @abac $abacDto, EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_SHOW_EMAIL_DATA, Restrict access to view emails on case or lead*/
+$canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SHOW_EMAIL_DATA);
 ?>
 
 <div class="x_panel">
@@ -142,26 +163,29 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                     <div class="row">
                         <div class="col-sm-4 form-group">
 
-                            <?= $form2->field($previewEmailForm, 'e_email_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                            <?= $form2->field($previewEmailForm, 'e_email_from_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => $emailFromReadonly]) ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_from_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => $emailFromNameReadonly]) ?>
 
 
                             <?= $form2->field($previewEmailForm, 'e_case_id')->hiddenInput()->label(false); ?>
                             <?= $form2->field($previewEmailForm, 'e_language_id')->hiddenInput()->label(false); ?>
                             <?= $form2->field($previewEmailForm, 'e_email_tpl_id')->hiddenInput()->label(false); ?>
                             <?= $form2->field($previewEmailForm, 'e_quote_list')->hiddenInput()->label(false); ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_message_origin')->hiddenInput()->label(false); ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_subject_origin')->hiddenInput()->label(false); ?>
+
                         </div>
                         <div class="col-sm-4 form-group">
-                            <?= $form2->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                            <?= $form2->field($previewEmailForm, 'e_email_to_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => $emailToReadonly]) ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_to_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => $emailToNameReadonly]) ?>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12 form-group">
-                            <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => $emailSubjectReadonly]) ?>
                         </div>
                     </div>
-                     <?php if (FileStorageSettings::canEmailAttach()) : ?>
+                     <?php if ($canAttachFiles && FileStorageSettings::canEmailAttach()) : ?>
                          <div class="row">
                              <div class="col-sm-6 form-group">
                                  <?= FileStorageEmailSendListWidget::byCase($previewEmailForm->getFileList()) ?>
@@ -183,12 +207,12 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                                 <iframe
                                     id="email_view"
                                     src="<?php echo Url::to(['/lead/get-template', 'key_cache' => $previewEmailForm->keyCache]) ?>"
-                                    style="width: 100%; height: 800px; border: 0;"></iframe>
+                                    style="width: 100%; height: 800px; border: 0;<?= !$emailMessageReadonly ? 'pointer-events: none;' : '' ?>"></iframe>
                             </div>
                         <?php endif ?>
 
                     </div>
-                    <?php if ($isAdmin) :?>
+                    <?php if ($canShowEmailData) : ?>
                     <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
                             //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
@@ -211,11 +235,14 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                     </div>
 
                     <div class="btn-wrapper text-right">
-                        <?= Html::submitButton(
-                            '<i class="fa fa-envelope-o"></i> Send Email',
-                            ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']
-                        ) ?>
-                        <?php if ($isAdmin) :?>
+                        <?php /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */ ?>
+                        <?php  if (Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND)) : ?>
+                            <?= Html::submitButton(
+                                '<i class="fa fa-envelope-o"></i> Send Email',
+                                ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']
+                            ) ?>
+                        <?php  endif; ?>
+                        <?php if ($canShowEmailData) : ?>
                             <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                         <?php endif; ?>
                     </div>
@@ -316,6 +343,13 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                     if (Yii::$app->session->hasFlash('sms-send-success')) {
                         echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                         echo Yii::$app->session->getFlash('sms-send-success');
+                        echo '</div>';
+                        $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();updateCommunication();');
+                    }
+
+                    if (Yii::$app->session->hasFlash('send-warning')) {
+                        echo '<div class="alert alert-warning alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+                        echo Yii::$app->session->getFlash('send-warning');
                         echo '</div>';
                         $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();updateCommunication();');
                     }
@@ -583,6 +617,14 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
     
     var isProcessing = false;
     
+    if ('$emailMessageReadonly' == true) {
+        function updateMessageInputVal() {
+            let iframeEmail = document.getElementById('email_view');
+            let contentEmail = iframeEmail.contentWindow.document.documentElement.outerHTML;
+            $('#e_email_message').val(contentEmail);
+        }
+    }
+    
     $(document).on('click', '#send_email_btn', function(e) {    
         if (isProcessing) {
             return;
@@ -597,10 +639,10 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
         let loaderInner = '<span class="spinner-border spinner-border-sm"></span> Loading';
         btn.html(loaderInner);
         
-        let iframeEmail = document.getElementById('email_view');
-        let contentEmail = iframeEmail.contentWindow.document.documentElement.outerHTML;
-             
-        $('#e_email_message').val(contentEmail);        
+        if (typeof updateMessageInputVal === "function") {
+            updateMessageInputVal();
+        }
+        
         $('#email-preview-form').submit(); 
         return true;       
     });

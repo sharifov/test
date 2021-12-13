@@ -557,6 +557,7 @@ class LeadController extends FController
                             $mail->update();
 
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
+                            $this->refresh('#communication-form');
                         }
                     } else {
                         $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
@@ -771,6 +772,7 @@ class LeadController extends FController
 
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
+                                    $previewEmailForm->e_email_subject_origin = $previewEmailForm->e_email_subject;
                                 }
                                 $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                 $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
@@ -784,7 +786,9 @@ class LeadController extends FController
                         //VarDumper::dump($mailPreview, 10, true);// exit;
                     } else {
                         $previewEmailForm->e_email_message = $comForm->c_email_message;
+                        $previewEmailForm->e_email_message_origin = $comForm->c_email_message;
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
+                        $previewEmailForm->e_email_subject_origin = $comForm->c_email_subject;
                         $previewEmailForm->e_email_from = $mailFrom;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
                         $previewEmailForm->e_email_from_name = Yii::$app->user->identity->nickname;
