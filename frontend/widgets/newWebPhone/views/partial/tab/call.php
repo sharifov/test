@@ -323,6 +323,6 @@ window.phoneWidget.initParams = {
     'isDevicePage': window.isTwilioDevicePage,
     'phoneDeviceIdStorageKey': '$phoneDeviceIdStorageKey',
     'userId': $userId
-});
+};
 JS;
 $this->registerJs($js);
