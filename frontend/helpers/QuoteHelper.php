@@ -214,11 +214,11 @@ class QuoteHelper
                         $airportChange = true;
                     }
                     if ($segment['departureAirportCode'] || $segment['arrivalAirportCode']) {
-                        if (!in_array($segment['departureAirportCode'], $connectionAirports)) {
-                            $connectionAirports[$segment['departureAirportCode']] = Airports::findByIata($segment['departureAirportCode'])->cityName . ' ' . $segment['departureAirportCode'];
+                        if (!in_array($segment['departureAirportCode'], $connectionAirports) && $airportObj = Airports::findByIata($segment['departureAirportCode'])) {
+                            $connectionAirports[$segment['departureAirportCode']] = $airportObj->cityName . ' ' . $segment['departureAirportCode'];
                         }
-                        if (!in_array($segment['arrivalAirportCode'], $connectionAirports)) {
-                            $connectionAirports[$segment['arrivalAirportCode']] = Airports::findByIata($segment['arrivalAirportCode'])->cityName . ' ' . $segment['arrivalAirportCode'];
+                        if (!in_array($segment['arrivalAirportCode'], $connectionAirports) && $airportObj = Airports::findByIata($segment['arrivalAirportCode'])) {
+                            $connectionAirports[$segment['arrivalAirportCode']] = $airportObj->cityName . ' ' . $segment['arrivalAirportCode'];
                         }
                     }
 
