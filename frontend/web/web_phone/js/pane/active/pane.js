@@ -73,7 +73,7 @@ var PhoneWidgetPaneActive = function () {
             canRecordingDisabled: canRecordingDisabled,
             canAddBlackList: canAddBlockList,
             reconnect: {
-                active: false,
+                active: true,
                 show: btnReconnectShow
             },
         };
