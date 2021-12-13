@@ -46,12 +46,20 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
 $abacDto = new EmailPreviewDto($previewEmailForm->e_email_tpl_id, null, null, $lead, null);
 
+/** @abac $abacDto, EmailAbacObject::ACT_VIEOBJ_PREVIEW_EMAILmailAbacObject::ACTION_EDIT_FROM, Restrict access to edit input email_from in lead communication block */
 $emailFromReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_FROM);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_TO, Restrict access to edit input email_to in lead communication block*/
 $emailToReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_TO);
+/** @abac $abacDto, EmailAbacObject::ACT_VIOBJ_PREVIEW_EMAILEmailAbacObject::ACTION_EDIT_EMAIL_FROM_NAME, Restrict access to edit input email_from_name in lead communication block*/
 $emailFromNameReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_EMAIL_FROM_NAME);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_EMAIL_TO_NAME, Restrict access to edit input email_to_name in lead communication block*/
 $emailToNameReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_EMAIL_TO_NAME);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_SUBJECT, Restrict access to edit input email_subject in lead communication block*/
 $emailSubjectReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_SUBJECT);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_MESSAGE, Restrict access to edit input email_message in lead communication block*/
 $emailMessageReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_MESSAGE);
+/** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block*/
+$canAttachFiles = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
 ?>
 
     <div class="x_panel">
@@ -180,7 +188,7 @@ $emailMessageReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PRE
                                     <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => $emailSubjectReadonly]) ?>
                                 </div>
                             </div>
-                            <?php if (FileStorageSettings::canEmailAttach()) : ?>
+                            <?php if ($canAttachFiles && FileStorageSettings::canEmailAttach()) : ?>
                                 <div class="row">
                                     <div class="col-sm-6 form-group">
                                         <?= FileStorageEmailSendListWidget::byLead($previewEmailForm->getFileList()) ?>
@@ -227,14 +235,14 @@ $emailMessageReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PRE
                             </div>
 
                             <div class="btn-wrapper text-right">
-                                <?php /** @abac $abacDto, EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to view emails on case or lead*/ ?>
-                                <?php // if (Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND)) : ?>
+                                <?php /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */ ?>
+                                <?php  if (Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND)) : ?>
                                     <?= Html::submitButton(
                                         '<i class="fa fa-envelope-o"></i> Send Email',
                                         ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']
                                     ) ?>
-                                <?php // endif; ?>
-                                <?php /** @abac $abacDto, EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to view emails on case or lead*/ ?>
+                                <?php  endif; ?>
+                                <?php /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SHOW_EMAIL_DATA, Restrict access to view email data in preview email */ ?>
                                 <?php if (Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SHOW_EMAIL_DATA)) :?>
                                     <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                                 <?php endif; ?>

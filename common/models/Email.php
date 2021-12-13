@@ -870,4 +870,9 @@ class Email extends \yii\db\ActiveRecord
     {
         return $this->e_status_id === self::STATUS_DONE;
     }
+
+    public function statusToCancel(): void
+    {
+        $this->e_status_id = self::STATUS_CANCEL;
+    }
 }

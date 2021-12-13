@@ -71,6 +71,8 @@ use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\contactPhoneData\entity\ContactPhoneData;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\department\department\DefaultPhoneType;
+use sales\model\emailReviewQueue\EmailReviewQueueManageService;
+use sales\model\emailReviewQueue\entity\EmailReviewQueue;
 use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
@@ -134,6 +136,7 @@ use common\models\local\LeadLogMessage;
  * @property ClientChatActionPermission $chatActionPermission
  * @property UrlGenerator $fileStorageUrlGenerator
  * @property UseCaseLeadManageService $useCaseLeadManageService
+ * @property EmailReviewQueueManageService $emailReviewQueueManageService
  */
 class LeadController extends FController
 {
@@ -149,6 +152,7 @@ class LeadController extends FController
     private $chatActionPermission;
     private UrlGenerator $fileStorageUrlGenerator;
     private UseCaseLeadManageService $useCaseLeadManageService;
+    private EmailReviewQueueManageService $emailReviewQueueManageService;
 
     public function __construct(
         $id,
@@ -165,6 +169,7 @@ class LeadController extends FController
         ClientChatActionPermission $chatActionPermission,
         UrlGenerator $fileStorageUrlGenerator,
         UseCaseLeadManageService $useCaseLeadManageService,
+        EmailReviewQueueManageService $emailReviewQueueManageService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -180,6 +185,7 @@ class LeadController extends FController
         $this->chatActionPermission = $chatActionPermission;
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->useCaseLeadManageService = $useCaseLeadManageService;
+        $this->emailReviewQueueManageService = $emailReviewQueueManageService;
     }
 
     public function behaviors(): array
@@ -461,96 +467,103 @@ class LeadController extends FController
         if ($previewEmailForm->load(Yii::$app->request->post())) {
             $previewEmailForm->e_lead_id = $lead->id;
             if ($previewEmailForm->validate()) {
-                $mail = new Email();
-                $mail->e_project_id = $lead->project_id;
-                $mail->e_lead_id = $lead->id;
-                if ($previewEmailForm->e_email_tpl_id) {
-                    $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
-                }
-                $mail->e_type_id = Email::TYPE_OUTBOX;
-                $mail->e_status_id = Email::STATUS_PENDING;
-                $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                $mail->body_html = $previewEmailForm->e_email_message;
-                $mail->e_email_from = $previewEmailForm->e_email_from;
+                $abacDto = new EmailPreviewDto(
+                    $previewEmailForm->e_email_tpl_id,
+                    $previewEmailForm->isMessageEdited(),
+                    $previewEmailForm->isSubjectEdited(),
+                    $lead,
+                    null
+                );
+                /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */
+                $canSend = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND);
+                if ($canSend) {
+                    $mail = new Email();
+                    $mail->e_project_id = $lead->project_id;
+                    $mail->e_lead_id = $lead->id;
+                    if ($previewEmailForm->e_email_tpl_id) {
+                        $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
+                    }
+                    $mail->e_type_id = Email::TYPE_OUTBOX;
+                    $mail->e_status_id = Email::STATUS_PENDING;
+                    $mail->e_email_subject = $previewEmailForm->e_email_subject;
+                    $mail->body_html = $previewEmailForm->e_email_message;
+                    $mail->e_email_from = $previewEmailForm->e_email_from;
 
-                $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
-                $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
+                    $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
+                    $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
 
-                if ($previewEmailForm->e_language_id) {
-                    $mail->e_language_id = $previewEmailForm->e_language_id;
-                }
+                    if ($previewEmailForm->e_language_id) {
+                        $mail->e_language_id = $previewEmailForm->e_language_id;
+                    }
 
-                $mail->e_email_to = $previewEmailForm->e_email_to;
-                $mail->e_created_dt = date('Y-m-d H:i:s');
-                $mail->e_created_user_id = Yii::$app->user->id;
-                $attachments = [];
-                if (FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
-                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
-                }
-                $mail->e_email_data = json_encode($attachments);
-                if ($mail->save()) {
-                    $mail->e_message_id = $mail->generateMessageId();
-                    $mail->update();
+                    $mail->e_email_to = $previewEmailForm->e_email_to;
+                    $mail->e_created_dt = date('Y-m-d H:i:s');
+                    $mail->e_created_user_id = Yii::$app->user->id;
+                    $attachments = [];
+                    /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block*/
+                    $canAttachFiles = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
+                    if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
+                        $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
+                    }
+                    $mail->e_email_data = json_encode($attachments);
+                    if ($mail->save()) {
+                        $mail->e_message_id = $mail->generateMessageId();
+                        $mail->update();
 
-                    $abacDto = new EmailPreviewDto(
-                        $previewEmailForm->e_email_tpl_id,
-                        $previewEmailForm->isMessageEdited(),
-                        $previewEmailForm->isSubjectEdited(),
-                        $lead,
-                        null
-                    );
+                        /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
+                        $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
+                        if ($canSendWithoutReview) {
+                            $previewEmailForm->is_send = true;
+                            $mailResponse = $mail->sendMail($attachments);
 
-                    $canSend = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND);
-                    $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
-                    if ($canSend && $canSendWithoutReview) {
-                        $previewEmailForm->is_send = true;
-                        $mailResponse = $mail->sendMail($attachments);
+                            if (isset($mailResponse['error']) && $mailResponse['error']) {
+                                //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                                Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
+                                Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'LeadController:view:Email:sendMail');
+                            } else {
+                                //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
 
-                        if (isset($mailResponse['error']) && $mailResponse['error']) {
-                            //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                            Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
-                            Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'LeadController:view:Email:sendMail');
-                        } else {
-                            //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-
-                            if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
-                                if (is_array($offerList)) {
-                                    $service = Yii::createObject(OfferSendLogService::class);
-                                    foreach ($offerList as $offerId) {
-                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
+                                if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
+                                    if (is_array($offerList)) {
+                                        $service = Yii::createObject(OfferSendLogService::class);
+                                        foreach ($offerList as $offerId) {
+                                            $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
+                                        }
                                     }
                                 }
-                            }
 
 
-                            if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
-                                if (is_array($quoteList)) {
-                                    foreach ($quoteList as $quoteId) {
-                                        $quoteId = (int)$quoteId;
-                                        $quote = Quote::findOne($quoteId);
-                                        if ($quote) {
-                                            $quote->setStatusSend();
-                                            if (!$this->quoteRepository->save($quote)) {
-                                                Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
+                                if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
+                                    if (is_array($quoteList)) {
+                                        foreach ($quoteList as $quoteId) {
+                                            $quoteId = (int)$quoteId;
+                                            $quote = Quote::findOne($quoteId);
+                                            if ($quote) {
+                                                $quote->setStatusSend();
+                                                if (!$this->quoteRepository->save($quote)) {
+                                                    Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
+                                Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
+                            }
+                            $this->refresh('#communication-form');
+                        } else {
+                            $mail->statusToReview();
+                            $this->emailReviewQueueManageService->createByEmail($mail, $lead->l_dep_id);
+                            $mail->update();
+
+                            Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                         }
-                        $this->refresh('#communication-form');
-                    } elseif ($canSend) {
-                        $mail->statusToReview();
-                        $mail->update();
-                        Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                     } else {
-                        $previewEmailForm->addError('general', 'Access denied');
+                        $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
+                        Yii::error(VarDumper::dumpAsString($mail->errors), 'LeadController:view:Email:save');
                     }
                 } else {
-                    $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
-                    Yii::error(VarDumper::dumpAsString($mail->errors), 'LeadController:view:Email:save');
+                    $previewEmailForm->addError('general', 'Access denied: you dont have permission to send email');
                 }
                 //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
             }

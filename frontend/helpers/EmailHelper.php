@@ -56,7 +56,7 @@ class EmailHelper
         }
 
         if ($mail->statusIsErrorGroup()) {
-            $statusTitle = 'Email on review';
+            $statusTitle = 'ERROR - ' . $mail->e_error_message;
             return Html::tag('i', null, [
                 'class' => 'chat__status chat__status--error fa fa-circle',
                 'data-toggle' => 'tooltip',
@@ -67,7 +67,7 @@ class EmailHelper
         }
 
         if ($mail->statusIsReview()) {
-            $statusTitle = 'ERROR - ' . $mail->e_error_message;
+            $statusTitle = 'Email on review';
             return Html::tag('i', null, [
                 'class' => 'chat__status warning fas fa-exclamation-triangle',
                 'data-toggle' => 'tooltip',
