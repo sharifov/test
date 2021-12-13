@@ -12,6 +12,7 @@ function ActivePaneControls(props) {
             <ButtonAddPerson call={props.call} controls={props.controls}/>
             <ButtonDialpad call={props.call} controls={props.controls}/>
             <ButtonAddNote call={props.call} controls={props.controls}/>
+            <ButtonReconnect call={props.call} controls={props.controls}/>
         </ul>
     );
 }
@@ -72,6 +73,21 @@ function ButtonAddNote(props) {
             <a href="#" className="in-call-controls__action">
                 <i className="fa fa-newspaper-o"> </i>
                 <span>Add Note</span>
+            </a>
+        </li>
+    );
+}
+
+function ButtonReconnect(props) {
+    return (
+        <li className="in-call-controls__item" id="wg-reconnect-call"
+            data-call-sid={props.call.data.callSid} data-active={props.controls.reconnect.active}>
+            <a href="#" className="in-call-controls__action">
+                {props.call.isSentReconnectRequestState()
+                    ?  <i className="fa fa-spinner fa-spin hold-loader"> </i>
+                    :  <i className="fa fa-refresh"> </i>
+                }
+                <span>Reconnect</span>
             </a>
         </li>
     );

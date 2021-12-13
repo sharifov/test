@@ -18,7 +18,8 @@
             'recordingDisableUrl': '',
             'acceptPriorityCallUrl': '',
             'acceptWarmTransferCallUrl': '',
-            'addPhoneBlackListUrl': ''
+            'addPhoneBlackListUrl': '',
+            'reconnectUrl': ''
         };
 
         this.init = function (settings) {
@@ -446,6 +447,29 @@
                     PhoneWidgetCall.queues.priority.unAccept();
                     window.phoneWidget.notifier.on(key);
                     PhoneWidgetCall.audio.incoming.on(key);
+                })
+        };
+
+        this.reconnect = function (call) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': call.data.callSid
+                },
+                url: this.settings.reconnectUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        call.unSetReconnectRequestState();
+                        createNotify('Reconnect', data.message, 'error');
+                        return;
+                    }
+                    PhoneWidgetCall.openHoldCallPanel();
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Reconnect', message, 'error');
+                    call.unSetReconnectRequestState();
                 })
         };
     }

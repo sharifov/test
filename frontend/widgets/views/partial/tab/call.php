@@ -219,6 +219,7 @@ $ajaxAddPhoneToBlackList = Url::to(['/call/ajax-add-phone-black-list']);
 $ajaxCreateLeadUrl = Url::to('/lead/ajax-create-from-phone-widget');
 $ajaxCreateLeadWithInvalidClientUrl = Url::to('/lead/ajax-create-from-phone-widget-with-invalid-client');
 $ajaxClientGetInfoJsonUrl = Url::to('/client/ajax-get-info-json');
+$reconnectUrl = Url::to('/call/reconnect');
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
@@ -226,7 +227,7 @@ $btnHoldShow = Auth::can('PhoneWidget_OnHold') ? 'true' : 'false';
 $btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
 $canRecordingDisabled = Auth::can('PhoneWidget_CallRecordingDisabled') ? 'true' : 'false';
 $canAddBlockList = PhoneBlackListGuard::canAdd(Auth::id()) ? 'true' : 'false';
-
+$btnReconnectShow = 'true';
 
 $js = <<<JS
 PhoneWidgetCall.init({
@@ -261,7 +262,9 @@ PhoneWidgetCall.init({
     'canAddBlockList': $canAddBlockList,
     'ajaxCreateLeadUrl': '$ajaxCreateLeadUrl',
     'ajaxClientGetInfoJsonUrl': '$ajaxClientGetInfoJsonUrl',
-    'ajaxCreateLeadWithInvalidClientUrl': '$ajaxCreateLeadWithInvalidClientUrl'
+    'ajaxCreateLeadWithInvalidClientUrl': '$ajaxCreateLeadWithInvalidClientUrl',
+    'btnReconnectShow': $btnReconnectShow,
+    'reconnectUrl': '$reconnectUrl'
 });
 JS;
 $this->registerJs($js);
