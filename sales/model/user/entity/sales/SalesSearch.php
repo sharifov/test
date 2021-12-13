@@ -43,6 +43,13 @@ use yii\db\Query;
  * @property int|null $status_id
  *
  * @property Employee $currentUser
+ *
+ * @Annotation:
+ * Qualified Leads Taken - кол-во уникальных лидов из таблицы Lead User Conversion, где дата создания записи попадает в указанный диапазон
+ * Split Share - это доля участия пользователя в продажах лидов, равно сумме ps_percent / 100 из таблицы Profit Split для лидов со статусом Sold где дата продажи (lead -> l_status_dt) попадает в указанный диапазон
+ * Sold Leads - это кол-во уникальных лидов пользователя в рамках которых у него есть запись в таблице Profit Split для лидов со статусом Sold где дата продажи (lead -> l_status_dt)попадает в указанный диапазон
+ * Gross Profit  - это сумма доходов пользователя по лидам в которых он имеют долю в продаже, равно сумме ((Lead Final Profit - Lead Agent Processing Fee)* Profit Split Percent / 100) окргуленной до двух знаков после запятой, для записей в таблице Profit Split для лидов со статусом Sold где дата продажи (lead -> l_status_dt) попадает в указанный диапазон
+ * Sale Conversion - это отношение Split Share к Qualified Leads Taken выражженое в процентах, с округлением до 2 знаков после запятой
  */
 class SalesSearch extends Model
 {
