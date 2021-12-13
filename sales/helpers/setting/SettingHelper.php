@@ -777,4 +777,9 @@ class SettingHelper
     {
         return (bool) (Yii::$app->params['settings']['lead_redial_enabled'] ?? false);
     }
+
+    public static function getCallReconnectAnnounceMessage(): string
+    {
+        return (string) (Yii::$app->params['settings']['call_reconnect_announce'] ?? 'Connection Error. Reconnecting. Please hold');
+    }
 }

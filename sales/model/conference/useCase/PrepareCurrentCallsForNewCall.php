@@ -30,7 +30,7 @@ class PrepareCurrentCallsForNewCall
         $this->communication = \Yii::$app->communication;
     }
 
-    public function prepare(): bool
+    public function prepare(?string $holdAnnounce = null): bool
     {
         foreach ($this->getCallsForActions() as $call) {
             if ($call['action'] === 'hangup') {
@@ -45,7 +45,7 @@ class PrepareCurrentCallsForNewCall
                     ->andWhere(['<>', 'cp_status_id', ConferenceParticipant::STATUS_LEAVE])
                     ->one();
                 if ($clientParticipant) {
-                    $this->toHold($clientParticipant, $call['conference_sid'], $call['call_sid']);
+                    $this->toHold($clientParticipant, $call['conference_sid'], $call['call_sid'], $holdAnnounce);
                 } else {
                     $this->hangUp($call['call_sid']);
                 }
@@ -84,10 +84,10 @@ class PrepareCurrentCallsForNewCall
         ->asArray()->all();
     }
 
-    public function toHold(ConferenceParticipant $clientParticipant, string $conferenceSid, string $callSid): void
+    public function toHold(ConferenceParticipant $clientParticipant, string $conferenceSid, string $callSid, ?string $announce): void
     {
         try {
-            $result = $this->communication->disconnectFromConferenceCall($conferenceSid, $callSid);
+            $result = $this->communication->disconnectFromConferenceCall($conferenceSid, $callSid, $announce);
             $isError = (bool)($result['error'] ?? true);
             if (!$isError) {
                 $this->sendSocketMessageCompleteCall($callSid);

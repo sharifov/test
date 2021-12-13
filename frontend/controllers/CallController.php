@@ -1410,6 +1410,47 @@ class CallController extends FController
         throw new BadRequestHttpException();
     }
 
+    public function actionReconnect(): Response
+    {
+        $callSid = (string) \Yii::$app->request->post('sid');
+        if (!$callSid) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Not found CallSid',
+            ]);
+        }
+
+        $response = [
+            'error' => false,
+            'message' => 'Ok',
+        ];
+
+        try {
+            $userId = Auth::id();
+            $call = $this->callRepository->findBySid($callSid);
+            if (!$call->isStatusInProgress()) {
+                throw new \DomainException('Call status is invalid.');
+            }
+            if (!$call->isOwner($userId)) {
+                throw new \DomainException('Is not your call.');
+            }
+            if (!$call->getDataCreatorType()->isAgent()) {
+                throw new \DomainException('Call creator type is invalid.');
+            }
+            $prepare = new PrepareCurrentCallsForNewCall($userId);
+            if (!$prepare->prepare(SettingHelper::getCallReconnectAnnounceMessage())) {
+                throw new \DomainException('Some errors. Please try again latter.');
+            }
+        } catch (\Throwable $e) {
+            $response = [
+                'error' => false,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        return $this->asJson($response);
+    }
+
     private function addUsersForCall(Call $call, array $users): array
     {
         $result = [];

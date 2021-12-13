@@ -324,6 +324,31 @@
             this.save();
         };
 
+        this.setReconnectRequestState = function () {
+            if (this.isBlocked()) {
+                return false;
+            }
+            this.data.sentReconnectRequest = true;
+            this.block();
+            this.save();
+            return true;
+        };
+
+        this.unSetReconnectRequestState = function () {
+            this.data.sentReconnectRequest = false;
+            this.unBlock();
+            this.save();
+        };
+
+        this.isSentReconnectRequestState = function () {
+            return this.data.sentReconnectRequest === true;
+        };
+
+        this.connectionError = function () {
+            this.data.connectionError = true;
+            this.save();
+        };
+
         this.save = function () {
             window.phoneWidget.eventDispatcher.dispatch(this.getEventUpdateName(),{call: this});
         };

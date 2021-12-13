@@ -320,6 +320,17 @@
     const deviceUnregisteredHandler = () => {
         PhoneWidget.getDeviceState().reset('Twilio Device unregistered.');
         PhoneWidget.incomingSoundOff();
+
+        //todo check device off line use case
+        let activeCallSid = PhoneWidget.getActiveCallSid();
+        if (activeCallSid) {
+            let call = PhoneWidget.queues.active.one(activeCallSid);
+            if (call !== null) {
+                createNotify('Phone Device', 'Phone device went offline. Try reconnect', 'error');
+                call.connectionError();
+            }
+        }
+
         setTimeout(() => device.register(), 5000);
     }
 

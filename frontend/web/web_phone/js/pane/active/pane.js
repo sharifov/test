@@ -15,16 +15,18 @@ var PhoneWidgetPaneActive = function () {
         'mute': new PhoneWidgetPaneActiveBtnMute($container)
     };
 
+    let btnReconnectShow = true;
     let btnHoldShow = true;
     let btnTransferShow = true;
     let canRecordingDisabled = false;
     let canAddBlockList = false;
 
-    function setup(btnHoldShowInit, btnTransferShowInit, canRecordingDisabledInit, canAddBlockListInit) {
+    function setup(btnHoldShowInit, btnTransferShowInit, canRecordingDisabledInit, canAddBlockListInit, btnReconnectShowInit) {
         btnHoldShow = btnHoldShowInit;
         btnTransferShow = btnTransferShowInit;
         canRecordingDisabled = canRecordingDisabledInit;
         canAddBlockList = canAddBlockListInit;
+        btnReconnectShow = btnReconnectShowInit;
     }
 
     function initControls() {
@@ -69,7 +71,11 @@ var PhoneWidgetPaneActive = function () {
             addPerson: {active: false},
             dialpad: {active: true},
             canRecordingDisabled: canRecordingDisabled,
-            canAddBlackList: canAddBlockList
+            canAddBlackList: canAddBlockList,
+            reconnect: {
+                active: false,
+                show: btnReconnectShow
+            },
         };
         if (call.data.typeId === 3) {
             controls.hold.active = false;

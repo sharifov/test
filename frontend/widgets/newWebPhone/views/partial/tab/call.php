@@ -222,6 +222,7 @@ $ajaxAddPhoneToBlackList = Url::to(['/call/ajax-add-phone-black-list']);
 $ajaxCreateLeadUrl = Url::to('/lead/ajax-create-from-phone-widget');
 $ajaxCreateLeadWithInvalidClientUrl = Url::to('/lead/ajax-create-from-phone-widget-with-invalid-client');
 $ajaxClientGetInfoJsonUrl = Url::to('/client/ajax-get-info-json');
+$reconnectUrl = Url::to('/call/reconnect');
 $ajaxCallTransferUrl = Url::to(['/phone/ajax-call-transfer']);
 $ajaxWarmTransferToUserUrl = Url::to(['/phone/ajax-warm-transfer-to-user']);
 $ajaxCallRedirectUrl = Url::to(['/phone/ajax-call-redirect']);
@@ -242,6 +243,7 @@ $btnHoldShow = Auth::can('PhoneWidget_OnHold') ? 'true' : 'false';
 $btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
 $canRecordingDisabled = Auth::can('PhoneWidget_CallRecordingDisabled') ? 'true' : 'false';
 $canAddBlockList = PhoneBlackListGuard::canAdd($userId) ? 'true' : 'false';
+$btnReconnectShow = 'true';
 
 $redialSourceType = Call::SOURCE_REDIAL_CALL;
 
@@ -298,6 +300,8 @@ window.phoneWidget.initParams = {
     'ajaxCreateLeadUrl': '$ajaxCreateLeadUrl',
     'ajaxClientGetInfoJsonUrl': '$ajaxClientGetInfoJsonUrl',
     'ajaxCreateLeadWithInvalidClientUrl': '$ajaxCreateLeadWithInvalidClientUrl',
+    'btnReconnectShow': $btnReconnectShow,
+    'reconnectUrl': '$reconnectUrl',
     'ajaxCallTransferUrl': '$ajaxCallTransferUrl',
     'ajaxWarmTransferToUserUrl': '$ajaxWarmTransferToUserUrl',
     'ajaxCallRedirectUrl': '$ajaxCallRedirectUrl',

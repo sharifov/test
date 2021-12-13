@@ -45,6 +45,10 @@ class ConferencePane extends React.Component {
         let call = this.state.call;
         let conference = this.state.conference;
         let countParticipants = conference.getCountParticipants();
+        let controls = this.props.controls;
+        if (call.data.connectionError) {
+            controls.reconnect.active = true;
+        }
 
         return (
             <React.Fragment>
@@ -69,11 +73,11 @@ class ConferencePane extends React.Component {
 
                     <SoundIndication/>
 
-                    <RecordIndicator call={call} canRecordingDisabled={this.props.controls.canRecordingDisabled}/>
+                    <RecordIndicator call={call} canRecordingDisabled={controls.canRecordingDisabled}/>
 
                 </div>
 
-                <ActivePaneControls call={call} controls={this.props.controls}/>
+                <ActivePaneControls call={call} controls={controls}/>
 
                 <div className="conference-call-details">
 

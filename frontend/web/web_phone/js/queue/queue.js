@@ -14,6 +14,8 @@
             data.sentAddNoteRequest = false;
             data.sentRejectInternalRequest = false;
             data.sentRecordingRequest = false;
+            data.sentReconnectRequest = false;
+            data.connectionError = false;
         }
 
         this.add = function (data) {
