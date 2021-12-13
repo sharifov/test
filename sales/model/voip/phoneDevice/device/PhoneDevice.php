@@ -28,6 +28,7 @@ use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
 class PhoneDevice extends \yii\db\ActiveRecord
 {
     public static function create(
+        int $connectionId,
         int $userId,
         string $name,
         string $identity,
@@ -40,6 +41,7 @@ class PhoneDevice extends \yii\db\ActiveRecord
         string $updated
     ): self {
         $device = new self();
+        $device->pd_connection_id = $connectionId;
         $device->pd_user_id = $userId;
         $device->pd_name = $name;
         $device->pd_device_identity = $identity;
@@ -53,9 +55,10 @@ class PhoneDevice extends \yii\db\ActiveRecord
         return $device;
     }
 
-    public function updateConnectionId(int $connectionId, string $updated): void
+    public function updateConnection(int $connectionId, string $ip, string $updated): void
     {
         $this->pd_connection_id = $connectionId;
+        $this->pd_ip_address = $ip;
         $this->pd_updated_dt = $updated;
     }
 

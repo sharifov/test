@@ -47,8 +47,6 @@ window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, use
 
 function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificationUpdateUrl, discardUnreadMessageUrl)
 {
-
-
     try {
         //const socket = new WebSocket(wsUrl);
         var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: reconnectInterval});
@@ -63,7 +61,6 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             if (typeof PhoneWidget === 'object') {
                 if (window.isTwilioDevicePage) {
                     socketSend('PhoneDeviceRegister', 'Register', {
-                        'userId': userId,
                         'deviceId': localStorage.getItem(window.phoneDeviceIdStorageKey)
                     });
                 } else {
