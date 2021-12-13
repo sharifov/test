@@ -20,6 +20,7 @@ use modules\product\src\useCases\product\api\create\flight\Handler;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
 use sales\helpers\app\AppHelper;
+use sales\model\clientData\service\ClientDataService;
 use sales\model\leadData\entity\LeadData;
 use sales\model\leadData\services\LeadDataCreateService;
 use sales\model\leadData\services\LeadDataService;
@@ -131,6 +132,9 @@ class LeadController extends ApiBaseController
      * @apiParam {object[]}             [lead.lead_data]                         Array of Lead Data
      * @apiParam {string{50}}           [lead.lead_data.field_key]               Lead Data Key
      * @apiParam {string{500}}          [lead.lead_data.field_value]             Lead Data Value
+     * @apiParam {object[]}             [lead.client_data]                       Array of Client Data
+     * @apiParam {string{50}}           [lead.client_data.field_key]             Client Data Key
+     * @apiParam {string{500}}          [lead.client_data.field_value]           Client Data Value
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  lead.visitor_log.vl_visit_dt
      * @apiParam {object}               Client
      * @apiParam {string}               [Client.name]                            Client name
@@ -172,6 +176,12 @@ class LeadController extends ApiBaseController
      *        "is_test": true,
      *        "expire_at": "2020-01-20 12:12:12",
      *        "lead_data": [
+     *               {
+     *                  "field_key": "example_key",
+     *                  "field_value": "example_value"
+     *              }
+     *        ],
+     *       "client_data": [
      *               {
      *                  "field_key": "example_key",
      *                  "field_value": "example_value"
@@ -301,6 +311,12 @@ class LeadController extends ApiBaseController
      *                  "ld_field_key": "kayakclickid",
      *                  "ld_field_value": "example_value",
      *                  "ld_id": 3
+     *              }
+     *          ],
+     *          "clientDataInserted": [
+     *              {
+     *                  "cd_field_key": "example_key",
+     *                  "cd_field_value": "example_value",
      *              }
      *          ],
      *          "warnings": []
@@ -509,6 +525,14 @@ class LeadController extends ApiBaseController
             $leadDataService->createFromApi($modelLead->lead_data, $lead->id);
             $warnings = ArrayHelper::merge($warnings, $leadDataService->getErrors());
             $leadDataInserted = $leadDataService->getInserted();
+        }
+
+        $clientDataInserted = [];
+        if (!empty($modelLead->client_data) && ($clientId = $lead->client->id ?? null)) {
+            [$clientDataInserted, $clientDataWarnings] = ClientDataService::createFromApi($modelLead->client_data, $clientId);
+            if ($clientDataWarnings) {
+                $warnings = ArrayHelper::merge($warnings, $clientDataWarnings);
+            }
         }
 
 //        $transaction = Yii::$app->db->beginTransaction();
@@ -806,6 +830,7 @@ class LeadController extends ApiBaseController
             ];
 
             $response['leadData'] = $leadDataInserted;
+            $response['clientData'] = $clientDataInserted;
             $response['warnings'] = $warnings;
         } catch (\Throwable $e) {
 //            $transaction->rollBack();
