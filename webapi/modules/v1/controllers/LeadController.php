@@ -452,6 +452,8 @@ class LeadController extends ApiBaseController
 
         if ($this->apiProject) {
             $modelLead->project_id = $this->apiProject->id;
+        } else {
+            $modelLead->project_id = Yii::$app->user->identity->au_project_id;
         }
 
         if ($modelLead->load($post)) {
