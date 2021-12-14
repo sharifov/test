@@ -4,11 +4,11 @@ namespace sales\model\call\useCase\createCall;
 
 use common\models\Call;
 use sales\auth\Auth;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\phone\AvailablePhoneList;
+use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 
 class CreateCallFromHistory
 {
@@ -39,7 +39,7 @@ class CreateCallFromHistory
             ];
 
             if ($call->isOut()) {
-                if (UserCallIdentity::canParse($call->cl_phone_from)) {
+                if (PhoneDeviceIdentity::canParse($call->cl_phone_from)) {
                     $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
                     if ($firstPhone = $list->getFirst()) {
                         $phoneFrom = [

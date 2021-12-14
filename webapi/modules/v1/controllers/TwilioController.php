@@ -13,12 +13,12 @@ use common\models\Sms;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use modules\twilio\src\services\sms\SmsCommunicationService;
 use sales\helpers\app\AppHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\services\QueueLongTimeNotificationJobCreator;
 use sales\model\call\services\RepeatMessageCallJobCreator;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 use Twilio\TwiML\MessagingResponse;
 use Twilio\TwiML\VoiceResponse;
 use webapi\src\services\communication\CommunicationService;
@@ -1226,7 +1226,7 @@ class TwilioController extends ApiBaseNoAuthController
                 }
                 $call->c_call_type_id = $parentCall->c_call_type_id;
             } else {
-                if (strpos($call->c_from, UserCallIdentity::getClientPrefix()) !== false) {
+                if (strpos($call->c_from, PhoneDeviceIdentity::getPrefix()) !== false) {
                     $call->setTypeOut();
                 } else {
                     $call->setTypeIn();

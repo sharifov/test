@@ -12,7 +12,6 @@ use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\setting\SettingHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\entity\call\data\Data;
 use sales\model\call\entity\call\data\QueueLongTime;
@@ -1560,27 +1559,13 @@ class Call extends \yii\db\ActiveRecord
     {
         try {
             if ($call) {
-                // \Yii::info('INFO: Call ('.$call->getStatusName().', '.$call->c_call_status.') CallId: ' . $call->c_id. ',  User: ' . $user_id, 'info\Call:applyCallToAgent:callRedirect');
-
-                /*if ($call->c_created_user_id) {
-                    return false;
-                }*/
-
-//              $callFromInternalPhone = PhoneList::find()->byPhone($call->c_from)->exists();
-
                 if ($call->isStatusQueue()) {
                 } else {
                     \Yii::warning('Error: Call (' . $call->getStatusName() . ', ' . $call->c_call_status . ') not in status QUEUE: ' . $call->c_id . ',  User: ' . $user_id, 'Call:applyCallToAgent:callRedirect');
                     return false;
                 }
 
-                //$call->c_call_status = self::CALL_STATUS_IN_PROGRESS;
-//                if ($parentCall = $call->cParent) {
-//                    //$parentCall->setStatusDelay();
-//                    //$parentCall->update();
-//                } else {
                 $call->setStatusDelay();
-                //}
 
                 if ($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
                     $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
@@ -1616,12 +1601,6 @@ class Call extends \yii\db\ActiveRecord
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                         Notifications::publish('getNewNotification', ['user_id' => $call->c_created_user_id], $dataNotification);
                     }
-
-
-
-
-                    //Notifications::create($call->c_source_type_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true);
-                    //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
                 }
 
                 $call->c_created_user_id = $user_id;

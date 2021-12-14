@@ -4,7 +4,6 @@ namespace frontend\widgets;
 
 use common\models\Lead;
 use sales\entities\cases\Cases;
-use sales\helpers\UserCallIdentity;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;

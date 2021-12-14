@@ -10,7 +10,6 @@ use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\createCall\CreateCallForm;
 use sales\model\call\useCase\createCall\CreateRedialCall;
 use sales\model\client\notifications\client\entity\NotificationType;
@@ -102,9 +101,7 @@ class TestController extends Controller
 {
     public function actionVoip()
     {
-        VarDumper::dump($t = PhoneDeviceIdentity::getClientId(295, 'qwertyuiop'));
-        VarDumper::dump(UserCallIdentity::canParse($t));
-        VarDumper::dump(UserCallIdentity::parseUserId($t));
+
         die;
 //        $f = new PhoneDeviceLogForm();
 //        $f->load([
@@ -132,7 +129,6 @@ JSON;
         VarDumper::dump($a);
         die;
 
-//        (new CreateRedialCall())(new RedialCall(295, '+14157693509', 1468, '+14154296676', 2, 3, 513226, 472988));
 //        die;
         $contacts = (new ContactsSearch(295))->getClientsContactByPhone('+37368852225');
         VarDumper::dump($contacts);

@@ -4,9 +4,6 @@ namespace console\socket\controllers;
 
 use common\models\UserConnection;
 use sales\model\voip\phoneDevice\device\PhoneDevice;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentityGenerator;
-use sales\model\voip\phoneDevice\device\PhoneDeviceNameGenerator;
-use sales\model\voip\phoneDevice\device\RandomStringGenerator;
 
 /**
  * Class PhoneDeviceRegisterController
@@ -44,21 +41,13 @@ class PhoneDeviceRegisterController
     private function withNewDevice(array $userConnection, string $now): array
     {
         try {
-            $devicePostfix = (new RandomStringGenerator())->generate(10);
-            $device = PhoneDevice::create(
+            $device = PhoneDevice::new(
                 $userConnection['uc_id'],
                 $userConnection['uc_user_id'],
-                PhoneDeviceNameGenerator::generate($devicePostfix),
-                PhoneDeviceIdentityGenerator::generate($userConnection['uc_user_id'], $devicePostfix),
-                false,
-                false,
-                false,
                 $userConnection['uc_ip'],
                 $userConnection['uc_user_agent'],
-                $now,
                 $now
             );
-            unset($devicePostfix);
             $device->save(false);
         } catch (\Throwable $e) {
             \Yii::error([

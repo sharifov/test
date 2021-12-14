@@ -5,7 +5,6 @@ namespace sales\model\call\useCase\createCall;
 use common\models\search\ContactsSearch;
 use frontend\widgets\newWebPhone\AvailablePhones;
 use sales\auth\Auth;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 

@@ -1089,7 +1089,7 @@ class CallController extends FController
                             \Yii::$app->queue_job->delay($delay)->push($job);
                             $response['isRedialCall'] = true;
                             try {
-                                $result = (new CreateRedialCall())($redialCall);
+                                $result = (new CreateRedialCall())($redialCall, $deviceIdentity);
                                 if ($result['error']) {
                                     $response['redialError'] = $result['message'];
                                 }

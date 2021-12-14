@@ -18,6 +18,7 @@ use sales\model\project\entity\projectLocale\ProjectLocale;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
+use yii\caching\TagDependency;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
@@ -758,24 +759,24 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
 
     /**
-     * @param string $username
+     * @param string $deviceName
      * @param bool $deleteCache
      * @return mixed
      * @throws Exception
      */
-    public function getJwtTokenCache($username = '', $deleteCache = false)
+    public function getJwtTokenCache($deviceName = '', $deleteCache = false)
     {
-        $cacheKey = 'jwt_token_' . $username;
+        $cacheKey = 'jwt_token_' . $deviceName;
         if ($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
         }
         $out = \Yii::$app->cache->get($cacheKey);
 
         if ($out === false) {
-            $out = $this->getJwtToken($username);
+            $out = $this->getJwtToken($deviceName);
             if ($out && !empty($out['data']['token'])) {
                 $expired = $this->calculateJwtExpiredSeconds($out['data']['expire']);
-                \Yii::$app->cache->set($cacheKey, $out, $expired);
+                \Yii::$app->cache->set($cacheKey, $out, $expired, new TagDependency(['tags' => 'twilio_jwt_token']));
             }
         }
 
@@ -833,11 +834,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
-    public function callForward($sid, $from, $to, $callRecordingDisabled, $phoneListId): array
+    public function callForward($sid, $to, $callRecordingDisabled, $phoneListId): array
     {
         $data = [
             'sid' => $sid,
-            'from' => $from,
             'to' => $to,
             'call_recording_disabled' => $callRecordingDisabled,
             'phone_list_id' => $phoneListId,

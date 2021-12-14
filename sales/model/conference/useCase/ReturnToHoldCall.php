@@ -8,7 +8,6 @@ use common\models\CallUserAccess;
 use common\models\Conference;
 use common\models\Notifications;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
-use sales\helpers\UserCallIdentity;
 use yii\helpers\VarDumper;
 
 /**

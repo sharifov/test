@@ -3,14 +3,13 @@
 namespace sales\model\call\useCase\createCall;
 
 use common\models\Call;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\leadRedial\queue\RedialCall;
 
 class CreateRedialCall
 {
-    public function __invoke(RedialCall $redialCall): array
+    public function __invoke(RedialCall $redialCall, string $deviceIdentity): array
     {
         $recordDisabled = (RecordManager::createCall(
             $redialCall->userId,
@@ -22,7 +21,7 @@ class CreateRedialCall
 
         return \Yii::$app->communication->createCall(
             new \sales\model\call\useCase\conference\create\CreateCallForm([
-                'user_identity' => UserCallIdentity::getClientId($redialCall->userId),
+                'user_identity' => $deviceIdentity,
                 'user_id' => $redialCall->userId,
                 'to_number' => $redialCall->phoneTo,
                 'from_number' => $redialCall->phoneFrom,

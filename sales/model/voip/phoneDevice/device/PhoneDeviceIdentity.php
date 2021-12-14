@@ -18,4 +18,27 @@ class PhoneDeviceIdentity
         }
         return $device->getClientDeviceIdentity();
     }
+
+    public static function generate(int $userId, string $postFix): string
+    {
+        return \Yii::$app->params['appEnv'] . 'user' . $userId . '_' . $postFix;
+    }
+
+    public static function getPrefix(): string
+    {
+        return 'client:';
+    }
+
+    public static function canParse(?string $value): bool
+    {
+        if (!$value) {
+            return false;
+        }
+        return strpos($value, self::getPrefix()) === 0;
+    }
+
+    public static function getUserId(string $value): int
+    {
+        return (int)preg_replace('/[^0-9]/', '', $value);
+    }
 }

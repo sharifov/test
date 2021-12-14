@@ -27,31 +27,21 @@ use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
  */
 class PhoneDevice extends \yii\db\ActiveRecord
 {
-    public static function create(
-        int $connectionId,
-        int $userId,
-        string $name,
-        string $identity,
-        bool $statusDevice,
-        bool $statusSpeaker,
-        bool $statusMicrophone,
-        ?string $ip,
-        ?string $userAgent,
-        string $created,
-        string $updated
-    ): self {
+    public static function new(int $connectionId, int $userId, ?string $ip, ?string $userAgent, string $createdDt): self
+    {
+        $devicePostfix = (new RandomStringGenerator())->generate(10);
         $device = new self();
         $device->pd_connection_id = $connectionId;
         $device->pd_user_id = $userId;
-        $device->pd_name = $name;
-        $device->pd_device_identity = $identity;
-        $device->pd_status_device = $statusDevice;
-        $device->pd_status_speaker = $statusSpeaker;
-        $device->pd_status_microphone = $statusMicrophone;
+        $device->pd_name = self::generateName($devicePostfix);
+        $device->pd_device_identity = PhoneDeviceIdentity::generate($userId, $devicePostfix);
+        $device->pd_status_device = false;
+        $device->pd_status_speaker = false;
+        $device->pd_status_microphone = false;
         $device->pd_ip_address = $ip;
         $device->pd_user_agent = $userAgent;
-        $device->pd_created_dt = $created;
-        $device->pd_updated_dt = $updated;
+        $device->pd_created_dt = $createdDt;
+        $device->pd_updated_dt = $createdDt;
         return $device;
     }
 
@@ -74,7 +64,7 @@ class PhoneDevice extends \yii\db\ActiveRecord
 
     public function getClientDeviceIdentity(): string
     {
-        return 'client:' . $this->pd_device_identity;
+        return PhoneDeviceIdentity::getPrefix() . $this->pd_device_identity;
     }
 
     public function isReady(): bool
@@ -131,6 +121,11 @@ class PhoneDevice extends \yii\db\ActiveRecord
     {
         $this->pd_status_microphone = false;
         $this->pd_updated_dt = $updated;
+    }
+
+    public static function generateName(string $postFix): string
+    {
+        return 'Device name #' . $postFix;
     }
 
     public function rules(): array

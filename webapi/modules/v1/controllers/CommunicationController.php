@@ -34,7 +34,6 @@ use sales\guards\call\CallRedialGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\LogExecutionTime;
 use sales\helpers\setting\SettingHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\exceptions\CallFinishedException;
 use sales\model\call\exceptions\UniqueCallNotFoundException;
 use sales\model\call\form\CallCustomParameters;
@@ -62,6 +61,7 @@ use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userVoiceMail\entity\UserVoiceMail;
 use sales\model\voiceMailRecord\entity\VoiceMailRecord;
+use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 use sales\repositories\client\ClientsQuery;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserProjectParamsRepository;
@@ -394,8 +394,6 @@ class CommunicationController extends ApiBaseController
                 return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: ' . $e->getMessage());
             }
 
-            //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-
             $conferenceRoom = ConferenceRoom::find()->where(['cr_phone_number' => $incoming_phone_number, 'cr_enabled' => true])->orderBy(['cr_id' => SORT_DESC])->limit(1)->one();
 
             if ($conferenceRoom) {
@@ -659,8 +657,6 @@ class CommunicationController extends ApiBaseController
                         $callModel->save(false);
                     }
 
-                    // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
-
                     /** @var Employee $user */
                     $user = $upp->uppUser;
 
@@ -692,7 +688,6 @@ class CommunicationController extends ApiBaseController
                         }
 
                         if ($user->isOnline()) {
-                            // Yii::info('DIRECT CALL - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:DirectCall');
                             if ($callFromInternalPhone && $user->userStatus->us_is_on_call) {
                                 return $this->createExceptionCall($incoming_phone_number, 'User is on call');
                             }
@@ -727,7 +722,7 @@ class CommunicationController extends ApiBaseController
                             Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
                         }
                         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
-                        return $this->createHoldCall($callModel, $user, $callFromInternalPhone);
+                        return $this->createHoldCall($callModel);
                     }
 
                     $response['error'] = 'Not found "user" for Call';
@@ -938,8 +933,8 @@ class CommunicationController extends ApiBaseController
                 $call->c_from = $callOriginalData['From'] ?? null;
                 $call->c_to = $callOriginalData['To'] ?? null;
                 $call->c_caller_name = $callOriginalData['Caller'] ?? null;
-                if (UserCallIdentity::canParse($call->c_from)) {
-                    $agentId = UserCallIdentity::parseUserId($call->c_from);
+                if (PhoneDeviceIdentity::canParse($call->c_from)) {
+                    $agentId = PhoneDeviceIdentity::getUserId($call->c_from);
                 } else {
                     $agentId = null;
                 }
@@ -1518,7 +1513,7 @@ class CommunicationController extends ApiBaseController
             $call->c_to = $customParameters->to;
         } else {
             if (!$call->isInternal()) {
-                if (UserCallIdentity::canParse($call->c_to)) {
+                if (PhoneDeviceIdentity::canParse($call->c_to)) {
                     $call->c_to = null;
                 }
             }
@@ -1660,8 +1655,8 @@ class CommunicationController extends ApiBaseController
 
         $agentId = null;
 
-        if (!empty($callData['Called']) && UserCallIdentity::canParse($callData['Called'])) {
-            $agentId = UserCallIdentity::parseUserId($callData['Called']);
+        if (!empty($callData['Called']) && PhoneDeviceIdentity::canParse($callData['Called'])) {
+            $agentId = PhoneDeviceIdentity::getUserId($callData['Called']);
         }
 
         if (!$agentId && !empty($callData['c_user_id'])) {
@@ -1723,7 +1718,6 @@ class CommunicationController extends ApiBaseController
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
-            $job->callFromInternalPhone = $callFromInternalPhone;
             $job->delayJob = $delayJob;
             $jobId = Yii::$app->queue_job->delay($delayJob)->priority(90)->push($job);
         }
@@ -1750,14 +1744,14 @@ class CommunicationController extends ApiBaseController
                 $responseTwml->play($callParams->url_music_play_hold, ['loop' => 0]);
             }
         } elseif ($callFromInternalPhone) {
-//          $dial = $responseTwml->dial('', [
-//              'answerOnBridge' => true,
-//              'recordingStatusCallbackMethod' => 'POST',
-//              'record' => 'record-from-answer-dual',
-//              'recordingStatusCallback' =>  Yii::$app->communication->host . '/v1/twilio-jwt/recording-callback',
-//          ]);
-//          $dial->client(UserCallIdentity::getId($user->id));
-            $response['agent_username'][] = UserCallIdentity::getId($user->id);
+            Yii::error([
+                'message' => 'Call from internal number. Deprecated logic.',
+                'userId' => $user->id,
+                'callId' => $callModel->c_id,
+            ], 'CommunicationController:createDirectCall');
+            // todo may be is deprecated feature
+//            $response['agent_username'][] = prefix device identity + userId.  ex: produser100;
+            $response['agent_username'][] = '';
             $responseTwml = null;
         }
 
@@ -1785,13 +1779,11 @@ class CommunicationController extends ApiBaseController
 
     /**
      * @param Call $callModel
-     * @param Employee $user
-     * @param bool $callFromInternalPhone
      * @return array
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    protected function createHoldCall(Call $callModel, Employee $user, bool $callFromInternalPhone = false): array
+    protected function createHoldCall(Call $callModel): array
     {
         $callModel->c_created_user_id = null;
         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
@@ -1803,7 +1795,6 @@ class CommunicationController extends ApiBaseController
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
-            $job->callFromInternalPhone = $callFromInternalPhone;
             $job->delayJob = $delayJob;
             $jobId = Yii::$app->queue_job->delay($delayJob)->priority(100)->push($job);
         }

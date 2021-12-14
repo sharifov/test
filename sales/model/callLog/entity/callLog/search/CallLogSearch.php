@@ -9,7 +9,6 @@ use common\models\PhoneBlacklist;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
 use sales\auth\Auth;
-use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
@@ -18,6 +17,7 @@ use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\callNote\entity\CallNote;
+use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 use yii\data\ActiveDataProvider;
 use sales\model\callLog\entity\callLog\CallLog;
 use yii\data\ArrayDataProvider;
@@ -324,12 +324,12 @@ class CallLogSearch extends CallLog
             'cn_note as callNote'
         ]);
 
-        $clientPrefix = 'client:';
+        $devicePrefix = PhoneDeviceIdentity::getPrefix();
         $query->addSelect([
             "IF(
               call_log.cl_type_id = 1,
-              if (cl_phone_to regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_to, '[[:digit:]]+'), null),
-              if (cl_phone_from regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_from, '[[:digit:]]+'), null)
+              if (cl_phone_to regexp '" . $devicePrefix . "' = 1, REGEXP_SUBSTR(cl_phone_to, '[[:digit:]]+'), null),
+              if (cl_phone_from regexp '" . $devicePrefix . "' = 1, REGEXP_SUBSTR(cl_phone_from, '[[:digit:]]+'), null)
             ) AS user_id"
         ]);
         $query->addSelect([

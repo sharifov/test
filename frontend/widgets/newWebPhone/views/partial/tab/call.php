@@ -229,7 +229,6 @@ $ajaxCallRedirectUrl = Url::to(['/phone/ajax-call-redirect']);
 $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
 $ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
 $leadViewPageShortUrl = Url::to(['/lead/view'], true);
-$createInternalCallUrl = Url::to(['/phone/create-internal-call']);
 $getCallHistoryFromNumberUrl = Url::to(['/phone/get-call-history-from-number']);
 $ajaxCheckRecording = Url::to(['/phone/ajax-check-recording']);
 $getUserByPhoneUrl = Url::to(['/phone/get-user-by-phone']);
@@ -312,7 +311,6 @@ window.phoneWidget.initParams = {
     'csrf_param': '$csrf_param',
     'csrf_token': '$csrf_token',
     'leadViewPageShortUrl': '$leadViewPageShortUrl',
-    'createInternalCallUrl': '$createInternalCallUrl',
     'getCallHistoryFromNumberUrl': '$getCallHistoryFromNumberUrl',
     'ajaxCheckRecording': '$ajaxCheckRecording',
     'getUserByPhoneUrl': '$getUserByPhoneUrl',
