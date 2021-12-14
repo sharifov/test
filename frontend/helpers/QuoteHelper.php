@@ -203,6 +203,8 @@ class QuoteHelper
                 }
                 $cnt++;
                 $stopCnt = count($trip['segments']) - 1;
+                $firstSegment = $trip['segments'][0];
+                $lastSegment = $trip['segments'][$stopCnt];
 
                 foreach ($trip['segments'] as $segment) {
                     if (isset($segment['stop']) && $segment['stop'] > 0) {
@@ -214,7 +216,7 @@ class QuoteHelper
                         $airportChange = true;
                     }
                     if ($segment['departureAirportCode'] || $segment['arrivalAirportCode']) {
-                        if (!in_array($segment['departureAirportCode'], $connectionAirports)) {
+                        if (!in_array($segment['departureAirportCode'], $connectionAirports) && $segment['departureAirportCode'] != $firstSegment['departureAirportCode'] && $segment['departureAirportCode'] != $lastSegment['arrivalAirportCode']) {
                             $airportObj = Airports::findByIata($segment['departureAirportCode']);
                             $connectionAirports[$segment['departureAirportCode']] = ($airportObj ? $airportObj->cityName . ' ' : '' ) . $segment['departureAirportCode'];
                             if (!$airportObj) {
@@ -224,7 +226,7 @@ class QuoteHelper
                                 );
                             }
                         }
-                        if (!in_array($segment['arrivalAirportCode'], $connectionAirports)) {
+                        if (!in_array($segment['arrivalAirportCode'], $connectionAirports) && $segment['arrivalAirportCode'] != $firstSegment['departureAirportCode'] && $segment['arrivalAirportCode'] != $lastSegment['arrivalAirportCode']) {
                             $airportObj = Airports::findByIata($segment['arrivalAirportCode']);
                             $connectionAirports[$segment['arrivalAirportCode']] = ($airportObj ? $airportObj->cityName . ' ' : '' ) . $segment['arrivalAirportCode'];
                             if (!$airportObj) {
@@ -246,8 +248,6 @@ class QuoteHelper
                     $preSegment = $segment;
                 }
 
-                $firstSegment = $trip['segments'][0];
-                $lastSegment = end($trip['segments']);
                 $time[] = ['departure' => $firstSegment['departureTime'],'arrival' => $lastSegment['arrivalTime']];
                 $stops[] = $stopCnt;
             }
