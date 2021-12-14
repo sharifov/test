@@ -220,7 +220,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
         ];
 
         $menuItems[] = [
-            'label' => 'Email <span class="label-info label pull-right"></span> ',
+            'label' => 'Email Data<span class="label-info label pull-right"></span> ',
             'url' => 'javascript:',
             'icon' => 'envelope',
             'items' => [
