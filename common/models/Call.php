@@ -1159,7 +1159,7 @@ class Call extends \yii\db\ActiveRecord
                             $leadRepository->save($lead);
 
                             $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                            $leadUserConversionService->add(
+                            $leadUserConversionService->addAutomate(
                                 $lead->id,
                                 $this->c_created_user_id,
                                 LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE,

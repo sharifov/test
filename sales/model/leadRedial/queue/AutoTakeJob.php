@@ -72,7 +72,7 @@ class AutoTakeJob implements JobInterface
                 if ($leadChanged) {
                     $leadRepository->save($lead);
                 }
-                $leadUserConversionService->add(
+                $leadUserConversionService->addAutomate(
                     $lead->id,
                     $userId,
                     LeadUserConversionDictionary::DESCRIPTION_TAKE,
