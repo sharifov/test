@@ -403,7 +403,7 @@ class LeadSearch extends Lead
                 'defaultOrder' => ['leads.id' => SORT_DESC]
             ],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 20,
             ],
         ]);
 
@@ -1629,7 +1629,7 @@ class LeadSearch extends Lead
             'query' => $query,
             'sort' => ['defaultOrder' => ['leads.id' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 20,
             ],
         ]);
 
@@ -1961,7 +1961,7 @@ class LeadSearch extends Lead
                 'defaultOrder' => ['l_status_dt' => SORT_DESC],
             ],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 20,
             ],
         ]);
 
@@ -2139,7 +2139,7 @@ class LeadSearch extends Lead
             'query' => $query,
             'sort' => ['defaultOrder' => ['updated' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 100,
+                'pageSize' => 30,
             ],
         ]);
 
@@ -2199,7 +2199,7 @@ class LeadSearch extends Lead
                 ]
             ],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 20,
             ],
         ]);
         $sort = $dataProvider->getSort();
@@ -3086,7 +3086,7 @@ class LeadSearch extends Lead
                 ]
             ],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 20,
             ],
         ]);
 
@@ -3161,7 +3161,7 @@ class LeadSearch extends Lead
             'query' => $query,
             'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 20,
             ],
         ]);
 
