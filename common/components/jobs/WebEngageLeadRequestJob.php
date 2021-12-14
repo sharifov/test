@@ -58,7 +58,7 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
             }
             $leadEventService = new LeadEventService($lead, $this->eventName);
             if (!$leadEventService->isSourceCIDChecked()) {
-                throw new \RuntimeException('SourceCIDChecked is failed. CID(' . $lead->source->cid ?? null . ')');
+                throw new \RuntimeException('SourceCIDChecked is failed. CID(' . $lead->source->cid ?? ')');
             }
 
             $webEngageUserService = new WebEngageUserService($this->eventName, $lead->client ?? null);
@@ -92,6 +92,11 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
                     ErrorsToStringHelper::extractFromModel($webEngageEventForm, ' '));
             }
             (new WebEngageRequestService())->addEvent($webEngageEventForm);
+        } catch (\RuntimeException $throwable) {
+            \Yii::warning(
+                AppHelper::throwableLog($throwable),
+                'WebEngageLeadRequestJob:warning'
+            );
         } catch (Throwable $throwable) {
             \Yii::error(
                 AppHelper::throwableLog($throwable),
