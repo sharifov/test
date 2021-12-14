@@ -11,7 +11,6 @@ use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\phoneList\entity\PhoneList;
-use sales\model\voip\phoneDevice\device\PhoneDevice;
 use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 use yii\base\Model;
 

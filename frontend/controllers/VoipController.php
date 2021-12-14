@@ -127,11 +127,11 @@ class VoipController extends FController
             $userStatusType = UserCallStatus::find()->select(['us_type_id'])->where(['us_user_id' => $createdUser->id])->orderBy(['us_id' => SORT_DESC])->limit(1)->asArray()->one();
             $calls = $this->currentQueueCallsService->getQueuesCalls($createdUser->id, null, SettingHelper::isGeneralLinePriorityEnable());
             if ($calls->outgoing || $calls->active) {
-                \Yii::error([
+                \Yii::info([
                     'message' => 'User wanted to make a call with active calls',
                     'userId' => $createdUser->id,
                     'calls' => $calls->toArray(),
-                ], 'UserIsOnCall');
+                ], 'log\UserIsOnCall');
                 return $this->asJson([
                     'error' => true,
                     'message' => 'You have an active call, please refresh the page or contact system administrator if the issue persist.',
@@ -142,10 +142,10 @@ class VoipController extends FController
                     ],
                 ]);
             }
-            \Yii::error([
+            \Yii::info([
                 'message' => 'Was wrong value(is_on_call = true) in DB',
                 'userId' => $createdUser->id,
-            ], 'UserIsOnCall');
+            ], 'log\UserIsOnCall');
             UserStatus::isOnCallOff($createdUser->id);
         }
 
@@ -155,7 +155,7 @@ class VoipController extends FController
             $this->leadRedialUnAssigner->createCall($form->getCreatedUserId());
 
             if ($form->isInternalCall()) {
-                $result = (new CreateInternalCall())($createdUser, $form->toUserId);
+                $result = (new CreateInternalCall())($createdUser, $form);
                 return $this->asJson($result);
             }
             if ($form->fromHistoryCall()) {

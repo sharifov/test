@@ -4,13 +4,13 @@ namespace sales\model\call\useCase\createCall;
 
 use common\models\Call;
 use common\models\Employee;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
+use sales\model\voip\phoneDevice\device\PhoneDevice;
 
 class CreateInternalCall
 {
-    public function __invoke(Employee $createdUser, int $toUserId): array
+    public function __invoke(Employee $createdUser, CreateCallForm $form): array
     {
         try {
             //todo: validate can created user cal to other user?
@@ -21,16 +21,30 @@ class CreateInternalCall
                 throw new \DomainException('Please wait ' . abs($result - time()) . ' seconds.');
             }
 
-            $this->guardToUserIsFree($toUserId);
+            if (!$user = Employee::findOne(['id' => $form->toUserId])) {
+                throw new \DomainException('Not found user. Id: ' . $form->toUserId);
+            }
+
+            if (!$user->isOnline()) {
+                throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is offline');
+            }
+            if (!$user->isCallFree()) {
+                throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is occupied');
+            }
+
+            $toUserPhoneDevice = PhoneDevice::find()->byUserId($form->toUserId)->ready()->one();
+            if (!$toUserPhoneDevice) {
+                throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is not ready');
+            }
 
             \Yii::$app->cache->set($key, (time() + 10), 10);
 
             $recordingManager = RecordManager::toUser($createdUser->id);
 
             $result = \Yii::$app->communication->callToUser(
-                UserCallIdentity::getClientId($createdUser->id),
-                UserCallIdentity::getClientId($toUserId),
-                $toUserId,
+                $form->getClientDeviceIdentity(),
+                $toUserPhoneDevice->getClientDeviceIdentity(),
+                $form->toUserId,
                 $createdUser->id,
                 [
                     'status' => 'Ringing',
@@ -71,18 +85,5 @@ class CreateInternalCall
         }
 
         return $result;
-    }
-
-    private function guardToUserIsFree(int $userId): void
-    {
-        if (!$user = Employee::findOne(['id' => $userId])) {
-            throw new \DomainException('Not found user. Id: ' . $userId);
-        }
-        if (!$user->isOnline()) {
-            throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is offline');
-        }
-        if (!$user->isCallFree()) {
-            throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is occupied');
-        }
     }
 }
