@@ -95,7 +95,10 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
             (new WebEngageRequestService())->addEvent($webEngageEventForm);
         } catch (\RuntimeException $throwable) {
             if ($throwable->getCode() >= 0) {
-                \Yii::warning(AppHelper::throwableLog($throwable),'WebEngageLeadRequestJob:warning');
+                \Yii::warning(
+                    AppHelper::throwableLog($throwable),
+                    'WebEngageLeadRequestJob:warning'
+                );
             }
         } catch (Throwable $throwable) {
             \Yii::error(
