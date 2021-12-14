@@ -58,7 +58,8 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
             }
             $leadEventService = new LeadEventService($lead, $this->eventName);
             if (!$leadEventService->isSourceCIDChecked()) {
-                throw new \RuntimeException('SourceCIDChecked is failed. CID(' . $lead->source->cid ?? ')');
+                $cid = $lead->source->cid ?? '';
+                throw new \RuntimeException('SourceCIDChecked is failed. CID(' . $cid . ')');
             }
 
             $webEngageUserService = new WebEngageUserService($this->eventName, $lead->client ?? null);
