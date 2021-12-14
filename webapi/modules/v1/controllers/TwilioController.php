@@ -1226,7 +1226,7 @@ class TwilioController extends ApiBaseNoAuthController
                 }
                 $call->c_call_type_id = $parentCall->c_call_type_id;
             } else {
-                if (strpos($call->c_from, PhoneDeviceIdentity::getPrefix()) !== false) {
+                if (PhoneDeviceIdentity::canParse($call->c_from)) {
                     $call->setTypeOut();
                 } else {
                     $call->setTypeIn();

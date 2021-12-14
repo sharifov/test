@@ -385,16 +385,20 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'PhoneDeviceRegister') {
-                        if (!PhoneWidget.isInitiated()) {
-                            PhoneWidget.init(window.phoneWidget.initParams);
-                        }
                         if (obj.error) {
                             if (obj.deviceIsInvalid) {
-                                PhoneWidget.getDeviceState().removeDeviceId();
+                                if (PhoneWidget.isInitiated()) {
+                                    PhoneWidget.getDeviceState().removeDeviceId();
+                                }
+                            }
+                            if (!PhoneWidget.isInitiated()) {
+                                createNotify('Phone Widget', obj.msg, 'error');
                             }
                             PhoneWidget.addLog(obj.msg);
-                            // createNotify('Phone Widget', obj.msg, 'error')
                         } else {
+                            if (!PhoneWidget.isInitiated()) {
+                                PhoneWidget.init(window.phoneWidget.initParams);
+                            }
                            window.phoneWidget.device.initialize.Init(obj.deviceId, window.phoneDeviceRemoteLogsEnabled);
                            window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
                         }
@@ -585,7 +589,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             window.socketConnectionId = null;
 
             if (window.isTwilioDevicePage) {
-                PhoneWidget.getDeviceState().reset('WS connection closed.');
+                if (PhoneWidget.isInitiated()) {
+                    PhoneWidget.getDeviceState().reset('WS connection closed.');
+                }
             }
 
             // setTimeout(function() {

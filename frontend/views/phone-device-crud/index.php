@@ -17,11 +17,22 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php /*
     <p>
-        <?= Html::a('Create Phone Device', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Invalidate cache token', ['invalidate-cache-token'], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => 'Are you sure you want to invalidate cache?',
+                'method' => 'post',
+            ],
+        ]) ?>
     </p>
-    */ ?>
+
+    <?php if (Yii::$app->session->hasFlash('twilio_jwt_clean')) : ?>
+        <div class="alert alert-success alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            Twilio JWT token cache was invalidated
+        </div>
+    <?php endif; ?>
 
     <?php Pjax::begin(['id' => 'pjax-phone-device']); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>

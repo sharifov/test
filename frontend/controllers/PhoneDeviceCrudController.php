@@ -6,6 +6,7 @@ use sales\auth\Auth;
 use Yii;
 use sales\model\voip\phoneDevice\device\PhoneDevice;
 use sales\model\voip\phoneDevice\device\PhoneDeviceSearch;
+use yii\caching\TagDependency;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -27,10 +28,18 @@ class PhoneDeviceCrudController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                    'invalidate-cache-token' => ['POST'],
                 ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function actionInvalidateCacheToken()
+    {
+        TagDependency::invalidate(\Yii::$app->cache, 'twilio_jwt_token');
+        Yii::$app->session->addFlash('twilio_jwt_clean', true);
+        return $this->redirect(['index']);
     }
 
     /**

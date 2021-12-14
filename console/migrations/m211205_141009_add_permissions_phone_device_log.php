@@ -14,6 +14,7 @@ class m211205_141009_add_permissions_phone_device_log extends Migration
             '/phone-device-log/*',
             '/phone-device-crud/*',
         ],
+        '/phone-device-crud/invalidate-cache-token',
     ];
 
     private array $roles = [
