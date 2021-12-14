@@ -214,11 +214,25 @@ class QuoteHelper
                         $airportChange = true;
                     }
                     if ($segment['departureAirportCode'] || $segment['arrivalAirportCode']) {
-                        if (!in_array($segment['departureAirportCode'], $connectionAirports) && $airportObj = Airports::findByIata($segment['departureAirportCode'])) {
-                            $connectionAirports[$segment['departureAirportCode']] = $airportObj->cityName . ' ' . $segment['departureAirportCode'];
+                        if (!in_array($segment['departureAirportCode'], $connectionAirports)) {
+                            $airportObj = Airports::findByIata($segment['departureAirportCode']);
+                            $connectionAirports[$segment['departureAirportCode']] = ($airportObj ? $airportObj->cityName . ' ' : '' ) . $segment['departureAirportCode'];
+                            if (!$airportObj) {
+                                \Yii::warning(
+                                    ['message' => 'Airport not found by code', 'airport_iata' => $segment['departureAirportCode']],
+                                    'QuoteHelper:Airports:IataNotFound'
+                                );
+                            }
                         }
-                        if (!in_array($segment['arrivalAirportCode'], $connectionAirports) && $airportObj = Airports::findByIata($segment['arrivalAirportCode'])) {
-                            $connectionAirports[$segment['arrivalAirportCode']] = $airportObj->cityName . ' ' . $segment['arrivalAirportCode'];
+                        if (!in_array($segment['arrivalAirportCode'], $connectionAirports)) {
+                            $airportObj = Airports::findByIata($segment['arrivalAirportCode']);
+                            $connectionAirports[$segment['arrivalAirportCode']] = ($airportObj ? $airportObj->cityName . ' ' : '' ) . $segment['arrivalAirportCode'];
+                            if (!$airportObj) {
+                                \Yii::warning(
+                                    ['message' => 'Airport not found by code', 'airport_iata' => $segment['arrivalAirportCode']],
+                                    'QuoteHelper:Airports:IataNotFound'
+                                );
+                            }
                         }
                     }
 
