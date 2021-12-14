@@ -689,7 +689,7 @@ class CasesController extends FController
                                 if (isset($smsPreview['error']) && $smsPreview['error']) {
                                     $errorJson = @json_decode($smsPreview['error'], true);
                                     $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
-                                    Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'CaseController:view:smsPreview');
+//                                    Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'CaseController:view:smsPreview');
                                     $comForm->c_preview_sms = 0;
                                 } else {
                                     //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];

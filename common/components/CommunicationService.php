@@ -12,6 +12,7 @@ namespace common\components;
 use common\models\Call;
 use common\models\Project;
 use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\phone\MaskPhoneHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\useCase\conference\create\CreateCallForm;
@@ -171,7 +172,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
+            \Yii::warning([
+                'error'  => $out['error'],
+                'email_from' => MaskEmailHelper::maskingPartial($data['mail']['email_from']),
+                'email_to' => MaskEmailHelper::maskingPartial($data['mail']['email_to'])
+            ], 'Component:CommunicationService::mailPreview');
         }
 
         return $out;
@@ -464,7 +469,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsPreview');
+            \Yii::error([
+                'error' => $out['error'],
+                'phone_from' => MaskPhoneHelper::maskingPartial($data['sms']['phone_from']),
+                'phone_to' => MaskPhoneHelper::maskingPartial($data['sms']['phone_to']),
+            ], 'Component:CommunicationService::smsPreview');
         }
 
         return $out;
