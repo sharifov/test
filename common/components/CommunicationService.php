@@ -1418,6 +1418,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'say_voice' => $sayVoice,
             'say_language' => $sayLanguage,
             'play' => $play,
+            'voip_api_username' => $this->voipApiUsername,
             'call_custom_parameters' =>  array_merge(
                 [
                     'type_id' => Call::CALL_TYPE_OUT,
