@@ -29,7 +29,7 @@ if ($case) {
 } else {
     $disableMasking = false;
 }
-
+//vred('tut', $model);
 ?>
 <div class="row">
     <div class="col-md-6">
@@ -46,7 +46,7 @@ if ($case) {
                 ],
                 'middle_name',
                 'last_name',
-                'locale',
+                'cl_locale',
             ],
         ]) ?>
     </div>
