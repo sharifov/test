@@ -241,7 +241,7 @@ class ProductQuoteController extends FController
                 $emailData['change_gid'] = $productQuoteChange->pqc_gid;
                 $emailData['original_quote'] = $originalQuote->serialize();
 
-                $bookingId = $case->cs_order_uid;
+                $bookingId = $originalQuote->getBookingId();
                 $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
                 if (!empty($emailData['original_quote']['data'])) {
                     ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
@@ -385,7 +385,7 @@ class ProductQuoteController extends FController
                             $whData = (new HybridWhData())->fillCollectedData(
                                 HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
                                 [
-                                    'booking_id' => $case->cs_order_uid,
+                                    'booking_id' => $originQuote->getBookingId(),
                                     'product_quote_gid' => $originQuote->pq_gid,
                                     'exchange_gid' => $productQuoteChange->pqc_gid,
                                     'exchange_status' => ucfirst(ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id)),
@@ -644,17 +644,20 @@ class ProductQuoteController extends FController
                                 Yii::warning('ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0], 'ProductQuoteController::actionReprotectionQuoteSendEmail::ProductQuoteChange::save');
                             }
                         }
-                        if ($case->cs_order_uid) {
+
+                        $bookingId = $originQuote->getBookingId();
+                        $data = [
+                            'data' => [
+                                'booking_id' => $bookingId,
+                                'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
+                                'case_gid' => $case->cs_gid,
+                                'product_quote_gid' => $originQuote->pq_gid,
+                            ]
+                        ];
+
+                        if ($bookingId) {
                             try {
                                 $hybridService = Yii::createObject(HybridService::class);
-                                $data = [
-                                    'data' => [
-                                        'booking_id' => $case->cs_order_uid,
-                                        'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
-                                        'case_gid' => $case->cs_gid,
-                                        'product_quote_gid' => $originQuote->pq_gid,
-                                    ]
-                                ];
                                 $hybridService->whReprotection($case->cs_project_id, $data);
                                 $case->addEventLog(null, 'Request HybridService sent successfully');
                             } catch (\Throwable $throwable) {
@@ -663,20 +666,13 @@ class ProductQuoteController extends FController
                                 $errorData['project_id'] = $case->cs_project_id;
                                 $errorData['case_id'] = $case->cs_id;
 
-
                                 Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
                             }
                         } else {
                             Yii::warning([
-                                    'message' => 'Reprotection Quote error when sending HybridService webhook',
-                                    'content' => 'Booking Id is blank',
-                                    'type' => 'flight/schedule-change',
-                                    'data' => [
-                                        'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
-                                        'case_gid' => $case->cs_gid,
-                                        'product_quote_gid' => $originQuote->pq_gid,
-                                    ]
-                                ], 'ProductQuoteController::actionReprotectionQuoteSendEmail::HybridService::whReprotection');
+                                    'message' => 'Error: WebHook hybridService "whReprotection" not sent. Reason: BookingId is empty',
+                                    'data' => $data
+                                ], 'ProductQuoteController:actionReprotectionQuoteSendEmail:HybridService:whReprotection');
                         }
                         return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success")</script>';
                     }
