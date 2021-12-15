@@ -1781,14 +1781,23 @@ var PhoneWidget = function () {
     }
 
     function joinListen(call_sid) {
+        if (!checkDevice('Listen Call')) {
+            return false;
+        }
         callRequester.joinConference(conferenceSources.listen.name, conferenceSources.listen.id, call_sid, getDeviceId());
     }
 
     function joinCoach(call_sid) {
+        if (!checkDevice('Coach Call')) {
+            return false;
+        }
         callRequester.joinConference(conferenceSources.coach.name, conferenceSources.coach.id, call_sid, getDeviceId());
     }
 
     function joinBarge(call_sid) {
+        if (!checkDevice('Barge Call')) {
+            return false;
+        }
         callRequester.joinConference(conferenceSources.barge.name, conferenceSources.barge.id, call_sid, getDeviceId());
     }
 
