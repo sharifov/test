@@ -38,7 +38,7 @@ class CreateSimpleCall
 
             $result = \Yii::$app->communication->createCall(
                 new \sales\model\call\useCase\conference\create\CreateCallForm([
-                    'user_identity' => $form->getClientDeviceIdentity(),
+                    'device' => $form->getVoipDevice(),
                     'user_id' => $form->getCreatedUserId(),
                     'to_number' => $form->to,
                     'from_number' => $form->from,

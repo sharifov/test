@@ -26,7 +26,7 @@ use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
 use sales\model\callLogFilterGuard\service\CallLogFilterGuardService;
 use sales\model\callNote\entity\CallNote;
 use sales\model\phoneList\entity\PhoneList;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use Yii;
 use yii\db\Expression;
 use yii\helpers\VarDumper;
@@ -497,14 +497,14 @@ class CallLogTransferService
 
         $call['user_id'] = null;
         if ((int)$call['cl_type_id'] === Call::CALL_TYPE_OUT) {
-            if (PhoneDeviceIdentity::canParse($call['cl_phone_to'])) {
-                $call['user_id'] = PhoneDeviceIdentity::getUserId($call['cl_phone_to']);
+            if (VoipDevice::isValid($call['cl_phone_to'])) {
+                $call['user_id'] = VoipDevice::getUserId($call['cl_phone_to']);
             }
             $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $call['cl_phone_to'], 'pbl_enabled' => true])->exists();
             $call['phone_to_blacklist'] = $call['cl_phone_to'];
         } else {
-            if (PhoneDeviceIdentity::canParse($call['cl_phone_from'])) {
-                $call['user_id'] = PhoneDeviceIdentity::getUserId($call['cl_phone_from']);
+            if (VoipDevice::isValid($call['cl_phone_from'])) {
+                $call['user_id'] = VoipDevice::getUserId($call['cl_phone_from']);
             }
             $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $call['cl_phone_from'], 'pbl_enabled' => true])->exists();
             $call['phone_to_blacklist'] = $call['cl_phone_from'];

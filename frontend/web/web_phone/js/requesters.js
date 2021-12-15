@@ -649,7 +649,6 @@
                         }
                         return;
                     }
-                    createNotify('Create Call', 'Request received', 'success');
                 })
                 .fail(function () {
                     createNotify('Create Call', 'Server error', 'error');

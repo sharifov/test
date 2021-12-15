@@ -6,7 +6,7 @@ use common\models\Call;
 use common\models\Employee;
 use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
-use sales\model\voip\phoneDevice\device\PhoneDevice;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
 
 class CreateInternalCall
 {
@@ -32,18 +32,15 @@ class CreateInternalCall
                 throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is occupied');
             }
 
-            $toUserPhoneDevice = PhoneDevice::find()->byUserId($form->toUserId)->ready()->one();
-            if (!$toUserPhoneDevice) {
-                throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is not ready');
-            }
+            $toUserVoipDevice = (new ReadyVoipDevice())->findAny($user);
 
             \Yii::$app->cache->set($key, (time() + 10), 10);
 
             $recordingManager = RecordManager::toUser($createdUser->id);
 
             $result = \Yii::$app->communication->callToUser(
-                $form->getClientDeviceIdentity(),
-                $toUserPhoneDevice->getClientDeviceIdentity(),
+                $form->getVoipDevice(),
+                $toUserVoipDevice,
                 $form->toUserId,
                 $createdUser->id,
                 [

@@ -55,7 +55,7 @@ use sales\model\leadRedial\assign\LeadRedialAccessChecker;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\leadRedial\job\CheckUserIsOnRedialCallJob;
 use sales\model\user\entity\userStatus\UserStatus;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\repositories\NotFoundException;
@@ -872,7 +872,7 @@ class CallController extends FController
         $deviceId = (int)\Yii::$app->request->post('deviceId');
 
         try {
-            $deviceIdentity = (new PhoneDeviceIdentity())->get($deviceId, Auth::id());
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
         } catch (\Throwable $e) {
             return $this->asJson([
                 'error' => true,
@@ -905,7 +905,7 @@ class CallController extends FController
                             if ($isReserved) {
                                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                                 if ($prepare->prepare()) {
-                                    $this->callService->acceptCall($callUserAccess, $userId, $deviceIdentity);
+                                    $this->callService->acceptCall($callUserAccess, $userId, $voipDevice);
                                     Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                                 }
                             } else {
@@ -948,7 +948,7 @@ class CallController extends FController
         $deviceId = (int)\Yii::$app->request->post('deviceId');
 
         try {
-            $deviceIdentity = (new PhoneDeviceIdentity())->get($deviceId, Auth::id());
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
         } catch (\Throwable $e) {
             return $this->asJson([
                 'error' => true,
@@ -978,7 +978,7 @@ class CallController extends FController
                 if ($isReserved) {
                     $prepare = new PrepareCurrentCallsForNewCall($userId);
                     if ($prepare->prepare()) {
-                        $this->callService->acceptWarmTransferCall($callUserAccess, $userId, $deviceIdentity);
+                        $this->callService->acceptWarmTransferCall($callUserAccess, $userId, $voipDevice);
                         Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                     }
                 } else {
@@ -1015,7 +1015,7 @@ class CallController extends FController
         $deviceId = (int)\Yii::$app->request->post('deviceId');
 
         try {
-            $deviceIdentity = (new PhoneDeviceIdentity())->get($deviceId, Auth::id());
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
         } catch (\Throwable $e) {
             return $this->asJson([
                 'error' => true,
@@ -1067,7 +1067,7 @@ class CallController extends FController
                 }
                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                 if ($prepare->prepare()) {
-                    $this->callService->acceptCall($access, $userId, $deviceIdentity);
+                    $this->callService->acceptCall($access, $userId, $voipDevice);
                     Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                 }
                 break;
@@ -1089,7 +1089,7 @@ class CallController extends FController
                             \Yii::$app->queue_job->delay($delay)->push($job);
                             $response['isRedialCall'] = true;
                             try {
-                                $result = (new CreateRedialCall())($redialCall, $deviceIdentity);
+                                $result = (new CreateRedialCall())($redialCall, $voipDevice);
                                 if ($result['error']) {
                                     $response['redialError'] = $result['message'];
                                 }
@@ -1136,7 +1136,7 @@ class CallController extends FController
         $deviceId = (int)\Yii::$app->request->post('deviceId');
 
         try {
-            $deviceIdentity = (new PhoneDeviceIdentity())->get($deviceId, Auth::id());
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
         } catch (\Throwable $e) {
             return $this->asJson([
                 'error' => true,
@@ -1163,7 +1163,7 @@ class CallController extends FController
                 }
 
                 $return = new ReturnToHoldCall();
-                if (!$return->return($call, $userId, $deviceIdentity)) {
+                if (!$return->return($call, $userId, $voipDevice)) {
                     throw new \DomainException('Return Hold call error');
                 }
 

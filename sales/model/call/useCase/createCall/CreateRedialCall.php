@@ -9,7 +9,7 @@ use sales\model\leadRedial\queue\RedialCall;
 
 class CreateRedialCall
 {
-    public function __invoke(RedialCall $redialCall, string $deviceIdentity): array
+    public function __invoke(RedialCall $redialCall, string $device): array
     {
         $recordDisabled = (RecordManager::createCall(
             $redialCall->userId,
@@ -21,7 +21,7 @@ class CreateRedialCall
 
         return \Yii::$app->communication->createCall(
             new \sales\model\call\useCase\conference\create\CreateCallForm([
-                'user_identity' => $deviceIdentity,
+                'device' => $device,
                 'user_id' => $redialCall->userId,
                 'to_number' => $redialCall->phoneTo,
                 'from_number' => $redialCall->phoneFrom,

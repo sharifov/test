@@ -33,8 +33,8 @@ class PhoneDevice extends \yii\db\ActiveRecord
         $device = new self();
         $device->pd_connection_id = $connectionId;
         $device->pd_user_id = $userId;
-        $device->pd_name = self::generateName($devicePostfix);
-        $device->pd_device_identity = PhoneDeviceIdentity::generate($userId, $devicePostfix);
+        $device->pd_name = 'Device name #' . $devicePostfix;
+        $device->pd_device_identity = self::generateIdentity($userId, $devicePostfix);
         $device->pd_status_device = false;
         $device->pd_status_speaker = false;
         $device->pd_status_microphone = false;
@@ -43,6 +43,16 @@ class PhoneDevice extends \yii\db\ActiveRecord
         $device->pd_created_dt = $createdDt;
         $device->pd_updated_dt = $createdDt;
         return $device;
+    }
+
+    private static function generateIdentity(int $userId, string $postFix): string
+    {
+        return \Yii::$app->params['appEnv'] . 'user' . $userId . '_' . $postFix;
+    }
+
+    public function getVoipDevice(): string
+    {
+        return VoipDevice::getClientPrefix() . $this->pd_device_identity;
     }
 
     public function updateConnection(int $connectionId, string $ip, string $updated): void
@@ -60,11 +70,6 @@ class PhoneDevice extends \yii\db\ActiveRecord
     public function isEqualUser(int $userId): bool
     {
         return $this->pd_user_id === $userId;
-    }
-
-    public function getClientDeviceIdentity(): string
-    {
-        return PhoneDeviceIdentity::getPrefix() . $this->pd_device_identity;
     }
 
     public function isReady(): bool
@@ -121,11 +126,6 @@ class PhoneDevice extends \yii\db\ActiveRecord
     {
         $this->pd_status_microphone = false;
         $this->pd_updated_dt = $updated;
-    }
-
-    public static function generateName(string $postFix): string
-    {
-        return 'Device name #' . $postFix;
     }
 
     public function rules(): array

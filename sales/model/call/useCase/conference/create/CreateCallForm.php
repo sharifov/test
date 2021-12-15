@@ -7,7 +7,7 @@ use yii\base\Model;
 /**
  * Class CreateCallForm
  *
- * @property string $user_identity
+ * @property string $device
  * @property int $user_id
  * @property string $to_number
  * @property string $from_number
@@ -24,7 +24,7 @@ use yii\base\Model;
  */
 class CreateCallForm extends Model
 {
-    public $user_identity;
+    public $device;
     public $user_id;
     public $to_number;
     public $from_number;
@@ -42,8 +42,8 @@ class CreateCallForm extends Model
     public function rules(): array
     {
         return [
-            ['user_identity', 'required'],
-            ['user_identity', 'string'],
+            ['device', 'required'],
+            ['device', 'string'],
 
             ['user_id', 'required'],
             ['user_id', 'integer'],

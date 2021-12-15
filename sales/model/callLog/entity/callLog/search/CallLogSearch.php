@@ -17,7 +17,7 @@ use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\callNote\entity\CallNote;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use yii\data\ActiveDataProvider;
 use sales\model\callLog\entity\callLog\CallLog;
 use yii\data\ArrayDataProvider;
@@ -324,7 +324,7 @@ class CallLogSearch extends CallLog
             'cn_note as callNote'
         ]);
 
-        $devicePrefix = PhoneDeviceIdentity::getPrefix();
+        $devicePrefix = VoipDevice::getClientPrefix();
         $query->addSelect([
             "IF(
               call_log.cl_type_id = 1,

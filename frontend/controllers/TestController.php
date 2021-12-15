@@ -775,10 +775,6 @@ class TestController extends FController
         ];
         Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
 
-
-
-//        $service = Yii::$app->communication;;
-//        $service->createCall('client:seller295', '+37369305726', '+14157693509', 295, 2);
 //        die;
 //
 //
@@ -796,8 +792,7 @@ class TestController extends FController
         ////
         ////        $service->disconnectFromConferenceCall($call->c_conference_sid, $call->c_call_sid);
         ////
-//        $conference = Conference::findOne(['cf_sid' => $call->c_conference_sid]);
-//        $service->returnToConferenceCall($call->c_call_sid,$conference->cf_friendly_name,$conference->cf_sid,'client:seller295');
+
         ////
         ////        $search = new ContactsSearch(295);
         ////        $search->searchContactsByWidget('373');

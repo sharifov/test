@@ -38,7 +38,8 @@ use sales\model\phone\AvailablePhoneList;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\voip\phoneDevice\device\PhoneDevice;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use sales\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
@@ -1385,7 +1386,7 @@ class PhoneController extends FController
         $deviceId = (int)\Yii::$app->request->post('deviceId');
 
         try {
-            $deviceIdentity = (new PhoneDeviceIdentity())->get($deviceId, Auth::id());
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
         } catch (\Throwable $e) {
             return $this->asJson([
                 'error' => true,
@@ -1424,7 +1425,7 @@ class PhoneController extends FController
                 $call->c_conference_sid,
                 $call->c_project_id,
                 $call->c_from, //$from
-                $deviceIdentity,
+                $voipDevice,
                 $source_type_id,
                 Auth::id(),
                 $conference->isRecordingDisabled(),
@@ -1946,7 +1947,7 @@ class PhoneController extends FController
             $phone = null;
 
             if ($call->isOut()) {
-                if (PhoneDeviceIdentity::canParse($call->cl_phone_from)) {
+                if (VoipDevice::isValid($call->cl_phone_from)) {
                     $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
                     $phone = $list->getFirst()->phone ?? null;
                 } else {

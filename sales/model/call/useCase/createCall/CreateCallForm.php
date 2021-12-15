@@ -11,7 +11,7 @@ use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\phoneList\entity\PhoneList;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
 use yii\base\Model;
 
 /**
@@ -30,13 +30,13 @@ use yii\base\Model;
  * @property $fromLead
  * @property $fromContacts
  * @property $deviceId
- * @property $deviceIdentity
+ * @property $voipDevice
  */
 class CreateCallForm extends Model
 {
     private $createdUserId;
     private $phoneListId;
-    private $deviceIdentity;
+    private $voipDevice;
 
     public $toUserId;
     public $from;
@@ -131,9 +131,8 @@ class CreateCallForm extends Model
             [
                 'deviceId',
                 function ($attribute) {
-                    $deviceIdentity = new PhoneDeviceIdentity();
                     try {
-                        $this->deviceIdentity = $deviceIdentity->get($this->{$attribute}, $this->getCreatedUserId());
+                        $this->voipDevice = (new ReadyVoipDevice())->find($this->{$attribute}, $this->getCreatedUserId());
                     } catch (\Throwable $e) {
                         $this->addError($attribute, $e->getMessage());
                     }
@@ -184,8 +183,8 @@ class CreateCallForm extends Model
         return $this->createdUserId;
     }
 
-    public function getClientDeviceIdentity(): string
+    public function getVoipDevice(): string
     {
-        return $this->deviceIdentity;
+        return $this->voipDevice;
     }
 }

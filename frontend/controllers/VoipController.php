@@ -155,24 +155,29 @@ class VoipController extends FController
             $this->leadRedialUnAssigner->createCall($form->getCreatedUserId());
 
             if ($form->isInternalCall()) {
-                $result = (new CreateInternalCall())($createdUser, $form);
-                return $this->asJson($result);
+                return $this->asJson(
+                    (new CreateInternalCall())($createdUser, $form)
+                );
             }
             if ($form->fromHistoryCall()) {
-                $result = (new CreateCallFromHistory())($form);
-                return $this->asJson($result);
+                return $this->asJson(
+                    (new CreateCallFromHistory())($form)
+                );
             }
             if ($form->isFromCase()) {
-                $result = (new CreateCallFromCase())($form);
-                return $this->asJson($result);
+                return $this->asJson(
+                    (new CreateCallFromCase())($form)
+                );
             }
             if ($form->isFromLead()) {
-                $result = (new CreateCallFromLead())($form);
-                return $this->asJson($result);
+                return $this->asJson(
+                    (new CreateCallFromLead())($form)
+                );
             }
             if ($form->isFromContacts()) {
-                $result = (new CreateCallFromContacts())($form);
-                return $this->asJson($result);
+                return $this->asJson(
+                    (new CreateCallFromContacts())($form)
+                );
             }
 
             if (!Auth::can('PhoneWidget_Dialpad')) {
@@ -181,8 +186,9 @@ class VoipController extends FController
                     'message' => 'Access denied.',
                 ]);
             }
-            $result = (new CreateSimpleCall())($form);
-            return $this->asJson($result);
+            return $this->asJson(
+                (new CreateSimpleCall())($form)
+            );
         }
 
         return $this->asJson([

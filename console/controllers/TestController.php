@@ -81,7 +81,6 @@ use sales\model\leadRedial\queue\RedialCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\project\entity\params\Params;
 use sales\model\user\reports\stats\UserStatsReport;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
 use sales\model\voip\phoneDevice\PhoneDeviceLogForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;

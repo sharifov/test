@@ -17,7 +17,7 @@ use sales\model\call\services\currentQueueCalls\ActiveConference;
 use sales\model\client\query\ClientLeadCaseCounter;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\phoneList\entity\PhoneList;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 
 class CallUpdateMessage
 {
@@ -64,12 +64,12 @@ class CallUpdateMessage
 
         if ($call->isInternal() || ($call->currentParticipant && $call->currentParticipant->isUser())) {
             if ($call->isIn()) {
-                if (($fromUserId = PhoneDeviceIdentity::getUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
+                if (($fromUserId = VoipDevice::getUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
                     $name = $fromUser->nickname ?: $fromUser->username;
                     $phone = '';
                 }
             } elseif ($call->isOut()) {
-                if (($toUserId = PhoneDeviceIdentity::getUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
+                if (($toUserId = VoipDevice::getUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
                     $name = $toUser->nickname ?: $toUser->username;
                     $phone = '';
                 }
@@ -221,11 +221,11 @@ class CallUpdateMessage
 
         if ($call->isInternal() || ($call->currentParticipant && $call->currentParticipant->isUser())) {
             if ($call->isIn()) {
-                if (($fromUserId = PhoneDeviceIdentity::getUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
+                if (($fromUserId = VoipDevice::getUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
                     $name = $fromUser->nickname ?: $fromUser->username;
                 }
             } elseif ($call->isOut()) {
-                if (($toUserId = PhoneDeviceIdentity::getUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
+                if (($toUserId = VoipDevice::getUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
                     $name = $toUser->nickname ?: $toUser->username;
                 }
             }

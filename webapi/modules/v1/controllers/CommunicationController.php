@@ -61,7 +61,7 @@ use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userVoiceMail\entity\UserVoiceMail;
 use sales\model\voiceMailRecord\entity\VoiceMailRecord;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use sales\repositories\client\ClientsQuery;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserProjectParamsRepository;
@@ -933,8 +933,8 @@ class CommunicationController extends ApiBaseController
                 $call->c_from = $callOriginalData['From'] ?? null;
                 $call->c_to = $callOriginalData['To'] ?? null;
                 $call->c_caller_name = $callOriginalData['Caller'] ?? null;
-                if (PhoneDeviceIdentity::canParse($call->c_from)) {
-                    $agentId = PhoneDeviceIdentity::getUserId($call->c_from);
+                if (VoipDevice::isValid($call->c_from)) {
+                    $agentId = VoipDevice::getUserId($call->c_from);
                 } else {
                     $agentId = null;
                 }
@@ -1513,7 +1513,7 @@ class CommunicationController extends ApiBaseController
             $call->c_to = $customParameters->to;
         } else {
             if (!$call->isInternal()) {
-                if (PhoneDeviceIdentity::canParse($call->c_to)) {
+                if (VoipDevice::isValid($call->c_to)) {
                     $call->c_to = null;
                 }
             }
@@ -1655,8 +1655,8 @@ class CommunicationController extends ApiBaseController
 
         $agentId = null;
 
-        if (!empty($callData['Called']) && PhoneDeviceIdentity::canParse($callData['Called'])) {
-            $agentId = PhoneDeviceIdentity::getUserId($callData['Called']);
+        if (!empty($callData['Called']) && VoipDevice::isValid($callData['Called'])) {
+            $agentId = VoipDevice::getUserId($callData['Called']);
         }
 
         if (!$agentId && !empty($callData['c_user_id'])) {

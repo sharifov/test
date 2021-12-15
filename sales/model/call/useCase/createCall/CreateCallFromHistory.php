@@ -8,7 +8,7 @@ use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\phone\AvailablePhoneList;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 
 class CreateCallFromHistory
 {
@@ -39,7 +39,7 @@ class CreateCallFromHistory
             ];
 
             if ($call->isOut()) {
-                if (PhoneDeviceIdentity::canParse($call->cl_phone_from)) {
+                if (VoipDevice::isValid($call->cl_phone_from)) {
                     $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
                     if ($firstPhone = $list->getFirst()) {
                         $phoneFrom = [
@@ -104,7 +104,7 @@ class CreateCallFromHistory
 
             $result = \Yii::$app->communication->createCall(
                 new \sales\model\call\useCase\conference\create\CreateCallForm([
-                    'user_identity' => $form->getClientDeviceIdentity(),
+                    'device' => $form->getVoipDevice(),
                     'user_id' => $form->getCreatedUserId(),
                     'to_number' => $form->to,
                     'from_number' => $phoneFrom['phone'],

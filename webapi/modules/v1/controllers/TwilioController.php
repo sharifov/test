@@ -18,7 +18,7 @@ use sales\model\call\services\RepeatMessageCallJobCreator;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\phoneList\entity\PhoneList;
-use sales\model\voip\phoneDevice\device\PhoneDeviceIdentity;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use Twilio\TwiML\MessagingResponse;
 use Twilio\TwiML\VoiceResponse;
 use webapi\src\services\communication\CommunicationService;
@@ -282,34 +282,6 @@ class TwilioController extends ApiBaseNoAuthController
             'get'       => Yii::$app->request->get(),
             'post'      => Yii::$app->request->post(),
         ];
-
-        // Yii::info(VarDumper::dumpAsString($out), 'info\API:Twilio:RedirectCal');
-
-
-
-//        [
-//            'ApiVersion' => '2010-04-01'
-//        'Called' => 'client:seller238'
-//        'ParentCallSid' => 'CA4119e45239f8ecf9114cd5cd7d1c7f93'
-//        'CallStatus' => 'in-progress'
-//        'From' => '+37379731662'
-//        'CallerCountry' => 'MD'
-//        'Direction' => 'outbound-dial'
-//        'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c'
-//        'CallerCity' => ''
-//        'CalledVia' => '+16692011257'
-//        'CallerState' => ''
-//        'Caller' => '+37379731662'
-//        'FromCountry' => 'MD'
-//        'FromCity' => ''
-//        'CallSid' => 'CA9f0c771e00ba81f6f1130f1a205f9b6e'
-//        'To' => 'client:seller238'
-//        'ForwardedFrom' => '+16692011257'
-//        'FromZip' => ''
-//        'CallerZip' => ''
-//        'FromState' => ''
-//    ]
-
 
         $id = (int) Yii::$app->request->post('id');
 
@@ -1226,7 +1198,7 @@ class TwilioController extends ApiBaseNoAuthController
                 }
                 $call->c_call_type_id = $parentCall->c_call_type_id;
             } else {
-                if (PhoneDeviceIdentity::canParse($call->c_from)) {
+                if (VoipDevice::isValid($call->c_from)) {
                     $call->setTypeOut();
                 } else {
                     $call->setTypeIn();
