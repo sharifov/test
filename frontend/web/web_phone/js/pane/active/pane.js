@@ -88,6 +88,7 @@ var PhoneWidgetPaneActive = function () {
             controls.transfer.active = false;
             controls.addPerson.active = false;
             controls.dialpad.active = false;
+            controls.reconnect.active = false;
         }
         return controls;
     }

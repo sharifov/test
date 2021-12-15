@@ -146,6 +146,7 @@
         this.panel = new Panel();
         this.statusReady = true;
         this.phoneDeviceIdStorageKey = phoneDeviceIdStorageKey;
+        this.isInitiated = true;
 
         this.reset = function (reason) {
             this.switcher.notReady('Reset devices. ' + reason);

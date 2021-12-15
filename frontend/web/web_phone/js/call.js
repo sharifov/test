@@ -71,7 +71,9 @@ var PhoneWidget = function () {
 
     let isDevicePage = false;
 
-    let deviceState = {};
+    let deviceState = {
+        isInitiated: false
+    };
 
     let logger = new window.phoneWidget.logger.Logger();
 
@@ -160,7 +162,12 @@ var PhoneWidget = function () {
     }
 
     function getDeviceId() {
-        return getDeviceState().getDeviceId();
+        let state = getDeviceState();
+        if (state.isInitiated !== true) {
+            createNotify('Phone Device', 'Device is not initiated. Please refresh Voip page or try again later.', 'error');
+            return;
+        }
+        return state.getDeviceId();
     }
 
     function getLeadViewPageShortUrl() {

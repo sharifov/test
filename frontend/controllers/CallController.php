@@ -1443,7 +1443,7 @@ class CallController extends FController
             }
         } catch (\Throwable $e) {
             $response = [
-                'error' => false,
+                'error' => true,
                 'message' => $e->getMessage(),
             ];
         }
