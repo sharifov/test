@@ -280,6 +280,13 @@
         }
 
         window.addEventListener('storage', function (event) {
+            if (event.key === 'PhoneWidgetLog' + window.userId) {
+                let value = JSON.parse(event.newValue);
+                PhoneWidget.addLog(value.message, value.color);
+            }
+        });
+
+        window.addEventListener('storage', function (event) {
             if (event.key === getStorageNameTwilioStatus(userId)) {
                 if (event.newValue === 'ready') {
                     PhoneWidget.getDeviceState().twilioRegister();

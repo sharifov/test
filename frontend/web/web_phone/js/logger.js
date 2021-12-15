@@ -13,7 +13,7 @@
         this.add = function (message, color) {
             if (window.isTwilioDevicePage) {
                 localStorage.setItem(
-                    'PhoneWidgetLog',
+                    'PhoneWidgetLog' + window.userId,// todo removed global user Id
                     JSON.stringify({
                         "message": message,
                         "color": color,
@@ -94,13 +94,6 @@
         this.clear = function () {};
         this.addError = function (error) {};
     }
-
-    window.addEventListener('storage', function (event) {
-        if (event.key === 'PhoneWidgetLog') {
-            let value = JSON.parse(event.newValue);
-            PhoneWidget.addLog(value.message, value.color);
-        }
-    });
 
     window.phoneWidget.logger = {
         Logger: Logger,
