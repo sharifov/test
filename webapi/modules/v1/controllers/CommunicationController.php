@@ -32,6 +32,7 @@ use sales\entities\cases\Cases;
 use sales\forms\lead\PhoneCreateForm;
 use sales\guards\call\CallRedialGuard;
 use sales\helpers\app\AppHelper;
+use sales\helpers\DuplicateExceptionChecker;
 use sales\helpers\LogExecutionTime;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
@@ -2889,7 +2890,7 @@ class CommunicationController extends ApiBaseController
                     $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 }
             } catch (\Throwable $e) {
-                $isDuplicateError = strpos($e->getMessage(), 'SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry') === 0;
+                $isDuplicateError = DuplicateExceptionChecker::isDuplicate($e->getMessage());
                 if ($isDuplicateError) {
                     Yii::info(
                         array_merge(
