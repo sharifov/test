@@ -204,7 +204,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                         <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(['style' => 'display:none', 'id' => 'e_email_message']) ?>
 
                                 <?php if ($previewEmailForm->keyCache) : ?>
-                                    <div style="max-height: 800px; overflow-x: auto;">
+                                    <div style="max-height: 800px;">
                                         <iframe
                                             id="email_view"
                                             src="<?php echo Url::to(['/lead/get-template', 'key_cache' => $previewEmailForm->keyCache]) ?>"
