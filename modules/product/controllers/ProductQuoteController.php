@@ -242,6 +242,19 @@ class ProductQuoteController extends FController
                 $emailData['original_quote'] = $originalQuote->serialize();
 
                 $bookingId = $originalQuote->getBookingId();
+                if (!$bookingId) {
+                    Yii::warning([
+                        'message' => 'ProjectHashGenerator::getHashByProjectId problem. Reason: BookingId is empty',
+                        'data' => [
+                            'data' => [
+                                'booking_id' => $bookingId,
+                                'product_quote_change_gid' => $productQuoteChange->pqc_gid,
+                                'case_gid' => $case->cs_gid,
+                                'product_quote_gid' => $originalQuote->pq_gid,
+                            ]
+                        ]
+                    ], 'ProductQuoteController:actionPreviewVoluntaryOfferEmail:ProjectHashGenerator:getHashByProjectId');
+                }
                 $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
                 if (!empty($emailData['original_quote']['data'])) {
                     ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
