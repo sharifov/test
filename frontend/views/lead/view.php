@@ -150,6 +150,12 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                 </div>
             <?php endif; ?>
 
+            <div id="lead-data">
+                <?= $this->render('partial/_lead_data', [
+                    'lead' => $lead
+                ]) ?>
+            </div>
+
             <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_READ, View list User Conversation */ ?>
             <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_READ)) : ?>
                 <?php echo $this->render('user_conversion/lead_user_conversion', [

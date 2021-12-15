@@ -7,6 +7,7 @@ use DateTime;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\leadData\entity\LeadData;
 use sales\model\leadData\repository\LeadDataRepository;
+use sales\model\leadDataKey\services\LeadDataKeyDictionary;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -48,7 +49,7 @@ class LeadDataCreateService
         $leadDataRepository = new LeadDataRepository();
         $leadData = LeadData::create(
             $lead->id,
-            LeadDataDictionary::KEY_WE_EMAIL_REPLIED,
+            LeadDataKeyDictionary::KEY_WE_EMAIL_REPLIED,
             (string) (new DateTime())->getTimestamp()
         );
         if (!$leadData->validate()) {
