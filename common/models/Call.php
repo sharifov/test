@@ -10,6 +10,7 @@ use common\models\query\CallQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
+use sales\helpers\DuplicateExceptionChecker;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
@@ -1890,15 +1891,21 @@ class Call extends \yii\db\ActiveRecord
                 $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
                 $callUserAccess->cua_priority = $call->getDataPriority();
             }
-
-            if (!$callUserAccess->save()) {
-                Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
-            } else {
+            if ($callUserAccess->save()) {
                 return true;
             }
+            $errors = $callUserAccess->getErrors();
+            foreach ($errors as $error) {
+                if (strpos($error[0], 'has already been taken') !== false) {
+                    return true;
+                }
+            }
+            Yii::error(VarDumper::dumpAsString($errors), 'Call:applyCallToAgentAccess:callUserAccess:save');
         } catch (\Throwable $e) {
+            if (DuplicateExceptionChecker::isDuplicate($e->getMessage())) {
+                return true;
+            }
             \Yii::error($e, 'Call:applyCallToAgentAccess');
-//            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgentAccess');
         }
         return false;
     }
