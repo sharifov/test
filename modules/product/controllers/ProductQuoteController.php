@@ -644,29 +644,40 @@ class ProductQuoteController extends FController
                                 Yii::warning('ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0], 'ProductQuoteController::actionReprotectionQuoteSendEmail::ProductQuoteChange::save');
                             }
                         }
+                        if ($case->cs_order_uid) {
+                            try {
+                                $hybridService = Yii::createObject(HybridService::class);
+                                $data = [
+                                    'data' => [
+                                        'booking_id' => $case->cs_order_uid,
+                                        'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
+                                        'case_gid' => $case->cs_gid,
+                                        'product_quote_gid' => $originQuote->pq_gid,
+                                    ]
+                                ];
+                                $hybridService->whReprotection($case->cs_project_id, $data);
+                                $case->addEventLog(null, 'Request HybridService sent successfully');
+                            } catch (\Throwable $throwable) {
+                                $errorData = AppHelper::throwableLog($throwable);
+                                $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';
+                                $errorData['project_id'] = $case->cs_project_id;
+                                $errorData['case_id'] = $case->cs_id;
 
-                        try {
-                            $hybridService = Yii::createObject(HybridService::class);
-                            $data = [
-                                'data' => [
-                                    'booking_id' => $case->cs_order_uid,
-                                    'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
-                                    'case_gid' => $case->cs_gid,
-                                    'product_quote_gid' => $originQuote->pq_gid,
-                                ]
-                            ];
-                            $hybridService->whReprotection($case->cs_project_id, $data);
-                            $case->addEventLog(null, 'Request HybridService sent successfully');
-                        } catch (\Throwable $throwable) {
-                            $errorData = AppHelper::throwableLog($throwable);
-                            $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';
-                            $errorData['project_id'] = $case->cs_project_id;
-                            $errorData['case_id'] = $case->cs_id;
 
-
-                            Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                                Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                            }
+                        } else {
+                            Yii::warning([
+                                    'message' => 'Reprotection Quote error when sending HybridService webhook',
+                                    'content' => 'Booking Id is blank',
+                                    'type' => 'flight/schedule-change',
+                                    'data' => [
+                                        'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
+                                        'case_gid' => $case->cs_gid,
+                                        'product_quote_gid' => $originQuote->pq_gid,
+                                    ]
+                                ], 'ProductQuoteController::actionReprotectionQuoteSendEmail::HybridService::whReprotection');
                         }
-
                         return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success")</script>';
                     }
 
